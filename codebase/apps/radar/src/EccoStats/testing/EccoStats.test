@@ -351,15 +351,15 @@ radar_coverage_min_ht_fraction = 0.7;
 
 censor_using_titan = TRUE;
 
-///////////// titan_data_dir //////////////////////////
+///////////// titan_input_dir /////////////////////////
 //
-// Directory for titan data.
+// Directory for input titan data.
 //
 // This directory will contain the titan storm and track files.
 //
 // Type: string
 
-titan_data_dir = "/scr/cirrus3/rsfdata/projects/nexrad-mrms/ecco_titan";
+titan_input_dir = "/scr/cirrus3/rsfdata/projects/nexrad-mrms/ecco_titan";
 
 ///////////// min_titan_track_duration_secs ///////////
 //
@@ -381,6 +381,27 @@ min_titan_track_duration_secs = 1800;
 // Type: int
 
 min_titan_storm_volume_km3 = 100;
+
+///////////// write_titan_mask_files //////////////////
+//
+// Option to write out the Titan mask for debugging.
+//
+// This allows us to view the Titan mask field and compare it to the 
+//   Ecco fields for debugging.
+//
+// Type: boolean
+
+write_titan_mask_files = TRUE;
+
+///////////// titan_mask_output_dir ///////////////////
+//
+// Directory for input titan data.
+//
+// This directory will contain the titan storm and track files.
+//
+// Type: string
+
+titan_mask_output_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/titan_mask";
 
 //======================================================================
 //

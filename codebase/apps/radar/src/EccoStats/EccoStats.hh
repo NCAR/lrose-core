@@ -145,7 +145,7 @@ private:
   int **_hourOfDay; // hour of day index
 
   bool _censorUsingTitan;
-  int **_titanMask;
+  ui08 **_titanMask;
   
   int _computeEccoStats();
 
@@ -168,6 +168,7 @@ private:
   int _readMrms();
   int _readCoverage();
   int _readTitan();
+  int _writeTitanMask();
   
   MdvxField *_make3DField(fl32 ***data,
                           string fieldName,

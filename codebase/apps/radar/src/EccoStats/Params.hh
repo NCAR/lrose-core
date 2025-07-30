@@ -425,11 +425,15 @@ public:
 
   tdrp_bool_t censor_using_titan;
 
-  char* titan_data_dir;
+  char* titan_input_dir;
 
   int min_titan_track_duration_secs;
 
   int min_titan_storm_volume_km3;
+
+  tdrp_bool_t write_titan_mask_files;
+
+  char* titan_mask_output_dir;
 
   tdrp_bool_t write_hour_of_day_stats;
 
@@ -442,7 +446,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[41];
+  mutable TDRPtable _table[43];
 
   const char *_className;
 

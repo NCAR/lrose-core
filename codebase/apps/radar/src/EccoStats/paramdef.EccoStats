@@ -218,9 +218,9 @@ paramdef boolean {
 
 paramdef string {
   p_default = "${HOME}/data/titan";
-  p_descr = "Directory for titan data.";
+  p_descr = "Directory for input titan data.";
   p_help = "This directory will contain the titan storm and track files.";
-} titan_data_dir;
+} titan_input_dir;
 
 paramdef int {
   p_default = 1800;
@@ -233,6 +233,18 @@ paramdef int {
   p_descr = "Minimum volume of storm for it to be valid for climatology.";
   p_help = "We only use titan storms that meet or exceed this volume. This test is applied at each scan time.";
 } min_titan_storm_volume_km3;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write out the Titan mask for debugging.";
+  p_help = "This allows us to view the Titan mask field and compare it to the Ecco fields for debugging.";
+} write_titan_mask_files;
+
+paramdef string {
+  p_default = "${HOME}/data/titan";
+  p_descr = "Directory for input titan data.";
+  p_help = "This directory will contain the titan storm and track files.";
+} titan_mask_output_dir;
 
 commentdef {
   p_header = "WRITE HOUR-OF-DAY SUMMARIES TO SEPARATE FILES";

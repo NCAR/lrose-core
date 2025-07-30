@@ -966,15 +966,15 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'titan_data_dir'
+    // Parameter 'titan_input_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("titan_data_dir");
-    tt->descr = tdrpStrDup("Directory for titan data.");
+    tt->param_name = tdrpStrDup("titan_input_dir");
+    tt->descr = tdrpStrDup("Directory for input titan data.");
     tt->help = tdrpStrDup("This directory will contain the titan storm and track files.");
-    tt->val_offset = (char *) &titan_data_dir - &_start_;
+    tt->val_offset = (char *) &titan_input_dir - &_start_;
     tt->single_val.s = tdrpStrDup("${HOME}/data/titan");
     tt++;
     
@@ -1000,6 +1000,30 @@
     tt->help = tdrpStrDup("We only use titan storms that meet or exceed this volume. This test is applied at each scan time.");
     tt->val_offset = (char *) &min_titan_storm_volume_km3 - &_start_;
     tt->single_val.i = 100;
+    tt++;
+    
+    // Parameter 'write_titan_mask_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_titan_mask_files");
+    tt->descr = tdrpStrDup("Option to write out the Titan mask for debugging.");
+    tt->help = tdrpStrDup("This allows us to view the Titan mask field and compare it to the Ecco fields for debugging.");
+    tt->val_offset = (char *) &write_titan_mask_files - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'titan_mask_output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("titan_mask_output_dir");
+    tt->descr = tdrpStrDup("Directory for input titan data.");
+    tt->help = tdrpStrDup("This directory will contain the titan storm and track files.");
+    tt->val_offset = (char *) &titan_mask_output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("${HOME}/data/titan");
     tt++;
     
     // Parameter 'Comment 8'

@@ -244,6 +244,17 @@ int EccoStats::_computeEccoStats()
     _lastEccoTime = _eccoValidTime;
     fileCount++;
     
+    // read the titan data if requested
+    
+    _censorUsingTitan = _params.censor_using_titan;
+    if (_params.censor_using_titan) {
+      if (_readTitan()) {
+        // failure - skip
+        cerr << "WARNING - no Titan masking" << endl;
+        _censorUsingTitan = false;
+      }
+    }
+
     // update the stats, based on the data in the ecco file
     
     _updateStats();
@@ -391,8 +402,8 @@ void EccoStats::_allocArrays()
   // titan mask
   
   if (_params.censor_using_titan) {
-    cerr << "TTTTTTTTTTTTT nx, ny: " << _nx << ", " << _ny << endl;
-    _titanMask = (int **) ucalloc2(_ny, _nx, sizeof(int));
+    Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
+    _titanMask = (ui08 **) ucalloc2(fhdr.ny, fhdr.nx, sizeof(ui08));
   }
   
 }
@@ -796,17 +807,6 @@ int EccoStats::_readEcco(const char *path)
       // failure - skip
       cerr << "ERROR - EccoStats::_readEcco()" << endl;
       return -1;
-    }
-  }
-
-  // read the titan data if requested
-
-  _censorUsingTitan = _params.censor_using_titan;
-  if (_params.censor_using_titan) {
-    if (_readTitan()) {
-      // failure - skip
-      cerr << "WARNING - no Titan masking" << endl;
-      _censorUsingTitan = false;
     }
   }
 
@@ -1845,13 +1845,13 @@ int EccoStats::_readTitan()
 
   if (_params.debug) {
     cerr << "Reading titan data, validTime: " << DateTime::str(_eccoValidTime) << endl;
-    cerr << "Titan dir: " << _params.titan_data_dir << endl;
+    cerr << "Titan dir: " << _params.titan_input_dir << endl;
   }
     
   // open titan file for the ecco valid time
   
   TitanFile tFile;
-  if (tFile.openBestDayFile(_params.titan_data_dir,
+  if (tFile.openBestDayFile(_params.titan_input_dir,
                             _eccoValidTime,
                             NcxxFile::read)) {
     cerr << "ERROR - EccoStats::_readTitan" << endl;
@@ -1947,18 +1947,18 @@ int EccoStats::_readTitan()
     return -1;
   }
 
-  // initialize the mask
+  // initialize the mask to 0
 
-  memset(*_titanMask, 0, _nx * _ny * sizeof(int));
+  memset(*_titanMask, 0, _nx * _ny * sizeof(ui08));
 
   // loop through the scan entries, setting the mask where we have significant storms
   
   const vector<TitanData::TrackEntry> &scanEntries = tFile.scanEntries();
-  for (size_t iscan = 0; iscan < scanEntries.size(); iscan++) {
+  for (size_t ientry = 0; ientry < scanEntries.size(); ientry++) {
 
     // get track entry
     
-    const TitanData::TrackEntry &entry = scanEntries[iscan];
+    const TitanData::TrackEntry &entry = scanEntries[ientry];
     int complexNum = entry.complex_track_num;
     if (tFile.readComplexTrackParams(complexNum, true)) {
       cerr << "ERROR - EccoStats::_readTitan" << endl;
@@ -1992,18 +1992,6 @@ int EccoStats::_readTitan()
     // loop through the projected area runs, setting the mask
     // where we have a storm
     
-    
-    // cerr << "2222222222222222222222222222222 iscan: " << iscan << endl;
-    // cerr << "  complexNum: " << complexNum << endl;
-    // cerr << "    durationInSecs: " << trackDurationSecs << endl;
-    // cerr << "    stormNum: " << stormNum << endl;
-    // cerr << "    volume: " << stormVol << endl;
-    // cerr << "    nProjRuns: " << nProjRuns << endl;
-    // cerr << "    projRuns.size(): " << projRuns.size() << endl;
-    // cerr << "2222222222222222222222222222222" << endl;
-    
-    // loop through the proj runs
-    
     const vector<TitanData::StormRun> &projRuns = tFile.projRuns();
     for (int irun = 0; irun < nProjRuns; irun++) {
       const TitanData::StormRun &run = projRuns[irun];
@@ -2012,14 +2000,97 @@ int EccoStats::_readTitan()
       }
     } // irun
     
-  } // iscan
+  } // ientry
 
   // close titan file
   
   tFile.closeFile();
 
+  // optionally write out the Titan mask for debugging
+
+  if (_params.write_titan_mask_files) {
+    _writeTitanMask();
+  }
+
   return 0;
   
+}
+
+/////////////////////////////////////////////////////////
+// write the Titan mask to an MDV file for debugging.
+// Returns 0 on success, -1 on failure.
+
+int EccoStats::_writeTitanMask()
+  
+{
+
+  // create header
+  
+  Mdvx::field_header_t fhdr = _mrmsDbzField->getFieldHeader();
+  
+  fhdr.missing_data_value = 0;
+  fhdr.bad_data_value = 0;
+  
+  fhdr.nz = 1;
+  fhdr.grid_dz = 1.0;
+  fhdr.grid_minz = 0.0;
+  
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  
+  fhdr.dz_constant = 1;
+  fhdr.data_dimension = 2;
+  
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(int);
+  fhdr.volume_size = volSize;
+  
+  Mdvx::vlevel_header_t vhdr = _mrmsDbzField->getVlevelHeader();
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  vhdr.level[0] = 0;
+  
+  MdvxField::setFieldName("titan_mask", fhdr);
+  MdvxField::setFieldNameLong("titan mask - 1 is for valid storm", fhdr);
+  MdvxField::setUnits("", fhdr);
+  
+  // create field from header and data
+  
+  MdvxField *maskField =
+    new MdvxField(fhdr, vhdr, nullptr, false, false, false);
+  maskField->setVolData(*_titanMask, volSize, Mdvx::ENCODING_INT8);
+  maskField->convertType(Mdvx::ENCODING_INT8, Mdvx::COMPRESSION_GZIP);
+
+  // create Mdvx object
+
+  Mdvx maskMdvx;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    maskMdvx.setDebug(true);
+  }
+  Mdvx::master_header_t mhdr = _mrmsMdvx.getMasterHeader();
+  mhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  mhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  mhdr.vlevel_included = 1;
+  maskMdvx.setMasterHeader(mhdr);
+  maskMdvx.setDataSetName("Titan storm track mask");
+  maskMdvx.setDataSetInfo("For censoring small echoes");
+  maskMdvx.setDataSetSource("EccoStats/Titan");
+  maskMdvx.setMdv2NcfOutput(true, true, true, true);
+
+  maskMdvx.addField(maskField);
+  
+  if(maskMdvx.writeToDir(_params.titan_mask_output_dir)) {
+    cerr << "ERROR - EccoStats::Run" << endl;
+    cerr << "  Cannot write mask field to dir: " << _params.titan_mask_output_dir << endl;
+    cerr << maskMdvx.getErrStr() << endl;
+    return -1;
+  }
+  
+  if (_params.debug) {
+    cerr << "Wrote titan mask file: " << maskMdvx.getPathInUse() << endl;
+  }
+
+  return 0;
+
 }
 
 /////////////////////////////////////////////////////////
