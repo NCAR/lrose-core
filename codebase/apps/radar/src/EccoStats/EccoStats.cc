@@ -2025,8 +2025,8 @@ int EccoStats::_writeTitanMask()
 {
 
   // create header
-  
-  Mdvx::field_header_t fhdr = _mrmsDbzField->getFieldHeader();
+
+  Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
   
   fhdr.missing_data_value = 0;
   fhdr.bad_data_value = 0;
@@ -2042,10 +2042,10 @@ int EccoStats::_writeTitanMask()
   fhdr.data_dimension = 2;
   
   size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
-  size_t volSize = npts * sizeof(int);
+  size_t volSize = npts * sizeof(si08);
   fhdr.volume_size = volSize;
   
-  Mdvx::vlevel_header_t vhdr = _mrmsDbzField->getVlevelHeader();
+  Mdvx::vlevel_header_t vhdr = _eccoTypeField->getVlevelHeader();
   vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
   vhdr.level[0] = 0;
   
