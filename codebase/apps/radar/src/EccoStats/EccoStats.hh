@@ -145,7 +145,7 @@ private:
   int **_hourOfDay; // hour of day index
 
   bool _censorUsingTitan;
-  int ***_titanMask;
+  int **_titanMask;
   
   int _computeEccoStats();
 

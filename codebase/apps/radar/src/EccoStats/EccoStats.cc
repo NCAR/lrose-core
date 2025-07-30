@@ -55,7 +55,7 @@ EccoStats::EccoStats(int argc, char **argv)
 {
 
   isOK = true;
-  _eccoPaths = NULL;
+  _eccoPaths = nullptr;
   
   // set programe name
 
@@ -113,14 +113,14 @@ EccoStats::EccoStats(int argc, char **argv)
   // init field pointers
   // these point to memory in MdvxField objects and do not need to be freed
   
-  _eccoTypeField = NULL;
-  _convectivityField = NULL;
-  _terrainHtField = NULL;
-  _waterFlagField = NULL;
-  _mrmsDbzField = NULL;
-  // _covMinHtField = NULL;
-  // _covMaxHtField = NULL;
-  _covHtFractionField = NULL;
+  _eccoTypeField = nullptr;
+  _convectivityField = nullptr;
+  _terrainHtField = nullptr;
+  _waterFlagField = nullptr;
+  _mrmsDbzField = nullptr;
+  // _covMinHtField = nullptr;
+  // _covMaxHtField = nullptr;
+  _covHtFractionField = nullptr;
 
   // init arrays
 
@@ -182,8 +182,8 @@ int EccoStats::_computeEccoStats()
   
   _eccoPaths->reset();
   int fileCount = 0;
-  char *nextPath = NULL;
-  while ((nextPath = _eccoPaths->next()) != NULL) {
+  char *nextPath = nullptr;
+  while ((nextPath = _eccoPaths->next()) != nullptr) {
 
     // do the read
 
@@ -194,9 +194,9 @@ int EccoStats::_computeEccoStats()
       continue;
     }
 
-    if (_eccoTypeField == NULL) {
+    if (_eccoTypeField == nullptr) {
       cerr << "ERROR - EccoStats::_computeEccoStats()" << endl;
-      cerr << "  _eccoTypeField is NULL" << endl;
+      cerr << "  _eccoTypeField is nullptr" << endl;
       return -1;
     }
     
@@ -286,46 +286,46 @@ void EccoStats::_initArraysToNull()
 
   // init arrays
   
-  _stratCount = NULL;
-  _mixedCount = NULL;
-  _convCount = NULL;
+  _stratCount = nullptr;
+  _mixedCount = nullptr;
+  _convCount = nullptr;
 
-  _stratLowCount = NULL;
-  _stratMidCount = NULL;
-  _stratHighCount = NULL;
+  _stratLowCount = nullptr;
+  _stratMidCount = nullptr;
+  _stratHighCount = nullptr;
 
-  _convShallowCount = NULL;
-  _convMidCount = NULL;
-  _convDeepCount = NULL;
-  _convElevCount = NULL;
+  _convShallowCount = nullptr;
+  _convMidCount = nullptr;
+  _convDeepCount = nullptr;
+  _convElevCount = nullptr;
 
-  _stratSumConv = NULL;
-  _stratLowSumConv = NULL;
-  _stratMidSumConv = NULL;
-  _stratHighSumConv = NULL;
+  _stratSumConv = nullptr;
+  _stratLowSumConv = nullptr;
+  _stratMidSumConv = nullptr;
+  _stratHighSumConv = nullptr;
 
-  _mixedSumConv = NULL;
+  _mixedSumConv = nullptr;
 
-  _convSumConv = NULL;
-  _convShallowSumConv = NULL;
-  _convMidSumConv = NULL;
-  _convDeepSumConv = NULL;
-  _convElevSumConv = NULL;
+  _convSumConv = nullptr;
+  _convShallowSumConv = nullptr;
+  _convMidSumConv = nullptr;
+  _convDeepSumConv = nullptr;
+  _convElevSumConv = nullptr;
 
-  _validCount = NULL;
-  _totalCount = NULL;
+  _validCount = nullptr;
+  _totalCount = nullptr;
   
-  _terrainHt = NULL;
-  _waterFlag = NULL;
+  _terrainHt = nullptr;
+  _waterFlag = nullptr;
 
-  _sumCovHtFrac = NULL;
-  _countCov = NULL;
+  _sumCovHtFrac = nullptr;
+  _countCov = nullptr;
 
-  _lat = NULL;
-  _lon = NULL;
-  _hourOfDay = NULL;
+  _lat = nullptr;
+  _lon = nullptr;
+  _hourOfDay = nullptr;
 
-  _titanMask = NULL;
+  _titanMask = nullptr;
 
 }
 
@@ -389,9 +389,10 @@ void EccoStats::_allocArrays()
   _hourOfDay = (int **) ucalloc2(_ny, _nx, sizeof(int));
 
   // titan mask
-
+  
   if (_params.censor_using_titan) {
-    _titanMask = (int ***) ucalloc3(_nz, _ny, _nx, sizeof(int));
+    cerr << "TTTTTTTTTTTTT nx, ny: " << _nx << ", " << _ny << endl;
+    _titanMask = (int **) ucalloc2(_ny, _nx, sizeof(int));
   }
   
 }
@@ -443,8 +444,8 @@ void EccoStats::_freeArrays()
 
   ufree2((void **) _hourOfDay);
   
-  if (_params.censor_using_titan) {
-    ufree3((void ***) _titanMask);
+  if (_titanMask != nullptr) {
+    ufree2((void **) _titanMask);
   }
 
 }
@@ -489,7 +490,7 @@ void EccoStats::_loadTerrain()
 
   // load terrain ht if field is available
   
-  if (_terrainHtField != NULL) {
+  if (_terrainHtField != nullptr) {
   
     // loop through 2D grid space
     
@@ -529,11 +530,11 @@ void EccoStats::_loadTerrain()
     ufree2((void **) count);
     ufree2((void **) sum);
 
-  } // if (_terrainHtField != NULL) 
+  } // if (_terrainHtField != nullptr) 
     
   // load water flag if field is available
   
-  if (_waterFlagField != NULL) {
+  if (_waterFlagField != nullptr) {
   
     // loop through 2D grid space
     
@@ -578,7 +579,7 @@ void EccoStats::_loadTerrain()
     ufree2((void **) count);
     ufree2((void **) sum);
 
-  } // if (_waterFlagField != NULL) 
+  } // if (_waterFlagField != nullptr) 
     
 }
   
@@ -610,9 +611,9 @@ void EccoStats::_updateStats()
   fl32 *echoType2D = (fl32 *) _eccoTypeField->getVol();
   fl32 *convectivity2D = (fl32 *) _convectivityField->getVol();
 
-  fl32 *covHtFrac2D = NULL;
+  fl32 *covHtFrac2D = nullptr;
   fl32 covHtFracMiss = -9999;
-  if (_covHtFractionField != NULL) {
+  if (_covHtFractionField != nullptr) {
     covHtFracMiss = _covHtFractionField->getFieldHeader().missing_data_value;
     covHtFrac2D = (fl32 *) _covHtFractionField->getVol();
   }
@@ -631,7 +632,7 @@ void EccoStats::_updateStats()
 
       // check for coverage ht fraction if active
       
-      if (covHtFrac2D != NULL) {
+      if (covHtFrac2D != nullptr) {
         fl32 covHtFrac = covHtFrac2D[offset];
         if (covHtFrac != covHtFracMiss) {
           // ht fraction
@@ -645,7 +646,7 @@ void EccoStats::_updateStats()
           // censor because ht fraction missing
           continue;
         }
-      } // if (covHtFrac2D != NULL) 
+      } // if (covHtFrac2D != nullptr) 
       
       if (echoTypeFl32 != eccoMiss) {
         
@@ -768,12 +769,12 @@ int EccoStats::_readEcco(const char *path)
   if (strlen(_params.water_flag_field_name) > 0) {
     _waterFlagField = _eccoMdvx.getField(_params.water_flag_field_name);
   }
-  if (_eccoTypeField == NULL) {
+  if (_eccoTypeField == nullptr) {
     cerr << "ERROR - readEcco(), file: " << _eccoMdvx.getPathInUse() << endl;
     cerr << "  Cannot find field: " << _params.ecco_type_comp_field_name << endl;
     return -1;
   }
-  if (_convectivityField == NULL) {
+  if (_convectivityField == nullptr) {
     cerr << "ERROR - readEcco(), file: " << _eccoMdvx.getPathInUse() << endl;
     cerr << "  Cannot find field: " << _params.convectivity_comp_field_name << endl;
     return -1;
@@ -1253,7 +1254,7 @@ void EccoStats::_addFieldsToStats()
 
   // add 2D fields for coverage
 
-  if (_covHtFractionField != NULL) {
+  if (_covHtFractionField != nullptr) {
     _statsMdvx.addField(_computeCov2DField(_sumCovHtFrac,
                                            _countCov,
                                            _params.coverage_ht_fraction_field_name,
@@ -1516,8 +1517,8 @@ int EccoStats::_computeCoverage()
   // loop until end of ecco data
   
   _eccoPaths->reset();
-  char *nextPath = NULL;
-  while ((nextPath = _eccoPaths->next()) != NULL) {
+  char *nextPath = nullptr;
+  while ((nextPath = _eccoPaths->next()) != nullptr) {
     
     // read the Ecco data
     
@@ -1635,7 +1636,7 @@ void EccoStats::_addCoverageFields()
   
   // load up height fraction
   
-  if (_terrainHtField != NULL) {
+  if (_terrainHtField != nullptr) {
 
     for (int iy = 0; iy < fhdrDbz.ny; iy++) {
       for (int ix = 0; ix < fhdrDbz.nx; ix++) {
@@ -1666,7 +1667,7 @@ void EccoStats::_addCoverageFields()
     _covMdvx.addField(_makeMrms2DField(covHtFrac, _params.coverage_ht_fraction_field_name,
                                        "Coverage fraction in vert column", "", _missingFl32));
     
-  } // if (_terrainHtField != NULL)
+  } // if (_terrainHtField != nullptr)
 
   // free up arrays
   
@@ -1684,7 +1685,7 @@ int EccoStats::_readMrms()
   
 {
 
-  _mrmsDbzField = NULL;
+  _mrmsDbzField = nullptr;
   
   _mrmsMdvx.clear();
   if (_params.debug >= Params::DEBUG_EXTRA) {
@@ -1720,7 +1721,7 @@ int EccoStats::_readMrms()
   // get dbz field
   
   _mrmsDbzField = _mrmsMdvx.getField(_params.mrms_dbz_field_name);
-  if (_mrmsDbzField == NULL) {
+  if (_mrmsDbzField == nullptr) {
     cerr << "ERROR - EccoStats::_readMrms" << endl;
     cerr << "  Cannot find MRMS DBZ field: " << _params.mrms_dbz_field_name << endl;
     cerr << "  MRMS path: " << _mrmsMdvx.getPathInUse() << endl;
@@ -1753,9 +1754,9 @@ int EccoStats::_readCoverage()
   
 {
 
-  // _covMinHtField = NULL;
-  // _covMaxHtField = NULL;
-  _covHtFractionField = NULL;
+  // _covMinHtField = nullptr;
+  // _covMaxHtField = nullptr;
+  _covHtFractionField = nullptr;
 
   _covMdvx.clear();
   if (_params.debug >= Params::DEBUG_EXTRA) {
@@ -1793,7 +1794,7 @@ int EccoStats::_readCoverage()
   // get fields
   
   // _covMinHtField = _covMdvx.getField(_params.coverage_min_ht_field_name);
-  // if (_covMinHtField == NULL) {
+  // if (_covMinHtField == nullptr) {
   //   cerr << "WARNING - EccoStats::_readCoverage" << endl;
   //   cerr << "  Cannot find coverage min ht field: "
   //        << _params.coverage_min_ht_field_name << endl;
@@ -1801,14 +1802,14 @@ int EccoStats::_readCoverage()
   // }
 
   // _covMaxHtField = _covMdvx.getField(_params.coverage_max_ht_field_name);
-  // if (_covMinHtField == NULL) {
+  // if (_covMinHtField == nullptr) {
   //   cerr << "WARNING - EccoStats::_readCoverage" << endl;
   //   cerr << "  Cannot find coverage max ht field: " << _params.coverage_max_ht_field_name << endl;
   //   cerr << "  Coverage path: " << _covMdvx.getPathInUse() << endl;
   // }
 
   _covHtFractionField = _covMdvx.getField(_params.coverage_ht_fraction_field_name);
-  if (_covHtFractionField == NULL) {
+  if (_covHtFractionField == nullptr) {
     cerr << "ERROR - EccoStats::_readCoverage" << endl;
     cerr << "  Cannot find coverage ht fraction field: "
          << _params.coverage_ht_fraction_field_name << endl;
@@ -1945,11 +1946,18 @@ int EccoStats::_readTitan()
          << scanNum << ", " << tFile.getPathInUse() << endl;
     return -1;
   }
+
+  // initialize the mask
+
+  memset(*_titanMask, 0, _nx * _ny * sizeof(int));
+
+  // loop through the scan entries, setting the mask where we have significant storms
   
   const vector<TitanData::TrackEntry> &scanEntries = tFile.scanEntries();
-  // cerr << "11111111111111 nStorms: " << tFile.scan().nstorms << endl;
-  // cerr << "11111111111111 scanEntries.size(): " << scanEntries.size() << endl;
   for (size_t iscan = 0; iscan < scanEntries.size(); iscan++) {
+
+    // get track entry
+    
     const TitanData::TrackEntry &entry = scanEntries[iscan];
     int complexNum = entry.complex_track_num;
     if (tFile.readComplexTrackParams(complexNum, true)) {
@@ -1958,6 +1966,9 @@ int EccoStats::_readTitan()
            << complexNum << endl;
       return -1;
     }
+
+    // check if this is a valid entry
+    
     int trackDurationSecs = tFile.complexParams().duration_in_secs;
     int stormNum = entry.storm_num;
     const TitanData::StormGprops &gprops = tFile.gprops()[stormNum];
@@ -1977,27 +1988,28 @@ int EccoStats::_readTitan()
            << stormNum << ", " << tFile.getPathInUse() << endl;
       return -1;
     }
+
+    // loop through the projected area runs, setting the mask
+    // where we have a storm
+    
+    
+    // cerr << "2222222222222222222222222222222 iscan: " << iscan << endl;
+    // cerr << "  complexNum: " << complexNum << endl;
+    // cerr << "    durationInSecs: " << trackDurationSecs << endl;
+    // cerr << "    stormNum: " << stormNum << endl;
+    // cerr << "    volume: " << stormVol << endl;
+    // cerr << "    nProjRuns: " << nProjRuns << endl;
+    // cerr << "    projRuns.size(): " << projRuns.size() << endl;
+    // cerr << "2222222222222222222222222222222" << endl;
+    
+    // loop through the proj runs
     
     const vector<TitanData::StormRun> &projRuns = tFile.projRuns();
-    
-    cerr << "2222222222222222222222222222222 iscan: " << iscan << endl;
-    cerr << "  complexNum: " << complexNum << endl;
-    cerr << "    durationInSecs: " << trackDurationSecs << endl;
-    cerr << "    stormNum: " << stormNum << endl;
-    cerr << "    volume: " << stormVol << endl;
-    cerr << "    nProjRuns: " << nProjRuns << endl;
-    cerr << "    projRuns.size(): " << projRuns.size() << endl;
-    cerr << "2222222222222222222222222222222" << endl;
-
-    // loop through the proj runs
-
     for (int irun = 0; irun < nProjRuns; irun++) {
       const TitanData::StormRun &run = projRuns[irun];
-      cerr << "333333 ix, iy, iz, len: "
-           << run.run_ix << ", "
-           << run.run_iy << ", "
-           << run.run_iz << ", "
-           << run.run_len << endl;
+      for (int jj = 0; jj < run.run_len; jj++) {
+        _titanMask[run.run_iy][run.run_ix + jj] = 1;
+      }
     } // irun
     
   } // iscan
@@ -2059,7 +2071,7 @@ MdvxField *EccoStats::_make3DField(fl32 ***data,
   MdvxField::setFieldNameLong(longName, fhdr);
   MdvxField::setUnits(units, fhdr);
   MdvxField *newField =
-    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+    new MdvxField(fhdr, vhdr, nullptr, false, false, false);
   newField->setVolData(**data, volSize, Mdvx::ENCODING_FLOAT32);
   newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
 
@@ -2118,7 +2130,7 @@ MdvxField *EccoStats::_make2DField(fl32 **data,
   // create field from header and data
   
   MdvxField *newField =
-    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+    new MdvxField(fhdr, vhdr, nullptr, false, false, false);
   newField->setVolData(*data, volSize, Mdvx::ENCODING_FLOAT32);
   newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
 
@@ -2194,7 +2206,7 @@ MdvxField *EccoStats::_computeMean3DField(fl32 ***data,
   // create field from header and data
   
   MdvxField *newField =
-    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+    new MdvxField(fhdr, vhdr, nullptr, false, false, false);
   newField->setVolData(**frac, volSize, Mdvx::ENCODING_FLOAT32);
   newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
 
@@ -2278,7 +2290,7 @@ MdvxField *EccoStats::_computeMean2DField(fl32 ***data,
   // create field from header and data
   
   MdvxField *newField =
-    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+    new MdvxField(fhdr, vhdr, nullptr, false, false, false);
   newField->setVolData(*frac, volSize, Mdvx::ENCODING_FLOAT32);
   newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
 
@@ -2335,7 +2347,7 @@ MdvxField *EccoStats::_makeMrms2DField(fl32 **data,
   // create field from header and data
   
   MdvxField *newField =
-    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+    new MdvxField(fhdr, vhdr, nullptr, false, false, false);
   newField->setVolData(*data, volSize, Mdvx::ENCODING_FLOAT32);
   newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
 
@@ -2406,7 +2418,7 @@ MdvxField *EccoStats::_computeCov2DField(fl32 **sum,
   // create field from header and data
   
   MdvxField *newField =
-    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+    new MdvxField(fhdr, vhdr, nullptr, false, false, false);
   newField->setVolData(*mean, volSize, Mdvx::ENCODING_FLOAT32);
   newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
 
@@ -2484,7 +2496,7 @@ MdvxField *EccoStats::_sumHourlyField(fl32 ***counts,
   // create field from header and data
   
   MdvxField *newField =
-    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+    new MdvxField(fhdr, vhdr, nullptr, false, false, false);
   newField->setVolData(*tot, volSize, Mdvx::ENCODING_FLOAT32);
   newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
   
@@ -2550,7 +2562,7 @@ MdvxField *EccoStats::_makeHourlyField(int hour,
   MdvxField::setUnits(units, fhdr);
 
   MdvxField *newField =
-    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+    new MdvxField(fhdr, vhdr, nullptr, false, false, false);
   newField->setVolData(*data[hour], volSize, Mdvx::ENCODING_FLOAT32);
   newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
 
@@ -2628,7 +2640,7 @@ MdvxField *EccoStats::_computeHourlyMeanField(int hour,
   // create field from header and data
   
   MdvxField *newField =
-    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+    new MdvxField(fhdr, vhdr, nullptr, false, false, false);
   newField->setVolData(*frac, volSize, Mdvx::ENCODING_FLOAT32);
   newField->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
 
