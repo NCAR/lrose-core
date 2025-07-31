@@ -402,8 +402,7 @@ void EccoStats::_allocArrays()
   // titan mask
   
   if (_params.censor_using_titan) {
-    Mdvx::field_header_t fhdr = _eccoTypeField->getFieldHeader();
-    _titanMask = (ui08 **) ucalloc2(fhdr.ny, fhdr.nx, sizeof(ui08));
+    _titanMask = (ui08 **) ucalloc2(_inNy, _inNx, sizeof(ui08));
   }
   
 }
@@ -1949,7 +1948,7 @@ int EccoStats::_readTitan()
 
   // initialize the mask to 0
 
-  memset(*_titanMask, 0, _nx * _ny * sizeof(ui08));
+  memset(*_titanMask, 0, _inNx * _inNy * sizeof(ui08));
 
   // loop through the scan entries, setting the mask where we have significant storms
   
