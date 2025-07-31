@@ -1,0 +1,455 @@
+/**********************************************************************
+ * TDRP params for EccoStats
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: EccoStats.
+//
+// EccoStats computes statistics from the Ecco output files. See the 
+//   Ecco app for details.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+
+debug = DEBUG_NORM;
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In ARCHIVE mode, the app moves through the data between the start and 
+//   end times set on the command line. In FILELIST mode, it moves through 
+//   the list of file names specified on the command line.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     FILELIST
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+//
+// This is used in ARCHIVE mode only. In FILELIST mode, the file paths 
+//   are specified on the command line.
+//
+// Type: string
+
+input_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_conus_terrain";
+
+///////////// ecco_type_comp_field_name ///////////////
+//
+// Field name for 2D composite of Ecco type.
+//
+// Type: string
+
+ecco_type_comp_field_name = "EchoTypeComp";
+
+///////////// convectivity_comp_field_name ////////////
+//
+// Field name for 2D composite of convectivity.
+//
+// Set to empty if you do not want to copy the terrain height grid to 
+//   the output files.
+//
+// Type: string
+
+convectivity_comp_field_name = "ConvectivityComp";
+
+///////////// terrain_height_field_name ///////////////
+//
+// Field name for terrain height.
+//
+// Type: string
+
+terrain_height_field_name = "TerrainHt";
+
+///////////// water_flag_field_name ///////////////////
+//
+// Field name for water flag.
+//
+// Set to empty if you do not want to copy the water flag to the output 
+//   files.
+//
+// Type: string
+
+water_flag_field_name = "WaterFlag";
+
+//======================================================================
+//
+// CLIMATOLOGY DETAILS.
+//
+//======================================================================
+ 
+///////////// set_month_range /////////////////////////
+//
+// Option to specify the month for the climatology.
+//
+// Only data files within this month range will be included in the 
+//   analysis. If min_month exceeds max_month, then the range wraps from 
+//   12 back to 1.
+//
+// Type: boolean
+
+set_month_range = FALSE;
+
+///////////// min_month ///////////////////////////////
+//
+// Min month to be analyzed.
+//
+// This is 1-based. January is 1, December is 12.
+//
+// Minimum val: 1
+// Maximum val: 12
+//
+// Type: int
+
+min_month = 1;
+
+///////////// max_month ///////////////////////////////
+//
+// Max month to be analyzed.
+//
+// This is 1-based. January is 1, December is 12.
+//
+// Minimum val: 1
+// Maximum val: 12
+//
+// Type: int
+
+max_month = 1;
+
+///////////// aggregate_grid_cells ////////////////////
+//
+// Option to aggregate the statistics over a block of grid cells.
+//
+// If true, the grid cell stats will be aggregated over a block of grid 
+//   cells, making the output grid smaller and the number of observations 
+//   larger per output grid cell.
+//
+// Type: boolean
+
+aggregate_grid_cells = TRUE;
+
+///////////// aggregate_ny ////////////////////////////
+//
+// Number of y cells to aggregate.
+//
+// Type: int
+
+aggregate_ny = 10;
+
+///////////// aggregate_nx ////////////////////////////
+//
+// Number of x cells to aggregate.
+//
+// Type: int
+
+aggregate_nx = 10;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+
+//   The partition field has the following values:
+//     CATEGORY_MISSING = 0
+//     CATEGORY_STRATIFORM_LOW = 14
+//     CATEGORY_STRATIFORM = 15
+//     CATEGORY_STRATIFORM_MID = 16
+//     CATEGORY_STRATIFORM_HIGH = 18
+//     CATEGORY_MIXED = 25
+//     CATEGORY_CONVECTIVE_ELEVATED = 32
+//     CATEGORY_CONVECTIVE_SHALLOW = 34
+//     CATEGORY_CONVECTIVE = 35
+//     CATEGORY_CONVECTIVE_MID = 36
+//     CATEGORY_CONVECTIVE_DEEP = 38.
+//
+//======================================================================
+ 
+///////////// stats_dir ///////////////////////////////
+//
+// Stats directory.
+//
+// Stats files are written to this directory.
+//
+// Type: string
+
+stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats/titan_censor";
+
+///////////// stats_data_set_info /////////////////////
+//
+// String for file metadata header.
+//
+// Information on the data set.
+//
+// Type: string
+
+stats_data_set_info = "Ecco climatology.";
+
+///////////// stats_data_set_source ///////////////////
+//
+// String for file metadata header.
+//
+// Source of the data set.
+//
+// Type: string
+
+stats_data_set_source = "Computed by EccoStats app.";
+
+//======================================================================
+//
+// CREATE COVERAGE FIELD FOR MRMS GRID.
+//
+//======================================================================
+ 
+///////////// compute_mrms_coverage ///////////////////
+//
+// Option to create coverage field field for MRMS data grid.
+//
+// If true, read the MRMS 3D reflectivity MDV files, compute the 
+//   coverage and write files to a separate directory.
+//
+// Type: boolean
+
+compute_mrms_coverage = FALSE;
+
+///////////// mrms_dbz_mdv_dir ////////////////////////
+//
+// Directory for MRMS 3D grid of reflectivity.
+//
+// This is in MDV NetCDF format.
+//
+// Type: string
+
+mrms_dbz_mdv_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv";
+
+///////////// mrms_dbz_field_name /////////////////////
+//
+// dBZ field name in MRMS MDV files.
+//
+// Type: string
+
+mrms_dbz_field_name = "DBZ";
+
+///////////// coverage_dir ////////////////////////////
+//
+// Directory for writing out MRMS coverage files.
+//
+// This is in MDV NetCDF format.
+//
+// Type: string
+
+coverage_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/mdv/coverage";
+
+///////////// coverage_min_ht_field_name //////////////
+//
+// Name of min coverage height field in output files.
+//
+// This is the minimum height of the radar coverage.
+//
+// Type: string
+
+coverage_min_ht_field_name = "CoverageMinHt";
+
+///////////// coverage_max_ht_field_name //////////////
+//
+// Name of max coverage height field in output files.
+//
+// This is the maximum height of the radar coverage.
+//
+// Type: string
+
+coverage_max_ht_field_name = "CoverageMaxHt";
+
+///////////// coverage_ht_fraction_field_name /////////
+//
+// Name of coverage height fraction in output files.
+//
+// The height fraction is computed as the fraction of the column, from 
+//   the terrain height to the top of the Cartesian grid, that is covered 
+//   by the radar data.
+//
+// Type: string
+
+coverage_ht_fraction_field_name = "CoverageHtFrac";
+
+//======================================================================
+//
+// CENSOR BASED ON COVERAGE FIELD.
+//
+//======================================================================
+ 
+///////////// censor_based_on_radar_coverage //////////
+//
+// Option to censor the analysis based on the radar coverage - see 
+//   above.
+//
+// If true, for each (x, y) location, we only accumulate the statistics 
+//   if the coverage height fraction meets the threshold. This helps to 
+//   remove areas in which there is inadequate coverage to allow for valid 
+//   results from the Ecco algorithm.
+//
+// Type: boolean
+
+censor_based_on_radar_coverage = FALSE;
+
+///////////// radar_coverage_min_ht_fraction //////////
+//
+// Minimum fraction of height coverage for stats to be valid.
+//
+// We only accumulate the counts for a column if the coverage height 
+//   fraction exceeds this threshold.
+//
+// Type: double
+
+radar_coverage_min_ht_fraction = 0.6;
+
+//======================================================================
+//
+// CENSOR USING TITAN STORM TRACKS.
+//
+//======================================================================
+ 
+///////////// censor_using_titan //////////////////////
+//
+// Option to use Titan tracks to mask data for use in climatology.
+//
+// Ecco sometimes identifies small spurious regions that contaminate the 
+//   climatology. We can run Titan on the Ecco output, and then using the 
+//   Titan output to select only significant storms. This helps to mask 
+//   out non-storm data.
+//
+// Type: boolean
+
+censor_using_titan = TRUE;
+
+///////////// titan_input_dir /////////////////////////
+//
+// Directory for input titan data.
+//
+// This directory will contain the titan storm and track files.
+//
+// Type: string
+
+titan_input_dir = "/scr/cirrus3/rsfdata/projects/nexrad-mrms/ecco_titan";
+
+///////////// min_titan_track_duration_secs ///////////
+//
+// Minimum duration of titan track for it to be valid for climatology.
+//
+// We only use tracks that meet or exceed this overall duration.
+//
+// Type: int
+
+min_titan_track_duration_secs = 1800;
+
+///////////// min_titan_storm_volume_km3 //////////////
+//
+// Minimum volume of storm for it to be valid for climatology.
+//
+// We only use titan storms that meet or exceed this volume. This test 
+//   is applied at each scan time.
+//
+// Type: int
+
+min_titan_storm_volume_km3 = 100;
+
+///////////// expand_titan_storms /////////////////////
+//
+// Option to expand the footprint of titan storms, to include an area 
+//   around the storm.
+//
+// If true, the storm projected area locations are expanded by a number 
+//   of grid cells around the detected region.
+//
+// Type: boolean
+
+expand_titan_storms = TRUE;
+
+///////////// titan_expand_n_cells ////////////////////
+//
+// Number of grid cells by which to expand the titan detections.
+//
+// See 'expand_titan_storms' above.
+//
+// Type: int
+
+titan_expand_n_cells = 3;
+
+///////////// write_titan_mask_files //////////////////
+//
+// Option to write out the Titan mask for debugging.
+//
+// This allows us to view the Titan mask field and compare it to the 
+//   Ecco fields for debugging.
+//
+// Type: boolean
+
+write_titan_mask_files = TRUE;
+
+///////////// titan_mask_output_dir ///////////////////
+//
+// Directory for input titan data.
+//
+// This directory will contain the titan storm and track files.
+//
+// Type: string
+
+titan_mask_output_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/titan_mask";
+
+//======================================================================
+//
+// WRITE HOUR-OF-DAY SUMMARIES TO SEPARATE FILES.
+//
+//======================================================================
+ 
+///////////// write_hour_of_day_stats /////////////////
+//
+// Option to write files, for each hour of the day, to separate 
+//   time-stamped files.
+//
+// If true, summaries for each hour of the day are written to separate 
+//   files, from which we can make movie loops.
+//
+// Type: boolean
+
+write_hour_of_day_stats = TRUE;
+
+///////////// hour_of_day_stats_dir ///////////////////
+//
+// Hour of day stats directory.
+//
+// Hour of dat stats files are written to this directory.
+//
+// Type: string
+
+hour_of_day_stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov60";
+
