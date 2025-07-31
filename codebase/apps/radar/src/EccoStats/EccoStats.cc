@@ -1991,11 +1991,37 @@ int EccoStats::_readTitan()
     // loop through the projected area runs, setting the mask
     // where we have a storm
     
+    int nExpand = _params.titan_expand_n_cells;
     const vector<TitanData::StormRun> &projRuns = tFile.projRuns();
     for (int irun = 0; irun < nProjRuns; irun++) {
       const TitanData::StormRun &run = projRuns[irun];
-      for (int jj = 0; jj < run.run_len; jj++) {
-        _titanMask[run.run_iy][run.run_ix + jj] = 1;
+      for (int ii = 0; ii < run.run_len; ii++) {
+        int iy = run.run_iy;
+        int ix = run.run_ix + ii;
+        _titanMask[iy][ix] = 1;
+        if (_params.expand_titan_storms) {
+          int yStart = iy - nExpand;
+          if (yStart < 0) {
+            yStart = 0;
+          }
+          int yEnd = iy + nExpand;
+          if (yEnd > _inNy - 1) {
+            yEnd = _inNy - 1;
+          }
+          int xStart = ix - nExpand;
+          if (xStart < 0) {
+            xStart = 0;
+          }
+          int xEnd = ix + nExpand;
+          if (xEnd > _inNx - 1) {
+            xEnd = _inNx - 1;
+          }
+          for (int jy = yStart; jy <= yEnd; jy++) {
+            for (int jx = xStart; jx <= xEnd; jx++) {
+              _titanMask[jy][jx] = 1;
+            }
+          }
+        } // if (_params.expand_titan_storms) 
       }
     } // irun
     

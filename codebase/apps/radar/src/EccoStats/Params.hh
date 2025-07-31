@@ -431,6 +431,10 @@ public:
 
   int min_titan_storm_volume_km3;
 
+  tdrp_bool_t expand_titan_storms;
+
+  int titan_expand_n_cells;
+
   tdrp_bool_t write_titan_mask_files;
 
   char* titan_mask_output_dir;
@@ -446,7 +450,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[43];
+  mutable TDRPtable _table[45];
 
   const char *_className;
 

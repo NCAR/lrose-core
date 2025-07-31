@@ -1002,6 +1002,30 @@
     tt->single_val.i = 100;
     tt++;
     
+    // Parameter 'expand_titan_storms'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("expand_titan_storms");
+    tt->descr = tdrpStrDup("Option to expand the footprint of titan storms, to include an area around the storm.");
+    tt->help = tdrpStrDup("If true, the storm projected area locations are expanded by a number of grid cells around the detected region.");
+    tt->val_offset = (char *) &expand_titan_storms - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'titan_expand_n_cells'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("titan_expand_n_cells");
+    tt->descr = tdrpStrDup("Number of grid cells by which to expand the titan detections.");
+    tt->help = tdrpStrDup("See 'expand_titan_storms' above.");
+    tt->val_offset = (char *) &titan_expand_n_cells - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
     // Parameter 'write_titan_mask_files'
     // ctype is 'tdrp_bool_t'
     

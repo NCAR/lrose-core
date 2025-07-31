@@ -236,6 +236,18 @@ paramdef int {
 
 paramdef boolean {
   p_default = FALSE;
+  p_descr = "Option to expand the footprint of titan storms, to include an area around the storm.";
+  p_help = "If true, the storm projected area locations are expanded by a number of grid cells around the detected region.";
+} expand_titan_storms;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of grid cells by which to expand the titan detections.";
+  p_help = "See 'expand_titan_storms' above.";
+} titan_expand_n_cells;
+
+paramdef boolean {
+  p_default = FALSE;
   p_descr = "Option to write out the Titan mask for debugging.";
   p_help = "This allows us to view the Titan mask field and compare it to the Ecco fields for debugging.";
 } write_titan_mask_files;
