@@ -633,6 +633,15 @@ void EccoStats::_updateStats()
   size_t offset = 0;
   for (int jy = 0; jy < _inNy; jy++) {
     for (int jx = 0; jx < _inNx; jx++, offset++) {
+
+      // check for titan mask
+
+      if (_params.censor_using_titan) {
+        if (_titanMask[jy][jx] != 1) {
+          // skip this point
+          continue;
+        }
+      }
       
       int iy = jy / _agNy;
       int ix = jx / _agNx;
@@ -1990,6 +1999,7 @@ int EccoStats::_readTitan()
 
     // loop through the projected area runs, setting the mask
     // where we have a storm
+    // expand mask as requested
     
     int nExpand = _params.titan_expand_n_cells;
     const vector<TitanData::StormRun> &projRuns = tFile.projRuns();
