@@ -2066,10 +2066,15 @@ int EccoStats::_writeTitanMask()
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     maskMdvx.setDebug(true);
   }
-  Mdvx::master_header_t mhdr = _mrmsMdvx.getMasterHeader();
+  Mdvx::master_header_t mhdr = _eccoMdvx.getMasterHeader();
   mhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
   mhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
   mhdr.vlevel_included = 1;
+  mhdr.n_fields = 0;
+  mhdr.n_chunks = 0;
+  mhdr.data_dimension = 2;
+  mhdr.data_collection_type = Mdvx::DATA_MEASURED;
+
   maskMdvx.setMasterHeader(mhdr);
   maskMdvx.setDataSetName("Titan storm track mask");
   maskMdvx.setDataSetInfo("For censoring small echoes");
