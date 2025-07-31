@@ -2039,6 +2039,7 @@ int EccoStats::_writeTitanMask()
   
   fhdr.dz_constant = 1;
   fhdr.data_dimension = 2;
+  fhdr.data_element_nbytes = 1;
   
   size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
   size_t volSize = npts * sizeof(si08);
