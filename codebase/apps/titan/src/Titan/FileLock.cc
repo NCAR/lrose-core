@@ -64,7 +64,7 @@ FileLock::FileLock(const string &prog_name, const Params &params) :
     cerr << "ERROR - " << _progName << ":Filelock::Filelock" << endl;
     cerr << "  Cannot create lock file '" << _lockFilePath << "'" << endl;
     cerr << "  " << _progName
-	 << " probably aleady be running in this directory" << endl;
+	 << " probably already running in this directory" << endl;
     OK = FALSE;
   }
 
