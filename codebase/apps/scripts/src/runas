@@ -65,3 +65,45 @@ cat <<EOF | sudo -H -u $user /bin/bash -c "umask 0077; tee $tmpscript" >/dev/nul
 
 EOF
 
+dpyname=":$(echo $DISPLAY | cut -f2 -d:)"
+xauth=$(xauth nextract - $dpyname)
+cat <<EOF | sudo -H -u $user tee -a $tmpscript >/dev/null
+# Get our Xauth key.
+echo '$xauth' | xauth nmerge -
+
+# Set our display
+export DISPLAY="${DISPLAY}"
+
+EOF
+
+tmpscript2="${mytmp}/.$user$$-2"
+if [[ $# -gt 0 ]]; then
+        cat <<EOF | sudo -H -u $user tee -a $tmpscript >/dev/null
+# Run the command
+$tgtshell $tmpscript2 "\$@"
+EOF
+
+if echo $(basename "$tgtshell") | grep 'csh$' -q; then
+        argv='$argv:q'
+else
+        argv='"$@"'
+fi
+        cat <<EOF | sudo -H -u $user /bin/bash -c "umask 0077; tee $tmpscript2" >/dev/null
+#!$tgtshell
+exec $argv
+EOF
+else
+        cat <<EOF | sudo -H -u $user tee -a $tmpscript >/dev/null
+# Run the command
+$tgtshell
+EOF
+sudo -H -u $user /bin/bash -c "umask 0077; touch $tmpscript2" >/dev/null
+fi
+
+# Fallback in case the temporary files weren't created
+# This happens if ${mytmp} is full
+[ ! -f "$tmpscript" ] && nox "$@"
+[ ! -f "$tmpscript2" ] && nox "$@"
+
+/usr/bin/sudo -H -u $user /bin/bash $tmpscript "$@"
+/usr/bin/sudo -H -u $user rm "$tmpscript" "$tmpscript2"
