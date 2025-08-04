@@ -800,6 +800,14 @@ public:
 
   char* test_pulse_field_name;
 
+  tdrp_bool_t add_SNR_field;
+
+  char* DBZ_field_name;
+
+  char* SNR_field_name;
+
+  double noise_dbz_at_100km;
+
   tdrp_bool_t apply_linear_transforms;
 
   transform_field_t *_transform_fields;
@@ -905,7 +913,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[208];
+  mutable TDRPtable _table[213];
 
   const char *_className;
 

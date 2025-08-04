@@ -39,6 +39,7 @@
 #include "Params.hh"
 #include <string>
 #include <set>
+#include <Radx/Radx.hh>
 class RadxVol;
 class RadxFile;
 class RadxRay;
@@ -99,6 +100,15 @@ private:
   void _censorFields(RadxVol &vol);
   void _censorRay(RadxRay *ray);
   bool _checkFieldForCensoring(const RadxField *field);
+  int _addSnrField(RadxVol &vol);
+  int _addSnrField(RadxRay *ray);
+  void _computeSnrFromDbz(size_t nGates,
+                          const Radx::fl32 *dbz,
+                          Radx::fl32 *snr,
+                          Radx::fl32 missingVal,
+                          double startRangeKm,
+                          double gateSpacingKm);
+
 
 };
 

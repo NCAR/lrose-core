@@ -2653,6 +2653,63 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 22");
+    tt->comment_hdr = tdrpStrDup("OPTION TO COMPUTE SNR FROM DBZ.");
+    tt->comment_text = tdrpStrDup("If SNR is not available, you may wish to add an estimated SNR field based on DBZ. This requires an estimate of the DBZ value of the noise at a range of 100 km. This can often be estimated by inspection of the DBZ field.");
+    tt++;
+    
+    // Parameter 'add_SNR_field'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_SNR_field");
+    tt->descr = tdrpStrDup("Option to add an estimated SNR field based on DBZ.");
+    tt->help = tdrpStrDup("If not, SNR will be computed from the DBZ field. See 'noise_dbz_at_100km'.");
+    tt->val_offset = (char *) &add_SNR_field - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'DBZ_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("DBZ_field_name");
+    tt->descr = tdrpStrDup("Field name for DBZ.");
+    tt->help = tdrpStrDup("Horizontally-polarized reflectivity factor.");
+    tt->val_offset = (char *) &DBZ_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DBZ");
+    tt++;
+    
+    // Parameter 'SNR_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("SNR_field_name");
+    tt->descr = tdrpStrDup("Field name for SNR.");
+    tt->help = tdrpStrDup("Signal-to-noise ratio (dB).");
+    tt->val_offset = (char *) &SNR_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("SNR");
+    tt++;
+    
+    // Parameter 'noise_dbz_at_100km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("noise_dbz_at_100km");
+    tt->descr = tdrpStrDup("The noise value, represented as dBZ at a range of 100km.");
+    tt->help = tdrpStrDup("This is used for computing the SNR from the DBZ field. The SNR will be computed by range-correcting this value and using it as the noise value.");
+    tt->val_offset = (char *) &noise_dbz_at_100km - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'Comment 23'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.");
     tt->comment_text = tdrpStrDup("These transforms are fixed. The same transform is applied to all files.");
     tt++;
@@ -2727,11 +2784,11 @@
       tt->struct_vals[9].d = 25;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("OPTION TO APPLY VARIABLE LINEAR TRANSFORM TO SPECIFIED FIELDS.");
     tt->comment_text = tdrpStrDup("These transforms vary from file to file, controlled by specific metadata.");
     tt++;
@@ -2813,11 +2870,11 @@
       tt->struct_vals[11].s = tdrpStrDup("(56.0, 1.0, -0.75), (58.0, 1.0, -0.75), (61.0, 1.0, 0.1), (63.5, 1.0, 0.2), (64.0, 1.0, 0.6), (69.0, 1.0, 0.6)");
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2880,11 +2937,11 @@
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2913,11 +2970,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2946,11 +3003,11 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3309,11 +3366,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 29'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("SEPARATING VOLUMES BY TYPE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3390,11 +3447,11 @@
     tt->single_val.s = tdrpStrDup("sun");
     tt++;
     
-    // Parameter 'Comment 29'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 29");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE MISSING VALUES");
     tt->comment_text = tdrpStrDup("Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n");
     tt++;
