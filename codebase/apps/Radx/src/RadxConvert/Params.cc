@@ -2588,6 +2588,42 @@
       tt->array_vals[0].s = tdrpStrDup("LDR");
     tt++;
     
+    // Parameter 'censoring_limit_elev_angles'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("censoring_limit_elev_angles");
+    tt->descr = tdrpStrDup("Limit censoring to a specified range of elevation angles.");
+    tt->help = tdrpStrDup("If TRUE, censoring will only be applied for elevation angles between the specified limits.");
+    tt->val_offset = (char *) &censoring_limit_elev_angles - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'censoring_min_elev_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("censoring_min_elev_deg");
+    tt->descr = tdrpStrDup("Minimum elevation angle for censoring (deg).");
+    tt->help = tdrpStrDup("Only applies if 'censoring_limit_elev_angles' is true.");
+    tt->val_offset = (char *) &censoring_min_elev_deg - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'censoring_max_elev_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("censoring_max_elev_deg");
+    tt->descr = tdrpStrDup("Maximum elevation angle for censoring (deg).");
+    tt->help = tdrpStrDup("Only applies if 'censoring_limit_elev_angles' is true.");
+    tt->val_offset = (char *) &censoring_max_elev_deg - &_start_;
+    tt->single_val.d = 90;
+    tt++;
+    
     // Parameter 'censor_test_pulse_ring'
     // ctype is 'tdrp_bool_t'
     

@@ -1032,6 +1032,24 @@ paramdef string {
 
 paramdef boolean {
   p_default = FALSE;
+  p_descr = "Limit censoring to a specified range of elevation angles.";
+  p_help = "If TRUE, censoring will only be applied for elevation angles between the specified limits.";
+} censoring_limit_elev_angles;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum elevation angle for censoring (deg).";
+  p_help = "Only applies if 'censoring_limit_elev_angles' is true.";
+} censoring_min_elev_deg;
+
+paramdef double {
+  p_default = 90.0;
+  p_descr = "Maximum elevation angle for censoring (deg).";
+  p_help = "Only applies if 'censoring_limit_elev_angles' is true.";
+} censoring_max_elev_deg;
+
+paramdef boolean {
+  p_default = FALSE;
   p_descr = "Censor non-missing data within the test pulse ring.";
   p_help = "If TRUE, non-missing data within the ring will be censored, provided there is no adjacent data in the margins.";
 } censor_test_pulse_ring;

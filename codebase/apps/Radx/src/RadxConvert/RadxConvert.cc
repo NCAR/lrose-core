@@ -1669,6 +1669,13 @@ void RadxConvert::_censorRay(RadxRay *ray)
     return;
   }
 
+  if (_params.censoring_limit_elev_angles) {
+    if (ray->getElevationDeg() < _params.censoring_min_elev_deg ||
+        ray->getElevationDeg() > _params.censoring_max_elev_deg) {
+      return;
+    }
+  }
+
   // convert fields to floats
 
   vector<Radx::DataType_t> fieldTypes;

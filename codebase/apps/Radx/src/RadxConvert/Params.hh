@@ -790,6 +790,12 @@ public:
   char* *_fields_to_be_censored;
   int fields_to_be_censored_n;
 
+  tdrp_bool_t censoring_limit_elev_angles;
+
+  double censoring_min_elev_deg;
+
+  double censoring_max_elev_deg;
+
   tdrp_bool_t censor_test_pulse_ring;
 
   double test_pulse_min_range_km;
@@ -913,7 +919,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[213];
+  mutable TDRPtable _table[216];
 
   const char *_className;
 
