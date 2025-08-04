@@ -1891,7 +1891,7 @@ int RadxConvert::_addSnrField(RadxRay *ray)
   // get DBZ field
   
   const RadxField *dbzField = ray->getField(_params.DBZ_field_name);
-  if (dbzField != NULL) {
+  if (dbzField == NULL) {
     cerr << "WARNING - DBZ field does not exist." << endl;
     cerr << "  DBZ field name: " << _params.DBZ_field_name << endl;
     return -1;
@@ -1899,10 +1899,10 @@ int RadxConvert::_addSnrField(RadxRay *ray)
 
   // make copy of dbz field, convert to floats
 
-  RadxField dbzCopy(*dbzField);
-  dbzCopy.convertToFl32();
-  size_t nGates = dbzCopy.getNPoints();
-  Radx::fl32 missingVal = dbzCopy.getMissingFl32();
+  RadxField *dbzCopy = new RadxField(*dbzField);
+  dbzCopy->convertToFl32();
+  size_t nGates = dbzCopy->getNPoints();
+  Radx::fl32 missingVal = dbzCopy->getMissingFl32();
   
   // create SNR array, fill with missing
   
@@ -1912,12 +1912,12 @@ int RadxConvert::_addSnrField(RadxRay *ray)
   // compute SNR
   
   _computeSnrFromDbz(nGates,
-                     dbzCopy.getDataFl32(),
+                     dbzCopy->getDataFl32(),
                      snr.data(),
                      missingVal,
                      ray->getStartRangeKm(),
                      ray->getGateSpacingKm());
-
+  
   // create SNR field
   
   RadxField *snrField = new RadxField;
@@ -1940,6 +1940,12 @@ int RadxConvert::_addSnrField(RadxRay *ray)
 
   ray->addField(snrField);
 
+  // clean up
+
+  delete dbzCopy;
+
+  // done
+  
   return 0;
 
 }
