@@ -23,27 +23,27 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for EccoStats program
+# Makefile for Tstorms2NetCDF program
 #
 # Mike Dixon, RAP, NCAR
 # POBox 3000, Boulder, CO, 80307, USA
 #
-# July 2024
+# March 2002
 #
 ###########################################################################
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = EccoStats
+TARGET_FILE = Tstorms2NetCDF
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = \
-	-ltitan -lradar -lMdv -lSpdb -lFmq \
-	-lrapformats -ldsserver -ldidss -leuclid \
-	-lrapmath -ltoolsa -ldataport -ltdrp \
-	-lRadx -lNcxx -lphysics $(NETCDF4_LIBS) \
-	-lbz2 -lz -lpthread -lfftw3
+	-ltitan -lMdv -lSpdb -lrapformats \
+	-ldsserver -ldidss -leuclid -lrapmath \
+	-ltoolsa -ldataport -ltdrp -lRadx -lNcxx \
+	-lphysics -lpthread $(NETCDF4_LIBS) \
+	-lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -51,14 +51,14 @@ LOC_CFLAGS =
 
 HDRS = \
 	$(PARAMS_HH) \
-	EccoStats.hh \
-	Args.hh
+	Args.hh \
+	Tstorms2NetCDF.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
-	EccoStats.cc \
 	Args.cc \
-	Main.cc
+	Main.cc \
+	Tstorms2NetCDF.cc
 
 #
 # tdrp macros

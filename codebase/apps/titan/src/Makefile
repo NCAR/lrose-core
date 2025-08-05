@@ -43,6 +43,7 @@ SUB_DIRS = \
 	Tracks2Ascii \
 	TstormTemporalSmooth \
 	Tstorms2GenPoly \
+	Tstorms2NetCDF \
 	Tstorms2Shapefile \
 	Tstorms2Spdb \
 	Tstorms2Xml \

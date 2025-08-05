@@ -2,22 +2,22 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: EccoStats
+# app name: Tstorms2NetCDF
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/radar/src/EccoStats
+# dir: lrose-core/codebase/apps/titan/src/Tstorms2NetCDF
 ###############################################################
 
-project (EccoStats)
+project (Tstorms2NetCDF)
 
 # source files
 
 set (SRCS
       Params.cc
-      EccoStats.cc
       Args.cc
       Main.cc
+      Tstorms2NetCDF.cc
     )
 
 # include directories
@@ -112,10 +112,8 @@ endif()
 # link libs
 
 link_libraries (titan)
-link_libraries (radar)
 link_libraries (Mdv)
 link_libraries (Spdb)
-link_libraries (Fmq)
 link_libraries (rapformats)
 link_libraries (dsserver)
 link_libraries (didss)
@@ -127,6 +125,7 @@ link_libraries (tdrp)
 link_libraries (Radx)
 link_libraries (Ncxx)
 link_libraries (physics)
+link_libraries (pthread)
 link_libraries (netcdf)
 link_libraries (hdf5_hl)
 link_libraries (hdf5)
@@ -134,8 +133,6 @@ link_libraries (z)
 link_libraries (bz2)
 link_libraries (bz2)
 link_libraries (z)
-link_libraries (pthread)
-link_libraries (fftw3)
 
 # If needed, generate TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file
@@ -143,7 +140,7 @@ link_libraries (fftw3)
 makeTdrpParams()
 # application
 
-add_executable (EccoStats ${SRCS})
+add_executable (Tstorms2NetCDF ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)
