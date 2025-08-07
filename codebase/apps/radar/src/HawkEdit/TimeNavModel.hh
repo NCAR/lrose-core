@@ -55,11 +55,11 @@ public:
   int findArchiveFileList(string archiveDataUrl, bool keepTimeRange = false);
   void recoverFromNoDatDirFormat(string archiveDataUrl);
 
-  const vector<string> &findArchiveFileList(RadxTime startTime, RadxTime endTime,
+  const vector<string> findArchiveFileList(RadxTime startTime, RadxTime endTime,
   const string &absolutePath);
   void findAndSetArchiveFileList(RadxTime startTime, RadxTime endTime,
     const string &absolutePath);
-  vector<string> &getArchiveFileListOnly(string path,
+  vector<string> getArchiveFileListOnly(string path,
   int startYear, int startMonth, int startDay,
   int startHour, int startMinute, int startSecond,
   int endYear, int endMonth, int endDay,
