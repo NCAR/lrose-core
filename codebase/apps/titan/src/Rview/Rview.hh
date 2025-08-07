@@ -707,6 +707,9 @@ public:
   int save_if_no_data;                 /* make copy or gif even if there
 					* is no image or track data */
 
+  double node_icon_diam_km;            /* diameter of node icon when plotting vectors only
+                                        * i.e. not ellipses or polygons */
+
   double double_click_delay;           /* max double click delay
 					* in millisecs */
 

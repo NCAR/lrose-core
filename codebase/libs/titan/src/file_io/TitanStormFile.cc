@@ -332,7 +332,18 @@ int TitanStormFile::OpenFiles(const char *mode,
   // close files
   
   CloseFiles();
-  
+
+  // ensure storm data dir exists
+
+  if (mode[0] == 'w') {
+    Path hpath(header_file_path);
+    if (ta_makedir_recurse(hpath.getDirectory().c_str())) {
+      fprintf(stderr, "ERROR - TitanStormFile::OpenFiles\n");
+      fprintf(stderr, "  Cannot create dir: '%s'\n", hpath.getDirectory().c_str());
+      return -1;
+    }
+  }
+
   // open the header file - file path may change if it is compressed
   
   char hdr_file_path[MAX_PATH_LEN];

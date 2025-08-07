@@ -633,6 +633,15 @@ void EccoStats::_updateStats()
   size_t offset = 0;
   for (int jy = 0; jy < _inNy; jy++) {
     for (int jx = 0; jx < _inNx; jx++, offset++) {
+
+      // check for titan mask
+
+      if (_params.censor_using_titan) {
+        if (_titanMask[jy][jx] != 1) {
+          // skip this point
+          continue;
+        }
+      }
       
       int iy = jy / _agNy;
       int ix = jx / _agNx;
@@ -1990,12 +1999,39 @@ int EccoStats::_readTitan()
 
     // loop through the projected area runs, setting the mask
     // where we have a storm
+    // expand mask as requested
     
+    int nExpand = _params.titan_expand_n_cells;
     const vector<TitanData::StormRun> &projRuns = tFile.projRuns();
     for (int irun = 0; irun < nProjRuns; irun++) {
       const TitanData::StormRun &run = projRuns[irun];
-      for (int jj = 0; jj < run.run_len; jj++) {
-        _titanMask[run.run_iy][run.run_ix + jj] = 1;
+      for (int ii = 0; ii < run.run_len; ii++) {
+        int iy = run.run_iy;
+        int ix = run.run_ix + ii;
+        _titanMask[iy][ix] = 1;
+        if (_params.expand_titan_storms) {
+          int yStart = iy - nExpand;
+          if (yStart < 0) {
+            yStart = 0;
+          }
+          int yEnd = iy + nExpand;
+          if (yEnd > _inNy - 1) {
+            yEnd = _inNy - 1;
+          }
+          int xStart = ix - nExpand;
+          if (xStart < 0) {
+            xStart = 0;
+          }
+          int xEnd = ix + nExpand;
+          if (xEnd > _inNx - 1) {
+            xEnd = _inNx - 1;
+          }
+          for (int jy = yStart; jy <= yEnd; jy++) {
+            for (int jx = xStart; jx <= xEnd; jx++) {
+              _titanMask[jy][jx] = 1;
+            }
+          }
+        } // if (_params.expand_titan_storms) 
       }
     } // irun
     
@@ -2066,10 +2102,15 @@ int EccoStats::_writeTitanMask()
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     maskMdvx.setDebug(true);
   }
-  Mdvx::master_header_t mhdr = _mrmsMdvx.getMasterHeader();
+  Mdvx::master_header_t mhdr = _eccoMdvx.getMasterHeader();
   mhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
   mhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
   mhdr.vlevel_included = 1;
+  mhdr.n_fields = 0;
+  mhdr.n_chunks = 0;
+  mhdr.data_dimension = 2;
+  mhdr.data_collection_type = Mdvx::DATA_MEASURED;
+
   maskMdvx.setMasterHeader(mhdr);
   maskMdvx.setDataSetName("Titan storm track mask");
   maskMdvx.setDataSetInfo("For censoring small echoes");

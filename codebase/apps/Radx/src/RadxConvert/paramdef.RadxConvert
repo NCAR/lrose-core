@@ -1032,6 +1032,24 @@ paramdef string {
 
 paramdef boolean {
   p_default = FALSE;
+  p_descr = "Limit censoring to a specified range of elevation angles.";
+  p_help = "If TRUE, censoring will only be applied for elevation angles between the specified limits.";
+} censoring_limit_elev_angles;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum elevation angle for censoring (deg).";
+  p_help = "Only applies if 'censoring_limit_elev_angles' is true.";
+} censoring_min_elev_deg;
+
+paramdef double {
+  p_default = 90.0;
+  p_descr = "Maximum elevation angle for censoring (deg).";
+  p_help = "Only applies if 'censoring_limit_elev_angles' is true.";
+} censoring_max_elev_deg;
+
+paramdef boolean {
+  p_default = FALSE;
   p_descr = "Censor non-missing data within the test pulse ring.";
   p_help = "If TRUE, non-missing data within the ring will be censored, provided there is no adjacent data in the margins.";
 } censor_test_pulse_ring;
@@ -1059,6 +1077,35 @@ paramdef string {
   p_descr = "Field used to check for data in or around the test pulse.";
   p_help = "We use this field to decide if there is non-missing data that needs censoring within the test pulse.";
 } test_pulse_field_name;
+
+commentdef {
+  p_header = "OPTION TO COMPUTE SNR FROM DBZ.";
+  p_text = "If SNR is not available, you may wish to add an estimated SNR field based on DBZ. This requires an estimate of the DBZ value of the noise at a range of 100 km. This can often be estimated by inspection of the DBZ field.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to add an estimated SNR field based on DBZ.";
+  p_help = "If not, SNR will be computed from the DBZ field. See 'noise_dbz_at_100km'.";
+} add_SNR_field;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for DBZ.";
+  p_help = "Horizontally-polarized reflectivity factor.";
+} DBZ_field_name;
+
+paramdef string {
+  p_default = "SNR";
+  p_descr = "Field name for SNR.";
+  p_help = "Signal-to-noise ratio (dB).";
+} SNR_field_name;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "The noise value, represented as dBZ at a range of 100km.";
+  p_help = "This is used for computing the SNR from the DBZ field. The SNR will be computed by range-correcting this value and using it as the noise value.";
+} noise_dbz_at_100km;
 
 commentdef {
   p_header = "OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.";

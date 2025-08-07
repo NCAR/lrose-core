@@ -598,6 +598,8 @@ static void draw_storm_shape(int dev,
   }
     
   if (Glob->track_graphic == ELLIPSES) {
+
+    // render ellipses
     
     if (forecast_step == 0) {
       
@@ -635,6 +637,8 @@ static void draw_storm_shape(int dev,
     
   } else if (Glob->track_graphic == POLYGONS) {
     
+    // render polygons
+    
     poly_delta_az = Glob->_dsTitan.storm_params().poly_delta_az * DEG_TO_RAD;
     theta = Glob->_dsTitan.storm_params().poly_start_az * DEG_TO_RAD;
     dx = scan->grid.dx;
@@ -667,6 +671,27 @@ static void draw_storm_shape(int dev,
 		 CoordModeOrigin);
     }
       
+  } else {
+
+    // render small circles to show each node
+
+    double node_radius = Glob->node_icon_diam_km / 2.0;
+    
+    plot_minor_radius = convert_dist(storm_proj, Glob->proj, node_radius);
+    plot_major_radius = plot_minor_radius;
+    
+    if (Glob->fill_graphic) {
+      GFillArc(dev, frame, storm_gc, storm_psgc,
+	       plot_x, plot_y, plot_major_radius, plot_minor_radius,
+	       START_AZIMUTH, END_AZIMUTH,
+	       (90.0 - gprops->proj_area_orientation), NSEGMENTS);
+    } else {
+      GDrawArc(dev, frame, storm_gc, storm_psgc,
+ 	       plot_x, plot_y, plot_major_radius, plot_minor_radius,
+ 	       START_AZIMUTH, END_AZIMUTH,
+ 	       (90.0 - gprops->proj_area_orientation), NSEGMENTS);
+    }
+    
   } /* if (Glob->track_graphic == ELLIPSES) */
 
   /*

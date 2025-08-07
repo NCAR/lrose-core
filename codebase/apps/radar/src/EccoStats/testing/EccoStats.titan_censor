@@ -202,7 +202,7 @@ aggregate_nx = 10;
 //
 // Type: string
 
-stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats/testing";
+stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats/titan_censor";
 
 ///////////// stats_data_set_info /////////////////////
 //
@@ -319,7 +319,7 @@ coverage_ht_fraction_field_name = "CoverageHtFrac";
 //
 // Type: boolean
 
-censor_based_on_radar_coverage = TRUE;
+censor_based_on_radar_coverage = FALSE;
 
 ///////////// radar_coverage_min_ht_fraction //////////
 //
@@ -330,7 +330,7 @@ censor_based_on_radar_coverage = TRUE;
 //
 // Type: double
 
-radar_coverage_min_ht_fraction = 0.7;
+radar_coverage_min_ht_fraction = 0.6;
 
 //======================================================================
 //
@@ -451,5 +451,5 @@ write_hour_of_day_stats = TRUE;
 //
 // Type: string
 
-hour_of_day_stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/test";
+hour_of_day_stats_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ecco_stats_hourly/cov60";
 

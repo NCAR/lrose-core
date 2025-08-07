@@ -70,6 +70,9 @@ void read_params()
 					     "double_click_delay",
 					     DOUBLE_CLICK_DELAY) * 1000.0;
   
+  Glob->node_icon_diam_km = uGetParamDouble(Glob->prog_name,
+                                            "node_icon_diam_km", 2.0);
+
   Glob->field = uGetParamLong(Glob->prog_name,
 			      "field_requested", FIELD_REQUESTED);
   

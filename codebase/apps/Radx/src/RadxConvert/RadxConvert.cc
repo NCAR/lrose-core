@@ -954,6 +954,15 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     vol.sortRaysByTimeDecreasing();
   }
   
+  // add SNR field if required
+
+  if (_params.add_SNR_field) {
+    if (_params.debug) {
+      cerr << "DEBUG - adding estimated SNR field based on DBZ" << endl;
+    }
+    _addSnrField(vol);
+  }
+
   // censor as needed
 
   if (_params.apply_censoring) {
@@ -1660,6 +1669,13 @@ void RadxConvert::_censorRay(RadxRay *ray)
     return;
   }
 
+  if (_params.censoring_limit_elev_angles) {
+    if (ray->getElevationDeg() < _params.censoring_min_elev_deg ||
+        ray->getElevationDeg() > _params.censoring_max_elev_deg) {
+      return;
+    }
+  }
+
   // convert fields to floats
 
   vector<Radx::DataType_t> fieldTypes;
@@ -1840,5 +1856,140 @@ bool RadxConvert::_checkFieldForCensoring(const RadxField *field)
     
   return false;
 
+}
+
+////////////////////////////////////////////////////////////////////
+// add SNR field based on DBZ
+
+int RadxConvert::_addSnrField(RadxVol &vol)
+
+{
+
+  vector<RadxRay *> &rays = vol.getRays();
+  for (size_t ii = 0; ii < rays.size(); ii++) {
+    if (_addSnrField(rays[ii])) {
+      cerr << "WARNING - SNR field will not be added." << endl;
+      return -1;
+    }
+  }
+
+  return 0;
+  
+}
+
+////////////////////////////////////////////////////////////////////
+// add SNR field in ray
+
+int RadxConvert::_addSnrField(RadxRay *ray)
+  
+{
+  
+  // check SNR field does not already exist
+
+  {
+    const RadxField *snrField = ray->getField(_params.SNR_field_name);
+    if (snrField != NULL) {
+      cerr << "WARNING - SNR field already exists." << endl;
+      cerr << "  SNR field name: " << _params.SNR_field_name << endl;
+      return -1;
+    }
+  }
+  
+  // get DBZ field
+  
+  const RadxField *dbzField = ray->getField(_params.DBZ_field_name);
+  if (dbzField == NULL) {
+    cerr << "WARNING - DBZ field does not exist." << endl;
+    cerr << "  DBZ field name: " << _params.DBZ_field_name << endl;
+    return -1;
+  }
+
+  // make copy of dbz field, convert to floats
+
+  RadxField *dbzCopy = new RadxField(*dbzField);
+  dbzCopy->convertToFl32();
+  size_t nGates = dbzCopy->getNPoints();
+  Radx::fl32 missingVal = dbzCopy->getMissingFl32();
+  
+  // create SNR array, fill with missing
+  
+  vector<Radx::fl32> snr;
+  snr.resize(nGates, missingVal);
+
+  // compute SNR
+  
+  _computeSnrFromDbz(nGates,
+                     dbzCopy->getDataFl32(),
+                     snr.data(),
+                     missingVal,
+                     ray->getStartRangeKm(),
+                     ray->getGateSpacingKm());
+  
+  // create SNR field
+  
+  RadxField *snrField = new RadxField;
+
+  // set properties
+
+  snrField->setName(_params.SNR_field_name);
+  snrField->setLongName("signal_to_noise_ratio");
+  snrField->setStandardName("signal_to_noise_ratio_co_polar_h");
+  snrField->setUnits("dB");
+  snrField->setComment("Computed from reflectivity field");
+  snrField->setAncillaryVariables(_params.DBZ_field_name);
+
+  // add data
+  
+  snrField->setTypeFl32(missingVal);
+  snrField->addDataFl32(nGates, snr.data());
+
+  // add SNR field to ray - which takes ownership of the memory
+
+  ray->addField(snrField);
+
+  // clean up
+
+  delete dbzCopy;
+
+  // done
+  
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////////////
+// Compute the SNR field from the DBZ field
+
+void RadxConvert::_computeSnrFromDbz(size_t nGates,
+                                     const Radx::fl32 *dbz,
+                                     Radx::fl32 *snr,
+                                     Radx::fl32 missingVal,
+                                     double startRangeKm,
+                                     double gateSpacingKm)
+
+{
+
+  // compute noise at each gate
+  
+  vector<double> noiseDbz(nGates);
+  double range = startRangeKm;
+  if (range == 0) {
+    range = gateSpacingKm / 10.0;
+  }
+  for (size_t igate = 0; igate < nGates; igate++, range += gateSpacingKm) {
+    noiseDbz[igate] = _params.noise_dbz_at_100km +
+      20.0 * (log10(range) - log10(100.0));
+  }
+
+  // compute snr from dbz
+  
+  for (size_t igate = 0; igate < nGates; igate++, snr++, dbz++) {
+    if (*dbz != missingVal) {
+      *snr = *dbz - noiseDbz[igate];
+    } else {
+      *snr = -20;
+    }
+  }
+  
 }
 
