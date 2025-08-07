@@ -39,7 +39,7 @@ TARGET_FILE = EccoStats
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = \
-	-lradar -lMdv -lSpdb -lFmq \
+	-ltitan -lradar -lMdv -lSpdb -lFmq \
 	-lrapformats -ldsserver -ldidss -leuclid \
 	-lrapmath -ltoolsa -ldataport -ltdrp \
 	-lRadx -lNcxx -lphysics $(NETCDF4_LIBS) \

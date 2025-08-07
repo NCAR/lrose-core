@@ -2,23 +2,119 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: EccoStats
+# app name: Lucid
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/radar/src/EccoStats
+# dir: lrose-core/codebase/apps/radar/src/Lucid
 ###############################################################
 
-project (EccoStats)
+project (Lucid)
 
 # source files
 
 set (SRCS
       Params.cc
-      EccoStats.cc
       Args.cc
+      Cdraw_P.cc
+      Cgui_P.cc
+      Cimages_P.cc
+      Croutes_P.cc
+      Csyprod_P.cc
+      Cterrain_P.cc
+      FieldTableItem.cc
+      GlobalData.cc
+      LatLonBox.cc
+      LegacyParams.cc
       Main.cc
+      Product.cc
+      ProductMgr.cc
+      RenderContext.cc
+      ScaledLabel.cc
+      SymprodRender.cc
+      SymprodRenderObj.cc
+      TimeList.cc
+      VlevelManager.cc
+      WayPts.cc
+      WorldPlot.cc
+      XyBox.cc
+      Lucid.cc
+      GuiManager.cc
+      HorizView.cc
+      MapMenuItem.cc
+      MdvReader.cc
+      ProdMenuItem.cc
+      TimeControl.cc
+      VertView.cc
+      VertManager.cc
+      VlevelSelector.cc
+      WindMenuItem.cc
+      ZoomMenuItem.cc
     )
+
+if(APPLE)
+  if (DEFINED MAMBA_BUILD)
+    set(Qt6_NO_OPENGL TRUE)
+    set(CMAKE_DISABLE_FINE_PACKAGE_OpenGL TRUE)
+  endif(DEFINED MAMBA_BUILD)
+endif(APPLE)
+#Finding Qt
+find_package (Qt6 COMPONENTS Core QUIET)
+if (NOT Qt6_FOUND)
+  find_package (Qt5 COMPONENTS Core REQUIRED)
+endif()
+if (Qt5_FOUND)
+  message(STATUS "Found Qt5: ${Qt5_VERSION}")
+elseif (Qt6_FOUND)
+    message(STATUS "Found Qt6: ${Qt6_VERSION}")
+else ()
+  message(FATAL_ERROR, "Qt not found.")
+endif(Qt5_FOUND)
+if(APPLE)
+  if (DEFINED MAMBA_BUILD)
+# MAMBA builds ignore system libs, use mamba libs
+    if (Qt5_FOUND)
+      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)
+    elseif (Qt6_FOUND)
+      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)
+    endif(Qt5_FOUND)
+  else()
+    if (Qt5_FOUND)
+      find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt5 NO_DEFAULT_PATH)
+    elseif (Qt6_FOUND)
+      find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)
+    endif(Qt5_FOUND)
+  endif(DEFINED MAMBA_BUILD)
+endif(APPLE)
+set (CMAKE_INCLUDE_CURRENT_DIR ON)
+set (CMAKE_AUTOMOC ON)
+set (CMAKE_AUTORCC ON)
+set (CMAKE_AUTOUIC ON)
+if (Qt5_FOUND)
+#QT5
+  if (DEFINED MAMBA_BUILD)
+    find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)
+  else()
+    find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
+  endif(DEFINED MAMBA_BUILD)
+  pkg_search_module(Qt5Core REQUIRED)
+  pkg_search_module(Qt5Gui REQUIRED)
+  pkg_search_module(Qt5Widgets REQUIRED)
+  pkg_search_module(Qt5Network REQUIRED)
+  pkg_search_module(Qt5Qml REQUIRED)
+else()
+#QT6
+  if (DEFINED MAMBA_BUILD)
+    find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS ${MINIFORGE_ROOT} NO_DEFAULT_PATH)
+  else()
+    find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
+  endif(DEFINED MAMBA_BUILD)
+  pkg_search_module(Qt6Core REQUIRED)
+  pkg_search_module(Qt6Gui REQUIRED)
+  pkg_search_module(Qt6Widgets REQUIRED)
+  pkg_search_module(Qt6Network REQUIRED)
+  pkg_search_module(Qt6Qml REQUIRED)
+endif(Qt5_FOUND)
 
 # include directories
 
@@ -58,6 +154,9 @@ if (DEFINED MAMBA_BUILD)
 # MAMBA builds ignore system libs, use mamba libs
   include_directories (${MAMBA_INCLUDE_PATH})
 else()
+  if (DEFINED X11_X11_INCLUDE_PATH)
+    include_directories (${X11_X11_INCLUDE_PATH})
+  endif()
   if (DEFINED netCDF_INSTALL_PREFIX)
     include_directories (${netCDF_INSTALL_PREFIX}/include)
   endif()
@@ -74,6 +173,21 @@ else()
   #add_compile_options(-I/usr/include)
   
 endif(DEFINED MAMBA_BUILD)
+#Including Qt
+if (Qt5_FOUND)
+include_directories(${Qt5Core_INCLUDE_DIRS})
+include_directories(${Qt5Gui_INCLUDE_DIRS})
+include_directories(${Qt5Widgets_INCLUDE_DIRS})
+include_directories(${Qt5Network_INCLUDE_DIRS})
+include_directories(${Qt5Qml_INCLUDE_DIRS})
+else()
+include_directories(${Qt6Core_INCLUDE_DIRS})
+include_directories(${Qt6Gui_INCLUDE_DIRS})
+include_directories(${Qt6Widgets_INCLUDE_DIRS})
+include_directories(${Qt6Network_INCLUDE_DIRS})
+include_directories(${Qt6Qml_INCLUDE_DIRS})
+endif(Qt5_FOUND)
+
 # link directories
 
 link_directories(${CMAKE_INSTALL_PREFIX}/lib)
@@ -81,6 +195,9 @@ if (DEFINED MAMBA_BUILD)
 # MAMBA builds ignore system libs, use mamba libs
   link_directories (${MAMBA_LIBRARY_PATH})
 else()
+  if (DEFINED X11_LIB_DIR)
+    link_directories (${X11_LIB_DIR})
+  endif()
   if (DEFINED netCDF_INSTALL_PREFIX)
     link_directories (${netCDF_INSTALL_PREFIX}/lib)
   endif()
@@ -111,7 +228,7 @@ endif()
 
 # link libs
 
-link_libraries (titan)
+link_libraries (dsdata)
 link_libraries (radar)
 link_libraries (Mdv)
 link_libraries (Spdb)
@@ -121,21 +238,42 @@ link_libraries (dsserver)
 link_libraries (didss)
 link_libraries (euclid)
 link_libraries (rapmath)
+link_libraries (rapplot)
+link_libraries (qtplot)
 link_libraries (toolsa)
 link_libraries (dataport)
 link_libraries (tdrp)
 link_libraries (Radx)
 link_libraries (Ncxx)
 link_libraries (physics)
+link_libraries (shapelib)
 link_libraries (netcdf)
 link_libraries (hdf5_hl)
 link_libraries (hdf5)
 link_libraries (z)
 link_libraries (bz2)
-link_libraries (bz2)
-link_libraries (z)
-link_libraries (pthread)
+link_libraries (X11)
+link_libraries (Xext)
 link_libraries (fftw3)
+link_libraries (png)
+link_libraries (pthread)
+link_libraries (z)
+link_libraries (bz2)
+#Linking Qt
+if (Qt5_FOUND)
+  link_libraries (${Qt5Core_LIBRARIES})
+  link_libraries (${Qt5Gui_LIBRARIES})
+  link_libraries (${Qt5Widgets_LIBRARIES})
+  link_libraries (${Qt5Network_LIBRARIES})
+  link_libraries (${Qt5Qml_LIBRARIES})
+else()
+  link_libraries (${Qt6Core_LIBRARIES})
+  link_libraries (${Qt6Gui_LIBRARIES})
+  link_libraries (${Qt6Widgets_LIBRARIES})
+  link_libraries (${Qt6Network_LIBRARIES})
+  link_libraries (${Qt6Qml_LIBRARIES})
+endif(Qt5_FOUND)
+
 
 # If needed, generate TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file
@@ -143,7 +281,7 @@ link_libraries (fftw3)
 makeTdrpParams()
 # application
 
-add_executable (EccoStats ${SRCS})
+add_executable (Lucid ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)

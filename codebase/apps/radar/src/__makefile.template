@@ -41,6 +41,7 @@ SUB_DIRS = \
 	IpsTsSim \
 	Iq2Dsr \
 	KinGin2Ncf \
+	Lucid \
 	Mdv2Vad \
 	MdvFold \
 	MdvRadarShear \
