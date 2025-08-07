@@ -278,7 +278,8 @@ endif(Qt5_FOUND)
 # If needed, generate TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file
 
-makeTdrpParams()
+makeTdrpSingleton()
+
 # application
 
 add_executable (Lucid ${SRCS})

@@ -140,6 +140,7 @@ link_libraries (pthread)
 # from their associated paramdef.<app> file
 
 makeTdrpParams()
+
 # application
 
 add_executable (TsTcp2File ${SRCS})

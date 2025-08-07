@@ -110,10 +110,6 @@ endif()
 
 link_libraries (pthread)
 
-# If needed, generate TDRP Params.cc and Params.hh files
-# from their associated paramdef.<app> file
-
-makeTdrpParams()
 # application
 
 add_executable (toneDownColorscale ${SRCS})

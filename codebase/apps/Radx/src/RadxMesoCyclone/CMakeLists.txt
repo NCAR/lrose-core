@@ -150,6 +150,7 @@ link_libraries (fftw3)
 # from their associated paramdef.<app> file
 
 makeTdrpParams()
+
 # application
 
 add_executable (RadxMesoCyclone ${SRCS})

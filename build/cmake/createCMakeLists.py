@@ -430,7 +430,7 @@ def getValuesForKey(makefilePath, key):
             foundKey = True
             multiLine = multiLine + line
             if (line.find("\\") < 0):
-                break;
+                break
         elif (foundKey):
             if (line[0] == '#'):
                 break
@@ -456,6 +456,42 @@ def getValuesForKey(makefilePath, key):
             valueList.append(tok)
 
     return valueList
+
+########################################################################
+# check if we need TDRP support, based on the Makefile
+# 2 values are returned:
+#   needTdrp, tdrpSingleton
+
+def checkNeedTdrp(makefilePath):
+
+    needTdrp = False
+    tdrpSingleton = False
+
+    try:
+        fp = open(makefilePath, 'r')
+    except IOError as e:
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open file:", makefilePath, file=sys.stderr)
+        print("  dir: ", options.coreDir, file=sys.stderr)
+        return (needTdrp, tdrpSingleton)
+
+    lines = fp.readlines()
+    fp.close()
+
+    foundKey = False
+    multiLine = ""
+    for line in lines:
+        if (line[0] == '#'):
+            continue
+        if (line.find("lrose_make_tdrp_c++_targets") >= 0):
+            needTdrp = True
+            break
+        elif (line.find("lrose_make_tdrp_singleton_targets") >= 0):
+            needTdrp = True
+            tdrpSingleton = True
+            break
+
+    return (needTdrp, tdrpSingleton)
 
 #===========================================================================
 #
@@ -711,6 +747,34 @@ def writeCMakeListsCodebase(dir):
     fo.write('      cd ${CMAKE_CURRENT_SOURCE_DIR} &&\n')
     fo.write('      ${CMAKE_BINARY_DIR}/codebase/apps/tdrp/src/tdrp_gen/tdrp_gen\n')
     fo.write('        -c++\n')
+    fo.write('        -f paramdef.${PROJECT_NAME}\n')
+    fo.write('        -prog ${PROJECT_NAME}\n')
+    fo.write('        -add_ncar_copyright\n')
+    fo.write('    COMMENT "Generating/updating Params.hh and Params.cc for ${PROJECT_NAME}"\n')
+    fo.write('  )\n')
+    fo.write('\n')
+    fo.write('endFunction()\n')
+    fo.write('\n')
+
+    fo.write('# Function for creating SINGLETON TDRP Params.cc and Params.hh files\n')
+    fo.write('\n')
+    fo.write('function(makeTdrpSingleton)\n')
+    fo.write('\n')
+    fo.write('  # Add a custom generator for TDRP Params.cc and Params.hh files\n')
+    fo.write('  # from their associated paramdef.<app> file\n')
+    fo.write('\n')
+    fo.write('  set(TDRP_EXECUTABLE ${CMAKE_BINARY_DIR}/codebase/apps/tdrp/src/tdrp_gen/tdrp_gen)\n')
+    fo.write('\n')
+    fo.write('  add_custom_command (\n')
+    fo.write('    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc\n')
+    fo.write('    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/paramdef.${PROJECT_NAME}\n')
+    fo.write('\n')
+    fo.write('    # Run tdrp_gen, explicitly using the one from this build instead of\n')
+    fo.write('    # any version that may be in the user\'s path.\n')
+    fo.write('    COMMAND export LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/codebase/libs/tdrp/src &&\n')
+    fo.write('      cd ${CMAKE_CURRENT_SOURCE_DIR} &&\n')
+    fo.write('      ${CMAKE_BINARY_DIR}/codebase/apps/tdrp/src/tdrp_gen/tdrp_gen\n')
+    fo.write('        -c++ -singleton\n')
     fo.write('        -f paramdef.${PROJECT_NAME}\n')
     fo.write('        -prog ${PROJECT_NAME}\n')
     fo.write('        -add_ncar_copyright\n')
@@ -1118,6 +1182,10 @@ def createCMakeListsApp(appDir, libList):
     if (appName.find('not-found') == 0):
         return
 
+    # do we need tdrp support
+
+    (needTdrp, tdrpSingleton) = checkNeedTdrp(makefilePath)
+
     # load list of files to be compiled
 
     appCompileFileList = getAppCompileList(appName, makefilePath)
@@ -1173,7 +1241,8 @@ def createCMakeListsApp(appDir, libList):
 
     writeCMakeListsApp(appName, appDir, appCompileFileList,
                        libListInUse, linkLibListInUse,
-                       needQt, needX11)
+                       needQt, needX11,
+                       needTdrp, tdrpSingleton)
 
 ########################################################################
 # parse the LROSE Makefile to get the app name
@@ -1445,7 +1514,8 @@ def checkMakefileForX11(makefilePath):
 # write out CMakeLists.txt for app
 
 def writeCMakeListsApp(appName, appDir, appCompileFileList,
-                       libList, linkLibList, needQt, needX11):
+                       libList, linkLibList, needQt, needX11,
+                       needTdrp, tdrpSingleton):
 
     cmakePath = os.path.join(appDir, 'CMakeLists.txt')
 
@@ -1571,10 +1641,15 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
         addQtLinks(fo)
     fo.write("\n")
 
-    fo.write("# If needed, generate TDRP Params.cc and Params.hh files\n")
-    fo.write("# from their associated paramdef.<app> file\n")
-    fo.write("\n")
-    fo.write("makeTdrpParams()\n")
+    if (needTdrp):
+        fo.write("# If needed, generate TDRP Params.cc and Params.hh files\n")
+        fo.write("# from their associated paramdef.<app> file\n")
+        fo.write("\n")
+        if (tdrpSingleton):
+            fo.write("makeTdrpSingleton()\n")
+        else:
+            fo.write("makeTdrpParams()\n")
+        fo.write("\n")
 
     fo.write("# application\n")
     fo.write("\n")

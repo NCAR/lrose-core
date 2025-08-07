@@ -146,6 +146,33 @@ function(makeTdrpParams)
 
 endFunction()
 
+# Function for creating SINGLETON TDRP Params.cc and Params.hh files
+
+function(makeTdrpSingleton)
+
+  # Add a custom generator for TDRP Params.cc and Params.hh files
+  # from their associated paramdef.<app> file
+
+  set(TDRP_EXECUTABLE ${CMAKE_BINARY_DIR}/codebase/apps/tdrp/src/tdrp_gen/tdrp_gen)
+
+  add_custom_command (
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/paramdef.${PROJECT_NAME}
+
+    # Run tdrp_gen, explicitly using the one from this build instead of
+    # any version that may be in the user's path.
+    COMMAND export LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/codebase/libs/tdrp/src &&
+      cd ${CMAKE_CURRENT_SOURCE_DIR} &&
+      ${CMAKE_BINARY_DIR}/codebase/apps/tdrp/src/tdrp_gen/tdrp_gen
+        -c++ -singleton
+        -f paramdef.${PROJECT_NAME}
+        -prog ${PROJECT_NAME}
+        -add_ncar_copyright
+    COMMENT "Generating/updating Params.hh and Params.cc for ${PROJECT_NAME}"
+  )
+
+endFunction()
+
 enable_testing()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ")

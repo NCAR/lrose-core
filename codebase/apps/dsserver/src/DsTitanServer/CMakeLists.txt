@@ -138,6 +138,7 @@ link_libraries (bz2)
 # from their associated paramdef.<app> file
 
 makeTdrpParams()
+
 # application
 
 add_executable (DsTitanServer ${SRCS})

@@ -142,6 +142,7 @@ link_libraries (m)
 # from their associated paramdef.<app> file
 
 makeTdrpParams()
+
 # application
 
 add_executable (TrackGridStats ${SRCS})
