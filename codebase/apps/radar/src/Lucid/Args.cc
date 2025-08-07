@@ -40,8 +40,8 @@ using namespace std;
 
 // Constructor
 
-Args::Args (const string &prog_name) :
-        _params(Params::Instance()),
+Args::Args (const string &prog_name, Params &params) :
+        _params(params),
         _gd(GlobalData::Instance()),
         _progName(prog_name)
 

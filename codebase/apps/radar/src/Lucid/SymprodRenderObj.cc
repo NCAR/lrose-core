@@ -108,8 +108,9 @@ const unsigned char SymprodRenderObj::_stipple90_bitmap_bits[] =
 //////////////////////////////////////////////////////////////////////////////
 // Abstract base class
 
-SymprodRenderObj::SymprodRenderObj(SymprodRender *c) :
-        _params(Params::Instance()),
+SymprodRenderObj::SymprodRenderObj(Params &params,
+                                   SymprodRender *c) :
+        _params(params),
         _gd(GlobalData::Instance())
 {
 
@@ -142,10 +143,11 @@ void SymprodRenderObj::fill_export_fields( vector<world_pt_t> &wpt, string &labe
 //////////////////////////////////////////////////////////////////////////////
 // Text objects
 
-SymprodRenderText::SymprodRenderText(const void *prod_buffer,
+SymprodRenderText::SymprodRenderText(Params &params,
+                                     const void *prod_buffer,
 				     const int obj_offset,
 				     Product &prod, SymprodRender *c)
-        : SymprodRenderObj(c),
+        : SymprodRenderObj(params, c),
           SymprodText(prod_buffer, obj_offset),
           prod(prod)
   
@@ -336,10 +338,11 @@ void SymprodRenderText::fill_export_fields( vector<world_pt_t> &wpt, string &lab
 // Polyline objects
 
 SymprodRenderPolyline::
-  SymprodRenderPolyline(const void *prod_buffer,
+  SymprodRenderPolyline(Params &params,
+                        const void *prod_buffer,
                         const int obj_offset,
                         Product &prod, SymprodRender *c)
-          : SymprodRenderObj(c),
+          : SymprodRenderObj(params, c),
             SymprodPolyline(prod_buffer, obj_offset),
             prod(prod)
   
@@ -589,10 +592,11 @@ void SymprodRenderPolyline::fill_export_fields( vector<world_pt_t> &wpt, string 
 // Iconline objects
 
 SymprodRenderIconline::
-  SymprodRenderIconline(const void *prod_buffer,
+  SymprodRenderIconline(Params &params,
+                        const void *prod_buffer,
                         const int obj_offset,
                         Product &prod, SymprodRender *c)
-          : SymprodRenderObj(c),
+          : SymprodRenderObj(params, c),
             SymprodIconline(prod_buffer, obj_offset),
             prod(prod)
   
@@ -804,10 +808,11 @@ void SymprodRenderIconline::fill_export_fields( vector<world_pt_t> &wpt, string 
 // StrokedIcon objects
 
 SymprodRenderStrokedIcon::
-  SymprodRenderStrokedIcon(const void *prod_buffer,
+  SymprodRenderStrokedIcon(Params &params,
+                           const void *prod_buffer,
                            const int obj_offset,
                            Product &prod, SymprodRender *c)
-          : SymprodRenderObj(c),
+          : SymprodRenderObj(params, c),
             SymprodStrokedIcon(prod_buffer, obj_offset),
             prod(prod)
   
@@ -968,10 +973,11 @@ void SymprodRenderStrokedIcon::fill_export_fields( vector<world_pt_t> &wpt, stri
 // NamedIcon objects
 
 SymprodRenderNamedIcon::
-  SymprodRenderNamedIcon(const void *prod_buffer,
+  SymprodRenderNamedIcon(Params &params,
+                         const void *prod_buffer,
                          const int obj_offset,
                          Product &prod, SymprodRender *c)
-          : SymprodRenderObj(c),
+          : SymprodRenderObj(params, c),
             SymprodNamedIcon(prod_buffer, obj_offset),
             prod(prod)
   
@@ -1023,10 +1029,11 @@ void SymprodRenderNamedIcon::fill_export_fields( vector<world_pt_t> &wpt, string
 // BitmapIcon objects
 
 SymprodRenderBitmapIcon::
-  SymprodRenderBitmapIcon( const void *prod_buffer,
-                           const int obj_offset,
-                           Product &prod, SymprodRender *c)
-          : SymprodRenderObj(c),
+  SymprodRenderBitmapIcon(Params &params,
+                          const void *prod_buffer,
+                          const int obj_offset,
+                          Product &prod, SymprodRender *c)
+          : SymprodRenderObj(params, c),
             SymprodBitmapIcon(prod_buffer, obj_offset),
             prod(prod)
   
@@ -1147,10 +1154,11 @@ void SymprodRenderBitmapIcon::fill_export_fields( vector<world_pt_t> &wpt, strin
 // Arc objects
 
 SymprodRenderArc::
-  SymprodRenderArc(const void *prod_buffer,
+  SymprodRenderArc(Params &params,
+                   const void *prod_buffer,
                    const int obj_offset,
                    Product &prod, SymprodRender *c)
-          : SymprodRenderObj(c),
+          : SymprodRenderObj(params, c),
             SymprodArc(prod_buffer, obj_offset),
             prod(prod)
   
@@ -1304,10 +1312,11 @@ void SymprodRenderArc::fill_export_fields( vector<world_pt_t> &wpt, string &labe
 // Rectangle objects
 
 SymprodRenderRectangle::
-  SymprodRenderRectangle(const void *prod_buffer,
+  SymprodRenderRectangle(Params &params,
+                         const void *prod_buffer,
                          const int obj_offset,
                          Product &prod, SymprodRender *c)
-          : SymprodRenderObj(c),
+          : SymprodRenderObj(params, c),
             SymprodRectangle(prod_buffer, obj_offset),
             prod(prod)
   
@@ -1420,10 +1429,11 @@ void SymprodRenderRectangle::fill_export_fields( vector<world_pt_t> &wpt, string
 // Chunk objects
 
 SymprodRenderChunk::
-  SymprodRenderChunk(const void *prod_buffer,
+  SymprodRenderChunk(Params &params,
+                     const void *prod_buffer,
                      const int obj_offset,
                      Product &prod, SymprodRender *c)
-          : SymprodRenderObj(c),
+          : SymprodRenderObj(params, c),
             SymprodChunk(prod_buffer, obj_offset),
             prod(prod)
   

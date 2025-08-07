@@ -73,10 +73,9 @@ using namespace std;
 // Constructor
 
 Lucid::Lucid(int argc, char **argv) :
-        _params(Params::Instance()),
         _gd(GlobalData::Instance()),
         _progName("Lucid"),
-        _args("Lucid")
+        _args("Lucid", _params)
 
 {
 
@@ -189,7 +188,7 @@ int Lucid::RunApp(QApplication &app)
 
   // create cartesian display
   
-  _guiManager = new GuiManager;
+  _guiManager = new GuiManager(_params);
   return _guiManager->run(app);
   
 }
@@ -820,7 +819,7 @@ int Lucid::_initGrids()
     
     /* get space for data info */
     
-    _gd.mread[ifld] = new MdvReader;
+    _gd.mread[ifld] = new MdvReader(_params);
     MdvReader *mread = _gd.mread[ifld]; 
     
     mread->legend_name = fld.legend_label;
@@ -1004,14 +1003,14 @@ void Lucid::_initWinds()
 
     // initialize the components
 
-    lwind.wind_u = new MdvReader;
+    lwind.wind_u = new MdvReader(_params);
     _initWindComponent(lwind.wind_u, windp, true, false, false);
 
-    lwind.wind_v = new MdvReader;
+    lwind.wind_v = new MdvReader(_params);
     _initWindComponent(lwind.wind_v, windp, false, true, false);
 
     if(strncasecmp(windp.w_field_name, "None", 4) != 0) {
-      lwind.wind_w = new MdvReader;
+      lwind.wind_w = new MdvReader(_params);
       _initWindComponent(lwind.wind_w, windp, false, false, true);
     } else {
       lwind.wind_w = NULL;
@@ -1106,7 +1105,7 @@ void Lucid::_initTerrain()
   if (strlen(_params.terrain_url) > 0) {
     
     _gd.layers.earth.terrain_active = 1;
-    _gd.layers.earth.terr = new MdvReader;
+    _gd.layers.earth.terr = new MdvReader(_params);
     if(_gd.layers.earth.terr == NULL) {
       fprintf(stderr,"Cannot allocate space for terrain data\n");
       exit(-1);
@@ -1129,7 +1128,7 @@ void Lucid::_initTerrain()
   if (strlen(_params.landuse_url) > 0) {
 
     _gd.layers.earth.landuse_active = (_params.landuse_active == true)? 1: 0;
-    _gd.layers.earth.land_use = new MdvReader;
+    _gd.layers.earth.land_use = new MdvReader(_params);
     if(_gd.layers.earth.land_use == NULL) {
       fprintf(stderr,"Cannot allocate space for land_use data\n");
       exit(-1);
@@ -1226,7 +1225,7 @@ void Lucid::_initRouteWinds()
 
   if(strlen(_params.route_u_url) > 1) {
 
-    MdvReader *mr = new MdvReader;
+    MdvReader *mr = new MdvReader(_params);
     if(mr == NULL) {
       fprintf(stderr,"Unable to allocate space for Route U Wind\n");
       perror("cidd_init::_initRouteWinds");
@@ -1259,7 +1258,7 @@ void Lucid::_initRouteWinds()
   
   if(strlen(_params.route_v_url) > 1) {
     
-    MdvReader *mr = new MdvReader;
+    MdvReader *mr = new MdvReader(_params);
     if(mr == NULL) {
       fprintf(stderr,"Unable to allocate space for Route V Wind\n");
       perror("cidd_init::_initRouteWinds");
@@ -2662,7 +2661,7 @@ void Lucid::_initSymprods()
   _gd.r_context = new RenderContext(_gd.h_win.vis_pdev,
                                     _gd.def_brush, _gd.cmap, _gd.proj);
   
-  _gd.prod_mgr = new ProductMgr(*_gd.r_context, (_gd.debug1 | _gd.debug2));
+  _gd.prod_mgr = new ProductMgr(_params, *_gd.r_context, (_gd.debug1 | _gd.debug2));
   
   _gd.r_context->set_scale_constant(_params.scale_constant);
   

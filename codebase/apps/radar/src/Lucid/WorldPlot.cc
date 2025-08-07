@@ -53,8 +53,8 @@ using namespace std;
 ////////////////////////////////////////
 // default constructor
 
-WorldPlot::WorldPlot() :
-        _params(Params::Instance()),
+WorldPlot::WorldPlot(Params &params) :
+        _params(params),
         _gd(GlobalData::Instance())
 {
 
@@ -142,7 +142,7 @@ WorldPlot::WorldPlot() :
 // copy constructor
 
 WorldPlot::WorldPlot(const WorldPlot &rhs):
-        _params(Params::Instance()),
+        _params(rhs._params),
         _gd(GlobalData::Instance())
 
 {

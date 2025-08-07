@@ -93,7 +93,7 @@ public:
 
   // constructor
   
-  GuiManager();
+  GuiManager(Params &params);
   
   // destructor
   

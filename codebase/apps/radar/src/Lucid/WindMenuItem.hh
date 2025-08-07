@@ -68,7 +68,7 @@ class DLL_EXPORT WindMenuItem : public QObject {
   
   // constructor
   
-  WindMenuItem(QObject *parent = nullptr);
+  WindMenuItem(Params &params);
   
   // destructor
   
@@ -90,7 +90,6 @@ class DLL_EXPORT WindMenuItem : public QObject {
 
  protected:
 
-  QObject *_parent;
   Params &_params;
   GlobalData &_gd;
   Params::wind_t *_windParams;

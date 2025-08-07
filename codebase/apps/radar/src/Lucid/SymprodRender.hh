@@ -56,7 +56,8 @@ public:
 
   // default constructor
   
-  SymprodRender(Product &p);
+  SymprodRender(Params &params,
+                Product &p);
 
   // destructor
   

@@ -36,10 +36,10 @@ using namespace std;
  * Constructor
  */
 
-VertManager::VertManager(GuiManager *manager):
+VertManager::VertManager(GuiManager *manager, Params &params):
         QMainWindow(manager),
         _manager(manager),
-        _params(Params::Instance()),
+        _params(params),
         _gd(GlobalData::Instance())
         
 {
@@ -55,7 +55,7 @@ VertManager::VertManager(GuiManager *manager):
 
   // create VERT view
   
-  _vertView = new VertView(_main, *manager, *this);
+  _vertView = new VertView(_main, *manager, *this, _params);
   _vertView->setGrids(_params.vert_grids_on_at_startup);
   _vertView->setParent(_vertTopFrame);
   

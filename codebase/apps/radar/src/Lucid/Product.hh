@@ -58,7 +58,13 @@ public:
 
   // default constructor
   
-  Product(int debug, Params::symprod_prod_info_t &prodInfo);
+  Product(int debug,
+          Params &params,
+          Params::symprod_prod_info_t &prodInfo);
+
+  // copy constructor
+
+  Product(const Product &rhs);
   
   // destructor
   

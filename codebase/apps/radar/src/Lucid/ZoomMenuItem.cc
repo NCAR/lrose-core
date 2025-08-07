@@ -41,11 +41,10 @@
 
 // Constructor
 
-ZoomMenuItem::ZoomMenuItem(QObject *parent,
-                           GuiManager *manager) :
-        _parent(parent),
+ZoomMenuItem::ZoomMenuItem(GuiManager *manager,
+                           Params &params) :
         _manager(manager),
-        _params(Params::Instance()),
+        _params(params),
         _gd(GlobalData::Instance()),
         _zoomParams(NULL),
         _zoomIndex(-1),

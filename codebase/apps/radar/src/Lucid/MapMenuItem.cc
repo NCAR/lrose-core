@@ -41,11 +41,10 @@
 
 // Constructor
 
-MapMenuItem::MapMenuItem(QObject *parent,
-                         GuiManager *manager) :
-        _parent(parent),
+MapMenuItem::MapMenuItem(GuiManager *manager,
+                         Params &params) :
         _manager(manager),
-        _params(Params::Instance()),
+        _params(params),
         _gd(GlobalData::Instance()),
         _mapParams(NULL),
         _overlay(NULL),

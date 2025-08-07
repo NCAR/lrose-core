@@ -69,7 +69,7 @@ public:
    * @param[in] parent   The parent widget.
    */
   
-  VertManager(GuiManager *manager);
+  VertManager(GuiManager *manager, Params &params);
 
   /**
    * @brief Destructor

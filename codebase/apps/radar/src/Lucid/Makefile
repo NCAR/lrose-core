@@ -174,8 +174,8 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_qt_targets
 # tdrp targets
 #
 
-#include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_singleton_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
+#include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_singleton_targets
 
 #
 # local targets

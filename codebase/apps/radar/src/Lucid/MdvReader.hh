@@ -64,7 +64,7 @@ public:
 
   // constructor
   
-  MdvReader(QObject* parent = nullptr);
+  MdvReader(Params &params);
 
   // is the data valid?
   
@@ -238,7 +238,6 @@ private:
 
   Params &_params;
   GlobalData &_gd;
-  QObject &_lucid;
   
   mutable QMutex _statusMutex;
 

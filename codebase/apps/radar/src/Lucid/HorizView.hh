@@ -86,7 +86,8 @@ class DLL_EXPORT HorizView : public QWidget
    */
   
   HorizView(QWidget* parent,
-            GuiManager &manager);
+            GuiManager &manager,
+            Params &params);
 
   // Destructor.
 

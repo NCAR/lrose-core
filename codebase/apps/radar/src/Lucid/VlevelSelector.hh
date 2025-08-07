@@ -58,7 +58,8 @@ class DLL_EXPORT VlevelSelector: public QWidget
 
 public:
 
-  VlevelSelector(int width,
+  VlevelSelector(Params &params,
+                 int width,
                  VlevelManager &vlevelManager,
                  GuiManager* parent = 0);
 
@@ -84,10 +85,10 @@ public:
 
  private:
   
-  WorldPlot _world;
+  Params &_params;
   VlevelManager &_vlevelManager;
   GuiManager *_guiManager;
-  const Params &_params;
+  WorldPlot _world;
 
   bool _mouseMoveInProgress;
   int _mouseMoveX, _mouseMoveY;

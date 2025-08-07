@@ -48,11 +48,11 @@ public:
 
   // constructor
 
-  Args (const string &prog_name);
+  Args(const string &prog_name, Params &params);
 
   // destructor
 
-  virtual ~Args ();
+  virtual ~Args();
 
   // parse command line
   // Returns 0 on success, -1 on failure

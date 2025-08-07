@@ -60,17 +60,20 @@ const double VertView::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 VertView::VertView(QWidget* parent,
                    const GuiManager &manager,
-                   const VertManager &vertWindow) :
+                   const VertManager &vertWindow,
+                   Params &params) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
-        _params(Params::Instance()),
+        _params(params),
         _gd(GlobalData::Instance()),
         _vertWindow(vertWindow),
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
         _gridsEnabled(false),
-        _rubberBand(0)
+        _rubberBand(0),
+        _fullWorld(_params),
+        _zoomWorld(_params)
         
 {
   

@@ -36,9 +36,10 @@
 //////////////////////////////////////////
 // default constructor
 
-SymprodRender::SymprodRender(Product &p) :
+SymprodRender::SymprodRender(Params &params,
+                             Product &p) :
         Symprod(),
-        _params(Params::Instance()),
+        _params(params),
         _gd(GlobalData::Instance()),
         prod(p)
 
@@ -120,31 +121,31 @@ int SymprodRender::deserialize(void *in_buf, int buf_len /* = -1 */)
     SymprodRenderObj *obj;
     switch (objType) {
     case Symprod::OBJ_TEXT:
-      obj = new SymprodRenderText( in_buf, offset, prod, this);
+      obj = new SymprodRenderText(_params, in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_POLYLINE:
-      obj = new SymprodRenderPolyline(in_buf, offset, prod, this);
+      obj = new SymprodRenderPolyline(_params, in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_ICONLINE:
-      obj = new SymprodRenderIconline(in_buf, offset, prod, this);
+      obj = new SymprodRenderIconline(_params, in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_STROKED_ICON:
-      obj = new SymprodRenderStrokedIcon(in_buf, offset, prod, this);
+      obj = new SymprodRenderStrokedIcon(_params, in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_NAMED_ICON:
-      obj = new SymprodRenderNamedIcon(in_buf, offset, prod, this);
+      obj = new SymprodRenderNamedIcon(_params, in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_BITMAP_ICON:
-      obj = new SymprodRenderBitmapIcon(in_buf, offset, prod, this);
+      obj = new SymprodRenderBitmapIcon(_params, in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_ARC:
-      obj = new SymprodRenderArc(in_buf, offset, prod, this);
+      obj = new SymprodRenderArc(_params, in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_RECTANGLE:
-      obj = new SymprodRenderRectangle(in_buf, offset, prod, this);
+      obj = new SymprodRenderRectangle(_params, in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_CHUNK:
-      obj = new SymprodRenderChunk(in_buf, offset, prod, this);
+      obj = new SymprodRenderChunk(_params, in_buf, offset, prod, this);
       break;
     }
     

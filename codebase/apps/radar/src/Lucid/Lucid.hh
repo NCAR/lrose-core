@@ -80,7 +80,7 @@ private:
 
   // basic
   
-  Params &_params;
+  Params _params;
   GlobalData &_gd;
   string _progName;
   Args _args;

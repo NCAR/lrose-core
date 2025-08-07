@@ -49,10 +49,10 @@ TimeControl *TimeControl::_instance = nullptr;
 
 // Constructor
 
-TimeControl::TimeControl(GuiManager *parent) :
+TimeControl::TimeControl(GuiManager *parent, Params &params) :
         QDialog(parent),
         _manager(parent),
-        _params(Params::Instance()),
+        _params(params),
         _gd(GlobalData::Instance())
         
 {

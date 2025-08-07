@@ -52,7 +52,9 @@ public:
 
   // default constructor
   
-  ProductMgr(RenderContext &context, int debug = 0);
+  ProductMgr(Params &params,
+             RenderContext &context,
+             int debug = 0);
   
   // destructor
   

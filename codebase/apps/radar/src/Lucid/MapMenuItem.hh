@@ -69,8 +69,8 @@ class DLL_EXPORT MapMenuItem : public QObject {
   
   // constructor
   
-  MapMenuItem(QObject *parent,
-              GuiManager *manager);
+  MapMenuItem(GuiManager *manager,
+              Params &params);
   
   // destructor
   
@@ -92,7 +92,6 @@ class DLL_EXPORT MapMenuItem : public QObject {
 
  protected:
 
-  QObject *_parent;
   GuiManager *_manager;
 
   Params &_params;

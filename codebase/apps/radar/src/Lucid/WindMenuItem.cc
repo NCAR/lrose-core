@@ -40,9 +40,8 @@
 
 // Constructor
 
-WindMenuItem::WindMenuItem(QObject *parent) :
-        _parent(parent),
-        _params(Params::Instance()),
+WindMenuItem::WindMenuItem(Params &params) :
+        _params(params),
         _gd(GlobalData::Instance()),
         _windParams(NULL),
         _windData(NULL),

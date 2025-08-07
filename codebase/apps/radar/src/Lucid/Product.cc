@@ -41,9 +41,10 @@
 // default constructor
 
 Product::Product(int debug,
+                 Params &params,
                  Params::symprod_prod_info_t &prodInfo) :
         _prodInfo(prodInfo),
-        _params(Params::Instance()),
+        _params(params),
         _gd(GlobalData::Instance()),
         _debug(debug)
         
@@ -57,6 +58,17 @@ Product::Product(int debug,
   _timesNeedProcess = false;
 }
 
+//////////////////////////////////////////
+// copy constructor
+
+Product::Product(const Product &rhs) :
+        _prodInfo(rhs._prodInfo),
+        _params(rhs._params),
+        _gd(GlobalData::Instance()),
+        _debug(rhs._debug)
+{
+}
+        
 //////////////
 // destructor
   
@@ -506,7 +518,7 @@ bool Product::processChunks()
 
   for (size_t ii = 0; ii < chunks.size(); ii++) {
     if (chunks[ii].len > 0) {
-      SymprodRender *symprod = new SymprodRender(*this);
+      SymprodRender *symprod = new SymprodRender(_params, *this);
       if (symprod->deserialize(chunks[ii].data, chunks[ii].len) == 0) {
 	_symprods.push_back(symprod);
       } else {

@@ -80,7 +80,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   // constructor
 
-  TimeControl(GuiManager *parent);
+  TimeControl(GuiManager *parent, Params &params);
   
   /**
    * @brief Retrieve the singleton instance of this class.

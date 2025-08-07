@@ -46,10 +46,9 @@
 ///////////////////////////////////////////////
 // constructor
 
-MdvReader::MdvReader(QObject* parent) :
-        _params(Params::Instance()),
-        _gd(GlobalData::Instance()),
-        _lucid(*parent)
+MdvReader::MdvReader(Params &params) :
+        _params(params),
+        _gd(GlobalData::Instance())
 {
   
   // initialize

@@ -48,11 +48,12 @@
 using namespace std;
 
 HorizView::HorizView(QWidget* parent,
-                     GuiManager &manager) :
+                     GuiManager &manager,
+                     Params &params) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
-        _params(Params::Instance()),
+        _params(params),
         _gd(GlobalData::Instance()),
         _selectedField(0),
         _rubberBand(nullptr)
@@ -431,7 +432,7 @@ void HorizView::_initZooms()
 
     }
     
-    WorldPlot world;
+    WorldPlot world(_params);
     _initWorld(world, zoomLevel.label);
     world.setWorldLimits(minx, miny, maxx, maxy);
     _definedZooms.push_back(world);

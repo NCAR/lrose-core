@@ -85,7 +85,8 @@ class DLL_EXPORT VertView : public QWidget
 
   VertView(QWidget* parent, 
            const GuiManager &manager,
-           const VertManager &vertWindow);
+           const VertManager &vertWindow,
+           Params &params);
 
   /**
    * @brief Destructor.

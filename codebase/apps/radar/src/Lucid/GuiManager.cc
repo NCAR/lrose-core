@@ -119,10 +119,11 @@ GuiManager* GuiManager::Instance()
 
 // Constructor
 
-GuiManager::GuiManager() :
-        _params(Params::Instance()),
+GuiManager::GuiManager(Params &params) :
+        _params(params),
         _gd(GlobalData::Instance()),
-        _vertWindowDisplayed(false)
+        _vertWindowDisplayed(false),
+        _vlevelManager(params)
 {
 
   _timerEventCount = 0;
@@ -477,11 +478,11 @@ void GuiManager::_setupWindows()
 
   // configure the HORIZ
 
-  _horiz = new HorizView(_horizFrame, *this);
+  _horiz = new HorizView(_horizFrame, *this, _params);
   
   // Create the VERT window
 
-  _vertWindow = new VertManager(this);
+  _vertWindow = new VertManager(this, _params);
   _vertWindow->setRadarName("unknown");
   
   // set pointer to the vertWidget
@@ -506,7 +507,8 @@ void GuiManager::_setupWindows()
 
   // vlevel selector
 
-  _vlevelSelector = new VlevelSelector(_params.vlevel_selector_width,
+  _vlevelSelector = new VlevelSelector(_params,
+                                       _params.vlevel_selector_width,
                                        _vlevelManager, this);
   mainLayout->addWidget(_vlevelSelector);
                                        
@@ -523,7 +525,7 @@ void GuiManager::_setupWindows()
   
   // time panel
   
-  _timeControl = new TimeControl(this);
+  _timeControl = new TimeControl(this, _params);
   
   // fill out menu bar
 
@@ -750,7 +752,7 @@ void GuiManager::_populateMapsMenu()
 
     // create action for this entry
 
-    MapMenuItem *item = new MapMenuItem(nullptr, this);
+    MapMenuItem *item = new MapMenuItem(this, _params);
     QAction *act = new QAction;
     item->setMapParams(&mparams);
     item->setMapIndex(imap);
@@ -813,7 +815,7 @@ void GuiManager::_populateProductsMenu()
     
     // create action for this entry
 
-    ProdMenuItem *item = new ProdMenuItem;
+    ProdMenuItem *item = new ProdMenuItem(_params);
     const Product *product = _gd.prod_mgr->getProduct(iprod);
     QAction *act = new QAction;
     item->setProdParams(&prodParams);
@@ -877,7 +879,7 @@ void GuiManager::_populateWindsMenu()
 
     // create action for this entry
 
-    WindMenuItem *item = new WindMenuItem;
+    WindMenuItem *item = new WindMenuItem(_params);
     QAction *act = new QAction;
     item->setWindParams(&wparams);
     item->setWindIndex(iwind);
@@ -943,7 +945,7 @@ void GuiManager::_populateZoomsMenu()
     
     // create item for this entry
     
-    ZoomMenuItem *item = new ZoomMenuItem(nullptr, this);
+    ZoomMenuItem *item = new ZoomMenuItem(this, _params);
     item->setZoomParams(&zparams);
     item->setZoomIndex(izoom);
 

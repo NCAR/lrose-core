@@ -58,7 +58,7 @@ public:
 
   // constructor
   
-  VlevelManager();
+  VlevelManager(Params &params);
   
   // destructor
   

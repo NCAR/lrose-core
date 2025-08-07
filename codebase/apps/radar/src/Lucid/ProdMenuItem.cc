@@ -40,9 +40,8 @@
 
 // Constructor
 
-ProdMenuItem::ProdMenuItem(QObject *parent) :
-        _parent(parent),
-        _params(Params::Instance()),
+ProdMenuItem::ProdMenuItem(Params &params) :
+        _params(params),
         _gd(GlobalData::Instance()),
         _prodParams(NULL),
         _prodIndex(-1),

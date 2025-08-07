@@ -53,7 +53,7 @@ class SymprodRenderObj
 
 public:
 
-  SymprodRenderObj(SymprodRender *c);
+  SymprodRenderObj(Params &params, SymprodRender *c);
   
   virtual ~SymprodRenderObj();
   
@@ -70,6 +70,7 @@ public:
 protected:
   
   Params &_params;
+
   GlobalData &_gd;
   
   unsigned long _background_pixel;
@@ -129,9 +130,11 @@ class SymprodRenderText
 
 public:
   
-  SymprodRenderText(const void *prod_buffer,
+  SymprodRenderText(Params &params,
+                    const void *prod_buffer,
 		    const int obj_offset,
-		    Product &prod, SymprodRender *c);
+		    Product &prod,
+                    SymprodRender *c);
   
   virtual ~SymprodRenderText() {};
   
@@ -158,7 +161,8 @@ class SymprodRenderPolyline
 
 public:
 
-  SymprodRenderPolyline(const void *prod_buffer,
+  SymprodRenderPolyline(Params &params,
+                        const void *prod_buffer,
 			const int obj_offset,
 			Product &prod, SymprodRender *c);
 
@@ -186,7 +190,8 @@ class SymprodRenderIconline
 
 public:
 
-  SymprodRenderIconline(const void *prod_buffer,
+  SymprodRenderIconline(Params &params,
+                        const void *prod_buffer,
 			const int obj_offset,
 			Product &prod, SymprodRender *c);
 
@@ -215,7 +220,8 @@ class SymprodRenderStrokedIcon
 
 public:
 
-  SymprodRenderStrokedIcon( const void *prod_buffer,
+  SymprodRenderStrokedIcon(Params &params,
+                           const void *prod_buffer,
 			   const int obj_offset,
 			   Product &prod, SymprodRender *c);
   
@@ -244,7 +250,8 @@ class SymprodRenderNamedIcon
 
 public:
 
-  SymprodRenderNamedIcon(const void *prod_buffer,
+  SymprodRenderNamedIcon(Params &params,
+                         const void *prod_buffer,
 			 const int obj_offset,
 			 Product &prod, SymprodRender *c);
   
@@ -273,7 +280,8 @@ class SymprodRenderBitmapIcon
 
 public:
 
-  SymprodRenderBitmapIcon( const void *prod_buffer,
+  SymprodRenderBitmapIcon(Params &params,
+                          const void *prod_buffer,
 			  const int obj_offset,
 			  Product &prod, SymprodRender *c);
   
@@ -302,7 +310,8 @@ class SymprodRenderArc
 
 public:
 
-  SymprodRenderArc(const void *prod_buffer,
+  SymprodRenderArc(Params &params,
+                   const void *prod_buffer,
 		   const int obj_offset,
 		   Product &prod, SymprodRender *c);
   
@@ -331,7 +340,8 @@ class SymprodRenderRectangle
 
 public:
 
-  SymprodRenderRectangle( const void *prod_buffer,
+  SymprodRenderRectangle(Params &params,
+                         const void *prod_buffer,
 			 const int obj_offset,
 			 Product &prod, SymprodRender *c);
   
@@ -360,7 +370,8 @@ class SymprodRenderChunk
 
 public:
 
-  SymprodRenderChunk(const void *prod_buffer,
+  SymprodRenderChunk(Params &params,
+                     const void *prod_buffer,
 		     const int obj_offset,
 		     Product &prod, SymprodRender *c);
   

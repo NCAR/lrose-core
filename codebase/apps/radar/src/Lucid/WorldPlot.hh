@@ -67,7 +67,7 @@ public:
   
   // default constructor
 
-  WorldPlot();
+  WorldPlot(Params &params);
   
   // copy constructor
   

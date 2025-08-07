@@ -42,8 +42,10 @@
 //////////////////////////////////////////
 // default constructor
 
-ProductMgr::ProductMgr(RenderContext &context, int debug) :
-        _params(Params::Instance()),
+ProductMgr::ProductMgr(Params &params,
+                       RenderContext &context,
+                       int debug) :
+        _params(params),
         _gd(GlobalData::Instance()),
         _context(context)
           
@@ -52,7 +54,7 @@ ProductMgr::ProductMgr(RenderContext &context, int debug) :
 
   for (int i = 0; i < _params.symprod_prod_info_n; i++) {
     
-    Product *product = new Product(debug, _params._symprod_prod_info[i]);
+    Product *product = new Product(debug, _params, _params._symprod_prod_info[i]);
     
     if (_params.symprod_debug != Params::SYMPROD_DEBUG_OFF ) {
       product->setDebug(true);

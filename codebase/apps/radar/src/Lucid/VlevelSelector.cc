@@ -36,13 +36,15 @@
 #include "GlobalData.hh"
 using namespace std;
 
-VlevelSelector::VlevelSelector(int width,
+VlevelSelector::VlevelSelector(Params &params,
+                               int width,
                                VlevelManager &vlevelManager,
                                GuiManager *guiManager) :
         QWidget(guiManager),
+        _params(params),
         _vlevelManager(vlevelManager),
         _guiManager(guiManager),
-        _params(*Params::Inst())
+        _world(_params)
 
 {
   
