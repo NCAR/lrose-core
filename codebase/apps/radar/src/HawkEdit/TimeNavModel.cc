@@ -500,7 +500,7 @@ int TimeNavModel::getPositionOfSelection() {
   // ???
 //}
 // fetch the list of archive files only; DOES NOT set any GUI info
-vector<string> &TimeNavModel::getArchiveFileListOnly(string path,
+vector<string> TimeNavModel::getArchiveFileListOnly(string path,
   int startYear, int startMonth, int startDay,
   int startHour, int startMinute, int startSecond,
   int endYear, int endMonth, int endDay,
@@ -530,7 +530,7 @@ vector<string> &TimeNavModel::getArchiveFileListOnly(string path,
   return fileList;
 }
 
-const vector<string> &TimeNavModel::findArchiveFileList(RadxTime startTime, RadxTime endTime,
+const vector<string> TimeNavModel::findArchiveFileList(RadxTime startTime, RadxTime endTime,
   const string &absolutePath) {
 
 

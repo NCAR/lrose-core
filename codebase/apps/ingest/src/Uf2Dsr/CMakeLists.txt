@@ -130,6 +130,7 @@ link_libraries (pthread)
 # from their associated paramdef.<app> file
 
 makeTdrpParams()
+
 # application
 
 add_executable (Uf2Dsr ${SRCS})

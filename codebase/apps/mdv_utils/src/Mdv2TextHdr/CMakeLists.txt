@@ -136,6 +136,7 @@ link_libraries (z)
 # from their associated paramdef.<app> file
 
 makeTdrpParams()
+
 # application
 
 add_executable (Mdv2TextHdr ${SRCS})

@@ -137,6 +137,7 @@ link_libraries (pthread)
 # from their associated paramdef.<app> file
 
 makeTdrpParams()
+
 # application
 
 add_executable (hiResNidsStormPrecip2Mdv ${SRCS})

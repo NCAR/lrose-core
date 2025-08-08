@@ -101,7 +101,7 @@ public:
   //vector<string> &getArchiveFileList(string path,
   //  string startTime, string endTime);
 
-  vector<string> &getArchiveFileList(string path,
+  vector<string> getArchiveFileList(string path,
   int startYear, int startMonth, int startDay,
   int startHour, int startMinute, int startSecond,
   int endYear, int endMonth, int endDay,

@@ -140,6 +140,7 @@ link_libraries (bz2)
 # from their associated paramdef.<app> file
 
 makeTdrpParams()
+
 # application
 
 add_executable (SpolCal2Xml ${SRCS})

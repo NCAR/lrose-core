@@ -131,10 +131,6 @@ link_libraries (hdf5)
 link_libraries (z)
 link_libraries (bz2)
 
-# If needed, generate TDRP Params.cc and Params.hh files
-# from their associated paramdef.<app> file
-
-makeTdrpParams()
 # application
 
 add_executable (test_tserver ${SRCS})
