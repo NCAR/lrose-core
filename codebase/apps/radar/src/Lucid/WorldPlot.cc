@@ -2990,8 +2990,6 @@ void WorldPlot::renderGridDistorted(int fieldNum,
   
 {
 
-  cerr << "DDDDDDDDDDDDDDDDDDD ====>> renderGridDistorted, fieldNum: " << fieldNum << endl;
-
   // check that image canvas is the correct size
   
   _createImage(_gridImage);
@@ -3089,8 +3087,6 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
   
 {
 
-  cerr << "====>> radar polar radar polar, fieldNum: " << fieldNum << endl;
-  
   // check that image canvas is the correct size
   
   _createImage(_gridImage);

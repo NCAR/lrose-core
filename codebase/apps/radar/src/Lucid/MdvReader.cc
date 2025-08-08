@@ -326,7 +326,6 @@ int MdvReader::_handleHorizReadDone()
     
     h_mhdr = h_mdvx.getMasterHeader();
     
-    cerr << "1111111111111111111 _handleHorizReadDone ERROR" << endl;
     return -1;
     
   }
@@ -334,8 +333,6 @@ int MdvReader::_handleHorizReadDone()
   ////////////////////////
   // success - data is in
 
-  cerr << "111111111111111111111111111111111111111 _handleHorizReadDone GOT DATA" << endl;
-  
   h_data_valid = 1;
   
   // copy the requested field
@@ -483,8 +480,6 @@ int MdvReader::_handleHorizReadDone()
 
   h_date.set(h_mhdr.time_centroid);
   
-  cerr << "1111111111111111111 _handleHorizReadDone END" << endl;
-
   // free up
 
   h_mdvx.clear();

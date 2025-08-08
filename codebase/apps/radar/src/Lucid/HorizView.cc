@@ -1387,6 +1387,11 @@ void HorizView::resizeEvent(QResizeEvent * e)
 
   for (size_t ii = 0; ii < _definedZooms.size(); ii++) {
     _definedZooms[ii].resize(width(), height());
+    if ((int) ii < _params.zoom_levels_n) {
+      const Params::zoom_level_t &zoomLevel = _params._zoom_levels[ii];
+      _definedZooms[ii].setWorldLimits(zoomLevel.min_x, zoomLevel.min_y,
+                                       zoomLevel.max_x, zoomLevel.max_y);
+    }
   }
   for (size_t ii = 0; ii < _customZooms.size(); ii++) {
     _customZooms[ii].resize(width(), height());

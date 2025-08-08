@@ -1403,8 +1403,6 @@ void GuiManager::_horizLocationClicked(double xkm, double ykm,
 
 {
 
-  cerr << "1111111111 horizLocationClicked, xkm, km: " << xkm << ", " << ykm << endl;
-  
   // find the relevant ray
   // ignore closest ray sent in
   
