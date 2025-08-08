@@ -257,16 +257,16 @@ int MdvReader::getHorizPlane()
 
   h_mdvx.setReadFieldFileHeaders();
   
-  //if(_gd.debug1) {
-  fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", _page, fullUrl.c_str());
-  // }
+  if(_gd.debug1) {
+    fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", _page, fullUrl.c_str());
+  }
 
   //////////////////////////////////////////
   // read the volume
   
   int iret = h_mdvx.readVolume();
   if (iret) {
-    cerr << "1111111 MdvReader::getHorizPlane, iret: " << ", " << iret << endl;
+    cerr << "ERROR - MdvReader::getHorizPlane, iret: " << ", " << iret << endl;
     qDebug() << "MdvReader::getHorizPlane returned, iret: " << ", " << iret;
     qDebug() << h_mdvx.getErrStr();
   }
@@ -590,10 +590,8 @@ int MdvReader::requestVertSection(const DateTime &midTime,
   string fieldName(_getFieldName());
   v_mdvx->clearRead(); 
   v_mdvx->addReadField(fieldName);
-  // v_mdvx->setThreadingOff();
   if(_gd.debug1) {
     fprintf(stderr, "Get MDVX Vert Plane - page : %d  -  %s\n", page, fullUrl.c_str());
-    // Disable threading while in debug mode
   }
 
   // time

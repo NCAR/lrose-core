@@ -297,8 +297,6 @@ void HorizView::paintEvent(QPaintEvent *event)
 
     _manager.showClick();
              
-    cerr << "CCCCCCCCCCCCCCC click lat, lon: " << _worldClickLat << ", " << _worldClickLon << endl;
-    
   }
 
   _sizeChanged = false;
