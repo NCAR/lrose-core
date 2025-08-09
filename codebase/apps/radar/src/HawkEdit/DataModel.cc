@@ -52,8 +52,8 @@ const vector<float> *DataModel::GetData(string fieldName,
   //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
   //}
   
-  if ((rayIdx > sweep->getEndRayIndex()) ||
-      (rayIdx < startRayIndex)) {
+  if ((rayIdx > (int) sweep->getEndRayIndex()) ||
+      (rayIdx < (int) startRayIndex)) {
     string msg = "DataModel::GetData rayIdx outside sweep ";
     msg.append(std::to_string(rayIdx));
     throw msg;
@@ -701,10 +701,10 @@ void DataModel::sanityCheckVolume(string &warningMsg) {
   // the appropriate level of information.
   // fatal errors, throw a string exception
   string fatalErrorMsg;
-  bool errors = false;
+  // bool errors = false;
   // warnings, throw a std::invalide_argument exception
   //string warningMsg;
-  bool warnings = false;
+  // bool warnings = false;
 
   if (getPrimaryAxis() == Radx::PRIMARY_AXIS_Y_PRIME) {
 
@@ -716,7 +716,7 @@ void DataModel::sanityCheckVolume(string &warningMsg) {
         warningMsg.append("and examination of the data. However, these data are NOT considered ready and it is ");
         warningMsg.append("recommended to run RadxConvert, to prepare the data for ");
         warningMsg.append("HawkEdit display and editing.");
-        warnings = true;
+        // warnings = true;
       }
 
       // get georefs on first ray
@@ -726,7 +726,7 @@ void DataModel::sanityCheckVolume(string &warningMsg) {
         warningMsg.append("Georeference information is missing.  ");
         warningMsg.append("This information is needed to properly display the field data. ");
         warningMsg.append("Azimuth will be used in the PPI display, instead of rotation. ");
-        warnings = true;
+        // warnings = true;
         // TODO: should this be a warning? and just use the azimuth since there is no rotation?
       } else {
         double az = georef->getTrackRelRot();
@@ -775,8 +775,8 @@ void DataModel::_selectFieldsNotInVolume(vector<string> *allFieldNames) {
   for (it = primaryFieldNames->begin(); it != primaryFieldNames->end(); ++it) {
     int i=0; 
     bool found = false;
-    while (i<allFieldNames->size() && !found) {
-      if (allFieldNames->at(i).compare(*it) != string::npos) {
+    while (i < (int) allFieldNames->size() && !found) {
+      if (allFieldNames->at(i).compare(*it) == 0) {
         found = true;
         // remove from list
         allFieldNames->erase(allFieldNames->begin()+i);
@@ -794,8 +794,8 @@ void DataModel::_selectFieldsNotInCurrentVersion(
   for (it = currentVersionFieldNames->begin(); it != currentVersionFieldNames->end(); ++it) {
     int i=0; 
     bool found = false;
-    while (i<allFieldNames->size() && !found) {
-      if (allFieldNames->at(i).compare(*it) != string::npos) {
+    while (i < (int) allFieldNames->size() && !found) {
+      if (allFieldNames->at(i).compare(*it) == 0) {
         found = true;
         // remove from list
         allFieldNames->erase(allFieldNames->begin()+i);
@@ -1064,7 +1064,7 @@ void DataModel::mergeDataFields(RadxVol *radxVol, string originalSourcePath) {
     
   // add secondary rays to primary vol
 
-  int maxSweepNum = 0;
+  // int maxSweepNum = 0;
   vector<RadxRay *> &pRays = radxVol->getRays();
   const vector<RadxRay *> &sRays = originalVol->getRays();
   for (size_t iray = 0; iray < pRays.size(); iray++) {
@@ -1127,7 +1127,7 @@ void DataModel::mergeDataFields2(RadxVol *radxVol, string originalSourcePath) {
     
   // add secondary rays to primary vol
 
-  int maxSweepNum = 0;
+  // int maxSweepNum = 0;
   vector<RadxRay *> &pRays = radxVol->getRays();
   const vector<RadxRay *> &sRays = originalVol->getRays();
   for (size_t iray = 0; iray < pRays.size(); iray++) {
@@ -1523,7 +1523,7 @@ void DataModel::overwriteSweepRays(RadxVol *dstVol, int dstSweepIndex, RadxVol *
   RadxRay *dstFirstRay = dstRays.at(dstStartRayIndex);
   vector<RadxField *> dstFields = dstFirstRay->getFields();
   
-  for (int offset = 0; offset < nRaysInSweep; offset += 1) {
+  for (int offset = 0; offset < (int) nRaysInSweep; offset += 1) {
     // working here ...
     // for each field in src
     vector<RadxField *>::const_iterator srcIter;
@@ -1889,7 +1889,7 @@ size_t DataModel::getFirstRayIndex(RadxVol *vol, int sweepIndex) {
   vol->loadRaysFromFields();
   
   const vector<RadxSweep *> sweeps = vol->getSweeps();
-  if (sweepIndex >= sweeps.size()) {
+  if (sweepIndex >= (int) sweeps.size()) {
     throw std::invalid_argument("DataModel::getFirstRayIndex: sweep index > number of sweeps");
   }
   RadxSweep *sweep = sweeps.at(sweepIndex);  
@@ -1910,7 +1910,7 @@ size_t DataModel::getLastRayIndex(RadxVol *vol, int sweepIndex) {
   vol->loadRaysFromFields();
   
   const vector<RadxSweep *> sweeps = vol->getSweeps();
-  if ((sweepIndex < 0) || (sweepIndex >= sweeps.size())) {
+  if ((sweepIndex < 0) || (sweepIndex >= (int) sweeps.size())) {
     string msg = "DataModel::getLastRayIndex sweepIndex out of bounds ";
     msg.append(std::to_string(sweepIndex));
     throw std::invalid_argument(msg);
@@ -1998,7 +1998,7 @@ int DataModel::getSweepNumber(float elevation) {
   int i = 0;
   float delta = 0.01;
   bool found = false;  
-  while ((i < sweepAngles->size()) && !found) {
+  while ((i < (int) sweepAngles->size()) && !found) {
     if (fabs(sweepAngles->at(i) - elevation) < delta) {
       found = true;
     } else {
@@ -2019,7 +2019,7 @@ int DataModel::getSweepNumber(float elevation) {
       throw std::invalid_argument("DataModel::getSweepNumber _vol is NULL; cache not valid");
     } 
     LOG(DEBUG) << "_vol is NULL; cache is valid ";
-    if ((i < 0) || (i >= _cacheSweepNumbers.size())) {
+    if ((i < 0) || (i >= (int) _cacheSweepNumbers.size())) {
       throw std::invalid_argument("DataModel::getSweepNumber index out of bounds for cache");
     }
     sweepNumber = _cacheSweepNumbers.at(i);
@@ -2035,7 +2035,7 @@ int DataModel::getSweepNumber(float elevation) {
 int DataModel::getSweepIndexFromSweepNumber(int sweepNumber) {
   vector<RadxSweep *> sweeps = _vol->getSweeps();
   int idx = -1;
-  for (int i = 0; i<sweeps.size(); i++) {
+  for (int i = 0; i < (int) sweeps.size(); i++) {
     if (sweeps.at(i)->getSweepNumber() == sweepNumber) {
       idx = i;
     }
@@ -2055,7 +2055,7 @@ int DataModel::getSweepIndexFromSweepAngle(float elevation) {
   int i = 0;
   float delta = 0.01;
   bool found = false;  
-  while ((i < sweepAngles->size()) && !found) {
+  while ((i < (int) sweepAngles->size()) && !found) {
     if (fabs(sweepAngles->at(i) - elevation) < delta) {
       found = true;
     } else {
@@ -2079,7 +2079,7 @@ size_t DataModel::getSweepIndexInVolume(RadxVol *vol,
   // -- use the sweep number
   vector<RadxSweep *> sweeps = vol->getSweeps();
   int idx = -1;
-  for (int i = 0; i<sweeps.size(); i++) {
+  for (int i = 0; i < (int) sweeps.size(); i++) {
     if (sweeps.at(i)->getSweepNumber() == sweepNumber) {
       idx = i;
     }
@@ -2090,7 +2090,7 @@ size_t DataModel::getSweepIndexInVolume(RadxVol *vol,
     int i = 0;
     float delta = 0.01;
     bool found = false;
-    while ((i < sweepAngles->size()) && !found) {
+    while ((i < (int) sweepAngles->size()) && !found) {
       if (fabs(sweepAngles->at(i) - elevation) < delta) {
         found = true;
       } else {
@@ -2113,7 +2113,7 @@ double DataModel::getSweepAngleFromSweepNumber(int sweepNumber) {
   int i = 0;
   bool found = false;  
   vector<int> *sweepNumbers = getSweepNumbers();
-  while ((i < sweepNumbers->size()) && !found) {
+  while ((i < (int) sweepNumbers->size()) && !found) {
     if (sweepNumbers->at(i) == sweepNumber) {
       found = true;
     } else {
@@ -2714,7 +2714,7 @@ size_t DataModel::findClosestRay(float azimuth, int sweepNumber) { // float elev
   bool foundIt = false;
   double minDiff = 1.0e99;
   size_t minIdx = 0;
-  double delta = 0.1;  // TODO set this to the min diff between elevations/sweeps
+  // double delta = 0.1;  // TODO set this to the min diff between elevations/sweeps
   RadxRay *closestRayToEdit = NULL;
   //vector<RadxRay *>::const_iterator r;
   //r=rays.begin();

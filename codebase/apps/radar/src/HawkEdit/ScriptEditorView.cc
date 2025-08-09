@@ -41,17 +41,17 @@ Q_DECLARE_METATYPE(QVector<double>)
 
   //_polarManager = (PolarManager *) parent;
 
-  int rows;
-  int cols;
+  // int rows;
+  // int cols;
 
-  cols = 3; // (int) fieldNames.size();
-  rows = 200;
+  // cols = 3; // (int) fieldNames.size();
+  // rows = 200;
 
     addToolBar(toolBar = new QToolBar());
     formulaInput = new TextEdit(this);
     // get the font to determine height of one row
     QFontMetrics m(formulaInput->font());
-    int rowHeight = m.lineSpacing();
+    // int rowHeight = m.lineSpacing();
     //formulaInput->setFixedHeight(3*rowHeight);
 
     formulaInputForEachRay = new TextEdit(this);
@@ -82,7 +82,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     forEachWidget->setLayout(forEachLayout);
     
     int actionFontSize = 18;
-    QVBoxLayout *actionLayout = new QVBoxLayout();
+    // QVBoxLayout *actionLayout = new QVBoxLayout();
     QAction *cancelAct = new QAction(tr("&Cancel"), this);
     QFont font = cancelAct->font();
     font.setPointSize(actionFontSize);
@@ -895,7 +895,7 @@ void ScriptEditorView::fieldDataSent(vector<float> *data, int useless, int c) {
 // request filled by Controller in response to needFieldNames signal
 void ScriptEditorView::fieldNamesProvided(vector<string> fieldNames) {
 
-  int useless = 0;
+  // int useless = 0;
 
   // fill everything that needs the fieldNames ...
 
@@ -905,7 +905,7 @@ void ScriptEditorView::fieldNamesProvided(vector<string> fieldNames) {
     //     
     // for each field in model (RadxVol)
 
-    int someValue = 0;
+  // int someValue = 0;
     vector<string>::iterator it; 
     /*
     for(it = fieldNames.begin(); it != fieldNames.end(); it++) {

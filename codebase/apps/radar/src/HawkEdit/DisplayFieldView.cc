@@ -34,20 +34,20 @@ void DisplayFieldView::createFieldPanel(QWidget *parent)
   Qt::Alignment alignCenter(Qt::AlignCenter);
   Qt::Alignment alignRight(Qt::AlignRight);
   
-  int fsize = _label_font_size;
-  int fsize2 = _label_font_size + 2;
-  int fsize4 = _label_font_size + 4;
-  int fsize6 = _label_font_size + 6;
+  // int fsize = _label_font_size;
+  // int fsize2 = _label_font_size + 2;
+  // int fsize4 = _label_font_size + 4;
+  // int fsize6 = _label_font_size + 6;
 
   //this = new QGroupBox(parent); // <=== here is the connection
   _fieldGroup = new QButtonGroup;
   _fieldsLayout = new QVBoxLayout(this);
   //_fieldsLayout->setVerticalSpacing(5);
 
-  int row = 0;
-  int nCols = 3;
+  // int row = 0;
+  // int nCols = 3;
   if (_haveFilteredFields) {
-    nCols = 4;
+    // nCols = 4;
   }
 
   QLabel dummy;
@@ -82,9 +82,9 @@ void DisplayFieldView::updateFieldPanel(string rawFieldLabel, string newFieldNam
   Qt::Alignment alignRight(Qt::AlignRight);
   
   int fsize = _label_font_size;
-  int fsize2 = _label_font_size + 2;
-  int fsize4 = _label_font_size + 4;
-  int fsize6 = _label_font_size + 6;
+  // int fsize2 = _label_font_size + 2;
+  // int fsize4 = _label_font_size + 4;
+  // int fsize6 = _label_font_size + 6;
 
   QLabel dummy;
   QFont font = dummy.font();
