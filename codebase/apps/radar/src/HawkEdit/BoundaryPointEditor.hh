@@ -156,6 +156,7 @@ class BoundaryPointEditor : public QObject
   BoundaryPointEditorView *_boundaryEditorView;
   BoundaryView *_boundaryView;  
   BoundaryPointEditorModel *_boundaryPointEditorModel;
+  bool _isValidColorName(QString colorName);
 };
 
 

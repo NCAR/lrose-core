@@ -98,7 +98,7 @@ void BoundaryPointEditor::updateBoundaryColor(string colorName)
   // get info from boundary point editor
   //string colorName = _model->getBoundaryColor();
   QString colorNameQ = QString::fromStdString(colorName);
-  if (QColor::isValidColor(colorNameQ)) {
+  if (_isValidColorName(colorNameQ)) {
     QColor color(colorNameQ);
     _boundaryEditorView->boundaryColorProvided(color);
   }
@@ -1165,3 +1165,17 @@ void BoundaryPointEditor::refreshBoundaries()
     onBoundaryEditorListItemClicked(_boundaryEditorList->currentItem());
 }
 */
+
+/////////////////////////////////////////////////////
+// check that color name is valid
+
+bool BoundaryPointEditor::_isValidColorName(QString colorName)
+{
+#if QT_VERSION >= 0x060000
+  return QColor::isValidColorName(colorName);
+#else
+  QColor color;
+  color.setNamedColor(colorName);
+  return color.isValid();
+#endif
+}
