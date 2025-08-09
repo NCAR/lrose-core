@@ -267,8 +267,8 @@ int MdvReader::getHorizPlane()
   int iret = h_mdvx.readVolume();
   if (iret) {
     cerr << "ERROR - MdvReader::getHorizPlane, iret: " << ", " << iret << endl;
-    qDebug() << "MdvReader::getHorizPlane returned, iret: " << ", " << iret;
-    qDebug() << h_mdvx.getErrStr();
+    cerr << "MdvReader::getHorizPlane returned, iret: " << ", " << iret << endl;
+    cerr << h_mdvx.getErrStr() << endl;
   }
   iret_h_mdvx_read = iret;
   last_collected = time(0);
@@ -1099,9 +1099,9 @@ ReadVolH::ReadVolH(MdvReader* parentObject, QObject* parent) :
 }
 
 void ReadVolH::doRead() {
-  qDebug() << "ReadVolH thread started. Parent object:" << _mr;
+  cerr << "ReadVolH thread started. Parent object:" << _mr << endl;
   int iret = _mr->getHorizPlane();
-  qDebug() << "ReadVolH returned, iret: " << ", " << iret;
+  cerr << "ReadVolH returned, iret: " << ", " << iret << endl;
   emit readDone();
 }
 
@@ -1110,7 +1110,7 @@ void ReadVolH::doRead() {
 
 void MdvReader::startReadVolH() {
   if (_readBusyH) {
-    qDebug() << "readVolH() is already in progress. Ignoring new request.";
+    cerr << "readVolH() is already in progress. Ignoring new request." << endl;
     return;
   }
   _readBusyH = true;
@@ -1140,7 +1140,7 @@ void MdvReader::readDoneH()
   }
   _setValidH(iret_h_mdvx_read == 0);
   _setNewH(true);
-  qDebug() << "readDone in ReadVolH worker thread";
+  cerr << "readDone in ReadVolH worker thread" << endl;
   _readBusyH = false;
 }
 
