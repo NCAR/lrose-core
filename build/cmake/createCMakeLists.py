@@ -794,11 +794,11 @@ def writeCMakeListsCodebase(dir):
 
     fo.write('if (Qt5_FOUND)\n')
     if (options.iscray):
-        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -hstd=c++11 ")\n')
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -hstd=c++17 ")\n')
     elif (options.isfujitsu):
-        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -D__fujitsu__ ")\n')        
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++17 -D__fujitsu__ ")\n')        
     else:
-        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")\n')
+        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++17 ")\n')
     fo.write('else()\n')
     if (options.iscray):
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -hstd=c++17 ")\n')
