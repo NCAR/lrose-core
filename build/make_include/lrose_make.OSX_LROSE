@@ -59,7 +59,8 @@ SYS_LD_LIBRARY_PATH =
 CC = gcc
 SYS_CFLAGS = $(GCC_WARNINGS) -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 $(MY_CFLAGS)
 PROFILE_FLAG = -pg
-DEBUG_FLAG = -g 
+DEBUG_FLAG = -g
+#DEBUG_FLAG = -g -O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=address -fsanitize-address-use-after-scope
 OPT_FLAG = -g
 
 #
@@ -87,7 +88,7 @@ NATIVE_FC = gfortran
 NATIVE_LIB_DIR = 
 F_TO_C_LIBS = -lf2c
 USE_GNU_F2C = -DUSE_GNU_F2C
-SYS_FFLAGS = -DLITENDIAN
+SYS_FFLAGS = -DLITENDIAN<
 
 #
 # link
@@ -179,8 +180,8 @@ NETCDF4_LIBS=-lnetcdf -lhdf5_hl -lhdf5
 #QT_CPPC_CFLAGS = -std=c++17
 #QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
 
-QJSENGINE = -F/usr/local/Cellar/qt/6.7.2_2/lib -framework QtQml
-PKG_CONFIG_PATH = /usr/local/Cellar/qt/6.7.2_2/libexec/lib/pkgconfig
+QJSENGINE = -F/usr/local/Cellar/qt/6.8.2/lib -framework QtQml
+PKG_CONFIG_PATH = /usr/local/Cellar/qt/6.8.2/libexec/lib/pkgconfig
 QT_INCLUDES = $(shell pkg-config --cflags Qt6Core Qt6Widgets Qt6Gui)
 QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt6Gui)
 QT_LIBS = $(shell pkg-config --libs Qt6Core Qt6Widgets Qt6Gui)
