@@ -690,7 +690,7 @@ bool BoundaryPointEditorModel::load(int boundaryIndex, string &selectedFieldName
       selectedFieldName, sweepIndex, boundaryIndex);
     LOG(DEBUG) << "loading from path: " << path;
 	  successful = load(path);
-	  bool successfulColor = loadBoundaryColor(path);
+	  loadBoundaryColor(path);
   } else {
   	// reset boundary to empty
   	clear();

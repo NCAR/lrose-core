@@ -902,7 +902,7 @@ int ColorMap::readXmlMap(const std::string &file_path)
     cerr << strerror(errNum) << endl;
     return -1;
   }
-  off_t fileSize = colFile.getStat().st_size;
+  size_t fileSize = colFile.getStat().st_size;
 
   // read entire file contents into buffer
 
