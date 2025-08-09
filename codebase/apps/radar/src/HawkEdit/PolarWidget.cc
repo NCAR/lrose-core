@@ -62,7 +62,7 @@ const double PolarWidget::SIN_30 = sin(30.0 * DEG_TO_RAD);
 const double PolarWidget::COS_30 = cos(30.0 * DEG_TO_RAD);
 
 PolarWidget::PolarWidget(QWidget* parent,
-                        PolarManager *manager,
+                         PolarManager *manager,
                          const RadxPlatform &platform,
 			 DisplayFieldController *displayFieldController,
 			 //                         const vector<DisplayField *> &fields,
@@ -82,8 +82,8 @@ PolarWidget::PolarWidget(QWidget* parent,
         _scaledLabel(ScaledLabel::DistanceEng),
         _rubberBand(0),
         _ringSpacing(10.0),
-        _boundaryTrackMouseMove(false),
-        _rayLocationController(rayLocationController)
+        _rayLocationController(rayLocationController),
+        _boundaryTrackMouseMove(false)
 
 {
   _params = ParamFile::Instance();
@@ -721,7 +721,7 @@ void PolarWidget::mouseDoubleClickEvent(QMouseEvent *e)
 
 void PolarWidget::paintEvent(QPaintEvent *event)
 {
-  static int trial= 0;
+  // static int trial= 0;
   LOG(DEBUG) << "enter";
 
   QImage m_image;
@@ -775,8 +775,8 @@ void PolarWidget::paintEvent(QPaintEvent *event)
             // todo overlay boundary image
         }
 
-        bool horizontal = false;
-        bool vertical = true;
+        // bool horizontal = false;
+        // bool vertical = true;
         painter.drawImage(0, 0, m_buffer);
       // need to plot data in a QImage, so that the overlays don't wipe out the data
    
@@ -1042,9 +1042,9 @@ void PolarWidget::drawRings(QPainter &painter)
 
   QPen pen(_gridRingsColor);
   qreal hscale = painter.combinedTransform().m11();
-  qreal vscale = painter.combinedTransform().m22();
-  qreal htranslate = painter.combinedTransform().m31();
-  qreal vtranslate = painter.combinedTransform().m32();
+  // qreal vscale = painter.combinedTransform().m22();
+  // qreal htranslate = painter.combinedTransform().m31();
+  // qreal vtranslate = painter.combinedTransform().m32();
 
   float width = 1.0/hscale * 2.0;
   if (width <= 0) width = 1.0;
@@ -1080,7 +1080,7 @@ void PolarWidget::drawRings(QPainter &painter)
     while (ringRange <= _maxRangeKm) {
       double labelPosD = ringRange * SIN_45;
       const string &labelStrS = _scaledLabel.scale(ringRange);
-      int labelPos = (int) labelPosD;
+      // int labelPos = (int) labelPosD;
       QString labelStr(labelStrS.c_str());
 
       qreal x; 
@@ -1238,14 +1238,14 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
   int xStart = 100; // _widthPixels - width;
   size_t nHts = cmap.size() + 1; // leave some space at top and bottom
   double patchHt = (double)(pltHt) / nHts;
-  int iPatchHt = (int) patchHt;
+  // int iPatchHt = (int) patchHt;
   int bottomMargin = (int) patchHt/2.0;
 
   // fill the swatches with the color
   
   //painter.save();
   painter.setPen(Qt::SolidLine);
-  int scaleYTop = 0, scaleYBot = 0;
+  // int scaleYTop = 0, scaleYBot = 0;
   for (size_t ii = 0; ii < cmap.size(); ii++) {
     const ColorMap::CmapEntry &entry = cmap[ii];
     QColor color(entry.red, entry.green, entry.blue);
@@ -1254,11 +1254,11 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
     double topY = (100-bottomMargin) - (ii+1)*patchHt;
     QRectF r(xStart, topY, width, patchHt);
     painter.fillRect(r, color);
-    if (ii == 0) {
-      scaleYBot = topY + patchHt;
-    } else if (ii == cmap.size() - 1) {
-      scaleYTop = topY;
-    }
+    // if (ii == 0) {
+    //   scaleYBot = topY + patchHt;
+    // } else if (ii == cmap.size() - 1) {
+    //   scaleYTop = topY;
+    // }
   }
   //painter.restore();
 
@@ -1310,10 +1310,10 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
     // label values specified in the color scale file
 
     const vector<ColorMap::CmapLabel> &labels = colorMap.getSpecifiedLabels();
-    double scaleHeight = scaleYBot - scaleYTop;
+    // double scaleHeight = scaleYBot - scaleYTop;
     for (size_t ii = 0; ii < labels.size(); ii++) {
       const ColorMap::CmapLabel &label = labels[ii];
-      double yy = scaleYBot - scaleHeight * label.position;
+      // double yy = scaleYBot - scaleHeight * label.position;
       double yPos = 100 - bottomMargin - ii*patchHt - (textHt+4)/2;
       painter.drawText(xStartPlusABit, 
                        (int) yPos, // yy - textHt / 2, 
@@ -1329,7 +1329,7 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
     // we space the labels vertically by at least 2 * text height
     
     //double yy = pltHt - (patchHt * 1.0) + _topMargin;
-    double prevIyy = -1;
+    // double prevIyy = -1;
 
     for (size_t ii = 0; ii < cmap.size(); ii++) {
       const ColorMap::CmapEntry &entry = cmap[ii];
@@ -1477,13 +1477,13 @@ void PolarWidget::drawLegend(QPainter &painter) {
     //legends.push_back(text);
 
 
-  int leftMargin = 0;
-  int rightMargin = 0;
-  int topMargin = 0;
-  int bottomMargin = 0;
-  int colorScaleWidth = _params->color_scale_width;
-  int axisTickLen = 7;
-  int nTicksIdeal = 7;
+  // int leftMargin = 0;
+  // int rightMargin = 0;
+  // int topMargin = 0;
+  // int bottomMargin = 0;
+  // int colorScaleWidth = _params->color_scale_width;
+  // int axisTickLen = 7;
+  // int nTicksIdeal = 7;
   int textMargin = 5;    
     
     painter.save();

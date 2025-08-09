@@ -785,7 +785,7 @@ void ScriptEditorController::writeData(string &path) {
 
 string ScriptEditorController::lowerIt(string s) {
   string lowered = s;
-  for (int i=0; i<s.size(); i++) {
+  for (int i=0; i< (int) s.size(); i++) {
     lowered[i] = std::tolower(s[i]);
   }
   return lowered;
@@ -802,7 +802,7 @@ vector<bool> *ScriptEditorController::getListOfFieldsReferencedInScript(
   cout << "lowered script: " << loweredScript << endl;
 
   vector<bool> *referenced = new vector<bool>(fields.size(), false);
-  for (int i=0; i<fields.size(); i++) {
+  for (int i=0; i < (int) fields.size(); i++) {
     string loweredField = lowerIt(fields.at(i));
     if (loweredScript.find(loweredField) != string::npos) {
       referenced->at(i) = true;
@@ -878,8 +878,8 @@ void ScriptEditorController::runForEachRayScript(QString script, bool useBoundar
       QString theValue = it.value().toString();
       theValue.truncate(100);
 
-      LOG(DEBUG) << it.name().toStdString() << ": " << theValue.toStdString(); // it.value().toString().tr\
-uncate(100);                                                                                               
+      LOG(DEBUG) << it.name().toStdString() << ": " << theValue.toStdString();
+                          
       currentVariableContext[it.name()] = it.value().toString();
     }
 
@@ -1166,8 +1166,7 @@ void ScriptEditorController::runForEachRayScript(QString script, int currentSwee
       QString theValue = it.value().toString();
       theValue.truncate(100);
 
-      LOG(DEBUG) << it.name().toStdString() << ": " << theValue.toStdString(); // it.value().toString().tr\
-uncate(100);                                                                                               
+      LOG(DEBUG) << it.name().toStdString() << ": " << theValue.toStdString();
       currentVariableContext[it.name()] = it.value().toString();
     }
 
@@ -1467,12 +1466,11 @@ void ScriptEditorController::runForEachRayScriptOLD(QString script, int currentS
       QString theValue = it.value().toString();
       theValue.truncate(100);
 
-      LOG(DEBUG) << it.name().toStdString() << ": " << theValue.toStdString(); // it.value().toString().tr\
-uncate(100);                                                                                               
+      LOG(DEBUG) << it.name().toStdString() << ": " << theValue.toStdString();
       currentVariableContext[it.name()] = it.value().toString();
     }
 
-    bool debug = false;
+    // bool debug = false;
     //_resetDataFile(dataFileName, currentSweepIndex, debug, debug, fieldNamesInScript);
 
     // set initial field names
@@ -1790,7 +1788,7 @@ void ScriptEditorController::fieldNamesProvided(vector<string> *fieldNames) {
     // the variable name as a string is substituted.                                                       
     //                                                                                                     
     // for each field in model (RadxVol)          
-    int someValue = 0;
+  // int someValue = 0;
     vector<string>::iterator it;
 
     for(it = fieldNames->begin(); it != fieldNames->end(); it++) {

@@ -133,13 +133,13 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
                            bool haveFilteredFields, bool interactive) :
 // DisplayManager(params, reader, displayFieldController, haveFilteredFields), 
         //_sweepManager(params),
-        _rhiWindowDisplayed(false),
         QMainWindow(NULL),
         //_params->params),
         //_reader(reader),
         _initialRay(true),
         _displayFieldController(displayFieldController),
-        _haveFilteredFields(haveFilteredFields)
+        _haveFilteredFields(haveFilteredFields),
+        _rhiWindowDisplayed(false)
 {
 
 	m_pInstance = this;
@@ -1203,7 +1203,7 @@ void PolarManager::_addNewFields(vector<string> *newFieldNames)
 
   LOG(DEBUG) << "newFieldNames ...";
   //  newFieldNames.split(',');
-  for (int i=0; i < newFieldNames->size(); ++i) {
+  for (int i=0; i < (int) newFieldNames->size(); ++i) {
     string name = newFieldNames->at(i); // .toLocal8Bit().constData();
 
     LOG(DEBUG) << name;
@@ -1673,7 +1673,7 @@ void PolarManager::_handleRayUpdate(RadxPlatform &platform, RadxRay *ray, vector
     // Add the beam to the display
     // ray contains data for ALL fields; fieldData contains only data for the new beams
     // nFields = total number of fields (old + new)
-    size_t nFields = _displayFieldController->getNFields();
+    // size_t nFields = _displayFieldController->getNFields();
     //_ppi->cleanBeams(nFields);
     //_ppi->updateBeamII(ray, _startAz, _endAz, fieldData, nFields, newFieldNames);
 
@@ -1689,7 +1689,7 @@ void PolarManager::_handleColorMapChangeOnRay(RadxPlatform &platform,
   LOG(DEBUG) << "enter";
 
     try {
-      size_t nFields = _displayFieldController->getNFields();
+      // size_t nFields = _displayFieldController->getNFields();
       if (_nGates < 0) throw "Error, cannot convert _nGates < 0 to type size_t";
       //_ppi->updateBeamColors(nFields, fieldName, (size_t) _nGates); //ray, _startAz, _endAz, data, nFields, fieldName);
     } catch (std::range_error &ex) {
@@ -2165,7 +2165,7 @@ void PolarManager::_openFile()
 
   QMessageBox::information(this, "Status", "retrieving field names ...");
   // choose which fields to import
-  vector<string> *selectedFields = userSelectFieldsForReading(fileList[0]);   
+  // vector<string> *selectedFields = userSelectFieldsForReading(fileList[0]);   
 
   QByteArray qb = filename.toUtf8();
   const char *name = qb.constData();
@@ -2426,7 +2426,7 @@ void PolarManager::_saveCurrentVersionAllFiles()
 {
 
   bool cancel = false;
-  bool overwriteOnce = false;
+  // bool overwriteOnce = false;
   bool discard = false;
 
   //QString finalPattern = "All files (*.nc)";
@@ -2717,7 +2717,7 @@ void PolarManager::_saveFile()
         LOG(DEBUG) << "writing to file " << name;
         string originalSourcePath = 
           _timeNavController->getSelectedArchiveFile();
-        DataModel *dataModel = DataModel::Instance();
+        // DataModel *dataModel = DataModel::Instance();
         // TODO: finish here
         //dataModel->mergeSelectedFileVersions(name, originalSourcePath,
         //                                     listOfVersions,
@@ -3411,7 +3411,7 @@ void PolarManager::ShowParameterColorDialog(QString fieldName)
   // const ColorMap &colorMapForSelectedField = field.getColorMap();
   ParameterColorView *parameterColorView = new ParameterColorView(this);
   // vector<DisplayField *> displayFields = displayFieldController->getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
-  DisplayField *selectedField = _displayFieldController->getSelectedField();
+  // DisplayField *selectedField = _displayFieldController->getSelectedField();
   string emphasis_color = "white";
   string annotation_color = "white";
 
@@ -3668,8 +3668,7 @@ void PolarManager::_updateStatusPanel(const RadxRay *ray)
   _statusPanelController->updateStatusPanel(ray);
 
 //  if (_maxRangeVal) {
-    double maxRangeData = ray->getStartRangeKm() +
-      ray->getNGates() * ray->getGateSpacingKm();
+  // double maxRangeData = ray->getStartRangeKm() + ray->getNGates() * ray->getGateSpacingKm();
 //    _setText(text, "%.1f", maxRangeData);
 //    _maxRangeVal->setText(text);
 //  }
@@ -3879,7 +3878,7 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
       // send the current sweep to the script editor controller
       
       // convert the sweep number to an index in the sweep list
-      DataModel *dataModel = DataModel::Instance();
+      // DataModel *dataModel = DataModel::Instance();
       //  sweep angle; sweep number; sweep index HOW TO KEEP THEM STRAIGHT?!!
       double sweepNumber = _sweepController->getSelectedNumber();
       // int sweepNumber = dataModel->getSweepNumber(sweepAngle);

@@ -117,10 +117,10 @@ void SpreadSheetController::displaySweepData(int sweepNumber) {
     // rayIdx goes from 0 to nRays; map to -nRays/2 ... 0 ... nRays/2
     for (int rayIdx= - _nRays/2; rayIdx <= _nRays/2; rayIdx++) {
       int offsetFromClosest = rayIdx;
-      for (int fieldIdx=0; fieldIdx < displayFields.size(); fieldIdx++) {  
+      for (int fieldIdx=0; fieldIdx < (int) displayFields.size(); fieldIdx++) {  
     
         // use RayLoc to find the closest ray
-        int idx = offsetFromClosest + _nRays/2;
+        // int idx = offsetFromClosest + _nRays/2;
         //_currentModel->setRay(idx,
         //  _rayLocationController->getClosestRay(azimuth, offsetFromClosest));
         vector <float> *data = 

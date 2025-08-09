@@ -141,8 +141,8 @@ Q_DECLARE_METATYPE(QVector<double>)
 
     
     undoStack = new QUndoStack(this);
-    QLabel *undoLabel = new QLabel(tr("Command List \n Undo/Redo"));
-    QUndoView *undoView = new QUndoView(undoStack);
+    // QLabel *undoLabel = new QLabel(tr("Command List \n Undo/Redo"));
+    // QUndoView *undoView = new QUndoView(undoStack);
 
 /*
     echoLayout->addWidget(undoLabel, 0, 2);
@@ -190,7 +190,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     dock->setWidget(echoGroup);
     addDockWidget(Qt::RightDockWidgetArea, dock);
 
-    int actionFontSize = 14;
+    // int actionFontSize = 14;
 
     // ============
     table = new QTableWidget(rows, cols, this);
@@ -439,7 +439,7 @@ void SpreadSheetView::setupMenuBar()
     QMenu *aboutMenu = menuBar()->addMenu(tr("&Help"));
     aboutMenu->addAction(aboutSpreadSheet);
 
-    QMenu *cancelMenu = menuBar()->addMenu(tr("&Cancel"));
+    // QMenu *cancelMenu = menuBar()->addMenu(tr("&Cancel"));
 
 }
 
@@ -459,10 +459,10 @@ void SpreadSheetView::updateStatus(QTableWidgetItem *item)
     if (item && item == table->currentItem()) {
         statusBar()->showMessage(item->data(Qt::StatusTipRole).toString(), 1000);
         //cellLabel->setText(tr("Cell: (%1)").arg(SpreadSheetUtils::encode_pos(table->row(item), table->column(item))));
-      int whichColumn = item->column();
+        // int whichColumn = item->column();
 
-      int rayIdx;
-      int fieldIdx;
+      int rayIdx = 0;
+      int fieldIdx = 0;
 
       //decode(whichColumn, &rayIdx, &fieldIdx);
       rayIdx = 0;
@@ -580,7 +580,7 @@ void SpreadSheetView::applyChanges()
   LOG(DEBUG) << "enter";
 
 
-  int column = 0;
+  // int column = 0;
   for(int column = 0; column < table->columnCount(); column++) {
     vector<float> *data = getDataForVariableFromSpreadSheet(column);
 
@@ -783,7 +783,7 @@ void SpreadSheetView::setupContents()
 
 void SpreadSheetView::rangeDataSent(size_t nGates, float startingKm, float gateSize) {
   //table->setHorizontalHeaderItem(0, new QTableWidgetItem("Km"));   
-  if (table->rowCount() != nGates) {
+  if (table->rowCount() != (int) nGates) {
     table->setRowCount(nGates);
   }
   char rangeFormatted[15];
@@ -827,14 +827,14 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int offsetFromClosest, 
       cout << "fieldName = " << fieldName.toStdString() << endl;
       //QJSValue fieldArray = engine.newArray(nPoints);
       QString vectorName = fieldName;
-      if (table->rowCount() != nPoints) {
+      if (table->rowCount() != (int) nPoints) {
         table->setRowCount(nPoints);
       }
       vector<float> dataVector = *data;
       float *dp = &dataVector[0];
 
       int startingRow = 0; // leave room for the azimuth header
-      for (int r=startingRow; r<startingRow + nPoints; r++) {
+      for (int r=startingRow; r < startingRow + (int) nPoints; r++) {
       // 752019 for (std::size_t r=0; r<data.size(); r++) {
         //    sprintf(formattedData, format, data[0]);
         if (*dp == MISSING) {
@@ -1143,7 +1143,7 @@ void SpreadSheetView::highlightClickedData(string fieldName, float azimuth,
 // display the fields selected and their data
 void SpreadSheetView::fieldNamesSelected(vector<string> fieldNames) {
 
-  int useless = 0; // this becomes iterator over nRays
+  // int useless = 0; // this becomes iterator over nRays
   table->clear(); // clearContents(); 
   _fieldNames.clear();
 
@@ -1192,7 +1192,7 @@ void SpreadSheetView::fieldNamesProvided(vector<string> *fieldNames) {
     table->setColumnCount(fieldNames.size());
     LOG(DEBUG) << " there are " << fieldNames.size() << " field namess";
 */
-    int c = 0;
+  // int c = 0;
     vector<string>::iterator it; 
     for(it = fieldNames->begin(); it != fieldNames->end(); it++) {
       QString the_name(QString::fromStdString(*it));
@@ -1385,7 +1385,7 @@ string SpreadSheetView::getFieldName(QString text) {
 void SpreadSheetView::deleteSelection() {
     QString missingValue(QString(_missingDataString.c_str()));
     //missingValue.setNum(_missingDataValue);
-    int currentColumn = table->currentColumn();
+    // int currentColumn = table->currentColumn();
     QList<QTableWidgetItem *> selectedGates = table->selectedItems();
     QList<QTableWidgetItem *>::iterator i;
     for (i = selectedGates.begin(); i != selectedGates.end(); ++i) {

@@ -440,9 +440,9 @@ void BoundaryPointEditor::clear()
 // user has dragged circle slider and reset the circle radius
 bool BoundaryPointEditor::setCircleRadius(int value)
 {
-	int circleRadius = value;
-	bool resizeExistingCircle = _boundaryPointEditorModel->setCircleRadius(value); 
-	return(resizeExistingCircle);
+  // int circleRadius = value;
+  bool resizeExistingCircle = _boundaryPointEditorModel->setCircleRadius(value); 
+  return(resizeExistingCircle);
 }
 
 // user has dragged the brush slider and reset its size

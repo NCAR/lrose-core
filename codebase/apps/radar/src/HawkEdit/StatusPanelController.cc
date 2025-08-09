@@ -299,7 +299,7 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
   // go through the unordered_map and use a case statement on the Keys?
   // to associate the ray variable?
 
-  const RadxGeoref *georef = ray->getGeoreference();
+  // const RadxGeoref *georef = ray->getGeoreference();
 
   const StatusPanelView::Hashy myHashy = _view->getMetaDataMap();
   StatusPanelView::HashyConstIt it;

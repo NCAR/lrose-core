@@ -361,7 +361,7 @@ void TimeNavView::timeSliderReleased()
 
 void TimeNavView::timeSliderPressed() 
 {
-  int value = _timeSlider->value();
+  // int value = _timeSlider->value();
   //if (_params->debug >= Params::DEBUG_VERBOSE) {
     //cerr << "Time slider released; value: " << value << endl;
   //}
