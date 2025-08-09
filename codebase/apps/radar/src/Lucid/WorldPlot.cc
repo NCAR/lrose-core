@@ -37,6 +37,7 @@
 #include <sstream>
 #include <iostream>
 #include <cstdio>
+#include <cmath>
 #include <QtCore/QLineF>
 #include <QtGui/QPainterPath>
 

@@ -27,7 +27,7 @@
 
 #include "ScaledLabel.hh"
 #include <iomanip>
-#include <math.h>
+#include <cmath>
 
 //////////////////////////////////////////////////////////////////////
 // Create a label that is scaled in engineering units. At
