@@ -46,8 +46,6 @@
 #include "Params.hh"
 #include <didss/DsInputPath.hh>
 #include <titan/TitanFile.hh>
-#include <filesystem>
-using Fpath = std::filesystem::path;
 
 ////////////////////////
 // This class
@@ -82,7 +80,7 @@ private:
   Params _params;
 
   DsInputPath *_input;
-  Fpath _inputPath;
+  string _inputPath;
   
   TitanFile _inFile;
   TitanFile _outFile;
