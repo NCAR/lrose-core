@@ -760,11 +760,11 @@ void PolarWidget::paintEvent(QPaintEvent *event)
         // TODO: move to sizeInBytes when no longer supporting Centos7;
         // byteCount() and numBytes() are obsolete.
         //memcpy(m_buffer.bits(), m_base_buffer.bits(), m_buffer.sizeInBytes());
-#if QT_VERSION >= 0x060000
+// #if QT_VERSION >= 0x060000
         memcpy(m_buffer.bits(), m_base_buffer.bits(), m_buffer.sizeInBytes());
-#else
-        memcpy(m_buffer.bits(), m_base_buffer.bits(), m_buffer.byteCount());
-#endif
+// #else
+//         memcpy(m_buffer.bits(), m_base_buffer.bits(), m_buffer.byteCount());
+// #endif
 
         {
             QPainter p(&m_buffer);
