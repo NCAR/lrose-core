@@ -48,12 +48,12 @@ public:
 
   // missing values
   
-  static constexpr double missingFl64 = -999999.0;
-  static constexpr float missingFl32 = -999999.0f;
-  static constexpr int64_t missingInt64 = -999999;
-  static constexpr int32_t missingInt32 = -999999;
-  static constexpr int16_t missingInt16 = -32768;
-  static constexpr int8_t missingInt08 = -128;
+  inline static constexpr double missingFl64 = -999999.0;
+  inline static constexpr float missingFl32 = -999999.0f;
+  inline static constexpr int64_t missingInt64 = -999999;
+  inline static constexpr int32_t missingInt32 = -999999;
+  inline static constexpr int16_t missingInt16 = -32768;
+  inline static constexpr int8_t missingInt08 = -128;
   
   typedef enum {
     FCAST_BY_TREND = 1,
@@ -311,7 +311,7 @@ public:
 
     // data
     
-    static constexpr int32_t GPROPS_N_POLY_SIDES = 72;
+    inline static constexpr int32_t GPROPS_N_POLY_SIDES = 72;
     
     int64_t layer_props_offset;	/* posn in file of layer props data */
     int64_t dbz_hist_offset;	/* posn in file of dbz hist data */
@@ -664,10 +664,10 @@ public:
     
     // data
     
-    static constexpr int32_t MAX_NWEIGHTS_FCAST = 10;
-    static constexpr int32_t N_MOVEMENT_PROPS_FCAST = 5;
-    static constexpr int32_t N_GROWTH_PROPS_FCAST = 5;
-    static constexpr int32_t N_TOTAL_PROPS_FCAST = 14;
+    inline static constexpr int32_t MAX_NWEIGHTS_FCAST = 10;
+    inline static constexpr int32_t N_MOVEMENT_PROPS_FCAST = 5;
+    inline static constexpr int32_t N_GROWTH_PROPS_FCAST = 5;
+    inline static constexpr int32_t N_TOTAL_PROPS_FCAST = 14;
     
     fl32 forecast_weights[MAX_NWEIGHTS_FCAST];
   
@@ -816,8 +816,8 @@ public:
     
     // data
     
-    static constexpr int32_t MAX_PARENTS_ = 8;
-    static constexpr int32_t MAX_CHILDREN_ = 8;
+    inline static constexpr int32_t MAX_PARENTS_ = 8;
+    inline static constexpr int32_t MAX_CHILDREN_ = 8;
     
     time_t start_time;		/* for the simple track only */
     time_t end_time;		/* for the simple track only */
