@@ -35,6 +35,7 @@
 #include "MdvReader.hh"
 #include "TimeControl.hh"
 
+#include <cmath>
 #include <QCoreApplication>
 #include <QThread>
 #include <QObject>
