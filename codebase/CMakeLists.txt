@@ -177,7 +177,7 @@ enable_testing()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ")
 if (Qt5_FOUND)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++17 ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")
 else()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++17 ")
 endif(Qt5_FOUND)
