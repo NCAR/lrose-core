@@ -108,10 +108,10 @@ int PrintTitanFiles::Run()
     if (_printLegacy()) {
       return -1;
     }
-  }
-  
-  if (_printNcFile()) {
-    return -1;
+  } else {
+    if (_printNcFile()) {
+      return -1;
+    }
   }
   
   return 0;
