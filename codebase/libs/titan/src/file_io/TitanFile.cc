@@ -36,10 +36,7 @@
 #include <fcntl.h>
 #include <cerrno>
 #include <cassert>
-
-#include <filesystem>
 #include <algorithm>
-using Fpath = std::filesystem::path;
 
 #include <dataport/bigend.h>
 #include <titan/TitanData.hh>
@@ -368,9 +365,11 @@ int TitanFile::_openLegacyFiles(const string &path,
   
 {
   
-  Fpath basePath(path);
-  string stormHeaderPath = basePath.replace_extension(".sh5").string();
-  string trackHeaderPath = basePath.replace_extension(".th5").string();
+  Path stormHeaderPath(path);
+  stormHeaderPath.setExt(STORM_HEADER_FILE_EXT_V5);
+  Path trackHeaderPath(path);
+  trackHeaderPath.setExt(TRACK_HEADER_FILE_EXT_V5);
+  
   string fmode("r");
   switch (mode) {
     case NcxxFile::read:
@@ -385,22 +384,24 @@ int TitanFile::_openLegacyFiles(const string &path,
   }
   
   if (fmode != "r") {
-    Path stormPath(stormHeaderPath);
-    stormPath.makeDirRecurse();
+    stormHeaderPath.makeDirRecurse();
   }
   
-  if (_sFile.OpenFiles(fmode.c_str(), stormHeaderPath.c_str(), "sd5")) {
+  if (_sFile.OpenFiles(fmode.c_str(), stormHeaderPath.getPath().c_str(),
+                       STORM_DATA_FILE_EXT_V5)) {
     _addErrStr("ERROR - TitanFile::openFile");
-    _addErrStr(" Opening storm files, header path: ", stormHeaderPath);
+    _addErrStr(" Opening storm files, header path: ", stormHeaderPath.getPath());
     return -1;
   }
 
-  if (_tFile.OpenFiles(fmode.c_str(), trackHeaderPath.c_str(), "td5")) {
+  if (_tFile.OpenFiles(fmode.c_str(), trackHeaderPath.getPath().c_str(),
+                       TRACK_DATA_FILE_EXT_V5)) {
     _addErrStr("ERROR - TitanFile::openFile");
-    _addErrStr(" Opening track files, header path: ", trackHeaderPath);
+    _addErrStr(" Opening track files, header path: ", trackHeaderPath.getPath());
     return -1;
   }
   return 0;
+  
 }
 
 //////////////////////////////////////////////////////////

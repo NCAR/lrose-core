@@ -1704,7 +1704,7 @@ int TitanTrackFile::WriteHeader()
     STRncopy(_header.header_file_name, hpath.getFile().c_str(), R_LABEL_LEN);
     if (strlen(_header.storm_header_file_name) == 0) {
       Path spath(hpath);
-      spath.setExt("sh5");
+      spath.setExt(STORM_HEADER_FILE_EXT_V5);
       STRncopy(_header.storm_header_file_name, spath.getFile().c_str(), R_LABEL_LEN);
     }
   }
