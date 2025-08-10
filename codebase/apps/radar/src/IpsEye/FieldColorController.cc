@@ -50,7 +50,7 @@ void FieldColorController::startUp()
 QColor FieldColorController::_stringToQColor(string colorName) {
 
   QString colorNameQ = QString::fromStdString(colorName);
-  if (QColor::isValidColor(colorNameQ)) {
+  if (_isValidColorName(colorNameQ)) {
     QColor color(colorNameQ);
     return color;
   }
@@ -109,7 +109,7 @@ void FieldColorController::getGridColor()
   _view->gridColorProvided(color);
 
   /*  QString colorNameQ = QString::fromStdString(colorName);
-  if (QColor::isValidColor(colorNameQ)) {
+  if (_isValidColorName(colorNameQ)) {
     QColor color(colorNameQ);
     _view->gridColorProvided(color);
   }
@@ -124,7 +124,7 @@ void FieldColorController::getEmphasisColor()
   // get info from model
   string colorName = _model->getEmphasisColor();
   QString colorNameQ = QString::fromStdString(colorName);
-  if (QColor::isValidColor(colorNameQ)) {
+  if (_isValidColorName(colorNameQ)) {
     QColor color(colorNameQ);
     _view->emphasisColorProvided(color);
   }
@@ -138,7 +138,7 @@ void FieldColorController::getAnnotationColor()
   // get info from model
   string colorName = _model->getAnnotationColor();
   QString colorNameQ = QString::fromStdString(colorName);
-  if (QColor::isValidColor(colorNameQ)) {
+  if (_isValidColorName(colorNameQ)) {
     QColor color(colorNameQ);
     _view->annotationColorProvided(color);
   }
@@ -152,7 +152,7 @@ void FieldColorController::getBackgroundColor()
   // get info from model
   string colorName = _model->getBackgroundColor();
   QString colorNameQ = QString::fromStdString(colorName);
-  if (QColor::isValidColor(colorNameQ)) {
+  if (_isValidColorName(colorNameQ)) {
     QColor color(colorNameQ);
     _view->backgroundColorProvided(color);
   }
@@ -232,4 +232,16 @@ void FieldColorController::newBackgroundColorSelected(QColor newColor) {
   LOG(DEBUG) << "exit";
 }
 
+/////////////////////////////////////////////////////
+// check that color name is valid
 
+bool FieldColorController::_isValidColorName(QString colorName)
+{
+#if QT_VERSION >= 0x060000
+  return QColor::isValidColorName(colorName);
+#else
+  QColor color;
+  color.setNamedColor(colorName);
+  return color.isValid();
+#endif
+}
