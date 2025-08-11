@@ -1171,7 +1171,7 @@ void BoundaryPointEditor::refreshBoundaries()
 
 bool BoundaryPointEditor::_isValidColorName(QString colorName)
 {
-#if QT_VERSION >= 0x060000
+#if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
   return QColor::isValidColorName(colorName);
 #else
   QColor color;
