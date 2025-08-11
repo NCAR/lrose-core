@@ -49,9 +49,7 @@ extern void swab(const void *from, void *to, ssize_t n);
  *    Converts it to Local byte order if necessary
  */
 
-int get_ccm_header(infile,head)
-    FILE    *infile;            /* Open stream  */
-    struct ccm_header *head;    /* pointer to a header area */
+int get_ccm_header(FILE *infile, struct ccm_header *head)
 {
     rewind(infile);
 
@@ -71,12 +69,7 @@ int get_ccm_header(infile,head)
  *    Don't forget to free array
  */
 
-unsigned short
-*get_data_plane(field,plane,c_head,file)
-        int field;    /* Data filed of interest */
-        int plane;
-        struct ccm_header *c_head;
-        FILE *file;
+unsigned short *get_data_plane(int field, int plane, struct ccm_header *c_head, FILE *file)
 {
     unsigned short   *c_data;  /* pointer for data manipulation */
     int    rec_len;
@@ -131,8 +124,7 @@ unsigned short
  */
 
 void
-swap_ccm_header_bytes(hd)
-    struct ccm_header *hd;
+swap_ccm_header_bytes(struct ccm_header *hd)
 {
     if(hd->pad1 == sizeof(*hd) - (2 * sizeof(int))) return; 
      
@@ -149,9 +141,7 @@ swap_ccm_header_bytes(hd)
  */
 
 void
-print_ccm_header(outfile,hd)
-    FILE    *outfile;
-    struct ccm_header *hd;
+print_ccm_header(FILE *outfile, struct ccm_header *hd)
 {
     int    i;
 
