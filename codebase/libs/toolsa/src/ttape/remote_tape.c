@@ -94,7 +94,7 @@ static int
 
 {
   int cmdlen;
-  void (*pipe_handler) ();
+  void (*pipe_handler) (int);
 
   /* Save the current pipe handler and try to make the request.  */
 
@@ -391,7 +391,7 @@ int
 
 {
   char buffer [CMD_BUF_SZ];
-  void (*pipe_handler) ();
+  void (*pipe_handler) (int);
 
   sprintf (buffer, "W%d\n", nbyte);
   if (snd_command (buffer) == -1)
