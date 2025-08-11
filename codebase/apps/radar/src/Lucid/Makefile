@@ -43,7 +43,7 @@ LOC_LIBS = \
 	-leuclid -lrapmath -lrapplot -lqtplot -ltoolsa \
 	-ldataport -ltdrp -lRadx -lNcxx \
 	-lphysics -lshapelib \
-	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) -lX11 -lXext \
+	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \
 	-lfftw3 -lpng -lpthread -lz -lbz2
 
 LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
