@@ -1118,7 +1118,7 @@ int dd_tokenz(char *att, char *str_ptrs[], char *dlims)
 {
     int nargs=0;
     char *b=att;
-    char *strtok();
+    //     char *strtok();
 
     for(b=strtok(b, dlims); b;  b = strtok(NULL, dlims)) {
 	str_ptrs[nargs++] = b;
@@ -1192,7 +1192,7 @@ void solo_reset_list_entries(struct solo_list_mgmt *which)
 void solo_add_list_entry(struct solo_list_mgmt *which, char *entry, int len)
 {
     int ii;
-    char *a, *c, *str_terminate();
+    char *a, *c;
 
     if(!which)
 	  return;
@@ -1348,7 +1348,7 @@ int generic_sweepfiles( char *dir,
 
 char *solo_modify_list_entry(struct solo_list_mgmt *which, char *entry, int len, int entry_num)
 {
-    char *a, *c, *str_terminate();
+    char *a, *c;
 
     if(!which || entry_num > which->num_entries || entry_num < 0)
 	  return(NULL);
