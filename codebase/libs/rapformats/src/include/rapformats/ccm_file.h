@@ -36,20 +36,6 @@
 #define NUM_HEADER_FLOATS 128
 #define CCM_MISSING_DATA -32768
 
-#ifdef GET_CCM
-int    get_ccm_header(/* FILE *infile, struct ccm_header *head */);
-unsigned short *get_data_plane(/*int field,int plane, struct ccm_header c_head, FILE *file */);
-void swap_ccm_header_bytes(/* struct ccm_header *header */);
-void print_ccm_header(/* FILE *outfile,struct ccm_header *header */);
-#endif
-
-#ifndef GET_CCM
-extern int    get_ccm_header(/* FILE *infile, struct ccm_header *head */);
-extern unsigned short *get_data_plane(/*int field,int plane, struct ccm_header c_head, FILE *file */);
-extern void swap_ccm_header_bytes(/* struct ccm_header *header */);
-extern void print_ccm_header(/* FILE *outfile,struct ccm_header *header */);
-#endif
-
 struct    grid_scale_bias {
     float    scale;
     float    bias;
@@ -90,6 +76,20 @@ struct ccm_header {
     int        pad2;
 };
 
+#ifdef GET_CCM
+   int  get_ccm_header(FILE *infile, struct ccm_header *head);
+   unsigned short *get_data_plane(int field, int plane, struct ccm_header *c_head, FILE *file );
+   void swap_ccm_header_bytes(struct ccm_header *header );
+   void print_ccm_header(FILE *outfile,struct ccm_header *header);
+#endif
+
+#ifndef GET_CCM
+extern int    get_ccm_header(/* FILE *infile, struct ccm_header *head */);
+extern unsigned short *get_data_plane(/*int field,int plane, struct ccm_header c_head, FILE *file */);
+extern void swap_ccm_header_bytes(/* struct ccm_header *header */);
+extern void print_ccm_header(/* FILE *outfile,struct ccm_header *header */);
+#endif
+   
 #ifdef __cplusplus
 }
 #endif
