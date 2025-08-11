@@ -67,22 +67,34 @@ static char *Stypes[] = { "CAL", "PPI", "COP", "RHI", "VER",
 
 # define PX2(x) (sig_swap2((&x)))
 
-char *dts_print();
-void crackers();
-void piraq_crackers();
-void swack_short();
-void swack_long();
-void swack_double();
+/* char *dts_print(); */
 
-void piraq_crack_header();
-void piraq_crack_radar();
-short sig_swap2();
+/* crackers(srs, dst, item_count, ndx_count, crk_drdh */
+/*          , offs_ndx, dst_ndx, limit); */
 
+static void crackers(char *srs, char *dst,
+                     int item_count, int ndx_cnt, int *tbl,
+                     int srs_ndx, int dst_ndx, int limit);
+
+
+static void swack_short(char *ss, char *tt, int nn);
+static void swack_long(char *ss, char *tt, int nn);
+static void swack4(char *ss, char *tt);
+static void swack_double(char *ss, char *tt, int nn);
+  
+#ifdef NOTNOW
+static short sig_swap2( twob *ov );
+static void swack2(char *ss, char *tt);
+static void piraq_crack_header(char *srs, char *dst, int limit);
+static void piraq_crack_radar(char *srs, char *dst, int limit);
+static void piraq_crackers(char *srs, char *dst,
+                           int item_count, int ndx_cnt, int *tbl,
+                           int srs_ndx, int dst_ndx, int limit);
+#endif
 
 /* c------------------------------------------------------------------------ */
 
-long
-time_now()
+long time_now()
 {
     struct timeval tp;
     struct timezone tzp;
@@ -92,9 +104,7 @@ time_now()
 }
 /* c------------------------------------------------------------------------ */
 
-char *str_terminate(dst, srs, n)
-  CHAR_PTR srs, dst;
-  int n;
+char *str_terminate(CHAR_PTR dst, CHAR_PTR srs, int n)
 {
     int m=n;
     char *a=srs, *c=dst;
@@ -120,8 +130,7 @@ char *str_terminate(dst, srs, n)
 }
 /* c------------------------------------------------------------------------ */
 
-double angdiff( a1, a2 )
-  float a1, a2;
+double angdiff( float a1, float a2 )
 {
     double d=a2-a1;
 
@@ -133,9 +142,7 @@ double angdiff( a1, a2 )
 }
 /* c------------------------------------------------------------------------ */
 
-void nex_crack_drdh (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void nex_crack_drdh (char *srs, char *dst, int limit)
 {
    int dst_ndx = sparc_ndx;
    int item_count=48;
@@ -190,14 +197,12 @@ void nex_crack_drdh (srs, dst, limit)
       {   96,    2,    2,    1,    1,    1,   96},
       {   98,    2,    2,    1,    1,    1,   98},
    };
-   crackers(srs, dst, item_count, ndx_count, crk_drdh
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_drdh
 	    , offs_ndx, dst_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void nex_crack_nmh (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void nex_crack_nmh (char *srs, char *dst, int limit)
 {
    int item_count=8;
 
@@ -212,14 +217,12 @@ void nex_crack_nmh (srs, dst, limit)
       {   14,    2,    2,    1,    1,    1,   14},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_nexrad_message_header
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_nexrad_message_header
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void nex_crack_rda (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void nex_crack_rda (char *srs, char *dst, int limit)
 {
    int item_count=27;
 
@@ -253,14 +256,13 @@ void nex_crack_rda (srs, dst, limit)
       {   52,    2,    2,   14,   14,    1,   52},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_rda_status_info
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_rda_status_info
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void piraq_crack_header (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+#ifdef NOTNOW
+void piraq_crack_header (char *srs, char *dst, int limit)
 {
    int item_count=31;
 
@@ -299,53 +301,22 @@ void piraq_crack_header (srs, dst, limit)
    };
 
    if(LittleEndian) {
-      piraq_crackers(srs, dst, item_count, ndx_count, crk_prq_ray_hdr
+      piraq_crackers(srs, dst, item_count, ndx_count, (int *) crk_prq_ray_hdr
 		     , offs_ndx, sparc_ndx, limit);
    }
    else {
-      crackers(srs, dst, item_count, ndx_count, crk_prq_ray_hdr
+      crackers(srs, dst, item_count, ndx_count, (int *) crk_prq_ray_hdr
 	       , offs_ndx, sparc_ndx, limit);
    }
 }
-# ifdef obsolete
-# endif
+#endif
+
+
 /* c------------------------------------------------------------------------ */
 
-void piraq_crack_radar (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+#ifdef NOTNOW
+void piraq_crack_radar (char *srs, char *dst, int limit)
 {
-# ifdef obsolete
-   int item_count=25;
-
-   static int crk_prq_radar_hdr [][7] = {
-      {    0,    1,    1,    4,    4,    1,    0},
-      {    4,    2,    2,    1,    3,    3,    4},
-      {    6,    2,    2,    1,    1,    1,    6},
-      {    8,    2,    2,    1,    1,    1,    8},
-      {   10,    1,    1,    8,    8,    1,   10},
-      {   18,    1,    1,    1,    1,    1,   18},
-      {   19,    4,    4,    1,   23,   18,   20},
-      {   23,    4,    4,    1,    1,    1,   24},
-      {   27,    4,    4,    1,    1,    1,   28},
-      {   31,    4,    4,    1,    1,    1,   32},
-      {   35,    4,    4,    1,    1,    1,   36},
-      {   39,    4,    4,    1,    1,    1,   40},
-      {   43,    4,    4,    1,    1,    1,   44},
-      {   47,    4,    4,    1,    1,    1,   48},
-      {   51,    4,    4,    1,    1,    1,   52},
-      {   55,    4,    4,    1,    1,    1,   56},
-      {   59,    4,    4,    1,    1,    1,   60},
-      {   63,    4,    4,    1,    1,    1,   64},
-      {   67,    4,    4,    1,    1,    1,   68},
-      {   71,    4,    4,    1,    1,    1,   72},
-      {   75,    4,    4,    1,    1,    1,   76},
-      {   79,    4,    4,    1,    1,    1,   80},
-      {   83,    4,    4,    1,    1,    1,   84},
-      {   87,    4,    4,    6,    6,    1,   88},
-      {  111,    1,    1,  960,  960,    1,  112},
-   };
-# else
    int item_count=27;
 
    static int crk_prq_radar_hdr [][7] = {
@@ -377,22 +348,21 @@ void piraq_crack_radar (srs, dst, limit)
       {   95,    4,    4,    4,    4,    1,   96},
       {  111,    1,    1,  960,  960,    1,  112},
    };
-# endif
 
    if(LittleEndian) {
-      piraq_crackers(srs, dst, item_count, ndx_count, crk_prq_radar_hdr
+      piraq_crackers(srs, dst, item_count, ndx_count, (int *) crk_prq_radar_hdr
 		     , offs_ndx, sparc_ndx, limit);
    }
    else {
-      crackers(srs, dst, item_count, ndx_count, crk_prq_radar_hdr
+      crackers(srs, dst, item_count, ndx_count, (int *) crk_prq_radar_hdr
 	       , offs_ndx, sparc_ndx, limit);
    }
 }
+#endif
+
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_vold (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_vold (char *srs, char *dst, int limit)
 {
    int item_count=18;
 
@@ -417,14 +387,12 @@ void ddin_crack_vold (srs, dst, limit)
       {   70,    2,    2,    1,    1,    1,   70},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_volume_d
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_volume_d
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_radd (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_radd (char *srs, char *dst, int limit)
 {
    int item_count=53;
 
@@ -484,14 +452,12 @@ void ddin_crack_radd (srs, dst, limit)
       {  280,    1,    1,   20,   20,    1,  280},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_radar_d 
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_radar_d 
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_frib (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_frib (char *srs, char *dst, int limit)
 {
 
    int item_count=33;
@@ -532,14 +498,12 @@ void ddin_crack_frib (srs, dst, limit)
       {  184,    1,    1,   80,   80,    1,  184},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_field_radar_i
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_field_radar_i
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_parm (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_parm (char *srs, char *dst, int limit)
 {
    int item_count=30;
 
@@ -576,14 +540,12 @@ void ddin_crack_parm (srs, dst, limit)
       {  212,    4,    4,    1,    1,    1,  212},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_parameter_d
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_parameter_d
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_celv (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_celv (char *srs, char *dst, int limit)
 {
    int item_count=4;
 
@@ -594,14 +556,12 @@ void ddin_crack_celv (srs, dst, limit)
       {   12,    4,    4,    1,    1,    1,   12},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_cell_d
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_cell_d
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_cfac (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_cfac (char *srs, char *dst, int limit)
 {
    int item_count=18;
 
@@ -626,14 +586,12 @@ void ddin_crack_cfac (srs, dst, limit)
       {   68,    4,    4,    1,    1,    1,   68},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_correction_d
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_correction_d
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_rktb (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_rktb (char *srs, char *dst, int limit)
 {
    int item_count=7;
 
@@ -647,14 +605,12 @@ void ddin_crack_rktb (srs, dst, limit)
       {   24,    3,    4,    1,    1,    1,   24},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_rot_ang_table
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_rot_ang_table
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_sswbLE (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_sswbLE (char *srs, char *dst, int limit)
 {
    int item_count=17;
 
@@ -678,14 +634,12 @@ void ddin_crack_sswbLE (srs, dst, limit)
       {  100,    3,    4,   24,   24,    1,  104},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_super_SWIB
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_super_SWIB
 	    , sparc_ndx, offs_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_sswb (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_sswb (char *srs, char *dst, int limit)
 {
    int item_count=17;
 
@@ -709,14 +663,12 @@ void ddin_crack_sswb (srs, dst, limit)
       {  100,    3,    4,   24,   24,    1,  104},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_super_SWIB
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_super_SWIB
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_swib (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_swib (char *srs, char *dst, int limit)
 {
    int item_count=9;
 
@@ -732,14 +684,12 @@ void ddin_crack_swib (srs, dst, limit)
       {   36,    3,    4,    1,    1,    1,   36},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_sweepinfo_d
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_sweepinfo_d
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_ryib (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_ryib (char *srs, char *dst, int limit)
 {
    int item_count=13;
 
@@ -759,14 +709,12 @@ void ddin_crack_ryib (srs, dst, limit)
       {   40,    3,    4,    1,    1,    1,   40},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_ray_i
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_ray_i
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_asib (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_asib (char *srs, char *dst, int limit)
 {
    int item_count=20;
 
@@ -793,14 +741,12 @@ void ddin_crack_asib (srs, dst, limit)
       {   76,    4,    4,    1,    1,    1,   76},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_platform_i
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_platform_i
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void ddin_crack_qdat (srs, dst, limit)
-  char *srs, *dst;
-  int limit;
+void ddin_crack_qdat (char *srs, char *dst, int limit)
 {
    int item_count=8;
 
@@ -815,16 +761,14 @@ void ddin_crack_qdat (srs, dst, limit)
       {   40,    4,    4,    4,    4,    1,   40},
    };
 
-   crackers(srs, dst, item_count, ndx_count, crk_qparamdata_d
+   crackers(srs, dst, item_count, ndx_count, (int *) crk_qparamdata_d
 	    , offs_ndx, sparc_ndx, limit);
 }
 /* c------------------------------------------------------------------------ */
 
-void crackers(srs, dst, item_count, ndx_cnt, tbl, srs_ndx, dst_ndx, limit)
-  char *srs, *dst;
-  const int item_count, ndx_cnt;
-  int *tbl;
-  int srs_ndx, dst_ndx, limit;
+void crackers(char *srs, char *dst,
+              int item_count, int ndx_cnt, int *tbl,
+              int srs_ndx, int dst_ndx, int limit)
 {
    int itm, *row = tbl, offs;
    char *ss=srs, *tt=dst;
@@ -886,10 +830,7 @@ void crackers(srs, dst, item_count, ndx_cnt, tbl, srs_ndx, dst_ndx, limit)
 /* c------------------------------------------------------------------------ */
 
 void piraq_crackers
-(srs, dst, item_count, ndx_cnt, tbl, srs_ndx, dst_ndx, limit)
-  char *srs, *dst;
-  int item_count, ndx_cnt, *tbl;
-  int srs_ndx, dst_ndx, limit;
+(char *srs, char *dst, int item_count, int ndx_cnt, int *tbl, int srs_ndx, int dst_ndx, int limit)
 {
    int itm, *row = tbl;
    char *ss=srs, *tt=dst;
@@ -931,9 +872,7 @@ void piraq_crackers
 }
 /* c------------------------------------------------------------------------ */
 
-void swack_short(ss, tt, nn)
-  char *ss, *tt;
-  int nn;
+void swack_short(char *ss, char *tt, int nn)
 {
    for(; nn--;) {
       *tt++ = *(ss+1);
@@ -943,17 +882,17 @@ void swack_short(ss, tt, nn)
 }
 /* c------------------------------------------------------------------------ */
 
-void swack2(ss, tt)
-  char *ss, *tt;
+#ifdef NOTNOW
+void swack2(char *ss, char *tt)
 {
    *tt++ = *(ss+1);
    *tt = *ss;
 }
+#endif
+
 /* c------------------------------------------------------------------------ */
 
-void swack_long(ss, tt, nn)
-  char *ss, *tt;
-  int nn;
+void swack_long(char *ss, char *tt, int nn)
 {
    for(; nn--;) {
       *tt++ = *(ss+3);
@@ -965,8 +904,7 @@ void swack_long(ss, tt, nn)
 }
 /* c------------------------------------------------------------------------ */
 
-void swack4(ss, tt)
-  char *ss, *tt;
+void swack4(char *ss, char *tt)
 {
    *tt++ = *(ss+3);
    *tt++ = *(ss+2);
@@ -975,9 +913,7 @@ void swack4(ss, tt)
 }
 /* c------------------------------------------------------------------------ */
 
-void swack_double(ss, tt, nn)
-  char *ss, *tt;
-  int nn;
+void swack_double(char *ss, char *tt, int nn)
 {
    for(; nn--;) {
       *tt++ = *(ss+7);
@@ -1004,8 +940,8 @@ int swap4( char *ov )		/* swap integer*4 */
 }
 /* c------------------------------------------------------------------------ */
 
-short sig_swap2( ov )		/* swap integer*2 */
-  twob *ov;
+#ifdef NOTNOW
+static short sig_swap2( twob *ov )		/* swap integer*2 */
 {
     union {
 	short newval;
@@ -1014,14 +950,13 @@ short sig_swap2( ov )		/* swap integer*2 */
     u.nv[1] = ov->one; u.nv[0] = ov->two;
     return(u.newval);
 }
-/* c------------------------------------------------------------------------ */
+#endif
 
 /* c------------------------------------------------------------------------ */
 
-int ffb_read( fin, buf, count )
-    FILE * fin;
-  int count;
-  char *buf;
+/* c------------------------------------------------------------------------ */
+
+int ffb_read( FILE *fin, char *buf, int count )
 {
     /* fortran-binary read routine
      */
@@ -1064,10 +999,7 @@ int ffb_read( fin, buf, count )
 }
 /* c------------------------------------------------------------------------ */
 
-int ffb_write( fout, buf, count )
-     FILE * fout;
-     int count;
-     char *buf;
+int ffb_write(FILE *fout, char *buf, int count )
 {
     /* fortran-binary write routine
      */
@@ -1093,9 +1025,7 @@ int ffb_write( fout, buf, count )
 }
 /* c------------------------------------------------------------------------ */
 
-int fb_write( fout, buf, count )
-  int fout, count;
-  char *buf;
+int fb_write( int fout, char *buf, int count )
 {
     /* fortran-binary write routine
      */
@@ -1130,9 +1060,7 @@ int fb_write( fout, buf, count )
 }
 /* c------------------------------------------------------------------------ */
 
-int fb_read( fin, buf, count )
-  int fin, count;
-  char *buf;
+int fb_read( int fin, char *buf, int count )
 {
     /* fortran-binary read routine
      */
@@ -1174,8 +1102,7 @@ int fb_read( fin, buf, count )
 }
 /* c------------------------------------------------------------------------ */
 
-int dd_tokens(att, str_ptrs)
-  char *att, *str_ptrs[];
+int dd_tokens(char *att, char *str_ptrs[])
 {
     int nargs=0;
     char *b=att, *dlims=" \t\n"; /* blank, tab, and new line */
@@ -1187,8 +1114,7 @@ int dd_tokens(att, str_ptrs)
 }
 /* c------------------------------------------------------------------------ */
 
-int dd_tokenz(att, str_ptrs, dlims)
-  char *att, *str_ptrs[], *dlims; /* token delimiters */
+int dd_tokenz(char *att, char *str_ptrs[], char *dlims)
 {
     int nargs=0;
     char *b=att;
@@ -1224,8 +1150,7 @@ struct solo_str_mgmt {
 /* c------------------------------------------------------------------------ */
 
 struct solo_list_mgmt *
-solo_malloc_list_mgmt(sizeof_entries)
-  int sizeof_entries;
+solo_malloc_list_mgmt(int sizeof_entries)
 {
     struct solo_list_mgmt *slm;
 
@@ -1236,8 +1161,7 @@ solo_malloc_list_mgmt(sizeof_entries)
 }
 /* c------------------------------------------------------------------------ */
 
-void solo_unmalloc_list_mgmt(slm)
-  struct solo_list_mgmt *slm;
+void solo_unmalloc_list_mgmt(struct solo_list_mgmt *slm)
 {
     int ii;
 
@@ -1251,8 +1175,7 @@ void solo_unmalloc_list_mgmt(slm)
 }
 /* c------------------------------------------------------------------------ */
 
-void solo_reset_list_entries(which)
-  struct solo_list_mgmt *which;
+void solo_reset_list_entries(struct solo_list_mgmt *which)
 {
     int ii;
 
@@ -1266,10 +1189,7 @@ void solo_reset_list_entries(which)
 }
 /* c------------------------------------------------------------------------ */
 
-void solo_add_list_entry(which, entry, len)
-  struct solo_list_mgmt *which;
-  char *entry;
-  int len;
+void solo_add_list_entry(struct solo_list_mgmt *which, char *entry, int len)
 {
     int ii;
     char *a, *c, *str_terminate();
@@ -1304,9 +1224,7 @@ void solo_add_list_entry(which, entry, len)
 /* c------------------------------------------------------------------------ */
 
 char *
-solo_list_entry(which, entry_num)
-  struct solo_list_mgmt *which;
-  int entry_num;
+solo_list_entry(struct solo_list_mgmt *which, int entry_num)
 {
     char *c;
 
@@ -1322,9 +1240,7 @@ void solo_sort_strings(char **, int);
 
 /* c------------------------------------------------------------------------ */
 
-int get_tmp_swp_files(dir, lm)
-  char *dir;
-  struct solo_list_mgmt *lm;
+int get_tmp_swp_files(char *dir, struct solo_list_mgmt *lm)
 {
     /* tries to create a list of files in a directory
      */
@@ -1364,10 +1280,10 @@ int get_tmp_swp_files(dir, lm)
 }
 /* c------------------------------------------------------------------------ */
 
-int generic_sweepfiles( dir, lm, prefix, suffix, not_this_suffix )
-  char *dir, *prefix, *suffix;
-  struct solo_list_mgmt *lm;
-  int not_this_suffix;
+int generic_sweepfiles( char *dir,
+                        struct solo_list_mgmt *lm,
+                        char *prefix,
+                        char *suffix, int not_this_suffix )
 {
     /* tries to create a list of files in a directory
      */
@@ -1430,11 +1346,7 @@ int generic_sweepfiles( dir, lm, prefix, suffix, not_this_suffix )
 }
 /* c------------------------------------------------------------------------ */
 
-char *solo_modify_list_entry(which, entry, len, entry_num)
-  struct solo_list_mgmt *which;
-  char *entry;
-  int len;
-  int entry_num;
+char *solo_modify_list_entry(struct solo_list_mgmt *which, char *entry, int len, int entry_num)
 {
     char *a, *c, *str_terminate();
 
@@ -1458,9 +1370,7 @@ char *solo_modify_list_entry(which, entry, len, entry_num)
 }
 /* c------------------------------------------------------------------------ */
 
-int get_swp_files(dir, lm)
-  char *dir;
-  struct solo_list_mgmt *lm;
+int get_swp_files(char *dir, struct solo_list_mgmt *lm)
 {
     /* tries to create a list of files in a directory
      */
@@ -1499,9 +1409,7 @@ int get_swp_files(dir, lm)
 }
 /* c------------------------------------------------------------------------ */
 
-void solo_sort_strings(sptr, ns)
-  char **sptr;
-  int ns;
+void solo_sort_strings(char **sptr, int ns)
 {
     int ii, jj;
     char *keep;
@@ -1518,9 +1426,7 @@ void solo_sort_strings(sptr, ns)
 }
 /* c------------------------------------------------------------------------ */
 
-int dd_hrd16_uncompressx( ss, dd, flag, empty_run, wmax )
-  short *ss, *dd;
-  int flag, *empty_run, wmax;
+int dd_hrd16_uncompressx( short *ss, short *dd, int flag, int *empty_run, int wmax )
 {
     /*
      * routine to unpacks actual data assuming MIT/HRD compression where:
@@ -1564,9 +1470,8 @@ int dd_hrd16_uncompressx( ss, dd, flag, empty_run, wmax )
 }
 /* c------------------------------------------------------------------------ */
 
-int dd_hrd16LE_uncompressx( ss, dd, flag, empty_run, wmax )
-  unsigned short *ss, *dd;
-  int flag, *empty_run, wmax;
+int dd_hrd16LE_uncompressx( unsigned short *ss, unsigned short *dd,
+                            int flag, int *empty_run, int wmax )
 {
     /*
      * routine to unpacks actual data assuming MIT/HRD compression where:
@@ -1620,9 +1525,7 @@ int dd_hrd16LE_uncompressx( ss, dd, flag, empty_run, wmax )
 }
 /* c------------------------------------------------------------------------ */
 
-int dd_compress( src, dst, flag, n )
-  unsigned short *src, *dst, flag;
-  int n;
+int dd_compress( unsigned short *src, unsigned short *dst, unsigned short flag, int n )
 {
     /* implement hrd compression of 16-bit values
      * and return the number of 16-bit words of compressed data
@@ -1715,8 +1618,7 @@ int dd_compress( src, dst, flag, n )
 /* c------------------------------------------------------------------------ */
 
 int
-dd_scan_mode(str)
-  char *str;
+dd_scan_mode(char *str)
 {
     char uc_scan_mode[16];
     int max_scan_mode = 10, ii, nn;
@@ -1742,9 +1644,7 @@ dd_scan_mode(str)
 /* c------------------------------------------------------------------------ */
 
 char *
-dd_scan_mode_mne(scan_mode, str)
-  int scan_mode;
-  char *str;
+dd_scan_mode_mne(int scan_mode, char *str)
 {
     int max_scan_mode = 10;
 
@@ -1757,9 +1657,7 @@ dd_scan_mode_mne(scan_mode, str)
 /* c------------------------------------------------------------------------ */
 
 char *
-dd_radar_type_ascii(radar_type, str)
-  int radar_type;
-  char *str;
+dd_radar_type_ascii(int radar_type, char *str)
 {
     int max_radar_types = 10;
     static char *Rtypes[] = { "GROUND", "AIR_FORE", "AIR_AFT", "AIR_TAIL"
@@ -1775,8 +1673,7 @@ dd_radar_type_ascii(radar_type, str)
 }
 /* c------------------------------------------------------------------------ */
 
-char *slash_path( dst, srs )
-  char *dst, *srs;
+char *slash_path( char *dst, char *srs )
 {
     int n;
 
@@ -1809,8 +1706,7 @@ int d_inSector( double ang, double ang1, double ang2)
 
 /* c------------------------------------------------------------------------ */
 
-double d_angdiff( a1, a2 )
-  double a1, a2;
+double d_angdiff(double a1, double a2)
 {
     double d=a2-a1;
 
@@ -1822,9 +1718,7 @@ double d_angdiff( a1, a2 )
 }
 /* c------------------------------------------------------------------------ */
 
-double
-dd_earthr(lat)
-  double lat;
+double dd_earthr(double lat)
 {
     static double *earth_r=NULL;
 

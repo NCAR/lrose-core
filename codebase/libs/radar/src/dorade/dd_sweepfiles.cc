@@ -1777,6 +1777,9 @@ enlarge_rotang_table() {
 int TimeSpanDir( char * ref_dir, struct solo_list_mgmt * rlist )
 {
     static DD_File_names * ddfn = NULL;
+    if(!ddfn ) {
+      ddfn = new DD_File_names();
+    }
     int nr = get_swp_files( ref_dir, rlist );
     if( nr < 2 )
       { return 0; }
