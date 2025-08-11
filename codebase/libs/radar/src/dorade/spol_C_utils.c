@@ -34,6 +34,7 @@
 
 # include <radar/dorade/dorade_includes.h>
 
+
 # ifdef BYTE_ORDER
 
 # if BYTE_ORDER == LITTLE_ENDIAN
@@ -77,14 +78,15 @@ static void crackers(char *srs, char *dst,
                      int srs_ndx, int dst_ndx, int limit);
 
 
-static void swack_short(char *ss, char *tt, int nn);
-static void swack_long(char *ss, char *tt, int nn);
-static void swack4(char *ss, char *tt);
 static void swack_double(char *ss, char *tt, int nn);
   
+extern void swack_long( char *, char *, int );
+extern void swack_short( char *, char *, int );
+extern void swack4( char *, char * );
+extern void swack2( char *, char * );
+
 #ifdef NOTNOW
 static short sig_swap2( twob *ov );
-static void swack2(char *ss, char *tt);
 static void piraq_crack_header(char *srs, char *dst, int limit);
 static void piraq_crack_radar(char *srs, char *dst, int limit);
 static void piraq_crackers(char *srs, char *dst,
@@ -882,13 +884,11 @@ void swack_short(char *ss, char *tt, int nn)
 }
 /* c------------------------------------------------------------------------ */
 
-#ifdef NOTNOW
 void swack2(char *ss, char *tt)
 {
    *tt++ = *(ss+1);
    *tt = *ss;
 }
-#endif
 
 /* c------------------------------------------------------------------------ */
 
