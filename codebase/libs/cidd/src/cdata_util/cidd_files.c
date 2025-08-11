@@ -35,6 +35,7 @@
 
 #include <time.h>
 #include <dirent.h>
+#include <toolsa/str.h>
 #include <toolsa/utim.h>
 #include <toolsa/file_io.h>
 #include <cidd/cdata_util.h>
@@ -58,14 +59,14 @@ FILE *open_data_time(long time,
 {
   int i;
   char file_name[1024];
-  char path_name[1024];
-  char format_str[32];
+  char path_name[2048];
+  char format_str[128];
   struct tm *tm;
   FILE *file = NULL;
 
   tm = gmtime(&time);
   strcpy(format_str,"%Y%m%d/%H%M%S."); /* Build the file name format string */
-  strncat(format_str,suffix,32);       /* Add the file suffix */
+  strncat(format_str,suffix,127);       /* Add the file suffix */
 
 
   strftime(file_name,128,format_str,tm);  /* build the file name */
@@ -180,7 +181,7 @@ int find_all_data_times(long **time_ptr,
 
         if((ext_ptr = strchr(dp->d_name,'.')) == NULL) continue; /* find the first dot */
         ext_ptr++; /* copy what's after it into a temp extension string */
-        strncpy(ext_string,ext_ptr,64);
+        STRncopy(ext_string,ext_ptr,64);
         /* Replace the next dot wiith a null - Avoids comparing .Z or.gz extension modifiers */
         if((dot_ptr = strchr(ext_string,'.')) != NULL) *dot_ptr = '\0';
         if(strcmp(ext_string,file_suffix)) continue;

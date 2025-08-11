@@ -48,7 +48,6 @@
 #include <toolsa/str.h>
 #include <toolsa/port.h>
 
-extern time_t time();
 #define DIR_NAME_LEN 8
 
 

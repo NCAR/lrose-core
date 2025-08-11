@@ -274,7 +274,7 @@ int cdata2_read(cdata2_index_t *index,char *field_name)
 
     /* assemble the whole url */
     STRncopy(url_buf, index->url,CDATA_URL_BUF_SIZE);
-    strncat(url_buf,field_name,CDATA_URL_BUF_SIZE);
+    strncat(url_buf, field_name, CDATA_URL_BUF_SIZE - 1);
 
     if (get_data_v2(&index->command,
 		 &index->reply,
