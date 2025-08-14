@@ -1,0 +1,413 @@
+/*********************************************************
+ * parameter definitions for Radx2Awips
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * August 2025
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Converts Radx-style files to AWIPS NetCDF polar files";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is _latest_data_info file available?";
+  p_help = "If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.";
+} latest_data_info_avail;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to recurse to subdirectories while looking for new files.";
+  p_help = "If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE."; 
+} search_recursively;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Maximum depth for recursive directory scan.";
+  p_help = "Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.";
+} max_recursion_depth;
+
+paramdef int {
+  p_default = 2;
+  p_min = 1;
+  p_descr = "Sleep time between checking directory for input - secs.";
+  p_help = "If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.";
+} wait_between_checks;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "File quiescence when checking for files - secs.";
+  p_help = "This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.";
+} file_quiescence;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} search_ext;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name sub-string.";
+  p_help = "If set, only files with names containing this sub-string will be processed.";
+} search_substr;
+
+commentdef {
+  p_header = "READ OPTIONS";
+}
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum elevation angle accepted - degrees.";
+} min_elevation_deg;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Maximum elevation angle accepted - degrees.";
+} max_elevation_deg;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to trip surveillance sweeps so that they only cover 360 degrees.";
+  p_help = "Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.";
+} trim_surveillance_sweeps_to_360deg;
+
+commentdef {
+  p_header = "Output NetCDF details";
+}
+
+paramdef string {
+  p_default = "Radial";
+  p_descr = "Name of radial dimension.";
+} radial_dim_name;
+
+paramdef string {
+  p_default = "Gate";
+  p_descr = "Name of gate dimension.";
+} gate_dim_name;
+
+paramdef string {
+  p_default = "Azimuth";
+  p_descr = "Name of azimuth variable.";
+} azimuth_var_name;
+
+paramdef string {
+  p_default = "Elevation";
+  p_descr = "Name of elevation variable.";
+} elevation_var_name;
+
+paramdef string {
+  p_default = "Time";
+  p_descr = "Name of time variable.";
+} time_var_name;
+
+paramdef string {
+  p_default = "StartRange";
+  p_descr = "Name of start range variable.";
+} start_range_var_name;
+
+paramdef string {
+  p_default = "millimeters";
+  p_descr = "Units of start range variable.";
+} start_range_units;
+
+paramdef string {
+  p_default = "GateWidth";
+  p_descr = "Name of gate width variable.";
+} gate_width_var_name;
+
+paramdef string {
+  p_default = "millimeters";
+  p_descr = "Units of gate width variable.";
+} gate_width_units;
+
+paramdef string {
+  p_default = "Latitude";
+  p_descr = "Name of latitude global attribute.";
+} latitude_attribute_name;
+
+paramdef string {
+  p_default = "Longitude";
+  p_descr = "Name of longitude global attribute.";
+} longitude_attribute_name;
+
+paramdef string {
+  p_default = "Height";
+  p_descr = "Name of height global attribute.";
+} height_attribute_name;
+
+paramdef string {
+  p_default = "RadarName";
+  p_descr = "Name of radar name global attribute.";
+} radar_name_attribute_name;
+
+commentdef {
+  p_header = "SPECIFY FIELD NAMES AND OUTPUT ENCODING";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set the field names and output encoding";
+  p_help = "If false, all fields will be used.";
+} set_output_fields;
+
+typedef struct {
+  string input_field_name; 
+  string output_field_name; 
+  string output_units;
+  float missingValue;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    {
+      "DBZ",
+      "Reflectivity",
+      "dBZ",
+      -99900.0
+    }
+    ,
+    {
+      "VEL", 
+      "Velocity", 
+      "MetersPerSecond",
+      -99900.0
+    }
+    ,
+    {
+      "WIDTH", 
+      "SpectrumWidth", 
+      "MetersPerSecond",
+      -99900.0
+    }
+  };
+  p_descr = "Output field details.";
+  p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. If the output_field_name is empty the input name will be used. It the output_units is empty the input units will be used.";
+} output_fields[];
+
+commentdef {
+  p_header = "OPTION TO OVERRIDE RADAR LOCATION";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the radar location.";
+  p_help = "If true, the location will be overridden. If not, the location in the input file will be used.";
+} override_radar_location;
+
+paramdef double {
+  p_default = -999;
+  p_descr = "Radar latitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_latitude_deg;
+
+paramdef double {
+  p_default = -999;
+  p_descr = "Radar longitude (deg).";
+  p_help = "See override_radar_location.";
+} radar_longitude_deg;
+
+paramdef double {
+  p_default = -999;
+  p_descr = "Radar altitude (meters).";
+  p_help = "See override_radar_location.";
+} radar_altitude_meters;
+
+commentdef {
+  p_header = "OPTION TO ADD USER-SPECIFIED GLOBAL ATTRIBUTES to output file";
+  p_text = "Only applies to CfRadial output format.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add user-specified global attributes to output file.";
+  p_help = "Only applies to CfRadial files. See below for details.";
+} add_user_specified_global_attributes;
+
+typedef enum {
+  ATTR_STRING,
+  ATTR_INT,
+  ATTR_DOUBLE,
+  ATTR_INT_ARRAY,
+  ATTR_DOUBLE_ARRAY
+} attr_type_t;
+
+typedef struct {
+  string name; 
+  attr_type_t attrType; 
+  string val;
+} attr_t;
+
+paramdef struct attr_t {
+  p_default = {
+    { name = "attr_string",
+      attrType = ATTR_STRING,
+      val = "user-attribute"
+    }
+    ,
+    { name = "attr_int",
+      attrType = ATTR_INT,
+      val = "99"
+    }
+    ,
+    { name = "attr_double",
+      attrType = ATTR_DOUBLE,
+      val = "99.99"
+    }
+    ,
+    { name = "attr_int_array",
+      attrType = ATTR_INT_ARRAY,
+      val = "1,2,3,4,5"
+    }
+    ,
+    { name = "attr_double_array",
+      attrType = ATTR_DOUBLE_ARRAY,
+      val = "1.1,2.2,3.3,4.4,5.5"
+    }
+  };
+  p_descr = "User-defined global attributes.";
+  p_help = "Applies if 'add_user_specified_global_attributes' is true. Array attributes are comma-delimited.";
+} user_defined_global_attributes[];
+
+commentdef {
+  p_header = "OUTPUT COMPRESSION";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compress data fields on output.";
+  p_help = "Applies to netCDF and Dorade. UF does not support compression.";
+} output_compressed;
+
+commentdef {
+  p_header = "OUTPUT DIRECTORY AND FILE NAME";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
+typedef enum {
+  START_AND_END_TIMES,
+  START_TIME_ONLY,
+  END_TIME_ONLY,
+  SPECIFY_FILE_NAME
+} filename_mode_t;
+
+paramdef enum filename_mode_t {
+  p_default = START_AND_END_TIMES;
+  p_descr = "Mode for computing output file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name. SPECIFY_FILE_NAME: file of this name will be written to output_dir.";
+} output_filename_mode;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Optional prefix for output filename.";
+  p_help = "If empty, the standard prefix will be used. Only applies to CfRadial files. Standard prefix is 'cfrad.'";
+} output_filename_prefix;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Optional suffix for output filename.";
+  p_help = "If not empty, the suffix will be inserted immediately prior to the extension.";
+} output_filename_suffix;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include the instrument name in the file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.";
+} include_radar_name_in_file_name;
+
+paramdef string {
+  p_default = "cfradial.test.nc";
+  p_descr = "Specified name of output file.";
+  p_help = "Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.";
+} output_filename;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out _latest_data_info files.";
+  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
+} write_latest_data_info;
+
