@@ -1,0 +1,3005 @@
+commit 13be47d8d58def93df30c0663f30492085da870c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Aug 11 08:24:54 2025 -0600
+
+    apps/radar/Lucid/Makefile - removing X11 on link line
+
+commit 876fd4bdc206b05d1e79a865604fa1454a9d73c0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Aug 11 08:24:26 2025 -0600
+
+    apps/radar/Lucid/Makefile - removing X11 on link line
+
+commit c06911e03197cc3b08252c0d3853723a989788d6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 21:43:04 2025 -0600
+
+    HawkEdit/BoundaryPointEditor.cc - adding test QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
+
+commit 45b42385637fac2c079a70e62498519d3c4e5ba8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 21:34:13 2025 -0600
+
+    In qt, adding check for version 6.4 for deprecated isValidColor() call
+
+commit 08143f01ff2d0c2e7c1cfe8017865ddd63720a67
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 21:10:02 2025 -0600
+
+    libs/radar - cleaning up old C K&R interfaces
+
+commit 52df9d9ba105793269de34f66c9e65cf287f6bab
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 21:03:05 2025 -0600
+
+    libs/toolsa/ttape.c - cleaning up old C K&R interfaces
+
+commit d168724414b278c9a1f2655e611b6625b430ef48
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 20:58:39 2025 -0600
+
+    libs/rapformats - cleaning up old C K&R interfaces
+
+commit e3eec22f150190e037b9ade337c0c4d1d50ad712
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 20:53:45 2025 -0600
+
+    libs/rapformats - cleaning up old C K&R interfaces
+
+commit c1e8b297677df0d23ae3056f97fe6a1f6861e37e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 20:49:25 2025 -0600
+
+    libs/radar/dorade - cleaning up old C code to modern interfaces
+
+commit dda480b13f4954bef4403de2e875da889781d682
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 20:43:54 2025 -0600
+
+    libs/radar/dorade - cleaning up old C code to modern interfaces
+
+commit e497a8f5195372ebc1aa3bb7515bc4feb5e3b8f7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 19:41:10 2025 -0600
+
+    libs/cdata_util - cleaning up compiler errors for fedora 42
+
+commit 23a3a4997a3f612d7752e837b9ead49616d2d394
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 15:33:24 2025 -0600
+
+    apps/radar/Lucid/MdvReader.cc - adding include for <cmath>
+
+commit cfa1d4b2ab015fe6f6f2f70031f6ada6718c64c7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 15:26:22 2025 -0600
+
+    apps/radar/HawkEdit - m_buffer.byteCount() deprecated, using m_buffer.sizeInBytes()
+
+commit 832cf8f9c785d98c57e8825a2bbed940f1df8419
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 14:46:11 2025 -0600
+
+    apps/titan/Tstorms2NetCDF - testing
+
+commit 1d5f8ab511cabf67219d2b437fe413e1306b4377
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 13:48:34 2025 -0600
+
+    libs/titan/TitanData class - adding 'inline' keyword to constexpr declarations
+
+commit 1a13d0d9cb9d7078be707828d16ca045e64df20f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 13:39:07 2025 -0600
+
+    apps/radar/IpsEye/FieldColorController - fixing deprecated use of isValidColor()
+
+commit d963c9a5c89e41d96e714a41de3117aadf57d17a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 12:32:29 2025 -0600
+
+    build/cmake/createCMakeLists.py - reverting to c++11 for qt5 case
+
+commit 0ca887b850a21d892924e5d998bc9df711022727
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 12:30:09 2025 -0600
+
+    apps/titan/PrintTitanFiles - fixing bug in use with legacy files
+
+commit ec3e21dc878b921c70f13ae9e7eb2e5e0622900f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Aug 10 12:00:41 2025 -0600
+
+    libs/titan/TitanFile - changing from using std::filesystem to toolsa/Path to avoid dependency on C++17 std
+
+commit 6e5ee377bb29d0cc478f49370d805a4569834486
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Aug 9 14:33:50 2025 -0600
+
+    build/make_include/lrose_make.OSX_LROSE - adding sanitizer flags
+
+commit e9aefca7ca6cb9afd2f5ef36aa371889c3f62b0c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Aug 9 14:09:01 2025 -0600
+
+    apps/titan/Rview/parse_args - adding _usage()
+
+commit 67cf976755dfec9f4f902cd5bfa822488126a56e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Aug 9 12:28:45 2025 -0600
+
+    apps/radar/src/Lucid/MdvReader.cc - fixing ambiguous call to QDebug
+
+commit b23dac217347cf94852978a25b2203af4194e370
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Aug 9 12:03:37 2025 -0600
+
+    createCMakeLists.py - c++11 -> c++17
+
+commit 80ce31a03eed0f88e877fdd2bdab231a0c36c160
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Aug 9 12:02:49 2025 -0600
+
+    createCMakeLists.py - c++11 -> c++17
+
+commit 10359dcf7e9161ca02f87344309b34e97b82b816
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Aug 9 11:37:52 2025 -0600
+
+    apps/radar/Lucid - adding <cmath> includes as appropriate
+
+commit 92a37e5e99722a32cf508519c8a920c1de398eda
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Aug 8 23:32:53 2025 -0600
+
+    apps/radar/HawkEdit - fixing compiler warnings, commenting out unused vars
+
+commit d042c42d78f670a4bb3a472a7e22be97744f6e1d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Aug 8 23:05:35 2025 -0600
+
+    apps/radar/HawkEdit - fixing compiler warnings, commenting out unused vars
+
+commit 8b071685e52a5282c87810a2c76ea06d57a1e531
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Aug 8 22:49:45 2025 -0600
+
+    apps/radar/HawkEdit - cleaning up compiler warnings
+
+commit 657771dd46db5c5841f68cc78c06a50cd0a030e9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Aug 8 22:44:57 2025 -0600
+
+    apps/radar/HawkEdir - isValidColor() -> _isValidColorName()
+
+commit 13a5c4ff971ea87602b7b0bca08375a5d9a731b4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Aug 8 10:38:28 2025 -0600
+
+    apps/radar/Lucid - fixing default zoom world coords
+
+commit 719270a574d711fd0e842ea6384fda626f550c60
+Merge: dc27d82b2 1b4fe4bfb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Aug 8 10:30:31 2025 -0600
+
+    Merge branch 'master' of github.com:ncar/lrose-core
+
+commit dc27d82b228a533fed5b30a3f46f3f36be9990de
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Aug 8 10:30:17 2025 -0600
+
+    apps/radar/Lucid - fixing default zoom world coords
+
+commit 1b4fe4bfbb922c99a57a5d07f2c33c455e73d01a
+Merge: b801c8653 f0fbb2cc3
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Aug 7 21:52:45 2025 -0600
+
+    Merge branch 'master' of github.com:ncar/lrose-core
+
+commit b801c8653d29b61ba47342358d2e53f5c490e009
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Aug 7 21:52:21 2025 -0600
+
+    Copying default Makefile to makefile.lrose_core for apps
+
+commit f0fbb2cc3a32993017131e423814881f2a2d0278
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Aug 7 14:35:22 2025 -0600
+
+    apps/radar/HawkEdit - TimeNavController and TimeNavModel - fixing calls to getArchiveFileList so that it returns the vector, rather than just a reference to a local variable
+
+commit 24437bc1416b4b6ffd00e834a5ca15ee28a9c665
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Aug 7 14:13:23 2025 -0600
+
+    Updating createCMakeLists.py to handle tdrp singleton
+
+commit 0d3a88dd340cd12927aead78a9d1b45e8360c59f
+Merge: 982573ca1 1f3bb68b0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Aug 7 07:29:11 2025 -0600
+
+    Merge branch 'master' of github.com:ncar/lrose-core
+
+commit 982573ca1e6a4d4b129ff5ec4dc7c1ef469838e0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Aug 7 07:28:56 2025 -0600
+
+    Adding Lucid and EccoStats to the CmakeLists
+
+commit 1f3bb68b011533e26951549f4498ad8513d9683e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 6 11:26:25 2025 -0600
+
+    apps/titan/Rview - adding circular node icons when plotting vectors
+
+commit e84e9af044d86d65c5dad29d8103aa8bdd53ae8b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Aug 6 10:27:00 2025 -0600
+
+    libs/titan/src/file_io/TitanStormFile.cc - in w+ mode for opening files, add check that dir exists
+
+commit 3e920ce001344403396b9ba0817dc434f4739b3e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Aug 5 17:22:17 2025 -0600
+
+    Adding Tstorms2NetCDF to cmake build
+
+commit 9506b47cb7a1e53f9f3b48c71d2b304f4b862291
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Aug 4 14:13:09 2025 -0600
+
+    apps/Radx/RadxConvert - adding option to limit censoring to within elevation limits
+
+commit 6f83322fa2c37c730fdf3125ef1d322538443e1f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Aug 4 11:08:09 2025 -0600
+
+    apps/Radx/RadxConvert - testing adding SNR field from DBZ
+
+commit 03cd78072c07ebc8f3195c27848a3a566c989571
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Aug 4 10:19:32 2025 -0600
+
+    apps/Radx/RadxConvert - adding option to compute SNR from DBZ
+
+commit d8ef4277f658f32d83b9401225c45921fa547b39
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Aug 1 17:21:03 2025 -0600
+
+    Updating scripts/runas
+
+commit 10c7b4db01a8d27d6fc8cb201582b67ede52f981
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Aug 1 13:56:49 2025 -0600
+
+    apps/titan/Titan - turning off file locking in archive mode
+
+commit a5a2bd12cbffb4f3b5bae657d3f510017b7c6703
+Author: dixon <dixon@ucar.edu>
+Date:   Thu Jul 31 15:14:12 2025 -0600
+
+    running EccoStats for Titan censoring
+
+commit cd07331d13edd4b98e4b2aa2fcd5b2213777c7ed
+Author: dixon <dixon@ucar.edu>
+Date:   Thu Jul 31 15:07:03 2025 -0600
+
+    apps/radar/EccoStats - adding titan masking
+
+commit d2d44479612426036bed9ba58ace0ce46cdfd5c8
+Author: dixon <dixon@ucar.edu>
+Date:   Thu Jul 31 14:54:04 2025 -0600
+
+    apps/radar/EccoStats - adding option to expand titan storms
+
+commit fb712197f60ed764bd0ca80c9f57416abd54081a
+Author: dixon <dixon@ucar.edu>
+Date:   Thu Jul 31 09:41:59 2025 -0600
+
+    apps/radar/EccoStats - working on adding Titan masking
+
+commit 53fe127a9ad374043456a44f882ab28045a82685
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 30 19:21:15 2025 -0600
+
+    apps/radar/EccoStats - working on writing Titan mask
+
+commit 1ad0fb51aeecbf7cc6daf5e820518b010c527a39
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 30 19:17:05 2025 -0600
+
+    apps/radar/EccoStats - working on titan mask
+
+commit 121e28b5565158f155b03f4b2d1e891226febf92
+Author: dixon <dixon@ucar.edu>
+Date:   Wed Jul 30 17:53:39 2025 -0600
+
+    apps/radar/EccoStats - adding Titan censoring - writing mask file
+
+commit 7439902b33759ae834d165287a14ae13d70774fb
+Author: dixon <dixon@ucar.edu>
+Date:   Wed Jul 30 17:48:15 2025 -0600
+
+    apps/radar/EccoStats - adding Titan censoring - writing mask file
+
+commit 200814a46209e75fbed92d4bbd7059966ea050bc
+Author: dixon <dixon@ucar.edu>
+Date:   Wed Jul 30 15:52:13 2025 -0600
+
+    apps/radar/EccoStats - adding Titan censoring
+
+commit 6c14d4da2e264a9f1e532d3495a6a08a9e4d890f
+Author: dixon <dixon@ucar.edu>
+Date:   Wed Jul 30 11:29:04 2025 -0600
+
+    apps/radar/EccoStats - adding Titan storm and track data for censoring
+
+commit ea1164c401c46d2def73cb50014109caf22082a6
+Author: dixon <dixon@ucar.edu>
+Date:   Tue Jul 29 18:02:42 2025 -0600
+
+    apps/radar/EccoStats - adding titan censoring
+
+commit 62d7cb18c50d9de3cf3b9e81e34ef8a72757f920
+Author: dixon <dixon@ucar.edu>
+Date:   Tue Jul 29 17:38:57 2025 -0600
+
+    apps/radar/EccoStats - adding titan censoring
+
+commit 5faab196a7f9f979ebd3d696a7823176e792d48b
+Author: dixon <dixon@ucar.edu>
+Date:   Tue Jul 29 17:27:56 2025 -0600
+
+    libs/titan/TitanFile - updating comments
+
+commit 5b6a99ca0af41b62b6898c11d90c02478e95607f
+Author: dixon <dixon@ucar.edu>
+Date:   Tue Jul 29 15:15:06 2025 -0600
+
+    libs/Mdv/MdvxProj - updating operator== to use fabs(diff) instead of absolute equality
+
+commit 26df2d8fdb43f2011c9d381cf6da8a409e48f15e
+Author: dixon <dixon@ucar.edu>
+Date:   Tue Jul 29 15:12:35 2025 -0600
+
+    libs/euclid/PjgMath - updating operator== to use fabs(diff) instead of absolute equality
+
+commit 091c3ad56c7ea5ba6dd5bd584cee65bb93bbfd9a
+Author: dixon <dixon@ucar.edu>
+Date:   Tue Jul 29 14:56:38 2025 -0600
+
+    libs/Mdv/MdvxProj - updating operator== to use fabs(diff) instead of absolute equality
+
+commit 2da322edb2a789af89d1586977f733d83d8862ed
+Author: dixon <dixon@ucar.edu>
+Date:   Mon Jul 28 17:37:22 2025 -0600
+
+    apps/radar/EccoStats - working on reading in Titan data
+
+commit cf4f99a527e700d0658bf5b66be9ff75a9057877
+Author: dixon <dixon@ucar.edu>
+Date:   Mon Jul 28 17:21:33 2025 -0600
+
+    apps/radar/EccoStats - working on reading in Titan data
+
+commit 321be5a6e6c311c318b04b2bb22e1a01765e91db
+Author: dixon <dixon@ucar.edu>
+Date:   Mon Jul 28 14:51:22 2025 -0600
+
+    libs/titan/src/file_io/TitanFile, apps/radar/Ecco - adding functionality to TitanFile class for use by Ecco
+
+commit 1d567404d5a641308e20f6fd0f9af05ee3bce773
+Author: dixon <dixon@ucar.edu>
+Date:   Mon Jul 28 11:02:55 2025 -0600
+
+    libs/titan/TitanFile - adding openBestDayFile()
+
+commit b524f9dc8c14a977d374728d8ecd119d1199e0eb
+Author: dixon <dixon@ucar.edu>
+Date:   Sat Jul 26 15:43:16 2025 -0600
+
+    libs/titan/TitanFile - adding _findBestDay()
+
+commit 975ec6d7e7015c48ce8d76adde8580e00a49c02a
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Jul 25 17:50:27 2025 -0600
+
+    libs/titan - adding TdataServer and TdataComplexTrack, upgrades from TitanServer and TitanComplexTrack
+
+commit 0a2c69b5b508073ee3b36151bac4f979c719db19
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Jul 25 16:22:36 2025 -0600
+
+    apps/radar/EccoStats - adding titan mask
+
+commit 8021ff5392ed3cc9d9f47c53e834ade86233634b
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Jul 25 14:58:40 2025 -0600
+
+    apps/radar/EccoStats - adding titan option
+
+commit b29e48da15897d9225ebbd22fa81766fd348e41c
+Author: MikeDixon <dixon@ucar.edu>
+Date:   Fri Jul 25 14:33:57 2025 -0600
+
+    Adding runas to scripts Makefile
+
+commit 1e0122887a8950e5cad94b64454b606ac1ab1b0e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 25 14:20:32 2025 -0600
+
+    Adding apps/scripts/runas
+
+commit 17f96076c6b80ab402aa0dc510dac27bae45933f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 24 21:54:05 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - printing updated
+
+commit 2ddaffca3ba7e80469f7f6ad97d915ec8f2abf9a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 24 21:51:20 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - printing updated
+
+commit 2f5d0672992bf3794e49cae770f84e7e617cc354
+Merge: ef5179557 723b7252f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 24 13:50:03 2025 -0600
+
+    Merge branch 'master' of github.com:ncar/lrose-core
+
+commit ef517955758f771355701c34ae72e01807cae3d2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 24 13:49:47 2025 -0600
+
+    Updating PrintTitanFiles to work with TitanFile and TitanData classes
+
+commit 723b7252feb8c0f6c1eea3fc1c6dc0662288187e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 24 11:37:02 2025 -0600
+
+    spol control3 - running CreateCmakeLists to get support for TitanFIle and TitanData
+
+commit 90adb472009f76d4f7c2ffa08c86b8e12967c6c4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 22 17:26:54 2025 -0600
+
+    apps/titan/src/PrintTitanFiles - testing with netcdf files
+
+commit 2098a6eb057ae39a3a2fb9590e7e664658e66b46
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 22 17:04:42 2025 -0600
+
+    apps/titan/src/PrintTitanFiles - testing with netcdf files
+
+commit 99af92fdec8d996307a7f4b9848b1a0e4afef8da
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 22 16:50:36 2025 -0600
+
+    apps/titan/src/PrintTitanFiles - testing with netcdf files
+
+commit d0a0bc1eea3a2b53fb65b9a087aa2f85bffc06fd
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 22 14:56:20 2025 -0600
+
+    apps/titan/PrintTitanFiles - adding support for netcdf
+
+commit fcc8cbbe5e14c7c21bb1ba7901ed8187a535a122
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 22 14:25:22 2025 -0600
+
+    apps/titan/PrintTitanFiles - adding print support for netcdf
+
+commit 57aac5628b5c77a1bf7f5a84fe0b4d43c444c992
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 21 22:30:06 2025 -0600
+
+    libs/titan/src/TitanFile - updating api
+
+commit 192951d3104eb76baa3bce7e0c7713c74aa65fb6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 21 22:19:24 2025 -0600
+
+    libs/titan/src/file_io/TitanData, TitanFile - debugging and testing
+
+commit 408511fe0d7508c6d969531f73b7cac26b4ce937
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 21 17:26:02 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - converting integer arrays to vectors
+
+commit 7f623bc70dc1d315780eefde5c917079de09a53f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 21 16:15:08 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - converting integer arrays to vectors
+
+commit c36c60ae16d409cd67e84978205706958c6d7d80
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 21 13:45:42 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - converting to use TitanData::TrackUtime_t
+
+commit 22dd3c33e09b9c2f27a7d898848192b7650b873e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 21 13:18:57 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - converting to use TitanData::TrackScanIndex
+
+commit 905409f2ba29ef76020df47e12f566a08a071688
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 21 11:43:44 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - converting to use TitanData::TrackEntry
+
+commit 066ab6a16f958bdcb5a1464a71c4ec3df0d902f5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 21 11:40:44 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - converting to use TitanData::TrackEntry
+
+commit fba27e9b4653e8c6cabf25e04bc167b32f144bb6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 21 11:21:53 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - converting to use TitanData::SimpleTrackParams
+
+commit 657e6bc3026531662fc7bbef63d429bfe8438f90
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 21 11:06:27 2025 -0600
+
+    libs/titan/src/file_io/TitanData - adding initialization methods
+
+commit d56582533affd2c531fcdc2b918a5ceba9d9218e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 21 10:09:32 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - convcerting to use TitanData::StormRun
+
+commit 84c73a4c2a08d5735f4d09e255f68af3339dc980
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 21 09:43:43 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - convcerting to use TitanData::StormDbzHist
+
+commit 6acab89ee4651b39eff98280e48336fe244e920d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 20 21:41:22 2025 -0600
+
+    libs/titan - incorporating and testing TitanData::StormLprops in TitanFile
+
+commit 0c2c88e4f43d2c069e6a08d8832abd74edf59555
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 20 19:39:30 2025 -0600
+
+    libs/titan - incorporating and testing TitanData::StormGprops in TitanFile
+
+commit d0cc891de63107280a39a2eecccd7dc0133d2c78
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 20 18:48:16 2025 -0600
+
+    libs/titan/TitanData - adding extra vesions of convertToLegacy()
+
+commit fea89d16fb2fc21634be09e70234302f2634fd21
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 20 18:27:17 2025 -0600
+
+    libs/titan - incorporating and testing TitanData::ScanHeader in TitanFile
+
+commit 72033ca25bd27d89da28f8484bc3c5768f90e7db
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 20 18:05:55 2025 -0600
+
+    libs/titan - incorporating and testing TitanData::StormHeader in TitanFile
+
+commit b3aebae2e1be4b52b1b1c40993ee8a626876db9b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 20 14:52:44 2025 -0600
+
+    libs/titan TitanData and TitanFile classes. Adding use of int64 for offsets
+
+commit eedc187c2f71e11b87bb7f13680b1392425a6626
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jul 19 16:49:58 2025 -0600
+
+    libs/titan/TitanData - adding print methods
+
+commit 9dff91a87cef0061401f9ecbab90364f7b046b6d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jul 19 16:23:47 2025 -0600
+
+    libs/titan/TitanData - adding print methods
+
+commit 9cb59f15902c1c57faca782b66871e7750de79fe
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 18:39:15 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding print methods
+
+commit 5ce14a1b2470ad17020b8bc7a6f6bc86a42be7a0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 18:34:17 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding print methods
+
+commit da1045e151bb3dbdd49a54f8ba855db81a61610b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 18:28:51 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding print methods
+
+commit 791d0bc89f3b2d6bd5c19c8be2c6f1581b372630
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 18:17:23 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding print methods
+
+commit 35de54b18372d92dd4317ebc540a67a08b60ef06
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 17:59:53 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding print methods
+
+commit e808af5a1fea497d5b3a9dbb105f27d38f118d1a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 17:48:50 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding print methods
+
+commit fc2141591c7185ceff2fce58df045fe5af22f585
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 17:41:03 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding print methods
+
+commit ccf8adb949f4cec8a1d206e42854e9b27f41f8da
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 17:40:23 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding print methods
+
+commit 84d24a540db9559c2c2ffb0adaab5ee137a301fe
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 17:17:29 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding print methods
+
+commit 89921d9a449332299112e54891e0f87f81c9efb4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 14:50:18 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding print methods
+
+commit dedb92ab44d9bc886d0d0f33b9e239c6afa89be2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 14:32:57 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - cleaning up
+
+commit bd7a47e0d7575a08b11b6affb7dabea8bc5f347e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 14:28:37 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding track scan index
+
+commit 41701a6035f6779610e7fad2f35d969c9ea02af0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 14:21:17 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding track file entry
+
+commit 4456c2f78865f37381dffcbcb6788d0614caa2c6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 18 14:09:43 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding complex track params
+
+commit e277340048d644ec29a3204e4ff72492f35511d5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 17 17:39:41 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding simple tracking params
+
+commit 3f7a3d433636a9ef046401c85f9174ac731d0881
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 17 17:03:54 2025 -0600
+
+    libs/titan/src/file_io/TitanData.cc - adding tracking classes
+
+commit 951feb7c42ed106408a0ed6dfef5fbb96740da58
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 17 07:34:10 2025 -0600
+
+    libs/titan/TitanData - adding StormRun
+
+commit 0b72f51d578d3791012a2b5ad50b20f6fce7b7df
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 17 07:30:38 2025 -0600
+
+    libs/titan/TitanData - adding StormRun
+
+commit 7d9b1cc970494607054fd0c67f4b450f8f566794
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 17 07:21:36 2025 -0600
+
+    libs/titan/TitanData - adding StormDbzHist
+
+commit 00fefb8ce90bdfc4a65b6794ff9c16ef13339380
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 17 07:16:07 2025 -0600
+
+    libs/titan/TitanData - adding StormLprops
+
+commit 5d8d58c7f4262b41e8d5c8cd1a485968aa888f25
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 16 22:13:12 2025 -0600
+
+    libs/titan/TitanData - adding StormGprops
+
+commit 8035048cc93c50e2b43cbb54a725553d4f1f1a93
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 16 21:22:28 2025 -0600
+
+    libs/titan/TitanData - adding ScanHeader
+
+commit 2d951862dda57bf335deb9af77656d9b7df1c01e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 16 18:29:52 2025 -0600
+
+    libs/titan/TitanData - adding ScanHeader
+
+commit d5c092950bf386740b05503a69389207ceeff4d1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 16 17:38:52 2025 -0600
+
+    libs/titan/TitanData - adding StormHeader
+
+commit 51950f78d996ddf0ff6071ce0729af7510894e59
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 16 16:21:00 2025 -0600
+
+    libs/titanTitanData - working on StormParams
+
+commit 9f260471c657f3e6577b9a464411e7d48d9c34af
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 16 16:03:37 2025 -0600
+
+    libs/titan/src/TitanData.hh - work in progress
+
+commit 10a1d2e9d0141e8e6ae7a6c788e4a167955c0f4f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 16 11:27:48 2025 -0600
+
+    libs/titan - adding class TitanData
+
+commit bb30a473e6b1ee9de2881b1af9203913bc4f6924
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 16 10:53:25 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc netcdf attr note -> comment
+
+commit 7136dff01b87f1fa578d17b61cf35c0221c6dbc1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 16 10:47:55 2025 -0600
+
+    libs/titan/src/file_io/TitanFile - cleaning up unused code
+
+commit a228ceb84f3697c4089ccf4180ad25f30dd9a72b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 15 21:42:56 2025 -0600
+
+    libs/Titan - working on TitanData.hh
+
+commit d508dd1bf4077802cb595959e9516d018a071742
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 15 18:00:05 2025 -0600
+
+    apps/titan/PrintTitanFiles - adding option to force print of verification data
+
+commit 352795ec5932a2b6b26377215f2cb8bfc66da060
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 15 17:45:26 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding track verify grid vars
+
+commit 22ffd9402ee0001da761308f2d82b200157c195a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 15 17:40:16 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding track verify grid vars
+
+commit d6443c88a979a943c05fa4ebc0b8b24e9bd1e853
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 15 15:05:16 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding verification vars
+
+commit 2db90e4fa700633da8b1b786fa283eec6e5a3ed7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 15 14:24:25 2025 -0600
+
+    libs/titan/src/file_io/TitanFile, TitanTrackFile - testing convert from v5 to netcdf and back
+
+commit b680b46df98e68df9c7ac082d7f6679de43bb681
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 15 14:09:48 2025 -0600
+
+    libs/titan/src/file_io/TitanFile, TitanTrackFile - testing convert from v5 to netcdf and back
+
+commit 1bd7d30173a759fc256bfea307a82825168e54cd
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 14 15:06:07 2025 -0600
+
+    libs/titan/src/file_io/TitanFile - testing storm props read/write
+
+commit 5b70efa2728c909ec9f2e182251a367c146bb622
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 13 21:58:51 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - testing
+
+commit 2b681040516021443c94ab6d47d0a941186a420f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 13 18:49:39 2025 -0600
+
+    libs/titan - testing file format conversion using TitanFile class
+
+commit 66dc25eb311d89438b7f848784d8bbe513ab0ece
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 13 12:28:14 2025 -0600
+
+    libs/titan/TitanFile - testing read/write from legacy to netcdf and back
+
+commit 1e5649ac9ccd913c2b30097bcd527331a08f3206
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 13 12:22:23 2025 -0600
+
+    libs/titan/TitanFile - testing read/write from legacy to netcdf and back
+
+commit 49ab1784524a7c8e145508c48ad5050e548c635a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 13 11:38:55 2025 -0600
+
+    libs/titan/TitanFile - testing read/write from legacy to netcdf and back
+
+commit ca6ce965ea85af1e0e5b2bdf06a0e783572d8713
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jul 12 13:36:51 2025 -0600
+
+    libs/titan/TitanFile - debugging read/write consistency check
+
+commit 6bc85abe6aa13af846db86d146b539a080945e3f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jul 12 11:13:53 2025 -0600
+
+    libs/titan/src/TitanFile - debugging netcdf writes
+
+commit de96d9f252f1bf50d4416eb36f7fabb6b8a73f29
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 11 21:10:33 2025 -0600
+
+    libs/titan/TitanFile - working on entry offsets when writing
+
+commit c52c589086f682f4b77adef0507cd654d0895d8c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 11 20:46:23 2025 -0600
+
+    libs/titan/TitanFile - working on entry offsets when writing
+
+commit 8d4d63a7aff640cee18fc83a6254a772540befe8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 11 17:21:09 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on entry offsets
+
+commit 69e6c0eed9a0ab31d3db6240863fed8e7eb8ee5d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 11 16:58:44 2025 -0600
+
+    libs/titan/src/file_io/TitanFile - testing read/write to/from legacy
+
+commit dd6a67c9f93334fdd76ac2441a3d9bde73c68f42
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 11 10:24:42 2025 -0600
+
+    apps/titan/src/Tstorms2NetCDF - testing truncation
+
+commit 09a54c7caee79af52251ad6cf09045479a7188ec
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 11 10:03:27 2025 -0600
+
+    libs/titan/TitanStormFile - adding TruncateData() method
+
+commit 28e5357c8f295e438fdae4a512145ad1490fb712
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 11 09:26:22 2025 -0600
+
+    Adding libs/titan/TitanData.hh
+
+commit 134abc81bebb5ce37aabbb8ac8f78e528ee3c8aa
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 10 21:13:35 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - testing truncation for retracking
+
+commit 5ba311599200552fb1bc9ef45a805a26b965959c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 10 17:09:34 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on truncate
+
+commit 1fe2808d71d5857730bde2011559954822101fbd
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 9 22:27:34 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding sumLayers etc
+
+commit 734b0191c3cb0fe3a772a0d20dfbbfa9b8ff0919
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 9 21:47:46 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding _nStorms
+
+commit 2b7f8133abbeb107c577fcc90caf7278739cfe7a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 9 19:33:17 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - testing truncation
+
+commit 6a3cc7e4398bf8179cdb2d62af035bd939f9c6cc
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 9 17:04:34 2025 -0600
+
+    apps/titan/Tstorms2NetCDF - testing truncation option for storm data
+
+commit 5d270c0c64e1e9a6884010578718887b2076a22c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jul 9 11:58:30 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding support for truncating storm data
+
+commit 4f767b97dfcff990a37e1f2d35960c7689730aa9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 8 17:15:17 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - changing missing vals
+
+commit 8e478fae6b206d38bc547c4c1532714bb5c94eff
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 8 11:15:22 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - changing dim names
+
+commit b9cbd1b6a445febdcf713fb0b695d2a2537b532c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jul 8 11:06:35 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - changing dim names
+
+commit 2c35b2f7e9263a7a6a1c9488de258e461bb4d92a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 7 21:14:33 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - testing and final design
+
+commit 4ac4c3d3292ddeba3b13c7c3303c4860164b9e7c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 7 17:56:55 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - testing read/write to/from netcdf
+
+commit 3b170cbfaecdd54524c05b799506c961dc186c65
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 7 17:45:11 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - testing read/write to/from netcdf
+
+commit 16ed51b67b3aa9e42dc62926b909fddf603a848b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 7 17:15:56 2025 -0600
+
+    Adding documentation links to README.md at the top level
+
+commit fa2b3ae08b7dc9de9a57dd0410fed77edac63c2c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jul 7 16:02:17 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - testing read/write to/from netcdf
+
+commit bc7c64ec4f0eb97402f182b62b24d1597d12cce9
+Author: karboski <karboski@ucar.edu>
+Date:   Mon Jul 7 09:30:04 2025 +0000
+
+    apps/radar/TsAscope - updates for Qt6
+
+commit e7c536040bc44b5a9df7af4bcc1a1ff79397b80d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 6 21:36:32 2025 -0600
+
+    libs/titan/src/file_io/TitanFile, apps/titan/Tstorms2Netcdf - cleaning up TitanFile class
+
+commit a49bc88029908254584b9f9ab1727e22b2e6b632
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jul 6 09:54:22 2025 -0600
+
+    libs/titan/TitanFile.cc - implenting readScanIndex()
+
+commit eee9d6e8a956e68672062100e83f887047d1b281
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jul 5 15:28:41 2025 -0600
+
+    libs/titan/TitanFile - testing writing of legacy files
+
+commit 3b2fc655366977a97c5ea2b6a714f401d303b9cc
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jul 5 15:23:43 2025 -0600
+
+    libs/titan/TitanFile - testing writing of legacy files
+
+commit 7767f20804c27bb7a745ea11de1fa58651a96c47
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jul 5 10:38:38 2025 -0600
+
+    libs/titan/TitanFile - working on writing legacy files
+
+commit 2bcfd1be150054c060a9357381b86bc36c6dc087
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jul 5 10:35:46 2025 -0600
+
+    libs/titan/TitanFile - working on writing legacy files
+
+commit 8f7a02440ab8ff3ae59cdb95972c00cecc097ac1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jul 5 10:11:28 2025 -0600
+
+    libs/titan/TitanFile - working on writing legacy files
+
+commit 66fcab4fd6a7dce79bcc9896d460f2855bafcd58
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 4 19:17:48 2025 -0600
+
+    apps/titan/Tstorms2NetCDF - adding reverse option
+
+commit ad49417962f57bad7989f86b499898774b5f554a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 4 18:47:34 2025 -0600
+
+    libs/titan/src/file_io/TitanFile class - adding legacy writes
+
+commit d44e81e9ef8058d8b9b11ae4d05a78d066557f8d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jul 4 17:22:37 2025 -0600
+
+    libs/titan/src/file_io/TitanFile class - adding legacy writes
+
+commit 3f9776753106ab59e1b24e1d725a9d43426a15a3
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jul 3 15:01:53 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding save of state when writing
+
+commit 56b5ad27767a535b888d6343fa70b54ea4a9e1d7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 29 20:55:12 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding write for legacy format
+
+commit e1a5ac1f4f19f919f180c0d3be84faf992ff4fab
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 29 16:45:03 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding write for legacy format
+
+commit 8678ece1e4fe6271ee30f258bdd0b2922e5adf78
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jun 28 18:47:02 2025 -0600
+
+    libs/titan/TitanFile - working on including support for legacy V5 format
+
+commit 6c0a97cb2c7b92d6bb69b9f34153322d8258f043
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jun 28 17:42:40 2025 -0600
+
+    libs/titan/TitanFile - working on including support for legacy V5 format
+
+commit 7cd239abacdbbea3918ba10eea8a5490e1ca1cfa
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 27 17:32:40 2025 -0600
+
+    libs/titan/TitanFile.cc - adding support for legacy files
+
+commit 2f49f235c6d48c4157242608c0ce65982465252d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 27 17:15:51 2025 -0600
+
+    libs/titan/TitanFile.cc - adding support for legacy files
+
+commit 9ca632a94f8f1607401e7817760bf4bcb256a32f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 27 17:10:53 2025 -0600
+
+    libs/titan/TitanFile.cc - adding support for legacy files
+
+commit b6f74c38de8dc346335bc72eb7b3cdf904293c81
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 27 16:14:54 2025 -0600
+
+    libs/titan/TitanFile.cc - adding support for legacy files
+
+commit 8a4ffce166d98ea16696d8efa236f12ad0381c21
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 27 10:58:50 2025 -0600
+
+    libs/titan/TitanFile.cc - adding global attributes
+
+commit aad31ceac04c266e0af2b657841e1af76501e27f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 26 17:10:12 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on reading in from NetCDF file
+
+commit ff2a2f6bbc0250bf7d640d315720dc6b1edf6aee
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 26 15:26:15 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on reading in from NetCDF file
+
+commit c76a0e8ca8f12de74d4c319e74a9350e1240394e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jun 25 21:07:26 2025 -0600
+
+    libs/titan/TitanFile.cc - fixing indentation
+
+commit c0aeef9be18891262eef55f9f6439453dc3e74bc
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jun 24 18:58:05 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on reading in from NetCDF file
+
+commit b282ef7628abb9c8dfd430b2679decb82933978e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jun 24 18:40:03 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on reading in from NetCDF file
+
+commit 945113d5d1ab28536746b85bf2f15748838489bc
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 23 19:06:26 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on reading in from NetCDF file
+
+commit e875d25eb98b2c49c159d014eaefefc5a5687e1f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 23 11:32:32 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on reading in from NetCDF file
+
+commit 557a5da1314877ad2bcdcc50966346237a43dd6a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 22 15:02:51 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on reading in from NetCDF file
+
+commit e7084eed81d74222b97e1ac5c08b1ae9c4a30dd3
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 22 14:15:32 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on reading in from NetCDF file
+
+commit 84cb4d00ec7eea9873fb6856cc4ff4e7d3719108
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 22 12:52:24 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on reading in from NetCDF file
+
+commit f1a8c348e8b6891ca2c5ceef64a16955814c9b24
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 22 12:33:59 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on reading in from NetCDF file
+
+commit 0962873f716daab5cc920b378092ea27769b67c8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 20 16:38:48 2025 -0600
+
+    libs/titan/TitanFile.cc - adding attributes for projection variables
+
+commit 10270b7946014abb902f6b0009714c342a0da8d6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 20 16:22:47 2025 -0600
+
+    libs/titan/TitanFile.cc - adding attributes for projection variables
+
+commit b354e841446e4491bb60a26ab79734d7932f498f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 20 15:53:16 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding flags for proj_type
+
+commit 6ecb4bf43e95a4b1337f9d53eb33e30c1c4a7300
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 20 14:54:33 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding units attributes
+
+commit 2b68a9470a450a6bd1adc198f72806961af9acb0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 20 11:37:57 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding units attributes
+
+commit fa6c8fd8cc7bd83fb3addcef97e25fefc594cac5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 20 10:20:23 2025 -0600
+
+    libs/Radx/src/Gematronik - updating long names for V1 and V2 fields
+
+commit fafa2cae489d87e208320c5f7d8145e9801638f4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 19 10:05:26 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding units attributes
+
+commit 1ae645936809c347119724f09140b7708d84f12b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 19 09:27:48 2025 -0600
+
+    libs/Mdv/oldMdv/mdv_write: sprintf -> snprintf
+
+commit 99fffd4407b95f2af19b739979e6f66240a4b578
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jun 17 16:51:15 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding units attributes to vars
+
+commit d61fbf4c70b5e7a27b4d54dde5eae38dc8787dbb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 16 14:33:55 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - setting entry_offsets for simple tracks
+
+commit d877d18a36b6ac1b7453cd08b40b6aa30a449951
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 16 13:51:25 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - setting entry_offsets for simple tracks
+
+commit 693f109356205565ea53a71c17e27f03267ef4d1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 16 11:30:04 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - setting entry_offsets for simple tracks
+
+commit 674b4f279b3472fbcd3ec152b659790adf1a6a5b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 16 10:17:10 2025 -0600
+
+    libs/titan/src - cleaning up compiler warnings from string copies
+
+commit 78d8f0eddf390b7184830609b9c37104ae08781b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 15 15:57:28 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - working on track entries
+
+commit da848008bf404da7c5eca1218de2ca74e49ad053
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jun 14 16:19:56 2025 -0600
+
+    libs/titan/TitanFile - adding support for track entries
+
+commit a90f70ce590437e20453529f0cfcf957c7895085
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jun 14 15:54:45 2025 -0600
+
+    libs/titan/TitanFile - adding support for track entries
+
+commit 1a80b0df28f28adef1bed8a9be0fb11e388303cc
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jun 14 15:35:58 2025 -0600
+
+    libs/Ncxx/src/include/Ncxx/NcxxVar.hh - adding makeIndex()
+
+commit 5741743728f4a47d1a7aff7456434163f5dd7f15
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 13 13:43:57 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF. - writing track entries
+
+commit 14507b4de9b1b5038603ee07ea23c716f8f4d491
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 12 16:37:23 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF. - adding support for simples_per_complex
+
+commit c31ab16930aa07ac3eb7d8a6cd6f883973e04cd2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 12 13:46:58 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF.
+
+commit b227a077da0c58726ce9f9b3707f92cdff7896de
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 12 09:48:13 2025 -0600
+
+    apps/titan/Tstorms2NetCDF - debug prints
+
+commit 157111113d5868668b0d51966d3d335c4d45b191
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 12 09:10:29 2025 -0600
+
+    libs/titanTitanFile.cc - adding compression for netcdf vars
+
+commit 298f54f528cef279958330230f5609ad4cb1f822
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jun 11 18:00:03 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF. Writing track parents and children
+
+commit bf577cd75bfdfb3fb7c33df1ae958736cb5c90f1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jun 11 17:45:07 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF. Writing complex track params
+
+commit e2c170d7c1c930607b7e4b2f17bc58e55a646199
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jun 11 11:02:17 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF. Adding write for simple tracks
+
+commit 98c1c0a0fb319b18841c6625943d28dd8d280535
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jun 10 18:13:37 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF. Writing complex track params
+
+commit 0d0ec127b2f7504698b6612060dc6c945afaf9c7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jun 10 16:46:43 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF. Adding tracking data to netcdf output
+
+commit c017567465beadd6fd1bb902d3a40bbb7245d19b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jun 10 13:49:27 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF. Changing function names for write()
+
+commit fb9a0ca28dc4176ce46d05e926e68bf90b6d3663
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 9 17:27:07 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF in progress
+
+commit a33940dbd01edff1bb51a98245f16ffcb0bec936
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 9 17:23:11 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF in progress
+
+commit 05682f445098830a817576e973726f03eae9fc3d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 9 14:51:51 2025 -0600
+
+    libs/titan/src/file_io/TitanFile.cc - adding compression
+
+commit 1d1eff5541a3ff17088ced31219450061c5f207f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 9 13:40:59 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF in progress
+
+commit a30f602c0f5a5fe61274b4210f98ee388f974eed
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 9 11:43:53 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF in progress
+
+commit 94c3c24a66bd14252f4c2ab3c4bbc3618f23f029
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 9 11:22:15 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF in progress
+
+commit f424e35ba7b989042d2e2eb7a6827bd6f332afb2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 9 11:13:38 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF in progress
+
+commit 5595a57e756ec97b428fbecd9e8e5368f041d772
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 8 20:41:46 2025 -0600
+
+    working on libs/titan/TitanFile, apps/titan/Tstorms2NetCDF
+
+commit 4b027291daa9b3fe84e6c2f8e59baefffcb40e75
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 8 17:31:12 2025 -0600
+
+    working on libs/titan/TitanFile, apps/titan/Tstorms2NetCDF
+
+commit 6f67c3ed41b9c7e601d287d4e4beff8e9076d6df
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 8 16:48:02 2025 -0600
+
+    working on libs/titan/TitanFile, apps/titan/Tstorms2NetCDF
+
+commit 6df7184cedfb5b3f55beb0bc702b7c0a04d41c75
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jun 8 16:35:03 2025 -0600
+
+    libs/titan/src/file_io/TitanNcFile.cc -> TitanFile.cc
+
+commit 4a9129bf1ff64b8b4057736d226dd0d5560e7640
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jun 7 22:04:32 2025 -0600
+
+    libs/titan - TitanNcFile class
+
+commit 3724b617544defa40083ec281279412f1a6dd63e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jun 7 09:05:01 2025 -0600
+
+    libs/titan/TitanNcFile, apps/titan/Tstorms2NetCDF - devlopment in progress
+
+commit ccc358d322b7ed6d8aace8da0e293ed676842f7a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jun 7 08:30:35 2025 -0600
+
+    libs/titan/TitanNcFile, apps/titan/Tstorms2NetCDF - devlopment in progress
+
+commit a6845d1d28c9a2faaaa14bde0599b3bb145a73e8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 6 16:23:29 2025 -0600
+
+    Tstorms2NetCDF - in progress
+
+commit c69a5cda2587159b6ccab2db65d87484433949b0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 6 16:09:58 2025 -0600
+
+    libs/titan - working on TitanNcFile. apps/titan/Tstorms2NetCDF in progress
+
+commit 4755cb3be454fa1ac9b9098150a1cba762c72893
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 6 15:42:16 2025 -0600
+
+    libs/titan - working on TitanNcFile
+
+commit a990802aa91098db3cdc074f0971ca77a855c019
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 6 15:19:43 2025 -0600
+
+    libs/titan - working on TitanNcFile
+
+commit 6f6336c76b191f606fadd99c30b7eeaa948b6484
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 6 11:21:02 2025 -0600
+
+    libs/titan - working on TitanNcFile
+
+commit 82158ba94c0fdad46f20cc6a537f289c00e1ea88
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jun 6 11:17:36 2025 -0600
+
+    libs/titan - working on TitanNcFile
+
+commit 6884084d6f8002326d66a428e3d1cee1465edc20
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 5 17:15:22 2025 -0600
+
+    libs/titan - working on TitanNcFile
+
+commit def1d5d92eff6a7801b13a166f90d391a349e8bc
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 5 17:01:58 2025 -0600
+
+    libs/titan - working on TitanNcFile
+
+commit 0623b865593785967ee2e64aca746d2476532843
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 5 15:48:29 2025 -0600
+
+    libs/titan - working on TitanNcFile
+
+commit 5549b39d1225df213a21e008394db637949ff20d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 5 09:50:54 2025 -0600
+
+    libs/titan - working on TitanNcFile
+
+commit 1da1619445e9add615344d8e6b6ae1a551d1d0cd
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 5 09:34:50 2025 -0600
+
+    libs/titan - working on TitanNcFile
+
+commit 0b8ed86ffadc90ac387fa44dcbb14b676979faa3
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 5 09:14:22 2025 -0600
+
+    libs/titan - working on TitanNcFile
+
+commit f4d7bfc53acbedd381cdb74765d385d686ad7376
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jun 5 09:03:10 2025 -0600
+
+    libs/titan - working on TitanNcFile
+
+commit 15df901f4de23f0698431c7382f470c34646b38c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jun 4 17:03:55 2025 -0600
+
+    apps/titan/Tstorms2NetCDF - devel in progress
+
+commit 18cd9466396984e4b6bc7fbfc6b66cd339df6a07
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jun 3 18:23:33 2025 -0600
+
+    libs/titan/TitanNcFile.hh - adding vars
+
+commit 5f9d22940bb38956033b1fbfa3adc94f442f52d2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jun 3 17:01:41 2025 -0600
+
+    libs/titan/TitanNcFile.hh - adding netcdf strings
+
+commit df0188854b059363700fa2d38ac7ab48fe578054
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 2 18:58:44 2025 -0600
+
+    apps/titan/Tstorms2NetCDF - dev in progress
+
+commit 74663f78460191271a2268c2b28e717143af07e8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 2 17:20:18 2025 -0600
+
+    apps/titan/Tstorms2NetCDF - devel in progress
+
+commit 2716b9c6c68a9c1bfabb933333280e280013dd01
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 2 15:30:17 2025 -0600
+
+    apps/titan/Tstorms2NetCDF - devel in progress
+
+commit c873f19ccd9e0ac09dac0a90a6cb31ef91f1a9cf
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 2 15:29:07 2025 -0600
+
+    libs/toolsa/TaStr - adding replaceSubStr() method
+
+commit 9cdb86bb93b632344ab054381f7a2c36eb5d9c47
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jun 2 14:40:54 2025 -0600
+
+    libs/titan, apps/titan/Tstorms2NetCDF - developing Tstorms2NetCDF
+
+commit 7fd96d9a37cbf50e36712ca5e770d65d654d8c1d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed May 28 17:46:45 2025 -0600
+
+    Adding apps/titan/Tstorms2NetCDF
+
+commit 1388d9a2aa6b7b8d689b35e2df7bb3f2428fefea
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed May 28 11:30:50 2025 -0600
+
+    libs/titan - workign on TitanNcFile class
+
+commit fbb917ea30bbaa75da86b5d0157e90a6f8a05c8b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon May 26 14:32:51 2025 -0600
+
+    adding libs/titan TitanNcFile class
+
+commit b7a1a516e0dd58daac608ed65fffd1fdcb50e558
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon May 26 13:36:51 2025 -0600
+
+    adding libs/titan TitanNcFile class
+
+commit b0ac5cc305dcef03b3a58b89b5659786605ee0c5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon May 26 13:18:49 2025 -0600
+
+    adding libs/titan TitanNcFile class
+
+commit 9e2d2659aa64d1821fb522e7fdd352b397cd0ec9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon May 26 12:55:58 2025 -0600
+
+    adding libs/titan TitanNcFile class
+
+commit 7f9253f23709486d61a5bdc5b576952aec1d130e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon May 26 12:41:14 2025 -0600
+
+    apps/mdv_utils - cleaning up Makefiles
+
+commit 85a06eae8d8db59311075c62a9eab184ecc7a99d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon May 26 12:38:31 2025 -0600
+
+    apps/didss - cleaning up Makefiles
+
+commit 7f165e6f6b5713a26b5a165c7d411e9ef67578f7
+Merge: 656375fab b29154c50
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon May 26 12:34:36 2025 -0600
+
+    Merge branch 'master' of github.com:ncar/lrose-core
+
+commit 656375fab62a92b4ac4d03db3cc994f83ee767ea
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon May 26 12:34:20 2025 -0600
+
+    apps/trec - fixing Makefiles
+
+commit b29154c5040ba58a8f4256b2fb1679b4293b2183
+Author: dixon <dixon@ucar.edu>
+Date:   Mon May 26 07:57:20 2025 -0600
+
+    apps/titan/Titan - debugging convectivity thresholding
+
+commit 6336c8f8e6502950a7b52941afe00cbf6ae11e98
+Author: dixon <dixon@ucar.edu>
+Date:   Mon May 26 07:43:55 2025 -0600
+
+    apps/titan/Titan - debugging convectivity thresholding
+
+commit 2e6be15eb06a98b2901238dc92448d878777fde0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 25 18:28:55 2025 -0600
+
+    apps/titan/Titan - adding option to threshold on convectivity
+
+commit feb133a09ceec003c03523f251f5e30cf7bc91b1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 25 17:47:11 2025 -0600
+
+    libs/titan - adding support for convectivity in structs
+
+commit aaf0d4993980e18b3784a03ce57a6047b39ac122
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 25 17:22:25 2025 -0600
+
+    apps/titan/Titan - adding option to threshold on convectivity
+
+commit fbc4b6e7cf3394848c76319f32ccfad43f94a66e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 25 13:03:09 2025 -0600
+
+    apps/titan/Titan - adding convectivity, NULL -> nullptr
+
+commit 5e8d284a508b95848d7527fffac35ffa9837236d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 25 08:00:22 2025 -0600
+
+    apps/titan/Titan - adding convectivity option
+
+commit 5ce6a643035ac0eb35674408958207af715f187e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 25 07:54:18 2025 -0600
+
+    apps/titan/Titan - adding convectivity option
+
+commit 3c01ed111d284a700362e565f1921c0d565b5304
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed May 21 13:43:49 2025 -0600
+
+    Updating README.md for 20250105 release
+
+commit 2a91bf483cd2d48740172d1aa1b7d885390de494
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon May 19 09:35:23 2025 -0600
+
+    libs/titan - adding define for N_POLY_SIDES into storm_v5.h and storm_v6.h. In tdata_server.h N_POLY_SIDES is also defined if it does not already exist.
+
+commit d87e1b79ebaff67aedee33b8c87e4f7c66a9871e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri May 16 09:56:53 2025 -0600
+
+    Adding EccoStats into the build
+
+commit 99e475b540139d07edea296c01178b3740d42f9a
+Author: dixon <dixon@ucar.edu>
+Date:   Fri May 9 17:33:59 2025 -0600
+
+    apps/ingest/Era5Nc2Mdv - adding support for multiple levels in a single file
+
+commit d5e98b330b91d7070967787386b56d5b85fb03e9
+Author: dixon <dixon@ucar.edu>
+Date:   Fri May 9 17:27:25 2025 -0600
+
+    apps/ingest/Era5Nc2Mdv - adding support for multiple levels in a single file
+
+commit d2976ee084dfc6a3b235bf89b55c1178090497e0
+Author: dixon <dixon@ucar.edu>
+Date:   Wed May 7 17:40:34 2025 -0600
+
+    apps/ingest/src/Era5Nc2Mdv - updating to support netcdf files with all height levels in a single file - debugging
+
+commit 236b74d5ea7139b6653c4fe6fbedb5d806ed42f3
+Author: dixon <dixon@ucar.edu>
+Date:   Wed May 7 16:54:12 2025 -0600
+
+    apps/ingest/src/Era5Nc2Mdv - updating to support netcdf files with all height levels in a single file
+
+commit 8d4a5213ee75057cf73d2650413494d392addbb0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 4 20:42:10 2025 -0600
+
+    apps/radar/Lucid - cleaning up debug prints
+
+commit 6f289ea12672e1f9b06f6cbaae0ae26e980a3fa9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 4 20:28:46 2025 -0600
+
+    apps/radar/Lucid - debugging zoom
+
+commit 5ad2534f631d6982259ffdaec6d4af93eab46c10
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 4 20:25:03 2025 -0600
+
+    apps/radar/Lucid - debugging zoom
+
+commit 7eff44335e9a495a2e874ad61218b5cb4815e321
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 4 20:21:08 2025 -0600
+
+    apps/radar/Lucid - debugging zoom
+
+commit dff35bc70d3b1a8e14ab2378c4df127b29606cb4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 4 17:59:52 2025 -0600
+
+    apps/radar/Lucid - deprecating use of zmin, zmax etc in Globals
+
+commit e468682355ecb248174dd9cd539f252e2c356a22
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 4 16:05:52 2025 -0600
+
+    apps/radar/Lucid - saving current state of GuiManager
+
+commit b7b576842b2d2c82c08300e9eb170013bdb787aa
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun May 4 16:05:07 2025 -0600
+
+    apps/radar/Lucid - working on zooming in HorizView
+
+commit c91cf779cf2d97ee93eb62758c7d4e750a04727a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat May 3 16:37:53 2025 -0600
+
+    apps/radar/Lucid - cleaning up zooms
+
+commit 0e9962e61bd6c43404a53e5d7e46fa5741066e85
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri May 2 14:55:53 2025 -0600
+
+    apps/radar/Lucid - updating zoom definitions to include units option
+
+commit 67fdec1940c7fc613caa1833becf7e7964f8f677
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu May 1 17:38:57 2025 -0600
+
+    apps/radar/Lucid - debugging zooms
+
+commit 5191edae5c05161d2a243e6f44b77ff46f333e55
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu May 1 15:28:21 2025 -0600
+
+    apps/radar/Lucid - debugging zooms
+
+commit f7906275ee56d01e6398c92ae72030064b98ae9c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Apr 30 17:50:25 2025 -0600
+
+    apps/radar/Lucid - debugging zoom issue
+
+commit b6445f7dbf2e710993ab8236fa1ada8eec43d967
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Apr 30 17:43:13 2025 -0600
+
+    apps/radar/Lucid - debugging zoom issue
+
+commit 826a0515362c42e2edc7ed9b0914aef36dcce37c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Apr 29 11:31:59 2025 -0600
+
+    apps/radar/Lucid - cleaning up GlobalData.cc - most initialization methods have moved to Lucid.cc
+
+commit c65702b0e474615f4c4a7a22ef477069b2d46abe
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Apr 28 13:52:42 2025 -0600
+
+    apps/radar/Lucid - working on range rings
+
+commit a75f28d9e7a80c80a8a2f9fe9d6ff9de8a1b12b6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Apr 28 11:47:03 2025 -0600
+
+    apps/radar/Lucid - working on range rings
+
+commit b04d7a2d8b367eb45256d9db0c075e7ac3d4400a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Apr 28 11:40:48 2025 -0600
+
+    apps/radar/Lucid - working on range rings
+
+commit a250fc9124ba4d3dd4dad7fbbca64e47ca5a49ae
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Apr 28 11:09:47 2025 -0600
+
+    apps/radar/Lucid - working on range rings
+
+commit 4d80dfada2e628390a7f71e9b041b13826fdd938
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Apr 27 22:09:30 2025 -0600
+
+    apps/radar/Lucid - debugging range rings
+
+commit 7dd6ad02c1899ea0333a8cb4465911766e9f59dd
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Apr 27 18:20:43 2025 -0600
+
+    Working on range rings
+
+commit d4522ddc6844ee3dc6c64428baafb4ccbaece2d6
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Apr 27 11:52:15 2025 -0600
+
+    Working on range rings
+
+commit 0a7cbb341dd9f3dd2aa5b5df0afb314ac8ca9d87
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Apr 27 11:26:44 2025 -0600
+
+    Working on range rings
+
+commit 7361f7df3cf48d6f60883c8bfd62019879680c93
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Apr 26 21:32:53 2025 -0600
+
+    apps/radar/Lucid - working on rendering range rings
+
+commit c4a9119ce7c7db668e3aa6bf7b4f935778c45577
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Apr 26 18:03:52 2025 -0600
+
+    apps/radar/Lucid - working on rendering range rings
+
+commit 023825e0a01a6f42fae54fef1e90d6cf6b6ac8a2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Apr 25 17:48:47 2025 -0600
+
+    apps/radar/Lucid - working on range rings for radars
+
+commit 6da3b3c5d6c3b728a8090678d6260bb1bd9503e0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Apr 25 16:36:52 2025 -0600
+
+    apps/radar/Lucid - updating field rendering
+
+commit 284a81a19d28ff9d424521f2088dcd7f70b6af14
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Apr 25 11:19:06 2025 -0600
+
+    libs/Radx/Gematronik/GemRadxFile.cc - bug fix on reading dual PRF data files
+
+commit 4f1b1631dd3ae05e4fad6f86c4a3c99768531aeb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Apr 24 17:37:08 2025 -0600
+
+    libs/Radx/Gematronik/GemRadxFile.cc - working on handling dual-prt vel fields. These fields sometimes have only every second ray available. Duplicate adjacent rays in the output file
+
+commit d2acce54465b3438c1c56ae80cffb00de539c24b
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Apr 18 17:26:32 2025 -0600
+
+    apps/radar/Iq2Dsr - testing new parametrer center_indexed_beams_starting_at_zero, and bug fixes
+
+commit 69c373380b45a780f5676b6d33d8be82e767232e
+Author: dixon <dixon@ucar.edu>
+Date:   Fri Apr 18 16:17:38 2025 -0600
+
+    apps/radar/Iq2Dsr - adding parameter 'center_indexed_beams_startin_at_zero'
+
+commit 7f13a945395ab90c89e5ee6ee6a2723cd672189d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Apr 16 13:55:17 2025 -0600
+
+    libs/Radx/src/Gematronik - adding support for dual PRF velocities
+
+commit 9029967cca29e2554bb307131f9aecda2ec8d8b7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Apr 14 14:16:22 2025 -0600
+
+    libs/Radx/GemRadxFile - adding _checkForVolKeyword() to correctly handle situation in which xml appears in the first line of a file as a type
+
+commit aed1008be56b9b45ee59de6e4e19b15cb1eca5a3
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Apr 14 14:15:14 2025 -0600
+
+    apps/radar/Lucid - HorizView.cc - working on zoom changes
+
+commit 25cecf42ffb31c66a29e5007f85e334aed78d781
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Apr 8 21:17:59 2025 -0600
+
+    apps/radar/Lucid - moving all zoom box functionality into HorizView
+
+commit be565cbb99e90ad76f418a05f91f4232ffc50bc2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Apr 8 17:47:57 2025 -0600
+
+    apps/radar/Lucid - moving zoom funtionality from GuiManager into HorizView
+
+commit d1552d06f892bc08c4490fca46c7f5aabd7eb668
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Apr 8 17:44:03 2025 -0600
+
+    apps/radar/Lucid - moving zoom funtionality from GuiManager into HorizView
+
+commit cf539be3cb61b49c4f276f969ee4efea45fa1731
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Apr 7 21:54:44 2025 -0600
+
+    Debugging range ring rendering
+
+commit fda54530b19e0dfa53194594f1774537aafdc3a3
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Apr 7 17:14:28 2025 -0600
+
+    apps/radar/Lucid - cleaning up MdvReader, making it intrinisically copyable by removing allocated arrays. Also ensuring that copying of data from Mdvx object into MdvReader object occurs in the main thread, to avoid altering the stored memory while the threaded reads are in progress
+
+commit f212122074fdec86ebc5f234d7f3cfa63b988fa2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Apr 6 22:30:29 2025 -0600
+
+    Adding copy semantics to MdvReader
+
+commit 6e40db815568c0e848779b88d27aea208f0f89ca
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Apr 4 17:42:31 2025 -0600
+
+    apps/radar/Lucid - cleaning up GuiManager class
+
+commit b234652ae90ae60c395bfe09136f42a99393ddcf
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Apr 4 14:39:23 2025 -0600
+
+    apps/radar/Lucid - adding click location to title bar
+
+commit e2f9c94ddecde1c88af322dbc8086c1e7373f11f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Apr 4 13:48:25 2025 -0600
+
+    apps/radar/Lucid - working on rendering maps and rings
+
+commit 6582490054e6c8f11747a32c77bf05870eb8cb18
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Apr 3 16:00:18 2025 -0600
+
+    apps/radar/Lucid - working on rendering maps and rings
+
+commit 1db5cafea64073f1e5147ce3c7b1aa7a2be7d6e8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Apr 2 17:39:27 2025 -0600
+
+    apps/radar/Lucid - updating rendering of radar range rings
+
+commit badb443af2e605845d50e2aa7b64376cc42db98a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Apr 1 19:59:06 2025 -0600
+
+    apps/radar/Lucid - fixing data request behavior on zoom, simplifying params related to this
+
+commit a29875afb2876e72f1877019c196f191c83e1585
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Apr 1 19:47:55 2025 -0600
+
+    apps/radar/Lucid - fixing data request behavior on zoom, simplifying params related to this
+
+commit 05cac769524e7f8c0781a6167267475cfb89cc0c
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Apr 1 19:23:45 2025 -0600
+
+    apps/radar/Lucid - fixing data request behavior on zoom, simplifying params related to this
+
+commit 67fcf541ccdbba15aa0b5492fc5062a785620469
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Apr 1 13:24:55 2025 -0600
+
+    apps/radar/Lucid - removing TestWindow code which was used to test rubberbanding operation for zooming
+
+commit bfc6c62667b82ae6b8da322067037e4afaff186e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Mar 31 21:19:19 2025 -0600
+
+    apps/radar/Lucid - working on overlay and grid rendering controls
+
+commit f37f249d8db3e04fe457b1c896e125a76ce56744
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Mar 31 19:47:47 2025 -0600
+
+    apps/radar/Lucid - debugging rubber banding for zoom, separating out rendering for overlays from grids
+
+commit 3e979f1240d32268361a702ef6d32dd0373d661e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Mar 31 09:43:24 2025 -0600
+
+    apps/radar/Lucid - cleaning up ScaledLabel
+
+commit a5ea338fa9e4d1c8203942d4784053361011bb28
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Mar 30 21:34:27 2025 -0600
+
+    apps/radar/Lucid - trying TransparentRubberBand
+
+commit ebd40913b3ece1ac13d073467c3b75706aeeacc9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Mar 30 16:43:52 2025 -0600
+
+    Debugging transparent image rendering as overlay
+
+commit 023cac0eef7ac03efa179a4a587a56d515ebb193
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Mar 30 13:01:26 2025 -0600
+
+    apps/radar/Lucid = debugging rubber banding for zoom
+
+commit cfd74f40b8cd6d9a66a6c44063613888b244e81d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Mar 30 12:58:20 2025 -0600
+
+    apps/radar/Lucid = debugging rubber banding for zoom
+
+commit 89bef5f8161103fef0606d30fcfccfd42b572455
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Mar 29 16:04:17 2025 -0600
+
+    Debugging transparent image rendering as overlay
+
+commit cc78aa1fe39a2eaf858837ecd3919cae7f8fd00e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Mar 28 20:22:29 2025 -0600
+
+    apps/radar/Lucid - working on rendering to images and then combining
+
+commit 937f8935fd7c87303ba63fcc54737502dcb66f03
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Mar 28 11:39:52 2025 -0600
+
+    apps/radar/Lucid - working on rendering to QImage
+
+commit 4e82fc24c46f00539fbd343326816d2a9b638ef1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Mar 27 21:55:37 2025 -0600
+
+    apps/radar/Lucid - rendering grid to image and then copy image to widget
+
+commit 7429d5e08914f3fb1c3fe39d5b4deef4b42c3c6a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Mar 27 21:28:36 2025 -0600
+
+    apps/radar/Lucid - rendering grid to image and then copy image to widget
+
+commit a47eac0c87bafff7ef109d9fcb4fac55c24ae9ac
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Mar 27 21:24:11 2025 -0600
+
+    apps/radar/Lucid - rendering grid to image and then copy image to widget
+
+commit d577778825305c7913e4df09c96e197b165714ef
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Mar 27 16:47:40 2025 -0600
+
+    apps/radar/Lucid - working on rendering to images
+
+commit 5cc1d82a5a5217657e339ca833b63cb374fbe8d1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Mar 27 14:17:50 2025 -0600
+
+    apps/radar/Lucid - adding use of cosine correction for polar radar data
+
+commit 8b6b6cf5083a99f6e476c47a273d45f78410f468
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Mar 26 21:53:50 2025 -0600
+
+    apps/radar/Lucid - adding rendering for polarRadar
+
+commit 1f57c61860127fb6884e7fa85b30d7367cf5cca5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Mar 26 17:17:20 2025 -0600
+
+    Adding rendering of distorted grid
+
+commit 88453024d67b0f5cd5d047d74be40741774b54c8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Mar 26 17:10:52 2025 -0600
+
+    Adding rendering of distorted grid
+
+commit 59dfd6ee3c06f693907092c9cc1de46f510da882
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Mar 25 09:59:05 2025 -0600
+
+    apps/Radx/RadxMergeVols - modifying Serial mode to allow for multiple files with the same scan name, i.e. if files are written one per sweep
+
+commit 53eacd514c8999477d877c234a2b71a16a7ec189
+Author: Gary Cunning <cunning@ucar.edu>
+Date:   Mon Mar 24 22:11:28 2025 +0000
+
+    undo last commit.
+
+commit dab6d7a8fdbbc1a03aa0861214fa397c4c9767a9
+Author: Gary Cunning <cunning@ucar.edu>
+Date:   Mon Mar 24 22:04:39 2025 +0000
+
+    made change to look for LROSE under /usr/local
+
+commit c767329e563c0b3277960a4a26360a871343403d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Mar 2 20:01:25 2025 -0700
+
+    apps/radar/Lucid - working on rendering for distorted grid
+
+commit b55219a0c3d7b584a71297e6959b1ff199a4c63d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Mar 2 17:31:44 2025 -0700
+
+    apps/radar/Lucid - working on rendering distorted grids
+
+commit 5b2194aed37b1d8475a19b281eae01417e0612f3
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 25 22:52:58 2025 -0700
+
+    apps/radar/Lucid - making Params and GlobalData singletons
+
+commit 440e201e59b0a91d25e01f48683df6f380549c46
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 25 22:44:45 2025 -0700
+
+    apps/radar/Lucid - making Params and GlobalData singletons
+
+commit f2d25f9c7c3c13248fc955079e97765e64422d8e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 25 21:35:57 2025 -0700
+
+    apps/radar/Lucid - making Params and GlobalData singletons
+
+commit 1afe86f9266b6628fca6b90ded5d4eca799a40aa
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 25 21:19:17 2025 -0700
+
+    apps/radar/Lucid - making Params and GlobalData singletons
+
+commit 7c586208dded7cb353a8cfa298533d1212331e90
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 25 20:58:13 2025 -0700
+
+    apps/tdrp/tdrp_gen - adding Instance() function for singleton instances of Params class
+
+commit feba6c72c3559041c5cc1dfed3e1ecd09b4a1a24
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 25 17:43:40 2025 -0700
+
+    apps/radar/Lucid - refactoring to use GlobalData and Params as singletons
+
+commit 691390aaed82e8ca7d48c1b7ce66d5048755565d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 25 17:41:37 2025 -0700
+
+    apps/radar/Lucid - refactoring to use GlobalData and Params as singletons
+
+commit 542cfc2ae05b7bdb148801386b44529f18ed3621
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 25 16:03:27 2025 -0700
+
+    libs/toolsa - adding MEM_zero_ptr() macro
+
+commit 19c6d51c514243c7160cc8987f903da5952c745e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 25 11:55:30 2025 -0700
+
+    apps/radar/Lucid - adding GlobalData and Constants classes
+
+commit d31611f5ba52efd5840408bd6400bfda319deabb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 24 22:26:56 2025 -0700
+
+    apps/radar/Lucid - adding use of GlobalData and Constants classes
+
+commit 2fb48d67d3977251b323d015dd2fce00801e9e40
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 24 17:05:26 2025 -0700
+
+    apps/radar/Lucid - adding GlobalData as a singleton to replace Global_data_t
+
+commit b1687f64b155be53ca974c8a67cf1439cb4133d0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 24 11:47:15 2025 -0700
+
+    apps/radar/Lucid - adding GlobalData as a singleton to replace Global_data_t
+
+commit 03b8d712d3985a90210c5aaaed0ee72087f7ddd7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 24 09:53:54 2025 -0700
+
+    apps/radar/Lucid - refactoring to make Params available as a singleton
+
+commit a490a01a4671f7b3394f7e711f564a5eeff569a4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 24 08:05:39 2025 -0700
+
+    apps/radar/Lucid - cleaning up paramdefs
+
+commit b0caf965a51576c153dcefe10f667f0a99830141
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 24 07:58:10 2025 -0700
+
+    apps/radar/Lucid - cleaning up paramdefs
+
+commit 4c41d3a39e63dbefa9c7d5578b708487c0545006
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 23 18:42:52 2025 -0700
+
+    apps/radar/Lucid - organizing paramdef file into logical sections
+
+commit a0adea224367f24582891f46f073e29692559a14
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 23 11:57:36 2025 -0700
+
+    apps/radar/Lucid - cleaning up paramdef file and parameters
+
+commit 35d419fe8476c494d9844cff076f0780762aa551
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 23 11:11:00 2025 -0700
+
+    apps/radar/Lucid - testing and fixing plot aspect ratio for latlon grid
+
+commit 575ae651357ec7648e39527f293f5d9a3971723d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 21 18:39:44 2025 -0700
+
+    Working on aspect ratio correction for lat/lon proj
+
+commit 6b44e835779a67451e8eee9298a8f64abea7103a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 21 17:20:04 2025 -0700
+
+    apps/radar/Lucid - in zooms, preserving plot aspect ratio
+
+commit fa16f014c8d9f5a716b3f1897f1cb477b61ff083
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 21 17:11:51 2025 -0700
+
+    apps/radar/Lucid - fixing post-zoom computations
+
+commit b41414f3f6ed7517d56fe8345cfd6d441b7046ba
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 21 15:11:53 2025 -0700
+
+    apps/radar/Lucid - testing zooming
+
+commit 77549025de9055133a9aa406fc52933bbdd1d8a8
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 21 15:01:51 2025 -0700
+
+    apps/radar/Lucid - refactoring VlevelManager
+
+commit afa043db4223f1ae379014e8e3d0b9a4c7bc08b4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 21 09:34:31 2025 -0700
+
+    apps/radar/Lucid - debugging initialization
+
+commit 10df6a770baf916833f6a603a0518b3bd30e53e3
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Feb 20 23:46:28 2025 -0700
+
+    apps/radar/Lucid - fixing click point rendering
+
+commit 3587b50bca7afa542c0cae5df856c86b6607f757
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Feb 20 18:29:17 2025 -0700
+
+    apps/radar/Lucid - updating rendering of click point
+
+commit 78b801362291840a77d1ddbae1e5f4d4eca4d1eb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Feb 20 16:39:25 2025 -0700
+
+    apps/radar/Lucid - working on horizontal scaling per pixel after zoom action
+
+commit be98b5f9eb05044de2295333abdbd7afb2020ec2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Feb 19 18:34:09 2025 -0700
+
+    apps/radar/Lucid - working on parameters and paramdef file ordering
+
+commit 09bd3aa1e97b924074e3aa9dd71e7de5aff3d412
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Feb 19 11:36:58 2025 -0700
+
+    apps/radar/Lucid - cleaning up parameters in paramdef, especially for winds
+
+commit 7879aa8937cf7f6c719216cb82005e2869b31db5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Feb 19 06:23:26 2025 -0700
+
+    apps/radar/Lucid - updating zoom behavior
+
+commit ac17b151f9a346a88d04090574558e4eac9b5362
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 18 19:09:33 2025 -0700
+
+    apps/radar/Lucid - cleaning up paramdefs
+
+commit ba6ba12bfd001b879865630f1c195b4f55e922a7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 18 18:41:56 2025 -0700
+
+    apps/radar/Lucid - cleaning up paramdefs
+
+commit 8b097e2d8bdb185fd0a1d1f6d07fe45ee215f0be
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 18 18:05:09 2025 -0700
+
+    apps/radar/Lucid - cleaning up paramdefs
+
+commit 344bebae4929a65ef65b5075ce0eef2932e6d29a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 18 17:00:37 2025 -0700
+
+    apps/radar/Lucid - cleaning up legends
+
+commit ed74383c6dc19a509d153f128c03cb396d5d3e60
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 17 21:33:42 2025 -0700
+
+    apps/radar/Lucid - working on zoom
+
+commit adefdbb53724520a9a83eadbb94c2d0278d7c89e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 17 17:18:44 2025 -0700
+
+    apps/radar/Lucid - checking for valid data value for plotting
+
+commit a8ec13d7a2d41b11d48fdbc2f9056c6958a82b67
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 17 17:14:31 2025 -0700
+
+    libs/qtplot/ColorMap - adding withinValidRange() method
+
+commit 8051ebab4a4149dc54d6bbbc350078c5bafaa33f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 17 12:44:05 2025 -0700
+
+    apps/radar/Lucid - working on title
+
+commit b635bce2ed5078967fc9b328fe05cd7d6f00e941
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 17 12:13:49 2025 -0700
+
+    apps/radar/Lucid - working on legends
+
+commit 2ce12e25ecf8855860a6dbeb95e1fce8f58827fb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 17 11:45:47 2025 -0700
+
+    apps/radar/Lucid - clearing margins to background color
+
+commit fc86a66015c83cd53c1b4a8b345569df01fc84ab
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 17 11:07:41 2025 -0700
+
+    apps/radar/Lucid - cleaning up axis rendering, adding check for change in overlays
+
+commit ae0f27823b5b605a561cf549d11b83cabf639ea7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 16 21:05:49 2025 -0700
+
+    apps/radar/Lucid - cleaning up legacy code
+
+commit 2f656e671fc5564c7ca816e2941c92546155baa9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 16 20:52:18 2025 -0700
+
+    apps/radar/Lucid - cleaning up legacy code for vertical selection
+
+commit 4feac6f909358a1d92f0d734d2cbbcb6e9dfc085
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 16 20:24:26 2025 -0700
+
+    apps/radar/Lucid - cleaning up legacy code
+
+commit 2b48f60773c4279fc403ea702ecd1953483513be
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 16 20:12:08 2025 -0700
+
+    apps/radar/Lucid - cleaning up legacy code
+
+commit aca78b73c549f87df36fddac4063c36c57644582
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 16 19:46:12 2025 -0700
+
+    apps/radar/Lucid - activating single . click to toggle between most recent fields
+
+commit 8c2d0e74c44351ab7ff44dce89b8be4dd6187e97
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 16 18:55:12 2025 -0700
+
+    apps/radar/Lucid - finalizing vlevel selector, commenting out radio-button selector
+
+commit 574beb1109c906f3294ecd829e97e8bb0a932a6f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 16 18:12:26 2025 -0700
+
+    apps/radar/Lucid - improving vlevel selector
+
+commit a56fcd6e09f73d942139ece7b9ad3a31ee188589
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 16 17:59:10 2025 -0700
+
+    apps/radar/Lucid - improving vlevel selector
+
+commit 613d0cc7dc39c50fce94cdd498ea9d71f964acb3
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 16 15:08:17 2025 -0700
+
+    apps/radar/Lucid - adding titles to vlevel selector
+
+commit 27bc3a6b6b3b8c0f746bc63081b7b3b2eb233529
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Feb 15 22:14:12 2025 -0700
+
+    apps/radar/Lucid - testing zoom behavior
+
+commit a3a0b3565778d2059e542f9dd654100662530c9b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Feb 15 15:02:06 2025 -0700
+
+    apps/radar/Lucid - working on vlevel selector
+
+commit d5485d81598b036878002a2775351830aa36ed20
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 14 21:42:35 2025 -0700
+
+    apps/radar/Lucid - working on vlevel selector
+
+commit 5f79d657a041083a1b3628e7be3423a9b86597dd
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 14 21:21:27 2025 -0700
+
+    apps/radar/Lucid - working on vlevel selector
+
+commit 71027072ae5380cfba920f1a6c2f93881a83acf9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 14 17:40:18 2025 -0700
+
+    apps/radar/Lucid - adding VlevelSelector widget
+
+commit c171688d37d06a3777b71be6e7e0c2c26c551a85
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 14 15:14:51 2025 -0700
+
+    apps/radar/Lucid - working on VlevelSelector
+
+commit 8f1c1f3961e6f8ce80643fbb5e6805db4de0bcc3
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 14 14:48:55 2025 -0700
+
+    apps/radar/Lucid - fixing resizing
+
+commit b6e48cfb0bd0cbafb8d0d9c7e0165ee364345926
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Feb 13 16:58:20 2025 -0700
+
+    apps/radar/Lucid - testing code to debounce resize events
+
+commit 630cddf83d0f2a1722db52973ca142f02371ad2d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Feb 12 19:13:25 2025 -0700
+
+    apps/radar/Lucid - adding VlevelSelector
+
+commit e834ad7436c7c14a29b3359493d21e8df261e333
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Feb 12 18:55:22 2025 -0700
+
+    apps/radar/Lucid - adding VlevelSelector class
+
+commit 90727c2ff1389c1f16ef0a73c990ad733f371ae4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Feb 12 18:39:16 2025 -0700
+
+    apps/mdv_utils/NcGeneric2Mdv - adding support for cm1 model output files
+
+commit ba31f45f2778ef75d82085d22558693072602757
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Feb 12 16:06:29 2025 -0700
+
+    apps/mdv_utils/NcGeneric2Mdv - updating to read in cm1 model files
+
+commit 3ce88d1a034630f53c6c255753381db547f19990
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 11 18:36:50 2025 -0700
+
+    apps/radar/Lucid - fixing location of some GUI elements
+
+commit 3369689763371798d422913ee034fdf7a12024a5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 11 16:33:45 2025 -0700
+
+    apps/radar/Lucid - fixing location of some GUI elements
+
+commit 39b5b3476b32ef93921bf3a30d54fc965332a31e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 9 20:40:13 2025 -0700
+
+    apps/radar/Lucid - fixing placement of TimeControl snd FieldMenu widgets
+
+commit af7b7312a32127a7ff15c4293ce0c445023f39ca
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 9 20:24:55 2025 -0700
+
+    apps/radar/Lucid - fixing placement of TimeControl widget
+
+commit 6c97abb5fbf081857b6bffaf3308490811298c47
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 7 13:58:59 2025 -0700
+
+    apps/radar/Lucid, in MdvReader setting some char* members to string
+
+commit f1ecf51f5f5160006fa53e865fa9415e4a18603b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 7 11:35:02 2025 -0700
+
+    apps/radar/Lucid - archiving scripts
+
+commit 11775edd10b9815eda3e13967cc476e5eefebbaa
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Feb 7 11:33:22 2025 -0700
+
+    apps/radar/Lucid - renaming VertWindow -> VertManager
+
+commit 4e77eef3f3d752e65d13f9444f0af20389945982
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Feb 6 18:27:06 2025 -0700
+
+    apps/radar/Lucid HorizWidget.cc -> HorizView.cc, VertWidget.cc -> VertView.cc
+
+commit e27198e6ebb95fb17d9f8f34960d38874baa4297
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Feb 6 18:11:03 2025 -0700
+
+    apps/radar/Lucid - MetRecord to MdvReader, mrec to mread
+
+commit ae0d580b09badc46250562b1e63a8f67d7fb1da7
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Feb 6 18:05:35 2025 -0700
+
+    apps/radar/Lucid - cleaning up globals
+
+commit 11f3942c57a1d71006708ca1a92332cf3ed100a2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Feb 6 15:19:32 2025 -0700
+
+    apps/radar/Lucid - git mv render_polar_grid.cc.new to old dir
+
+commit 65b35f0d8d4e5e2ccc36484f801ffbc4cfbc8f30
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Feb 6 15:17:56 2025 -0700
+
+    apps/radar/Lucid - renamed class, MetRecord -> MdvReader
+
+commit 907acd01099031f2c65f807d00389ea8d8449405
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Feb 6 15:05:39 2025 -0700
+
+    apps/radar/Lucid - removing dependency on cidd_funcs.h
+
+commit d7a2f2c833d297e18e54b0d732443034e49b9b1a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Feb 6 11:39:41 2025 -0700
+
+    apps/radar/Lucid - moving non-object code to old
+
+commit 593d59f59f30aaad0c7ad0baa8b158937228dbba
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Feb 6 10:56:20 2025 -0700
+
+    Moving code from cidd_init.cc into Lucid.cc
+
+commit 9aba320c0728ebb8498ebbbbb36e55b987baad45
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Feb 5 18:44:46 2025 -0700
+
+    apps/radar/Lucid - testing TimeControl
+
+commit 2b3c88c7bf3e28d61c5337604868ec077cc2648f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Feb 5 18:40:25 2025 -0700
+
+    apps/radar/Lucid - testing TimeControl
+
+commit cded2c0dd505c3562b9d30ebcdd1e50b1ea8e5a9
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Feb 5 18:16:34 2025 -0700
+
+    apps/radar/Lucid - working on TimeControl
+
+commit 9404ce46bfad4300986fc7e6abbd8764f6302c78
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Feb 5 17:05:42 2025 -0700
+
+    apps/radar/Lucid - working on TimeControl
+
+commit 90bd80ffd84595b21d719adced168fe852d4073a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Feb 5 17:03:15 2025 -0700
+
+    apps/radar/Lucid - working on TimeControl
+
+commit ba4743723c4ec5269cbc5a00418a2637d20e4702
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 4 22:27:08 2025 -0700
+
+    apps/radar/Lucid - working on TimeControl
+
+commit f5caac4a62c9a356b35b271b095a952a3383f5ea
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 4 19:04:30 2025 -0700
+
+    apps/radar/Lucid - working on TimeControl
+
+commit 940484f9c23b913f97737f02a1d83f6ce57a5849
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Feb 4 18:03:57 2025 -0700
+
+    apps/radar/Lucid - working on TimeControl
+
+commit f127391e06c5f7abd995797d525c38a36829c89f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 3 22:37:56 2025 -0700
+
+    apps/radar/Lucid - hooking up time slider
+
+commit 5a5e0c5e90200be433c9ea77f3c1b636531a37aa
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 3 19:21:44 2025 -0700
+
+    apps/radar/Lucid - changing to use DateTime
+
+commit 8435b0542b74613ab38677e5210cd8c6194b2910
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 3 19:03:07 2025 -0700
+
+    Adding comments to libs/toolsa/DateTime class
+
+commit 4f10289f4f6b0dfc44eb50c63d468b658897e9a5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 3 15:50:49 2025 -0700
+
+    apps/radar/Lucid - removing Makefile.qmake from git check in
+
+commit d9eab82b76f8e9151fbc590648507db5332ae493
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Feb 3 15:48:25 2025 -0700
+
+    apps/radar/Lucid - working on time controller
+
+commit e66a12df103d1ceaf3030f4d3fe779918b6ed491
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 2 21:32:23 2025 -0700
+
+    apps/radar/Lucid - working on horiz legends
+
+commit 69cefd357e073a84079743b09a0a4a9cc6bbce6a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Feb 2 19:43:58 2025 -0700
+
+    apps/radar/Lucid - working on horiz legends
+
+commit 49ac5011dc9d5217587bc1af71475e8195825d27
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jan 31 17:31:59 2025 -0700
+
+    apps/Radx/src/RadxVolTimingStats - updating Python plotting scripts
+
+commit b41819c238f705757bcb3b516dac2d419088425d
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 29 19:21:47 2025 -0700
+
+    apps/radar/Lucid - cleaning up legacy code
+
+commit f8fe26a52011614be7545db0894caee4c3d1410f
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 29 19:16:03 2025 -0700
+
+    apps/radar/Lucid - cleaning up legacy code
+
+commit 4462d21b6ed2dd4152d161f666773e14c9c28ab1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 29 19:11:42 2025 -0700
+
+    apps/radar/Lucid - cleaning up legacy code
+
+commit 48c8f62fa496b47a2bab4ec16a54476f4df3c4fb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 29 18:51:50 2025 -0700
+
+    apps/radar/Lucid - cleaning up legacy code
+
+commit db048157924401f3a693b339a41398a60b3b59db
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 29 17:39:20 2025 -0700
+
+    apps/radar/Lucid - cleaning up MetRecord code, and TimeControl use
+
+commit d2763d65347171c266e7310db789987986b826c5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jan 27 17:27:07 2025 -0700
+
+    apps/radar/Lucid - testing vlevel change
+
+commit 1d5f8e1d9073444d95a581717e4563f31e905a27
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jan 26 17:07:38 2025 -0700
+
+    apps/radar/Lucid - working on VlevelManager
+
+commit 8f871593da2a0e94a17fdef285c7ef8f2d1cf4e4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jan 26 16:32:41 2025 -0700
+
+    apps/radar/Lucid - updating Field menu table slots
+
+commit bca049783d7e8ed4d07a97e1492c64eceee0f77a
+Author: karboski <karboski@ucar.edu>
+Date:   Fri Jan 24 15:35:31 2025 +0000
+
+    libs/Radx - tweak new enums and fix sweepModeFromStr str.find precedence
+
+commit c023d045cc33f80be4259e7cd1cf2b987b4e8fd4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jan 23 04:27:59 2025 -0700
+
+    Adding apps/Radx/src/Radx2Fmq
+
+commit 85587a836e3bda889a0e16f2e7b0e0decdd38106
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 22 19:08:07 2025 -0700
+
+    adding apps/Radx/Radx2Fmq - copied from Radx2Dsr
+
+commit bd84ec7a60dd3fcf125b7fc49c7da6b7a08548dc
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 22 19:04:57 2025 -0700
+
+    adding apps/Radx/Radx2Fmq - copied from Radx2Dsr
+
+commit d8fe6f8c799fd6d84dc9840c08f93f2616d9ae08
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 22 18:50:26 2025 -0700
+
+    apps/Radx - adding SWEEP_MODE enums for APAR-specific scans
+
+commit 7bf01ea6d125d986b4fd70a0f23f8de91f5b614e
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 22 18:47:06 2025 -0700
+
+    libs/Radx - adding SWEEP_MODE enums for APAR-specific scans
+
+commit b1f9c385c1080761a7f0e98cce0f9ca5449f1f3a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 22 18:16:15 2025 -0700
+
+    apps/radar/Lucid - debugging manual zoom
+
+commit b320bfbc38e6810c0215c57bef7cd98d0b1ac5fb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 22 11:04:04 2025 -0700
+
+    apps/radar/Lucid - working on rubber banding for zoom
+
+commit 1d50ecaa8d27316fcf7f447503cca8fd999e7567
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 22 10:32:04 2025 -0700
+
+    apps/radar/HawkEye - cleaning up unused members in PolarWidget
+
+commit 58c0e63770a473ae1cf93cc6354bf10c2fe17aec
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 22 10:08:25 2025 -0700
+
+    apps/radar/Lucid - working on rubber banding for zoom
+
+commit c666eb92ed1da7cfcefb5a5e75c92894d681b027
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 22 07:49:24 2025 -0700
+
+    apps/radar/Lucid - working on rubber banding for zoom
+
+commit fe43ccf3a4750f2555a2690b2d70f9d3c8866ce0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jan 21 21:26:01 2025 -0700
+
+    apps/radar/Lucid - linking zooms actions to rendering
+
+commit 87212da9075cf4240c3102eb5488c503f0049ff2
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jan 21 19:44:02 2025 -0700
+
+    apps/radar/Lucid - linking zooms actions to rendering
+
+commit 07dcb25ef68bfe49fffd58d990ab8c065dad7cfe
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Tue Jan 21 19:37:37 2025 -0700
+
+    apps/radar/Lucid - linking zooms to rendering
+
+commit 90aa42d66c7575f0bff8a6383ba4503bb237ed84
+Author: Gary Cunning <cunning@ucar.edu>
+Date:   Tue Jan 21 13:33:22 2025 -0700
+
+    removed <rapformats/DsRadarMsg.hh> from list of includes. There is no longer
+    a dependence on DsRadarMsg.
+
+commit 61f8ff9d5f63b086f0234ff2e8d76c8e3ab1c6af
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jan 20 18:35:37 2025 -0700
+
+    apps/radar/Lucid - adding XyBox
+
+commit 642eb4dc2624aff95cd6d7ff062129beae17616a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jan 20 17:54:52 2025 -0700
+
+    apps/radar/Lucid - working on zooms
+
+commit a612e28855c85fdf3d9b8fec77f5eba8dae940a5
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jan 20 15:43:39 2025 -0700
+
+    apps/radar/Lucid - moving data retrieval control into the MetRecord class
+
+commit 26c71b5d633844d43ec6f386cbe50bf290f97799
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jan 20 09:27:12 2025 -0700
+
+    apps/radar/Lucid - GuiManager
+
+commit 12e9fc285d87659520c9677eb626d6a1c60189b0
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jan 19 22:04:00 2025 -0700
+
+    apps/radar/Lucid - MetRecord - working on threading for data request
+
+commit b84e6571fd38dcd1593d44359706e128bed6c4e4
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sun Jan 19 19:57:20 2025 -0700
+
+    apps/radar/Lucid - MetRecord - working on threading for data request
+
+commit 1e99f8be9099575a7114123409ff3ad8f781594a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jan 18 12:45:33 2025 -0700
+
+    libs/Radx/src/NoaaFsl/NoaaFslRadxFile.cc - handling missing values
+
+commit 14948329d749ff8035a098f0fb546bbd5edd4176
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Sat Jan 18 11:49:37 2025 -0700
+
+    libs/Radx/src/NoaaFsl/NoaaFslRadxFile.cc - debugging on latest India data files
+
+commit 3af3adbb8f933c0778201fde619dbbbde4b15399
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Fri Jan 17 17:45:17 2025 -0700
+
+    libs/Radx/src/NoaaFsl/NoaaFslRadxFile.cc - debugging for India NOAA netcdf format file
+
+commit 3d37bfca21733078567823198aae1047a063c8ed
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jan 16 16:26:08 2025 -0700
+
+    libs/Radx/NoaaFslRadxFile.cc - updating for India sample data
+
+commit 63695103e63538514a98c713d7e1978e4465efec
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jan 16 11:17:30 2025 -0700
+
+    libs/Radx/NoaaFslRadxFile.cc - updating for India sample data
+
+commit 66046ecfd8e33950f38800932b3be974fd8f498a
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Mon Jan 13 13:30:15 2025 -0700
+
+    libs/Radx/NoaaFslRadxFile - adding vars etc
+
+commit 18192dca79e3f60d17fe7f9f763445c90e2209ac
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jan 9 17:23:05 2025 -0700
+
+    apps/radar/Lucid - activating data gathering in thread
+
+commit 86ae86c34aeb1c7925b22e0184ff30ff85d2f12b
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Thu Jan 9 15:01:16 2025 -0700
+
+    apps/radar/Lucid - working on field change signals
+
+commit fa5254bd1431520e1b0cedf74776f816efb5ce07
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 8 19:19:59 2025 -0700
+
+    apps/radar/Lucid: CartManager -> GuiManager
+
+commit 5ca9976dae3c40101e1e8ae1dc643747623f9ccb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 8 19:09:15 2025 -0700
+
+    apps/radar/Lucid - removing DisplayManager class, consolidating DisplayManager into CartManager
+
+commit 1f72cf6a6d9ec6aafa5af6e41cf3ee72f4114d27
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 8 18:31:40 2025 -0700
+
+    apps/radar/Lucid - adding ReadVolH() to MetRecord for threaded read
+
+commit 886afd97c3c5ba029d4a74c39536d49f5e5b7ee1
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 8 17:27:59 2025 -0700
+
+    apps/radar/Lucid - adding ReadVolH() to MetRecord for threaded read
+
+commit 938fe246cde8aa960d5fb63f41c38c7be77614eb
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 8 08:08:40 2025 -0700
+
+    Cleaning up ReleaseNotes_20250105.md
+
+commit ae002a03e20afd4703c381648cba4f674eb7d714
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 8 08:08:03 2025 -0700
+
+    Cleaning up ReleaseNotes_20250105.md
+
+commit 29a0d23043be8bbd523da5b11be951fc1afced03
+Author: mike-dixon <dixon@ucar.edu>
+Date:   Wed Jan 8 08:07:05 2025 -0700
+
+    Cleaning up ReleaseNotes_20250105.md
+
+commit 87e55809f6aad8baac3aec027aa78562d8e82ece
+Author: leavesntwigs <bjav7496@gmail.com>
+Date:   Mon Jan 6 17:40:59 2025 -0700
+
+    fixing double spacing of release notes
+
+commit b039d4aeeb0e134d61ee4eb8d5239be79c008242
+Author: leavesntwigs <bjav7496@gmail.com>
+Date:   Mon Jan 6 17:38:48 2025 -0700
+
+    organizing content of release notes
+
+commit a7e3e5695575f9425a75e14f61022e75450014a7
+Author: leavesntwigs <bjav7496@gmail.com>
+Date:   Mon Jan 6 17:25:32 2025 -0700
+
+    updating release notes
+
+commit 7174728045f722ff287b70e603504672b9fe8c1c
+Author: leavesntwigs <bjav7496@gmail.com>
+Date:   Mon Jan 6 17:20:13 2025 -0700
+
+    updating release notes
