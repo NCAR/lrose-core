@@ -1,3 +1,8 @@
+# command to create this file
+#
+#   git log --until 2025/08/12 --since 2025/01/05 > & /tmp/gitlog.txt
+#
+
 commit 13be47d8d58def93df30c0663f30492085da870c
 Author: mike-dixon <dixon@ucar.edu>
 Date:   Mon Aug 11 08:24:54 2025 -0600

@@ -1,16 +1,9 @@
-# command to create this file
-#
-#   git log --until 2025/08/12 --since 2025/01/05 > & /tmp/gitlog.txt
-#
-
-New applications
-================
+# New applications
 
 Adding apps/titan/Tstorms2NetCDF - convert Titan binary data to NetCDF
 Adding apps/Radx/src/Radx2Fmq - replay Radx files into FMQ
 
-Application updates
-===================
+# Application updates
 
 apps/radar/Lucid - adding prototype to release
 apps/radar/Lucid - major additions to Lucid prototype since previous release
@@ -48,13 +41,11 @@ apps/radar/Iq2Dsr - bug fixes
 
 apps/radar/TsAscope - updates for Qt6
                     
-Scripts
-=======
+# Scripts
 
 Adding apps/scripts/runas - run as new user with X forwarding
 
-Libraries
-=========
+# Libraries
 
 Qt6 - adding check for version 6.4 for deprecated isValidColor() call
 Qt6 - apps/radar/IpsEye/FieldColorController - fixing deprecated use of isValidColor()
@@ -89,8 +80,7 @@ libs/toolsa/TaStr - adding replaceSubStr() method
 
 removed <rapformats/DsRadarMsg.hh> from list of includes. There is no longer a dependence on DsRadarMsg.
 
-Build system
-============
+# Build system
 
 createCMakeLists.py - c++11 -> c++17
 Updating createCMakeLists.py to handle tdrp singleton
@@ -98,8 +88,7 @@ Adding Lucid and EccoStats to the CmakeLists
 apps/mdv_utils - cleaning up Makefiles
 apps/didss - cleaning up Makefiles
 
-Docs
-====
+# Docs
 
 Adding documentation links to README.md at the top level
 
