@@ -383,7 +383,7 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
                      "ConvStrat",
                      "1 = stratiform, 2 = convective",
                      ConvStratFinder::CATEGORY_MISSING,
-                     convStrat.getPartition2D());
+                     convStrat.getEchoType2D());
   }
 
   if (_params.conv_strat_write_max_texture) {
@@ -414,7 +414,7 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
              "dBZ",
              Radx::FL32, 1.0, 0.0,
              convStrat.getMissingFl32(),
-             convStrat.getColMaxDbz());
+             convStrat.getDbzColMax());
     
     addField(vol, proj, vlevel2D,
              "FractionActive",
