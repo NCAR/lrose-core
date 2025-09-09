@@ -42,6 +42,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/uusleep.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/ucopyright.h>
 #include <radar/RadarComplex.hh>
 #include <radar/iwrf_data.h>
 #include <radar/iwrf_functions.hh>
@@ -64,6 +65,7 @@ TsUdp2Fmq::TsUdp2Fmq(int argc, char **argv)
   _messageInProgress = false;
   _inputBuf.setAllowShrink(false);
   _done = false;
+  _primed = false;
 
   _pulseCount = 0;
   _posnLastChecked = 0;
@@ -86,6 +88,7 @@ TsUdp2Fmq::TsUdp2Fmq(int argc, char **argv)
   // set programe name
 
   _progName = "TsUdp2Fmq";
+  ucopyright((char *) _progName.c_str());
 
   // get command line args
 
@@ -415,6 +418,12 @@ int TsUdp2Fmq::_readUdpPacket()
     return -1;
   }
   
+  if (!_primed) {
+    _primed = true;
+    std::cerr << "First IWRF packet assembled:" << std::endl;
+    iwrf_packet_info_print(stderr, *reinterpret_cast<iwrf_packet_info_t*>(_inputBuf.getPtr()));
+  }
+    
   _messageInProgress = false;
   _sockTimedOut = false;
   _timedOutCount = 0;

@@ -96,6 +96,7 @@ private:
   int _unknownCount;
   bool _messageInProgress;
   bool _done;
+  bool _primed;
 
   // input message
 
