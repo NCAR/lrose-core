@@ -320,6 +320,14 @@ void AScope::processTimeSeries(
       displayData();
       break;
     }
+    case TS_POWER_PLOT:
+      P.resize(Idata.size());
+      for (unsigned int i = 0; i < P.size(); i++) {
+        P[i] = 10.0 * log10(Idata[i]*Idata[i] + Qdata[i]*Qdata[i]);
+      }
+      _zeroMoment = zeroMomentFromTimeSeries(Idata, Qdata);
+      displayData();
+      break;
     default:
       // ignore others
       break;
@@ -378,6 +386,13 @@ void AScope::displayData()
               false,
               "Frequency (Hz)",
               "Power (dB)");
+      break;
+    case TS_POWER_PLOT:
+      if (pi->autoscale()) {
+        autoScale(P, displayType);
+        pi->autoscale(false);
+      }
+      _scopePlot->TimeSeries(P, yBottom, yTop, 1, "Time", "Power (dB)");
       break;
   }
 }
@@ -499,6 +514,7 @@ void AScope::initPlots()
   _pulsePlots.insert(TS_IANDQ_PLOT);
   _pulsePlots.insert(TS_IVSQ_PLOT);
   _pulsePlots.insert(TS_SPECTRUM_PLOT);
+  _pulsePlots.insert(TS_POWER_PLOT);
 
   _tsPlotInfo[TS_AMPLITUDE_PLOT] = 
     PlotInfo(1, TS_AMPLITUDE_PLOT, "I and Q", "Amplitude",
@@ -514,6 +530,10 @@ void AScope::initPlots()
 
   _tsPlotInfo[TS_SPECTRUM_PLOT] =
     PlotInfo(4, TS_SPECTRUM_PLOT, "Power Spectrum", "Power Spectrum",
+             -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
+
+  _tsPlotInfo[TS_POWER_PLOT] =
+    PlotInfo(5, TS_POWER_PLOT, "Power", "Power",
              -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
 
   // remove the one tab that was put there by designer
@@ -678,6 +698,9 @@ void AScope::autoScale(std::vector<double>& data1,
   double max1 = *std::max_element(data1.begin(), data1.end());
   double max2 = *std::max_element(data2.begin(), data2.end());
   double max = std::max(max1, max2);
+
+  max = std::max(max, -min);
+  min = -max;
 
   // adjust the gains
   adjustGainOffset(min, max, displayType);

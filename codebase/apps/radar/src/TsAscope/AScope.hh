@@ -121,7 +121,8 @@ Q_OBJECT
     TS_AMPLITUDE_PLOT,  ///<  time series amplitude plot
     TS_IANDQ_PLOT,      ///<  time series I and Q plot
     TS_IVSQ_PLOT,       ///<  time series I versus Q plot
-    TS_SPECTRUM_PLOT    ///<  time series power spectrum plot
+    TS_SPECTRUM_PLOT,   ///<  time series power spectrum plot
+    TS_POWER_PLOT       ///<  time series power plot
   };
   
 public:
@@ -407,6 +408,9 @@ protected:
   std::vector<double> I;
   /// Holds Q data to display for I vs. Q display
   std::vector<double> Q;
+
+  /// Holds P data to display for  Power display
+  std::vector<double> P;
 
   /// Holds power spectrum values for display.
   std::vector<double> _spectrum;
