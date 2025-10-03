@@ -68,7 +68,7 @@ For details on builds and the code development environment, see:
 | [build](./build/README.md) | build scripts, release scripts and associated files |
 | [codebase/libs](./docs/libs/lrose-libs-summary.pdf) | list of libraries |
 | [codebase/apps](./docs/apps/lrose_app_table.md) | table of primary applications |
-| [codebase/apps](./docs/apps/lrose-apps-summary.pdf) | full list of legacy applications |
+| [codebase/apps](./docs/apps/lrose-apps-summary.pdf) | directory list of app code |
 | [github.com/ncar/lrose-bootstrap](https://github.com/NCAR/lrose-bootstrap) | Bootstrap scripts and configurations for releases and builds |
 
 ### DOCUMENTATION LINKS
