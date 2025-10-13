@@ -50,11 +50,11 @@ def main():
                       help='Name of radar')
     parser.add_option('--width',
                       dest='figWidthMm',
-                      default=300,
+                      default=200,
                       help='Width of figure in mm')
     parser.add_option('--height',
                       dest='figHeightMm',
-                      default=100,
+                      default=150,
                       help='Height of figure in mm')
     parser.add_option('--peakPowerDbm',
                       dest='peakPowerDbm',
