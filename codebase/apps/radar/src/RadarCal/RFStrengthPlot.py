@@ -48,17 +48,13 @@ def main():
                       dest='radarName',
                       default='SPOL',
                       help='Name of radar')
-    parser.add_option('--title',
-                      dest='title',
-                      default='S-Pol Calibration',
-                      help='Title for plot')
     parser.add_option('--width',
                       dest='figWidthMm',
-                      default=240,
+                      default=300,
                       help='Width of figure in mm')
     parser.add_option('--height',
                       dest='figHeightMm',
-                      default=300,
+                      default=100,
                       help='Height of figure in mm')
     parser.add_option('--peakPowerDbm',
                       dest='peakPowerDbm',
@@ -98,6 +94,8 @@ def main():
     if (options.verbose):
         options.debug = True
 
+    global peakPowerW, g0, efficiency, diameter, prf, tau, freq, wavelength
+
     peakPowerW = math.pow(10.0, float(options.peakPowerDbm) / 10.0) / 1.0e3
     if (float(options.peakPowerKw) > 0) :
         peakPowerW = float(options.peakPowerKw) * 1000.0
@@ -111,6 +109,8 @@ def main():
     freq = float(options.freq)
     wavelength = 2.99792458e8 / freq;
 
+    global r1, r2, Snf, Sffr1, Sffr2
+    
     r1 = (diameter * diameter) / (4.0 * wavelength)
     r2 = 0.6 * (diameter * diameter) / wavelength
 
@@ -136,170 +136,55 @@ def main():
     print(f"  Sffr1 (W/m2) {Sffr1:.2g}", file=sys.stderr)
     print(f"  Sffr2 (W/m2) {Sffr2:.2g}", file=sys.stderr)
 
-    # read in column headers
-
-    # readColumnHeaders()
-
-    # read in cal results
-
-    # readCalResults()
-
     # plot results
     
-    # doPlot()
+    doPlot()
 
     sys.exit(0)
     
 ########################################################################
-# Read columm headers for the data
-# this is in the fist line
-
-def readColumnHeaders():
-
-    global colHeaders
-    global colIndex
-    global colData
-
-    fp = open(options.inputFilePath, 'r')
-    line = fp.readline()
-    fp.close()
-    
-    commentIndex = line.find("#")
-    if (commentIndex == 0):
-        # header
-        headerLine = line.lstrip("# ").rstrip("\n")
-    else:
-        # no header, use defaults
-        headerLine = "siggen hc vc hx vx hcmhx vcmvx wgh wgv hcNs vcNs hxNs vxNs"
-
-    colHeaders = headerLine.split()
-    if (options.verbose):
-        print('colHeaders: ', colHeaders, file=sys.stderr)
-    
-    for index, var in enumerate(colHeaders, start=0):
-        colIndex[var] = index
-        colData[var] = []
-        
-    if (options.verbose):
-        print('colIndex: ', colIndex, file=sys.stderr)
-
-    return 0
-
-########################################################################
-# Read in the data
-
-def readCalResults():
-
-    global nData
-    global colData
-    global obsTimes
-
-    # open file
-
-    fp = open(options.inputFilePath, 'r')
-    lines = fp.readlines()
-    fp.close()
-
-    # read in a line at a time, set colData
-
-    nData = 0
-    for line in lines:
-        
-        commentIndex = line.find("#")
-        if (commentIndex >= 0):
-            continue
-            
-        # data
-        
-        data = line.strip().split()
-        for index, var in enumerate(colHeaders, start=0):
-            if (float(data[index]) < -990):
-                colData[var].append(math.nan)
-            else:
-                colData[var].append(float(data[index]))
-        nData = nData + 1
-
-    if (options.debug):
-
-        print('Data:', file=sys.stderr)
-
-        # print headers
-
-        print('{:>8s}'.format("index"), end=' ', file=sys.stderr)
-        for ifield, field in enumerate(colHeaders, start=0):
-            fieldName = colHeaders[ifield]
-            if (ifield == len(colHeaders) - 1):
-                print('{:>9s}'.format(fieldName), end='', file=sys.stderr)
-            else:
-                print('{:>9s}'.format(fieldName), end=' ', file=sys.stderr)
-        print('', file=sys.stderr)
-
-        # print data
-
-        for index in range(0, nData):
-
-            print('{:8}'.format(index), end=' ', file=sys.stderr)
-
-            for ifield, field in enumerate(colHeaders, start=0):
-                fieldName = colHeaders[ifield]
-                fieldVal = colData[fieldName][index]
-                if (ifield == len(colHeaders) - 1):
-                    print('{:9.3f}'.format(fieldVal), end='', file=sys.stderr)
-                else:
-                    print('{:9.3f}'.format(fieldVal), end=' ', file=sys.stderr)
-
-            print('', file=sys.stderr)
-
-########################################################################
 # Plot
 
 def doPlot():
-
-    global fig1
-    global ax1
-    global ax2
-    global ax3
-
+    
     widthIn = float(options.figWidthMm) / 25.4
     htIn = float(options.figHeightMm) / 25.4
 
     fig1 = plt.figure(1, (widthIn, htIn))
+    ax1 = fig1.add_subplot(1,1,1,xmargin=0.0)
 
-    ax1 = fig1.add_subplot(3,1,1,xmargin=0.0)
-    ax2 = fig1.add_subplot(3,1,2,xmargin=0.0)
-    ax3 = fig1.add_subplot(3,1,3,xmargin=0.0)
+    ax1.clear()
 
-    plotCalResults()
+    maxRange = int(r2 * 2.0) + 1
+    dists = np.arange(maxRange, dtype=float)
+    # print(" dists: ", dists)
+
+    pwrDens = np.arange(maxRange, dtype=float)
+    for ii in range(0, len(dists)):
+        dist = dists[ii]
+        if (dist <= r1):
+            pwrDens[ii] = Snf
+        elif (dist >= r2):
+            pwrDens[ii] = (g0 * tau * prf * peakPowerW) / (4.0 * math.pi * dist * dist)
+        else:
+            pwrDens[ii] = Snf + ((dist - r1) / (r2 - r1)) * (Sffr2 - Snf)
+
+    for ii in range(0, len(dists)):
+        print("  ii, dist, pwrDens: ", ii, ", ", dists[ii], ", ", pwrDens[ii])
     
-    filePath = options.inputFilePath
-    fileName = os.path.basename(filePath)
-    subdirName = os.path.basename(os.path.dirname(filePath))
-    titleStr = "Calibration file: " + subdirName + " " + fileName
+    ax1.plot(dists, pwrDens, linestyle = "-", label = 'pwrDens', color = 'red')
 
+    ax1.set_xlabel("Range from antenna (m)")
+    ax1.set_ylabel("RF power density (W/m2)")
+    ax1.grid(True)
+
+    titleStr = options.radarName + " RF density plot"
     fig1.suptitle(titleStr)
+
     plt.tight_layout()
-    plt.subplots_adjust(top=0.96)
+    plt.subplots_adjust(top=0.9)
     plt.show()
 
-########################################################################
-# Reload and redraw - after getting new file
-
-def reloadAndDraw():
-
-    # read in column header
-
-    if (readColumnHeaders() != 0):
-        sys.exit(-1)
-
-    # read in file
-
-    readInputData()
-
-    # plot XY
-    
-    plotCalResults()
-    plt.draw()
-    
 ########################################################################
 # Plot data on axes
 
@@ -401,26 +286,6 @@ def plotCalResults():
     ax3.set_ylim([zdrMean - 2.0, zdrMean + 2.0])
 
     return
-
-########################################################################
-# Run a command in a shell, wait for it to complete
-
-def runCommand(cmd):
-
-    if (options.debug):
-        print("running cmd:",cmd, file=sys.stderr)
-    
-    try:
-        retcode = subprocess.check_call(cmd, shell=True)
-        if retcode != 0:
-            print("Child exited with code: ", retcode, file=sys.stderr)
-            exit(1)
-        else:
-            if (options.debug):
-                print("Child returned code: ", retcode, file=sys.stderr)
-    except OSError as e:
-        print("Execution failed:", e, file=sys.stderr)
-        exit(1)
 
 ########################################################################
 # Run - entry point
