@@ -88,7 +88,7 @@ RadxNcfStr::RadxNcfStr()
   COUPLER_FORWARD_LOSS_H = "coupler_forward_loss_h";
   COUPLER_FORWARD_LOSS_V = "coupler_forward_loss_v";
   CREATED = "created";
-  DB = "db";
+  DB = "dB";
   DBM = "dBm";
   DBZ = "dBZ";
   DBZ_CORRECTION = "dbz_correction";
