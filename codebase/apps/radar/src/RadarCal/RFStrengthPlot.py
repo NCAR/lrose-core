@@ -133,7 +133,7 @@ def main():
     print(f"  r1 (m) {r1:.3g}", file=sys.stderr)
     print(f"  r2 (m) {r2:.3g}", file=sys.stderr)
     print(f"  Snf (W/m2) {Snf:.2g}", file=sys.stderr)
-    print(f"  Sffr1 (W/m2) {Sffr1:.2g}", file=sys.stderr)
+    # print(f"  Sffr1 (W/m2) {Sffr1:.2g}", file=sys.stderr)
     print(f"  Sffr2 (W/m2) {Sffr2:.2g}", file=sys.stderr)
 
     # plot results
@@ -169,8 +169,8 @@ def doPlot():
         else:
             pwrDens[ii] = Snf + ((dist - r1) / (r2 - r1)) * (Sffr2 - Snf)
 
-    for ii in range(0, len(dists)):
-        print("  ii, dist, pwrDens: ", ii, ", ", dists[ii], ", ", pwrDens[ii])
+    # for ii in range(0, len(dists)):
+    #     print("  ii, dist, pwrDens: ", ii, ", ", dists[ii], ", ", pwrDens[ii])
     
     ax1.plot(dists, pwrDens, linestyle = "-", label = 'pwrDens', color = 'red')
 
