@@ -1,0 +1,6 @@
+#! /bin/csh
+
+RFStrengthPlot.py --radarName S-Pol --peakPowerDbm 87.95 --gain 45.0 --efficiency 0.9 --diameter 8.5 --prf 1000 --pulseLength 1.0e-6 --freq 2.809e9 --sector 30.0
+
+
+

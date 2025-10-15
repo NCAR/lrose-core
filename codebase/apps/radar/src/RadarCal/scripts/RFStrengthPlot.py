@@ -88,6 +88,10 @@ def main():
                       dest='freq',
                       default=2.809e9,
                       help='Transmit frequency (Hz)')
+    parser.add_option('--sector',
+                      dest='sector',
+                      default=0.0,
+                      help='Sector width (deg), 0 for stationary, 360 for surveillance')
     
     (options, args) = parser.parse_args()
     
@@ -107,7 +111,24 @@ def main():
     prf = float(options.prf)
     tau = float(options.tau)
     freq = float(options.freq)
-    wavelength = 2.99792458e8 / freq;
+    wavelength = 2.99792458e8 / freq
+
+    global beamWidthDeg
+    beamWidthDeg = math.degrees(1.27 * wavelength / diameter)
+
+    global sectorWidthDeg, stationary, ppi, sector
+    sectorWidthDeg = float(options.sector)
+    stationary = True
+    ppi = False
+    sector = False
+
+    if (sectorWidthDeg > 359.0):
+        stationary = False
+        ppi = True
+        sectorWidthDeg = 360.0
+    elif (sectorWidthDeg > 0.0):
+        stationary = False
+        sector = True
 
     global r1, r2, Snf, Sffr1, Sffr2
     
@@ -126,6 +147,7 @@ def main():
     print(f"  antenna gain (linear) {g0:.2f}", file=sys.stderr)
     print(f"  antenna efficiency: {efficiency:.3f}", file=sys.stderr)
     print(f"  antenna diameter (m) {diameter:.2f}", file=sys.stderr)
+    print(f"  beamWidth (deg) {beamWidthDeg:.2f}", file=sys.stderr)
     print(f"  PRF (s-1) {prf:.2f}", file=sys.stderr)
     print(f"  pulse length (s) {tau:.3g}", file=sys.stderr)
     print(f"  transmit freq (Hz) {freq:.3g}", file=sys.stderr)
@@ -155,7 +177,9 @@ def doPlot():
 
     ax1.clear()
 
-    maxRange = int(r2 * 2.0) + 1
+    maxRange = int(r2 * 2.0) + 1.0
+    if (maxRange < 50):
+        maxRange = 50.0
     dists = np.arange(maxRange, dtype=float)
     # print(" dists: ", dists)
 
@@ -169,6 +193,10 @@ def doPlot():
         else:
             pwrDens[ii] = Snf + ((dist - r1) / (r2 - r1)) * (Sffr2 - Snf)
 
+    for ii in range(0, len(pwrDens)):
+        if (not stationary):
+            pwrDens[ii] = pwrDens[ii] / (sectorWidthDeg / beamWidthDeg)
+
     # for ii in range(0, len(dists)):
     #     print("  ii, dist, pwrDens: ", ii, ", ", dists[ii], ", ", pwrDens[ii])
     
@@ -179,6 +207,12 @@ def doPlot():
     ax1.grid(True)
 
     titleStr = options.radarName + " RF density plot"
+    if (stationary):
+        titleStr = titleStr + " - stationary antenna"
+    elif (ppi):
+        titleStr = titleStr + " - rotating 360 deg ppi"
+    elif (sector):
+        titleStr = titleStr + " - rotating " + "{:.0f}".format(sectorWidthDeg) + " deg sector"
     fig1.suptitle(titleStr)
 
     plt.tight_layout()
