@@ -1,0 +1,6 @@
+#! /bin/csh
+
+RFStrengthPlot.py --radarName XPOL --peakPowerDbm 73.7 --gain 42.2 --efficiency 0.9 --diameter 1.8 --prf 2000 --pulseLength 0.5e-6 --freq 9.5e9 --sector 360.0
+
+
+

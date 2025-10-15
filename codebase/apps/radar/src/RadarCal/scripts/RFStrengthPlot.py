@@ -177,25 +177,53 @@ def doPlot():
 
     ax1.clear()
 
+    # set up array of distances from antenna in meters
+    
     maxRange = int(r2 * 2.0) + 1.0
     if (maxRange < 50):
         maxRange = 50.0
     dists = np.arange(maxRange, dtype=float)
-    # print(" dists: ", dists)
 
+    # compute power density at each dist
+    
     pwrDens = np.arange(maxRange, dtype=float)
     for ii in range(0, len(dists)):
         dist = dists[ii]
         if (dist <= r1):
+            # near field
             pwrDens[ii] = Snf
         elif (dist >= r2):
+            # far field
             pwrDens[ii] = (g0 * tau * prf * peakPowerW) / (4.0 * math.pi * dist * dist)
         else:
+            # transition - interpolate
             pwrDens[ii] = Snf + ((dist - r1) / (r2 - r1)) * (Sffr2 - Snf)
 
-    for ii in range(0, len(pwrDens)):
-        if (not stationary):
-            pwrDens[ii] = pwrDens[ii] / (sectorWidthDeg / beamWidthDeg)
+    if (not stationary):
+        # correct for rotation exposure duty cycle
+        for ii in range(1, len(pwrDens)):
+            dist = dists[ii]
+            arc360 = 2.0 * math.pi * dist
+            arcLen = arc360 * (sectorWidthDeg / 360.0)
+            duty = 1.0
+            dutyNear = diameter / arcLen
+            if (dutyNear > 1.0):
+                dutyNear = 1.0
+            dutyFar = beamWidthDeg / sectorWidthDeg
+            if (dist <= r1):
+                # duty is diameter/arcLen
+                duty = dutyNear
+                print("  near ii, dist, duty: ", ii, ", ", dists[ii], ", ", duty)
+            elif (dist >= r2):
+                # duty is beamwidth/sectorWidth
+                duty = dutyFar
+                print("  far ii, dist, duty: ", ii, ", ", dists[ii], ", ", duty)
+            else:
+                # transition - interpolate
+                duty = dutyNear + ((dist - r1) / (r2 - r1)) * (dutyFar - dutyNear)
+                print("  trans ii, dist, duty: ", ii, ", ", dists[ii], ", ", duty)
+            # adjust power density by duty cycle
+            pwrDens[ii] = pwrDens[ii] * duty
 
     # for ii in range(0, len(dists)):
     #     print("  ii, dist, pwrDens: ", ii, ", ", dists[ii], ", ", pwrDens[ii])
