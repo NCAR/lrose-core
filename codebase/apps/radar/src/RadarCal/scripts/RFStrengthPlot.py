@@ -54,7 +54,7 @@ def main():
                       help='Width of figure in mm')
     parser.add_option('--height',
                       dest='figHeightMm',
-                      default=150,
+                      default=120,
                       help='Height of figure in mm')
     parser.add_option('--peakPowerDbm',
                       dest='peakPowerDbm',
@@ -140,23 +140,23 @@ def main():
     Sffr1 = (g0 * tau * prf * peakPowerW) / (4.0 * math.pi * r1 * r1)
     Sffr2 = (g0 * tau * prf * peakPowerW) / (4.0 * math.pi * r2 * r2)
 
-    print("Running " + thisScriptName, file=sys.stderr)
-    print("  radar name: " + options.radarName, file=sys.stderr)
-    print(f"  peak power W: {peakPowerW:.3g}", file=sys.stderr)
-    print(f"  antenna gain (dB) {g0Db:.2f}", file=sys.stderr)
-    print(f"  antenna gain (linear) {g0:.2f}", file=sys.stderr)
-    print(f"  antenna efficiency: {efficiency:.3f}", file=sys.stderr)
-    print(f"  antenna diameter (m) {diameter:.2f}", file=sys.stderr)
-    print(f"  beamWidth (deg) {beamWidthDeg:.2f}", file=sys.stderr)
-    print(f"  PRF (s-1) {prf:.2f}", file=sys.stderr)
-    print(f"  pulse length (s) {tau:.3g}", file=sys.stderr)
-    print(f"  transmit freq (Hz) {freq:.3g}", file=sys.stderr)
-    print(f"  wavelength (m) {wavelength:.3g}", file=sys.stderr)
-    print(f"  r1 (m) {r1:.3g}", file=sys.stderr)
-    print(f"  r2 (m) {r2:.3g}", file=sys.stderr)
-    print(f"  Snf (W/m2) {Snf:.2g}", file=sys.stderr)
-    # print(f"  Sffr1 (W/m2) {Sffr1:.2g}", file=sys.stderr)
-    print(f"  Sffr2 (W/m2) {Sffr2:.2g}", file=sys.stderr)
+    print("Running " + thisScriptName, file=sys.stdout)
+    print("  radar name: " + options.radarName, file=sys.stdout)
+    print(f"  peak power W: {peakPowerW:.3g}", file=sys.stdout)
+    print(f"  antenna gain (dB) {g0Db:.2f}", file=sys.stdout)
+    print(f"  antenna gain (linear) {g0:.2f}", file=sys.stdout)
+    print(f"  antenna efficiency: {efficiency:.3f}", file=sys.stdout)
+    print(f"  antenna diameter (m) {diameter:.2f}", file=sys.stdout)
+    print(f"  beamWidth (deg) {beamWidthDeg:.2f}", file=sys.stdout)
+    print(f"  PRF (s-1) {prf:.2f}", file=sys.stdout)
+    print(f"  pulse length (s) {tau:.3g}", file=sys.stdout)
+    print(f"  transmit freq (Hz) {freq:.3g}", file=sys.stdout)
+    print(f"  wavelength (m) {wavelength:.3g}", file=sys.stdout)
+    print(f"  r1 (m) {r1:.3g}", file=sys.stdout)
+    print(f"  r2 (m) {r2:.3g}", file=sys.stdout)
+    print(f"  Snf (W/m2) {Snf:.2g}", file=sys.stdout)
+    # print(f"  Sffr1 (W/m2) {Sffr1:.2g}", file=sys.stdout)
+    print(f"  Sffr2 (W/m2) {Sffr2:.2g}", file=sys.stdout)
 
     # plot results
     
@@ -263,6 +263,22 @@ def doPlot():
 
     plt.tight_layout()
     plt.subplots_adjust(top=0.9)
+
+    # save the plot to a file
+
+    os.makedirs(os.path.expanduser("~/Downloads"), exist_ok=True)
+    savePath = os.environ["HOME"] + "/Downloads/RF_field_strength."
+    savePath = savePath + options.radarName
+    if (stationary):
+        savePath = savePath + ".stationary"
+    elif (ppi):
+        savePath = savePath + ".ppi_360"
+    elif (sector):
+        savePath = savePath + ".sector_" + "{:.0f}".format(sectorWidthDeg)
+    savePath = savePath + ".png"
+    plt.savefig(savePath)
+    print("==>> Saved fig: ", savePath)
+
     plt.show()
 
 ########################################################################
