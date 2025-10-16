@@ -1,0 +1,6 @@
+#! /bin/csh
+
+RFStrengthPlot.py --radarName HCR --peakPowerDbm 59.9 --gain 45.9 --efficiency 0.9 --diameter 0.3 --prf 10000 --pulseLength 0.512e-6 --freq 94.4062e9 --sector 60
+
+
+

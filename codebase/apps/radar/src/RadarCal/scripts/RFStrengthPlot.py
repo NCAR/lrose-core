@@ -184,7 +184,7 @@ def doPlot():
         maxRange = 50.0
     dists = np.arange(maxRange, dtype=float)
 
-    # compute power density at each dist
+    # compute power density at each distance from the antenna
     
     pwrDens = np.arange(maxRange, dtype=float)
     for ii in range(0, len(dists)):
@@ -213,23 +213,41 @@ def doPlot():
             if (dist <= r1):
                 # duty is diameter/arcLen
                 duty = dutyNear
-                print("  near ii, dist, duty: ", ii, ", ", dists[ii], ", ", duty)
+                # print("  near ii, dist, duty: ", ii, ", ", dists[ii], ", ", duty)
             elif (dist >= r2):
                 # duty is beamwidth/sectorWidth
                 duty = dutyFar
-                print("  far ii, dist, duty: ", ii, ", ", dists[ii], ", ", duty)
+                # print("  far ii, dist, duty: ", ii, ", ", dists[ii], ", ", duty)
             else:
                 # transition - interpolate
                 duty = dutyNear + ((dist - r1) / (r2 - r1)) * (dutyFar - dutyNear)
-                print("  trans ii, dist, duty: ", ii, ", ", dists[ii], ", ", duty)
+                # print("  trans ii, dist, duty: ", ii, ", ", dists[ii], ", ", duty)
             # adjust power density by duty cycle
             pwrDens[ii] = pwrDens[ii] * duty
 
     # for ii in range(0, len(dists)):
     #     print("  ii, dist, pwrDens: ", ii, ", ", dists[ii], ", ", pwrDens[ii])
-    
-    ax1.plot(dists, pwrDens, linestyle = "-", label = 'pwrDens', color = 'red')
 
+    # scale the y axis
+    
+    maxy = max(pwrDens) * 1.1
+    maxy = max(maxy, 60)
+    ax1.set_ylim(0, maxy)
+    
+    # plot power density
+
+    ax1.plot(dists, pwrDens, linestyle = "-", label = 'pwrDens', color = 'blue')
+
+    # plot safety thresholds
+
+    ax1.axhline(y=10, color='green', linestyle='--', linewidth=2)
+    ax1.text(x=1, y=12, s='Public threshold = 10  ', color='green',
+             ha='right', transform=ax1.get_yaxis_transform())
+
+    ax1.axhline(y=50, color='red', linestyle='--', linewidth=2)
+    ax1.text(x=1, y=52, s='Occupational threshold = 50  ', color='red',
+             ha='right', transform=ax1.get_yaxis_transform())
+    
     ax1.set_xlabel("Range from antenna (m)")
     ax1.set_ylabel("Time-mean RF power density (W/m2)")
     ax1.grid(True)
