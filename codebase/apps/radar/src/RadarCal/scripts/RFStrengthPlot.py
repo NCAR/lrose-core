@@ -231,7 +231,7 @@ def doPlot():
     ax1.plot(dists, pwrDens, linestyle = "-", label = 'pwrDens', color = 'red')
 
     ax1.set_xlabel("Range from antenna (m)")
-    ax1.set_ylabel("RF power density (W/m2)")
+    ax1.set_ylabel("Time-mean RF power density (W/m2)")
     ax1.grid(True)
 
     titleStr = options.radarName + " RF density plot"
