@@ -54,7 +54,7 @@ def main():
                       help='Width of figure in mm')
     parser.add_option('--height',
                       dest='figHeightMm',
-                      default=120,
+                      default=100,
                       help='Height of figure in mm')
     parser.add_option('--peakPowerDbm',
                       dest='peakPowerDbm',
@@ -254,11 +254,11 @@ def doPlot():
 
     titleStr = options.radarName + " RF density plot"
     if (stationary):
-        titleStr = titleStr + " - stationary antenna"
+        titleStr = titleStr + " - stationary antenna, " + "PRF: {:.0f}".format(prf)
     elif (ppi):
-        titleStr = titleStr + " - rotating 360 deg ppi"
+        titleStr = titleStr + " - rotating 360 deg ppi, " + "PRF: {:.0f}".format(prf)
     elif (sector):
-        titleStr = titleStr + " - rotating " + "{:.0f}".format(sectorWidthDeg) + " deg sector"
+        titleStr = titleStr + " - rotating " + "{:.0f}".format(sectorWidthDeg) + " deg sector, " + "PRF: {:.0f}".format(prf)
     fig1.suptitle(titleStr)
 
     plt.tight_layout()
@@ -275,6 +275,7 @@ def doPlot():
         savePath = savePath + ".ppi_360"
     elif (sector):
         savePath = savePath + ".sector_" + "{:.0f}".format(sectorWidthDeg)
+    savePath = savePath + ".prf_{:.0f}".format(prf)
     savePath = savePath + ".png"
     plt.savefig(savePath)
     print("==>> Saved fig: ", savePath)
