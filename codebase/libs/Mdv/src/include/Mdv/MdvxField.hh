@@ -854,6 +854,12 @@ public:
     return (_volBuf.getLen() / _fhdr.data_element_nbytes);
   }
 
+  // access to non-const data as a volume
+  // this enables you to get a pointer to the volume, and then overwrite the contents
+  // should be used with care
+  
+  void *getVolWritable() { return _volBuf.getPtr(); }
+
   // access to the data as a plane
   //
   // Note: you must call setPlanePtrs() just prior to
