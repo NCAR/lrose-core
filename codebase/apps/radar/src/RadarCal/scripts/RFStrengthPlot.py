@@ -154,7 +154,7 @@ def main():
     print(f"  wavelength (m) {wavelength:.3g}", file=sys.stdout)
     print(f"  r1 (m) {r1:.3g}", file=sys.stdout)
     print(f"  r2 (m) {r2:.3g}", file=sys.stdout)
-    print(f"  Snf (W/m2) {Snf:.2g}", file=sys.stdout)
+    print(f"  Snf (W/m2) {Snf:.3g}", file=sys.stdout)
     # print(f"  Sffr1 (W/m2) {Sffr1:.2g}", file=sys.stdout)
     print(f"  Sffr2 (W/m2) {Sffr2:.2g}", file=sys.stdout)
 
