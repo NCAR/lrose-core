@@ -9,6 +9,8 @@
 # dir: lrose-core/codebase/apps/radar/src/TsUdp2Fmq
 ###############################################################
 
+if(NOT CMAKE_CXX_FLAGS MATCHES "c\\+\\+11")
+
 project (TsUdp2Fmq)
 
 # source files
@@ -159,3 +161,4 @@ INSTALL(TARGETS ${PROJECT_NAME}
         DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
        )
 
+endif()
