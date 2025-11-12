@@ -1456,3 +1456,45 @@ void CartPidQpe::_printParamsKdp()
 
 }
 
+//////////////////////////////////////////////////
+// get radar field name from type
+
+string CartPidQpe::getRadarFieldName(Params::radar_field_type_t ftype)
+{
+  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
+    if (_params._radar_field_names[ii].field_type == ftype) {
+      return _params._radar_field_names[ii].field_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+//////////////////////////////////////////////////
+// get model field name from type
+
+string CartPidQpe::getModelFieldName(Params::model_field_type_t ftype)
+{
+  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
+    if (_params._model_field_names[ii].field_type == ftype) {
+      return _params._model_field_names[ii].field_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+//////////////////////////////////////////////////
+// get beam block field name from type
+
+string CartPidQpe::getBeamBlockFieldName(Params::bblock_field_type_t ftype)
+{
+  for (int ii = 0; ii < _params.bblock_field_names_n; ii++) {
+    if (_params._bblock_field_names[ii].field_type == ftype) {
+      return _params._bblock_field_names[ii].field_name;
+    }
+  }
+  // not found
+  return "";
+}
+

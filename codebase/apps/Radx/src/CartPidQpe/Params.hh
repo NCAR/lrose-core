@@ -92,6 +92,18 @@ public:
   } radar_field_type_t;
 
   typedef enum {
+    TEMP = 0,
+    RH = 1,
+    UVEL = 2,
+    VVEL = 3,
+    WVEL = 4
+  } model_field_type_t;
+
+  typedef enum {
+    BEAME = 0
+  } bblock_field_type_t;
+
+  typedef enum {
     RATE_ZH = 0,
     RATE_ZH_SNOW = 1,
     RATE_Z_ZDR = 2,
@@ -131,6 +143,16 @@ public:
     radar_field_type_t field_type;
     char* field_name;
   } radar_field_name_t;
+
+  typedef struct {
+    model_field_type_t field_type;
+    char* field_name;
+  } model_field_name_t;
+
+  typedef struct {
+    bblock_field_type_t field_type;
+    char* field_name;
+  } bblock_field_name_t;
 
   typedef struct {
     char* input_name;
@@ -495,6 +517,12 @@ public:
   radar_field_name_t *_radar_field_names;
   int radar_field_names_n;
 
+  model_field_name_t *_model_field_names;
+  int model_field_names_n;
+
+  bblock_field_name_t *_bblock_field_names;
+  int bblock_field_names_n;
+
   char* output_dir;
 
   tdrp_bool_t rename_fields_on_input;
@@ -763,7 +791,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[171];
+  mutable TDRPtable _table[175];
 
   const char *_className;
 

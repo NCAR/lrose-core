@@ -87,6 +87,12 @@ public:
   double getRadarHtKm() const { return _radarHtKm; }
   double getWavelengthM() const { return _wavelengthM; }
 
+  // get field names
+  
+  string getRadarFieldName(Params::radar_field_type_t ftype);
+  string getModelFieldName(Params::model_field_type_t ftype);
+  string getBeamBlockFieldName(Params::bblock_field_type_t ftype);
+
   // names for extra fields
 
   static string smoothedDbzFieldName;

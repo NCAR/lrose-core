@@ -106,6 +106,52 @@ paramdef struct radar_field_name_t {
 } radar_field_names[8];
 
 commentdef {
+  p_header = "MODEL FIELD NAMES";
+}
+
+typedef enum {
+  TEMP, RH, UVEL, VVEL, WVEL
+} model_field_type_t;
+
+typedef struct {
+  model_field_type_t field_type;
+  string field_name;
+} model_field_name_t;
+
+paramdef struct model_field_name_t {
+  p_default = { 
+    { TEMP, "TEMP" },
+    { RH, "RH" },
+    { UVEL, "UVEL" },
+    { VVEL, "VVEL" },
+    { WVEL, "WVEL" }
+  };
+  p_descr = "Converts field name enum to string.";
+  p_help = "If string is empty the field does not exist in the data set.";
+} model_field_names[5];
+
+commentdef {
+  p_header = "BEAM BLOCKAGE FIELD NAMES";
+}
+
+typedef enum {
+  BEAME
+} bblock_field_type_t;
+
+typedef struct {
+  bblock_field_type_t field_type;
+  string field_name;
+} bblock_field_name_t;
+
+paramdef struct bblock_field_name_t {
+  p_default = { 
+    { BEAME, "BEAME" }
+  };
+  p_descr = "Converts field name enum to string.";
+  p_help = "If string is empty the field does not exist in the data set.";
+} bblock_field_names[1];
+
+commentdef {
   p_header = "DATA OUTPUT DIRECTORY AND FILE NAMES";
 }
 
