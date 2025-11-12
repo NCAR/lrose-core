@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// Pid2Grid.cc
+// CartPidQpe.cc
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,13 +30,13 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Pid2Grid reads moments from Radx-supported format files,
+// CartPidQpe reads moments from Radx-supported format files,
 // interpolates onto a Cartesian grid, and writes out the
 // results to Cartesian files in MDV or NetCDF.
 //
 ///////////////////////////////////////////////////////////////
 
-#include "Pid2Grid.hh"
+#include "CartPidQpe.hh"
 #include "OutputMdv.hh"
 #include "PolarCompute.hh"
 #include "PolarThread.hh"
@@ -58,21 +58,21 @@ using namespace std;
 
 // initialize extra field names
 
-string Pid2Grid::smoothedDbzFieldName = "DBZ_SMOOTHED";
-string Pid2Grid::smoothedRhohvFieldName = "RHOHV_SMOOTHED";
-string Pid2Grid::elevationFieldName = "ELEV";
-string Pid2Grid::rangeFieldName = "RANGE";
-string Pid2Grid::beamHtFieldName = "BEAM_HT";
-string Pid2Grid::tempFieldName = "TEMPC";
-string Pid2Grid::pidFieldName = "PID";
-string Pid2Grid::pidInterestFieldName = "PID_INTEREST";
-string Pid2Grid::mlFieldName = "MELTING_LAYER";
-string Pid2Grid::mlExtendedFieldName = "ML_EXTENDED";
-string Pid2Grid::convFlagFieldName = "CONV_FLAG";
+string CartPidQpe::smoothedDbzFieldName = "DBZ_SMOOTHED";
+string CartPidQpe::smoothedRhohvFieldName = "RHOHV_SMOOTHED";
+string CartPidQpe::elevationFieldName = "ELEV";
+string CartPidQpe::rangeFieldName = "RANGE";
+string CartPidQpe::beamHtFieldName = "BEAM_HT";
+string CartPidQpe::tempFieldName = "TEMPC";
+string CartPidQpe::pidFieldName = "PID";
+string CartPidQpe::pidInterestFieldName = "PID_INTEREST";
+string CartPidQpe::mlFieldName = "MELTING_LAYER";
+string CartPidQpe::mlExtendedFieldName = "ML_EXTENDED";
+string CartPidQpe::convFlagFieldName = "CONV_FLAG";
 
 // Constructor
 
-Pid2Grid::Pid2Grid(int argc, char **argv)
+CartPidQpe::CartPidQpe(int argc, char **argv)
   
 {
 
@@ -82,7 +82,7 @@ Pid2Grid::Pid2Grid(int argc, char **argv)
 
   // set programe name
 
-  _progName = "Pid2Grid";
+  _progName = "CartPidQpe";
   ucopyright((char *) _progName.c_str());
   
   // parse command line args
@@ -210,7 +210,7 @@ Pid2Grid::Pid2Grid(int argc, char **argv)
 //////////////////////////////////////
 // destructor
 
-Pid2Grid::~Pid2Grid()
+CartPidQpe::~CartPidQpe()
 
 {
 
@@ -235,7 +235,7 @@ Pid2Grid::~Pid2Grid()
 //////////////////////////////////////////////////
 // Run
 
-int Pid2Grid::Run()
+int CartPidQpe::Run()
 {
 
   if (_params.mode == Params::ARCHIVE) {
@@ -250,7 +250,7 @@ int Pid2Grid::Run()
 //////////////////////////////////////////////////
 // Run in filelist mode
 
-int Pid2Grid::_runFilelist()
+int CartPidQpe::_runFilelist()
 {
 
   // loop through the input file list
@@ -273,14 +273,14 @@ int Pid2Grid::_runFilelist()
 //////////////////////////////////////////////////
 // Run in archive mode
 
-int Pid2Grid::_runArchive()
+int CartPidQpe::_runArchive()
 {
 
   // get start and end times
 
   time_t startTime = RadxTime::parseDateTime(_params.start_time);
   if (startTime == RadxTime::NEVER) {
-    cerr << "ERROR - Pid2Grid::_runArchive()" << endl;
+    cerr << "ERROR - CartPidQpe::_runArchive()" << endl;
     cerr << "  Start time format incorrect: " << _params.start_time << endl;
     if (_args.startTimeSet) {
       cerr << "  Check command line" << endl;
@@ -292,7 +292,7 @@ int Pid2Grid::_runArchive()
 
   time_t endTime = RadxTime::parseDateTime(_params.end_time);
   if (endTime == RadxTime::NEVER) {
-    cerr << "ERROR - Pid2Grid::_runArchive()" << endl;
+    cerr << "ERROR - CartPidQpe::_runArchive()" << endl;
     cerr << "  End time format incorrect: " << _params.end_time << endl;
     if (_args.endTimeSet) {
       cerr << "  Check command line" << endl;
@@ -303,7 +303,7 @@ int Pid2Grid::_runArchive()
   }
 
   if (_params.debug) {
-    cerr << "Running Pid2Grid in ARCHIVE mode" << endl;
+    cerr << "Running CartPidQpe in ARCHIVE mode" << endl;
     cerr << "  Input dir: " << _params.input_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
     cerr << "  End time: " << RadxTime::strm(endTime) << endl;
@@ -315,7 +315,7 @@ int Pid2Grid::_runArchive()
   tlist.setDir(_params.input_dir);
   tlist.setModeInterval(startTime, endTime);
   if (tlist.compile()) {
-    cerr << "ERROR - Pid2Grid::_runArchive()" << endl;
+    cerr << "ERROR - CartPidQpe::_runArchive()" << endl;
     cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
     cerr << "  End time: " << RadxTime::strm(endTime) << endl;
@@ -325,7 +325,7 @@ int Pid2Grid::_runArchive()
 
   const vector<string> &paths = tlist.getPathList();
   if (paths.size() < 1) {
-    cerr << "ERROR - Pid2Grid::_runArchive()" << endl;
+    cerr << "ERROR - CartPidQpe::_runArchive()" << endl;
     cerr << "  No files found, dir: " << _params.input_dir << endl;
     return -1;
   }
@@ -346,7 +346,7 @@ int Pid2Grid::_runArchive()
 //////////////////////////////////////////////////
 // Run in realtime mode
 
-int Pid2Grid::_runRealtime()
+int CartPidQpe::_runRealtime()
 {
 
   // init process mapper registration
@@ -381,7 +381,7 @@ int Pid2Grid::_runRealtime()
 // Process a file
 // Returns 0 on success, -1 on failure
 
-int Pid2Grid::_processFile(const string &filePath)
+int CartPidQpe::_processFile(const string &filePath)
 {
 
   PMU_auto_register("Processing file");
@@ -429,7 +429,7 @@ int Pid2Grid::_processFile(const string &filePath)
   }
   
   if (_params.debug) {
-    cerr << "INFO - Pid2Grid::_processFile" << endl;
+    cerr << "INFO - CartPidQpe::_processFile" << endl;
     cerr << "  Input file path: " << filePath << endl;
     cerr << "  Reading in file ..." << endl;
   }
@@ -442,14 +442,14 @@ int Pid2Grid::_processFile(const string &filePath)
   // read in file
   
   if (_readFile(filePath)) {
-    cerr << "ERROR - Pid2Grid::_processFile" << endl;
+    cerr << "ERROR - CartPidQpe::_processFile" << endl;
     return -1;
   }
 
   // check we have at least 2 rays
   
   if (_readVol.getNRays() < 2) {
-    cerr << "ERROR - Pid2Grid::_processFile" << endl;
+    cerr << "ERROR - CartPidQpe::_processFile" << endl;
     cerr << "  Too few rays: " << _readVol.getNRays() << endl;
     return -1;
   }
@@ -482,7 +482,7 @@ int Pid2Grid::_processFile(const string &filePath)
   // compute the derived fields
   
   if (_computeDerived()) {
-    cerr << "ERROR - Pid2Grid::Run" << endl;
+    cerr << "ERROR - CartPidQpe::Run" << endl;
     cerr << "  Cannot compute derived fields" << endl;
     return -1;
   }
@@ -517,7 +517,7 @@ int Pid2Grid::_processFile(const string &filePath)
 // Read in a RADX file
 // Returns 0 on success, -1 on failure
 
-int Pid2Grid::_readFile(const string &filePath)
+int CartPidQpe::_readFile(const string &filePath)
 {
 
   GenericRadxFile inFile;
@@ -526,7 +526,7 @@ int Pid2Grid::_readFile(const string &filePath)
   // read in file
   
   if (inFile.readFromPath(filePath, _readVol)) {
-    cerr << "ERROR - Pid2Grid::_readFile" << endl;
+    cerr << "ERROR - CartPidQpe::_readFile" << endl;
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
@@ -637,7 +637,7 @@ int Pid2Grid::_readFile(const string &filePath)
 //////////////////////////////////////////////////
 // set up read
 
-void Pid2Grid::_setupRead(RadxFile &file)
+void CartPidQpe::_setupRead(RadxFile &file)
 {
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -682,7 +682,7 @@ void Pid2Grid::_setupRead(RadxFile &file)
 // check all fields are present
 // set standard names etc
 
-void Pid2Grid::_checkFields(const string &filePath)
+void CartPidQpe::_checkFields(const string &filePath)
 {
   
   vector<RadxRay *> &rays = _readVol.getRays();
@@ -712,7 +712,7 @@ void Pid2Grid::_checkFields(const string &filePath)
 //////////////////////////////////////////////////
 // add geometry and pid fields to the volume
 
-void Pid2Grid::_addExtraFieldsToInput()
+void CartPidQpe::_addExtraFieldsToInput()
 
 {
 
@@ -799,7 +799,7 @@ void Pid2Grid::_addExtraFieldsToInput()
 //////////////////////////////////////////////////
 // add extra output fields
 
-void Pid2Grid::_addExtraFieldsToOutput()
+void CartPidQpe::_addExtraFieldsToOutput()
 
 {
 
@@ -837,7 +837,7 @@ void Pid2Grid::_addExtraFieldsToOutput()
 /////////////////////////////////////////////////////
 // compute the derived fields for all rays in volume
 
-int Pid2Grid::_computeDerived()
+int CartPidQpe::_computeDerived()
 {
 
   // initialize the volume with ray numbers
@@ -904,7 +904,7 @@ int Pid2Grid::_computeDerived()
 ///////////////////////////////////////////////////////////
 // Store the derived ray
 
-int Pid2Grid::_storeDerivedRay(PolarThread *thread)
+int CartPidQpe::_storeDerivedRay(PolarThread *thread)
 
 {
   
@@ -924,7 +924,7 @@ int Pid2Grid::_storeDerivedRay(PolarThread *thread)
 //////////////////////////////////////////////////
 // load up the input ray data vector
 
-void Pid2Grid::_loadInterpRays()
+void CartPidQpe::_loadInterpRays()
 {
 
   // loop through the rays in the read volume,
@@ -959,7 +959,7 @@ void Pid2Grid::_loadInterpRays()
 //////////////////////////////////////////////////
 // add geometry fields
 
-void Pid2Grid::_addGeometryFields()
+void CartPidQpe::_addGeometryFields()
 {
   
   if (_params.output_angle_fields) {
@@ -1129,7 +1129,7 @@ void Pid2Grid::_addGeometryFields()
 //////////////////////////////////////////////////
 // add time field
 
-void Pid2Grid::_addTimeField()
+void CartPidQpe::_addTimeField()
 {
 
   if (!_params.output_time_field) {
@@ -1177,7 +1177,7 @@ void Pid2Grid::_addTimeField()
 /////////////////////////////////////////////////////
 // check whether volume is predominantly in RHI mode
 
-bool Pid2Grid::_isRhi()
+bool CartPidQpe::_isRhi()
 {
   
   // check to see if we are in RHI mode, set flag accordingly
@@ -1202,7 +1202,7 @@ bool Pid2Grid::_isRhi()
 //////////////////////////////////////////////////
 // initialize the fields for interpolation
 
-void Pid2Grid::_initInterpFields()
+void CartPidQpe::_initInterpFields()
 {
   
   _interpFields.clear();
@@ -1291,7 +1291,7 @@ void Pid2Grid::_initInterpFields()
 ////////////////////////////////////////////////////////////
 // Allocate interpolation objects as needed
 
-void Pid2Grid::_allocCartInterp()
+void CartPidQpe::_allocCartInterp()
 {
   if (_cartInterp == NULL) {
     _cartInterp = new CartInterp(_progName, _params, _readVol,
@@ -1302,7 +1302,7 @@ void Pid2Grid::_allocCartInterp()
 ////////////////////////////////////////////////////////////
 // Free up input rays
 
-void Pid2Grid::_freeInterpRays()
+void CartPidQpe::_freeInterpRays()
   
 {
   for (size_t ii = 0; ii < _interpRays.size(); ii++) {
@@ -1314,7 +1314,7 @@ void Pid2Grid::_freeInterpRays()
 //////////////////////////////////////////////////
 // Print params for RATE
 
-void Pid2Grid::_printParamsRate()
+void CartPidQpe::_printParamsRate()
 {
 
   if (_params.debug) {
@@ -1363,7 +1363,7 @@ void Pid2Grid::_printParamsRate()
 //////////////////////////////////////////////////
 // Print params for PID
 
-void Pid2Grid::_printParamsPid()
+void CartPidQpe::_printParamsPid()
 {
 
   if (_params.debug) {
@@ -1411,7 +1411,7 @@ void Pid2Grid::_printParamsPid()
 //////////////////////////////////////////////////
 // Print params for KDP
 
-void Pid2Grid::_printParamsKdp()
+void CartPidQpe::_printParamsKdp()
 {
 
   if (_params.debug) {

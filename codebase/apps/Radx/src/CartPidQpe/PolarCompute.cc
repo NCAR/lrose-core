@@ -37,7 +37,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "PolarCompute.hh"
-#include "Pid2Grid.hh"
+#include "CartPidQpe.hh"
 #include <toolsa/os_config.h>
 #include <toolsa/file_io.h>
 #include <rapmath/trig.h>

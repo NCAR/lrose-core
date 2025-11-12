@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
 //
-// main for Pid2Grid
+// main for CartPidQpe
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -31,13 +31,13 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Pid2Grid reads moments from Radx-supported format files,
+// CartPidQpe reads moments from Radx-supported format files,
 // computes PID and rain rate, interpolates onto a Cartesian grid,
 // and writes out the results to Cartesian files in MDV or NetCDF.
 //
 ///////////////////////////////////////////////////////////////
 
-#include "Pid2Grid.hh"
+#include "CartPidQpe.hh"
 #include <signal.h>
 #include <new>
 #include <iostream>
@@ -47,7 +47,7 @@ using namespace std;
 
 static void tidy_and_exit (int sig);
 static void out_of_store();
-static Pid2Grid *Prog = NULL;
+static CartPidQpe *Prog = NULL;
 
 // main
 
@@ -57,9 +57,9 @@ int main(int argc, char **argv)
 
   // create program object
 
-  Prog = new Pid2Grid(argc, argv);
+  Prog = new CartPidQpe(argc, argv);
   if (!Prog->OK) {
-    cerr << "Error: Could not create Pid2Grid object." << endl;
+    cerr << "Error: Could not create CartPidQpe object." << endl;
     return(-1);
   }
 
@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 
   int iret = Prog->Run();
   if (iret < 0) {
-    cerr << "ERROR - running Pid2Grid" << endl;
+    cerr << "ERROR - running CartPidQpe" << endl;
   }
   
   // clean up
@@ -110,7 +110,7 @@ static void out_of_store()
 
 {
 
-  cerr << "FATAL ERROR - program Pid2Grid" << endl;
+  cerr << "FATAL ERROR - program CartPidQpe" << endl;
   cerr << "  Operator new failed - out of store" << endl;
   exit(-1);
 

@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for Pid2Grid program
+# Makefile for CartPidQpe program
 #
 # Mike Dixon, EOL, NCAR, Boulder, CO, 80307, USA
 #
@@ -33,7 +33,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = Pid2Grid
+TARGET_FILE = CartPidQpe
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
@@ -55,7 +55,7 @@ HDRS = \
 	Interp.hh \
 	Orient.hh \
 	OutputMdv.hh \
-	Pid2Grid.hh \
+	CartPidQpe.hh \
 	PolarCompute.hh \
 	PolarThread.hh \
 	RhiOrient.hh
@@ -70,7 +70,7 @@ CPPC_SRCS = \
 	OutputMdv.cc \
 	PolarCompute.cc \
 	PolarThread.cc \
-	Pid2Grid.cc \
+	CartPidQpe.cc \
 	RhiOrient.cc
 
 #

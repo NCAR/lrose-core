@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Pid2Grid.hh
+// CartPidQpe.hh
 //
-// Pid2Grid object
+// CartPidQpe object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,14 +32,14 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Pid2Grid reads moments from Radx-supported format files,
+// CartPidQpe reads moments from Radx-supported format files,
 // interpolates onto a Cartesian grid, and writes out the
 // results to Cartesian files in MDV or NetCDF.
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef Pid2Grid_HH
-#define Pid2Grid_HH
+#ifndef CartPidQpe_HH
+#define CartPidQpe_HH
 
 #include "Args.hh"
 #include "Params.hh"
@@ -61,17 +61,17 @@ class PolarCompute;
 class PolarThread;
 using namespace std;
 
-class Pid2Grid {
+class CartPidQpe {
   
 public:
 
   // constructor
   
-  Pid2Grid (int argc, char **argv);
+  CartPidQpe (int argc, char **argv);
 
   // destructor
   
-  ~Pid2Grid();
+  ~CartPidQpe();
 
   // run 
 

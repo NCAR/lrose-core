@@ -34,85 +34,81 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef PolarThread_HH
-#define PolarThread_HH
+#include <cassert>
+#include <radar/KdpFiltParams.hh>
+#include <radar/NcarPidParams.hh>
+#include "CartPidQpe.hh"
+#include "PolarThread.hh"
+#include "PolarCompute.hh"
+#include "Params.hh"
 
-#include <toolsa/TaThread.hh>
+///////////////////////////////////////////////////////////////
+// Constructor
 
-class RadxRay;
-class Pid2Grid;
-class PolarCompute;
-class Params;
-class KdpFiltParams;
-class NcarPidParams;
-
-class PolarThread : public TaThread
-{  
-
-public:
+PolarThread::PolarThread(CartPidQpe *parent,
+                         const Params &params,
+                         const KdpFiltParams &kdpFiltParams,
+                         const NcarPidParams &ncarPidParams,
+                         const PrecipRateParams &precipRateParams,
+                         int threadNum) :
+        _parent(parent),
+        _params(params),
+        _kdpFiltParams(kdpFiltParams),
+        _ncarPidParams(ncarPidParams),
+        _precipRateParams(precipRateParams),
+        _threadNum(threadNum)
+{
   
-  // constructor
+  OK = TRUE;
+  _inputRay = NULL;
+  _outputRay = NULL;
   
-  PolarThread(Pid2Grid *parent, 
-              const Params &params,
-              const KdpFiltParams &kdpFiltParams,
-              const NcarPidParams &ncarPidParams,
-              const PrecipRateParams &precipRateParams,
-              int threadNum);
-
-  // destructor
+  // create compute compute object
   
-  virtual ~PolarThread();
-
-  // compute engine object
+  _polarCompute = new PolarCompute(_params,
+                                   _kdpFiltParams,
+                                   _ncarPidParams,
+                                   _precipRateParams,
+                                   _threadNum);
+  if (_polarCompute == NULL) {
+    OK = FALSE;
+    return;
+  }
+  if (!_polarCompute->OK) {
+    OK = FALSE;
+    _polarCompute = NULL;
+    return;
+  }
   
-  inline PolarCompute *getPolarCompute() const { return _polarCompute; }
+}  
+
+// Destructor
+
+PolarThread::~PolarThread()
+{
+
+  if (_polarCompute != NULL) {
+    delete _polarCompute;
+  }
   
-  // set input ray
+}  
+
+// run method
+
+void PolarThread::run()
+{
+
+  // check
+
+  assert(_polarCompute != NULL);
+  assert(_inputRay != NULL);
   
-  inline void setInputRay(RadxRay *val) { _inputRay = val; }
+  // Compute compute object will create the output ray
+  // The ownership of the ray is passed to the parent object
+  // which adds it to the output volume.
+
+  _outputRay = _polarCompute->doCompute(_inputRay,
+                                        _parent->getRadarHtKm(),
+                                        _parent->getWavelengthM());
   
-  // derived ray - result of computations
-  
-  inline RadxRay *getOutputRay() const { return _outputRay; }
-
-  // override run method
-
-  virtual void run();
-
-  // constructor OK?
-
-  bool OK;
-
-private:
-
-  // parent object
-
-  Pid2Grid *_parent;
-
-  // params
-
-  const Params &_params;
-  const KdpFiltParams &_kdpFiltParams;
-  const NcarPidParams &_ncarPidParams;
-  const PrecipRateParams &_precipRateParams;
-
-  // thread number
-
-  int _threadNum;
-
-  // computation engine
-
-  PolarCompute *_polarCompute;
-
-  // input ray
-
-  RadxRay *_inputRay;
-
-  // output ray
-
-  RadxRay *_outputRay;
-
-};
-
-#endif
+}

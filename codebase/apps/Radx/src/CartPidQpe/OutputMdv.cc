@@ -968,7 +968,7 @@ void OutputMdv::_writeLdataInfo(const string &outputPath)
 
   DsLdataInfo ldata(_params.output_dir, _params.debug);
 
-  ldata.setWriter("Pid2Grid");
+  ldata.setWriter("CartPidQpe");
   ldata.setDataFileExt("nc");
   ldata.setDataType("netCDF");
 
