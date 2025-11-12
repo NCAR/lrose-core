@@ -87,22 +87,23 @@ typedef enum {
 
 typedef struct {
   radar_field_type_t field_type;
-  string field_name;
+  string input_name;
+  string output_name;
 } radar_field_name_t;
 
 paramdef struct radar_field_name_t {
   p_default = { 
-    { DBZ, "DBZ" },
-    { VEL, "VEL" },
-    { WIDTH, "WIDTH" },
-    { ZDR, "ZDR" },
-    { LDR, "LDR" },
-    { PHIDP, "PHIDP" },
-    { RHOHV, "RHOHV" },
-    { KDP, "KDP" }
+    { DBZ, "DBZ", "DBZ" },
+    { VEL, "VEL", "VEL" },
+    { WIDTH, "WIDTH", "WIDTH" },
+    { ZDR, "ZDR", "ZDR"},
+    { LDR, "", "LDR" },
+    { PHIDP, "PHIDP", "PHIDP" },
+    { RHOHV, "RHOHV", "RHOHV" },
+    { KDP, "", "KDP" }
   };
-  p_descr = "Converts field name enum to string.";
-  p_help = "If string is empty the field does not exist in the data set.";
+  p_descr = "Converts field type to strings.";
+  p_help = "If input_name is empty the field does not exist in the input data set.";
 } radar_field_names[8];
 
 commentdef {
@@ -115,19 +116,20 @@ typedef enum {
 
 typedef struct {
   model_field_type_t field_type;
-  string field_name;
+  string input_name;
+  string output_name;
 } model_field_name_t;
 
 paramdef struct model_field_name_t {
   p_default = { 
-    { TEMP, "TEMP" },
-    { RH, "RH" },
-    { UVEL, "UVEL" },
-    { VVEL, "VVEL" },
-    { WVEL, "WVEL" }
+    { TEMP, "TEMP", "TEMP" },
+    { RH, "RH", "RH" },
+    { UVEL, "UVEL", "UVEL" },
+    { VVEL, "VVEL", "VVEL" },
+    { WVEL, "WVEL", "WVEL" }
   };
-  p_descr = "Converts field name enum to string.";
-  p_help = "If string is empty the field does not exist in the data set.";
+  p_descr = "Converts field type to string.";
+  p_help = "If input_name is empty the field does not exist in the input data set.";
 } model_field_names[5];
 
 commentdef {
@@ -140,15 +142,16 @@ typedef enum {
 
 typedef struct {
   bblock_field_type_t field_type;
-  string field_name;
+  string input_name;
+  string output_name;
 } bblock_field_name_t;
 
 paramdef struct bblock_field_name_t {
   p_default = { 
-    { BEAME, "BEAME" }
+    { BEAME, "BEAME", "BEAME" }
   };
-  p_descr = "Converts field name enum to string.";
-  p_help = "If string is empty the field does not exist in the data set.";
+  p_descr = "Converts field type to string.";
+  p_help = "If input_field is empty the field does not exist in the input data set.";
 } bblock_field_names[1];
 
 commentdef {

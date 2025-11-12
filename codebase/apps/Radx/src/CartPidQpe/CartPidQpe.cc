@@ -1459,11 +1459,22 @@ void CartPidQpe::_printParamsKdp()
 //////////////////////////////////////////////////
 // get radar field name from type
 
-string CartPidQpe::getRadarFieldName(Params::radar_field_type_t ftype)
+string CartPidQpe::getRadarInputName(Params::radar_field_type_t ftype)
 {
   for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
     if (_params._radar_field_names[ii].field_type == ftype) {
-      return _params._radar_field_names[ii].field_name;
+      return _params._radar_field_names[ii].input_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+string CartPidQpe::getRadarOutputName(Params::radar_field_type_t ftype)
+{
+  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
+    if (_params._radar_field_names[ii].field_type == ftype) {
+      return _params._radar_field_names[ii].output_name;
     }
   }
   // not found
@@ -1473,11 +1484,22 @@ string CartPidQpe::getRadarFieldName(Params::radar_field_type_t ftype)
 //////////////////////////////////////////////////
 // get model field name from type
 
-string CartPidQpe::getModelFieldName(Params::model_field_type_t ftype)
+string CartPidQpe::getModelInputName(Params::model_field_type_t ftype)
 {
   for (int ii = 0; ii < _params.model_field_names_n; ii++) {
     if (_params._model_field_names[ii].field_type == ftype) {
-      return _params._model_field_names[ii].field_name;
+      return _params._model_field_names[ii].input_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+string CartPidQpe::getModelOutputName(Params::model_field_type_t ftype)
+{
+  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
+    if (_params._model_field_names[ii].field_type == ftype) {
+      return _params._model_field_names[ii].output_name;
     }
   }
   // not found
@@ -1487,11 +1509,22 @@ string CartPidQpe::getModelFieldName(Params::model_field_type_t ftype)
 //////////////////////////////////////////////////
 // get beam block field name from type
 
-string CartPidQpe::getBeamBlockFieldName(Params::bblock_field_type_t ftype)
+string CartPidQpe::getBeamBlockInputName(Params::bblock_field_type_t ftype)
 {
   for (int ii = 0; ii < _params.bblock_field_names_n; ii++) {
     if (_params._bblock_field_names[ii].field_type == ftype) {
-      return _params._bblock_field_names[ii].field_name;
+      return _params._bblock_field_names[ii].input_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+string CartPidQpe::getBeamBlockOutputName(Params::bblock_field_type_t ftype)
+{
+  for (int ii = 0; ii < _params.bblock_field_names_n; ii++) {
+    if (_params._bblock_field_names[ii].field_type == ftype) {
+      return _params._bblock_field_names[ii].output_name;
     }
   }
   // not found

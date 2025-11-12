@@ -89,9 +89,13 @@ public:
 
   // get field names
   
-  string getRadarFieldName(Params::radar_field_type_t ftype);
-  string getModelFieldName(Params::model_field_type_t ftype);
-  string getBeamBlockFieldName(Params::bblock_field_type_t ftype);
+  string getRadarInputName(Params::radar_field_type_t ftype);
+  string getModelInputName(Params::model_field_type_t ftype);
+  string getBeamBlockInputName(Params::bblock_field_type_t ftype);
+
+  string getRadarOutputName(Params::radar_field_type_t ftype);
+  string getModelOutputName(Params::model_field_type_t ftype);
+  string getBeamBlockOutputName(Params::bblock_field_type_t ftype);
 
   // names for extra fields
 

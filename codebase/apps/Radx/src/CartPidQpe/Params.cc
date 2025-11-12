@@ -714,8 +714,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("radar_field_names");
-    tt->descr = tdrpStrDup("Converts field name enum to string.");
-    tt->help = tdrpStrDup("If string is empty the field does not exist in the data set.");
+    tt->descr = tdrpStrDup("Converts field type to strings.");
+    tt->help = tdrpStrDup("If input_name is empty the field does not exist in the input data set.");
     tt->array_offset = (char *) &_radar_field_names - &_start_;
     tt->array_n_offset = (char *) &radar_field_names_n - &_start_;
     tt->is_array = TRUE;
@@ -723,7 +723,7 @@
     tt->array_elem_size = sizeof(radar_field_name_t);
     tt->array_n = 8;
     tt->struct_def.name = tdrpStrDup("radar_field_name_t");
-    tt->struct_def.nfields = 2;
+    tt->struct_def.nfields = 3;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("radar_field_type_t");
@@ -752,29 +752,42 @@
         tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("KDP");
         tt->struct_def.fields[0].enum_def.fields[7].val = KDP;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("field_name");
+      tt->struct_def.fields[1].fname = tdrpStrDup("input_name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_radar_field_names->field_name - (char *) _radar_field_names;
-    tt->n_struct_vals = 16;
+        (char *) &_radar_field_names->input_name - (char *) _radar_field_names;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("output_name");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_radar_field_names->output_name - (char *) _radar_field_names;
+    tt->n_struct_vals = 24;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = DBZ;
       tt->struct_vals[1].s = tdrpStrDup("DBZ");
-      tt->struct_vals[2].e = VEL;
-      tt->struct_vals[3].s = tdrpStrDup("VEL");
-      tt->struct_vals[4].e = WIDTH;
-      tt->struct_vals[5].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[6].e = ZDR;
-      tt->struct_vals[7].s = tdrpStrDup("ZDR");
-      tt->struct_vals[8].e = LDR;
-      tt->struct_vals[9].s = tdrpStrDup("LDR");
-      tt->struct_vals[10].e = PHIDP;
-      tt->struct_vals[11].s = tdrpStrDup("PHIDP");
-      tt->struct_vals[12].e = RHOHV;
-      tt->struct_vals[13].s = tdrpStrDup("RHOHV");
-      tt->struct_vals[14].e = KDP;
-      tt->struct_vals[15].s = tdrpStrDup("KDP");
+      tt->struct_vals[2].s = tdrpStrDup("DBZ");
+      tt->struct_vals[3].e = VEL;
+      tt->struct_vals[4].s = tdrpStrDup("VEL");
+      tt->struct_vals[5].s = tdrpStrDup("VEL");
+      tt->struct_vals[6].e = WIDTH;
+      tt->struct_vals[7].s = tdrpStrDup("WIDTH");
+      tt->struct_vals[8].s = tdrpStrDup("WIDTH");
+      tt->struct_vals[9].e = ZDR;
+      tt->struct_vals[10].s = tdrpStrDup("ZDR");
+      tt->struct_vals[11].s = tdrpStrDup("ZDR");
+      tt->struct_vals[12].e = LDR;
+      tt->struct_vals[13].s = tdrpStrDup("");
+      tt->struct_vals[14].s = tdrpStrDup("LDR");
+      tt->struct_vals[15].e = PHIDP;
+      tt->struct_vals[16].s = tdrpStrDup("PHIDP");
+      tt->struct_vals[17].s = tdrpStrDup("PHIDP");
+      tt->struct_vals[18].e = RHOHV;
+      tt->struct_vals[19].s = tdrpStrDup("RHOHV");
+      tt->struct_vals[20].s = tdrpStrDup("RHOHV");
+      tt->struct_vals[21].e = KDP;
+      tt->struct_vals[22].s = tdrpStrDup("");
+      tt->struct_vals[23].s = tdrpStrDup("KDP");
     tt++;
     
     // Parameter 'Comment 4'
@@ -792,8 +805,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("model_field_names");
-    tt->descr = tdrpStrDup("Converts field name enum to string.");
-    tt->help = tdrpStrDup("If string is empty the field does not exist in the data set.");
+    tt->descr = tdrpStrDup("Converts field type to string.");
+    tt->help = tdrpStrDup("If input_name is empty the field does not exist in the input data set.");
     tt->array_offset = (char *) &_model_field_names - &_start_;
     tt->array_n_offset = (char *) &model_field_names_n - &_start_;
     tt->is_array = TRUE;
@@ -801,7 +814,7 @@
     tt->array_elem_size = sizeof(model_field_name_t);
     tt->array_n = 5;
     tt->struct_def.name = tdrpStrDup("model_field_name_t");
-    tt->struct_def.nfields = 2;
+    tt->struct_def.nfields = 3;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("model_field_type_t");
@@ -824,23 +837,33 @@
         tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("WVEL");
         tt->struct_def.fields[0].enum_def.fields[4].val = WVEL;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("field_name");
+      tt->struct_def.fields[1].fname = tdrpStrDup("input_name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_model_field_names->field_name - (char *) _model_field_names;
-    tt->n_struct_vals = 10;
+        (char *) &_model_field_names->input_name - (char *) _model_field_names;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("output_name");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_model_field_names->output_name - (char *) _model_field_names;
+    tt->n_struct_vals = 15;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = TEMP;
       tt->struct_vals[1].s = tdrpStrDup("TEMP");
-      tt->struct_vals[2].e = RH;
-      tt->struct_vals[3].s = tdrpStrDup("RH");
-      tt->struct_vals[4].e = UVEL;
-      tt->struct_vals[5].s = tdrpStrDup("UVEL");
-      tt->struct_vals[6].e = VVEL;
-      tt->struct_vals[7].s = tdrpStrDup("VVEL");
-      tt->struct_vals[8].e = WVEL;
-      tt->struct_vals[9].s = tdrpStrDup("WVEL");
+      tt->struct_vals[2].s = tdrpStrDup("TEMP");
+      tt->struct_vals[3].e = RH;
+      tt->struct_vals[4].s = tdrpStrDup("RH");
+      tt->struct_vals[5].s = tdrpStrDup("RH");
+      tt->struct_vals[6].e = UVEL;
+      tt->struct_vals[7].s = tdrpStrDup("UVEL");
+      tt->struct_vals[8].s = tdrpStrDup("UVEL");
+      tt->struct_vals[9].e = VVEL;
+      tt->struct_vals[10].s = tdrpStrDup("VVEL");
+      tt->struct_vals[11].s = tdrpStrDup("VVEL");
+      tt->struct_vals[12].e = WVEL;
+      tt->struct_vals[13].s = tdrpStrDup("WVEL");
+      tt->struct_vals[14].s = tdrpStrDup("WVEL");
     tt++;
     
     // Parameter 'Comment 5'
@@ -858,8 +881,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("bblock_field_names");
-    tt->descr = tdrpStrDup("Converts field name enum to string.");
-    tt->help = tdrpStrDup("If string is empty the field does not exist in the data set.");
+    tt->descr = tdrpStrDup("Converts field type to string.");
+    tt->help = tdrpStrDup("If input_field is empty the field does not exist in the input data set.");
     tt->array_offset = (char *) &_bblock_field_names - &_start_;
     tt->array_n_offset = (char *) &bblock_field_names_n - &_start_;
     tt->is_array = TRUE;
@@ -867,7 +890,7 @@
     tt->array_elem_size = sizeof(bblock_field_name_t);
     tt->array_n = 1;
     tt->struct_def.name = tdrpStrDup("bblock_field_name_t");
-    tt->struct_def.nfields = 2;
+    tt->struct_def.nfields = 3;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("bblock_field_type_t");
@@ -882,15 +905,21 @@
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("BEAME");
         tt->struct_def.fields[0].enum_def.fields[0].val = BEAME;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("field_name");
+      tt->struct_def.fields[1].fname = tdrpStrDup("input_name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_bblock_field_names->field_name - (char *) _bblock_field_names;
-    tt->n_struct_vals = 2;
+        (char *) &_bblock_field_names->input_name - (char *) _bblock_field_names;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("output_name");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_bblock_field_names->output_name - (char *) _bblock_field_names;
+    tt->n_struct_vals = 3;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = BEAME;
       tt->struct_vals[1].s = tdrpStrDup("BEAME");
+      tt->struct_vals[2].s = tdrpStrDup("BEAME");
     tt++;
     
     // Parameter 'Comment 6'

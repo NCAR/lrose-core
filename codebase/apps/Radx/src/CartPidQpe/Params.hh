@@ -141,17 +141,20 @@ public:
 
   typedef struct {
     radar_field_type_t field_type;
-    char* field_name;
+    char* input_name;
+    char* output_name;
   } radar_field_name_t;
 
   typedef struct {
     model_field_type_t field_type;
-    char* field_name;
+    char* input_name;
+    char* output_name;
   } model_field_name_t;
 
   typedef struct {
     bblock_field_type_t field_type;
-    char* field_name;
+    char* input_name;
+    char* output_name;
   } bblock_field_name_t;
 
   typedef struct {
