@@ -3,13 +3,13 @@
  *
  * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
  *
- * May 2021
+ * Nov 2025
  */
 
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "CartPidQpe reads moments from Radx-supported format files, computes PID and rain rate, interpolates onto a Cartesian grid, and writes out the results to Cartesian files in MDV or NetCDF.";
+  p_header = "CartPidQpe reads radar fields in polar coordinates, radar beam blockages, and model data in Cartesian coordinates. It computes KDP, PID and precip rate, interpolates onto a Cartesian grid, estimates QPE at the surface, and writes out the results to Cartesian files in MDV NetCDF files.";
   p_text = "The output is written to Cartesian files in CF-compliant NetCDF format.";
 }
 
@@ -76,6 +76,34 @@ paramdef string {
   p_descr = "Set the end time for ARCHIVE mode analysis.";
   p_help = "Format is 'yyyy mm dd hh mm ss'.";
 } end_time;
+
+commentdef {
+  p_header = "RADAR FIELD NAMES";
+}
+
+typedef enum {
+  DBZ, VEL, WIDTH, ZDR, LDR, PHIDP, RHOHV, KDP
+} radar_field_type_t;
+
+typedef struct {
+  radar_field_type_t field_type;
+  string field_name;
+} radar_field_name_t;
+
+paramdef struct radar_field_name_t {
+  p_default = { 
+    { DBZ, "DBZ" },
+    { VEL, "VEL" },
+    { WIDTH, "WIDTH" },
+    { ZDR, "ZDR" },
+    { LDR, "LDR" },
+    { PHIDP, "PHIDP" },
+    { RHOHV, "RHOHV" },
+    { KDP, "KDP" }
+  };
+  p_descr = "Converts field name enum to string.";
+  p_help = "If string is empty the field does not exist in the data set.";
+} radar_field_names[8];
 
 commentdef {
   p_header = "DATA OUTPUT DIRECTORY AND FILE NAMES";
@@ -248,11 +276,11 @@ typedef enum {
   RATE_HIDRO,
   RATE_BRINGI,
 
-  PID,
+  PID_OUT,
   PID_INTEREST,
   TEMP_FOR_PID,
 
-  KDP,
+  KDP_OUT,
   KDP_SC,
 
   DBZ_ATTEN_CORRECTION,
@@ -337,7 +365,7 @@ paramdef struct pid_output_field_t {
     }
     ,
     {
-      id = PID,
+      id = PID_OUT,
       name = "PID",
       long_name = "particle_id",
       standard_name = "hydrometeor_type",
@@ -364,7 +392,7 @@ paramdef struct pid_output_field_t {
     }
     ,
     {
-      id = KDP,
+      id = KDP_OUT,
       name = "KDP",
       long_name = "specific_differential_phase",
       standard_name = "specific_differential_phase_hv",

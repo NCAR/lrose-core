@@ -81,6 +81,17 @@ public:
   } mode_t;
 
   typedef enum {
+    DBZ = 0,
+    VEL = 1,
+    WIDTH = 2,
+    ZDR = 3,
+    LDR = 4,
+    PHIDP = 5,
+    RHOHV = 6,
+    KDP = 7
+  } radar_field_type_t;
+
+  typedef enum {
     RATE_ZH = 0,
     RATE_ZH_SNOW = 1,
     RATE_Z_ZDR = 2,
@@ -90,10 +101,10 @@ public:
     RATE_PID = 6,
     RATE_HIDRO = 7,
     RATE_BRINGI = 8,
-    PID = 9,
+    PID_OUT = 9,
     PID_INTEREST = 10,
     TEMP_FOR_PID = 11,
-    KDP = 12,
+    KDP_OUT = 12,
     KDP_SC = 13,
     DBZ_ATTEN_CORRECTION = 14,
     ZDR_ATTEN_CORRECTION = 15,
@@ -115,6 +126,11 @@ public:
   } projection_t;
 
   // struct typedefs
+
+  typedef struct {
+    radar_field_type_t field_type;
+    char* field_name;
+  } radar_field_name_t;
 
   typedef struct {
     char* input_name;
@@ -476,6 +492,9 @@ public:
 
   char* end_time;
 
+  radar_field_name_t *_radar_field_names;
+  int radar_field_names_n;
+
   char* output_dir;
 
   tdrp_bool_t rename_fields_on_input;
@@ -744,7 +763,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[169];
+  mutable TDRPtable _table[171];
 
   const char *_className;
 

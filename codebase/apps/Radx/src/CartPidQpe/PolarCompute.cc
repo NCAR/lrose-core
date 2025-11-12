@@ -686,7 +686,7 @@ void PolarCompute::_loadOutputFields(RadxRay *inputRay,
 
           // PID
         
-        case Params::PID:
+        case Params::PID_OUT:
           *datp = _pidArray[igate];
           break;
         case Params::PID_INTEREST:
@@ -698,7 +698,7 @@ void PolarCompute::_loadOutputFields(RadxRay *inputRay,
           
           // computed KDP
         
-        case Params::KDP:
+        case Params::KDP_OUT:
           *datp = _kdpArray[igate];
           break;
         case Params::KDP_SC:
