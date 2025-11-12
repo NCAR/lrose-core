@@ -13,6 +13,7 @@ project (lrose-core)
 # subdirectories
 
 add_subdirectory (Ascii2Radx)
+add_subdirectory (CartPidQpe)
 add_subdirectory (Dsr2Radx)
 add_subdirectory (FixCfradialPaths)
 add_subdirectory (FixFieldVals)
