@@ -141,6 +141,8 @@ typedef si32 iwrf_event_flags_t;
 #define IWRF_END_OF_VOLUME (1 << 1)
 #define IWRF_START_OF_SWEEP (1 << 2)
 #define IWRF_START_OF_VOLUME (1 << 3)
+#define IWRF_START_OF_BLOCK (1 << 4)
+#define IWRF_END_OF_BLOCK (1 << 5)
 
 /* txrx state flags
  *
@@ -1410,7 +1412,9 @@ typedef struct iwrf_pulse_header {
 
   fl32 tx_phase_deg; /** phase on transmit - for phase-coded ops */
 
-  si32 unused[5];
+  si32 block_num; /** pulse block number */ 
+
+  si32 unused[4];
 
 } iwrf_pulse_header_t;
 
