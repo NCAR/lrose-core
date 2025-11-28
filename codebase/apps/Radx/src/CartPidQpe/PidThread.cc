@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// PolarThread.hh
+// PidThread.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -34,85 +34,81 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef PolarThread_HH
-#define PolarThread_HH
+#include <cassert>
+#include <radar/KdpFiltParams.hh>
+#include <radar/NcarPidParams.hh>
+#include "CartPidQpe.hh"
+#include "PidThread.hh"
+#include "PidCompute.hh"
+#include "Params.hh"
 
-#include <toolsa/TaThread.hh>
+///////////////////////////////////////////////////////////////
+// Constructor
 
-class RadxRay;
-class CartPidQpe;
-class PolarCompute;
-class Params;
-class KdpFiltParams;
-class NcarPidParams;
-
-class PolarThread : public TaThread
-{  
-
-public:
+PidThread::PidThread(CartPidQpe *parent,
+                     const Params &params,
+                     const KdpFiltParams &kdpFiltParams,
+                     const NcarPidParams &ncarPidParams,
+                     const PrecipRateParams &precipRateParams,
+                     int threadNum) :
+        _parent(parent),
+        _params(params),
+        _kdpFiltParams(kdpFiltParams),
+        _ncarPidParams(ncarPidParams),
+        _precipRateParams(precipRateParams),
+        _threadNum(threadNum)
+{
   
-  // constructor
+  OK = TRUE;
+  _inputRay = NULL;
+  _outputRay = NULL;
   
-  PolarThread(CartPidQpe *parent, 
-              const Params &params,
-              const KdpFiltParams &kdpFiltParams,
-              const NcarPidParams &ncarPidParams,
-              const PrecipRateParams &precipRateParams,
-              int threadNum);
-
-  // destructor
+  // create compute compute object
   
-  virtual ~PolarThread();
-
-  // compute engine object
+  _pidCompute = new PidCompute(_params,
+                               _kdpFiltParams,
+                               _ncarPidParams,
+                               _precipRateParams,
+                               _threadNum);
+  if (_pidCompute == NULL) {
+    OK = FALSE;
+    return;
+  }
+  if (!_pidCompute->OK) {
+    OK = FALSE;
+    _pidCompute = NULL;
+    return;
+  }
   
-  inline PolarCompute *getPolarCompute() const { return _polarCompute; }
+}  
+
+// Destructor
+
+PidThread::~PidThread()
+{
+
+  if (_pidCompute != NULL) {
+    delete _pidCompute;
+  }
   
-  // set input ray
+}  
+
+// run method
+
+void PidThread::run()
+{
   
-  inline void setInputRay(RadxRay *val) { _inputRay = val; }
+  // check
+
+  assert(_pidCompute != NULL);
+  assert(_inputRay != NULL);
   
-  // derived ray - result of computations
+  // Compute compute object will create the output ray
+  // The ownership of the ray is passed to the parent object
+  // which adds it to the output volume.
+
+  _outputRay = _pidCompute->doCompute(_inputRay,
+                                      _parent->getRadarHtKm(),
+                                      _parent->getWavelengthM());
   
-  inline RadxRay *getOutputRay() const { return _outputRay; }
-
-  // override run method
-
-  virtual void run();
-
-  // constructor OK?
-
-  bool OK;
-
-private:
-
-  // parent object
-
-  CartPidQpe *_parent;
-
-  // params
-
-  const Params &_params;
-  const KdpFiltParams &_kdpFiltParams;
-  const NcarPidParams &_ncarPidParams;
-  const PrecipRateParams &_precipRateParams;
-
-  // thread number
-
-  int _threadNum;
-
-  // computation engine
-
-  PolarCompute *_polarCompute;
-
-  // input ray
-
-  RadxRay *_inputRay;
-
-  // output ray
-
-  RadxRay *_outputRay;
-
-};
-
-#endif
+}

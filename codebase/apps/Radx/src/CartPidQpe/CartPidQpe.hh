@@ -57,8 +57,8 @@
 class RadxFile;
 class RadxRay;
 class RadxField;
-class PolarCompute;
-class PolarThread;
+class PidCompute;
+class PidThread;
 using namespace std;
 
 class CartPidQpe {
@@ -133,9 +133,9 @@ private:
   double _radarHtKm;
   double _wavelengthM;
 
-  // derived rays - after computing PID
+  // pid rays - after computing PID
 
-  vector <RadxRay *> _derivedRays;
+  vector <RadxRay *> _pidRays;
 
   // interpolation fields
   
@@ -153,7 +153,7 @@ private:
   // instantiate thread pool for computations
 
   TaThreadPool _threadPool;
-  vector<PolarCompute *> _computeThreads;
+  vector<PidCompute *> _computePidThreads;
 
   // private methods
 
@@ -169,8 +169,8 @@ private:
   void _addExtraFieldsToOutput();
   void _encodeFieldsForOutput();
 
-  int _computeDerived();
-  int _storeDerivedRay(PolarThread *thread);
+  int _computePid();
+  int _storePidRay(PidThread *thread);
 
   void _loadInterpRays();
   void _addGeometryFields();

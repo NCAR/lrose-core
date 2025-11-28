@@ -38,8 +38,8 @@
 
 #include "CartPidQpe.hh"
 #include "OutputMdv.hh"
-#include "PolarCompute.hh"
-#include "PolarThread.hh"
+#include "PidCompute.hh"
+#include "PidThread.hh"
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
 #include <toolsa/pjg.h>
@@ -190,19 +190,19 @@ CartPidQpe::CartPidQpe(int argc, char **argv)
   // set up compute thread pool
   
   for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-    PolarThread *thread =
-      new PolarThread(this, _params, 
-                      _kdpFiltParams,
-                      _ncarPidParams,
-                      _precipRateParams,
-                      ii);
+    PidThread *thread =
+      new PidThread(this, _params, 
+                    _kdpFiltParams,
+                    _ncarPidParams,
+                    _precipRateParams,
+                    ii);
     if (!thread->OK) {
       delete thread;
       OK = FALSE;
       return;
     }
     _threadPool.addThreadToMain(thread);
-    _computeThreads.push_back(thread->getPolarCompute());
+    _computePidThreads.push_back(thread->getPidCompute());
   }
 
 }
@@ -445,9 +445,9 @@ int CartPidQpe::_processFile(const string &filePath)
 
   // read the temperature profile into the threads
 
-  if (_computeThreads.size() > 0) {
+  if (_computePidThreads.size() > 0) {
     // thread 0
-    PolarCompute *thread0 = _computeThreads[0];
+    PidCompute *thread0 = _computePidThreads[0];
     if (_params.debug) {
       cerr << "Thread #: " << 0 << endl;
       cerr << "  Loading temp profile for time: "
@@ -455,8 +455,8 @@ int CartPidQpe::_processFile(const string &filePath)
     }
     thread0->loadTempProfile(_readVol.getStartTimeSecs());
     // copy to other threads
-    for (size_t ii = 1; ii < _computeThreads.size(); ii++) {
-      _computeThreads[ii]->setTempProfile(thread0->getTempProfile());
+    for (size_t ii = 1; ii < _computePidThreads.size(); ii++) {
+      _computePidThreads[ii]->setTempProfile(thread0->getTempProfile());
     }
   }
   
@@ -464,11 +464,11 @@ int CartPidQpe::_processFile(const string &filePath)
   
   _addExtraFieldsToInput();
 
-  // compute the derived fields
+  // compute the pid fields
   
-  if (_computeDerived()) {
+  if (_computePid()) {
     cerr << "ERROR - CartPidQpe::Run" << endl;
-    cerr << "  Cannot compute derived fields" << endl;
+    cerr << "  Cannot compute pid fields" << endl;
     return -1;
   }
 
@@ -704,7 +704,7 @@ void CartPidQpe::_addExtraFieldsToInput()
     
     double rangeKm = startRangeKm;
     double elevationDeg = ray->getElevationDeg();
-    const TempProfile &profile = _computeThreads[0]->getTempProfile();
+    const TempProfile &profile = _computePidThreads[0]->getTempProfile();
     for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
       double htKm = beamHt.computeHtKm(elevationDeg, rangeKm);
       double tempC = profile.getTempForHtKm(htKm);
@@ -766,11 +766,11 @@ void CartPidQpe::_addExtraFieldsToOutput()
     
     RadxRay *outputRay = NULL;
     double inTime = inputRay->getTimeDouble();
-    for (size_t jj = 0; jj < _derivedRays.size(); jj++) {
-      RadxRay *derivedRay = _derivedRays[jj];
-      double outTime = derivedRay->getTimeDouble();
+    for (size_t jj = 0; jj < _pidRays.size(); jj++) {
+      RadxRay *pidRay = _pidRays[jj];
+      double outTime = pidRay->getTimeDouble();
       if (fabs(inTime - outTime) < 0.001) {
-        outputRay = derivedRay;
+        outputRay = pidRay;
         break;
       }
     } // jj
@@ -787,35 +787,35 @@ void CartPidQpe::_addExtraFieldsToOutput()
 }
 
 /////////////////////////////////////////////////////
-// compute the derived fields for all rays in volume
+// compute the pid fields for all rays in volume
 
-int CartPidQpe::_computeDerived()
+int CartPidQpe::_computePid()
 {
 
   // initialize the volume with ray numbers
   
   _readVol.setRayNumbersInOrder();
 
-  // initialize derived
+  // initialize pid
 
-  _derivedRays.clear();
+  _pidRays.clear();
   
   // loop through the input rays,
-  // computing the derived fields
+  // computing the pid fields
 
   const vector<RadxRay *> &inputRays = _readVol.getRays();
   for (size_t iray = 0; iray < inputRays.size(); iray++) {
 
     // get a thread from the pool
     bool isDone = true;
-    PolarThread *thread = 
-      (PolarThread *) _threadPool.getNextThread(true, isDone);
+    PidThread *thread = 
+      (PidThread *) _threadPool.getNextThread(true, isDone);
     if (thread == NULL) {
       break;
     }
     if (isDone) {
       // store the results computed by the thread
-      if (_storeDerivedRay(thread)) {
+      if (_storePidRay(thread)) {
         cerr << "ERROR - RadxRate::_compute()" << endl;
         cerr << "  Cannot compute for ray num: " << iray << endl;
         break;
@@ -838,12 +838,12 @@ int CartPidQpe::_computeDerived()
 
   _threadPool.setReadyForDoneCheck();
   while (!_threadPool.checkAllDone()) {
-    PolarThread *thread = (PolarThread *) _threadPool.getNextDoneThread();
+    PidThread *thread = (PidThread *) _threadPool.getNextDoneThread();
     if (thread == NULL) {
       break;
     } else {
       // store the results computed by the thread
-      _storeDerivedRay(thread);
+      _storePidRay(thread);
       // return thread to the available pool
       _threadPool.addThreadToAvail(thread);
     }
@@ -854,20 +854,20 @@ int CartPidQpe::_computeDerived()
 }
 
 ///////////////////////////////////////////////////////////
-// Store the derived ray
+// Store the pid ray
 
-int CartPidQpe::_storeDerivedRay(PolarThread *thread)
-
+int CartPidQpe::_storePidRay(PidThread *thread)
+  
 {
   
-  RadxRay *derivedRay = thread->getOutputRay();
-  if (derivedRay == NULL) {
+  RadxRay *pidRay = thread->getOutputRay();
+  if (pidRay == NULL) {
     // error
     return -1;
   }
 
   // good return, add to results
-  _derivedRays.push_back(derivedRay);
+  _pidRays.push_back(pidRay);
   
   return 0;
 

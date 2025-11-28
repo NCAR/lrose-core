@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// PolarCompute.hh
+// PidCompute.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,14 +30,14 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// PolarCompute computation engine
+// PidCompute computation engine
 // Computes PID in polar coords
 // There is one object per thread.
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef PolarCompute_HH
-#define PolarCompute_HH
+#ifndef PidCompute_HH
+#define PidCompute_HH
 
 #include "Params.hh"
 #include <radar/KdpFilt.hh>
@@ -55,21 +55,21 @@ class TempProfile;
 #include <pthread.h>
 using namespace std;
 
-class PolarCompute {
+class PidCompute {
   
 public:
   
   // constructor
   
-  PolarCompute(const Params &params,
-               const KdpFiltParams &kdpFiltParams,
-               const NcarPidParams &ncarPidParams,
-               const PrecipRateParams &precipRateParams,
-               int id);
+  PidCompute(const Params &params,
+             const KdpFiltParams &kdpFiltParams,
+             const NcarPidParams &ncarPidParams,
+             const PrecipRateParams &precipRateParams,
+             int id);
 
   // destructor
   
-  ~PolarCompute();
+  ~PidCompute();
 
   // Load the temperature profile for PID computations,
   // for the specified time.
