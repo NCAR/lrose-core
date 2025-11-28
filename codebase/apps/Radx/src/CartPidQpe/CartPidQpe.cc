@@ -413,21 +413,6 @@ int CartPidQpe::_processFile(const string &filePath)
     }
   }
 
-  // check we have not already processed this file
-  // in the file aggregation step
-
-  RadxPath thisPath(filePath);
-  for (size_t ipath = 0; ipath < _readPaths.size(); ipath++) {
-    RadxPath rpath(_readPaths[ipath]);
-    if (thisPath.getFile() == rpath.getFile()) {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "Skipping file: " << filePath << endl;
-        cerr << "  Previously processed in aggregation step" << endl;
-      }
-      return 0;
-    }
-  }
-  
   if (_params.debug) {
     cerr << "INFO - CartPidQpe::_processFile" << endl;
     cerr << "  Input file path: " << filePath << endl;
@@ -445,7 +430,7 @@ int CartPidQpe::_processFile(const string &filePath)
     cerr << "ERROR - CartPidQpe::_processFile" << endl;
     return -1;
   }
-
+  
   // check we have at least 2 rays
   
   if (_readVol.getNRays() < 2) {
@@ -530,7 +515,6 @@ int CartPidQpe::_readFile(const string &filePath)
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
-  _readPaths = inFile.getReadPaths();
   
   // convert to fl32
   
@@ -546,13 +530,13 @@ int CartPidQpe::_readFile(const string &filePath)
 
   // rename fields if requested
 
-  if (_params.rename_fields_on_input) {
-    for (int ii = 0; ii < _params.renamed_fields_n; ii++) {
-      string inputName = _params._renamed_fields[ii].input_name;
-      string outputName = _params._renamed_fields[ii].output_name;
-      _readVol.renameField(inputName, outputName);
-    } // ii
-  } // if (_params.rename_fields_on_input)
+  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
+    string inName = _params._radar_field_names[ii].input_name;
+    string outName = _params._radar_field_names[ii].output_name;
+    if (inName.size() > 0 && inName != outName) {
+      _readVol.renameField(inName, outName);
+    }
+  }
 
   // override radar location if requested
 
@@ -562,15 +546,6 @@ int CartPidQpe::_readFile(const string &filePath)
                               _params.radar_altitude_meters / 1000.0);
   }
 
-  // override radar name and site name if requested
-  
-  if (_params.override_instrument_name) {
-    _readVol.setInstrumentName(_params.instrument_name);
-  }
-  if (_params.override_site_name) {
-    _readVol.setSiteName(_params.site_name);
-  }
-    
   // override beam width if requested
   
   if (_params.override_beam_width) {
@@ -588,18 +563,6 @@ int CartPidQpe::_readFile(const string &filePath)
 
   if (_params.override_fixed_angle_with_mean_measured_angle) {
     _readVol.computeFixedAnglesFromRays();
-  }
-
-  // reorder sweeps into ascending order if requested
-
-  if (_params.reorder_sweeps_by_ascending_angle) {
-    _readVol.reorderSweepsAscendingAngle();
-  }
-
-  // trim surveillance sweeps to 360 degrees if requested
-
-  if (_params.trim_surveillance_sweeps_to_360deg) {
-    _readVol.trimSurveillanceSweepsTo360Deg();
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -644,27 +607,16 @@ void CartPidQpe::_setupRead(RadxFile &file)
     file.setDebug(true);
   }
 
-  if (_params.remove_long_range_rays) {
-    file.setReadRemoveLongRange(true);
-  } else {
-    file.setReadRemoveLongRange(false);
-  }
-
-  if (_params.remove_short_range_rays) {
-    file.setReadRemoveShortRange(true);
-  } else {
-    file.setReadRemoveShortRange(false);
-  }
-
-  if (_params.compute_sweep_angles_from_vcp_tables) {
-    file.setReadComputeSweepAnglesFromVcpTables(true);
-  } else {
-    file.setReadComputeSweepAnglesFromVcpTables(false);
-  }
-
   if (_params.set_max_range) {
     file.setReadMaxRangeKm(_params.max_range_km);
   }
+
+  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
+    if (strlen(_params._radar_field_names[ii].input_name) > 0) {
+      file.addReadField(_params._radar_field_names[ii].input_name);
+    }
+  }
+  
 
   if (_params.copy_selected_input_fields_to_output) {
     for (int ii = 0; ii < _params.copy_fields_n; ii++) {

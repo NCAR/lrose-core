@@ -125,7 +125,6 @@ private:
 
   // input data
   
-  vector<string> _readPaths;
   RadxVol _readVol;
   bool _rhiMode;
 

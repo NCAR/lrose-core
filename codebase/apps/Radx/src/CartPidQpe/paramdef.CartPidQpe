@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "CartPidQpe reads radar fields in polar coordinates, radar beam blockages, and model data in Cartesian coordinates. It computes KDP, PID and precip rate, interpolates onto a Cartesian grid, estimates QPE at the surface, and writes out the results to Cartesian files in MDV NetCDF files.";
+  p_header = "CartPidQpe reads radar fields in polar coordinates, radar beam blockage, and model data in Cartesian coordinates. It computes KDP, PID and precip rate, interpolates onto a Cartesian grid, estimates QPE at the surface, and writes out the results to Cartesian files in MDV NetCDF files.";
   p_text = "The output is written to Cartesian files in CF-compliant NetCDF format.";
 }
 
@@ -44,7 +44,7 @@ typedef enum {
 paramdef enum mode_t {
   p_default = FILELIST;
   p_descr = "Operating mode";
-  p_help = "In FILELIST mode, we move through the list of file names specified on the command line.\n\nIn REALTIME mode, the program waits for a new input file to arrive in 'input_dir'.\n\nIn ARCHIVE mode, we move through the files in input_dir between the start and end times set on the command line.\n\nIn ARCHIVE mode, input_dir must be one above the day-directory.";
+  p_help = "In FILELIST mode, we move through the list of file names specified on the command line.\n\nIn REALTIME mode, the program waits for a new input file to arrive in 'input_dir'. We assume that latest_data_info files are available.\n\nIn ARCHIVE mode, we move through the files in input_dir between the start and end times set on the command line.\n\nIn ARCHIVE mode, input_dir must be one above the day-directory.";
 } mode;
 
 paramdef int {
@@ -103,7 +103,7 @@ paramdef struct radar_field_name_t {
     { KDP, "", "KDP" }
   };
   p_descr = "Converts field type to strings.";
-  p_help = "If input_name is empty the field does not exist in the input data set.";
+  p_help = "If input_name is empty the field is assumed to not exist in the input data set.";
 } radar_field_names[8];
 
 commentdef {
@@ -129,7 +129,7 @@ paramdef struct model_field_name_t {
     { WVEL, "WVEL", "WVEL" }
   };
   p_descr = "Converts field type to string.";
-  p_help = "If input_name is empty the field does not exist in the input data set.";
+  p_help = "If input_name is empty the field is assumed to not exist in the input data set.";
 } model_field_names[5];
 
 commentdef {
@@ -151,7 +151,7 @@ paramdef struct bblock_field_name_t {
     { BEAME, "BEAME", "BEAME" }
   };
   p_descr = "Converts field type to string.";
-  p_help = "If input_field is empty the field does not exist in the input data set.";
+  p_help = "If input_field is empty the field is assumed to not exist in the input data set.";
 } bblock_field_names[1];
 
 commentdef {
@@ -163,31 +163,6 @@ paramdef string {
   p_descr = "Output directory for writing files.";
   p_help = "Files will be written to this directory.";
 } output_dir;
-
-commentdef {
-  p_header = "OPTION TO RENAME FIELDS ON INPUT";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to rename some or all of the fields when they are read in.";
-  p_help = "This operation is performed immediately after the read completes. All field names specified later in the parameter file refer to these new names.";
-} rename_fields_on_input;
-
-typedef struct {
-  string input_name;
-  string output_name;
-} rename_field_t;
-
-paramdef struct rename_field_t {
-  p_default = { 
-    { "DBZ", "DBZ_S" },
-    { "VEL", "VEL_S" },
-    { "WIDTH", "WIDTH_S" }
-  };
-  p_descr = "Specify the list of fields to be renamed.";
-  p_help = "Only applies if 'rename_fields_on_input' is TRUE.\n\nThe field name is changed from 'input_name' to 'output_name'.\n\n";
-} renamed_fields[];
 
 commentdef {
   p_header = "INPUT FIELD INFORMATION for computing KDP, PID and RATE.";
@@ -943,44 +918,10 @@ commentdef {
 }
 
 paramdef boolean {
-  p_default = true;
-  p_descr = "Option to remove long range rays.";
-  p_help = "Applies to NEXRAD data. If true, data from the non-Doppler long-range sweeps will be removed.";
-} remove_long_range_rays;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to remove short range rays.";
-  p_help = "Applies to NEXRAD data. If true, data from the Doppler short-range sweeps will be removed.";
-} remove_short_range_rays;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to trip surveillance sweeps so that they only cover 360 degrees.";
-  p_help = "Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.";
-} trim_surveillance_sweeps_to_360deg;
-
-paramdef boolean {
   p_default = false;
   p_descr = "Option to override the fixed angle with the mean angle for a sweep.";
   p_help = "If true, for each sweep the mean pointing angle is computed and then this is used to override the fixed angle.";
 } override_fixed_angle_with_mean_measured_angle;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to reorder sweeps by ascending angles.";
-  p_help = "If true, sweeps will be checked to see if they are in ascending angle order. If not they are reordered. If the sweeps are reordered, this means that the rays times will no longer be monotonically increasing";
-} reorder_sweeps_by_ascending_angle;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to compute sweep angles using the VCP tables when reading NEXRAD data.";
-  p_help = "If true, the VCP tables will be used to assign sweep angles. This is useful if rounding angles to fit the VCP is desired. For NEXRAD data files that don't follow a known VCP and the VCP header is not included, set this to false.";
-} compute_sweep_angles_from_vcp_tables;
-
-commentdef {
-  p_header = "SETTING LIMITS ON THE VALID DATA";
-}
 
 paramdef boolean {
   p_default = false;
@@ -1020,34 +961,6 @@ paramdef double {
   p_descr = "Radar altitude (meters).";
   p_help = "See override_radar_location.";
 } radar_altitude_meters;
-
-commentdef {
-  p_header = "OPTION TO OVERRIDE INSTRUMENT AND/OR SITE NAME";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the instrument name.";
-  p_help = "If true, the name provided will be used.";
-} override_instrument_name;
-
-paramdef string {
-  p_default = "unknown";
-  p_descr = "Instrument name.";
-  p_help = "See override_instrument_name.";
-} instrument_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the site name.";
-  p_help = "If true, the name provided will be used.";
-} override_site_name;
-
-paramdef string {
-  p_default = "unknown";
-  p_descr = "Site name.";
-  p_help = "See override_site_name.";
-} site_name;
 
 commentdef {
   p_header = "OPTION TO OVERRIDE RADAR BEAM WIDTH";
