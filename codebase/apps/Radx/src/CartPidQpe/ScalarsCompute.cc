@@ -22,21 +22,21 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// PidCompute.cc
+// ScalarsCompute.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// May 2021
+// Nov 2025
 //
 ///////////////////////////////////////////////////////////////
 //
-// PidCompute computation engine
-// Computes PID in polar coords
+// ScalarsCompute computation engine
+// Computes dual pol scalars in polar coords
 // There is one object per thread.
 //
 ///////////////////////////////////////////////////////////////
 
-#include "PidCompute.hh"
+#include "ScalarsCompute.hh"
 #include "CartPidQpe.hh"
 #include <toolsa/os_config.h>
 #include <toolsa/file_io.h>
@@ -46,16 +46,16 @@
 #include <Radx/RadxField.hh>
 #include <cerrno>
 using namespace std;
-pthread_mutex_t PidCompute::_debugPrintMutex = PTHREAD_MUTEX_INITIALIZER;
-const double PidCompute::missingDbl = -9999.0;
+pthread_mutex_t ScalarsCompute::_debugPrintMutex = PTHREAD_MUTEX_INITIALIZER;
+const double ScalarsCompute::missingDbl = -9999.0;
 
 // Constructor
 
-PidCompute::PidCompute(const Params &params,
-                       const KdpFiltParams &kdpFiltParams,
-                       const NcarPidParams &ncarPidParams,
-                       const PrecipRateParams &precipRateParams,
-                       int id)  :
+ScalarsCompute::ScalarsCompute(const Params &params,
+                               const KdpFiltParams &kdpFiltParams,
+                               const NcarPidParams &ncarPidParams,
+                               const PrecipRateParams &precipRateParams,
+                               int id)  :
         _params(params),
         _kdpFiltParams(kdpFiltParams),
         _ncarPidParams(ncarPidParams),
@@ -80,7 +80,7 @@ PidCompute::PidCompute(const Params &params,
 
 // destructor
 
-PidCompute::~PidCompute()
+ScalarsCompute::~ScalarsCompute()
 
 {
 
@@ -92,7 +92,7 @@ PidCompute::~PidCompute()
 // This reads in a new sounding if needed.
 // If no sounding is available, the static profile is used
 
-void PidCompute::loadTempProfile(time_t dataTime)
+void ScalarsCompute::loadTempProfile(time_t dataTime)
 {
   _pid.loadTempProfile(dataTime);
 }
@@ -100,7 +100,7 @@ void PidCompute::loadTempProfile(time_t dataTime)
 ///////////////////////////////////////////////////////////
 // Set the temperature profile
 
-void PidCompute::setTempProfile(const TempProfile &profile)
+void ScalarsCompute::setTempProfile(const TempProfile &profile)
 {
   _pid.setTempProfile(profile);
 }
@@ -108,7 +108,7 @@ void PidCompute::setTempProfile(const TempProfile &profile)
 ///////////////////////////////////////////////////////////
 // Get the temperature profile
 
-const TempProfile &PidCompute::getTempProfile() const
+const TempProfile &ScalarsCompute::getTempProfile() const
 {
   return _pid.getTempProfile();
 }
@@ -122,7 +122,7 @@ const TempProfile &PidCompute::getTempProfile() const
 //
 // Returns NULL on error.
 
-RadxRay *PidCompute::doCompute(RadxRay *inputRay,
+RadxRay *ScalarsCompute::doCompute(RadxRay *inputRay,
                                double radarHtKm,
                                double wavelengthM)
 
@@ -155,7 +155,7 @@ RadxRay *PidCompute::doCompute(RadxRay *inputRay,
   // load input arrays
   
   if (_loadInputArrays(inputRay)) {
-    cerr << "ERROR - RadxRate::PidCompute - cannot load input arrays" << endl;
+    cerr << "ERROR - RadxRate::ScalarsCompute - cannot load input arrays" << endl;
     return NULL;
   }
 
@@ -171,7 +171,7 @@ RadxRay *PidCompute::doCompute(RadxRay *inputRay,
   // compute pid
 
   if (_pid.loadTempProfile(inputRay->getTimeSecs())) {
-    cerr << "ERROR - RadxRate::PidCompute - cannot load temp profile" << endl;
+    cerr << "ERROR - RadxRate::ScalarsCompute - cannot load temp profile" << endl;
     return NULL;
   }
   _pidCompute();
@@ -191,7 +191,7 @@ RadxRay *PidCompute::doCompute(RadxRay *inputRay,
 //////////////////////////////////////
 // initialize KDP
   
-void PidCompute::_kdpInit()
+void ScalarsCompute::_kdpInit()
   
 {
 
@@ -208,7 +208,7 @@ void PidCompute::_kdpInit()
 ////////////////////////////////////////////////
 // compute kdp from phidp, using Bringi's method
 
-void PidCompute::_kdpCompute()
+void ScalarsCompute::_kdpCompute()
   
 {
 
@@ -257,7 +257,7 @@ void PidCompute::_kdpCompute()
 //////////////////////////////////////
 // initialize PID
   
-int PidCompute::_pidInit()
+int ScalarsCompute::_pidInit()
   
 {
 
@@ -279,7 +279,7 @@ int PidCompute::_pidInit()
 //////////////////////////////////////
 // compute PID
 
-void PidCompute::_pidCompute()
+void ScalarsCompute::_pidCompute()
   
 {
   
@@ -314,7 +314,7 @@ void PidCompute::_pidCompute()
 //////////////////////////////////////
 // initialize PRECIP
   
-void PidCompute::_precipInit()
+void ScalarsCompute::_precipInit()
   
 {
 
@@ -327,7 +327,7 @@ void PidCompute::_precipInit()
 //////////////////////////////////////
 // compute PRECIP
   
-void PidCompute::_precipCompute()
+void ScalarsCompute::_precipCompute()
   
 {
   
@@ -369,7 +369,7 @@ void PidCompute::_precipCompute()
 //////////////////////////////////////
 // alloc computational arrays
   
-void PidCompute::_allocArrays()
+void ScalarsCompute::_allocArrays()
   
 {
 
@@ -402,7 +402,7 @@ void PidCompute::_allocArrays()
 /////////////////////////////////////////////////////
 // load input arrays ready for KDP
   
-int PidCompute::_loadInputArrays(RadxRay *inputRay)
+int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   
 {
   
@@ -455,7 +455,7 @@ int PidCompute::_loadInputArrays(RadxRay *inputRay)
 ////////////////////////////////////////
 // load a field array based on the name
 
-int PidCompute::_loadFieldArray(RadxRay *inputRay,
+int ScalarsCompute::_loadFieldArray(RadxRay *inputRay,
                                 const string &fieldName,
                                 bool required,
                                 double *array)
@@ -473,7 +473,7 @@ int PidCompute::_loadFieldArray(RadxRay *inputRay,
     }
 
     pthread_mutex_lock(&_debugPrintMutex);
-    cerr << "ERROR - PidCompute::_getField" << endl;
+    cerr << "ERROR - ScalarsCompute::_getField" << endl;
     cerr << "  Cannot find field in ray: " << fieldName<< endl;
     cerr << "  El, az: "
          << inputRay->getElevationDeg() << ", "
@@ -504,7 +504,7 @@ int PidCompute::_loadFieldArray(RadxRay *inputRay,
 //////////////////////////////////////////////////////////////
 // Compute the SNR field from the DBZ field
 
-void PidCompute::_computeSnrFromDbz()
+void ScalarsCompute::_computeSnrFromDbz()
 
 {
 
@@ -538,7 +538,7 @@ void PidCompute::_computeSnrFromDbz()
 //////////////////////////////////////////////////////////////
 // Censor gates with non-weather particle types
 
-void PidCompute::_censorNonWeather(RadxField &field)
+void ScalarsCompute::_censorNonWeather(RadxField &field)
 
 {
 
@@ -559,7 +559,7 @@ void PidCompute::_censorNonWeather(RadxField &field)
 ///////////////////////////////
 // load up fields in output ray
 
-void PidCompute::_loadOutputFields(RadxRay *inputRay,
+void ScalarsCompute::_loadOutputFields(RadxRay *inputRay,
                                    RadxRay *outputRay)
 
 {
@@ -772,7 +772,7 @@ void PidCompute::_loadOutputFields(RadxRay *inputRay,
 //////////////////////////////////////
 // add the debug fields
   
-void PidCompute::_addPidDebugFields(const RadxRay *inputRay, 
+void ScalarsCompute::_addPidDebugFields(const RadxRay *inputRay, 
                                     RadxRay *outputRay)
 
 {
@@ -857,7 +857,7 @@ void PidCompute::_addPidDebugFields(const RadxRay *inputRay,
 //////////////////////////////////////
 // add the debug fields
   
-void PidCompute::_addKdpDebugFields(RadxRay *outputRay)
+void ScalarsCompute::_addKdpDebugFields(RadxRay *outputRay)
 
 {
 
@@ -962,7 +962,7 @@ void PidCompute::_addKdpDebugFields(RadxRay *outputRay)
 //////////////////////////////////////
 // add a field to the output ray
   
-void PidCompute::_addField(RadxRay *outputRay,
+void ScalarsCompute::_addField(RadxRay *outputRay,
                            const string &name,
                            const string &units,
                            const string &longName,
@@ -1002,7 +1002,7 @@ void PidCompute::_addField(RadxRay *outputRay,
 //////////////////////////////////////
 // add a field to the output ray
   
-void PidCompute::_addField(RadxRay *outputRay,
+void ScalarsCompute::_addField(RadxRay *outputRay,
                            const string &name,
                            const string &units,
                            const string &longName,
@@ -1039,7 +1039,7 @@ void PidCompute::_addField(RadxRay *outputRay,
 
 }
 
-void PidCompute::_addField(RadxRay *outputRay,
+void ScalarsCompute::_addField(RadxRay *outputRay,
                            const string &name,
                            const string &units,
                            const string &longName,

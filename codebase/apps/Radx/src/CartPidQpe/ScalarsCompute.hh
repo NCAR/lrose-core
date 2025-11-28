@@ -22,22 +22,22 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// PidCompute.hh
+// ScalarsCompute.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// May 2021
+// Nov 2025
 //
 ///////////////////////////////////////////////////////////////
 //
-// PidCompute computation engine
-// Computes PID in polar coords
+// ScalarsCompute computation engine
+// Computes dual pol scalars in polar coords
 // There is one object per thread.
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef PidCompute_HH
-#define PidCompute_HH
+#ifndef ScalarsCompute_HH
+#define ScalarsCompute_HH
 
 #include "Params.hh"
 #include <radar/KdpFilt.hh>
@@ -55,21 +55,21 @@ class TempProfile;
 #include <pthread.h>
 using namespace std;
 
-class PidCompute {
+class ScalarsCompute {
   
 public:
   
   // constructor
   
-  PidCompute(const Params &params,
-             const KdpFiltParams &kdpFiltParams,
-             const NcarPidParams &ncarPidParams,
-             const PrecipRateParams &precipRateParams,
-             int id);
+  ScalarsCompute(const Params &params,
+                 const KdpFiltParams &kdpFiltParams,
+                 const NcarPidParams &ncarPidParams,
+                 const PrecipRateParams &precipRateParams,
+                 int id);
 
   // destructor
   
-  ~PidCompute();
+  ~ScalarsCompute();
 
   // Load the temperature profile for PID computations,
   // for the specified time.

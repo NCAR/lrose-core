@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// PidThread.hh
+// ScalarsThread.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,43 +30,43 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Thread class for handling computations
+// Thread class for handling computations of dual pol scalars
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef PidThread_HH
-#define PidThread_HH
+#ifndef ScalarsThread_HH
+#define ScalarsThread_HH
 
 #include <toolsa/TaThread.hh>
 
 class RadxRay;
 class CartPidQpe;
-class PidCompute;
+class ScalarsCompute;
 class Params;
 class KdpFiltParams;
 class NcarPidParams;
 
-class PidThread : public TaThread
+class ScalarsThread : public TaThread
 {  
 
 public:
   
   // constructor
   
-  PidThread(CartPidQpe *parent, 
-            const Params &params,
-            const KdpFiltParams &kdpFiltParams,
-            const NcarPidParams &ncarPidParams,
-            const PrecipRateParams &precipRateParams,
-            int threadNum);
+  ScalarsThread(CartPidQpe *parent, 
+                const Params &params,
+                const KdpFiltParams &kdpFiltParams,
+                const NcarPidParams &ncarPidParams,
+                const PrecipRateParams &precipRateParams,
+                int threadNum);
 
   // destructor
   
-  virtual ~PidThread();
+  virtual ~ScalarsThread();
 
   // compute engine object
   
-  inline PidCompute *getPidCompute() const { return _pidCompute; }
+  inline ScalarsCompute *getScalarsCompute() const { return _scalarsCompute; }
   
   // set input ray
   
@@ -103,7 +103,7 @@ private:
 
   // computation engine
 
-  PidCompute *_pidCompute;
+  ScalarsCompute *_scalarsCompute;
 
   // input ray
 

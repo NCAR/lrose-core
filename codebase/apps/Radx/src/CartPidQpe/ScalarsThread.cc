@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// PidThread.hh
+// ScalarsThread.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -38,19 +38,19 @@
 #include <radar/KdpFiltParams.hh>
 #include <radar/NcarPidParams.hh>
 #include "CartPidQpe.hh"
-#include "PidThread.hh"
-#include "PidCompute.hh"
+#include "ScalarsThread.hh"
+#include "ScalarsCompute.hh"
 #include "Params.hh"
 
 ///////////////////////////////////////////////////////////////
 // Constructor
 
-PidThread::PidThread(CartPidQpe *parent,
-                     const Params &params,
-                     const KdpFiltParams &kdpFiltParams,
-                     const NcarPidParams &ncarPidParams,
-                     const PrecipRateParams &precipRateParams,
-                     int threadNum) :
+ScalarsThread::ScalarsThread(CartPidQpe *parent,
+                             const Params &params,
+                             const KdpFiltParams &kdpFiltParams,
+                             const NcarPidParams &ncarPidParams,
+                             const PrecipRateParams &precipRateParams,
+                             int threadNum) :
         _parent(parent),
         _params(params),
         _kdpFiltParams(kdpFiltParams),
@@ -65,18 +65,18 @@ PidThread::PidThread(CartPidQpe *parent,
   
   // create compute compute object
   
-  _pidCompute = new PidCompute(_params,
-                               _kdpFiltParams,
-                               _ncarPidParams,
-                               _precipRateParams,
-                               _threadNum);
-  if (_pidCompute == NULL) {
+  _scalarsCompute = new ScalarsCompute(_params,
+                                       _kdpFiltParams,
+                                       _ncarPidParams,
+                                       _precipRateParams,
+                                       _threadNum);
+  if (_scalarsCompute == NULL) {
     OK = FALSE;
     return;
   }
-  if (!_pidCompute->OK) {
+  if (!_scalarsCompute->OK) {
     OK = FALSE;
-    _pidCompute = NULL;
+    _scalarsCompute = NULL;
     return;
   }
   
@@ -84,31 +84,31 @@ PidThread::PidThread(CartPidQpe *parent,
 
 // Destructor
 
-PidThread::~PidThread()
+ScalarsThread::~ScalarsThread()
 {
-
-  if (_pidCompute != NULL) {
-    delete _pidCompute;
+  
+  if (_scalarsCompute != NULL) {
+    delete _scalarsCompute;
   }
   
 }  
 
 // run method
 
-void PidThread::run()
+void ScalarsThread::run()
 {
   
   // check
 
-  assert(_pidCompute != NULL);
+  assert(_scalarsCompute != NULL);
   assert(_inputRay != NULL);
   
   // Compute compute object will create the output ray
   // The ownership of the ray is passed to the parent object
   // which adds it to the output volume.
 
-  _outputRay = _pidCompute->doCompute(_inputRay,
-                                      _parent->getRadarHtKm(),
-                                      _parent->getWavelengthM());
+  _outputRay = _scalarsCompute->doCompute(_inputRay,
+                                          _parent->getRadarHtKm(),
+                                          _parent->getWavelengthM());
   
 }

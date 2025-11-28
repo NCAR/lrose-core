@@ -52,12 +52,12 @@ HDRS = \
 	Params.hh \
 	Args.hh \
 	BaseInterp.hh \
+	CartPidQpe.hh \
 	InterpToCart.hh \
 	Orient.hh \
 	OutputMdv.hh \
-	CartPidQpe.hh \
-	PidCompute.hh \
-	PidThread.hh \
+	ScalarsCompute.hh \
+	ScalarsThread.hh \
 	RhiOrient.hh
 
 CPPC_SRCS = \
@@ -69,8 +69,8 @@ CPPC_SRCS = \
 	Main.cc \
 	Orient.cc \
 	OutputMdv.cc \
-	PidCompute.cc \
-	PidThread.cc \
+	ScalarsCompute.cc \
+	ScalarsThread.cc \
 	RhiOrient.cc
 
 #
