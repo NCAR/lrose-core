@@ -123,8 +123,8 @@ const TempProfile &ScalarsCompute::getTempProfile() const
 // Returns NULL on error.
 
 RadxRay *ScalarsCompute::doCompute(RadxRay *inputRay,
-                               double radarHtKm,
-                               double wavelengthM)
+                                   double radarHtKm,
+                                   double wavelengthM)
 
 {
 
@@ -456,9 +456,9 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
 // load a field array based on the name
 
 int ScalarsCompute::_loadFieldArray(RadxRay *inputRay,
-                                const string &fieldName,
-                                bool required,
-                                double *array)
+                                    const string &fieldName,
+                                    bool required,
+                                    double *array)
 
 {
   
@@ -560,7 +560,7 @@ void ScalarsCompute::_censorNonWeather(RadxField &field)
 // load up fields in output ray
 
 void ScalarsCompute::_loadOutputFields(RadxRay *inputRay,
-                                   RadxRay *outputRay)
+                                       RadxRay *outputRay)
 
 {
 
@@ -773,7 +773,7 @@ void ScalarsCompute::_loadOutputFields(RadxRay *inputRay,
 // add the debug fields
   
 void ScalarsCompute::_addPidDebugFields(const RadxRay *inputRay, 
-                                    RadxRay *outputRay)
+                                        RadxRay *outputRay)
 
 {
 
@@ -963,11 +963,11 @@ void ScalarsCompute::_addKdpDebugFields(RadxRay *outputRay)
 // add a field to the output ray
   
 void ScalarsCompute::_addField(RadxRay *outputRay,
-                           const string &name,
-                           const string &units,
-                           const string &longName,
-                           const string standardName,
-                           const double *array64)
+                               const string &name,
+                               const string &units,
+                               const string &longName,
+                               const string standardName,
+                               const double *array64)
 
 {
 
@@ -1003,11 +1003,11 @@ void ScalarsCompute::_addField(RadxRay *outputRay,
 // add a field to the output ray
   
 void ScalarsCompute::_addField(RadxRay *outputRay,
-                           const string &name,
-                           const string &units,
-                           const string &longName,
-                           const string standardName,
-                           const Radx::fl32 *array32)
+                               const string &name,
+                               const string &units,
+                               const string &longName,
+                               const string standardName,
+                               const Radx::fl32 *array32)
   
 {
 
@@ -1040,11 +1040,11 @@ void ScalarsCompute::_addField(RadxRay *outputRay,
 }
 
 void ScalarsCompute::_addField(RadxRay *outputRay,
-                           const string &name,
-                           const string &units,
-                           const string &longName,
-                           const string standardName,
-                           const bool *arrayBool)
+                               const string &name,
+                               const string &units,
+                               const string &longName,
+                               const string standardName,
+                               const bool *arrayBool)
 
 {
 

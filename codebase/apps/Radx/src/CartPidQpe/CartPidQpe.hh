@@ -97,7 +97,7 @@ public:
   string getModelOutputName(Params::model_field_type_t ftype);
   string getBeamBlockOutputName(Params::bblock_field_type_t ftype);
 
-  // names for extra fields
+  // names for geom fields
 
   static string smoothedDbzFieldName;
   static string smoothedRhohvFieldName;
@@ -165,8 +165,8 @@ private:
   int _readFile(const string &filePath);
   void _checkFields(const string &filePath);
 
-  void _addExtraFieldsToInput();
-  void _addExtraFieldsToOutput();
+  void _addGeomFieldsToInput();
+  void _addGeomFieldsToOutput();
   void _encodeFieldsForOutput();
 
   int _computeScalars();

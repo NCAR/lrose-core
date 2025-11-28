@@ -56,7 +56,7 @@
 #include <Mdv/GenericRadxFile.hh>
 using namespace std;
 
-// initialize extra field names
+// initialize geom field names
 
 string CartPidQpe::smoothedDbzFieldName = "DBZ_SMOOTHED";
 string CartPidQpe::smoothedRhohvFieldName = "RHOHV_SMOOTHED";
@@ -462,7 +462,7 @@ int CartPidQpe::_processFile(const string &filePath)
   
   // add geometry and pid fields to the volume
   
-  _addExtraFieldsToInput();
+  _addGeomFieldsToInput();
 
   // compute the pid fields
   
@@ -570,7 +570,7 @@ int CartPidQpe::_readFile(const string &filePath)
     cerr << "  _gateSpacingKm: " << _readVol.getGateSpacingKm() << endl;
   }
 
-  // add extra fields fields
+  // add geom fields fields
   
   _addGeometryFields();
   _addTimeField();
@@ -664,7 +664,7 @@ void CartPidQpe::_checkFields(const string &filePath)
 //////////////////////////////////////////////////
 // add geometry and pid fields to the volume
 
-void CartPidQpe::_addExtraFieldsToInput()
+void CartPidQpe::_addGeomFieldsToInput()
 
 {
 
@@ -749,9 +749,9 @@ void CartPidQpe::_addExtraFieldsToInput()
 }
 
 //////////////////////////////////////////////////
-// add extra output fields
+// add geom output fields
 
-void CartPidQpe::_addExtraFieldsToOutput()
+void CartPidQpe::_addGeomFieldsToOutput()
 
 {
 
