@@ -478,11 +478,11 @@ int CartPidQpe::_processFile(const string &filePath)
     if (_params.debug) {
       cerr << "  NOTE: data is in RHI mode" << endl;
     }
-    _allocCartInterp();
+    _allocInterpToCart();
     _cartInterp->setRhiMode(true);
     _cartInterp->interpVol();
   } else {
-    _allocCartInterp();
+    _allocInterpToCart();
     _cartInterp->setRhiMode(false);
     _cartInterp->interpVol();
   }
@@ -893,8 +893,8 @@ void CartPidQpe::_loadInterpRays()
 
       // accept ray
       
-      Interp::Ray *interpRay = 
-        new Interp::Ray(rays[iray],
+      BaseInterp::Ray *interpRay = 
+        new BaseInterp::Ray(rays[iray],
                         isweep,
                         _interpFields,
                         _params.use_fixed_angle_for_interpolation,
@@ -1175,7 +1175,7 @@ void CartPidQpe::_initInterpFields()
       const RadxRay *ray = rays[iray];
       const RadxField *field = ray->getField(radxName);
       if (field != NULL) {
-        Interp::Field interpField;
+        BaseInterp::Field interpField;
         interpField.radxName = field->getName();
         interpField.outputName = field->getName();
         interpField.longName = field->getLongName();
@@ -1243,10 +1243,10 @@ void CartPidQpe::_initInterpFields()
 ////////////////////////////////////////////////////////////
 // Allocate interpolation objects as needed
 
-void CartPidQpe::_allocCartInterp()
+void CartPidQpe::_allocInterpToCart()
 {
   if (_cartInterp == NULL) {
-    _cartInterp = new CartInterp(_progName, _params, _readVol,
+    _cartInterp = new InterpToCart(_progName, _params, _readVol,
                                  _interpFields, _interpRays);
   }
 }

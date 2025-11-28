@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// Interp.cc
+// BaseInterp.cc
 //
-// Interp base class
+// BaseInterp base class
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "Interp.hh"
+#include "BaseInterp.hh"
 #include "OutputMdv.hh"
 #include <algorithm>
 #include <iomanip>
@@ -54,17 +54,17 @@
 #include <Radx/RadxSweep.hh>
 using namespace std;
 
-const double Interp::PseudoDiamKm = 17066.0; // for earth curvature correction
-const double Interp::missingDouble = -9999.0;
-const fl32 Interp::missingFl32 = -9999.0;
+const double BaseInterp::PseudoDiamKm = 17066.0; // for earth curvature correction
+const double BaseInterp::missingDouble = -9999.0;
+const fl32 BaseInterp::missingFl32 = -9999.0;
 
 // Constructor
 
-Interp::Interp(const string &progName,
-               const Params &params,
-               RadxVol &readVol,
-               vector<Field> &interpFields,
-               vector<Ray *> &interpRays) :
+BaseInterp::BaseInterp(const string &progName,
+                       const Params &params,
+                       RadxVol &readVol,
+                       vector<Field> &interpFields,
+                       vector<Ray *> &interpRays) :
         _progName(progName),
         _params(params),
         _readVol(readVol),
@@ -109,7 +109,7 @@ Interp::Interp(const string &progName,
 //////////////////////////////////////
 // destructor
 
-Interp::~Interp()
+BaseInterp::~BaseInterp()
 
 {
 
@@ -118,7 +118,7 @@ Interp::~Interp()
 ////////////////////////////////////////////////////////////
 // Initialize projection
 
-void Interp::_initProjection()
+void BaseInterp::_initProjection()
 
 {
 
@@ -186,7 +186,7 @@ void Interp::_initProjection()
                   _radarX, _radarY);
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "============ Interp::_initProjection() ===============" << endl;
+    cerr << "============ BaseInterp::_initProjection() ===============" << endl;
     _proj.print(cerr, false);
     cerr << "  radarX: " << _radarX << endl;
     cerr << "  radarY: " << _radarY << endl;
@@ -200,15 +200,15 @@ void Interp::_initProjection()
 // this is for cart and ppi interpolation
 //   i.e. interpolate between inner and outer gates
 
-void Interp::_accumNearest(const Ray *ray,
-                           int ifield,
-                           int igateInner,
-                           int igateOuter,
-                           double wtInner,
-                           double wtOuter,
-                           double &closestVal,
-                           double &maxWt,
-                           int &nContrib)
+void BaseInterp::_accumNearest(const Ray *ray,
+                               int ifield,
+                               int igateInner,
+                               int igateOuter,
+                               double wtInner,
+                               double wtOuter,
+                               double &closestVal,
+                               double &maxWt,
+                               int &nContrib)
   
 {
     
@@ -252,13 +252,13 @@ void Interp::_accumNearest(const Ray *ray,
 // accumulate data for a pt using nearest neighbor
 // this is for a single gate
 
-void Interp::_accumNearest(const Ray *ray,
-                           int ifield,
-                           int igate,
-                           double wt,
-                           double &closestVal,
-                           double &maxWt,
-                           int &nContrib)
+void BaseInterp::_accumNearest(const Ray *ray,
+                               int ifield,
+                               int igate,
+                               double wt,
+                               double &closestVal,
+                               double &maxWt,
+                               int &nContrib)
   
 {
     
@@ -292,15 +292,15 @@ void Interp::_accumNearest(const Ray *ray,
 // this is for cart and ppi interpolation
 //   i.e. interpolate between inner and outer gates
 
-void Interp::_accumInterp(const Ray *ray,
-                          int ifield,
-                          int igateInner,
-                          int igateOuter,
-                          double wtInner,
-                          double wtOuter,
-                          double &sumVals,
-                          double &sumWts,
-                          int &nContrib)
+void BaseInterp::_accumInterp(const Ray *ray,
+                              int ifield,
+                              int igateInner,
+                              int igateOuter,
+                              double wtInner,
+                              double wtOuter,
+                              double &sumVals,
+                              double &sumWts,
+                              int &nContrib)
 
 {
 
@@ -340,13 +340,13 @@ void Interp::_accumInterp(const Ray *ray,
 // accumulate data for a grid point using interpolation
 // this is for a single gate
 
-void Interp::_accumInterp(const Ray *ray,
-                          int ifield,
-                          int igate,
-                          double wt,
-                          double &sumVals,
-                          double &sumWts,
-                          int &nContrib)
+void BaseInterp::_accumInterp(const Ray *ray,
+                              int ifield,
+                              int igate,
+                              double wt,
+                              double &sumVals,
+                              double &sumWts,
+                              int &nContrib)
 
 {
     
@@ -379,16 +379,16 @@ void Interp::_accumInterp(const Ray *ray,
 // this is for cart and ppi interpolation
 //   i.e. interpolate between inner and outer gates
 
-void Interp::_accumFolded(const Ray *ray,
-                          int ifield,
-                          int igateInner,
-                          int igateOuter,
-                          double wtInner,
-                          double wtOuter,
-                          double &sumX,
-                          double &sumY,
-                          double &sumWts,
-                          int &nContrib)
+void BaseInterp::_accumFolded(const Ray *ray,
+                              int ifield,
+                              int igateInner,
+                              int igateOuter,
+                              double wtInner,
+                              double wtOuter,
+                              double &sumX,
+                              double &sumY,
+                              double &sumWts,
+                              int &nContrib)
 
 {
     
@@ -441,14 +441,14 @@ void Interp::_accumFolded(const Ray *ray,
 // for a folded field
 // this is for a single gate
 
-void Interp::_accumFolded(const Ray *ray,
-                          int ifield,
-                          int igate,
-                          double wt,
-                          double &sumX,
-                          double &sumY,
-                          double &sumWts,
-                          int &nContrib)
+void BaseInterp::_accumFolded(const Ray *ray,
+                              int ifield,
+                              int igate,
+                              double wt,
+                              double &sumX,
+                              double &sumY,
+                              double &sumWts,
+                              int &nContrib)
 
 {
     
@@ -485,9 +485,9 @@ void Interp::_accumFolded(const Ray *ray,
 /////////////////////////////////////////////////////////////////
 // convert a value to an angle, for a field that folds
 
-double Interp::_getFoldAngle(double val,
-                             double foldLimitLower,
-                             double foldRange) const
+double BaseInterp::_getFoldAngle(double val,
+                                 double foldLimitLower,
+                                 double foldRange) const
 {
   double fraction = (val - foldLimitLower) / foldRange;
   double angle = -M_PI + fraction * (M_PI * 2.0);
@@ -497,9 +497,9 @@ double Interp::_getFoldAngle(double val,
 /////////////////////////////////////////////////////////////////
 // convert an angle to a value, for a field that folds
 
-double Interp::_getFoldValue(double angle,
-                             double foldLimitLower,
-                             double foldRange) const
+double BaseInterp::_getFoldValue(double angle,
+                                 double foldLimitLower,
+                                 double foldRange) const
 {
   double fraction = (angle + M_PI) / (M_PI * 2.0);
   double val = fraction * foldRange + foldLimitLower;
@@ -509,7 +509,7 @@ double Interp::_getFoldValue(double angle,
 //////////////////////////////////////////////////
 // set the radar details
 
-int Interp::_setRadarParams()
+int BaseInterp::_setRadarParams()
 
 {
 
@@ -525,7 +525,7 @@ int Interp::_setRadarParams()
   _beamWidthDegV = _readVol.getRadarBeamWidthDegV();
 
   if (_beamWidthDegH <= 0 || _beamWidthDegV <= 0) {
-    cerr << "ERROR - Interp::_setRadarParams()" << endl;
+    cerr << "ERROR - BaseInterp::_setRadarParams()" << endl;
     cerr << "  Radar beam width not set" << endl;
     cerr << "  beamWidthDegH: " << _beamWidthDegH << endl;
     cerr << "  beamWidthDegV: " << _beamWidthDegV << endl;
@@ -540,7 +540,7 @@ int Interp::_setRadarParams()
   _gateSpacingKm = _readVol.getGateSpacingKm();
 
   if (_startRangeKm <= -9990) {
-    cerr << "ERROR - Interp::_setRadarParams()" << endl;
+    cerr << "ERROR - BaseInterp::_setRadarParams()" << endl;
     cerr << "  Ray start range not set" << endl;
     cerr << "  startRangeKm: " << _startRangeKm << endl;
     cerr << "  You must use the option to override the gate geometry" << endl;
@@ -549,7 +549,7 @@ int Interp::_setRadarParams()
   }
 
   if (_gateSpacingKm <= 0) {
-    cerr << "ERROR - Interp::_setRadarParams()" << endl;
+    cerr << "ERROR - BaseInterp::_setRadarParams()" << endl;
     cerr << "  Ray gate spacing not set" << endl;
     cerr << "  gateSpacingKm: " << _gateSpacingKm << endl;
     cerr << "  You must use the option to override the gate geometry" << endl;
@@ -582,7 +582,7 @@ int Interp::_setRadarParams()
 //
 // Returns -1 if no data, 0 otherwise
 
-int Interp::_locateDataSector()
+int BaseInterp::_locateDataSector()
             
 {
 
@@ -727,7 +727,7 @@ int Interp::_locateDataSector()
 // Compute the azimuth difference to be used for
 // searching
 
-void Interp::_computeAzimuthDelta()
+void BaseInterp::_computeAzimuthDelta()
 {
 
   // initialize to a reasonable value
@@ -811,7 +811,7 @@ void Interp::_computeAzimuthDelta()
 // Compute the elevation difference to be used for
 // searching
 
-void Interp::_computeElevationDelta()
+void BaseInterp::_computeElevationDelta()
 {
 
   // initialize to a reasonable value
@@ -884,7 +884,7 @@ void Interp::_computeElevationDelta()
 
 // Print the elapsed run time since the previous call, in seconds.
 
-void Interp::_printRunTime(const string& str, bool verbose /* = false */)
+void BaseInterp::_printRunTime(const string& str, bool verbose /* = false */)
 {
   if (verbose) {
     if (_params.debug < Params::DEBUG_VERBOSE) {
@@ -907,11 +907,11 @@ void Interp::_printRunTime(const string& str, bool verbose /* = false */)
 ///////////////////////////
 // sub class implementation
 
-Interp::Ray::Ray(RadxRay *ray,
-                 int isweep,
-                 const vector<Field> &interpFields,
-                 bool use_fixed_angle_for_interpolation,
-                 bool use_fixed_angle_for_data_limits)
+BaseInterp::Ray::Ray(RadxRay *ray,
+                     int isweep,
+                     const vector<Field> &interpFields,
+                     bool use_fixed_angle_for_interpolation,
+                     bool use_fixed_angle_for_data_limits)
   
 {
 
@@ -976,7 +976,7 @@ Interp::Ray::Ray(RadxRay *ray,
 
 }
 
-Interp::Ray::~Ray()
+BaseInterp::Ray::~Ray()
   
 {
 
@@ -989,4 +989,3 @@ Interp::Ray::~Ray()
   delete[] fldData;
   delete[] missingVal;
 }
-

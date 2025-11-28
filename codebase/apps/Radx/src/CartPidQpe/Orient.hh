@@ -41,7 +41,7 @@
 #include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
 #include <radar/ConvStratFinder.hh>
-#include "Interp.hh"
+#include "BaseInterp.hh"
 #include "Params.hh"
 
 class RadxVol;
@@ -70,9 +70,9 @@ public:
   
   // load the sdev fields on the cartesian grid
 
-  void loadSdevFields(Interp::GridLoc ****gridLoc,
-                      Interp::DerivedField *sdevDbzH,
-                      Interp::DerivedField *sdevDbzV);
+  void loadSdevFields(BaseInterp::GridLoc ****gridLoc,
+                      BaseInterp::DerivedField *sdevDbzH,
+                      BaseInterp::DerivedField *sdevDbzV);
 
   // set RHI mode
 

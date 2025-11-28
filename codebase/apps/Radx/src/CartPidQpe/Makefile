@@ -51,8 +51,8 @@ LOC_CFLAGS =
 HDRS = \
 	Params.hh \
 	Args.hh \
-	CartInterp.hh \
-	Interp.hh \
+	BaseInterp.hh \
+	InterpToCart.hh \
 	Orient.hh \
 	OutputMdv.hh \
 	CartPidQpe.hh \
@@ -63,8 +63,8 @@ HDRS = \
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
-	CartInterp.cc \
-	Interp.cc \
+	BaseInterp.cc \
+	InterpToCart.cc \
 	Main.cc \
 	Orient.cc \
 	OutputMdv.cc \

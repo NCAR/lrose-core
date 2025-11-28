@@ -43,7 +43,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include "CartInterp.hh"
+#include "InterpToCart.hh"
 #include <string>
 #include <deque>
 #include <toolsa/TaArray.hh>
@@ -139,12 +139,12 @@ private:
 
   // interpolation fields
   
-  vector<Interp::Field> _interpFields;
-  vector<Interp::Ray *> _interpRays;
+  vector<BaseInterp::Field> _interpFields;
+  vector<BaseInterp::Ray *> _interpRays;
 
   // interpolation objects
 
-  CartInterp *_cartInterp;
+  InterpToCart *_cartInterp;
 
   // mutex for debug prints
   
@@ -179,7 +179,7 @@ private:
   bool _isRhi();
 
   void _initInterpFields();
-  void _allocCartInterp();
+  void _allocInterpToCart();
   void _freeInterpRays();
 
 

@@ -184,9 +184,9 @@ int Orient::findEchoOrientation()
 //////////////////////////////////////////////////
 // load the sdev fields on the cartesian grid
 
-void Orient::loadSdevFields(Interp::GridLoc ****gridLoc,
-                            Interp::DerivedField *sdevDbzH,
-                            Interp::DerivedField *sdevDbzV)
+void Orient::loadSdevFields(BaseInterp::GridLoc ****gridLoc,
+                            BaseInterp::DerivedField *sdevDbzH,
+                            BaseInterp::DerivedField *sdevDbzV)
 
 {
 
@@ -198,7 +198,7 @@ void Orient::loadSdevFields(Interp::GridLoc ****gridLoc,
   for (size_t iz = 0; iz < _gridNz; iz++) {
     for (size_t iy = 0; iy < _gridNy; iy++) {
       for (size_t ix = 0; ix < _gridNx; ix++, ii++) {
-        const Interp::GridLoc *loc = gridLoc[iz][iy][ix];
+        const BaseInterp::GridLoc *loc = gridLoc[iz][iy][ix];
         double az = loc->az;
         double gndRange = loc->gndRange;
         size_t rhiIndex = (int) ((az - _startAz) / _deltaAz + 0.5);
