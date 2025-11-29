@@ -1522,6 +1522,14 @@ int CartPidQpe::_readModel(time_t radarTime)
 
 }
 
+/////////////////////////////////////////////////////////
+// interpolate the model data onto the output grid
+
+void CartPidQpe::_interpModelToOutputGrid()
+{
+
+}
+
 #ifdef NOTNOW
 
 /////////////////////////////////////////////////////////

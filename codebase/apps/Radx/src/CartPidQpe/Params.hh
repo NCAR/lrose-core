@@ -84,11 +84,12 @@ public:
     DBZ = 0,
     VEL = 1,
     WIDTH = 2,
-    ZDR = 3,
-    LDR = 4,
-    PHIDP = 5,
-    RHOHV = 6,
-    KDP = 7
+    SNR = 3,
+    ZDR = 4,
+    LDR = 5,
+    PHIDP = 6,
+    RHOHV = 7,
+    KDP = 8
   } radar_field_type_t;
 
   typedef enum {

@@ -721,7 +721,7 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = TRUE;
     tt->array_elem_size = sizeof(radar_field_name_t);
-    tt->array_n = 8;
+    tt->array_n = 9;
     tt->struct_def.name = tdrpStrDup("radar_field_name_t");
     tt->struct_def.nfields = 3;
     tt->struct_def.fields = (struct_field_t *)
@@ -732,7 +732,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_radar_field_names->field_type - (char *) _radar_field_names;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("radar_field_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 8;
+        tt->struct_def.fields[0].enum_def.nfields = 9;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("DBZ");
@@ -741,16 +741,18 @@
         tt->struct_def.fields[0].enum_def.fields[1].val = VEL;
         tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("WIDTH");
         tt->struct_def.fields[0].enum_def.fields[2].val = WIDTH;
-        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("ZDR");
-        tt->struct_def.fields[0].enum_def.fields[3].val = ZDR;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("LDR");
-        tt->struct_def.fields[0].enum_def.fields[4].val = LDR;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[5].val = PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("RHOHV");
-        tt->struct_def.fields[0].enum_def.fields[6].val = RHOHV;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("KDP");
-        tt->struct_def.fields[0].enum_def.fields[7].val = KDP;
+        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("SNR");
+        tt->struct_def.fields[0].enum_def.fields[3].val = SNR;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("ZDR");
+        tt->struct_def.fields[0].enum_def.fields[4].val = ZDR;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("LDR");
+        tt->struct_def.fields[0].enum_def.fields[5].val = LDR;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[6].val = PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[7].val = RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("KDP");
+        tt->struct_def.fields[0].enum_def.fields[8].val = KDP;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("input_name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -761,7 +763,7 @@
       tt->struct_def.fields[2].ptype = STRING_TYPE;
       tt->struct_def.fields[2].rel_offset = 
         (char *) &_radar_field_names->output_name - (char *) _radar_field_names;
-    tt->n_struct_vals = 24;
+    tt->n_struct_vals = 27;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = DBZ;
@@ -773,21 +775,24 @@
       tt->struct_vals[6].e = WIDTH;
       tt->struct_vals[7].s = tdrpStrDup("WIDTH");
       tt->struct_vals[8].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[9].e = ZDR;
-      tt->struct_vals[10].s = tdrpStrDup("ZDR");
-      tt->struct_vals[11].s = tdrpStrDup("ZDR");
-      tt->struct_vals[12].e = LDR;
-      tt->struct_vals[13].s = tdrpStrDup("");
-      tt->struct_vals[14].s = tdrpStrDup("LDR");
-      tt->struct_vals[15].e = PHIDP;
-      tt->struct_vals[16].s = tdrpStrDup("PHIDP");
-      tt->struct_vals[17].s = tdrpStrDup("PHIDP");
-      tt->struct_vals[18].e = RHOHV;
-      tt->struct_vals[19].s = tdrpStrDup("RHOHV");
-      tt->struct_vals[20].s = tdrpStrDup("RHOHV");
-      tt->struct_vals[21].e = KDP;
-      tt->struct_vals[22].s = tdrpStrDup("");
-      tt->struct_vals[23].s = tdrpStrDup("KDP");
+      tt->struct_vals[9].e = SNR;
+      tt->struct_vals[10].s = tdrpStrDup("SNR");
+      tt->struct_vals[11].s = tdrpStrDup("SNR");
+      tt->struct_vals[12].e = ZDR;
+      tt->struct_vals[13].s = tdrpStrDup("ZDR");
+      tt->struct_vals[14].s = tdrpStrDup("ZDR");
+      tt->struct_vals[15].e = LDR;
+      tt->struct_vals[16].s = tdrpStrDup("");
+      tt->struct_vals[17].s = tdrpStrDup("LDR");
+      tt->struct_vals[18].e = PHIDP;
+      tt->struct_vals[19].s = tdrpStrDup("PHIDP");
+      tt->struct_vals[20].s = tdrpStrDup("PHIDP");
+      tt->struct_vals[21].e = RHOHV;
+      tt->struct_vals[22].s = tdrpStrDup("RHOHV");
+      tt->struct_vals[23].s = tdrpStrDup("RHOHV");
+      tt->struct_vals[24].e = KDP;
+      tt->struct_vals[25].s = tdrpStrDup("");
+      tt->struct_vals[26].s = tdrpStrDup("KDP");
     tt++;
     
     // Parameter 'Comment 4'

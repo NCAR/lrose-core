@@ -82,7 +82,7 @@ commentdef {
 }
 
 typedef enum {
-  DBZ, VEL, WIDTH, ZDR, LDR, PHIDP, RHOHV, KDP
+  DBZ, VEL, WIDTH, SNR, ZDR, LDR, PHIDP, RHOHV, KDP
 } radar_field_type_t;
 
 typedef struct {
@@ -96,6 +96,7 @@ paramdef struct radar_field_name_t {
     { DBZ, "DBZ", "DBZ" },
     { VEL, "VEL", "VEL" },
     { WIDTH, "WIDTH", "WIDTH" },
+    { SNR, "SNR", "SNR" },
     { ZDR, "ZDR", "ZDR"},
     { LDR, "", "LDR" },
     { PHIDP, "PHIDP", "PHIDP" },
@@ -104,7 +105,7 @@ paramdef struct radar_field_name_t {
   };
   p_descr = "Converts field type to strings.";
   p_help = "If input_name is empty the field is assumed to not exist in the input data set.";
-} radar_field_names[8];
+} radar_field_names[9];
 
 commentdef {
   p_header = "MODEL FOR ENVIRONMENTAL FIELDS";
