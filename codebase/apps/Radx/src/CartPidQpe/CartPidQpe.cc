@@ -238,9 +238,9 @@ CartPidQpe::~CartPidQpe()
 int CartPidQpe::Run()
 {
 
-  if (_params.mode == Params::ARCHIVE) {
+  if (_params.radar_input_mode == Params::ARCHIVE) {
     return _runArchive();
-  } else if (_params.mode == Params::FILELIST) {
+  } else if (_params.radar_input_mode == Params::FILELIST) {
     return _runFilelist();
   } else {
     return _runRealtime();
@@ -304,7 +304,7 @@ int CartPidQpe::_runArchive()
 
   if (_params.debug) {
     cerr << "Running CartPidQpe in ARCHIVE mode" << endl;
-    cerr << "  Input dir: " << _params.input_dir << endl;
+    cerr << "  Input dir: " << _params.radar_input_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
     cerr << "  End time: " << RadxTime::strm(endTime) << endl;
   }
@@ -312,11 +312,11 @@ int CartPidQpe::_runArchive()
   // get the files to be processed
   
   RadxTimeList tlist;
-  tlist.setDir(_params.input_dir);
+  tlist.setDir(_params.radar_input_dir);
   tlist.setModeInterval(startTime, endTime);
   if (tlist.compile()) {
     cerr << "ERROR - CartPidQpe::_runArchive()" << endl;
-    cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
+    cerr << "  Cannot compile time list, dir: " << _params.radar_input_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
     cerr << "  End time: " << RadxTime::strm(endTime) << endl;
     cerr << tlist.getErrStr() << endl;
@@ -326,7 +326,7 @@ int CartPidQpe::_runArchive()
   const vector<string> &paths = tlist.getPathList();
   if (paths.size() < 1) {
     cerr << "ERROR - CartPidQpe::_runArchive()" << endl;
-    cerr << "  No files found, dir: " << _params.input_dir << endl;
+    cerr << "  No files found, dir: " << _params.radar_input_dir << endl;
     return -1;
   }
   
@@ -358,13 +358,13 @@ int CartPidQpe::_runRealtime()
 
   // watch for new data to arrive
 
-  LdataInfo ldata(_params.input_dir,
+  LdataInfo ldata(_params.radar_input_dir,
                   _params.debug >= Params::DEBUG_VERBOSE);
   
   int iret = 0;
 
   while (true) {
-    ldata.readBlocking(_params.max_realtime_data_age_secs,
+    ldata.readBlocking(_params.radar_max_realtime_data_age_secs,
                        1000, PMU_auto_register);
     
     const string path = ldata.getDataPath();
@@ -388,26 +388,26 @@ int CartPidQpe::_processFile(const string &filePath)
 
   // check file name
   
-  if (strlen(_params.input_file_search_ext) > 0) {
+  if (strlen(_params.radar_file_search_ext) > 0) {
     RadxPath rpath(filePath);
-    if (strcmp(rpath.getExt().c_str(), _params.input_file_search_ext)) {
+    if (strcmp(rpath.getExt().c_str(), _params.radar_file_search_ext)) {
       if (_params.debug) {
         cerr << "WARNING - ignoring file: " << filePath << endl;
         cerr << "  Does not have correct extension: "
-             << _params.input_file_search_ext << endl;
+             << _params.radar_file_search_ext << endl;
       }
       return 0;
     }
   }
   
-  if (strlen(_params.input_file_search_substr) > 0) {
+  if (strlen(_params.radar_file_search_substr) > 0) {
     RadxPath rpath(filePath);
-    if (rpath.getFile().find(_params.input_file_search_substr)
+    if (rpath.getFile().find(_params.radar_file_search_substr)
         == string::npos) {
       if (_params.debug) {
         cerr << "WARNING - ignoring file: " << filePath << endl;
         cerr << "  Does not contain required substr: "
-             << _params.input_file_search_substr << endl;
+             << _params.radar_file_search_substr << endl;
       }
       return 0;
     }
@@ -617,7 +617,6 @@ void CartPidQpe::_setupRead(RadxFile &file)
     }
   }
   
-
   if (_params.copy_selected_input_fields_to_output) {
     for (int ii = 0; ii < _params.copy_fields_n; ii++) {
       file.addReadField(_params._copy_fields[ii].field_name);
@@ -1484,3 +1483,202 @@ string CartPidQpe::getBeamBlockOutputName(Params::bblock_field_type_t ftype)
   return "";
 }
 
+/////////////////////////////////////////////////////////
+// read in model data
+//
+// Returns 0 on success, -1 on failure.
+
+int CartPidQpe::_readModel(time_t radarTime)
+
+{
+
+  _modelMdvx.clearRead();
+  _modelMdvx.setReadTime(Mdvx::READ_CLOSEST,
+                         _params.model_input_url,
+                         _params.model_search_margin_secs,
+                         radarTime);
+
+  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
+    if (strlen(_params._model_field_names[ii].input_name) > 0) {
+      _modelMdvx.addReadField(_params._model_field_names[ii].input_name);
+    }
+  }
+  
+  if (_modelMdvx.readVolume()) {
+    cerr << "ERROR - CartPidQpe::_readModel" << endl;
+    cerr << "  Cannot read model data" << endl;
+    cerr << "  URL: " << _params.model_input_url << endl;
+    cerr << "  Search time: " << DateTime::strm(radarTime) << endl;
+    cerr << "  Search margin (secs): " << _params.model_search_margin_secs << endl;
+    cerr << _modelMdvx.getErrStr() << endl;
+    return -1;
+  }
+
+  // interpolate the model data onto the output Cartesian grid
+
+  _interpModelToOutputGrid();
+  
+  return 0;
+
+}
+
+#ifdef NOTNOW
+
+/////////////////////////////////////////////////////////
+// fill temperature level ht array
+
+void CartPidQpe::_computeHts(double tempC,
+                             MdvxField &htField,
+                             const string &fieldName,
+                             const string &longName,
+                             const string &units)
+  
+{
+
+  // set up the height field
+
+  htField.clearVolData();
+
+  Mdvx::field_header_t fhdr = _tempField->getFieldHeader();
+  fhdr.nz = 1;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  size_t planeSize32 = fhdr.nx * fhdr.ny * sizeof(fl32);
+  fhdr.volume_size = planeSize32;
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = 4;
+  fhdr.missing_data_value = _missingFl32;
+  fhdr.bad_data_value = _missingFl32;
+  
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  vhdr.level[0] = 0;
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  
+  htField.setHdrsAndVolData(fhdr, vhdr, NULL,
+                            true, false, true);
+
+  htField.setFieldName(fieldName);
+  htField.setFieldNameLong(longName);
+  htField.setUnits(units);
+  
+  // get hts array pointer
+  
+  fl32 *hts = (fl32 *) htField.getVol();
+
+  // get temp array
+
+  _tempField->convertType(Mdvx::ENCODING_FLOAT32);
+  const Mdvx::field_header_t tempFhdr = _tempField->getFieldHeader();
+  fl32 *temp = (fl32 *) _tempField->getVol();
+  fl32 tempMiss = tempFhdr.missing_data_value;
+  
+  // get Z profile for temperatures
+  
+  const Mdvx::vlevel_header_t tempVhdr = _tempField->getVlevelHeader();
+  vector<double> zProfile;
+  for (si64 iz = 0; iz < tempFhdr.nz; iz++) {
+    zProfile.push_back(tempVhdr.level[iz]);
+  } // iz
+  
+  // loop through the (x, y) plane
+  
+  si64 xyIndex = 0;
+  size_t nxy = fhdr.nx * fhdr.ny;
+  for (si64 iy = 0; iy < tempFhdr.ny; iy++) {
+    for (si64 ix = 0; ix < tempFhdr.nx; ix++, xyIndex++) {
+
+      // initialize
+
+      fl32 bottomTemp = tempMiss;
+      double bottomHt = tempVhdr.level[0]; // if temp is below grid
+      
+      fl32 topTemp = tempMiss;
+      double topHt = tempVhdr.level[tempFhdr.nz - 1]; // if temp is above grid
+      
+      hts[xyIndex] = bottomHt;
+      
+      // loop through heights, looking for temps that straddle
+      // the required temp
+
+      bool htFound = false;
+      for (si64 iz = 1; iz < tempFhdr.nz; iz++) {
+        si64 zIndexBelow = xyIndex + (iz - 1) * nxy; 
+        si64 zIndexAbove = zIndexBelow + nxy; 
+        double tempBelow = temp[zIndexBelow];
+        double tempAbove = temp[zIndexAbove];
+        // set bottom temp
+        if (tempBelow != tempMiss && bottomTemp == tempMiss) {
+          bottomTemp = tempBelow;
+        }
+        // set top temp
+        if (tempAbove != tempMiss) {
+          topTemp = tempAbove;
+        }
+        if (!htFound && (tempBelow != tempMiss) && (tempAbove != tempMiss)) {
+          // check for normal profile and inversion
+          if ((tempBelow >= tempC && tempAbove <= tempC) ||
+              (tempBelow <= tempC && tempAbove >= tempC)) {
+            double deltaTemp = tempAbove - tempBelow;
+            double deltaHt = zProfile[iz] - zProfile[iz-1];
+            double interpHt =
+              zProfile[iz] + ((tempC - tempBelow) / deltaTemp) * deltaHt;
+            hts[xyIndex] = interpHt;
+            htFound = true;
+          }
+        }
+      } // iz
+      
+      if (!htFound) {
+        if (tempC >= bottomTemp) {
+          // required temp is below grid
+          hts[xyIndex] = bottomHt;
+        } else if (tempC <= topTemp) {
+          // required temp is above grid
+          hts[xyIndex] = topHt;
+        }
+      }
+
+    } // ix
+  } // iy
+  
+}
+
+
+  _tempField = _modelMdvx.getField(_params.temp_profile_field_name);
+  if (_tempField == NULL) {
+    cerr << "ERROR - CartPidQpe::_readModel" << endl;
+    cerr << "  Cannot find field in temp file: "
+         << _params.temp_profile_field_name << endl;
+    cerr << "  URL: " << _params.temp_profile_url << endl;
+    cerr << "  Time: " << DateTime::strm(_modelMdvx.getValidTime()) << endl;
+    return -1;
+  }
+  
+  // fill the temperature level arrays
+  
+  _computeHts(_params.shallow_threshold_temp, _shallowHtField,
+              "ShallowHt", "shallow_threshold_ht", "km");
+  _computeHts(_params.deep_threshold_temp, _deepHtField,
+              "DeepHt", "deep_threshold_ht", "km");
+
+  // remap from model to radar grid coords
+  // use of the lookup table makes this more efficient
+  
+  MdvxProj proj(dbzField->getFieldHeader());
+  MdvxRemapLut lut;
+  if (_shallowHtField.remap(lut, proj)) {
+    cerr << "ERROR - CartPidQpe::_readModel" << endl;
+    cerr << "  Cannot convert model temp grid to radar grid" << endl;
+    cerr << "  URL: " << _params.temp_profile_url << endl;
+    cerr << "  Time: " << DateTime::strm(_modelMdvx.getValidTime()) << endl;
+    return -1;
+  }
+  if (_deepHtField.remap(lut, proj)) {
+    cerr << "ERROR - CartPidQpe::_readModel" << endl;
+    cerr << "  Cannot convert model temp grid to radar grid" << endl;
+    cerr << "  URL: " << _params.temp_profile_url << endl;
+    cerr << "  Time: " << DateTime::strm(_modelMdvx.getValidTime()) << endl;
+    return -1;
+  }
+                       
+#endif

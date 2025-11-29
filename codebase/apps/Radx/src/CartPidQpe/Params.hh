@@ -498,15 +498,15 @@ public:
 
   debug_t debug;
 
-  char* input_dir;
+  char* radar_input_dir;
 
-  mode_t mode;
+  mode_t radar_input_mode;
 
-  int max_realtime_data_age_secs;
+  int radar_max_realtime_data_age_secs;
 
-  char* input_file_search_ext;
+  char* radar_file_search_ext;
 
-  char* input_file_search_substr;
+  char* radar_file_search_substr;
 
   char* start_time;
 
@@ -514,6 +514,10 @@ public:
 
   radar_field_name_t *_radar_field_names;
   int radar_field_names_n;
+
+  char* model_input_url;
+
+  int model_search_margin_secs;
 
   model_field_name_t *_model_field_names;
   int model_field_names_n;
@@ -766,7 +770,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[161];
+  mutable TDRPtable _table[164];
 
   const char *_className;
 

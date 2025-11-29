@@ -49,6 +49,7 @@
 #include <toolsa/TaArray.hh>
 #include <radar/NoiseLocator.hh>
 #include <Radx/RadxVol.hh>
+#include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
 #include <radar/KdpFiltParams.hh>
 #include <radar/NcarPidParams.hh>
@@ -151,9 +152,13 @@ private:
   pthread_mutex_t _debugPrintMutex;
   
   // instantiate thread pool for computations
-
+  
   TaThreadPool _scalarsThreadPool;
   vector<ScalarsCompute *> _computeScalarsThreads;
+
+  // model data
+  
+  DsMdvx _modelMdvx;
 
   // private methods
 
@@ -187,6 +192,9 @@ private:
   void _printParamsPid();
   void _printParamsKdp();
 
+  int _readModel(time_t radarTime);
+  void _interpModelToOutputGrid();
+  
 };
 
 #endif

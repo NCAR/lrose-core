@@ -28,14 +28,14 @@ paramdef enum debug_t {
 } debug;
 
 commentdef {
-  p_header = "DATA INPUT DIRECTORY and INPUT MODE";
+  p_header = "RADAR DATA INPUT DIRECTORY and INPUT MODE";
 }
 
 paramdef string {
   p_default = ".";
   p_descr = "Input directory for searching for files.";
   p_help = "Files will be searched for in this directory. This is ignored if the list of files is  specified on the command line using the -f option.";
-} input_dir;
+} radar_input_dir;
 
 typedef enum {
   FILELIST, ARCHIVE, REALTIME
@@ -45,25 +45,25 @@ paramdef enum mode_t {
   p_default = FILELIST;
   p_descr = "Operating mode";
   p_help = "In FILELIST mode, we move through the list of file names specified on the command line.\n\nIn REALTIME mode, the program waits for a new input file to arrive in 'input_dir'. We assume that latest_data_info files are available.\n\nIn ARCHIVE mode, we move through the files in input_dir between the start and end times set on the command line.\n\nIn ARCHIVE mode, input_dir must be one above the day-directory.";
-} mode;
+} radar_input_mode;
 
 paramdef int {
   p_default = 300;
   p_descr = "Maximum age of realtime data (secs)";
   p_help =  "REALTIME mode only. Only data files less old than this will be processed.";
-} max_realtime_data_age_secs;
+} radar_max_realtime_data_age_secs;
 
 paramdef string {
   p_default = "";
   p_descr = "File name extension.";
   p_help = "If set, only files with this extension will be processed.";
-} input_file_search_ext;
+} radar_file_search_ext;
 
 paramdef string {
   p_default = "";
   p_descr = "File name sub-string.";
   p_help = "If set, only files with names containing this sub-string will be processed.";
-} input_file_search_substr;
+} radar_file_search_substr;
 
 paramdef string {
   p_default = "2015 06 26 00 00 00";
@@ -105,6 +105,23 @@ paramdef struct radar_field_name_t {
   p_descr = "Converts field type to strings.";
   p_help = "If input_name is empty the field is assumed to not exist in the input data set.";
 } radar_field_names[8];
+
+commentdef {
+  p_header = "MODEL FOR ENVIRONMENTAL FIELDS";
+  p_text = "We need access to model data to provide a temperature profile. We can also make use of moisture and wind fields from the model.";
+}
+
+paramdef string {
+  p_default = "mdv/model";
+  p_descr = "URL for model data, in MDV/Netcdf-CF format.";
+  p_help = "We read in the model data that is closest in time to the radar data.";
+} model_input_url;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin for model data (secs)";
+  p_help =  "We search for model data within this margin of the radar data.";
+} model_search_margin_secs;
 
 commentdef {
   p_header = "MODEL FIELD NAMES";
