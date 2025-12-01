@@ -168,7 +168,7 @@ def getForInterval(radarName, thisDay, startTime, endTime):
     # construct the URL
 
     awsDateStr =  startTime.strftime("%Y/%m/%d")
-    bucketURL = "http://noaa-nexrad-level2.s3.amazonaws.com"
+    bucketURL = "http://unidata-nexrad-level2.s3.amazonaws.com"
     dirListURL = bucketURL+ "/?prefix=" + awsDateStr + "/" + radarName
     if (options.debug):
         print("dirListURL: ", dirListURL, file=sys.stderr)
