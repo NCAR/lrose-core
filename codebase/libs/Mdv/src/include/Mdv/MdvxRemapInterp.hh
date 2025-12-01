@@ -41,6 +41,7 @@
 
 #include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxProj.hh>
+#include <Mdv/MdvxField.hh>
 #include <vector>
 using namespace std;
 
@@ -88,11 +89,31 @@ protected:
   MdvxProj _projSource;
   MdvxProj _projTarget;
   
+  Mdvx::vlevel_header_t _vlevelSource;
+  Mdvx::vlevel_header_t _vlevelTarget;
+
   vector<int64_t> _sourceOffsets;
   vector<int64_t> _targetOffsets;
 
   bool _lutComputed;
 
+  typedef struct {
+    double zz;
+    int indexLower;
+    int indexUpper;
+    double zLower;
+    double zUpper;
+    double wtLower;
+    double wtUpper;
+  } z_lut_t;
+
+  vector<z_lut_t> _zLut;
+
+  
+  // Compute z interpolation lookup table
+  
+  void _computeZLut();
+  
 private:
 
 };

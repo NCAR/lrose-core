@@ -42,6 +42,7 @@
 
 #include <Mdv/MdvxRemapInterp.hh>
 #include <toolsa/pjg.h>
+#include <cassert>
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////
@@ -164,6 +165,80 @@ void MdvxRemapInterp::computeLut(const MdvxProj &proj_source,
   _lutComputed = true;
 
   return;
+
+}
+
+////////////////////////////////////////////////////////
+// Compute ht interpolation lookup table
+
+void MdvxRemapInterp::_computeZLut()
+  
+{
+
+// void MdvxRemapInterp::_computeHtInterpLut(const vector<double> &htsOut,
+//                                           const MdvxField *htFld,
+//                                           vector<interp_pt_t> &interpPts)
+
+  const Mdvx::coord_t &coordSource = _projSource.getCoord();
+  const Mdvx::coord_t &coordTarget = _projTarget.getCoord();
+
+  assert(coordSource.nz <= MDV64_MAX_VLEVELS);
+  assert(coordTarget.nz <= MDV64_MAX_VLEVELS);
+  
+  _zLut.resize(coordTarget.nz);
+  
+  for (int iz = 0; iz < coordTarget.nz; iz++) {
+
+    z_lut_t &lut = _zLut[iz];
+    lut.zz = _vlevelTarget.level[iz];
+    
+    if (lut.zz <= _vlevelSource.level[0]) {
+
+      // target z is below source lower plane
+      
+      lut.indexLower = 0;
+      lut.indexUpper = 0;
+      lut.zLower = _vlevelSource.level[0];
+      lut.zUpper = _vlevelSource.level[0];
+      lut.wtLower = 0.0;
+      lut.wtUpper = 1.0;
+
+      continue;
+      
+    }
+    
+    if (lut.zz >= _vlevelSource.level[coordSource.nz - 1]) {
+
+      // target z is above source upper plane
+      
+      lut.indexLower = coordSource.nz - 1;
+      lut.indexUpper = coordSource.nz - 1;
+      lut.zLower = _vlevelSource.level[coordSource.nz - 1];
+      lut.zUpper = _vlevelSource.level[coordSource.nz - 1];
+      lut.wtLower = 1.0;
+      lut.wtUpper = 0.0;
+
+      continue;
+      
+    }
+    
+    // we are within the source zlevel limits
+    
+    for (int jz = 1; jz < coordSource.nz; jz++) {
+      double zLower = _vlevelSource.level[jz-1];
+      double zUpper = _vlevelSource.level[jz];
+      if (lut.zz >= zLower && lut.zz <= zUpper) {
+        lut.indexLower = jz-1;
+        lut.indexUpper = jz;
+        lut.zLower = zLower;
+        lut.zUpper = zUpper;
+        lut.wtLower = (zUpper - lut.zz) / (zUpper - zLower);
+        lut.wtUpper = 1.0 - lut.wtLower;
+        // break;
+      }
+    } // jz
+    
+  } // iz
 
 }
 
