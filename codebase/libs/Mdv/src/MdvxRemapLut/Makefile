@@ -31,6 +31,7 @@ HDRS = \
 	../include/Mdv/MdvxRemapLut.hh
 
 CPPC_SRCS = \
+	MdvxRemapInterp.cc \
 	MdvxRemapLut.cc
 
 #

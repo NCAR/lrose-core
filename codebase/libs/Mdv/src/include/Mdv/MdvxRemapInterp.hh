@@ -22,29 +22,29 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ////////////////////////////////////////////////////////////////////
-// Mdv/MdvxRemapLut.hh
+// Mdv/MdvxRemapInterp.hh
 //
-// An object of this class is used to hold the lookup table for
-// computing grid remapping.
+// An object of this class is used to hold the data for interpolation
+// from one MdvxProj grid mapping to another.
 //
-// This method uses nearest-neighbor remapping only.
+// This method uses bilinear interpolation for remapping in 3-D.
 //
-// Mike Dixon, RAP, NCAR,
+// Mike Dixon, EOL, NCAR,
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// November 1999
+// December 2025
 //
 ////////////////////////////////////////////////////////////////////
 
-#ifndef MdvxRemapLut_hh
-#define MdvxRemapLut_hh
+#ifndef MdvxRemapInterp_hh
+#define MdvxRemapInterp_hh
 
 #include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxProj.hh>
 #include <vector>
 using namespace std;
 
-class MdvxRemapLut
+class MdvxRemapInterp
 {
 
 public:
@@ -55,24 +55,24 @@ public:
   // You need to call computeSamplePts() and
   // computeLut() before using the lookup table.
   
-  MdvxRemapLut();
+  MdvxRemapInterp();
   
   //////////////////////////////////////////
   // constructor which computes lookup table
   
-  MdvxRemapLut(const MdvxProj &proj_source,
-	       const MdvxProj &proj_target);
+  MdvxRemapInterp(const MdvxProj &proj_source,
+                  const MdvxProj &proj_target);
   
   ///////////////////////
   // destructor
   
-  virtual ~MdvxRemapLut();
+  virtual ~MdvxRemapInterp();
 
   ///////////////////////////////
-  // compute lookup table offsets
+  // compute lookup table
   
-  void computeOffsets(const MdvxProj &proj_source,
-		      const MdvxProj &proj_target);
+  void computeLut(const MdvxProj &proj_source,
+                  const MdvxProj &proj_target);
   
   // access to members
 
@@ -91,7 +91,7 @@ protected:
   vector<int64_t> _sourceOffsets;
   vector<int64_t> _targetOffsets;
 
-  bool _offsetsComputed;
+  bool _lutComputed;
 
 private:
 
