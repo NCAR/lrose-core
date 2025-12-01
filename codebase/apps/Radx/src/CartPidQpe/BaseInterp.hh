@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// Interp.hh
+// BaseInterp.hh
 //
-// Interp base class
+// BaseInterp base class
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,8 +32,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef Interp_HH
-#define Interp_HH
+#ifndef BaseInterp_HH
+#define BaseInterp_HH
 
 #include "Params.hh"
 #include <string>
@@ -46,7 +46,7 @@ class RadxRay;
 class RadxVol;
 using namespace std;
 
-class Interp {
+class BaseInterp {
   
 public:
 
@@ -174,15 +174,15 @@ public:
 
   // constructor
   
-  Interp(const string &progName,
-         const Params &params,
-         RadxVol &readVol,
-         vector<Field> &interpFields,
-         vector<Ray *> &interpRays);
+  BaseInterp(const string &progName,
+             const Params &params,
+             RadxVol &readVol,
+             vector<Field> &interpFields,
+             vector<Ray *> &interpRays);
   
   // destructor
   
-  virtual ~Interp();
+  virtual ~BaseInterp();
 
   // interpolate a volume
   // assumes volume has been read

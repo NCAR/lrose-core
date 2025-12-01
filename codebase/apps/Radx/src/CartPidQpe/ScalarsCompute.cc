@@ -22,21 +22,21 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// PolarCompute.cc
+// ScalarsCompute.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// May 2021
+// Nov 2025
 //
 ///////////////////////////////////////////////////////////////
 //
-// PolarCompute computation engine
-// Computes PID in polar coords
+// ScalarsCompute computation engine
+// Computes dual pol scalars in polar coords
 // There is one object per thread.
 //
 ///////////////////////////////////////////////////////////////
 
-#include "PolarCompute.hh"
+#include "ScalarsCompute.hh"
 #include "CartPidQpe.hh"
 #include <toolsa/os_config.h>
 #include <toolsa/file_io.h>
@@ -46,16 +46,16 @@
 #include <Radx/RadxField.hh>
 #include <cerrno>
 using namespace std;
-pthread_mutex_t PolarCompute::_debugPrintMutex = PTHREAD_MUTEX_INITIALIZER;
-const double PolarCompute::missingDbl = -9999.0;
+pthread_mutex_t ScalarsCompute::_debugPrintMutex = PTHREAD_MUTEX_INITIALIZER;
+const double ScalarsCompute::missingDbl = -9999.0;
 
 // Constructor
 
-PolarCompute::PolarCompute(const Params &params,
-                           const KdpFiltParams &kdpFiltParams,
-                           const NcarPidParams &ncarPidParams,
-                           const PrecipRateParams &precipRateParams,
-                           int id)  :
+ScalarsCompute::ScalarsCompute(const Params &params,
+                               const KdpFiltParams &kdpFiltParams,
+                               const NcarPidParams &ncarPidParams,
+                               const PrecipRateParams &precipRateParams,
+                               int id)  :
         _params(params),
         _kdpFiltParams(kdpFiltParams),
         _ncarPidParams(ncarPidParams),
@@ -80,7 +80,7 @@ PolarCompute::PolarCompute(const Params &params,
 
 // destructor
 
-PolarCompute::~PolarCompute()
+ScalarsCompute::~ScalarsCompute()
 
 {
 
@@ -92,7 +92,7 @@ PolarCompute::~PolarCompute()
 // This reads in a new sounding if needed.
 // If no sounding is available, the static profile is used
 
-void PolarCompute::loadTempProfile(time_t dataTime)
+void ScalarsCompute::loadTempProfile(time_t dataTime)
 {
   _pid.loadTempProfile(dataTime);
 }
@@ -100,7 +100,7 @@ void PolarCompute::loadTempProfile(time_t dataTime)
 ///////////////////////////////////////////////////////////
 // Set the temperature profile
 
-void PolarCompute::setTempProfile(const TempProfile &profile)
+void ScalarsCompute::setTempProfile(const TempProfile &profile)
 {
   _pid.setTempProfile(profile);
 }
@@ -108,7 +108,7 @@ void PolarCompute::setTempProfile(const TempProfile &profile)
 ///////////////////////////////////////////////////////////
 // Get the temperature profile
 
-const TempProfile &PolarCompute::getTempProfile() const
+const TempProfile &ScalarsCompute::getTempProfile() const
 {
   return _pid.getTempProfile();
 }
@@ -122,9 +122,9 @@ const TempProfile &PolarCompute::getTempProfile() const
 //
 // Returns NULL on error.
 
-RadxRay *PolarCompute::doCompute(RadxRay *inputRay,
-                                 double radarHtKm,
-                                 double wavelengthM)
+RadxRay *ScalarsCompute::doCompute(RadxRay *inputRay,
+                                   double radarHtKm,
+                                   double wavelengthM)
 
 {
 
@@ -155,7 +155,7 @@ RadxRay *PolarCompute::doCompute(RadxRay *inputRay,
   // load input arrays
   
   if (_loadInputArrays(inputRay)) {
-    cerr << "ERROR - RadxRate::PolarCompute - cannot load input arrays" << endl;
+    cerr << "ERROR - RadxRate::ScalarsCompute - cannot load input arrays" << endl;
     return NULL;
   }
 
@@ -171,7 +171,7 @@ RadxRay *PolarCompute::doCompute(RadxRay *inputRay,
   // compute pid
 
   if (_pid.loadTempProfile(inputRay->getTimeSecs())) {
-    cerr << "ERROR - RadxRate::PolarCompute - cannot load temp profile" << endl;
+    cerr << "ERROR - RadxRate::ScalarsCompute - cannot load temp profile" << endl;
     return NULL;
   }
   _pidCompute();
@@ -191,7 +191,7 @@ RadxRay *PolarCompute::doCompute(RadxRay *inputRay,
 //////////////////////////////////////
 // initialize KDP
   
-void PolarCompute::_kdpInit()
+void ScalarsCompute::_kdpInit()
   
 {
 
@@ -208,7 +208,7 @@ void PolarCompute::_kdpInit()
 ////////////////////////////////////////////////
 // compute kdp from phidp, using Bringi's method
 
-void PolarCompute::_kdpCompute()
+void ScalarsCompute::_kdpCompute()
   
 {
 
@@ -257,7 +257,7 @@ void PolarCompute::_kdpCompute()
 //////////////////////////////////////
 // initialize PID
   
-int PolarCompute::_pidInit()
+int ScalarsCompute::_pidInit()
   
 {
 
@@ -279,7 +279,7 @@ int PolarCompute::_pidInit()
 //////////////////////////////////////
 // compute PID
 
-void PolarCompute::_pidCompute()
+void ScalarsCompute::_pidCompute()
   
 {
   
@@ -314,7 +314,7 @@ void PolarCompute::_pidCompute()
 //////////////////////////////////////
 // initialize PRECIP
   
-void PolarCompute::_precipInit()
+void ScalarsCompute::_precipInit()
   
 {
 
@@ -327,7 +327,7 @@ void PolarCompute::_precipInit()
 //////////////////////////////////////
 // compute PRECIP
   
-void PolarCompute::_precipCompute()
+void ScalarsCompute::_precipCompute()
   
 {
   
@@ -369,7 +369,7 @@ void PolarCompute::_precipCompute()
 //////////////////////////////////////
 // alloc computational arrays
   
-void PolarCompute::_allocArrays()
+void ScalarsCompute::_allocArrays()
   
 {
 
@@ -402,7 +402,7 @@ void PolarCompute::_allocArrays()
 /////////////////////////////////////////////////////
 // load input arrays ready for KDP
   
-int PolarCompute::_loadInputArrays(RadxRay *inputRay)
+int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   
 {
   
@@ -455,10 +455,10 @@ int PolarCompute::_loadInputArrays(RadxRay *inputRay)
 ////////////////////////////////////////
 // load a field array based on the name
 
-int PolarCompute::_loadFieldArray(RadxRay *inputRay,
-                                  const string &fieldName,
-                                  bool required,
-                                  double *array)
+int ScalarsCompute::_loadFieldArray(RadxRay *inputRay,
+                                    const string &fieldName,
+                                    bool required,
+                                    double *array)
 
 {
   
@@ -473,7 +473,7 @@ int PolarCompute::_loadFieldArray(RadxRay *inputRay,
     }
 
     pthread_mutex_lock(&_debugPrintMutex);
-    cerr << "ERROR - PolarCompute::_getField" << endl;
+    cerr << "ERROR - ScalarsCompute::_getField" << endl;
     cerr << "  Cannot find field in ray: " << fieldName<< endl;
     cerr << "  El, az: "
          << inputRay->getElevationDeg() << ", "
@@ -504,7 +504,7 @@ int PolarCompute::_loadFieldArray(RadxRay *inputRay,
 //////////////////////////////////////////////////////////////
 // Compute the SNR field from the DBZ field
 
-void PolarCompute::_computeSnrFromDbz()
+void ScalarsCompute::_computeSnrFromDbz()
 
 {
 
@@ -538,7 +538,7 @@ void PolarCompute::_computeSnrFromDbz()
 //////////////////////////////////////////////////////////////
 // Censor gates with non-weather particle types
 
-void PolarCompute::_censorNonWeather(RadxField &field)
+void ScalarsCompute::_censorNonWeather(RadxField &field)
 
 {
 
@@ -559,8 +559,8 @@ void PolarCompute::_censorNonWeather(RadxField &field)
 ///////////////////////////////
 // load up fields in output ray
 
-void PolarCompute::_loadOutputFields(RadxRay *inputRay,
-                                     RadxRay *outputRay)
+void ScalarsCompute::_loadOutputFields(RadxRay *inputRay,
+                                       RadxRay *outputRay)
 
 {
 
@@ -772,8 +772,8 @@ void PolarCompute::_loadOutputFields(RadxRay *inputRay,
 //////////////////////////////////////
 // add the debug fields
   
-void PolarCompute::_addPidDebugFields(const RadxRay *inputRay, 
-                                      RadxRay *outputRay)
+void ScalarsCompute::_addPidDebugFields(const RadxRay *inputRay, 
+                                        RadxRay *outputRay)
 
 {
 
@@ -857,7 +857,7 @@ void PolarCompute::_addPidDebugFields(const RadxRay *inputRay,
 //////////////////////////////////////
 // add the debug fields
   
-void PolarCompute::_addKdpDebugFields(RadxRay *outputRay)
+void ScalarsCompute::_addKdpDebugFields(RadxRay *outputRay)
 
 {
 
@@ -962,12 +962,12 @@ void PolarCompute::_addKdpDebugFields(RadxRay *outputRay)
 //////////////////////////////////////
 // add a field to the output ray
   
-void PolarCompute::_addField(RadxRay *outputRay,
-                             const string &name,
-                             const string &units,
-                             const string &longName,
-                             const string standardName,
-                             const double *array64)
+void ScalarsCompute::_addField(RadxRay *outputRay,
+                               const string &name,
+                               const string &units,
+                               const string &longName,
+                               const string standardName,
+                               const double *array64)
 
 {
 
@@ -1002,12 +1002,12 @@ void PolarCompute::_addField(RadxRay *outputRay,
 //////////////////////////////////////
 // add a field to the output ray
   
-void PolarCompute::_addField(RadxRay *outputRay,
-                             const string &name,
-                             const string &units,
-                             const string &longName,
-                             const string standardName,
-                             const Radx::fl32 *array32)
+void ScalarsCompute::_addField(RadxRay *outputRay,
+                               const string &name,
+                               const string &units,
+                               const string &longName,
+                               const string standardName,
+                               const Radx::fl32 *array32)
   
 {
 
@@ -1039,12 +1039,12 @@ void PolarCompute::_addField(RadxRay *outputRay,
 
 }
 
-void PolarCompute::_addField(RadxRay *outputRay,
-                             const string &name,
-                             const string &units,
-                             const string &longName,
-                             const string standardName,
-                             const bool *arrayBool)
+void ScalarsCompute::_addField(RadxRay *outputRay,
+                               const string &name,
+                               const string &units,
+                               const string &longName,
+                               const string standardName,
+                               const bool *arrayBool)
 
 {
 

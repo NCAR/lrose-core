@@ -84,11 +84,12 @@ public:
     DBZ = 0,
     VEL = 1,
     WIDTH = 2,
-    ZDR = 3,
-    LDR = 4,
-    PHIDP = 5,
-    RHOHV = 6,
-    KDP = 7
+    SNR = 3,
+    ZDR = 4,
+    LDR = 5,
+    PHIDP = 6,
+    RHOHV = 7,
+    KDP = 8
   } radar_field_type_t;
 
   typedef enum {
@@ -156,11 +157,6 @@ public:
     char* input_name;
     char* output_name;
   } bblock_field_name_t;
-
-  typedef struct {
-    char* input_name;
-    char* output_name;
-  } rename_field_t;
 
   typedef struct {
     pid_output_field_id_t id;
@@ -503,15 +499,15 @@ public:
 
   debug_t debug;
 
-  char* input_dir;
+  char* radar_input_dir;
 
-  mode_t mode;
+  mode_t radar_input_mode;
 
-  int max_realtime_data_age_secs;
+  int radar_max_realtime_data_age_secs;
 
-  char* input_file_search_ext;
+  char* radar_file_search_ext;
 
-  char* input_file_search_substr;
+  char* radar_file_search_substr;
 
   char* start_time;
 
@@ -520,6 +516,10 @@ public:
   radar_field_name_t *_radar_field_names;
   int radar_field_names_n;
 
+  char* model_input_url;
+
+  int model_search_margin_secs;
+
   model_field_name_t *_model_field_names;
   int model_field_names_n;
 
@@ -527,11 +527,6 @@ public:
   int bblock_field_names_n;
 
   char* output_dir;
-
-  tdrp_bool_t rename_fields_on_input;
-
-  rename_field_t *_renamed_fields;
-  int renamed_fields_n;
 
   tdrp_bool_t SNR_available;
 
@@ -669,17 +664,7 @@ public:
 
   double pseudo_earth_radius_ratio;
 
-  tdrp_bool_t remove_long_range_rays;
-
-  tdrp_bool_t remove_short_range_rays;
-
-  tdrp_bool_t trim_surveillance_sweeps_to_360deg;
-
   tdrp_bool_t override_fixed_angle_with_mean_measured_angle;
-
-  tdrp_bool_t reorder_sweeps_by_ascending_angle;
-
-  tdrp_bool_t compute_sweep_angles_from_vcp_tables;
 
   tdrp_bool_t set_max_range;
 
@@ -692,14 +677,6 @@ public:
   double radar_longitude_deg;
 
   double radar_altitude_meters;
-
-  tdrp_bool_t override_instrument_name;
-
-  char* instrument_name;
-
-  tdrp_bool_t override_site_name;
-
-  char* site_name;
 
   tdrp_bool_t override_beam_width;
 
@@ -794,7 +771,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[175];
+  mutable TDRPtable _table[164];
 
   const char *_className;
 

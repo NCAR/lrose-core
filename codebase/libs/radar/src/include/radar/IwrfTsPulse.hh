@@ -331,6 +331,7 @@ public:
 
   inline int getVolNum() const { return _hdr.volume_num; }
   inline int getSweepNum() const { return _hdr.sweep_num; }
+  inline int getBlockNum() const { return _hdr.block_num; }
   inline double getPhaseDiff0() const { return _phaseDiff[0]; }
   inline double getPhaseDiff1() const { return _phaseDiff[1]; }
 
@@ -401,6 +402,7 @@ public:
   inline void set_scan_mode(si32 x) { _hdr.scan_mode = x; }
   inline void set_follow_mode(si32 x) { _hdr.follow_mode = x; }
   inline void set_sweep_num(si32 x) { _hdr.sweep_num = x; }
+  inline void set_block_num(si32 x) { _hdr.block_num = x; }
   inline void set_volume_num(si32 x) { _hdr.volume_num = x; }
   inline void set_fixed_el(fl32 x) { _hdr.fixed_el = x; }
   inline void set_fixed_az(fl32 x) { _hdr.fixed_az = x; }
@@ -470,6 +472,7 @@ public:
   inline si32 get_follow_mode() const { return _hdr.follow_mode; }
   inline si32 get_sweep_num() const { return _hdr.sweep_num; }
   inline si32 get_volume_num() const { return _hdr.volume_num; }
+  inline si32 get_block_num() const { return _hdr.block_num; }
   inline fl32 get_fixed_el() const { return _hdr.fixed_el; }
   inline fl32 get_fixed_az() const { return _hdr.fixed_az; }
   inline fl32 get_elevation() const { return _hdr.elevation; }

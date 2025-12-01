@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// CartInterp class - derived from Interp.
+// InterpToCart class - derived from Interp.
 // Used for full 3-D Cartesian interpolation.
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -31,7 +31,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "CartInterp.hh"
+#include "InterpToCart.hh"
 #include "Orient.hh"
 #include "OutputMdv.hh"
 #include <toolsa/pjg.h>
@@ -47,23 +47,23 @@
 #include <algorithm>
 using namespace std;
 
-const double CartInterp::_searchResAz = 0.1;
-const double CartInterp::_searchResEl = 0.1;
-const double CartInterp::_searchAzOverlapDeg = 20.0;
-const double CartInterp::_searchAzOverlapHalf = CartInterp::_searchAzOverlapDeg / 2.0;
+const double InterpToCart::_searchResAz = 0.1;
+const double InterpToCart::_searchResEl = 0.1;
+const double InterpToCart::_searchAzOverlapDeg = 20.0;
+const double InterpToCart::_searchAzOverlapHalf = InterpToCart::_searchAzOverlapDeg / 2.0;
 
 // Constructor
 
-CartInterp::CartInterp(const string &progName,
-                       const Params &params,
-                       RadxVol &readVol,
-                       vector<Field> &interpFields,
-                       vector<Ray *> &interpRays) :
-        Interp(progName,
-               params,
-               readVol,
-               interpFields,
-               interpRays)
+InterpToCart::InterpToCart(const string &progName,
+                           const Params &params,
+                           RadxVol &readVol,
+                           vector<Field> &interpFields,
+                           vector<Ray *> &interpRays) :
+        BaseInterp(progName,
+                   params,
+                   readVol,
+                   interpFields,
+                   interpRays)
   
 {
   
@@ -150,7 +150,7 @@ CartInterp::CartInterp(const string &progName,
 //////////////////////////////////////
 // destructor
 
-CartInterp::~CartInterp()
+InterpToCart::~InterpToCart()
 
 {
 
@@ -171,7 +171,7 @@ CartInterp::~CartInterp()
 // and _interpFields and _interpRays vectors are populated
 // returns 0 on succes, -1 on failure
 
-int CartInterp::interpVol()
+int InterpToCart::interpVol()
 
 {
 
@@ -184,7 +184,7 @@ int CartInterp::interpVol()
   // set radar params from volume
 
   if (_setRadarParams()) {
-    cerr << "ERROR - CartInterp::interpVol()" << endl;
+    cerr << "ERROR - InterpToCart::interpVol()" << endl;
     return -1;
   }
 
@@ -288,7 +288,7 @@ int CartInterp::interpVol()
   _printRunTime("Cart interp - before _writeOutputFile");
 
   if (_writeOutputFile()) {
-    cerr << "ERROR - CartInterp::interpVol" << endl;
+    cerr << "ERROR - InterpToCart::interpVol" << endl;
     cerr << "  Cannot write output file" << endl;
     return -1;
   }
@@ -309,7 +309,7 @@ int CartInterp::interpVol()
 //////////////////////////////////////////////////
 // create the threading objects
 
-void CartInterp::_createThreads()
+void InterpToCart::_createThreads()
 {
 
   // threads for search
@@ -338,7 +338,7 @@ void CartInterp::_createThreads()
 //////////////////////////////////////////////////
 // free the threading objects
 
-void CartInterp::_freeThreads()
+void InterpToCart::_freeThreads()
 {
 
   // free threads we created for search
@@ -363,7 +363,7 @@ void CartInterp::_freeThreads()
 //////////////////////////////////////////////////
 // create the debug Cart fields
 
-void CartInterp::_createDebugFields()
+void InterpToCart::_createDebugFields()
 
 {
   
@@ -411,7 +411,7 @@ void CartInterp::_createDebugFields()
 //////////////////////////////////////////////////
 // free the derived fields
 
-void CartInterp::_freeDerivedFields()
+void InterpToCart::_freeDerivedFields()
   
 {
   for (size_t ii = 0; ii < _derived3DFields.size(); ii++) {
@@ -428,7 +428,7 @@ void CartInterp::_freeDerivedFields()
 ////////////////////////////////////////////////////////////
 // Initialize Z levels
 
-void CartInterp::_initZLevels()
+void InterpToCart::_initZLevels()
 
 {
 
@@ -460,7 +460,7 @@ void CartInterp::_initZLevels()
 ////////////////////////////////////////////////////////////
 // Free Z levels
 
-void CartInterp::_freeZLevels()
+void InterpToCart::_freeZLevels()
 
 {
   _gridZLevels.clear();
@@ -469,7 +469,7 @@ void CartInterp::_freeZLevels()
 ////////////////////////////////////////////////////////////
 // Initialize output grid
 
-void CartInterp::_initGrid()
+void InterpToCart::_initGrid()
 
 {
 
@@ -518,7 +518,7 @@ void CartInterp::_initGrid()
 ////////////////////////////////////////////////////////////
 // Free grid loc array
 
-void CartInterp::_freeGridLoc()
+void InterpToCart::_freeGridLoc()
   
 {
   
@@ -542,7 +542,7 @@ void CartInterp::_freeGridLoc()
 ////////////////////////////////////////////////////////////
 // Allocate the output arrays for the gridded fields
 
-void CartInterp::_allocOutputArrays()
+void InterpToCart::_allocOutputArrays()
   
 {
 
@@ -555,7 +555,7 @@ void CartInterp::_allocOutputArrays()
 ////////////////////////////////////////////////////////////
 // Free up the output arrays for the gridded fields
 
-void CartInterp::_freeOutputArrays()
+void InterpToCart::_freeOutputArrays()
   
 {
   if (_outputFields) {
@@ -567,7 +567,7 @@ void CartInterp::_freeOutputArrays()
 ////////////////////////////////////////////////////////////
 // init the output arrays for the gridded fields
 
-void CartInterp::_initOutputArrays()
+void InterpToCart::_initOutputArrays()
   
 {
 
@@ -585,7 +585,7 @@ void CartInterp::_initOutputArrays()
 // Compute the search matrix limits
 // keeping it as small as possible for efficiency
 
-void CartInterp::_computeSearchLimits()
+void InterpToCart::_computeSearchLimits()
 {
 
   // elevation
@@ -672,7 +672,7 @@ void CartInterp::_computeSearchLimits()
 ////////////////////////////////////////////////////////////
 // Compute grid locations relative to radar
 
-void CartInterp::_computeGridRelative()
+void InterpToCart::_computeGridRelative()
 
 {
 
@@ -729,7 +729,7 @@ void CartInterp::_computeGridRelative()
 //////////////////////////////////////////////////////
 // compute grid rows in multi-threaded mode
 
-void CartInterp::_computeGridRelMultiThreaded()
+void InterpToCart::_computeGridRelMultiThreaded()
 {
 
   _threadPoolGridRel.initForRun();
@@ -778,7 +778,7 @@ void CartInterp::_computeGridRelMultiThreaded()
 ////////////////////////////////////////////////////////////
 // Compute grid locations for one row
 
-void CartInterp::_computeGridRow(int iz, int iy)
+void InterpToCart::_computeGridRow(int iz, int iy)
 
 {
 
@@ -842,7 +842,7 @@ void CartInterp::_computeGridRow(int iz, int iy)
 ////////////////////////////////////////////////////////////
 // Allocate the search matrix
 
-void CartInterp::_allocSearchMatrix()
+void InterpToCart::_allocSearchMatrix()
 
 {
 
@@ -863,7 +863,7 @@ void CartInterp::_allocSearchMatrix()
 ////////////////////////////////////////////////////////////
 // Free up the search matrix
 
-void CartInterp::_freeSearchMatrix()
+void InterpToCart::_freeSearchMatrix()
 
 {
   if (_searchMatrixLowerLeft) {
@@ -887,7 +887,7 @@ void CartInterp::_freeSearchMatrix()
 ////////////////////////////////////////////////////////////
 // Initalize the search matrix
 
-void CartInterp::_initSearchMatrix()
+void InterpToCart::_initSearchMatrix()
 
 {
 
@@ -1006,7 +1006,7 @@ void CartInterp::_initSearchMatrix()
 // Fill the search matrix, using the el/az for each ray
 // in the current volume
 
-void CartInterp::_fillSearchMatrix()
+void InterpToCart::_fillSearchMatrix()
 
 {
 
@@ -1060,7 +1060,7 @@ void CartInterp::_fillSearchMatrix()
 ///////////////////////////////////////////////////////////
 // print search matrix
 
-void CartInterp::_printSearchMatrix(FILE *out, int res)
+void InterpToCart::_printSearchMatrix(FILE *out, int res)
 {
 
   for (int iel = 0; iel < _searchNEl; iel += res) {
@@ -1113,7 +1113,7 @@ void CartInterp::_printSearchMatrix(FILE *out, int res)
 ///////////////////////////////////////////////////////////
 // print point in search matrix
 
-void CartInterp::_printSearchMatrixPoint(FILE *out, int iel, int iaz)
+void InterpToCart::_printSearchMatrixPoint(FILE *out, int iel, int iaz)
 {
 
   const SearchPoint &ll = _searchMatrixLowerLeft[iel][iaz];
@@ -1163,9 +1163,9 @@ void CartInterp::_printSearchMatrixPoint(FILE *out, int iel, int iaz)
 // We do this by propagating the ray information up and
 // to the right.
 
-int CartInterp::_fillSearchLowerLeft(int level,
-                                     vector<SearchIndex> &thisSearch,
-                                     vector<SearchIndex> &nextSearch)
+int InterpToCart::_fillSearchLowerLeft(int level,
+                                       vector<SearchIndex> &thisSearch,
+                                       vector<SearchIndex> &nextSearch)
   
 {
 
@@ -1255,9 +1255,9 @@ int CartInterp::_fillSearchLowerLeft(int level,
 // We do this by propagating the ray information down and
 // to the right.
 
-int CartInterp::_fillSearchUpperLeft(int level,
-                                     vector<SearchIndex> &thisSearch,
-                                     vector<SearchIndex> &nextSearch)
+int InterpToCart::_fillSearchUpperLeft(int level,
+                                       vector<SearchIndex> &thisSearch,
+                                       vector<SearchIndex> &nextSearch)
 
 {
 
@@ -1348,9 +1348,9 @@ int CartInterp::_fillSearchUpperLeft(int level,
 // We do this by propagating the ray information up and
 // to the left.
 
-int CartInterp::_fillSearchLowerRight(int level,
-                                      vector<SearchIndex> &thisSearch,
-                                      vector<SearchIndex> &nextSearch)
+int InterpToCart::_fillSearchLowerRight(int level,
+                                        vector<SearchIndex> &thisSearch,
+                                        vector<SearchIndex> &nextSearch)
 
 {
 
@@ -1440,9 +1440,9 @@ int CartInterp::_fillSearchLowerRight(int level,
 // We do this by propagating the ray information below and
 // to the left.
 
-int CartInterp::_fillSearchUpperRight(int level,
-                                      vector<SearchIndex> &thisSearch,
-                                      vector<SearchIndex> &nextSearch)
+int InterpToCart::_fillSearchUpperRight(int level,
+                                        vector<SearchIndex> &thisSearch,
+                                        vector<SearchIndex> &nextSearch)
 
 {
 
@@ -1532,7 +1532,7 @@ int CartInterp::_fillSearchUpperRight(int level,
 //
 // Returns -1 if out of bounds
 
-int CartInterp::_getSearchElIndex(double el) 
+int InterpToCart::_getSearchElIndex(double el) 
 { 
   int iel = (int) floor((el - _searchMinEl) / _searchResEl + 0.5);
   if (iel < 0) {
@@ -1549,7 +1549,7 @@ int CartInterp::_getSearchElIndex(double el)
 //
 // Returns -1 if out of bounds
 
-int CartInterp::_getSearchAzIndex(double az) 
+int InterpToCart::_getSearchAzIndex(double az) 
 {
   int iaz = (int) ((az - _searchMinAz) / _searchResAz + 0.5);
   if (iaz < 0) {
@@ -1563,7 +1563,7 @@ int CartInterp::_getSearchAzIndex(double az)
 /////////////////////////////////////////////////////////
 // get the elevation given the search index
 
-double CartInterp::_getSearchEl(int index) 
+double InterpToCart::_getSearchEl(int index) 
 {
   return _searchMinEl + index * _searchResEl;
 }
@@ -1571,7 +1571,7 @@ double CartInterp::_getSearchEl(int index)
 /////////////////////////////////////////////////////////
 // get the azimuth given the search index
 
-double CartInterp::_getSearchAz(int index) 
+double InterpToCart::_getSearchAz(int index) 
 {
   return _searchMinAz + index * _searchResAz;
 }
@@ -1579,7 +1579,7 @@ double CartInterp::_getSearchAz(int index)
 //////////////////////////////////////////////////
 // interpolate onto the grid
 
-void CartInterp::_doInterp()
+void InterpToCart::_doInterp()
 {
 
   // perform the interpolation
@@ -1595,7 +1595,7 @@ void CartInterp::_doInterp()
 //////////////////////////////////////////////////
 // interpolate entire volume in single thread
 
-void CartInterp::_interpSingleThreaded()
+void InterpToCart::_interpSingleThreaded()
 {
   
   // interpolate one column at a time
@@ -1611,7 +1611,7 @@ void CartInterp::_interpSingleThreaded()
 //////////////////////////////////////////////////////
 // interpolate volume in threads, one X row at a time
 
-void CartInterp::_interpMultiThreaded()
+void InterpToCart::_interpMultiThreaded()
 {
 
   _threadPoolInterp.initForRun();
@@ -1660,7 +1660,7 @@ void CartInterp::_interpMultiThreaded()
 ////////////////////////////////////////////////////////////
 // Interpolate a row at a time
 
-void CartInterp::_interpRow(int iz, int iy)
+void InterpToCart::_interpRow(int iz, int iy)
 
 {
 
@@ -2009,14 +2009,14 @@ void CartInterp::_interpRow(int iz, int iy)
 // load up weights for case where we only
 // have 2 valid rays
   
-void CartInterp::_loadWtsFor2ValidRays(const GridLoc *loc,
-                                       const SearchPoint &ll,
-                                       const SearchPoint &ul,
-                                       const SearchPoint &lr,
-                                       const SearchPoint &ur,
-                                       double wtInner,
-                                       double wtOuter, 
-                                       Neighbors &wts)
+void InterpToCart::_loadWtsFor2ValidRays(const GridLoc *loc,
+                                         const SearchPoint &ll,
+                                         const SearchPoint &ul,
+                                         const SearchPoint &lr,
+                                         const SearchPoint &ur,
+                                         double wtInner,
+                                         double wtOuter, 
+                                         Neighbors &wts)
 
 {
   
@@ -2072,14 +2072,14 @@ void CartInterp::_loadWtsFor2ValidRays(const GridLoc *loc,
 ////////////////////////////////////////////
 // load up weights for 3 or 4 valid rays
   
-void CartInterp::_loadWtsFor3Or4ValidRays(const GridLoc *loc,
-                                          const SearchPoint &ll,
-                                          const SearchPoint &ul,
-                                          const SearchPoint &lr,
-                                          const SearchPoint &ur,
-                                          double wtInner,
-                                          double wtOuter, 
-                                          Neighbors &wts)
+void InterpToCart::_loadWtsFor3Or4ValidRays(const GridLoc *loc,
+                                            const SearchPoint &ll,
+                                            const SearchPoint &ul,
+                                            const SearchPoint &lr,
+                                            const SearchPoint &ur,
+                                            double wtInner,
+                                            double wtOuter, 
+                                            Neighbors &wts)
 
 {
 
@@ -2158,15 +2158,15 @@ void CartInterp::_loadWtsFor3Or4ValidRays(const GridLoc *loc,
 // load up grid point using nearest neighbor
 // returns the number of points contributing
   
-int CartInterp::_loadNearestGridPt(int ifield,
-                                   int ptIndex,
-                                   int igateInner,
-                                   int igateOuter,
-                                   const SearchPoint &ll,
-                                   const SearchPoint &ul,
-                                   const SearchPoint &lr,
-                                   const SearchPoint &ur,
-                                   const Neighbors &wts)
+int InterpToCart::_loadNearestGridPt(int ifield,
+                                     int ptIndex,
+                                     int igateInner,
+                                     int igateOuter,
+                                     const SearchPoint &ll,
+                                     const SearchPoint &ul,
+                                     const SearchPoint &lr,
+                                     const SearchPoint &ur,
+                                     const Neighbors &wts)
   
 {
 
@@ -2212,15 +2212,15 @@ int CartInterp::_loadNearestGridPt(int ifield,
 // load up data for a grid point using interpolation
 // returns the number of points contributing
   
-int CartInterp::_loadInterpGridPt(int ifield,
-                                  int ptIndex,
-                                  int igateInner,
-                                  int igateOuter,
-                                  const SearchPoint &ll,
-                                  const SearchPoint &ul,
-                                  const SearchPoint &lr,
-                                  const SearchPoint &ur,
-                                  const Neighbors &wts)
+int InterpToCart::_loadInterpGridPt(int ifield,
+                                    int ptIndex,
+                                    int igateInner,
+                                    int igateOuter,
+                                    const SearchPoint &ll,
+                                    const SearchPoint &ul,
+                                    const SearchPoint &lr,
+                                    const SearchPoint &ur,
+                                    const Neighbors &wts)
 
 {
 
@@ -2271,15 +2271,15 @@ int CartInterp::_loadInterpGridPt(int ifield,
 // for a folded field
 // returns the number of points contributing
   
-int CartInterp::_loadFoldedGridPt(int ifield,
-                                  int ptIndex,
-                                  int igateInner,
-                                  int igateOuter,
-                                  const SearchPoint &ll,
-                                  const SearchPoint &ul,
-                                  const SearchPoint &lr,
-                                  const SearchPoint &ur,
-                                  const Neighbors &wts)
+int InterpToCart::_loadFoldedGridPt(int ifield,
+                                    int ptIndex,
+                                    int igateInner,
+                                    int igateOuter,
+                                    const SearchPoint &ll,
+                                    const SearchPoint &ul,
+                                    const SearchPoint &lr,
+                                    const SearchPoint &ur,
+                                    const Neighbors &wts)
   
 {
 
@@ -2331,7 +2331,7 @@ int CartInterp::_loadFoldedGridPt(int ifield,
 // condition the azimuth, if we are in sector that
 // spans the north line
 
-double CartInterp::_conditionAz(double az)
+double InterpToCart::_conditionAz(double az)
 {
   if (_isSector) {
     // sector mode
@@ -2350,7 +2350,7 @@ double CartInterp::_conditionAz(double az)
 /////////////////////////////////////////////////////
 // write out data
 
-int CartInterp::_writeOutputFile()
+int InterpToCart::_writeOutputFile()
 {
 
   if (_params.debug) {
@@ -2419,7 +2419,7 @@ int CartInterp::_writeOutputFile()
 //////////////////////////////////////////////////
 // Compute convective/stratiform split
 
-int CartInterp::_convStratCompute()
+int InterpToCart::_convStratCompute()
 {
 
   // set the grid in the ConvStratFinder object
@@ -2443,7 +2443,7 @@ int CartInterp::_convStratCompute()
     }
   }
   if (dbzVals == NULL) {
-    cerr << "ERROR - CartInterp::_convStratCompute()" << endl;
+    cerr << "ERROR - InterpToCart::_convStratCompute()" << endl;
     cerr << "  Cannot find dbz field: " << dbzName << endl;
     cerr << "  conv/strat partition will not be computed" << endl;
     return -1;
@@ -2452,12 +2452,12 @@ int CartInterp::_convStratCompute()
   // compute the convective/stratiform partition
   
   if (_convStrat.computeEchoType(dbzVals, missingFl32)) {
-    cerr << "ERROR - CartInterp::_convStratCompute()" << endl;
+    cerr << "ERROR - InterpToCart::_convStratCompute()" << endl;
     cerr << "  _convStrat.computePartition() failed" << endl;
     return -1;
   }
 
-  _printRunTime("CartInterp::_convStratCompute");
+  _printRunTime("InterpToCart::_convStratCompute");
 
   return 0;
   
@@ -2467,12 +2467,12 @@ int CartInterp::_convStratCompute()
 // FillSearchLowerLeft thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::FillSearchLowerLeft::FillSearchLowerLeft(CartInterp *obj) :
+InterpToCart::FillSearchLowerLeft::FillSearchLowerLeft(InterpToCart *obj) :
         _this(obj)
 {
 }  
 // run method
-void CartInterp::FillSearchLowerLeft::run()
+void InterpToCart::FillSearchLowerLeft::run()
 {
   vector<SearchIndex> thisSearch, nextSearch;
   for (int level = 0; level < _this->_searchMaxCount; level++) {
@@ -2487,12 +2487,12 @@ void CartInterp::FillSearchLowerLeft::run()
 // FillSearchLowerRight thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::FillSearchLowerRight::FillSearchLowerRight(CartInterp *obj) :
+InterpToCart::FillSearchLowerRight::FillSearchLowerRight(InterpToCart *obj) :
         _this(obj)
 {
 }  
 // run method
-void CartInterp::FillSearchLowerRight::run()
+void InterpToCart::FillSearchLowerRight::run()
 {
   vector<SearchIndex> thisSearch, nextSearch;
   for (int level = 0; level < _this->_searchMaxCount; level++) {
@@ -2507,12 +2507,12 @@ void CartInterp::FillSearchLowerRight::run()
 // FillSearchUpperLeft thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::FillSearchUpperLeft::FillSearchUpperLeft(CartInterp *obj) :
+InterpToCart::FillSearchUpperLeft::FillSearchUpperLeft(InterpToCart *obj) :
         _this(obj)
 {
 }  
 // run method
-void CartInterp::FillSearchUpperLeft::run()
+void InterpToCart::FillSearchUpperLeft::run()
 {
   vector<SearchIndex> thisSearch, nextSearch;
   for (int level = 0; level < _this->_searchMaxCount; level++) {
@@ -2527,12 +2527,12 @@ void CartInterp::FillSearchUpperLeft::run()
 // FillSearchUpperRight thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::FillSearchUpperRight::FillSearchUpperRight(CartInterp *obj) :
+InterpToCart::FillSearchUpperRight::FillSearchUpperRight(InterpToCart *obj) :
         _this(obj)
 {
 }  
 // run method
-void CartInterp::FillSearchUpperRight::run()
+void InterpToCart::FillSearchUpperRight::run()
 {
   vector<SearchIndex> thisSearch, nextSearch;
   for (int level = 0; level < _this->_searchMaxCount; level++) {
@@ -2547,12 +2547,12 @@ void CartInterp::FillSearchUpperRight::run()
 // ComputeGridRelative thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::ComputeGridRelative::ComputeGridRelative(CartInterp *obj) :
+InterpToCart::ComputeGridRelative::ComputeGridRelative(InterpToCart *obj) :
         _this(obj)
 {
 }  
 // run method
-void CartInterp::ComputeGridRelative::run()
+void InterpToCart::ComputeGridRelative::run()
 {
   _this->_computeGridRow(_zIndex, _yIndex);
 }
@@ -2561,13 +2561,12 @@ void CartInterp::ComputeGridRelative::run()
 // PerformInterp thread
 ///////////////////////////////////////////////////////////////
 // Constructor
-CartInterp::PerformInterp::PerformInterp(CartInterp *obj) :
+InterpToCart::PerformInterp::PerformInterp(InterpToCart *obj) :
         _this(obj)
 {
 }  
 // run method
-void CartInterp::PerformInterp::run()
+void InterpToCart::PerformInterp::run()
 {
   _this->_interpRow(_zIndex, _yIndex);
 }
-

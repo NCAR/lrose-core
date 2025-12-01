@@ -618,6 +618,7 @@ void iwrf_pulse_header_init(iwrf_pulse_header_t &val)
   val.n_gates_burst = 0;
 
   val.tx_phase_deg = IWRF_MISSING_FLOAT;
+  val.block_num = IWRF_MISSING_INT; 
   
 }
 

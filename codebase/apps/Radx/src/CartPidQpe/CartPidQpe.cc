@@ -38,8 +38,8 @@
 
 #include "CartPidQpe.hh"
 #include "OutputMdv.hh"
-#include "PolarCompute.hh"
-#include "PolarThread.hh"
+#include "ScalarsCompute.hh"
+#include "ScalarsThread.hh"
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
 #include <toolsa/pjg.h>
@@ -56,7 +56,7 @@
 #include <Mdv/GenericRadxFile.hh>
 using namespace std;
 
-// initialize extra field names
+// initialize geom field names
 
 string CartPidQpe::smoothedDbzFieldName = "DBZ_SMOOTHED";
 string CartPidQpe::smoothedRhohvFieldName = "RHOHV_SMOOTHED";
@@ -190,19 +190,19 @@ CartPidQpe::CartPidQpe(int argc, char **argv)
   // set up compute thread pool
   
   for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-    PolarThread *thread =
-      new PolarThread(this, _params, 
-                      _kdpFiltParams,
-                      _ncarPidParams,
-                      _precipRateParams,
-                      ii);
+    ScalarsThread *thread =
+      new ScalarsThread(this, _params, 
+                    _kdpFiltParams,
+                    _ncarPidParams,
+                    _precipRateParams,
+                    ii);
     if (!thread->OK) {
       delete thread;
       OK = FALSE;
       return;
     }
-    _threadPool.addThreadToMain(thread);
-    _computeThreads.push_back(thread->getPolarCompute());
+    _scalarsThreadPool.addThreadToMain(thread);
+    _computeScalarsThreads.push_back(thread->getScalarsCompute());
   }
 
 }
@@ -238,9 +238,9 @@ CartPidQpe::~CartPidQpe()
 int CartPidQpe::Run()
 {
 
-  if (_params.mode == Params::ARCHIVE) {
+  if (_params.radar_input_mode == Params::ARCHIVE) {
     return _runArchive();
-  } else if (_params.mode == Params::FILELIST) {
+  } else if (_params.radar_input_mode == Params::FILELIST) {
     return _runFilelist();
   } else {
     return _runRealtime();
@@ -304,7 +304,7 @@ int CartPidQpe::_runArchive()
 
   if (_params.debug) {
     cerr << "Running CartPidQpe in ARCHIVE mode" << endl;
-    cerr << "  Input dir: " << _params.input_dir << endl;
+    cerr << "  Input dir: " << _params.radar_input_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
     cerr << "  End time: " << RadxTime::strm(endTime) << endl;
   }
@@ -312,11 +312,11 @@ int CartPidQpe::_runArchive()
   // get the files to be processed
   
   RadxTimeList tlist;
-  tlist.setDir(_params.input_dir);
+  tlist.setDir(_params.radar_input_dir);
   tlist.setModeInterval(startTime, endTime);
   if (tlist.compile()) {
     cerr << "ERROR - CartPidQpe::_runArchive()" << endl;
-    cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
+    cerr << "  Cannot compile time list, dir: " << _params.radar_input_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
     cerr << "  End time: " << RadxTime::strm(endTime) << endl;
     cerr << tlist.getErrStr() << endl;
@@ -326,7 +326,7 @@ int CartPidQpe::_runArchive()
   const vector<string> &paths = tlist.getPathList();
   if (paths.size() < 1) {
     cerr << "ERROR - CartPidQpe::_runArchive()" << endl;
-    cerr << "  No files found, dir: " << _params.input_dir << endl;
+    cerr << "  No files found, dir: " << _params.radar_input_dir << endl;
     return -1;
   }
   
@@ -358,13 +358,13 @@ int CartPidQpe::_runRealtime()
 
   // watch for new data to arrive
 
-  LdataInfo ldata(_params.input_dir,
+  LdataInfo ldata(_params.radar_input_dir,
                   _params.debug >= Params::DEBUG_VERBOSE);
   
   int iret = 0;
 
   while (true) {
-    ldata.readBlocking(_params.max_realtime_data_age_secs,
+    ldata.readBlocking(_params.radar_max_realtime_data_age_secs,
                        1000, PMU_auto_register);
     
     const string path = ldata.getDataPath();
@@ -388,46 +388,31 @@ int CartPidQpe::_processFile(const string &filePath)
 
   // check file name
   
-  if (strlen(_params.input_file_search_ext) > 0) {
+  if (strlen(_params.radar_file_search_ext) > 0) {
     RadxPath rpath(filePath);
-    if (strcmp(rpath.getExt().c_str(), _params.input_file_search_ext)) {
+    if (strcmp(rpath.getExt().c_str(), _params.radar_file_search_ext)) {
       if (_params.debug) {
         cerr << "WARNING - ignoring file: " << filePath << endl;
         cerr << "  Does not have correct extension: "
-             << _params.input_file_search_ext << endl;
+             << _params.radar_file_search_ext << endl;
       }
       return 0;
     }
   }
   
-  if (strlen(_params.input_file_search_substr) > 0) {
+  if (strlen(_params.radar_file_search_substr) > 0) {
     RadxPath rpath(filePath);
-    if (rpath.getFile().find(_params.input_file_search_substr)
+    if (rpath.getFile().find(_params.radar_file_search_substr)
         == string::npos) {
       if (_params.debug) {
         cerr << "WARNING - ignoring file: " << filePath << endl;
         cerr << "  Does not contain required substr: "
-             << _params.input_file_search_substr << endl;
+             << _params.radar_file_search_substr << endl;
       }
       return 0;
     }
   }
 
-  // check we have not already processed this file
-  // in the file aggregation step
-
-  RadxPath thisPath(filePath);
-  for (size_t ipath = 0; ipath < _readPaths.size(); ipath++) {
-    RadxPath rpath(_readPaths[ipath]);
-    if (thisPath.getFile() == rpath.getFile()) {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "Skipping file: " << filePath << endl;
-        cerr << "  Previously processed in aggregation step" << endl;
-      }
-      return 0;
-    }
-  }
-  
   if (_params.debug) {
     cerr << "INFO - CartPidQpe::_processFile" << endl;
     cerr << "  Input file path: " << filePath << endl;
@@ -445,7 +430,7 @@ int CartPidQpe::_processFile(const string &filePath)
     cerr << "ERROR - CartPidQpe::_processFile" << endl;
     return -1;
   }
-
+  
   // check we have at least 2 rays
   
   if (_readVol.getNRays() < 2) {
@@ -460,9 +445,9 @@ int CartPidQpe::_processFile(const string &filePath)
 
   // read the temperature profile into the threads
 
-  if (_computeThreads.size() > 0) {
+  if (_computeScalarsThreads.size() > 0) {
     // thread 0
-    PolarCompute *thread0 = _computeThreads[0];
+    ScalarsCompute *thread0 = _computeScalarsThreads[0];
     if (_params.debug) {
       cerr << "Thread #: " << 0 << endl;
       cerr << "  Loading temp profile for time: "
@@ -470,20 +455,20 @@ int CartPidQpe::_processFile(const string &filePath)
     }
     thread0->loadTempProfile(_readVol.getStartTimeSecs());
     // copy to other threads
-    for (size_t ii = 1; ii < _computeThreads.size(); ii++) {
-      _computeThreads[ii]->setTempProfile(thread0->getTempProfile());
+    for (size_t ii = 1; ii < _computeScalarsThreads.size(); ii++) {
+      _computeScalarsThreads[ii]->setTempProfile(thread0->getTempProfile());
     }
   }
   
   // add geometry and pid fields to the volume
   
-  _addExtraFieldsToInput();
+  _addGeomFieldsToInput();
 
-  // compute the derived fields
+  // compute the pid fields
   
-  if (_computeDerived()) {
+  if (_computeScalars()) {
     cerr << "ERROR - CartPidQpe::Run" << endl;
-    cerr << "  Cannot compute derived fields" << endl;
+    cerr << "  Cannot compute pid fields" << endl;
     return -1;
   }
 
@@ -493,11 +478,11 @@ int CartPidQpe::_processFile(const string &filePath)
     if (_params.debug) {
       cerr << "  NOTE: data is in RHI mode" << endl;
     }
-    _allocCartInterp();
+    _allocInterpToCart();
     _cartInterp->setRhiMode(true);
     _cartInterp->interpVol();
   } else {
-    _allocCartInterp();
+    _allocInterpToCart();
     _cartInterp->setRhiMode(false);
     _cartInterp->interpVol();
   }
@@ -530,7 +515,6 @@ int CartPidQpe::_readFile(const string &filePath)
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
-  _readPaths = inFile.getReadPaths();
   
   // convert to fl32
   
@@ -546,13 +530,13 @@ int CartPidQpe::_readFile(const string &filePath)
 
   // rename fields if requested
 
-  if (_params.rename_fields_on_input) {
-    for (int ii = 0; ii < _params.renamed_fields_n; ii++) {
-      string inputName = _params._renamed_fields[ii].input_name;
-      string outputName = _params._renamed_fields[ii].output_name;
-      _readVol.renameField(inputName, outputName);
-    } // ii
-  } // if (_params.rename_fields_on_input)
+  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
+    string inName = _params._radar_field_names[ii].input_name;
+    string outName = _params._radar_field_names[ii].output_name;
+    if (inName.size() > 0 && inName != outName) {
+      _readVol.renameField(inName, outName);
+    }
+  }
 
   // override radar location if requested
 
@@ -562,15 +546,6 @@ int CartPidQpe::_readFile(const string &filePath)
                               _params.radar_altitude_meters / 1000.0);
   }
 
-  // override radar name and site name if requested
-  
-  if (_params.override_instrument_name) {
-    _readVol.setInstrumentName(_params.instrument_name);
-  }
-  if (_params.override_site_name) {
-    _readVol.setSiteName(_params.site_name);
-  }
-    
   // override beam width if requested
   
   if (_params.override_beam_width) {
@@ -590,24 +565,12 @@ int CartPidQpe::_readFile(const string &filePath)
     _readVol.computeFixedAnglesFromRays();
   }
 
-  // reorder sweeps into ascending order if requested
-
-  if (_params.reorder_sweeps_by_ascending_angle) {
-    _readVol.reorderSweepsAscendingAngle();
-  }
-
-  // trim surveillance sweeps to 360 degrees if requested
-
-  if (_params.trim_surveillance_sweeps_to_360deg) {
-    _readVol.trimSurveillanceSweepsTo360Deg();
-  }
-
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "  _startRangeKm: " << _readVol.getStartRangeKm() << endl;
     cerr << "  _gateSpacingKm: " << _readVol.getGateSpacingKm() << endl;
   }
 
-  // add extra fields fields
+  // add geom fields fields
   
   _addGeometryFields();
   _addTimeField();
@@ -644,28 +607,16 @@ void CartPidQpe::_setupRead(RadxFile &file)
     file.setDebug(true);
   }
 
-  if (_params.remove_long_range_rays) {
-    file.setReadRemoveLongRange(true);
-  } else {
-    file.setReadRemoveLongRange(false);
-  }
-
-  if (_params.remove_short_range_rays) {
-    file.setReadRemoveShortRange(true);
-  } else {
-    file.setReadRemoveShortRange(false);
-  }
-
-  if (_params.compute_sweep_angles_from_vcp_tables) {
-    file.setReadComputeSweepAnglesFromVcpTables(true);
-  } else {
-    file.setReadComputeSweepAnglesFromVcpTables(false);
-  }
-
   if (_params.set_max_range) {
     file.setReadMaxRangeKm(_params.max_range_km);
   }
 
+  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
+    if (strlen(_params._radar_field_names[ii].input_name) > 0) {
+      file.addReadField(_params._radar_field_names[ii].input_name);
+    }
+  }
+  
   if (_params.copy_selected_input_fields_to_output) {
     for (int ii = 0; ii < _params.copy_fields_n; ii++) {
       file.addReadField(_params._copy_fields[ii].field_name);
@@ -712,7 +663,7 @@ void CartPidQpe::_checkFields(const string &filePath)
 //////////////////////////////////////////////////
 // add geometry and pid fields to the volume
 
-void CartPidQpe::_addExtraFieldsToInput()
+void CartPidQpe::_addGeomFieldsToInput()
 
 {
 
@@ -752,7 +703,7 @@ void CartPidQpe::_addExtraFieldsToInput()
     
     double rangeKm = startRangeKm;
     double elevationDeg = ray->getElevationDeg();
-    const TempProfile &profile = _computeThreads[0]->getTempProfile();
+    const TempProfile &profile = _computeScalarsThreads[0]->getTempProfile();
     for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
       double htKm = beamHt.computeHtKm(elevationDeg, rangeKm);
       double tempC = profile.getTempForHtKm(htKm);
@@ -797,9 +748,9 @@ void CartPidQpe::_addExtraFieldsToInput()
 }
 
 //////////////////////////////////////////////////
-// add extra output fields
+// add geom output fields
 
-void CartPidQpe::_addExtraFieldsToOutput()
+void CartPidQpe::_addGeomFieldsToOutput()
 
 {
 
@@ -814,11 +765,11 @@ void CartPidQpe::_addExtraFieldsToOutput()
     
     RadxRay *outputRay = NULL;
     double inTime = inputRay->getTimeDouble();
-    for (size_t jj = 0; jj < _derivedRays.size(); jj++) {
-      RadxRay *derivedRay = _derivedRays[jj];
-      double outTime = derivedRay->getTimeDouble();
+    for (size_t jj = 0; jj < _scalarsRays.size(); jj++) {
+      RadxRay *pidRay = _scalarsRays[jj];
+      double outTime = pidRay->getTimeDouble();
       if (fabs(inTime - outTime) < 0.001) {
-        outputRay = derivedRay;
+        outputRay = pidRay;
         break;
       }
     } // jj
@@ -835,41 +786,42 @@ void CartPidQpe::_addExtraFieldsToOutput()
 }
 
 /////////////////////////////////////////////////////
-// compute the derived fields for all rays in volume
+// compute the pid fields for all rays in volume
 
-int CartPidQpe::_computeDerived()
+int CartPidQpe::_computeScalars()
 {
 
   // initialize the volume with ray numbers
   
+  
   _readVol.setRayNumbersInOrder();
 
-  // initialize derived
+  // initialize pid
 
-  _derivedRays.clear();
+  _scalarsRays.clear();
   
   // loop through the input rays,
-  // computing the derived fields
+  // computing the pid fields
 
   const vector<RadxRay *> &inputRays = _readVol.getRays();
   for (size_t iray = 0; iray < inputRays.size(); iray++) {
 
     // get a thread from the pool
     bool isDone = true;
-    PolarThread *thread = 
-      (PolarThread *) _threadPool.getNextThread(true, isDone);
+    ScalarsThread *thread = 
+      (ScalarsThread *) _scalarsThreadPool.getNextThread(true, isDone);
     if (thread == NULL) {
       break;
     }
     if (isDone) {
       // store the results computed by the thread
-      if (_storeDerivedRay(thread)) {
+      if (_storeScalarsRay(thread)) {
         cerr << "ERROR - RadxRate::_compute()" << endl;
         cerr << "  Cannot compute for ray num: " << iray << endl;
         break;
       }
       // return thread to the available pool
-      _threadPool.addThreadToAvail(thread);
+      _scalarsThreadPool.addThreadToAvail(thread);
       // reduce iray by 1 since we did not actually process this ray
       // we only handled a previously started thread
       iray--;
@@ -884,16 +836,16 @@ int CartPidQpe::_computeDerived()
     
   // collect remaining done threads
 
-  _threadPool.setReadyForDoneCheck();
-  while (!_threadPool.checkAllDone()) {
-    PolarThread *thread = (PolarThread *) _threadPool.getNextDoneThread();
+  _scalarsThreadPool.setReadyForDoneCheck();
+  while (!_scalarsThreadPool.checkAllDone()) {
+    ScalarsThread *thread = (ScalarsThread *) _scalarsThreadPool.getNextDoneThread();
     if (thread == NULL) {
       break;
     } else {
       // store the results computed by the thread
-      _storeDerivedRay(thread);
+      _storeScalarsRay(thread);
       // return thread to the available pool
-      _threadPool.addThreadToAvail(thread);
+      _scalarsThreadPool.addThreadToAvail(thread);
     }
   } // while
 
@@ -902,20 +854,20 @@ int CartPidQpe::_computeDerived()
 }
 
 ///////////////////////////////////////////////////////////
-// Store the derived ray
+// Store the scalars ray
 
-int CartPidQpe::_storeDerivedRay(PolarThread *thread)
-
+int CartPidQpe::_storeScalarsRay(ScalarsThread *thread)
+  
 {
   
-  RadxRay *derivedRay = thread->getOutputRay();
-  if (derivedRay == NULL) {
+  RadxRay *scalarsRay = thread->getOutputRay();
+  if (scalarsRay == NULL) {
     // error
     return -1;
   }
 
   // good return, add to results
-  _derivedRays.push_back(derivedRay);
+  _scalarsRays.push_back(scalarsRay);
   
   return 0;
 
@@ -941,8 +893,8 @@ void CartPidQpe::_loadInterpRays()
 
       // accept ray
       
-      Interp::Ray *interpRay = 
-        new Interp::Ray(rays[iray],
+      BaseInterp::Ray *interpRay = 
+        new BaseInterp::Ray(rays[iray],
                         isweep,
                         _interpFields,
                         _params.use_fixed_angle_for_interpolation,
@@ -1223,7 +1175,7 @@ void CartPidQpe::_initInterpFields()
       const RadxRay *ray = rays[iray];
       const RadxField *field = ray->getField(radxName);
       if (field != NULL) {
-        Interp::Field interpField;
+        BaseInterp::Field interpField;
         interpField.radxName = field->getName();
         interpField.outputName = field->getName();
         interpField.longName = field->getLongName();
@@ -1291,10 +1243,10 @@ void CartPidQpe::_initInterpFields()
 ////////////////////////////////////////////////////////////
 // Allocate interpolation objects as needed
 
-void CartPidQpe::_allocCartInterp()
+void CartPidQpe::_allocInterpToCart()
 {
   if (_cartInterp == NULL) {
-    _cartInterp = new CartInterp(_progName, _params, _readVol,
+    _cartInterp = new InterpToCart(_progName, _params, _readVol,
                                  _interpFields, _interpRays);
   }
 }
@@ -1531,3 +1483,210 @@ string CartPidQpe::getBeamBlockOutputName(Params::bblock_field_type_t ftype)
   return "";
 }
 
+/////////////////////////////////////////////////////////
+// read in model data
+//
+// Returns 0 on success, -1 on failure.
+
+int CartPidQpe::_readModel(time_t radarTime)
+
+{
+
+  _modelMdvx.clearRead();
+  _modelMdvx.setReadTime(Mdvx::READ_CLOSEST,
+                         _params.model_input_url,
+                         _params.model_search_margin_secs,
+                         radarTime);
+
+  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
+    if (strlen(_params._model_field_names[ii].input_name) > 0) {
+      _modelMdvx.addReadField(_params._model_field_names[ii].input_name);
+    }
+  }
+  
+  if (_modelMdvx.readVolume()) {
+    cerr << "ERROR - CartPidQpe::_readModel" << endl;
+    cerr << "  Cannot read model data" << endl;
+    cerr << "  URL: " << _params.model_input_url << endl;
+    cerr << "  Search time: " << DateTime::strm(radarTime) << endl;
+    cerr << "  Search margin (secs): " << _params.model_search_margin_secs << endl;
+    cerr << _modelMdvx.getErrStr() << endl;
+    return -1;
+  }
+
+  // interpolate the model data onto the output Cartesian grid
+
+  _interpModelToOutputGrid();
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// interpolate the model data onto the output grid
+
+void CartPidQpe::_interpModelToOutputGrid()
+{
+
+}
+
+#ifdef NOTNOW
+
+/////////////////////////////////////////////////////////
+// fill temperature level ht array
+
+void CartPidQpe::_computeHts(double tempC,
+                             MdvxField &htField,
+                             const string &fieldName,
+                             const string &longName,
+                             const string &units)
+  
+{
+
+  // set up the height field
+
+  htField.clearVolData();
+
+  Mdvx::field_header_t fhdr = _tempField->getFieldHeader();
+  fhdr.nz = 1;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  size_t planeSize32 = fhdr.nx * fhdr.ny * sizeof(fl32);
+  fhdr.volume_size = planeSize32;
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = 4;
+  fhdr.missing_data_value = _missingFl32;
+  fhdr.bad_data_value = _missingFl32;
+  
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  vhdr.level[0] = 0;
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  
+  htField.setHdrsAndVolData(fhdr, vhdr, NULL,
+                            true, false, true);
+
+  htField.setFieldName(fieldName);
+  htField.setFieldNameLong(longName);
+  htField.setUnits(units);
+  
+  // get hts array pointer
+  
+  fl32 *hts = (fl32 *) htField.getVol();
+
+  // get temp array
+
+  _tempField->convertType(Mdvx::ENCODING_FLOAT32);
+  const Mdvx::field_header_t tempFhdr = _tempField->getFieldHeader();
+  fl32 *temp = (fl32 *) _tempField->getVol();
+  fl32 tempMiss = tempFhdr.missing_data_value;
+  
+  // get Z profile for temperatures
+  
+  const Mdvx::vlevel_header_t tempVhdr = _tempField->getVlevelHeader();
+  vector<double> zProfile;
+  for (si64 iz = 0; iz < tempFhdr.nz; iz++) {
+    zProfile.push_back(tempVhdr.level[iz]);
+  } // iz
+  
+  // loop through the (x, y) plane
+  
+  si64 xyIndex = 0;
+  size_t nxy = fhdr.nx * fhdr.ny;
+  for (si64 iy = 0; iy < tempFhdr.ny; iy++) {
+    for (si64 ix = 0; ix < tempFhdr.nx; ix++, xyIndex++) {
+
+      // initialize
+
+      fl32 bottomTemp = tempMiss;
+      double bottomHt = tempVhdr.level[0]; // if temp is below grid
+      
+      fl32 topTemp = tempMiss;
+      double topHt = tempVhdr.level[tempFhdr.nz - 1]; // if temp is above grid
+      
+      hts[xyIndex] = bottomHt;
+      
+      // loop through heights, looking for temps that straddle
+      // the required temp
+
+      bool htFound = false;
+      for (si64 iz = 1; iz < tempFhdr.nz; iz++) {
+        si64 zIndexBelow = xyIndex + (iz - 1) * nxy; 
+        si64 zIndexAbove = zIndexBelow + nxy; 
+        double tempBelow = temp[zIndexBelow];
+        double tempAbove = temp[zIndexAbove];
+        // set bottom temp
+        if (tempBelow != tempMiss && bottomTemp == tempMiss) {
+          bottomTemp = tempBelow;
+        }
+        // set top temp
+        if (tempAbove != tempMiss) {
+          topTemp = tempAbove;
+        }
+        if (!htFound && (tempBelow != tempMiss) && (tempAbove != tempMiss)) {
+          // check for normal profile and inversion
+          if ((tempBelow >= tempC && tempAbove <= tempC) ||
+              (tempBelow <= tempC && tempAbove >= tempC)) {
+            double deltaTemp = tempAbove - tempBelow;
+            double deltaHt = zProfile[iz] - zProfile[iz-1];
+            double interpHt =
+              zProfile[iz] + ((tempC - tempBelow) / deltaTemp) * deltaHt;
+            hts[xyIndex] = interpHt;
+            htFound = true;
+          }
+        }
+      } // iz
+      
+      if (!htFound) {
+        if (tempC >= bottomTemp) {
+          // required temp is below grid
+          hts[xyIndex] = bottomHt;
+        } else if (tempC <= topTemp) {
+          // required temp is above grid
+          hts[xyIndex] = topHt;
+        }
+      }
+
+    } // ix
+  } // iy
+  
+}
+
+
+  _tempField = _modelMdvx.getField(_params.temp_profile_field_name);
+  if (_tempField == NULL) {
+    cerr << "ERROR - CartPidQpe::_readModel" << endl;
+    cerr << "  Cannot find field in temp file: "
+         << _params.temp_profile_field_name << endl;
+    cerr << "  URL: " << _params.temp_profile_url << endl;
+    cerr << "  Time: " << DateTime::strm(_modelMdvx.getValidTime()) << endl;
+    return -1;
+  }
+  
+  // fill the temperature level arrays
+  
+  _computeHts(_params.shallow_threshold_temp, _shallowHtField,
+              "ShallowHt", "shallow_threshold_ht", "km");
+  _computeHts(_params.deep_threshold_temp, _deepHtField,
+              "DeepHt", "deep_threshold_ht", "km");
+
+  // remap from model to radar grid coords
+  // use of the lookup table makes this more efficient
+  
+  MdvxProj proj(dbzField->getFieldHeader());
+  MdvxRemapLut lut;
+  if (_shallowHtField.remap(lut, proj)) {
+    cerr << "ERROR - CartPidQpe::_readModel" << endl;
+    cerr << "  Cannot convert model temp grid to radar grid" << endl;
+    cerr << "  URL: " << _params.temp_profile_url << endl;
+    cerr << "  Time: " << DateTime::strm(_modelMdvx.getValidTime()) << endl;
+    return -1;
+  }
+  if (_deepHtField.remap(lut, proj)) {
+    cerr << "ERROR - CartPidQpe::_readModel" << endl;
+    cerr << "  Cannot convert model temp grid to radar grid" << endl;
+    cerr << "  URL: " << _params.temp_profile_url << endl;
+    cerr << "  Time: " << DateTime::strm(_modelMdvx.getValidTime()) << endl;
+    return -1;
+  }
+                       
+#endif

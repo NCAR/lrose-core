@@ -43,12 +43,13 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include "CartInterp.hh"
+#include "InterpToCart.hh"
 #include <string>
 #include <deque>
 #include <toolsa/TaArray.hh>
 #include <radar/NoiseLocator.hh>
 #include <Radx/RadxVol.hh>
+#include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
 #include <radar/KdpFiltParams.hh>
 #include <radar/NcarPidParams.hh>
@@ -57,8 +58,8 @@
 class RadxFile;
 class RadxRay;
 class RadxField;
-class PolarCompute;
-class PolarThread;
+class ScalarsCompute;
+class ScalarsThread;
 using namespace std;
 
 class CartPidQpe {
@@ -97,7 +98,7 @@ public:
   string getModelOutputName(Params::model_field_type_t ftype);
   string getBeamBlockOutputName(Params::bblock_field_type_t ftype);
 
-  // names for extra fields
+  // names for geom fields
 
   static string smoothedDbzFieldName;
   static string smoothedRhohvFieldName;
@@ -125,7 +126,6 @@ private:
 
   // input data
   
-  vector<string> _readPaths;
   RadxVol _readVol;
   bool _rhiMode;
 
@@ -134,27 +134,31 @@ private:
   double _radarHtKm;
   double _wavelengthM;
 
-  // derived rays - after computing PID
+  // scalars rays - after computing scalars
 
-  vector <RadxRay *> _derivedRays;
+  vector <RadxRay *> _scalarsRays;
 
   // interpolation fields
   
-  vector<Interp::Field> _interpFields;
-  vector<Interp::Ray *> _interpRays;
+  vector<BaseInterp::Field> _interpFields;
+  vector<BaseInterp::Ray *> _interpRays;
 
   // interpolation objects
 
-  CartInterp *_cartInterp;
+  InterpToCart *_cartInterp;
 
   // mutex for debug prints
   
   pthread_mutex_t _debugPrintMutex;
   
   // instantiate thread pool for computations
+  
+  TaThreadPool _scalarsThreadPool;
+  vector<ScalarsCompute *> _computeScalarsThreads;
 
-  TaThreadPool _threadPool;
-  vector<PolarCompute *> _computeThreads;
+  // model data
+  
+  DsMdvx _modelMdvx;
 
   // private methods
 
@@ -166,12 +170,12 @@ private:
   int _readFile(const string &filePath);
   void _checkFields(const string &filePath);
 
-  void _addExtraFieldsToInput();
-  void _addExtraFieldsToOutput();
+  void _addGeomFieldsToInput();
+  void _addGeomFieldsToOutput();
   void _encodeFieldsForOutput();
 
-  int _computeDerived();
-  int _storeDerivedRay(PolarThread *thread);
+  int _computeScalars();
+  int _storeScalarsRay(ScalarsThread *thread);
 
   void _loadInterpRays();
   void _addGeometryFields();
@@ -180,7 +184,7 @@ private:
   bool _isRhi();
 
   void _initInterpFields();
-  void _allocCartInterp();
+  void _allocInterpToCart();
   void _freeInterpRays();
 
 
@@ -188,6 +192,9 @@ private:
   void _printParamsPid();
   void _printParamsKdp();
 
+  int _readModel(time_t radarTime);
+  void _interpModelToOutputGrid();
+  
 };
 
 #endif
