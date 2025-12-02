@@ -51,26 +51,26 @@ LOC_CFLAGS =
 HDRS = \
 	Params.hh \
 	Args.hh \
-	CartInterp.hh \
-	Interp.hh \
+	BaseInterp.hh \
+	CartPidQpe.hh \
+	InterpToCart.hh \
 	Orient.hh \
 	OutputMdv.hh \
-	CartPidQpe.hh \
-	PolarCompute.hh \
-	PolarThread.hh \
+	ScalarsCompute.hh \
+	ScalarsThread.hh \
 	RhiOrient.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
-	CartInterp.cc \
-	Interp.cc \
+	BaseInterp.cc \
+	CartPidQpe.cc \
+	InterpToCart.cc \
 	Main.cc \
 	Orient.cc \
 	OutputMdv.cc \
-	PolarCompute.cc \
-	PolarThread.cc \
-	CartPidQpe.cc \
+	ScalarsCompute.cc \
+	ScalarsThread.cc \
 	RhiOrient.cc
 
 #

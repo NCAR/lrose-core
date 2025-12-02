@@ -69,50 +69,47 @@ public:
   
   virtual ~MdvxRemapInterp();
 
-  ///////////////////////////////
-  // compute lookup table
+  ///////////////////////////////////////////////////////////
+  // interpolate a field, remapping to target projection
+  //
+  // Creates a field, returns pointer to that field.
+  // Memory ownership passes back to caller.
+  // The returned field must be freed by the caller.
+  //
+  // Side effect - the source field is converted to FLOAT32
+  // and uncompressed
   
-  void computeLut(const MdvxProj &proj_source,
-                  const MdvxProj &proj_target);
+  MdvxField *interpField(MdvxField &sourceFld);
   
   // access to members
 
   const MdvxProj &getProjSource() const { return _projSource; }
   const MdvxProj &getProjTarget() const { return _projTarget; }
   
-  size_t getNOffsets() const { return _sourceOffsets.size(); }
-  const int64_t *getSourceOffsets() const { return _sourceOffsets.data(); }
-  const int64_t *getTargetOffsets() const { return _targetOffsets.data(); }
-  
 protected:
   
   MdvxProj _projSource;
   MdvxProj _projTarget;
   
+  const Mdvx::coord_t *_coordSource;
+  const Mdvx::coord_t *_coordTarget;
+
   Mdvx::vlevel_header_t _vlevelSource;
   Mdvx::vlevel_header_t _vlevelTarget;
-
-  vector<int64_t> _sourceOffsets;
-  vector<int64_t> _targetOffsets;
-
+  
   bool _lutComputed;
-
-  typedef struct {
-    double xx;
-    double yy;
-  } xy_pt_t;
 
   typedef struct {
     double xx, yy;
     double wtx, wty;
     size_t sourceIndex;
-  } xy_entry_t;
+  } xy_pt_t;
 
   typedef struct {
-    xy_entry_t entry_ul;
-    xy_entry_t entry_ur;
-    xy_entry_t entry_ll;
-    xy_entry_t entry_lr;
+    xy_pt_t pt_ul;
+    xy_pt_t pt_ur;
+    xy_pt_t pt_ll;
+    xy_pt_t pt_lr;
   } xy_lut_t;
 
   vector<xy_lut_t> _xyLut;
@@ -128,6 +125,12 @@ protected:
   } z_lut_t;
 
   vector<z_lut_t> _zLut;
+
+  // compute lookup table
+  
+  void _computeLut(const MdvxProj &proj_source,
+                   const MdvxProj &proj_target);
+  
 
   // Compute xy interpolation lookup table
   

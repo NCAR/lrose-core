@@ -16,14 +16,14 @@ project (CartPidQpe)
 set (SRCS
       Params.cc
       Args.cc
-      CartInterp.cc
-      Interp.cc
+      BaseInterp.cc
+      CartPidQpe.cc
+      InterpToCart.cc
       Main.cc
       Orient.cc
       OutputMdv.cc
-      PolarCompute.cc
-      PolarThread.cc
-      CartPidQpe.cc
+      ScalarsCompute.cc
+      ScalarsThread.cc
       RhiOrient.cc
     )
 

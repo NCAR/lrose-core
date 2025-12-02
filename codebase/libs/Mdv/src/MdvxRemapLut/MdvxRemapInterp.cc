@@ -41,6 +41,7 @@
 ///////////////////////////////////////////////////////////
 
 #include <Mdv/MdvxRemapInterp.hh>
+#include <toolsa/mem.h>
 #include <toolsa/pjg.h>
 #include <cassert>
 using namespace std;
@@ -55,6 +56,8 @@ MdvxRemapInterp::MdvxRemapInterp()
   
 {
   _lutComputed = false;
+  _coordSource = &_projSource.getCoord();
+  _coordTarget = &_projTarget.getCoord();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -65,7 +68,9 @@ MdvxRemapInterp::MdvxRemapInterp(const MdvxProj &proj_source,
   
 {
   _lutComputed = false;
-  computeLut(proj_source, proj_target);
+  _coordSource = &_projSource.getCoord();
+  _coordTarget = &_projTarget.getCoord();
+  _computeLut(proj_source, proj_target);
 }
 
 /////////////////////////////
@@ -77,11 +82,102 @@ MdvxRemapInterp::~MdvxRemapInterp()
   return;
 }
 
+///////////////////////////////////////////////////////////
+// interpolate a field, remapping to target projection
+//
+// Creates a field, returns pointer to that field.
+// Memory ownership passes back to caller.
+// The returned field must be freed by the caller.
+//
+// Side effect - the source field is converted to FLOAT32
+// and uncompressed
+
+MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
+  
+{
+  
+  // uncompress source and convert source to FLOAT32
+  
+  sourceFld.convertType(Mdvx::ENCODING_FLOAT32,
+                        Mdvx::COMPRESSION_NONE);
+  
+  // create source projection object
+
+  const Mdvx::field_header_t &fhdrSource = sourceFld.getFieldHeader();
+  const Mdvx::vlevel_header_t &vhdrSource = sourceFld.getVlevelHeader();
+  MdvxProj proj_source(fhdrSource);
+  
+  // check this object has been previosuly initialized
+
+  assert(_lutComputed);
+  
+  // make sure lookup table is up to date
+  
+  _computeLut(proj_source, _projTarget);
+  
+  // create field to be returned
+
+  MdvxField *targetFld = new MdvxField;
+
+  // set the field and vlevel headers in target
+
+  targetFld->setFieldHeader(fhdrSource);
+  targetFld->setVlevelHeader(vhdrSource);
+
+  // we first interpolate the source planes, in (x,y),
+  // leaving the heights unchanged
+
+  // allocate 3d volume stage1
+  
+  int nz1 = fhdrSource.nz;
+  int ny1 = _projTarget.getCoord().ny;
+  int nx1 = _projTarget.getCoord().nx;
+  fl32 ***vol1 = (fl32 ***) ucalloc3(nz1, ny1, nx1, sizeof(fl32)); // 3D pointer
+
+  // initialize to missing
+  
+  size_t nvol1 = nz1 * ny1 * nx1;
+  fl32 *ptr1 = **vol1; // 1D pointer
+  fl32 miss = fhdrSource.missing_data_value;
+  for (size_t ii = 0; ii < nvol1; ii++, ptr1++) {
+    *ptr1 = miss;
+  }
+
+  // interpolate one z plane at a time
+
+  size_t nPtsPlaneSource = _coordSource->ny * _coordSource->nx;
+  for (int iz = 0; iz < nz1; iz++) {
+
+    fl32 *sourceStart = (fl32 *) sourceFld.getVol() + iz * nPtsPlaneSource;
+    fl32 *targetStart = *vol1[iz];
+
+    // loop through (x,y) lookup table
+    
+    for (size_t ii = 0; ii < _xyLut.size(); ii++) {
+      // find lookup entry
+      xy_lut_t &lut = _xyLut[ii];
+      // interpolate in x dim
+      
+    }
+
+  } // iz
+  
+  // free volume stage1
+  
+  ufree3((void ***) vol1);
+  
+  // return interpolated field
+  // this must be freed by the caller.
+  
+  return targetFld;
+  
+}
+
 ////////////////////////////////////
 // compute lookup table coefficients
 
-void MdvxRemapInterp::computeLut(const MdvxProj &proj_source,
-                                 const MdvxProj &proj_target)
+void MdvxRemapInterp::_computeLut(const MdvxProj &proj_source,
+                                  const MdvxProj &proj_target)
   
 {
 
@@ -89,20 +185,30 @@ void MdvxRemapInterp::computeLut(const MdvxProj &proj_source,
   
   bool coordsDiffer = false;
 
-  const Mdvx::coord_t &thisSource = _projSource.getCoord();
-  const Mdvx::coord_t &inSource = proj_source.getCoord();
-  if (memcmp(&thisSource, &inSource, sizeof(Mdvx::coord_t))) {
-    // copy in projection
-    _projSource = proj_source;
-    coordsDiffer = true;
-  }
+  if (!_lutComputed) {
 
-  const Mdvx::coord_t &thisTarget = _projTarget.getCoord();
-  const Mdvx::coord_t &inTarget = proj_target.getCoord();
-  if (memcmp(&thisTarget, &inTarget, sizeof(Mdvx::coord_t))) {
-    // copy in projection
+    _projSource = proj_source;
     _projTarget = proj_target;
     coordsDiffer = true;
+
+  } else {
+
+    const Mdvx::coord_t &thisSource = _projSource.getCoord();
+    const Mdvx::coord_t &inSource = proj_source.getCoord();
+    if (memcmp(&thisSource, &inSource, sizeof(Mdvx::coord_t))) {
+      // copy in projection
+      _projSource = proj_source;
+      coordsDiffer = true;
+    }
+    
+    const Mdvx::coord_t &thisTarget = _projTarget.getCoord();
+    const Mdvx::coord_t &inTarget = proj_target.getCoord();
+    if (memcmp(&thisTarget, &inTarget, sizeof(Mdvx::coord_t))) {
+      // copy in projection
+      _projTarget = proj_target;
+      coordsDiffer = true;
+    }
+
   }
 
   if (!coordsDiffer && _lutComputed) {
@@ -204,33 +310,33 @@ void MdvxRemapInterp::_computeXyLookup()
       
       xy_lut_t lut;
       
-      lut.entry_ul.xx = coordSource.minx + ix_left * coordSource.dx;
-      lut.entry_ul.yy = coordSource.miny + iy_upper * coordSource.dy;
+      lut.pt_ul.xx = coordSource.minx + ix_left * coordSource.dx;
+      lut.pt_ul.yy = coordSource.miny + iy_upper * coordSource.dy;
       
-      lut.entry_ur.xx = lut.entry_ul.xx + coordSource.dx;
-      lut.entry_ur.yy = lut.entry_ul.yy;
+      lut.pt_ur.xx = lut.pt_ul.xx + coordSource.dx;
+      lut.pt_ur.yy = lut.pt_ul.yy;
       
-      lut.entry_ll.xx = lut.entry_ul.xx;
-      lut.entry_ll.yy = lut.entry_ul.yy - coordSource.dy;
+      lut.pt_ll.xx = lut.pt_ul.xx;
+      lut.pt_ll.yy = lut.pt_ul.yy - coordSource.dy;
       
-      lut.entry_lr.xx = lut.entry_ll.xx + coordSource.dx;
-      lut.entry_lr.yy = lut.entry_ll.yy;
+      lut.pt_lr.xx = lut.pt_ll.xx + coordSource.dx;
+      lut.pt_lr.yy = lut.pt_ll.yy;
       
-      lut.entry_ul.sourceIndex = iy_upper * coordSource.nx + ix_left;
-      lut.entry_ur.sourceIndex = iy_upper * coordSource.nx + ix_right;
+      lut.pt_ul.sourceIndex = iy_upper * coordSource.nx + ix_left;
+      lut.pt_ur.sourceIndex = iy_upper * coordSource.nx + ix_right;
 
-      lut.entry_ll.sourceIndex = iy_lower * coordSource.nx + ix_left;
-      lut.entry_lr.sourceIndex = iy_lower * coordSource.nx + ix_right;
+      lut.pt_ll.sourceIndex = iy_lower * coordSource.nx + ix_left;
+      lut.pt_lr.sourceIndex = iy_lower * coordSource.nx + ix_right;
 
-      lut.entry_ul.wtx = wtx_left;
-      lut.entry_ur.wtx = wtx_right;
-      lut.entry_ll.wtx = wtx_left;
-      lut.entry_lr.wtx = wtx_right;
+      lut.pt_ul.wtx = wtx_left;
+      lut.pt_ur.wtx = wtx_right;
+      lut.pt_ll.wtx = wtx_left;
+      lut.pt_lr.wtx = wtx_right;
 
-      lut.entry_ul.wty = wty_upper;
-      lut.entry_ur.wty = wty_upper;
-      lut.entry_ll.wty = wty_lower;
-      lut.entry_lr.wty = wty_lower;
+      lut.pt_ul.wty = wty_upper;
+      lut.pt_ur.wty = wty_upper;
+      lut.pt_ll.wty = wty_lower;
+      lut.pt_lr.wty = wty_lower;
 
       // add to vector
       

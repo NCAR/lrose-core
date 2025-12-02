@@ -132,6 +132,7 @@ set (SRCS
       ./MdvxProj/MdvxPjg.cc
       ./MdvxProj/MdvxProj.cc
       ./MdvxRadar/MdvxRadar.cc
+      ./MdvxRemapLut/MdvxRemapInterp.cc
       ./MdvxRemapLut/MdvxRemapLut.cc
       ./MdvxTimeList/MdvxTimeList.cc
       ./MdvxTimeStamp/MdvxTimeStamp.cc
