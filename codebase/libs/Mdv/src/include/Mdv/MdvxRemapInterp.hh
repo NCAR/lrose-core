@@ -98,6 +98,26 @@ protected:
   bool _lutComputed;
 
   typedef struct {
+    double xx;
+    double yy;
+  } xy_pt_t;
+
+  typedef struct {
+    xy_pt_t pt;
+    size_t index;
+    double wt;
+  } xy_entry_t;
+
+  typedef struct {
+    xy_entry_t entry_ul;
+    xy_entry_t entry_ur;
+    xy_entry_t entry_ll;
+    xy_entry_t entry_lr;
+  } xy_lut_t;
+
+  vector<xy_lut_t> _xyLut;
+  
+  typedef struct {
     double zz;
     int indexLower;
     int indexUpper;
@@ -109,10 +129,13 @@ protected:
 
   vector<z_lut_t> _zLut;
 
+  // Compute xy interpolation lookup table
+  
+  void _computeXyLookup();
   
   // Compute z interpolation lookup table
   
-  void _computeZLut();
+  void _computeZLookup();
   
 private:
 

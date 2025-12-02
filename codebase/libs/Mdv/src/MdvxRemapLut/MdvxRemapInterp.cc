@@ -169,27 +169,92 @@ void MdvxRemapInterp::computeLut(const MdvxProj &proj_source,
 }
 
 ////////////////////////////////////////////////////////
-// Compute ht interpolation lookup table
+// Compute XY interpolation lookup table
 
-void MdvxRemapInterp::_computeZLut()
+void MdvxRemapInterp::_computeXyLookup()
   
 {
-
-// void MdvxRemapInterp::_computeHtInterpLut(const vector<double> &htsOut,
-//                                           const MdvxField *htFld,
-//                                           vector<interp_pt_t> &interpPts)
 
   const Mdvx::coord_t &coordSource = _projSource.getCoord();
   const Mdvx::coord_t &coordTarget = _projTarget.getCoord();
 
-  assert(coordSource.nz <= MDV64_MAX_VLEVELS);
-  assert(coordTarget.nz <= MDV64_MAX_VLEVELS);
-  
-  _zLut.resize(coordTarget.nz);
-  
+  _xyLut.clear();
+
+  size_t targetIndex;
+  for (int iy = 0; iy < coordTarget.ny; iy++) {
+
+    double targetY = coordTarget.miny + iy * coordTarget.dy;
+
+    for (int ix = 0; ix < coordTarget.nx; ix++, targetIndex++) {
+
+      double targetX = coordTarget.minx + ix * coordTarget.dx;
+
+      // compute lat,lon of target point
+      
+      double targetLat, targetLon;
+      _projTarget.xy2latlon(targetX, targetY, targetLat, targetLon);
+
+      // compute x,y of source point, in source grid units
+
+      double sourceX, sourceY;
+      _projSource.latlon2xy(targetLat, targetLon, sourceX, sourceY);
+
+      // compute indices of target point, in source grid
+
+      double sourceIx, sourceIy;
+      _projSource.xy2xyIndex(sourceX, sourceY, sourceIx, sourceIy);
+
+      // check location is valid
+      // only interpolate points that are completely within the source grid
+
+      if (sourceIx < 0.0 || sourceIy < 0.0 ||
+          sourceIx > coordSource.nx || sourceIy > coordSource.ny) {
+        continue;
+      }
+
+      // compute indices of surrounding points
+
+      int ix_left = (int) sourceIx;
+      int ix_right = ix_left + 1;
+      
+      int iy_lower = (int) sourceIy;
+      int iy_upper = iy_lower + 1;
+
+      // compute interpolation weights
+
+      double wtx_lower = sourceIx - ix_left;
+      double wtx_upper = 1.0 - wtx_lower;
+      
+      double wty_lower = sourceIy - iy_lower;
+      double wty_upper = 1.0 - wty_lower;
+      
+      // fill out lookup details details
+      
+      xy_lut_t lut;
+      
+      lut.entry_ul.pt.xx = coordSource.minx + ix_left * coordSource.dx;
+      lut.entry_ul.pt.yy = coordSource.miny + iy_upper * coordSource.dy;
+      
+      lut.entry_ur.pt.xx = lut.entry_ul.pt.xx + coordSource.dx;
+      lut.entry_ur.pt.yy = lut.entry_ul.pt.yy;
+      
+      lut.entry_ll.pt.xx = lut.entry_ul.pt.xx;
+      lut.entry_ll.pt.yy = lut.entry_ul.pt.yy - coordSource.dy;
+      
+      lut.entry_lr.pt.xx = lut.entry_ll.pt.xx + coordSource.dx;
+      lut.entry_lr.pt.yy = lut.entry_ll.pt.yy;
+      
+      // add to vector
+      
+      _xyLut.push_back(lut);
+      
+    } // ix
+
+  } // iy
+
   for (int iz = 0; iz < coordTarget.nz; iz++) {
 
-    z_lut_t &lut = _zLut[iz];
+    z_lut_t lut;
     lut.zz = _vlevelTarget.level[iz];
     
     if (lut.zz <= _vlevelSource.level[0]) {
@@ -237,6 +302,80 @@ void MdvxRemapInterp::_computeZLut()
         // break;
       }
     } // jz
+
+    _zLut.push_back(lut);
+    
+  } // iz
+
+}
+
+////////////////////////////////////////////////////////
+// Compute Z interpolation lookup table
+
+void MdvxRemapInterp::_computeZLookup()
+  
+{
+
+  const Mdvx::coord_t &coordSource = _projSource.getCoord();
+  const Mdvx::coord_t &coordTarget = _projTarget.getCoord();
+
+  assert(coordSource.nz <= MDV64_MAX_VLEVELS);
+  assert(coordTarget.nz <= MDV64_MAX_VLEVELS);
+  
+  _zLut.clear();
+  
+  for (int iz = 0; iz < coordTarget.nz; iz++) {
+
+    z_lut_t lut;
+    lut.zz = _vlevelTarget.level[iz];
+    
+    if (lut.zz <= _vlevelSource.level[0]) {
+
+      // target z is below source lower plane
+      
+      lut.indexLower = 0;
+      lut.indexUpper = 0;
+      lut.zLower = _vlevelSource.level[0];
+      lut.zUpper = _vlevelSource.level[0];
+      lut.wtLower = 0.0;
+      lut.wtUpper = 1.0;
+
+      continue;
+      
+    }
+    
+    if (lut.zz >= _vlevelSource.level[coordSource.nz - 1]) {
+
+      // target z is above source upper plane
+      
+      lut.indexLower = coordSource.nz - 1;
+      lut.indexUpper = coordSource.nz - 1;
+      lut.zLower = _vlevelSource.level[coordSource.nz - 1];
+      lut.zUpper = _vlevelSource.level[coordSource.nz - 1];
+      lut.wtLower = 1.0;
+      lut.wtUpper = 0.0;
+
+      continue;
+      
+    }
+    
+    // we are within the source zlevel limits
+    
+    for (int jz = 1; jz < coordSource.nz; jz++) {
+      double zLower = _vlevelSource.level[jz-1];
+      double zUpper = _vlevelSource.level[jz];
+      if (lut.zz >= zLower && lut.zz <= zUpper) {
+        lut.indexLower = jz-1;
+        lut.indexUpper = jz;
+        lut.zLower = zLower;
+        lut.zUpper = zUpper;
+        lut.wtLower = (zUpper - lut.zz) / (zUpper - zLower);
+        lut.wtUpper = 1.0 - lut.wtLower;
+        // break;
+      }
+    } // jz
+
+    _zLut.push_back(lut);
     
   } // iz
 
