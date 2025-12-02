@@ -129,39 +129,11 @@ void MdvxRemapInterp::computeLut(const MdvxProj &proj_source,
   }
   _projTarget.setConditionLon2Ref(true, refLon);
 
-  // compute lookup offsets
+  // compute lookups
 
-  _sourceOffsets.clear();
-  _targetOffsets.clear();
+  _computeXyLookup();
+  _computeZLookup();
   
-  // loop through the target
-
-  double yy = inTarget.miny;
-  int64_t targetIndex = 0;
-  for (int64_t iy = 0; iy < inTarget.ny; iy++, yy += inTarget.dy) {
-    
-    double xx = inTarget.minx;
-    for (int64_t ix = 0; ix < inTarget.nx;
-	 ix++, xx += inTarget.dx, targetIndex++) {
-      
-      // get lat/lon of target point
-      
-      double lat, lon;
-      _projTarget.xy2latlon(xx, yy, lat, lon);
-
-      // get index of source point
-      
-      int64_t sourceIndex;
-      if (_projSource.latlon2arrayIndex(lat, lon, sourceIndex) == 0) {
-        // add mapping
-	_sourceOffsets.push_back(sourceIndex);
-	_targetOffsets.push_back(targetIndex);
-      }
-      
-    } // ix
-
-  } // iy
-
   _lutComputed = true;
 
   return;
