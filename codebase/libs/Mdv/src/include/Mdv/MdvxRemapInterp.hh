@@ -103,9 +103,9 @@ protected:
   } xy_pt_t;
 
   typedef struct {
-    xy_pt_t pt;
-    size_t index;
-    double wt;
+    double xx, yy;
+    double wtx, wty;
+    size_t sourceIndex;
   } xy_entry_t;
 
   typedef struct {

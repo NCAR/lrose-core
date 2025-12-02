@@ -222,28 +222,44 @@ void MdvxRemapInterp::_computeXyLookup()
 
       // compute interpolation weights
 
-      double wtx_lower = sourceIx - ix_left;
-      double wtx_upper = 1.0 - wtx_lower;
+      double wtx_left = sourceIx - ix_left;
+      double wtx_right = 1.0 - wtx_left;
       
       double wty_lower = sourceIy - iy_lower;
       double wty_upper = 1.0 - wty_lower;
       
-      // fill out lookup details details
+      // fill out lookup details
       
       xy_lut_t lut;
       
-      lut.entry_ul.pt.xx = coordSource.minx + ix_left * coordSource.dx;
-      lut.entry_ul.pt.yy = coordSource.miny + iy_upper * coordSource.dy;
+      lut.entry_ul.xx = coordSource.minx + ix_left * coordSource.dx;
+      lut.entry_ul.yy = coordSource.miny + iy_upper * coordSource.dy;
       
-      lut.entry_ur.pt.xx = lut.entry_ul.pt.xx + coordSource.dx;
-      lut.entry_ur.pt.yy = lut.entry_ul.pt.yy;
+      lut.entry_ur.xx = lut.entry_ul.xx + coordSource.dx;
+      lut.entry_ur.yy = lut.entry_ul.yy;
       
-      lut.entry_ll.pt.xx = lut.entry_ul.pt.xx;
-      lut.entry_ll.pt.yy = lut.entry_ul.pt.yy - coordSource.dy;
+      lut.entry_ll.xx = lut.entry_ul.xx;
+      lut.entry_ll.yy = lut.entry_ul.yy - coordSource.dy;
       
-      lut.entry_lr.pt.xx = lut.entry_ll.pt.xx + coordSource.dx;
-      lut.entry_lr.pt.yy = lut.entry_ll.pt.yy;
+      lut.entry_lr.xx = lut.entry_ll.xx + coordSource.dx;
+      lut.entry_lr.yy = lut.entry_ll.yy;
       
+      lut.entry_ul.sourceIndex = iy_upper * coordSource.nx + ix_left;
+      lut.entry_ur.sourceIndex = iy_upper * coordSource.nx + ix_right;
+
+      lut.entry_ll.sourceIndex = iy_lower * coordSource.nx + ix_left;
+      lut.entry_lr.sourceIndex = iy_lower * coordSource.nx + ix_right;
+
+      lut.entry_ul.wtx = wtx_left;
+      lut.entry_ur.wtx = wtx_right;
+      lut.entry_ll.wtx = wtx_left;
+      lut.entry_lr.wtx = wtx_right;
+
+      lut.entry_ul.wty = wty_upper;
+      lut.entry_ur.wty = wty_upper;
+      lut.entry_ll.wty = wty_lower;
+      lut.entry_lr.wty = wty_lower;
+
       // add to vector
       
       _xyLut.push_back(lut);
@@ -251,61 +267,6 @@ void MdvxRemapInterp::_computeXyLookup()
     } // ix
 
   } // iy
-
-  for (int iz = 0; iz < coordTarget.nz; iz++) {
-
-    z_lut_t lut;
-    lut.zz = _vlevelTarget.level[iz];
-    
-    if (lut.zz <= _vlevelSource.level[0]) {
-
-      // target z is below source lower plane
-      
-      lut.indexLower = 0;
-      lut.indexUpper = 0;
-      lut.zLower = _vlevelSource.level[0];
-      lut.zUpper = _vlevelSource.level[0];
-      lut.wtLower = 0.0;
-      lut.wtUpper = 1.0;
-
-      continue;
-      
-    }
-    
-    if (lut.zz >= _vlevelSource.level[coordSource.nz - 1]) {
-
-      // target z is above source upper plane
-      
-      lut.indexLower = coordSource.nz - 1;
-      lut.indexUpper = coordSource.nz - 1;
-      lut.zLower = _vlevelSource.level[coordSource.nz - 1];
-      lut.zUpper = _vlevelSource.level[coordSource.nz - 1];
-      lut.wtLower = 1.0;
-      lut.wtUpper = 0.0;
-
-      continue;
-      
-    }
-    
-    // we are within the source zlevel limits
-    
-    for (int jz = 1; jz < coordSource.nz; jz++) {
-      double zLower = _vlevelSource.level[jz-1];
-      double zUpper = _vlevelSource.level[jz];
-      if (lut.zz >= zLower && lut.zz <= zUpper) {
-        lut.indexLower = jz-1;
-        lut.indexUpper = jz;
-        lut.zLower = zLower;
-        lut.zUpper = zUpper;
-        lut.wtLower = (zUpper - lut.zz) / (zUpper - zLower);
-        lut.wtUpper = 1.0 - lut.wtLower;
-        // break;
-      }
-    } // jz
-
-    _zLut.push_back(lut);
-    
-  } // iz
 
 }
 
