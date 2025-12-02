@@ -134,7 +134,7 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   int nx1 = _projTarget.getCoord().nx;
   fl32 ***vol1 = (fl32 ***) ucalloc3(nz1, ny1, nx1, sizeof(fl32)); // 3D pointer
 
-  // initialize to missing
+  // initialize stage 1 to missing
   
   size_t nvol1 = nz1 * ny1 * nx1;
   fl32 *ptr1 = **vol1; // 1D pointer
@@ -143,28 +143,60 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
     *ptr1 = miss;
   }
 
-  // interpolate one z plane at a time
+  // interpolate in (x,y), one z plane at a time
 
   size_t nPtsPlaneSource = _coordSource->ny * _coordSource->nx;
   for (int iz = 0; iz < nz1; iz++) {
 
     fl32 *sourceStart = (fl32 *) sourceFld.getVol() + iz * nPtsPlaneSource;
-    fl32 *targetStart = *vol1[iz];
-
+    fl32 *vol1Start = *vol1[iz];
+    
     // loop through (x,y) lookup table
     
     for (size_t ii = 0; ii < _xyLut.size(); ii++) {
       // find lookup entry
       xy_lut_t &lut = _xyLut[ii];
-      // interpolate in x dim
-      
-    }
+      // get field values at each corner
+      fl32 val_ul = *(sourceStart + lut.pt_ul.sourceIndex);
+      fl32 val_ur = *(sourceStart + lut.pt_ur.sourceIndex);
+      fl32 val_ll = *(sourceStart + lut.pt_ll.sourceIndex);
+      fl32 val_lr = *(sourceStart + lut.pt_lr.sourceIndex);
+      if (val_ul != miss && val_ur != miss &&
+          val_ll != miss && val_lr != miss) {
+        // interpolate in x dim
+        fl32 mean_upper = val_ul * lut.pt_ul.wtx + val_ur * lut.pt_ur.wtx;
+        fl32 mean_lower = val_ll * lut.pt_ll.wtx + val_lr * lut.pt_lr.wtx;
+        // interpolate in y dim
+        fl32 mean2D = mean_upper * lut.pt_ul.wty + mean_lower * lut.pt_ll.wty;
+        vol1Start[lut.targetIndex] = mean2D;
+      } else {
+        vol1Start[lut.targetIndex] = miss; // not really needed, since already initialized to missing
+      }
+    } // ii
 
   } // iz
+
+  // allocate 3d volume stage2
   
-  // free volume stage1
+  int nz2 = _projTarget.getCoord().nz;
+  int ny2 = _projTarget.getCoord().ny;
+  int nx2 = _projTarget.getCoord().nx;
+  fl32 ***vol2 = (fl32 ***) ucalloc3(nz2, ny2, nx2, sizeof(fl32)); // 3D pointer
+  
+  // initialize stage 2 to missing
+  
+  size_t nvol2 = nz2 * ny2 * nx2;
+  fl32 *ptr2 = **vol2; // 1D pointer
+  for (size_t ii = 0; ii < nvol2; ii++, ptr2++) {
+    *ptr2 = miss;
+  }
+
+  // interpolate the data onto the target Z dimension
+
+  // free volumes
   
   ufree3((void ***) vol1);
+  ufree3((void ***) vol2);
   
   // return interpolated field
   // this must be freed by the caller.
@@ -258,7 +290,7 @@ void MdvxRemapInterp::_computeXyLookup()
 
   _xyLut.clear();
 
-  size_t targetIndex;
+  size_t targetIndex = 0;
   for (int iy = 0; iy < coordTarget.ny; iy++) {
 
     double targetY = coordTarget.miny + iy * coordTarget.dy;
@@ -337,6 +369,8 @@ void MdvxRemapInterp::_computeXyLookup()
       lut.pt_ur.wty = wty_upper;
       lut.pt_ll.wty = wty_lower;
       lut.pt_lr.wty = wty_lower;
+
+      lut.targetIndex = targetIndex;
 
       // add to vector
       

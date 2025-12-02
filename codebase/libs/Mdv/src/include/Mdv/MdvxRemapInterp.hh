@@ -110,6 +110,7 @@ protected:
     xy_pt_t pt_ur;
     xy_pt_t pt_ll;
     xy_pt_t pt_lr;
+    size_t targetIndex;
   } xy_lut_t;
 
   vector<xy_lut_t> _xyLut;
