@@ -130,8 +130,8 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   // allocate 3d volume stage1
   
   int nz1 = fhdrSource.nz;
-  int ny1 = _projTarget.getCoord().ny;
-  int nx1 = _projTarget.getCoord().nx;
+  int ny1 = _coordTarget->ny;
+  int nx1 = _coordTarget->nx;
   fl32 ***vol1 = (fl32 ***) ucalloc3(nz1, ny1, nx1, sizeof(fl32)); // 3D pointer
 
   // initialize stage 1 to missing
@@ -170,7 +170,8 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
         fl32 mean2D = mean_upper * lut.pt_ul.wty + mean_lower * lut.pt_ll.wty;
         vol1Start[lut.targetIndex] = mean2D;
       } else {
-        vol1Start[lut.targetIndex] = miss; // not really needed, since already initialized to missing
+        // not really needed, since already initialized to missing
+        vol1Start[lut.targetIndex] = miss;
       }
     } // ii
 
@@ -178,9 +179,9 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
 
   // allocate 3d volume stage2
   
-  int nz2 = _projTarget.getCoord().nz;
-  int ny2 = _projTarget.getCoord().ny;
-  int nx2 = _projTarget.getCoord().nx;
+  int nz2 = _coordTarget->nz;
+  int ny2 = _coordTarget->ny;
+  int nx2 = _coordTarget->nx;
   fl32 ***vol2 = (fl32 ***) ucalloc3(nz2, ny2, nx2, sizeof(fl32)); // 3D pointer
   
   // initialize stage 2 to missing
@@ -191,7 +192,31 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
     *ptr2 = miss;
   }
 
-  // interpolate the data onto the target Z dimension
+  // interpolate each (x,y) column onto the target Z dimension
+
+  for (int iy = 0; iy < _coordTarget->ny; iy++) {
+    for (int ix = 0; ix < _coordTarget->nx; ix++) {
+
+      
+      for (int iz = 0; iz < _coordTarget->nz; iz++) {
+        
+        z_lut_t &lut = _zLut[iz];
+
+        fl32 valLower = vol1[lut.indexLower][iy][ix];
+        fl32 valUpper = vol1[lut.indexUpper][iy][ix];
+
+        if (valLower != miss && valUpper != miss) {
+          double valInterp = valLower * lut.wtLower + valUpper * lut.wtUpper;
+          vol2[iz][iy][ix] = valInterp;
+        } else {
+          // not really needed, since already initialized to missing
+          vol2[iz][iy][ix] = miss;
+        }
+        
+      } // iz
+      
+    } // ix
+  } // iy
 
   // free volumes
   
@@ -285,19 +310,16 @@ void MdvxRemapInterp::_computeXyLookup()
   
 {
 
-  const Mdvx::coord_t &coordSource = _projSource.getCoord();
-  const Mdvx::coord_t &coordTarget = _projTarget.getCoord();
-
   _xyLut.clear();
 
   size_t targetIndex = 0;
-  for (int iy = 0; iy < coordTarget.ny; iy++) {
+  for (int iy = 0; iy < _coordTarget->ny; iy++) {
 
-    double targetY = coordTarget.miny + iy * coordTarget.dy;
+    double targetY = _coordTarget->miny + iy * _coordTarget->dy;
 
-    for (int ix = 0; ix < coordTarget.nx; ix++, targetIndex++) {
+    for (int ix = 0; ix < _coordTarget->nx; ix++, targetIndex++) {
 
-      double targetX = coordTarget.minx + ix * coordTarget.dx;
+      double targetX = _coordTarget->minx + ix * _coordTarget->dx;
 
       // compute lat,lon of target point
       
@@ -318,7 +340,7 @@ void MdvxRemapInterp::_computeXyLookup()
       // only interpolate points that are completely within the source grid
 
       if (sourceIx < 0.0 || sourceIy < 0.0 ||
-          sourceIx > coordSource.nx || sourceIy > coordSource.ny) {
+          sourceIx > _coordSource->nx || sourceIy > _coordSource->ny) {
         continue;
       }
 
@@ -342,23 +364,23 @@ void MdvxRemapInterp::_computeXyLookup()
       
       xy_lut_t lut;
       
-      lut.pt_ul.xx = coordSource.minx + ix_left * coordSource.dx;
-      lut.pt_ul.yy = coordSource.miny + iy_upper * coordSource.dy;
+      lut.pt_ul.xx = _coordSource->minx + ix_left * _coordSource->dx;
+      lut.pt_ul.yy = _coordSource->miny + iy_upper * _coordSource->dy;
       
-      lut.pt_ur.xx = lut.pt_ul.xx + coordSource.dx;
+      lut.pt_ur.xx = lut.pt_ul.xx + _coordSource->dx;
       lut.pt_ur.yy = lut.pt_ul.yy;
       
       lut.pt_ll.xx = lut.pt_ul.xx;
-      lut.pt_ll.yy = lut.pt_ul.yy - coordSource.dy;
+      lut.pt_ll.yy = lut.pt_ul.yy - _coordSource->dy;
       
-      lut.pt_lr.xx = lut.pt_ll.xx + coordSource.dx;
+      lut.pt_lr.xx = lut.pt_ll.xx + _coordSource->dx;
       lut.pt_lr.yy = lut.pt_ll.yy;
       
-      lut.pt_ul.sourceIndex = iy_upper * coordSource.nx + ix_left;
-      lut.pt_ur.sourceIndex = iy_upper * coordSource.nx + ix_right;
+      lut.pt_ul.sourceIndex = iy_upper * _coordSource->nx + ix_left;
+      lut.pt_ur.sourceIndex = iy_upper * _coordSource->nx + ix_right;
 
-      lut.pt_ll.sourceIndex = iy_lower * coordSource.nx + ix_left;
-      lut.pt_lr.sourceIndex = iy_lower * coordSource.nx + ix_right;
+      lut.pt_ll.sourceIndex = iy_lower * _coordSource->nx + ix_left;
+      lut.pt_lr.sourceIndex = iy_lower * _coordSource->nx + ix_right;
 
       lut.pt_ul.wtx = wtx_left;
       lut.pt_ur.wtx = wtx_right;
@@ -389,15 +411,12 @@ void MdvxRemapInterp::_computeZLookup()
   
 {
 
-  const Mdvx::coord_t &coordSource = _projSource.getCoord();
-  const Mdvx::coord_t &coordTarget = _projTarget.getCoord();
-
-  assert(coordSource.nz <= MDV64_MAX_VLEVELS);
-  assert(coordTarget.nz <= MDV64_MAX_VLEVELS);
+  assert(_coordSource->nz <= MDV64_MAX_VLEVELS);
+  assert(_coordTarget->nz <= MDV64_MAX_VLEVELS);
   
   _zLut.clear();
   
-  for (int iz = 0; iz < coordTarget.nz; iz++) {
+  for (int iz = 0; iz < _coordTarget->nz; iz++) {
 
     z_lut_t lut;
     lut.zz = _vlevelTarget.level[iz];
@@ -417,14 +436,14 @@ void MdvxRemapInterp::_computeZLookup()
       
     }
     
-    if (lut.zz >= _vlevelSource.level[coordSource.nz - 1]) {
+    if (lut.zz >= _vlevelSource.level[_coordSource->nz - 1]) {
 
       // target z is above source upper plane
       
-      lut.indexLower = coordSource.nz - 1;
-      lut.indexUpper = coordSource.nz - 1;
-      lut.zLower = _vlevelSource.level[coordSource.nz - 1];
-      lut.zUpper = _vlevelSource.level[coordSource.nz - 1];
+      lut.indexLower = _coordSource->nz - 1;
+      lut.indexUpper = _coordSource->nz - 1;
+      lut.zLower = _vlevelSource.level[_coordSource->nz - 1];
+      lut.zUpper = _vlevelSource.level[_coordSource->nz - 1];
       lut.wtLower = 1.0;
       lut.wtUpper = 0.0;
 
@@ -434,7 +453,7 @@ void MdvxRemapInterp::_computeZLookup()
     
     // we are within the source zlevel limits
     
-    for (int jz = 1; jz < coordSource.nz; jz++) {
+    for (int jz = 1; jz < _coordSource->nz; jz++) {
       double zLower = _vlevelSource.level[jz-1];
       double zUpper = _vlevelSource.level[jz];
       if (lut.zz >= zLower && lut.zz <= zUpper) {
