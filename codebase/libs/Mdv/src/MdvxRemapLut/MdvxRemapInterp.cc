@@ -115,15 +115,6 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   
   _computeLut(proj_source, _projTarget);
   
-  // create field to be returned
-
-  MdvxField *targetFld = new MdvxField;
-
-  // set the field and vlevel headers in target
-
-  targetFld->setFieldHeader(fhdrSource);
-  targetFld->setVlevelHeader(vhdrSource);
-
   // we first interpolate the source planes, in (x,y),
   // leaving the heights unchanged
 
@@ -217,6 +208,28 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
       
     } // ix
   } // iy
+
+  // create field to be returned
+
+  MdvxField *targetFld = new MdvxField;
+
+  // set the field and vlevel headers in target
+
+  Mdvx::field_header_t fhdr2 = fhdrSource;
+  Mdvx::vlevel_header_t vhdr2 = vhdrSource;
+
+  fhdr2.nx = _coordTarget->nx;
+  fhdr2.ny = _coordTarget->ny;
+  fhdr2.nz = _coordTarget->nz;
+
+  fhdr2.proj_type = _coordTarget->proj_type;
+  fhdr2.nz = _coordTarget->nz;
+  fhdr2.nz = _coordTarget->nz;
+  fhdr2.nz = _coordTarget->nz;
+  fhdr2.nz = _coordTarget->nz;
+  
+  targetFld->setFieldHeader(fhdr2);
+  targetFld->setVlevelHeader(vhdr2);
 
   // free volumes
   
