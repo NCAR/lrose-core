@@ -218,16 +218,10 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   Mdvx::field_header_t fhdr2 = fhdrSource;
   Mdvx::vlevel_header_t vhdr2 = vhdrSource;
 
-  fhdr2.nx = _coordTarget->nx;
-  fhdr2.ny = _coordTarget->ny;
+  _projTarget.syncXyToFieldHdr(fhdr2);
+  
   fhdr2.nz = _coordTarget->nz;
 
-  fhdr2.proj_type = _coordTarget->proj_type;
-  fhdr2.nz = _coordTarget->nz;
-  fhdr2.nz = _coordTarget->nz;
-  fhdr2.nz = _coordTarget->nz;
-  fhdr2.nz = _coordTarget->nz;
-  
   targetFld->setFieldHeader(fhdr2);
   targetFld->setVlevelHeader(vhdr2);
 
