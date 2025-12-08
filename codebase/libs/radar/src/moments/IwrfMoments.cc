@@ -67,6 +67,14 @@ Radx::SweepMode_t IwrfMoments::getRadxSweepMode(int dsrScanMode)
       return Radx::SWEEP_MODE_FOLLOW_VEHICLE;
     case DS_RADAR_SUNSCAN_RHI_MODE:
       return Radx::SWEEP_MODE_SUNSCAN_RHI;
+    case DS_RADAR_APAR_FORE_DOPPLER:
+      return Radx::SWEEP_MODE_APAR_FORE_DOPPLER;
+    case DS_RADAR_APAR_AFT_DOPPLER:
+      return Radx::SWEEP_MODE_APAR_AFT_DOPPLER;
+    case DS_RADAR_APAR_DUALPOL_RHI:
+      return Radx::SWEEP_MODE_APAR_DUALPOL_RHI;
+    case DS_RADAR_APAR_SECTOR_PPI:
+      return Radx::SWEEP_MODE_APAR_SECTOR_PPI;
     default:
       return Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
   }

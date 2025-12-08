@@ -81,6 +81,10 @@ extern "C" {
 #define DS_RADAR_MANPPI_MODE 15 /* manual ppi */
 #define DS_RADAR_MANRHI_MODE 16 /* manual rhi */
 #define DS_RADAR_SUNSCAN_RHI_MODE 17 /* scan the sun in RHI mode */
+#define DS_RADAR_APAR_FORE_DOPPLER 21  /* forward Doppler for APAR */
+#define DS_RADAR_APAR_AFT_DOPPLER 22  /* aft Doppler for APAR */
+#define DS_RADAR_APAR_DUALPOL_RHI 23  /* dual pol RHI for APAR */
+#define DS_RADAR_APAR_SECTOR_PPI 24  /* surveillance sector PPI for APAR */
 
 /* follow mode duplicated from IWRF */
 
