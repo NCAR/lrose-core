@@ -143,6 +143,11 @@ private:
   vector<BaseInterp::Field> _interpFields;
   vector<BaseInterp::Ray *> _interpRays;
 
+  // target projection and vlevels
+
+  MdvxProj _targetProj;
+  vector<double> _targetVlevels;
+  
   // interpolation objects
 
   InterpToCart *_cartInterp;
@@ -194,6 +199,7 @@ private:
 
   int _readModel(time_t radarTime);
   void _interpModelToOutputGrid();
+  void _initTargetGrid();
   
 };
 

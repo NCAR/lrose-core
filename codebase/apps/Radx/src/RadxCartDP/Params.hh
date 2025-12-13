@@ -134,8 +134,7 @@ public:
     PROJ_OBLIQUE_STEREO = 12,
     PROJ_TRANS_MERCATOR = 15,
     PROJ_ALBERS = 16,
-    PROJ_LAMBERT_AZIM = 17,
-    PROJ_VERT_PERSP = 18
+    PROJ_LAMBERT_AZIM = 17
   } projection_t;
 
   // struct typedefs
@@ -610,8 +609,6 @@ public:
 
   tdrp_bool_t grid_pole_is_north;
 
-  double grid_persp_radius;
-
   double grid_false_northing;
 
   double grid_false_easting;
@@ -771,7 +768,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[164];
+  mutable TDRPtable _table[163];
 
   const char *_className;
 

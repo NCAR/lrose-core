@@ -183,6 +183,10 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
     }
   }
 
+  // initialize the projection and vlevels of the target volume
+
+  _initTargetGrid();
+
   // initialize compute object
   
   pthread_mutex_init(&_debugPrintMutex, NULL);
@@ -1247,7 +1251,7 @@ void RadxCartDP::_allocInterpToCart()
 {
   if (_cartInterp == NULL) {
     _cartInterp = new InterpToCart(_progName, _params, _readVol,
-                                 _interpFields, _interpRays);
+                                   _interpFields, _interpRays);
   }
 }
 
@@ -1527,6 +1531,113 @@ int RadxCartDP::_readModel(time_t radarTime)
 
 void RadxCartDP::_interpModelToOutputGrid()
 {
+
+}
+
+/////////////////////////////////////////////////////////
+// initialize the projection and vlevels of the target volume
+
+void RadxCartDP::_initTargetGrid()
+{
+
+  Mdvx::coord_t coord;
+
+  coord.nx = _params.grid_xy_geom.nx;
+  coord.ny = _params.grid_xy_geom.ny;
+  coord.nz = _params.grid_z_geom.nz;
+  
+  coord.dx = _params.grid_xy_geom.dx;
+  coord.dy = _params.grid_xy_geom.dy;
+  coord.dz = _params.grid_z_geom.dz;
+  
+  coord.minx = _params.grid_xy_geom.minx;
+  coord.miny = _params.grid_xy_geom.miny;
+  coord.minz = _params.grid_z_geom.minz;
+
+  // init _targetVlevels
+  
+  if (_params.specify_individual_z_levels) {
+    _targetVlevels.clear();
+    for (int ii = 0; ii < _params.z_level_array_n; ii++) {
+      _targetVlevels.push_back(_params._z_level_array[ii]);
+    }
+    coord.nz = _targetVlevels.size();
+    coord.minz = _targetVlevels[0];
+    if (coord.nz > 1) {
+      coord.dz = _targetVlevels[1] - _targetVlevels[0];
+    } else {
+      coord.dz = 0.0;
+    }
+  } else {
+    _targetVlevels.clear();
+    for (int ii = 0; ii < coord.nz; ii++) {
+      _targetVlevels.push_back(coord.minz + ii * coord.dz);
+    }
+  }
+
+  // init _targetProj
+  
+  coord.proj_type = _params.grid_projection;
+  coord.proj_origin_lat = _params.grid_origin_lat;
+  coord.proj_origin_lon = _params.grid_origin_lon;
+
+  switch (_params.grid_projection) {
+
+    case Params::PROJ_LATLON:
+      coord.proj_type = Mdvx::PROJ_LATLON;
+      break;
+      
+    case Params::PROJ_LAMBERT_CONF:
+      coord.proj_type = Mdvx::PROJ_LAMBERT_CONF;
+      coord.proj_params.lc2.lat1 = _params.grid_lat1;
+      coord.proj_params.lc2.lat2 = _params.grid_lat2;
+      break;
+
+    case Params::PROJ_MERCATOR:
+      coord.proj_type = Mdvx::PROJ_MERCATOR;
+      break;
+
+    case Params::PROJ_POLAR_STEREO:
+      coord.proj_type = Mdvx::PROJ_POLAR_STEREO;
+      coord.proj_params.ps.tan_lon = _params.grid_tangent_lon;
+      coord.proj_params.ps.central_scale = _params.grid_central_scale;
+      if (_params.grid_pole_is_north) {
+        coord.proj_params.ps.pole_type = Mdvx::POLE_NORTH;
+      } else {
+        coord.proj_params.ps.pole_type = Mdvx::POLE_SOUTH;
+      }
+      break;
+
+    case Params::PROJ_FLAT:
+      coord.proj_type = Mdvx::PROJ_FLAT;
+      coord.proj_params.flat.rotation = _params.grid_rotation;
+      break;
+
+    case Params::PROJ_OBLIQUE_STEREO:
+      coord.proj_type = Mdvx::PROJ_OBLIQUE_STEREO;
+      coord.proj_params.os.tan_lat = _params.grid_tangent_lat;
+      coord.proj_params.os.tan_lon = _params.grid_tangent_lon;
+      coord.proj_params.os.central_scale = _params.grid_central_scale;
+      break;
+
+    case Params::PROJ_TRANS_MERCATOR:
+      coord.proj_type = Mdvx::PROJ_TRANS_MERCATOR;
+      coord.proj_params.tmerc.central_scale = _params.grid_central_scale;
+      break;
+
+    case Params::PROJ_ALBERS:
+      coord.proj_type = Mdvx::PROJ_ALBERS;
+      coord.proj_params.albers.lat1 = _params.grid_lat1;
+      coord.proj_params.albers.lat2 = _params.grid_lat2;
+      break;
+
+    case Params::PROJ_LAMBERT_AZIM:
+      coord.proj_type = Mdvx::PROJ_LAMBERT_AZIM;
+      break;
+
+  } // switch
+
+  _targetProj.init(coord);
 
 }
 

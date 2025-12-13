@@ -619,8 +619,7 @@ typedef enum {
   PROJ_OBLIQUE_STEREO = 12,
   PROJ_TRANS_MERCATOR = 15,
   PROJ_ALBERS = 16,
-  PROJ_LAMBERT_AZIM = 17,
-  PROJ_VERT_PERSP = 18
+  PROJ_LAMBERT_AZIM = 17
 } projection_t;
 
 paramdef enum projection_t {
@@ -698,12 +697,6 @@ paramdef boolean {
   p_descr = "Flag indicating stereogtraphic is over the NORTH pole.";
   p_help = "This applies to POLAR_STEREO. If false, the projection is over the south pole.";
 } grid_pole_is_north;
-
-paramdef double {
-  p_default = 35786;
-  p_descr = "Radius of perspective point (km).";
-  p_help = "This applies to VERT_PERSP.";
-} grid_persp_radius;
 
 paramdef double {
   p_default = 0.0;

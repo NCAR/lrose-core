@@ -1680,7 +1680,7 @@
     tt->help = tdrpStrDup("\tPROJ_LATLON: regular lat/lon grid (Equidistant Cylindrical)\n\tPROJ_FLAT: Azimuthal Equidistant (Radar)\n\tPROJ_LAMBERT_CONF: Lambert Conformal Conic\n\tPROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area\n\tPROJ_MERCATOR: Mercator - EW orientation\n\tPROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation\n\tPROJ_POLAR_STEREO: Stereographic- polar aspect\n\tPROJ_OBLIQUE_STEREO: Stereographic - oblique aspect\n\tPROJ_ALBERS: Albers Equal Area Conic\n\tPROJ_VERT_PERSP: Vertical Perspective (satellite view)\n\n");
     tt->val_offset = (char *) &grid_projection - &_start_;
     tt->enum_def.name = tdrpStrDup("projection_t");
-    tt->enum_def.nfields = 10;
+    tt->enum_def.nfields = 9;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("PROJ_LATLON");
@@ -1701,8 +1701,6 @@
       tt->enum_def.fields[7].val = PROJ_ALBERS;
       tt->enum_def.fields[8].name = tdrpStrDup("PROJ_LAMBERT_AZIM");
       tt->enum_def.fields[8].val = PROJ_LAMBERT_AZIM;
-      tt->enum_def.fields[9].name = tdrpStrDup("PROJ_VERT_PERSP");
-      tt->enum_def.fields[9].val = PROJ_VERT_PERSP;
     tt->single_val.e = PROJ_FLAT;
     tt++;
     
@@ -1824,18 +1822,6 @@
     tt->help = tdrpStrDup("This applies to POLAR_STEREO. If false, the projection is over the south pole.");
     tt->val_offset = (char *) &grid_pole_is_north - &_start_;
     tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'grid_persp_radius'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("grid_persp_radius");
-    tt->descr = tdrpStrDup("Radius of perspective point (km).");
-    tt->help = tdrpStrDup("This applies to VERT_PERSP.");
-    tt->val_offset = (char *) &grid_persp_radius - &_start_;
-    tt->single_val.d = 35786;
     tt++;
     
     // Parameter 'grid_false_northing'
