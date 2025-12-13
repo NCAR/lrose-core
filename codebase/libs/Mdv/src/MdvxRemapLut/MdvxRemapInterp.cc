@@ -51,23 +51,57 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////////
 // constructor
-// sets target coordinates
 
-MdvxRemapInterp::MdvxRemapInterp(const MdvxProj &projTgt,
-                                 const vector<double> &vlevelsTgt)
+MdvxRemapInterp::MdvxRemapInterp()
   
 {
+
   // initialize
+  
+  _lutComputed = false;
+  _targetSet = false;
+  _coordSource = &_projSource.getCoord();
+  _coordTarget = &_projTarget.getCoord();
+
+}
+
+////////////////////////////////////////////////////////////////////////
+// set target coordinates
+
+void MdvxRemapInterp::setTargetCoords(const MdvxProj &projTgt,
+                                      const vector<double> &vlevelsTgt)
+  
+{
+
+  bool coordsDiffer = false;
+  
+  // check if proj has changed
+  
+  const Mdvx::coord_t &thisCoord = _projTarget.getCoord();
+  const Mdvx::coord_t &inCoord = projTgt.getCoord();
+  if (memcmp(&thisCoord, &inCoord, sizeof(Mdvx::coord_t))) {
+    // copy in projection
+    coordsDiffer = true;
+  }
+
+  if (vlevelsTgt != _vlevelsTarget) {
+    coordsDiffer = true;
+  }
+  
+  if (!coordsDiffer) {
+    // no need to change anything
+    return;
+  }
+
+  // re-initialize
   
   _lutComputed = false;
   _projTarget = projTgt;
   _vlevelsTarget = vlevelsTgt;
+  _xyLut.clear();
+  _zLut.clear();
+  _targetSet = true;
   
-  // set pointers
-  
-  _coordSource = &_projSource.getCoord();
-  _coordTarget = &_projTarget.getCoord();
-
 }
 
 /////////////////////////////
@@ -92,7 +126,9 @@ MdvxRemapInterp::~MdvxRemapInterp()
 MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   
 {
-  
+
+  assert(_targetSet);
+
   // uncompress source and convert source to FLOAT32
   
   sourceFld.convertType(Mdvx::ENCODING_FLOAT32,

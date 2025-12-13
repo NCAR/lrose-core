@@ -446,7 +446,7 @@ int RadxCartDP::_processFile(const string &filePath)
   // make sure gate geom is constant
 
   _readVol.remapToFinestGeom();
-
+  
   // read the temperature profile into the threads
 
   if (_computeScalarsThreads.size() > 0) {

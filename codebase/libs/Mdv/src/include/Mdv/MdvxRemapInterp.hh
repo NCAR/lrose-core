@@ -51,16 +51,20 @@ class MdvxRemapInterp
 public:
 
   ///////////////////////////////////////////////
-  // constructor which sets target coordinates
-  
-  MdvxRemapInterp(const MdvxProj &projTgt,
-                  const vector<double> &vlevelsTgt);
-  
+  // constructor
+
+  MdvxRemapInterp();
+
   ///////////////////////
   // destructor
   
   virtual ~MdvxRemapInterp();
 
+  // set target coordinates
+  
+  void setTargetCoords(const MdvxProj &projTgt,
+                       const vector<double> &vlevelsTgt);
+    
   ///////////////////////////////////////////////////////////
   // interpolate a field, remapping to target projection
   //
@@ -85,10 +89,11 @@ protected:
   
   const Mdvx::coord_t *_coordSource;
   const Mdvx::coord_t *_coordTarget;
-
+  
   vector<double> _vlevelsSource;
   vector<double> _vlevelsTarget;
   
+  bool _targetSet;
   bool _lutComputed;
 
   typedef struct {
