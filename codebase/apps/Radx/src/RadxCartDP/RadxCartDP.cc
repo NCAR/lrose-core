@@ -465,21 +465,10 @@ int RadxCartDP::_processFile(const string &filePath)
     return -1;
   }
 
-  // read the temperature profile into the threads
+  // set the temperature profile into the threads
 
-  if (_computeScalarsThreads.size() > 0) {
-    // thread 0
-    ScalarsCompute *thread0 = _computeScalarsThreads[0];
-    if (_params.debug) {
-      cerr << "Thread #: " << 0 << endl;
-      cerr << "  Loading temp profile for time: "
-           << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
-    }
-    thread0->loadTempProfile(_readVol.getStartTimeSecs());
-    // copy to other threads
-    for (size_t ii = 1; ii < _computeScalarsThreads.size(); ii++) {
-      _computeScalarsThreads[ii]->setTempProfile(thread0->getTempProfile());
-    }
+  for (size_t ii = 0; ii < _computeScalarsThreads.size(); ii++) {
+    _computeScalarsThreads[ii]->setTempProfile(_tempProfile);
   }
   
   // add geometry and pid fields to the volume
@@ -1687,14 +1676,48 @@ int RadxCartDP::_computeTempProfile()
 {
 
   _tempProfile.clear();
-  
-  // if (_computeTempProfile()) {
-  //   cerr << "ERROR - RadxCartDP::_processFile" << endl;
-  //   cerr << "  Cannot read model data, time: "
-  //        << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
-  //   return -1;
-  // }
 
+  MdvxField *tempFld =
+    _modelInterpMdvx.getField(getModelInputName(Params::TEMP).c_str());
+  if (tempFld == NULL) {
+    cerr << "ERROR - RadxCartDP::_computeTempProfile" << endl;
+    cerr << "  Cannot find temp field in model, time: "
+         << RadxTime::strm(_modelInterpMdvx.getValidTime()) << endl;
+    return -1;
+  }
+
+  const Mdvx::field_header_t &fhdr = tempFld->getFieldHeader();
+  const Mdvx::vlevel_header_t &vhdr = tempFld->getVlevelHeader();
+  fl32 *tempVol = (fl32 *) tempFld->getVol();
+  fl32 miss = fhdr.missing_data_value;
+  size_t nPtsPlane = fhdr.ny * fhdr.nx;
+
+  for (int iz = 0; iz < fhdr.nz; iz++) {
+    double htKm = vhdr.level[iz];
+    fl32 *tmpPtr = tempVol + iz * nPtsPlane;
+    double sum = 0.0, nn = 0.0;
+    for (size_t ii = 0; ii < nPtsPlane; ii++, tmpPtr++) {
+      if (*tmpPtr != miss) {
+        sum += *tmpPtr;
+        nn++;
+      }
+    } // ii
+    if (nn > 0) {
+      double meanTemp = sum / nn;
+      TempProfile::PointVal val(htKm, meanTemp);
+      _tempProfile.addPoint(val);
+    }
+    
+  } // iz
+
+  if (_tempProfile.getProfile().size() < 2) {
+    cerr << "ERROR - RadxCartDP::_computeTempProfile" << endl;
+    cerr << "  Not enough temp data for valid profile" << endl;
+    cerr << "  Cannot find temp field in model, time: "
+         << RadxTime::strm(_modelInterpMdvx.getValidTime()) << endl;
+    return -1;
+  }
+  
   return 0;
 
 }
