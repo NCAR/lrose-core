@@ -183,10 +183,6 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
     }
   }
 
-  // initialize the projection and vlevels of the target volume
-
-  _initTargetGrid();
-
   // initialize compute object
   
   pthread_mutex_init(&_debugPrintMutex, NULL);
@@ -447,6 +443,19 @@ int RadxCartDP::_processFile(const string &filePath)
 
   _readVol.remapToFinestGeom();
   
+  // initialize the projection and vlevels of the target volume
+
+  _initTargetGrid();
+
+  // read the model data
+  
+  if (_readModel(_readVol.getStartTimeSecs())) {
+    cerr << "ERROR - RadxCartDP::_processFile" << endl;
+    cerr << "  Cannot read model data, time: "
+         << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
+    return -1;
+  }
+
   // read the temperature profile into the threads
 
   if (_computeScalarsThreads.size() > 0) {
@@ -1496,32 +1505,32 @@ int RadxCartDP::_readModel(time_t radarTime)
 
 {
 
-  _modelMdvx.clearRead();
-  _modelMdvx.setReadTime(Mdvx::READ_CLOSEST,
+  _modelRawMdvx.clearRead();
+  _modelRawMdvx.setReadTime(Mdvx::READ_CLOSEST,
                          _params.model_input_url,
                          _params.model_search_margin_secs,
                          radarTime);
 
   for (int ii = 0; ii < _params.model_field_names_n; ii++) {
     if (strlen(_params._model_field_names[ii].input_name) > 0) {
-      _modelMdvx.addReadField(_params._model_field_names[ii].input_name);
+      _modelRawMdvx.addReadField(_params._model_field_names[ii].input_name);
     }
   }
   
-  if (_modelMdvx.readVolume()) {
+  if (_modelRawMdvx.readVolume()) {
     cerr << "ERROR - RadxCartDP::_readModel" << endl;
     cerr << "  Cannot read model data" << endl;
     cerr << "  URL: " << _params.model_input_url << endl;
     cerr << "  Search time: " << DateTime::strm(radarTime) << endl;
     cerr << "  Search margin (secs): " << _params.model_search_margin_secs << endl;
-    cerr << _modelMdvx.getErrStr() << endl;
+    cerr << _modelRawMdvx.getErrStr() << endl;
     return -1;
   }
 
   // interpolate the model data onto the output Cartesian grid
 
   _interpModelToOutputGrid();
-  
+
   return 0;
 
 }
@@ -1532,6 +1541,18 @@ int RadxCartDP::_readModel(time_t radarTime)
 void RadxCartDP::_interpModelToOutputGrid()
 {
 
+  _modelInterpMdvx.clear();
+  _modelInterpMdvx.setMasterHeader(_modelRawMdvx.getMasterHeader());
+  
+  for (size_t ifield = 0; ifield < _modelRawMdvx.getNFields(); ifield++) {
+
+    MdvxField *rawFld = _modelRawMdvx.getField(ifield);
+    MdvxField *interpField = _modelRemap.interpField(*rawFld);
+    _modelInterpMdvx.addField(interpField);
+    
+  } // ifield
+
+  
 }
 
 /////////////////////////////////////////////////////////
@@ -1578,9 +1599,14 @@ void RadxCartDP::_initTargetGrid()
   // init _targetProj
   
   coord.proj_type = _params.grid_projection;
-  coord.proj_origin_lat = _params.grid_origin_lat;
-  coord.proj_origin_lon = _params.grid_origin_lon;
-
+  if (_params.center_grid_on_radar) {
+    coord.proj_origin_lat = _readVol.getLatitudeDeg();
+    coord.proj_origin_lon = _readVol.getLongitudeDeg();
+  } else {
+    coord.proj_origin_lat = _params.grid_origin_lat;
+    coord.proj_origin_lon = _params.grid_origin_lon;
+  }
+  
   switch (_params.grid_projection) {
 
     case Params::PROJ_LATLON:
@@ -1638,6 +1664,10 @@ void RadxCartDP::_initTargetGrid()
   } // switch
 
   _targetProj.init(coord);
+
+  // initialize lookup table
+
+  _modelRemap.setTargetCoords(_targetProj, _targetVlevels);
 
 }
 
@@ -1763,13 +1793,13 @@ void RadxCartDP::_computeHts(double tempC,
 }
 
 
-  _tempField = _modelMdvx.getField(_params.temp_profile_field_name);
+  _tempField = _modelRawMdvx.getField(_params.temp_profile_field_name);
   if (_tempField == NULL) {
     cerr << "ERROR - RadxCartDP::_readModel" << endl;
     cerr << "  Cannot find field in temp file: "
          << _params.temp_profile_field_name << endl;
     cerr << "  URL: " << _params.temp_profile_url << endl;
-    cerr << "  Time: " << DateTime::strm(_modelMdvx.getValidTime()) << endl;
+    cerr << "  Time: " << DateTime::strm(_modelRawMdvx.getValidTime()) << endl;
     return -1;
   }
   
@@ -1789,14 +1819,14 @@ void RadxCartDP::_computeHts(double tempC,
     cerr << "ERROR - RadxCartDP::_readModel" << endl;
     cerr << "  Cannot convert model temp grid to radar grid" << endl;
     cerr << "  URL: " << _params.temp_profile_url << endl;
-    cerr << "  Time: " << DateTime::strm(_modelMdvx.getValidTime()) << endl;
+    cerr << "  Time: " << DateTime::strm(_modelRawMdvx.getValidTime()) << endl;
     return -1;
   }
   if (_deepHtField.remap(lut, proj)) {
     cerr << "ERROR - RadxCartDP::_readModel" << endl;
     cerr << "  Cannot convert model temp grid to radar grid" << endl;
     cerr << "  URL: " << _params.temp_profile_url << endl;
-    cerr << "  Time: " << DateTime::strm(_modelMdvx.getValidTime()) << endl;
+    cerr << "  Time: " << DateTime::strm(_modelRawMdvx.getValidTime()) << endl;
     return -1;
   }
                        

@@ -168,10 +168,6 @@ void BaseInterp::_initProjection()
   } else if (_params.grid_projection == Params::PROJ_LAMBERT_AZIM) {
     _proj.initLambertAzim(_gridOriginLat,
                           _gridOriginLon);
-  } else if (_params.grid_projection == Params::PROJ_VERT_PERSP) {
-    _proj.initVertPersp(_gridOriginLat,
-                        _gridOriginLon,
-                        _params.grid_persp_radius);
   }
   
   if (_params.grid_set_offset_origin) {

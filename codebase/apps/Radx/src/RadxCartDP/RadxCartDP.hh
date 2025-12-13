@@ -51,6 +51,7 @@
 #include <Radx/RadxVol.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
+#include <Mdv/MdvxRemapInterp.hh>
 #include <radar/KdpFiltParams.hh>
 #include <radar/NcarPidParams.hh>
 #include <radar/PrecipRateParams.hh>
@@ -147,8 +148,14 @@ private:
 
   MdvxProj _targetProj;
   vector<double> _targetVlevels;
+
+  // model interpolation
   
-  // interpolation objects
+  MdvxRemapInterp _modelRemap;
+  DsMdvx _modelRawMdvx;
+  DsMdvx _modelInterpMdvx;
+
+  // radar interpolation
 
   InterpToCart *_cartInterp;
 
@@ -160,10 +167,6 @@ private:
   
   TaThreadPool _scalarsThreadPool;
   vector<ScalarsCompute *> _computeScalarsThreads;
-
-  // model data
-  
-  DsMdvx _modelMdvx;
 
   // private methods
 
