@@ -50,19 +50,11 @@ class MdvxRemapInterp
 
 public:
 
-  ///////////////////////
-  // default constructor
-  //
-  // You need to call computeSamplePts() and
-  // computeLut() before using the lookup table.
+  ///////////////////////////////////////////////
+  // constructor which sets target coordinates
   
-  MdvxRemapInterp();
-  
-  //////////////////////////////////////////
-  // constructor which computes lookup table
-  
-  MdvxRemapInterp(const MdvxProj &proj_source,
-                  const MdvxProj &proj_target);
+  MdvxRemapInterp(const MdvxProj &projTgt,
+                  const vector<double> &vlevelsTgt);
   
   ///////////////////////
   // destructor
@@ -94,8 +86,8 @@ protected:
   const Mdvx::coord_t *_coordSource;
   const Mdvx::coord_t *_coordTarget;
 
-  Mdvx::vlevel_header_t _vlevelSource;
-  Mdvx::vlevel_header_t _vlevelTarget;
+  vector<double> _vlevelsSource;
+  vector<double> _vlevelsTarget;
   
   bool _lutComputed;
 
@@ -129,8 +121,8 @@ protected:
 
   // compute lookup table
   
-  void _computeLut(const MdvxProj &proj_source,
-                   const MdvxProj &proj_target);
+  void _computeLut(const MdvxProj &projSrc,
+                   const vector<double> &vlevelsSrc);
   
 
   // Compute xy interpolation lookup table

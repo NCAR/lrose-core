@@ -717,6 +717,10 @@ public:
   const Mdvx::field_header_t &getFieldHeader() const { return _fhdr; }
   const Mdvx::vlevel_header_t &getVlevelHeader() const { return _vhdr; }
 
+  // return a vector of vlevels, derived from the headers
+  
+  vector<double> getVlevels() const;
+  
   // Getting pointers to file headers for inspection.
   // Field and vlevel headers exactly as they appear in the file.
   // To get these on read, call setReadFieldFileHeaders() before

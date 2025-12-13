@@ -807,6 +807,21 @@ bool MdvxField::isCompressed(const Mdvx::field_header_t &fhdr)
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// return a vector of vlevels, derived from the headers
+  
+vector<double> MdvxField::getVlevels() const
+
+{
+
+  vector<double> vlevels;
+  for (int iz = 0; iz < _fhdr.nz; iz++) {
+    vlevels.push_back(_vhdr.level[iz]);
+  } // iz
+  return vlevels;
+  
+}
+  
+///////////////////////////////////////////////////////////////////////////
 // convertType()
 //
 // Convert field data to an output encoding type, specifying

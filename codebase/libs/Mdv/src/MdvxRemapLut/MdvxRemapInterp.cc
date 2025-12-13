@@ -21,11 +21,14 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-//////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // MdvxRemapInterp.cc
 //
-// An object of this class is used to hold the data for interpolation
-// from one MdvxProj grid mapping to another.
+// An object of this class is used to hold the lookup table
+// for interpolation from one MdvxProj grid mapping to another.
+//
+// The constructor sets the target coords.
+// interpField() passes in the source field, from which we deduce the coords.
 //
 // This method uses bilinear interpolation for remapping in 3-D.
 //
@@ -47,30 +50,24 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////
-// Default constructor
-//
-// You need to call computeOffsets()
-// before using the lookup table.
+// constructor
+// sets target coordinates
 
-MdvxRemapInterp::MdvxRemapInterp()
+MdvxRemapInterp::MdvxRemapInterp(const MdvxProj &projTgt,
+                                 const vector<double> &vlevelsTgt)
   
 {
-  _lutComputed = false;
-  _coordSource = &_projSource.getCoord();
-  _coordTarget = &_projTarget.getCoord();
-}
-
-////////////////////////////////////////////////////////////////////////
-// constructor which computes lookup table
-
-MdvxRemapInterp::MdvxRemapInterp(const MdvxProj &proj_source,
-                                 const MdvxProj &proj_target)
+  // initialize
   
-{
   _lutComputed = false;
+  _projTarget = projTgt;
+  _vlevelsTarget = vlevelsTgt;
+  
+  // set pointers
+  
   _coordSource = &_projSource.getCoord();
   _coordTarget = &_projTarget.getCoord();
-  _computeLut(proj_source, proj_target);
+
 }
 
 /////////////////////////////
@@ -102,25 +99,22 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
                         Mdvx::COMPRESSION_NONE);
   
   // create source projection object
-
+  
   const Mdvx::field_header_t &fhdrSource = sourceFld.getFieldHeader();
   const Mdvx::vlevel_header_t &vhdrSource = sourceFld.getVlevelHeader();
-  MdvxProj proj_source(fhdrSource);
-  
-  // check this object has been previosuly initialized
-
-  assert(_lutComputed);
+  MdvxProj projSource(fhdrSource);
+  vector<double> vlevelsSource = sourceFld.getVlevels();
   
   // make sure lookup table is up to date
   
-  _computeLut(proj_source, _projTarget);
+  _computeLut(projSource, vlevelsSource);
   
   // we first interpolate the source planes, in (x,y),
   // leaving the heights unchanged
 
   // allocate 3d volume stage1
   
-  int nz1 = fhdrSource.nz;
+  int nz1 = _vlevelsSource.size();
   int ny1 = _coordTarget->ny;
   int nx1 = _coordTarget->nx;
   fl32 ***vol1 = (fl32 ***) ucalloc3(nz1, ny1, nx1, sizeof(fl32)); // 3D pointer
@@ -170,7 +164,7 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
 
   // allocate 3d volume stage2
   
-  int nz2 = _coordTarget->nz;
+  int nz2 = _vlevelsTarget.size();
   int ny2 = _coordTarget->ny;
   int nx2 = _coordTarget->nx;
   fl32 ***vol2 = (fl32 ***) ucalloc3(nz2, ny2, nx2, sizeof(fl32)); // 3D pointer
@@ -189,7 +183,7 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
     for (int ix = 0; ix < _coordTarget->nx; ix++) {
 
       
-      for (int iz = 0; iz < _coordTarget->nz; iz++) {
+      for (int iz = 0; iz < (int) _vlevelsTarget.size(); iz++) {
         
         z_lut_t &lut = _zLut[iz];
 
@@ -240,8 +234,8 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
 ////////////////////////////////////
 // compute lookup table coefficients
 
-void MdvxRemapInterp::_computeLut(const MdvxProj &proj_source,
-                                  const MdvxProj &proj_target)
+void MdvxRemapInterp::_computeLut(const MdvxProj &projSrc,
+                                  const vector<double> &vlevelsSrc)
   
 {
 
@@ -249,35 +243,32 @@ void MdvxRemapInterp::_computeLut(const MdvxProj &proj_source,
   
   bool coordsDiffer = false;
 
+  // check if we need to compute lut
+  
   if (!_lutComputed) {
-
-    _projSource = proj_source;
-    _projTarget = proj_target;
     coordsDiffer = true;
-
-  } else {
-
-    const Mdvx::coord_t &thisSource = _projSource.getCoord();
-    const Mdvx::coord_t &inSource = proj_source.getCoord();
-    if (memcmp(&thisSource, &inSource, sizeof(Mdvx::coord_t))) {
-      // copy in projection
-      _projSource = proj_source;
-      coordsDiffer = true;
-    }
-    
-    const Mdvx::coord_t &thisTarget = _projTarget.getCoord();
-    const Mdvx::coord_t &inTarget = proj_target.getCoord();
-    if (memcmp(&thisTarget, &inTarget, sizeof(Mdvx::coord_t))) {
-      // copy in projection
-      _projTarget = proj_target;
-      coordsDiffer = true;
-    }
-
+  }
+  
+  const Mdvx::coord_t &thisCoord = _projSource.getCoord();
+  const Mdvx::coord_t &inCoord = projSrc.getCoord();
+  if (memcmp(&thisCoord, &inCoord, sizeof(Mdvx::coord_t))) {
+    // copy in projection
+    coordsDiffer = true;
   }
 
-  if (!coordsDiffer && _lutComputed) {
+  if (vlevelsSrc != _vlevelsSource) {
+    coordsDiffer = true;
+  }
+  
+  if (!coordsDiffer) {
+    // no need to recompute
     return;
   }
+
+  // save source info
+  
+  _projSource = projSrc;
+  _vlevelsSource = vlevelsSrc;
   
   // Set the projection longitude conditioning so we can handle
   // cases where the input and output projections normalize the
@@ -418,24 +409,21 @@ void MdvxRemapInterp::_computeZLookup()
   
 {
 
-  assert(_coordSource->nz <= MDV64_MAX_VLEVELS);
-  assert(_coordTarget->nz <= MDV64_MAX_VLEVELS);
-  
   _zLut.clear();
   
-  for (int iz = 0; iz < _coordTarget->nz; iz++) {
-
-    z_lut_t lut;
-    lut.zz = _vlevelTarget.level[iz];
+  for (size_t iz = 0; iz < _vlevelsTarget.size(); iz++) {
     
-    if (lut.zz <= _vlevelSource.level[0]) {
+    z_lut_t lut;
+    lut.zz = _vlevelsTarget[iz];
+    
+    if (lut.zz <= _vlevelsSource[0]) {
 
       // target z is below source lower plane
       
       lut.indexLower = 0;
       lut.indexUpper = 0;
-      lut.zLower = _vlevelSource.level[0];
-      lut.zUpper = _vlevelSource.level[0];
+      lut.zLower = _vlevelsSource[0];
+      lut.zUpper = _vlevelsSource[0];
       lut.wtLower = 0.0;
       lut.wtUpper = 1.0;
 
@@ -443,14 +431,14 @@ void MdvxRemapInterp::_computeZLookup()
       
     }
     
-    if (lut.zz >= _vlevelSource.level[_coordSource->nz - 1]) {
+    if (lut.zz >= _vlevelsSource[_vlevelsSource.size() - 1]) {
 
       // target z is above source upper plane
       
-      lut.indexLower = _coordSource->nz - 1;
-      lut.indexUpper = _coordSource->nz - 1;
-      lut.zLower = _vlevelSource.level[_coordSource->nz - 1];
-      lut.zUpper = _vlevelSource.level[_coordSource->nz - 1];
+      lut.indexLower = _vlevelsSource.size() - 1;
+      lut.indexUpper = _vlevelsSource.size() - 1;
+      lut.zLower = _vlevelsSource[_vlevelsSource.size() - 1];
+      lut.zUpper = _vlevelsSource[_vlevelsSource.size() - 1];
       lut.wtLower = 1.0;
       lut.wtUpper = 0.0;
 
@@ -460,9 +448,9 @@ void MdvxRemapInterp::_computeZLookup()
     
     // we are within the source zlevel limits
     
-    for (int jz = 1; jz < _coordSource->nz; jz++) {
-      double zLower = _vlevelSource.level[jz-1];
-      double zUpper = _vlevelSource.level[jz];
+    for (size_t jz = 1; jz < _vlevelsSource.size(); jz++) {
+      double zLower = _vlevelsSource[jz-1];
+      double zUpper = _vlevelsSource[jz];
       if (lut.zz >= zLower && lut.zz <= zUpper) {
         lut.indexLower = jz-1;
         lut.indexUpper = jz;
