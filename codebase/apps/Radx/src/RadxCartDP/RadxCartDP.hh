@@ -52,6 +52,7 @@
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
 #include <Mdv/MdvxRemapInterp.hh>
+#include <radar/TempProfile.hh>
 #include <radar/KdpFiltParams.hh>
 #include <radar/NcarPidParams.hh>
 #include <radar/PrecipRateParams.hh>
@@ -154,6 +155,7 @@ private:
   MdvxRemapInterp _modelRemap;
   DsMdvx _modelRawMdvx;
   DsMdvx _modelInterpMdvx;
+  TempProfile _tempProfile;
 
   // radar interpolation
 
@@ -203,6 +205,7 @@ private:
   int _readModel(time_t radarTime);
   void _interpModelToOutputGrid();
   void _initTargetGrid();
+  int _computeTempProfile();
   
 };
 

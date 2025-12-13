@@ -456,6 +456,15 @@ int RadxCartDP::_processFile(const string &filePath)
     return -1;
   }
 
+  // compute the temperature profile from the model data
+
+  if (_computeTempProfile()) {
+    cerr << "ERROR - RadxCartDP::_processFile" << endl;
+    cerr << "  Cannot read model data, time: "
+         << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
+    return -1;
+  }
+
   // read the temperature profile into the threads
 
   if (_computeScalarsThreads.size() > 0) {
@@ -1670,6 +1679,26 @@ void RadxCartDP::_initTargetGrid()
   _modelRemap.setTargetCoords(_targetProj, _targetVlevels);
 
 }
+
+////////////////////////////////////////////////////////////////
+// compute the temperatude profile from the interpolated model
+
+int RadxCartDP::_computeTempProfile()
+{
+
+  _tempProfile.clear();
+  
+  // if (_computeTempProfile()) {
+  //   cerr << "ERROR - RadxCartDP::_processFile" << endl;
+  //   cerr << "  Cannot read model data, time: "
+  //        << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
+  //   return -1;
+  // }
+
+  return 0;
+
+}
+
 
 #ifdef NOTNOW
 
