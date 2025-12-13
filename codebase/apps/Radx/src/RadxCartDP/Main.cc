@@ -1,5 +1,5 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2018                                         
+// ** Copyright UCAR (c) 1990 - 2016                                         
 // ** University Corporation for Atmospheric Research (UCAR)                 
 // ** National Center for Atmospheric Research (NCAR)                        
 // ** Boulder, Colorado, USA                                                 
@@ -21,98 +21,97 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// ScalarsThread.hh
+///////////////////////////////////////////////////////////////
+//
+// main for RadxCartDP
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Dec 2018
+// May 2021
 //
 ///////////////////////////////////////////////////////////////
 //
-// Thread class for handling computations of dual pol scalars
+// RadxCartDP reads moments from Radx-supported format files,
+// computes PID and rain rate, interpolates onto a Cartesian grid,
+// and writes out the results to Cartesian files in MDV or NetCDF.
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef ScalarsThread_HH
-#define ScalarsThread_HH
+#include "RadxCartDP.hh"
+#include <signal.h>
+#include <new>
+#include <iostream>
+using namespace std;
 
-#include <toolsa/TaThread.hh>
+// file scope
 
-class RadxRay;
-class CartPidQpe;
-class ScalarsCompute;
-class Params;
-class KdpFiltParams;
-class NcarPidParams;
+static void tidy_and_exit (int sig);
+static void out_of_store();
+static RadxCartDP *Prog = NULL;
 
-class ScalarsThread : public TaThread
-{  
+// main
 
-public:
+int main(int argc, char **argv)
+
+{
+
+  // create program object
+
+  Prog = new RadxCartDP(argc, argv);
+  if (!Prog->OK) {
+    cerr << "Error: Could not create RadxCartDP object." << endl;
+    return(-1);
+  }
+
+  // set signal handling
   
-  // constructor
+  signal(SIGINT, tidy_and_exit);
+  signal(SIGHUP, tidy_and_exit);
+  signal(SIGTERM, tidy_and_exit);
+  signal(SIGPIPE, SIG_IGN);
+
+  // set new() memory failure handler function
+
+  set_new_handler(out_of_store);
+
+  // run it
+
+  int iret = Prog->Run();
+  if (iret < 0) {
+    cerr << "ERROR - running RadxCartDP" << endl;
+  }
   
-  ScalarsThread(CartPidQpe *parent, 
-                const Params &params,
-                const KdpFiltParams &kdpFiltParams,
-                const NcarPidParams &ncarPidParams,
-                const PrecipRateParams &precipRateParams,
-                int threadNum);
+  // clean up
 
-  // destructor
+  tidy_and_exit(iret);
+  return (iret);
   
-  virtual ~ScalarsThread();
+}
 
-  // compute engine object
-  
-  inline ScalarsCompute *getScalarsCompute() const { return _scalarsCompute; }
-  
-  // set input ray
-  
-  inline void setInputRay(RadxRay *val) { _inputRay = val; }
-  
-  // derived ray - result of computations
-  
-  inline RadxRay *getOutputRay() const { return _outputRay; }
+// tidy up on exit
 
-  // override run method
+static void tidy_and_exit (int sig)
 
-  virtual void run();
+{
+  if (Prog) {
+    delete Prog;
+    Prog = NULL;
+  }
+  exit(sig);
+}
 
-  // constructor OK?
+////////////////////////////////////
+// out_of_store()
+//
+// Handle out-of-memory conditions
+//
 
-  bool OK;
+static void out_of_store()
 
-private:
+{
 
-  // parent object
+  cerr << "FATAL ERROR - program RadxCartDP" << endl;
+  cerr << "  Operator new failed - out of store" << endl;
+  exit(-1);
 
-  CartPidQpe *_parent;
-
-  // params
-
-  const Params &_params;
-  const KdpFiltParams &_kdpFiltParams;
-  const NcarPidParams &_ncarPidParams;
-  const PrecipRateParams &_precipRateParams;
-
-  // thread number
-
-  int _threadNum;
-
-  // computation engine
-
-  ScalarsCompute *_scalarsCompute;
-
-  // input ray
-
-  RadxRay *_inputRay;
-
-  // output ray
-
-  RadxRay *_outputRay;
-
-};
-
-#endif
+}

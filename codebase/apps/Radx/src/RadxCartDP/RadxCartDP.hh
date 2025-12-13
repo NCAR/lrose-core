@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// CartPidQpe.hh
+// RadxCartDP.hh
 //
-// CartPidQpe object
+// RadxCartDP object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,14 +32,14 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// CartPidQpe reads moments from Radx-supported format files,
+// RadxCartDP reads moments from Radx-supported format files,
 // interpolates onto a Cartesian grid, and writes out the
 // results to Cartesian files in MDV or NetCDF.
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef CartPidQpe_HH
-#define CartPidQpe_HH
+#ifndef RadxCartDP_HH
+#define RadxCartDP_HH
 
 #include "Args.hh"
 #include "Params.hh"
@@ -62,17 +62,17 @@ class ScalarsCompute;
 class ScalarsThread;
 using namespace std;
 
-class CartPidQpe {
+class RadxCartDP {
   
 public:
 
   // constructor
   
-  CartPidQpe (int argc, char **argv);
+  RadxCartDP (int argc, char **argv);
 
   // destructor
   
-  ~CartPidQpe();
+  ~RadxCartDP();
 
   // run 
 

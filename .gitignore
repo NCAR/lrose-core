@@ -683,7 +683,7 @@ codebase/apps/trec/src/TrecGauge2Spdb/TrecGauge2Spdb
 codebase/apps/trec/src/ctrec/ctrec
 
 codebase/apps/Radx/src/Ascii2Radx/Ascii2Radx
-codebase/apps/Radx/src/CartPidQpe/CartPidQpe
+codebase/apps/Radx/src/RadxCartDP/RadxCartDP
 codebase/apps/Radx/src/Dsr2Radx/Dsr2Radx
 codebase/apps/Radx/src/FixCfradialPaths/FixCfradialPaths
 codebase/apps/Radx/src/FixFieldVals/FixFieldVals

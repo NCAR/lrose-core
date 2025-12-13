@@ -2,14 +2,14 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: CartPidQpe
+# app name: RadxCartDP
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/Radx/src/CartPidQpe
+# dir: lrose-core/codebase/apps/Radx/src/RadxCartDP
 ###############################################################
 
-project (CartPidQpe)
+project (RadxCartDP)
 
 # source files
 
@@ -17,7 +17,7 @@ set (SRCS
       Params.cc
       Args.cc
       BaseInterp.cc
-      CartPidQpe.cc
+      RadxCartDP.cc
       InterpToCart.cc
       Main.cc
       Orient.cc
@@ -152,7 +152,7 @@ makeTdrpParams()
 
 # application
 
-add_executable (CartPidQpe ${SRCS})
+add_executable (RadxCartDP ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)

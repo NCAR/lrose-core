@@ -37,7 +37,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "ScalarsCompute.hh"
-#include "CartPidQpe.hh"
+#include "RadxCartDP.hh"
 #include <toolsa/os_config.h>
 #include <toolsa/file_io.h>
 #include <rapmath/trig.h>

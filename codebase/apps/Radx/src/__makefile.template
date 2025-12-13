@@ -8,7 +8,7 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
 	Ascii2Radx \
-	CartPidQpe \
+	RadxCartDP \
 	Dsr2Radx \
 	FixCfradialPaths \
 	FixFieldVals \

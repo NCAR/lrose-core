@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// CartPidQpe.cc
+// RadxCartDP.cc
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,13 +30,13 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// CartPidQpe reads moments from Radx-supported format files,
+// RadxCartDP reads moments from Radx-supported format files,
 // interpolates onto a Cartesian grid, and writes out the
 // results to Cartesian files in MDV or NetCDF.
 //
 ///////////////////////////////////////////////////////////////
 
-#include "CartPidQpe.hh"
+#include "RadxCartDP.hh"
 #include "OutputMdv.hh"
 #include "ScalarsCompute.hh"
 #include "ScalarsThread.hh"
@@ -58,21 +58,21 @@ using namespace std;
 
 // initialize geom field names
 
-string CartPidQpe::smoothedDbzFieldName = "DBZ_SMOOTHED";
-string CartPidQpe::smoothedRhohvFieldName = "RHOHV_SMOOTHED";
-string CartPidQpe::elevationFieldName = "ELEV";
-string CartPidQpe::rangeFieldName = "RANGE";
-string CartPidQpe::beamHtFieldName = "BEAM_HT";
-string CartPidQpe::tempFieldName = "TEMPC";
-string CartPidQpe::pidFieldName = "PID";
-string CartPidQpe::pidInterestFieldName = "PID_INTEREST";
-string CartPidQpe::mlFieldName = "MELTING_LAYER";
-string CartPidQpe::mlExtendedFieldName = "ML_EXTENDED";
-string CartPidQpe::convFlagFieldName = "CONV_FLAG";
+string RadxCartDP::smoothedDbzFieldName = "DBZ_SMOOTHED";
+string RadxCartDP::smoothedRhohvFieldName = "RHOHV_SMOOTHED";
+string RadxCartDP::elevationFieldName = "ELEV";
+string RadxCartDP::rangeFieldName = "RANGE";
+string RadxCartDP::beamHtFieldName = "BEAM_HT";
+string RadxCartDP::tempFieldName = "TEMPC";
+string RadxCartDP::pidFieldName = "PID";
+string RadxCartDP::pidInterestFieldName = "PID_INTEREST";
+string RadxCartDP::mlFieldName = "MELTING_LAYER";
+string RadxCartDP::mlExtendedFieldName = "ML_EXTENDED";
+string RadxCartDP::convFlagFieldName = "CONV_FLAG";
 
 // Constructor
 
-CartPidQpe::CartPidQpe(int argc, char **argv)
+RadxCartDP::RadxCartDP(int argc, char **argv)
   
 {
 
@@ -82,7 +82,7 @@ CartPidQpe::CartPidQpe(int argc, char **argv)
 
   // set programe name
 
-  _progName = "CartPidQpe";
+  _progName = "RadxCartDP";
   ucopyright((char *) _progName.c_str());
   
   // parse command line args
@@ -210,7 +210,7 @@ CartPidQpe::CartPidQpe(int argc, char **argv)
 //////////////////////////////////////
 // destructor
 
-CartPidQpe::~CartPidQpe()
+RadxCartDP::~RadxCartDP()
 
 {
 
@@ -235,7 +235,7 @@ CartPidQpe::~CartPidQpe()
 //////////////////////////////////////////////////
 // Run
 
-int CartPidQpe::Run()
+int RadxCartDP::Run()
 {
 
   if (_params.radar_input_mode == Params::ARCHIVE) {
@@ -250,7 +250,7 @@ int CartPidQpe::Run()
 //////////////////////////////////////////////////
 // Run in filelist mode
 
-int CartPidQpe::_runFilelist()
+int RadxCartDP::_runFilelist()
 {
 
   // loop through the input file list
@@ -273,14 +273,14 @@ int CartPidQpe::_runFilelist()
 //////////////////////////////////////////////////
 // Run in archive mode
 
-int CartPidQpe::_runArchive()
+int RadxCartDP::_runArchive()
 {
 
   // get start and end times
 
   time_t startTime = RadxTime::parseDateTime(_params.start_time);
   if (startTime == RadxTime::NEVER) {
-    cerr << "ERROR - CartPidQpe::_runArchive()" << endl;
+    cerr << "ERROR - RadxCartDP::_runArchive()" << endl;
     cerr << "  Start time format incorrect: " << _params.start_time << endl;
     if (_args.startTimeSet) {
       cerr << "  Check command line" << endl;
@@ -292,7 +292,7 @@ int CartPidQpe::_runArchive()
 
   time_t endTime = RadxTime::parseDateTime(_params.end_time);
   if (endTime == RadxTime::NEVER) {
-    cerr << "ERROR - CartPidQpe::_runArchive()" << endl;
+    cerr << "ERROR - RadxCartDP::_runArchive()" << endl;
     cerr << "  End time format incorrect: " << _params.end_time << endl;
     if (_args.endTimeSet) {
       cerr << "  Check command line" << endl;
@@ -303,7 +303,7 @@ int CartPidQpe::_runArchive()
   }
 
   if (_params.debug) {
-    cerr << "Running CartPidQpe in ARCHIVE mode" << endl;
+    cerr << "Running RadxCartDP in ARCHIVE mode" << endl;
     cerr << "  Input dir: " << _params.radar_input_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
     cerr << "  End time: " << RadxTime::strm(endTime) << endl;
@@ -315,7 +315,7 @@ int CartPidQpe::_runArchive()
   tlist.setDir(_params.radar_input_dir);
   tlist.setModeInterval(startTime, endTime);
   if (tlist.compile()) {
-    cerr << "ERROR - CartPidQpe::_runArchive()" << endl;
+    cerr << "ERROR - RadxCartDP::_runArchive()" << endl;
     cerr << "  Cannot compile time list, dir: " << _params.radar_input_dir << endl;
     cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
     cerr << "  End time: " << RadxTime::strm(endTime) << endl;
@@ -325,7 +325,7 @@ int CartPidQpe::_runArchive()
 
   const vector<string> &paths = tlist.getPathList();
   if (paths.size() < 1) {
-    cerr << "ERROR - CartPidQpe::_runArchive()" << endl;
+    cerr << "ERROR - RadxCartDP::_runArchive()" << endl;
     cerr << "  No files found, dir: " << _params.radar_input_dir << endl;
     return -1;
   }
@@ -346,7 +346,7 @@ int CartPidQpe::_runArchive()
 //////////////////////////////////////////////////
 // Run in realtime mode
 
-int CartPidQpe::_runRealtime()
+int RadxCartDP::_runRealtime()
 {
 
   // init process mapper registration
@@ -381,7 +381,7 @@ int CartPidQpe::_runRealtime()
 // Process a file
 // Returns 0 on success, -1 on failure
 
-int CartPidQpe::_processFile(const string &filePath)
+int RadxCartDP::_processFile(const string &filePath)
 {
 
   PMU_auto_register("Processing file");
@@ -414,7 +414,7 @@ int CartPidQpe::_processFile(const string &filePath)
   }
 
   if (_params.debug) {
-    cerr << "INFO - CartPidQpe::_processFile" << endl;
+    cerr << "INFO - RadxCartDP::_processFile" << endl;
     cerr << "  Input file path: " << filePath << endl;
     cerr << "  Reading in file ..." << endl;
   }
@@ -427,14 +427,14 @@ int CartPidQpe::_processFile(const string &filePath)
   // read in file
   
   if (_readFile(filePath)) {
-    cerr << "ERROR - CartPidQpe::_processFile" << endl;
+    cerr << "ERROR - RadxCartDP::_processFile" << endl;
     return -1;
   }
   
   // check we have at least 2 rays
   
   if (_readVol.getNRays() < 2) {
-    cerr << "ERROR - CartPidQpe::_processFile" << endl;
+    cerr << "ERROR - RadxCartDP::_processFile" << endl;
     cerr << "  Too few rays: " << _readVol.getNRays() << endl;
     return -1;
   }
@@ -467,7 +467,7 @@ int CartPidQpe::_processFile(const string &filePath)
   // compute the pid fields
   
   if (_computeScalars()) {
-    cerr << "ERROR - CartPidQpe::Run" << endl;
+    cerr << "ERROR - RadxCartDP::Run" << endl;
     cerr << "  Cannot compute pid fields" << endl;
     return -1;
   }
@@ -502,7 +502,7 @@ int CartPidQpe::_processFile(const string &filePath)
 // Read in a RADX file
 // Returns 0 on success, -1 on failure
 
-int CartPidQpe::_readFile(const string &filePath)
+int RadxCartDP::_readFile(const string &filePath)
 {
 
   GenericRadxFile inFile;
@@ -511,7 +511,7 @@ int CartPidQpe::_readFile(const string &filePath)
   // read in file
   
   if (inFile.readFromPath(filePath, _readVol)) {
-    cerr << "ERROR - CartPidQpe::_readFile" << endl;
+    cerr << "ERROR - RadxCartDP::_readFile" << endl;
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
@@ -600,7 +600,7 @@ int CartPidQpe::_readFile(const string &filePath)
 //////////////////////////////////////////////////
 // set up read
 
-void CartPidQpe::_setupRead(RadxFile &file)
+void RadxCartDP::_setupRead(RadxFile &file)
 {
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -633,7 +633,7 @@ void CartPidQpe::_setupRead(RadxFile &file)
 // check all fields are present
 // set standard names etc
 
-void CartPidQpe::_checkFields(const string &filePath)
+void RadxCartDP::_checkFields(const string &filePath)
 {
   
   vector<RadxRay *> &rays = _readVol.getRays();
@@ -663,7 +663,7 @@ void CartPidQpe::_checkFields(const string &filePath)
 //////////////////////////////////////////////////
 // add geometry and pid fields to the volume
 
-void CartPidQpe::_addGeomFieldsToInput()
+void RadxCartDP::_addGeomFieldsToInput()
 
 {
 
@@ -750,7 +750,7 @@ void CartPidQpe::_addGeomFieldsToInput()
 //////////////////////////////////////////////////
 // add geom output fields
 
-void CartPidQpe::_addGeomFieldsToOutput()
+void RadxCartDP::_addGeomFieldsToOutput()
 
 {
 
@@ -788,7 +788,7 @@ void CartPidQpe::_addGeomFieldsToOutput()
 /////////////////////////////////////////////////////
 // compute the pid fields for all rays in volume
 
-int CartPidQpe::_computeScalars()
+int RadxCartDP::_computeScalars()
 {
 
   // initialize the volume with ray numbers
@@ -856,7 +856,7 @@ int CartPidQpe::_computeScalars()
 ///////////////////////////////////////////////////////////
 // Store the scalars ray
 
-int CartPidQpe::_storeScalarsRay(ScalarsThread *thread)
+int RadxCartDP::_storeScalarsRay(ScalarsThread *thread)
   
 {
   
@@ -876,7 +876,7 @@ int CartPidQpe::_storeScalarsRay(ScalarsThread *thread)
 //////////////////////////////////////////////////
 // load up the input ray data vector
 
-void CartPidQpe::_loadInterpRays()
+void RadxCartDP::_loadInterpRays()
 {
 
   // loop through the rays in the read volume,
@@ -911,7 +911,7 @@ void CartPidQpe::_loadInterpRays()
 //////////////////////////////////////////////////
 // add geometry fields
 
-void CartPidQpe::_addGeometryFields()
+void RadxCartDP::_addGeometryFields()
 {
   
   if (_params.output_angle_fields) {
@@ -1081,7 +1081,7 @@ void CartPidQpe::_addGeometryFields()
 //////////////////////////////////////////////////
 // add time field
 
-void CartPidQpe::_addTimeField()
+void RadxCartDP::_addTimeField()
 {
 
   if (!_params.output_time_field) {
@@ -1129,7 +1129,7 @@ void CartPidQpe::_addTimeField()
 /////////////////////////////////////////////////////
 // check whether volume is predominantly in RHI mode
 
-bool CartPidQpe::_isRhi()
+bool RadxCartDP::_isRhi()
 {
   
   // check to see if we are in RHI mode, set flag accordingly
@@ -1154,7 +1154,7 @@ bool CartPidQpe::_isRhi()
 //////////////////////////////////////////////////
 // initialize the fields for interpolation
 
-void CartPidQpe::_initInterpFields()
+void RadxCartDP::_initInterpFields()
 {
   
   _interpFields.clear();
@@ -1243,7 +1243,7 @@ void CartPidQpe::_initInterpFields()
 ////////////////////////////////////////////////////////////
 // Allocate interpolation objects as needed
 
-void CartPidQpe::_allocInterpToCart()
+void RadxCartDP::_allocInterpToCart()
 {
   if (_cartInterp == NULL) {
     _cartInterp = new InterpToCart(_progName, _params, _readVol,
@@ -1254,7 +1254,7 @@ void CartPidQpe::_allocInterpToCart()
 ////////////////////////////////////////////////////////////
 // Free up input rays
 
-void CartPidQpe::_freeInterpRays()
+void RadxCartDP::_freeInterpRays()
   
 {
   for (size_t ii = 0; ii < _interpRays.size(); ii++) {
@@ -1266,7 +1266,7 @@ void CartPidQpe::_freeInterpRays()
 //////////////////////////////////////////////////
 // Print params for RATE
 
-void CartPidQpe::_printParamsRate()
+void RadxCartDP::_printParamsRate()
 {
 
   if (_params.debug) {
@@ -1315,7 +1315,7 @@ void CartPidQpe::_printParamsRate()
 //////////////////////////////////////////////////
 // Print params for PID
 
-void CartPidQpe::_printParamsPid()
+void RadxCartDP::_printParamsPid()
 {
 
   if (_params.debug) {
@@ -1363,7 +1363,7 @@ void CartPidQpe::_printParamsPid()
 //////////////////////////////////////////////////
 // Print params for KDP
 
-void CartPidQpe::_printParamsKdp()
+void RadxCartDP::_printParamsKdp()
 {
 
   if (_params.debug) {
@@ -1411,7 +1411,7 @@ void CartPidQpe::_printParamsKdp()
 //////////////////////////////////////////////////
 // get radar field name from type
 
-string CartPidQpe::getRadarInputName(Params::radar_field_type_t ftype)
+string RadxCartDP::getRadarInputName(Params::radar_field_type_t ftype)
 {
   for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
     if (_params._radar_field_names[ii].field_type == ftype) {
@@ -1422,7 +1422,7 @@ string CartPidQpe::getRadarInputName(Params::radar_field_type_t ftype)
   return "";
 }
 
-string CartPidQpe::getRadarOutputName(Params::radar_field_type_t ftype)
+string RadxCartDP::getRadarOutputName(Params::radar_field_type_t ftype)
 {
   for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
     if (_params._radar_field_names[ii].field_type == ftype) {
@@ -1436,7 +1436,7 @@ string CartPidQpe::getRadarOutputName(Params::radar_field_type_t ftype)
 //////////////////////////////////////////////////
 // get model field name from type
 
-string CartPidQpe::getModelInputName(Params::model_field_type_t ftype)
+string RadxCartDP::getModelInputName(Params::model_field_type_t ftype)
 {
   for (int ii = 0; ii < _params.model_field_names_n; ii++) {
     if (_params._model_field_names[ii].field_type == ftype) {
@@ -1447,7 +1447,7 @@ string CartPidQpe::getModelInputName(Params::model_field_type_t ftype)
   return "";
 }
 
-string CartPidQpe::getModelOutputName(Params::model_field_type_t ftype)
+string RadxCartDP::getModelOutputName(Params::model_field_type_t ftype)
 {
   for (int ii = 0; ii < _params.model_field_names_n; ii++) {
     if (_params._model_field_names[ii].field_type == ftype) {
@@ -1461,7 +1461,7 @@ string CartPidQpe::getModelOutputName(Params::model_field_type_t ftype)
 //////////////////////////////////////////////////
 // get beam block field name from type
 
-string CartPidQpe::getBeamBlockInputName(Params::bblock_field_type_t ftype)
+string RadxCartDP::getBeamBlockInputName(Params::bblock_field_type_t ftype)
 {
   for (int ii = 0; ii < _params.bblock_field_names_n; ii++) {
     if (_params._bblock_field_names[ii].field_type == ftype) {
@@ -1472,7 +1472,7 @@ string CartPidQpe::getBeamBlockInputName(Params::bblock_field_type_t ftype)
   return "";
 }
 
-string CartPidQpe::getBeamBlockOutputName(Params::bblock_field_type_t ftype)
+string RadxCartDP::getBeamBlockOutputName(Params::bblock_field_type_t ftype)
 {
   for (int ii = 0; ii < _params.bblock_field_names_n; ii++) {
     if (_params._bblock_field_names[ii].field_type == ftype) {
@@ -1488,7 +1488,7 @@ string CartPidQpe::getBeamBlockOutputName(Params::bblock_field_type_t ftype)
 //
 // Returns 0 on success, -1 on failure.
 
-int CartPidQpe::_readModel(time_t radarTime)
+int RadxCartDP::_readModel(time_t radarTime)
 
 {
 
@@ -1505,7 +1505,7 @@ int CartPidQpe::_readModel(time_t radarTime)
   }
   
   if (_modelMdvx.readVolume()) {
-    cerr << "ERROR - CartPidQpe::_readModel" << endl;
+    cerr << "ERROR - RadxCartDP::_readModel" << endl;
     cerr << "  Cannot read model data" << endl;
     cerr << "  URL: " << _params.model_input_url << endl;
     cerr << "  Search time: " << DateTime::strm(radarTime) << endl;
@@ -1525,7 +1525,7 @@ int CartPidQpe::_readModel(time_t radarTime)
 /////////////////////////////////////////////////////////
 // interpolate the model data onto the output grid
 
-void CartPidQpe::_interpModelToOutputGrid()
+void RadxCartDP::_interpModelToOutputGrid()
 {
 
 }
@@ -1535,7 +1535,7 @@ void CartPidQpe::_interpModelToOutputGrid()
 /////////////////////////////////////////////////////////
 // fill temperature level ht array
 
-void CartPidQpe::_computeHts(double tempC,
+void RadxCartDP::_computeHts(double tempC,
                              MdvxField &htField,
                              const string &fieldName,
                              const string &longName,
@@ -1654,7 +1654,7 @@ void CartPidQpe::_computeHts(double tempC,
 
   _tempField = _modelMdvx.getField(_params.temp_profile_field_name);
   if (_tempField == NULL) {
-    cerr << "ERROR - CartPidQpe::_readModel" << endl;
+    cerr << "ERROR - RadxCartDP::_readModel" << endl;
     cerr << "  Cannot find field in temp file: "
          << _params.temp_profile_field_name << endl;
     cerr << "  URL: " << _params.temp_profile_url << endl;
@@ -1675,14 +1675,14 @@ void CartPidQpe::_computeHts(double tempC,
   MdvxProj proj(dbzField->getFieldHeader());
   MdvxRemapLut lut;
   if (_shallowHtField.remap(lut, proj)) {
-    cerr << "ERROR - CartPidQpe::_readModel" << endl;
+    cerr << "ERROR - RadxCartDP::_readModel" << endl;
     cerr << "  Cannot convert model temp grid to radar grid" << endl;
     cerr << "  URL: " << _params.temp_profile_url << endl;
     cerr << "  Time: " << DateTime::strm(_modelMdvx.getValidTime()) << endl;
     return -1;
   }
   if (_deepHtField.remap(lut, proj)) {
-    cerr << "ERROR - CartPidQpe::_readModel" << endl;
+    cerr << "ERROR - RadxCartDP::_readModel" << endl;
     cerr << "  Cannot convert model temp grid to radar grid" << endl;
     cerr << "  URL: " << _params.temp_profile_url << endl;
     cerr << "  Time: " << DateTime::strm(_modelMdvx.getValidTime()) << endl;

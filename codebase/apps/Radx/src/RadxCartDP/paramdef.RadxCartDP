@@ -1,5 +1,5 @@
 /*********************************************************
- * Parameter definitions for CartPidQpe
+ * Parameter definitions for RadxCartDP
  *
  * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
  *
@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "CartPidQpe reads radar fields in polar coordinates, radar beam blockage, and model data in Cartesian coordinates. It computes KDP, PID and precip rate, interpolates onto a Cartesian grid, estimates QPE at the surface, and writes out the results to Cartesian files in MDV NetCDF files.";
+  p_header = "RadxCartDP reads radar fields in polar coordinates, radar beam blockage, and model data in Cartesian coordinates. It computes KDP, PID and precip rate, interpolates onto a Cartesian grid, estimates QPE at the surface, and writes out the results to Cartesian files in MDV NetCDF files.";
   p_text = "The output is written to Cartesian files in CF-compliant NetCDF format.";
 }
 

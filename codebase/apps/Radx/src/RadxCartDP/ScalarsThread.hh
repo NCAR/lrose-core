@@ -30,85 +30,89 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Thread class for handling computations
+// Thread class for handling computations of dual pol scalars
 //
 ///////////////////////////////////////////////////////////////
 
-#include <cassert>
-#include <radar/KdpFiltParams.hh>
-#include <radar/NcarPidParams.hh>
-#include "CartPidQpe.hh"
-#include "ScalarsThread.hh"
-#include "ScalarsCompute.hh"
-#include "Params.hh"
+#ifndef ScalarsThread_HH
+#define ScalarsThread_HH
 
-///////////////////////////////////////////////////////////////
-// Constructor
+#include <toolsa/TaThread.hh>
 
-ScalarsThread::ScalarsThread(CartPidQpe *parent,
-                             const Params &params,
-                             const KdpFiltParams &kdpFiltParams,
-                             const NcarPidParams &ncarPidParams,
-                             const PrecipRateParams &precipRateParams,
-                             int threadNum) :
-        _parent(parent),
-        _params(params),
-        _kdpFiltParams(kdpFiltParams),
-        _ncarPidParams(ncarPidParams),
-        _precipRateParams(precipRateParams),
-        _threadNum(threadNum)
-{
-  
-  OK = TRUE;
-  _inputRay = NULL;
-  _outputRay = NULL;
-  
-  // create compute compute object
-  
-  _scalarsCompute = new ScalarsCompute(_params,
-                                       _kdpFiltParams,
-                                       _ncarPidParams,
-                                       _precipRateParams,
-                                       _threadNum);
-  if (_scalarsCompute == NULL) {
-    OK = FALSE;
-    return;
-  }
-  if (!_scalarsCompute->OK) {
-    OK = FALSE;
-    _scalarsCompute = NULL;
-    return;
-  }
-  
-}  
+class RadxRay;
+class RadxCartDP;
+class ScalarsCompute;
+class Params;
+class KdpFiltParams;
+class NcarPidParams;
 
-// Destructor
+class ScalarsThread : public TaThread
+{  
 
-ScalarsThread::~ScalarsThread()
-{
+public:
   
-  if (_scalarsCompute != NULL) {
-    delete _scalarsCompute;
-  }
+  // constructor
   
-}  
+  ScalarsThread(RadxCartDP *parent, 
+                const Params &params,
+                const KdpFiltParams &kdpFiltParams,
+                const NcarPidParams &ncarPidParams,
+                const PrecipRateParams &precipRateParams,
+                int threadNum);
 
-// run method
-
-void ScalarsThread::run()
-{
+  // destructor
   
-  // check
+  virtual ~ScalarsThread();
 
-  assert(_scalarsCompute != NULL);
-  assert(_inputRay != NULL);
+  // compute engine object
   
-  // Compute compute object will create the output ray
-  // The ownership of the ray is passed to the parent object
-  // which adds it to the output volume.
+  inline ScalarsCompute *getScalarsCompute() const { return _scalarsCompute; }
+  
+  // set input ray
+  
+  inline void setInputRay(RadxRay *val) { _inputRay = val; }
+  
+  // derived ray - result of computations
+  
+  inline RadxRay *getOutputRay() const { return _outputRay; }
 
-  _outputRay = _scalarsCompute->doCompute(_inputRay,
-                                          _parent->getRadarHtKm(),
-                                          _parent->getWavelengthM());
-  
-}
+  // override run method
+
+  virtual void run();
+
+  // constructor OK?
+
+  bool OK;
+
+private:
+
+  // parent object
+
+  RadxCartDP *_parent;
+
+  // params
+
+  const Params &_params;
+  const KdpFiltParams &_kdpFiltParams;
+  const NcarPidParams &_ncarPidParams;
+  const PrecipRateParams &_precipRateParams;
+
+  // thread number
+
+  int _threadNum;
+
+  // computation engine
+
+  ScalarsCompute *_scalarsCompute;
+
+  // input ray
+
+  RadxRay *_inputRay;
+
+  // output ray
+
+  RadxRay *_outputRay;
+
+};
+
+#endif

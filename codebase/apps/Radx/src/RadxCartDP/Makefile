@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for CartPidQpe program
+# Makefile for RadxCartDP program
 #
 # Mike Dixon, EOL, NCAR, Boulder, CO, 80307, USA
 #
@@ -33,7 +33,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = CartPidQpe
+TARGET_FILE = RadxCartDP
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
@@ -52,7 +52,7 @@ HDRS = \
 	Params.hh \
 	Args.hh \
 	BaseInterp.hh \
-	CartPidQpe.hh \
+	RadxCartDP.hh \
 	InterpToCart.hh \
 	Orient.hh \
 	OutputMdv.hh \
@@ -64,7 +64,7 @@ CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
 	BaseInterp.cc \
-	CartPidQpe.cc \
+	RadxCartDP.cc \
 	InterpToCart.cc \
 	Main.cc \
 	Orient.cc \
