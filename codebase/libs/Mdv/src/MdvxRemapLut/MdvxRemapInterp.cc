@@ -47,6 +47,7 @@
 #include <toolsa/mem.h>
 #include <toolsa/pjg.h>
 #include <cassert>
+#include <cmath>
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////
@@ -228,6 +229,10 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
 
         if (valLower != miss && valUpper != miss) {
           double valInterp = valLower * lut.wtLower + valUpper * lut.wtUpper;
+          // cerr << "lower, upper, interp: " << valLower << ", " << valUpper << ", " << valInterp << endl;
+          // if (std::isnan(valInterp)) {
+          //   cerr << "*";
+          // }
           vol2[iz][iy][ix] = valInterp;
         } else {
           // not really needed, since already initialized to missing
@@ -248,14 +253,17 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   Mdvx::field_header_t fhdr2 = fhdrSource;
   Mdvx::vlevel_header_t vhdr2 = vhdrSource;
 
+  fhdr2.nz = _coordTarget->nz;
   _projTarget.syncXyToFieldHdr(fhdr2);
   
-  fhdr2.nz = _coordTarget->nz;
-
   // add headers
   
   targetFld->setFieldHeader(fhdr2);
   targetFld->setVlevelHeader(vhdr2);
+
+  // cerr << "222222222222222222222222222222222222222" << endl;
+  // Mdvx::printFieldHeader(fhdr2, cerr);
+  // cerr << "222222222222222222222222222222222222222" << endl;
 
   // add data - use ** to get to the 1D array underneath the 3D version
   

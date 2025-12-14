@@ -1540,6 +1540,9 @@ void RadxCartDP::_interpModelToOutputGrid()
 {
 
   _modelInterpMdvx.clear();
+  if (_params.debug) {
+    _modelInterpMdvx.setDebug(true);
+  }
   _modelInterpMdvx.setMasterHeader(_modelRawMdvx.getMasterHeader());
   
   for (size_t ifield = 0; ifield < _modelRawMdvx.getNFields(); ifield++) {
@@ -1550,6 +1553,9 @@ void RadxCartDP::_interpModelToOutputGrid()
     
   } // ifield
 
+  if (_params.write_interpolated_model_data) {
+    _modelInterpMdvx.writeToDir(_params.interpolated_model_output_url);
+  }
   
 }
 

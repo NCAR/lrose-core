@@ -114,7 +114,7 @@ commentdef {
 
 paramdef string {
   p_default = "mdv/model";
-  p_descr = "URL for model data, in MDV/Netcdf-CF format.";
+  p_descr = "URL for reading model data, in MDV/Netcdf-CF format.";
   p_help = "We read in the model data that is closest in time to the radar data.";
 } model_input_url;
 
@@ -123,6 +123,18 @@ paramdef int {
   p_descr = "Search margin for model data (secs)";
   p_help =  "We search for model data within this margin of the radar data.";
 } model_search_margin_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write out interpolated model data?";
+  p_help = "This is useful for debugging.";
+} write_interpolated_model_data;
+
+paramdef string {
+  p_default = "mdv/interp_model";
+  p_descr = "URL for interpolated model data, in MDV/Netcdf-CF format.";
+  p_help = "We interpolate the model data onto the output grid. Writing out this data is useful for debugging, allowing us to compare the original model with the interpolated model."
+} interpolated_model_output_url;
 
 commentdef {
   p_header = "MODEL FIELD NAMES";

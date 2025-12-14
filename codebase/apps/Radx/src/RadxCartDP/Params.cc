@@ -810,7 +810,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("model_input_url");
-    tt->descr = tdrpStrDup("URL for model data, in MDV/Netcdf-CF format.");
+    tt->descr = tdrpStrDup("URL for reading model data, in MDV/Netcdf-CF format.");
     tt->help = tdrpStrDup("We read in the model data that is closest in time to the radar data.");
     tt->val_offset = (char *) &model_input_url - &_start_;
     tt->single_val.s = tdrpStrDup("mdv/model");
@@ -826,6 +826,30 @@
     tt->help = tdrpStrDup("We search for model data within this margin of the radar data.");
     tt->val_offset = (char *) &model_search_margin_secs - &_start_;
     tt->single_val.i = 3600;
+    tt++;
+    
+    // Parameter 'write_interpolated_model_data'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_interpolated_model_data");
+    tt->descr = tdrpStrDup("Write out interpolated model data?");
+    tt->help = tdrpStrDup("This is useful for debugging.");
+    tt->val_offset = (char *) &write_interpolated_model_data - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'interpolated_model_output_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("interpolated_model_output_url");
+    tt->descr = tdrpStrDup("URL for interpolated model data, in MDV/Netcdf-CF format.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &interpolated_model_output_url - &_start_;
+    tt->single_val.s = tdrpStrDup("mdv/interp_model");
     tt++;
     
     // Parameter 'Comment 5'
