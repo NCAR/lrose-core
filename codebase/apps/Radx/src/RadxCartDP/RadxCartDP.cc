@@ -142,7 +142,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   }
 
   // read params for Ncar PID
-  
+
   if (strstr(_params.PID_params_file_path, "use-defaults") == NULL) {
     // not using defaults
     if (_ncarPidParams.load(_params.PID_params_file_path,
@@ -154,7 +154,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
       return;
     }
   }
-  
+
   // read params for KdpFilt
   
   if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
@@ -192,10 +192,10 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   for (int ii = 0; ii < _params.n_compute_threads; ii++) {
     ScalarsThread *thread =
       new ScalarsThread(this, _params, 
-                    _kdpFiltParams,
-                    _ncarPidParams,
-                    _precipRateParams,
-                    ii);
+                        _kdpFiltParams,
+                        _ncarPidParams,
+                        _precipRateParams,
+                        ii);
     if (!thread->OK) {
       delete thread;
       OK = FALSE;

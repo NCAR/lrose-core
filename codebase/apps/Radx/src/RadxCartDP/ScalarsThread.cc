@@ -58,7 +58,7 @@ ScalarsThread::ScalarsThread(RadxCartDP *parent,
         _precipRateParams(precipRateParams),
         _threadNum(threadNum)
 {
-  
+
   OK = TRUE;
   _inputRay = NULL;
   _outputRay = NULL;
@@ -70,6 +70,7 @@ ScalarsThread::ScalarsThread(RadxCartDP *parent,
                                        _ncarPidParams,
                                        _precipRateParams,
                                        _threadNum);
+  
   if (_scalarsCompute == NULL) {
     OK = FALSE;
     return;

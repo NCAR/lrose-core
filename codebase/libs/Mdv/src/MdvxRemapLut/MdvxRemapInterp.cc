@@ -218,7 +218,6 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   for (int iy = 0; iy < _coordTarget->ny; iy++) {
     for (int ix = 0; ix < _coordTarget->nx; ix++) {
 
-      
       for (int iz = 0; iz < (int) _vlevelsTarget.size(); iz++) {
         
         z_lut_t &lut = _zLut[iz];
