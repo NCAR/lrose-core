@@ -203,6 +203,7 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   int nz2 = _vlevelsTarget.size();
   int ny2 = _coordTarget->ny;
   int nx2 = _coordTarget->nx;
+  size_t npts2 = nz2 * ny2 * nx2;
   fl32 ***vol2 = (fl32 ***) ucalloc3(nz2, ny2, nx2, sizeof(fl32)); // 3D pointer
   
   // initialize stage 2 to missing
@@ -251,8 +252,14 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   
   fhdr2.nz = _coordTarget->nz;
 
+  // add headers
+  
   targetFld->setFieldHeader(fhdr2);
   targetFld->setVlevelHeader(vhdr2);
+
+  // add data - use ** to get to the 1D array underneath the 3D version
+  
+  targetFld->setVolData((void *) **vol2, npts2, Mdvx::ENCODING_FLOAT32);
 
   // free volumes
   
@@ -462,6 +469,7 @@ void MdvxRemapInterp::_computeZLookup()
       lut.wtLower = 0.0;
       lut.wtUpper = 1.0;
 
+      _zLut.push_back(lut);
       continue;
       
     }
@@ -477,6 +485,7 @@ void MdvxRemapInterp::_computeZLookup()
       lut.wtLower = 1.0;
       lut.wtUpper = 0.0;
 
+      _zLut.push_back(lut);
       continue;
       
     }
@@ -502,4 +511,3 @@ void MdvxRemapInterp::_computeZLookup()
   } // iz
 
 }
-
