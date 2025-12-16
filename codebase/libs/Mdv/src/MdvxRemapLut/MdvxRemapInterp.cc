@@ -254,6 +254,9 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   Mdvx::vlevel_header_t vhdr2 = vhdrSource;
 
   fhdr2.nz = _coordTarget->nz;
+  for (int ii = 0; ii < fhdr2.nz; ii++) {
+    vhdr2.level[ii] = _vlevelsTarget[ii];
+  }
   _projTarget.syncXyToFieldHdr(fhdr2);
   
   // add headers
