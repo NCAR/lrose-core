@@ -209,18 +209,22 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   
   // initialize stage 2 to missing
   
-  size_t nvol2 = nz2 * ny2 * nx2;
   fl32 *ptr2 = **vol2; // 1D pointer
-  for (size_t ii = 0; ii < nvol2; ii++, ptr2++) {
+  for (size_t ii = 0; ii < npts2; ii++, ptr2++) {
     *ptr2 = miss;
   }
 
+  cerr << "XXXXXXXXXXXXXXXXXX nz2: " << nz2 << endl;
+  cerr << "XXXXXXXXXXXXXXXXXX _vlevelsTarget.size(): " << _vlevelsTarget.size() << endl;
+  cerr << "XXXXXXXXXXXXXXXXXX _coordTarget->nz: " << _coordTarget->nz << endl;
+  
+#ifdef JUNK
   // interpolate each (x,y) column onto the target Z dimension
 
   for (int iy = 0; iy < _coordTarget->ny; iy++) {
     for (int ix = 0; ix < _coordTarget->nx; ix++) {
 
-      for (int iz = 0; iz < (int) _vlevelsTarget.size(); iz++) {
+      for (size_t iz = 0; iz < _vlevelsTarget.size(); iz++) {
         
         z_lut_t &lut = _zLut[iz];
 
@@ -243,6 +247,7 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
       
     } // ix
   } // iy
+#endif
 
   // create field to be returned
 
@@ -397,26 +402,26 @@ void MdvxRemapInterp::_computeXyLookup()
 
       // compute indices of surrounding points
 
-      int ix_left = (int) sourceIx;
+      int ix_left = static_cast<int>(sourceIx);
       int ix_right = ix_left + 1;
       
-      int iy_lower = (int) sourceIy;
+      int iy_lower = static_cast<int>(sourceIy);
       int iy_upper = iy_lower + 1;
 
       // compute interpolation weights
 
-      double wtx_left = sourceIx - ix_left;
-      double wtx_right = 1.0 - wtx_left;
+      double wtx_right = sourceIx - ix_left;
+      double wtx_left = 1.0 - wtx_right;
       
-      double wty_lower = sourceIy - iy_lower;
-      double wty_upper = 1.0 - wty_lower;
+      double wty_upper = sourceIy - iy_lower;
+      double wty_lower = 1.0 - wty_upper;
       
       // fill out lookup details
       
       xy_lut_t lut;
       
       lut.pt_ul.xx = _coordSource->minx + ix_left * _coordSource->dx;
-      lut.pt_ul.yy = _coordSource->miny + iy_upper * _coordSource->dy;
+      lut.pt_ul.yy = _coordSource->miny + (iy_upper + 1) * _coordSource->dy;
       
       lut.pt_ur.xx = lut.pt_ul.xx + _coordSource->dx;
       lut.pt_ur.yy = lut.pt_ul.yy;
@@ -462,6 +467,10 @@ void MdvxRemapInterp::_computeZLookup()
   
 {
 
+  // for (size_t iz = 0; iz < _vlevelsSource.size(); iz++) {
+  //   cerr << "000000000000 iz, vlevelSource: " << iz << ", " << _vlevelsSource[iz] << endl;
+  // }
+  
   _zLut.clear();
   
   for (size_t iz = 0; iz < _vlevelsTarget.size(); iz++) {
@@ -471,6 +480,8 @@ void MdvxRemapInterp::_computeZLookup()
     
     if (lut.zz <= _vlevelsSource[0]) {
 
+      // cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" << endl;
+      
       // target z is below source lower plane
       
       lut.indexLower = 0;
@@ -480,12 +491,29 @@ void MdvxRemapInterp::_computeZLookup()
       lut.wtLower = 0.0;
       lut.wtUpper = 1.0;
 
-      _zLut.push_back(lut);
-      continue;
+    } else if (lut.zz < _vlevelsSource[_vlevelsSource.size() - 1]) {
+
+      // cerr << "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww" << endl;
+
+      // we are within the source zlevel limits
       
-    }
-    
-    if (lut.zz >= _vlevelsSource[_vlevelsSource.size() - 1]) {
+      for (size_t jz = 1; jz < _vlevelsSource.size(); jz++) {
+        double zLower = _vlevelsSource[jz-1];
+        double zUpper = _vlevelsSource[jz];
+        if (lut.zz >= zLower && lut.zz <= zUpper) {
+          lut.indexLower = jz-1;
+          lut.indexUpper = jz;
+          lut.zLower = zLower;
+          lut.zUpper = zUpper;
+          lut.wtLower = (zUpper - lut.zz) / (zUpper - zLower);
+          lut.wtUpper = 1.0 - lut.wtLower;
+          break;
+        }
+      } // jz
+
+    } else {
+
+      // cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
 
       // target z is above source upper plane
       
@@ -496,27 +524,18 @@ void MdvxRemapInterp::_computeZLookup()
       lut.wtLower = 1.0;
       lut.wtUpper = 0.0;
 
-      _zLut.push_back(lut);
-      continue;
-      
     }
-    
-    // we are within the source zlevel limits
-    
-    for (size_t jz = 1; jz < _vlevelsSource.size(); jz++) {
-      double zLower = _vlevelsSource[jz-1];
-      double zUpper = _vlevelsSource[jz];
-      if (lut.zz >= zLower && lut.zz <= zUpper) {
-        lut.indexLower = jz-1;
-        lut.indexUpper = jz;
-        lut.zLower = zLower;
-        lut.zUpper = zUpper;
-        lut.wtLower = (zUpper - lut.zz) / (zUpper - zLower);
-        lut.wtUpper = 1.0 - lut.wtLower;
-        // break;
-      }
-    } // jz
 
+    // cerr << "1111111111111111111111111111111111111111" << endl;
+    // cerr << "  zz: " << lut.zz << endl;
+    // cerr << "  indexLower: " << lut.indexLower << endl;
+    // cerr << "  indexUpper: " << lut.indexUpper << endl;
+    // cerr << "  zLower: " << lut.zLower << endl;
+    // cerr << "  zUpper: " << lut.zUpper << endl;
+    // cerr << "  wtLower: " << lut.wtLower << endl;
+    // cerr << "  wtUpper: " << lut.wtUpper << endl;
+    // cerr << "1111111111111111111111111111111111111111" << endl;
+    
     _zLut.push_back(lut);
     
   } // iz
