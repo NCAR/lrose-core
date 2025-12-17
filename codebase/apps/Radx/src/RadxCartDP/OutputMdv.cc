@@ -144,7 +144,7 @@ void OutputMdv::addField(const RadxVol &vol,
   int nz = (int) vlevels.size();
   Mdvx::coord_t coord = proj.getCoord();
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "  Adding field: " << field_name << endl;
   }
 
@@ -265,7 +265,7 @@ void OutputMdv::addConvStratBool(const RadxVol &vol,
   
   Mdvx::coord_t coord = proj.getCoord();
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "  Adding field: " << field_name << endl;
   }
 
@@ -848,7 +848,7 @@ int OutputMdv::writeVol()
   }
 
   Mdv2NcfTrans trans;
-  trans.setDebug(_params.debug);
+  trans.setDebug(_params.debug >= Params::DEBUG_VERBOSE);
   if (trans.writeCf(_mdvx, outputPath)) {
     cerr << "ERROR - Mdv2NetCDF::_processData()" << endl;
     cerr << trans.getErrStr() << endl;

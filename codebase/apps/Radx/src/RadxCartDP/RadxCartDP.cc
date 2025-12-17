@@ -1540,7 +1540,7 @@ void RadxCartDP::_interpModelToOutputGrid()
 {
 
   _modelInterpMdvx.clear();
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     _modelInterpMdvx.setDebug(true);
   }
   _modelInterpMdvx.setMasterHeader(_modelRawMdvx.getMasterHeader());

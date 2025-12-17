@@ -154,12 +154,12 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   int nz1 = _vlevelsSource.size();
   int ny1 = _coordTarget->ny;
   int nx1 = _coordTarget->nx;
-  fl32 ***vol1 = (fl32 ***) ucalloc3(nz1, ny1, nx1, sizeof(fl32)); // 3D pointer
-
+  fl32 ***vol1 = (fl32 ***) ucalloc3(nz1, ny1, nx1, sizeof(fl32)); // 3D array
+  
   // initialize stage 1 to missing
   
   size_t nvol1 = nz1 * ny1 * nx1;
-  fl32 *ptr1 = **vol1; // 1D pointer
+  fl32 *ptr1 = &vol1[0][0][0]; // 1D pointer
   fl32 miss = fhdrSource.missing_data_value;
   for (size_t ii = 0; ii < nvol1; ii++, ptr1++) {
     *ptr1 = miss;
@@ -169,9 +169,9 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
 
   size_t nPtsPlaneSource = _coordSource->ny * _coordSource->nx;
   for (int iz = 0; iz < nz1; iz++) {
-
+    
     fl32 *sourceStart = (fl32 *) sourceFld.getVol() + iz * nPtsPlaneSource;
-    fl32 *vol1Start = *vol1[iz];
+    fl32 *planeStart = &vol1[iz][0][0];
     
     // loop through (x,y) lookup table
     
@@ -190,41 +190,36 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
         fl32 mean_lower = val_ll * lut.pt_ll.wtx + val_lr * lut.pt_lr.wtx;
         // interpolate in y dim
         fl32 mean2D = mean_upper * lut.pt_ul.wty + mean_lower * lut.pt_ll.wty;
-        vol1Start[lut.targetIndex] = mean2D;
+        planeStart[lut.targetIndex] = mean2D;
       } else {
         // not really needed, since already initialized to missing
-        vol1Start[lut.targetIndex] = miss;
+        planeStart[lut.targetIndex] = miss;
       }
     } // ii
 
   } // iz
 
-  // allocate 3d volume stage2
+  // allocate target 3d volume for stage2
   
   int nz2 = _vlevelsTarget.size();
   int ny2 = _coordTarget->ny;
   int nx2 = _coordTarget->nx;
   size_t npts2 = nz2 * ny2 * nx2;
-  fl32 ***vol2 = (fl32 ***) ucalloc3(nz2, ny2, nx2, sizeof(fl32)); // 3D pointer
+  fl32 ***vol2 = (fl32 ***) ucalloc3(nz2, ny2, nx2, sizeof(fl32)); // 3D array
   
   // initialize stage 2 to missing
   
-  fl32 *ptr2 = **vol2; // 1D pointer
+  fl32 *ptr2 = &vol2[0][0][0]; // 1D pointer to start of array
   for (size_t ii = 0; ii < npts2; ii++, ptr2++) {
     *ptr2 = miss;
   }
 
-  cerr << "XXXXXXXXXXXXXXXXXX nz2: " << nz2 << endl;
-  cerr << "XXXXXXXXXXXXXXXXXX _vlevelsTarget.size(): " << _vlevelsTarget.size() << endl;
-  cerr << "XXXXXXXXXXXXXXXXXX _coordTarget->nz: " << _coordTarget->nz << endl;
-  
-#ifdef JUNK
   // interpolate each (x,y) column onto the target Z dimension
 
-  for (int iy = 0; iy < _coordTarget->ny; iy++) {
-    for (int ix = 0; ix < _coordTarget->nx; ix++) {
+  for (int iy = 0; iy < ny2; iy++) {
+    for (int ix = 0; ix < nx2; ix++) {
 
-      for (size_t iz = 0; iz < _vlevelsTarget.size(); iz++) {
+      for (int iz = 0; iz < nz2; iz++) {
         
         z_lut_t &lut = _zLut[iz];
 
@@ -233,10 +228,6 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
 
         if (valLower != miss && valUpper != miss) {
           double valInterp = valLower * lut.wtLower + valUpper * lut.wtUpper;
-          // cerr << "lower, upper, interp: " << valLower << ", " << valUpper << ", " << valInterp << endl;
-          // if (std::isnan(valInterp)) {
-          //   cerr << "*";
-          // }
           vol2[iz][iy][ix] = valInterp;
         } else {
           // not really needed, since already initialized to missing
@@ -247,7 +238,6 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
       
     } // ix
   } // iy
-#endif
 
   // create field to be returned
 
@@ -269,13 +259,10 @@ MdvxField *MdvxRemapInterp::interpField(MdvxField &sourceFld)
   targetFld->setFieldHeader(fhdr2);
   targetFld->setVlevelHeader(vhdr2);
 
-  // cerr << "222222222222222222222222222222222222222" << endl;
-  // Mdvx::printFieldHeader(fhdr2, cerr);
-  // cerr << "222222222222222222222222222222222222222" << endl;
+  // add data, using the pointer to the start of the 3D array
+  // this makes a copy of the data array in the field
 
-  // add data - use ** to get to the 1D array underneath the 3D version
-  
-  targetFld->setVolData((void *) **vol2, npts2, Mdvx::ENCODING_FLOAT32);
+  targetFld->setVolData(&vol2[0][0][0], npts2 * sizeof(fl32), Mdvx::ENCODING_FLOAT32);
 
   // free volumes
   
@@ -467,10 +454,6 @@ void MdvxRemapInterp::_computeZLookup()
   
 {
 
-  // for (size_t iz = 0; iz < _vlevelsSource.size(); iz++) {
-  //   cerr << "000000000000 iz, vlevelSource: " << iz << ", " << _vlevelsSource[iz] << endl;
-  // }
-  
   _zLut.clear();
   
   for (size_t iz = 0; iz < _vlevelsTarget.size(); iz++) {
@@ -480,8 +463,6 @@ void MdvxRemapInterp::_computeZLookup()
     
     if (lut.zz <= _vlevelsSource[0]) {
 
-      // cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" << endl;
-      
       // target z is below source lower plane
       
       lut.indexLower = 0;
@@ -492,8 +473,6 @@ void MdvxRemapInterp::_computeZLookup()
       lut.wtUpper = 1.0;
 
     } else if (lut.zz < _vlevelsSource[_vlevelsSource.size() - 1]) {
-
-      // cerr << "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww" << endl;
 
       // we are within the source zlevel limits
       
@@ -513,8 +492,6 @@ void MdvxRemapInterp::_computeZLookup()
 
     } else {
 
-      // cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
-
       // target z is above source upper plane
       
       lut.indexLower = _vlevelsSource.size() - 1;
@@ -526,16 +503,6 @@ void MdvxRemapInterp::_computeZLookup()
 
     }
 
-    // cerr << "1111111111111111111111111111111111111111" << endl;
-    // cerr << "  zz: " << lut.zz << endl;
-    // cerr << "  indexLower: " << lut.indexLower << endl;
-    // cerr << "  indexUpper: " << lut.indexUpper << endl;
-    // cerr << "  zLower: " << lut.zLower << endl;
-    // cerr << "  zUpper: " << lut.zUpper << endl;
-    // cerr << "  wtLower: " << lut.wtLower << endl;
-    // cerr << "  wtUpper: " << lut.wtUpper << endl;
-    // cerr << "1111111111111111111111111111111111111111" << endl;
-    
     _zLut.push_back(lut);
     
   } // iz
