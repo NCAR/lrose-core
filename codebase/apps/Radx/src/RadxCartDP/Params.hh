@@ -515,6 +515,8 @@ public:
   radar_field_name_t *_radar_field_names;
   int radar_field_names_n;
 
+  double noise_dbz_at_100km;
+
   char* model_input_url;
 
   int model_search_margin_secs;
@@ -530,24 +532,6 @@ public:
   int bblock_field_names_n;
 
   char* output_dir;
-
-  tdrp_bool_t SNR_available;
-
-  char* SNR_field_name;
-
-  double noise_dbz_at_100km;
-
-  char* DBZ_field_name;
-
-  char* ZDR_field_name;
-
-  char* PHIDP_field_name;
-
-  char* RHOHV_field_name;
-
-  tdrp_bool_t LDR_available;
-
-  char* LDR_field_name;
 
   char* KDP_params_file_path;
 
@@ -772,7 +756,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[165];
+  mutable TDRPtable _table[156];
 
   const char *_className;
 

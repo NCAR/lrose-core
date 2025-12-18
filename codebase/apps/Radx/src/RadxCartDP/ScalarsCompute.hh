@@ -49,6 +49,7 @@
 #include <Radx/Radx.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxTime.hh>
+class RadxCartDP;
 class RadxRay;
 class RadxField;
 class TempProfile;
@@ -61,7 +62,8 @@ public:
   
   // constructor
   
-  ScalarsCompute(const Params &params,
+  ScalarsCompute(RadxCartDP *parent, 
+                 const Params &params,
                  const KdpFiltParams &kdpFiltParams,
                  const NcarPidParams &ncarPidParams,
                  const PrecipRateParams &precipRateParams,
@@ -102,6 +104,10 @@ private:
 
   static const double missingDbl;
   
+  // parent object
+
+  RadxCartDP *_parent;
+
   // parameters
 
   const Params &_params;
@@ -215,7 +221,6 @@ private:
 
   int _loadFieldArray(RadxRay *inputRay,
                       const string &fieldName,
-                      bool required,
                       double *array);
 
   void _computeSnrFromDbz();

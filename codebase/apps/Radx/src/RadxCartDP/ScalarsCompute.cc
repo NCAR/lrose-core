@@ -51,11 +51,13 @@ const double ScalarsCompute::missingDbl = -9999.0;
 
 // Constructor
 
-ScalarsCompute::ScalarsCompute(const Params &params,
+ScalarsCompute::ScalarsCompute(RadxCartDP *parent, 
+                               const Params &params,
                                const KdpFiltParams &kdpFiltParams,
                                const NcarPidParams &ncarPidParams,
                                const PrecipRateParams &precipRateParams,
                                int id)  :
+        _parent(parent),
         _params(params),
         _kdpFiltParams(kdpFiltParams),
         _ncarPidParams(ncarPidParams),
@@ -406,47 +408,41 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   
 {
   
-  if (_loadFieldArray(inputRay, _params.DBZ_field_name,
-                      true, _dbzArray)) {
+  if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::DBZ),
+                      _dbzArray)) {
     return -1;
   }
-
-  if (_params.SNR_available) {
-    if (_loadFieldArray(inputRay, _params.SNR_field_name,
-                        true, _snrArray)) {
+  
+  if (_parent->getRadarInputName(Params::SNR).size() > 0) {
+    if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::SNR),
+                        _snrArray)) {
       return -1;
     }
   } else {
     _computeSnrFromDbz();
   }
   
-  if (_loadFieldArray(inputRay, _params.ZDR_field_name,
-                      true, _zdrArray)) {
+  if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::ZDR),
+                      _zdrArray)) {
     return -1;
   }
 
-  if (_loadFieldArray(inputRay, _params.PHIDP_field_name,
-                      true, _phidpArray)) {
+  if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::PHIDP),
+                      _phidpArray)) {
     return -1;
   }
   
-  if (_loadFieldArray(inputRay, _params.RHOHV_field_name,
-                      true, _rhohvArray)) {
+  if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::RHOHV),
+                      _rhohvArray)) {
     return -1;
   }
   
-  if (_params.LDR_available) {
-    if (_loadFieldArray(inputRay, _params.LDR_field_name,
-                        true, _ldrArray)) {
-      return -1;
-    }
-  } else {
-    for (size_t igate = 0; igate < _nGates; igate++) {
-      _ldrArray[igate] = missingDbl;
-    }
+  if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::LDR),
+                      _ldrArray)) {
+    return -1;
   }
   
-  _loadFieldArray(inputRay, "TEMPC", true, _tempForPid);
+  _loadFieldArray(inputRay, "TEMPC", _tempForPid);
 
   return 0;
   
@@ -457,15 +453,14 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
 
 int ScalarsCompute::_loadFieldArray(RadxRay *inputRay,
                                     const string &fieldName,
-                                    bool required,
                                     double *array)
 
 {
-  
+
   RadxField *field = inputRay->getField(fieldName);
   if (field == NULL) {
 
-    if (!required) {
+    if (fieldName.size() == 0) {
       for (size_t igate = 0; igate < _nGates; igate++) {
         array[igate] = missingDbl;
       }
@@ -795,7 +790,7 @@ void ScalarsCompute::_addPidDebugFields(const RadxRay *inputRay,
             "specific_differential_phase_hv",
             _pid.getKdp());
   
-  if (_params.LDR_available) {
+  if (_parent->getRadarInputName(Params::LDR).size() > 0) {
     _addField(outputRay,
               "LDR_FOR_PID", "dB",
               "linear_differential_refectivity_for_pid_computations",

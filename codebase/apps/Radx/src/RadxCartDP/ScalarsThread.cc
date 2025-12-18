@@ -65,7 +65,8 @@ ScalarsThread::ScalarsThread(RadxCartDP *parent,
   
   // create compute compute object
   
-  _scalarsCompute = new ScalarsCompute(_params,
+  _scalarsCompute = new ScalarsCompute(_parent,
+                                       _params,
                                        _kdpFiltParams,
                                        _ncarPidParams,
                                        _precipRateParams,
