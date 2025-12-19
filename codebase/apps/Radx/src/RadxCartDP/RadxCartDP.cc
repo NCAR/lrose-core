@@ -483,6 +483,14 @@ int RadxCartDP::_processFile(const string &filePath)
     return -1;
   }
 
+  const vector<RadxRay *> &rays = _readVol.getRays();
+  for (const auto& ray : rays) {
+    cerr << "RRRRRRRRRRRR ray el, az: " << ray->getElevationDeg() << ", " << ray->getAzimuthDeg() << endl;
+    for (const auto& fld : ray->getFields()) {
+      cerr << "    FFFFFF field: " << fld->getName() << endl;
+    }
+  } // iray
+
   // interpolate and write out
   
   if (_rhiMode) {
@@ -802,8 +810,6 @@ void RadxCartDP::_addGeomFieldsToOutput()
 int RadxCartDP::_computeScalars()
 {
 
-  cerr << "SSSSSSSSSSSSSSSSSSSSSSSS" << endl;
-  
   // initialize the volume with ray numbers
   
   _readVol.setRayNumbersInOrder();
