@@ -479,7 +479,7 @@ int RadxCartDP::_processFile(const string &filePath)
   
   if (_computeScalars()) {
     cerr << "ERROR - RadxCartDP::Run" << endl;
-    cerr << "  Cannot compute pid fields" << endl;
+    cerr << "  Cannot compute scalar pid feature fields" << endl;
     return -1;
   }
 
@@ -802,8 +802,9 @@ void RadxCartDP::_addGeomFieldsToOutput()
 int RadxCartDP::_computeScalars()
 {
 
-  // initialize the volume with ray numbers
+  cerr << "SSSSSSSSSSSSSSSSSSSSSSSS" << endl;
   
+  // initialize the volume with ray numbers
   
   _readVol.setRayNumbersInOrder();
 

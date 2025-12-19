@@ -410,12 +410,18 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   
   if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::DBZ),
                       _dbzArray)) {
+    cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
+    cerr << "  Cannot load DBZ field name: "
+         << _parent->getRadarInputName(Params::DBZ) << endl;
     return -1;
   }
   
   if (_parent->getRadarInputName(Params::SNR).size() > 0) {
     if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::SNR),
                         _snrArray)) {
+      cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
+      cerr << "  Cannot load SNR field name: "
+           << _parent->getRadarInputName(Params::SNR) << endl;
       return -1;
     }
   } else {
@@ -424,21 +430,33 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   
   if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::ZDR),
                       _zdrArray)) {
+    cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
+    cerr << "  Cannot load ZDR field name: "
+         << _parent->getRadarInputName(Params::ZDR) << endl;
     return -1;
   }
 
   if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::PHIDP),
                       _phidpArray)) {
+    cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
+    cerr << "  Cannot load PHIDP field name: "
+         << _parent->getRadarInputName(Params::PHIDP) << endl;
     return -1;
   }
   
   if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::RHOHV),
                       _rhohvArray)) {
+    cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
+    cerr << "  Cannot load RHOHV field name: "
+         << _parent->getRadarInputName(Params::RHOHV) << endl;
     return -1;
   }
   
   if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::LDR),
                       _ldrArray)) {
+    cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
+    cerr << "  Cannot load LDR field name: "
+         << _parent->getRadarInputName(Params::LDR) << endl;
     return -1;
   }
   
@@ -464,7 +482,7 @@ int ScalarsCompute::_loadFieldArray(RadxRay *inputRay,
       for (size_t igate = 0; igate < _nGates; igate++) {
         array[igate] = missingDbl;
       }
-      return -1;
+      return 0;
     }
 
     pthread_mutex_lock(&_debugPrintMutex);
