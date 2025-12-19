@@ -117,12 +117,13 @@ public:
     PID_OUT = 9,
     PID_INTEREST = 10,
     TEMP_FOR_PID = 11,
-    KDP_OUT = 12,
-    KDP_SC = 13,
-    DBZ_ATTEN_CORRECTION = 14,
-    ZDR_ATTEN_CORRECTION = 15,
-    DBZ_ATTEN_CORRECTED = 16,
-    ZDR_ATTEN_CORRECTED = 17
+    SD_ZDR = 12,
+    KDP_OUT = 13,
+    KDP_SC = 14,
+    DBZ_ATTEN_CORRECTION = 15,
+    ZDR_ATTEN_CORRECTION = 16,
+    DBZ_ATTEN_CORRECTED = 17,
+    ZDR_ATTEN_CORRECTED = 18
   } pid_output_field_id_t;
 
   typedef enum {

@@ -389,6 +389,8 @@ void ScalarsCompute::_allocArrays()
   _pidInterest = _pidInterest_.alloc(_nGates);
   _tempForPid = _tempForPid_.alloc(_nGates);
 
+  _sdZdr = _sdZdr_.alloc(_nGates);
+
   _rateZ = _rateZ_.alloc(_nGates);
   _rateZSnow = _rateZSnow_.alloc(_nGates);
   _rateZZdr = _rateZZdr_.alloc(_nGates);
@@ -462,6 +464,8 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   
   _loadFieldArray(inputRay, "TEMPC", _tempForPid);
 
+  _addFieldToRay(inputRay, "SD_ZDR", "dB", _sdZdr, _pid.getMissingDouble());
+
   return 0;
   
 }
@@ -509,6 +513,26 @@ int ScalarsCompute::_loadFieldArray(RadxRay *inputRay,
       array[igate] = val;
     }
   }
+  
+  return 0;
+  
+}
+
+////////////////////////////////////////
+// add a derived field to a ray
+
+int ScalarsCompute::_addFieldToRay(RadxRay *inputRay,
+                                   const string &fieldName,
+                                   const string &units,
+                                   double *array,
+                                   double miss)
+
+{
+
+  RadxField *field = new RadxField(fieldName, units);
+  field->setTypeFl64(miss);
+  field->addDataFl64(_nGates, array);
+  inputRay->addField(field);
   
   return 0;
   
@@ -707,6 +731,10 @@ void ScalarsCompute::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::TEMP_FOR_PID:
           *datp = _tempForPid[igate];
+          break;
+          
+        case Params::SD_ZDR:
+          *datp = _sdZdr[igate];
           break;
           
           // computed KDP

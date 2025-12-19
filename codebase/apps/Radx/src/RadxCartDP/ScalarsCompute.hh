@@ -156,10 +156,12 @@ private:
   RadxArray<int> _pidArray_;
   RadxArray<double> _pidInterest_;
   RadxArray<double> _tempForPid_;
+  RadxArray<double> _sdZdr_;
 
   int *_pidArray;
   double *_pidInterest;
   double *_tempForPid;
+  double *_sdZdr;
 
   RadxArray<double> _kdpArray_;
   RadxArray<double> _kdpScArray_;
@@ -222,6 +224,12 @@ private:
   int _loadFieldArray(RadxRay *inputRay,
                       const string &fieldName,
                       double *array);
+
+  int _addFieldToRay(RadxRay *inputRay,
+                     const string &fieldName,
+                     const string &units,
+                     double *array,
+                     double miss);
 
   void _computeSnrFromDbz();
 

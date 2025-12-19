@@ -1174,7 +1174,7 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(pid_output_field_t);
-    tt->array_n = 15;
+    tt->array_n = 16;
     tt->struct_def.name = tdrpStrDup("pid_output_field_t");
     tt->struct_def.nfields = 6;
     tt->struct_def.fields = (struct_field_t *)
@@ -1185,7 +1185,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_pid_output_fields->id - (char *) _pid_output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("pid_output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 18;
+        tt->struct_def.fields[0].enum_def.nfields = 19;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("RATE_ZH");
@@ -1212,18 +1212,20 @@
         tt->struct_def.fields[0].enum_def.fields[10].val = PID_INTEREST;
         tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("TEMP_FOR_PID");
         tt->struct_def.fields[0].enum_def.fields[11].val = TEMP_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("KDP_OUT");
-        tt->struct_def.fields[0].enum_def.fields[12].val = KDP_OUT;
-        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("KDP_SC");
-        tt->struct_def.fields[0].enum_def.fields[13].val = KDP_SC;
-        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
-        tt->struct_def.fields[0].enum_def.fields[14].val = DBZ_ATTEN_CORRECTION;
-        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
-        tt->struct_def.fields[0].enum_def.fields[15].val = ZDR_ATTEN_CORRECTION;
-        tt->struct_def.fields[0].enum_def.fields[16].name = tdrpStrDup("DBZ_ATTEN_CORRECTED");
-        tt->struct_def.fields[0].enum_def.fields[16].val = DBZ_ATTEN_CORRECTED;
-        tt->struct_def.fields[0].enum_def.fields[17].name = tdrpStrDup("ZDR_ATTEN_CORRECTED");
-        tt->struct_def.fields[0].enum_def.fields[17].val = ZDR_ATTEN_CORRECTED;
+        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("SD_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[12].val = SD_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("KDP_OUT");
+        tt->struct_def.fields[0].enum_def.fields[13].val = KDP_OUT;
+        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("KDP_SC");
+        tt->struct_def.fields[0].enum_def.fields[14].val = KDP_SC;
+        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
+        tt->struct_def.fields[0].enum_def.fields[15].val = DBZ_ATTEN_CORRECTION;
+        tt->struct_def.fields[0].enum_def.fields[16].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
+        tt->struct_def.fields[0].enum_def.fields[16].val = ZDR_ATTEN_CORRECTION;
+        tt->struct_def.fields[0].enum_def.fields[17].name = tdrpStrDup("DBZ_ATTEN_CORRECTED");
+        tt->struct_def.fields[0].enum_def.fields[17].val = DBZ_ATTEN_CORRECTED;
+        tt->struct_def.fields[0].enum_def.fields[18].name = tdrpStrDup("ZDR_ATTEN_CORRECTED");
+        tt->struct_def.fields[0].enum_def.fields[18].val = ZDR_ATTEN_CORRECTED;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -1249,7 +1251,7 @@
       tt->struct_def.fields[5].ptype = BOOL_TYPE;
       tt->struct_def.fields[5].rel_offset = 
         (char *) &_pid_output_fields->do_write - (char *) _pid_output_fields;
-    tt->n_struct_vals = 90;
+    tt->n_struct_vals = 96;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = RATE_ZH;
@@ -1312,36 +1314,42 @@
       tt->struct_vals[57].s = tdrpStrDup("temperature");
       tt->struct_vals[58].s = tdrpStrDup("C");
       tt->struct_vals[59].b = pFALSE;
-      tt->struct_vals[60].e = KDP_OUT;
-      tt->struct_vals[61].s = tdrpStrDup("KDP");
-      tt->struct_vals[62].s = tdrpStrDup("specific_differential_phase");
-      tt->struct_vals[63].s = tdrpStrDup("specific_differential_phase_hv");
-      tt->struct_vals[64].s = tdrpStrDup("deg/km");
-      tt->struct_vals[65].b = pTRUE;
-      tt->struct_vals[66].e = KDP_SC;
-      tt->struct_vals[67].s = tdrpStrDup("KDP_SC");
-      tt->struct_vals[68].s = tdrpStrDup("kdp_conditioned_using_ZZDR_self_consistency");
+      tt->struct_vals[60].e = SD_ZDR;
+      tt->struct_vals[61].s = tdrpStrDup("SD_ZDR");
+      tt->struct_vals[62].s = tdrpStrDup("stdev_of_zdr_for_computing_pid");
+      tt->struct_vals[63].s = tdrpStrDup("sdev_zdr");
+      tt->struct_vals[64].s = tdrpStrDup("dB");
+      tt->struct_vals[65].b = pFALSE;
+      tt->struct_vals[66].e = KDP_OUT;
+      tt->struct_vals[67].s = tdrpStrDup("KDP");
+      tt->struct_vals[68].s = tdrpStrDup("specific_differential_phase");
       tt->struct_vals[69].s = tdrpStrDup("specific_differential_phase_hv");
       tt->struct_vals[70].s = tdrpStrDup("deg/km");
-      tt->struct_vals[71].b = pFALSE;
-      tt->struct_vals[72].e = ZDR_ATTEN_CORRECTION;
-      tt->struct_vals[73].s = tdrpStrDup("ZDR_ATTEN_CORRECTION");
-      tt->struct_vals[74].s = tdrpStrDup("correction_to_zdr_for_attenuation");
-      tt->struct_vals[75].s = tdrpStrDup("zdr_attenuation_correction");
-      tt->struct_vals[76].s = tdrpStrDup("dB");
+      tt->struct_vals[71].b = pTRUE;
+      tt->struct_vals[72].e = KDP_SC;
+      tt->struct_vals[73].s = tdrpStrDup("KDP_SC");
+      tt->struct_vals[74].s = tdrpStrDup("kdp_conditioned_using_ZZDR_self_consistency");
+      tt->struct_vals[75].s = tdrpStrDup("specific_differential_phase_hv");
+      tt->struct_vals[76].s = tdrpStrDup("deg/km");
       tt->struct_vals[77].b = pFALSE;
-      tt->struct_vals[78].e = DBZ_ATTEN_CORRECTED;
-      tt->struct_vals[79].s = tdrpStrDup("DBZ_ATTEN_CORRECTED");
-      tt->struct_vals[80].s = tdrpStrDup("dbz_corrected_for_attenuation");
-      tt->struct_vals[81].s = tdrpStrDup("dbz_corrected_for_attenuation");
-      tt->struct_vals[82].s = tdrpStrDup("dBZ");
+      tt->struct_vals[78].e = ZDR_ATTEN_CORRECTION;
+      tt->struct_vals[79].s = tdrpStrDup("ZDR_ATTEN_CORRECTION");
+      tt->struct_vals[80].s = tdrpStrDup("correction_to_zdr_for_attenuation");
+      tt->struct_vals[81].s = tdrpStrDup("zdr_attenuation_correction");
+      tt->struct_vals[82].s = tdrpStrDup("dB");
       tt->struct_vals[83].b = pFALSE;
-      tt->struct_vals[84].e = ZDR_ATTEN_CORRECTED;
-      tt->struct_vals[85].s = tdrpStrDup("ZDR_ATTEN_CORRECTED");
-      tt->struct_vals[86].s = tdrpStrDup("zdr_corrected_for_attenuation");
-      tt->struct_vals[87].s = tdrpStrDup("zdr_corrected_for_attenuation");
-      tt->struct_vals[88].s = tdrpStrDup("dB");
+      tt->struct_vals[84].e = DBZ_ATTEN_CORRECTED;
+      tt->struct_vals[85].s = tdrpStrDup("DBZ_ATTEN_CORRECTED");
+      tt->struct_vals[86].s = tdrpStrDup("dbz_corrected_for_attenuation");
+      tt->struct_vals[87].s = tdrpStrDup("dbz_corrected_for_attenuation");
+      tt->struct_vals[88].s = tdrpStrDup("dBZ");
       tt->struct_vals[89].b = pFALSE;
+      tt->struct_vals[90].e = ZDR_ATTEN_CORRECTED;
+      tt->struct_vals[91].s = tdrpStrDup("ZDR_ATTEN_CORRECTED");
+      tt->struct_vals[92].s = tdrpStrDup("zdr_corrected_for_attenuation");
+      tt->struct_vals[93].s = tdrpStrDup("zdr_corrected_for_attenuation");
+      tt->struct_vals[94].s = tdrpStrDup("dB");
+      tt->struct_vals[95].b = pFALSE;
     tt++;
     
     // Parameter 'Comment 12'

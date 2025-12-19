@@ -634,6 +634,7 @@ public:
    * @param[in] missing The missing data value to use
    */ 
   void setMissingDouble(double missing) { _missingDouble = missing; }
+  double getMissingDouble() { return _missingDouble; }
 
   /**
    * Fill a temperature array, for a radar beam elevation
