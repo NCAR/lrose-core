@@ -167,6 +167,8 @@ private:
   DerivedField *_sdevDbzH;
   DerivedField *_sdevDbzV;
 
+  DerivedField *_sdZdr;
+  
   vector<DerivedField *> _derived3DFields;
   vector<DerivedField *> _derived2DFields;
 
@@ -184,6 +186,8 @@ private:
 
   void _createThreads();
   void _freeThreads();
+
+  void _addDpDerivedFields();
 
   void _createDebugFields();
   void _createConvStratFields();

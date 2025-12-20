@@ -98,6 +98,10 @@ InterpToCart::InterpToCart(const string &progName,
   _orient = NULL;
   _echoOrientationAvailable = false;
 
+  // create dual-pol derived fields
+
+  _addDpDerivedFields();
+  
   // create debug fields if needed
 
   if (_params.output_debug_fields) {
@@ -360,6 +364,16 @@ void InterpToCart::_freeThreads()
 
 }
 
+//////////////////////////////////////////////////
+// add dual pol derived fields
+
+void InterpToCart::_addDpDerivedFields()
+
+{
+
+
+}
+  
 //////////////////////////////////////////////////
 // create the debug Cart fields
 
