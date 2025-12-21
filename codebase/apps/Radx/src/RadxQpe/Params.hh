@@ -86,7 +86,8 @@ public:
     NUM_BLOCKED = 4,
     NUM_LOW_SNR = 5,
     NUM_CLUTTER = 6,
-    MASK = 7
+    MASK = 7,
+    PCAPPI = 8
   } output_data_t;
 
   typedef enum {
@@ -445,6 +446,10 @@ public:
 
   double max_beam_height_km_msl;
 
+  double min_beam_height_km_msl;
+
+  double max_range_km;
+
   double min_valid_precip_rate;
 
   tdrp_bool_t constrain_by_elevation_angle;
@@ -480,6 +485,8 @@ public:
   char* beam_block_path;
 
   char* beam_block_field_name;
+
+  char* beam_peak_field_name;
 
   rate_field_t *_rate_fields;
   int rate_fields_n;
@@ -571,7 +578,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[76];
+  mutable TDRPtable _table[79];
 
   const char *_className;
 

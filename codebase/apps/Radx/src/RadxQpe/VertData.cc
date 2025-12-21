@@ -70,19 +70,22 @@ VertData::VertData(const Data &data, const BeamBlock &block,
     double elevDeg = sweep.elev();
 
     double blockage;
+    double terrainheight;
     if (blockOk)
     {    
       // note that blockage input assumed to have same # of elevations
       size_t j = data.index(sweep);
       blockage = _setValue(igt, iaz, params.beam_block_field_name, block[j]);
+      terrainheight = _setValue(igt, iaz, params.beam_peak_field_name, block[j]);
     }
     else
     {
       blockage = 0.0;
+      terrainheight = -9999;
     }
 
     _data.push_back(VertData1(_setValue(igt, iaz, params.PID_field_name, sweep),
-                              blockage, elevDeg, htKm, rangeKm,
+                              blockage, terrainheight, elevDeg, htKm, rangeKm,
                               _setValue(igt, iaz, params.SNR_field_name, sweep)));
   
   } // i

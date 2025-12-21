@@ -74,8 +74,10 @@ private:
   double _rangeKm;
   double _pid;
   double _nblock;
+  double _pcappi;
   double _nlow_snr;
   double _nclutter;
+  double _peak;
 
   bool _evaluate(const VertData1 &v, const Parms &parms);
 };

@@ -34,7 +34,9 @@ BeamBlock::BeamBlock(const Parms &params) : Data(params)
   LOG(LogMsg::DEBUG, "Reading beam blockage file");
   vector<string> fields;
   fields.push_back(params.beam_block_field_name);
+  fields.push_back(params.beam_peak_field_name);
   _dataIsOK = readLite(params.beam_block_path, fields, true);
+
   for (size_t i=0; i<_sweeps.size(); ++i)
   {
     _beamElevations.push_back(_sweeps[i].elev());

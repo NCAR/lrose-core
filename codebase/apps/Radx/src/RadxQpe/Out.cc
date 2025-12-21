@@ -40,9 +40,10 @@ Out::Out(const VertData &vert, const Parms &parms) :
         _rangeKm(BadValue::value()),
         _pid(BadValue::value()),
         _nblock(0),
+	_pcappi(0),
         _nlow_snr(0),
-        _nclutter(0)
-					    
+        _nclutter(0),
+	_peak(0)
 {
   for (size_t i=0; i<vert.size(); ++i)
   {
@@ -96,6 +97,10 @@ void Out::store(int igt, int iaz, const Parms &parms, Sweep &out) const
   {
     out.setValue(name, igt, iaz, 1.0);
   }
+  if (parms.matchingOutput(Params::PCAPPI, name))
+  {
+    out.setValue(name, igt, iaz, _pcappi);
+  }
 }
 
 //----------------------------------------------------------------
@@ -106,7 +111,8 @@ void Out::storePrecip(const std::string &name, const VertPrecipData &pdata,
   double v = BadValue::value();
   if (_index >= 0)
   {
-    if (_heightKm <=  parms.max_beam_height_km_msl)
+    //printf("Range of Value - %f, Max Rake - %f\n",_rangeKm,parms.max_range_km);
+    if (_rangeKm <=  parms.max_range_km) 
     {
       v = pdata[_index];
       if (v < parms.min_valid_precip_rate)
@@ -125,6 +131,10 @@ bool Out::_evaluate(const VertData1 &v, const Parms &parms)
 
   // always save out range
   _rangeKm = v._rangeKm;
+  if (v._peak < 0)
+    _peak = 0.0;
+  else
+    _peak = v._peak/1000.0;
 
   if (v._hasSnr)
   {
@@ -147,7 +157,19 @@ bool Out::_evaluate(const VertData1 &v, const Parms &parms)
     ++_nblock;
     return false;
   }
-
+  if ( v._heightKm < (_peak + parms.min_beam_height_km_msl)) 	
+  {
+    //#printf("Beam Fraction - %f, Terrain Height - %f, Min PCAPPI height - %f, Beam Height - %f\n", v._beamE,v._peak, parms.min_beam_height_km_msl,v._heightKm);
+    ++_pcappi;
+    return false;
+  }
+  if (v._heightKm > (_peak + parms.max_beam_height_km_msl))
+  {
+    //printf("Beam Fraction - %f, Terrain Height - %f, Max PCAPPI height - %f, Beam Height - %f\n", v._beamE,v._peak, parms.max_beam_height_km_msl,v._heightKm);
+    ++_pcappi;
+    return false;
+  }
+  
   if (v._pid == BadValue::value())
   {
     // move up

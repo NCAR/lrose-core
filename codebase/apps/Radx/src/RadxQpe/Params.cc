@@ -612,6 +612,30 @@
     tt->single_val.d = 6;
     tt++;
     
+    // Parameter 'min_beam_height_km_msl'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_beam_height_km_msl");
+    tt->descr = tdrpStrDup("Min height of beam for valid precip rate (km MSL).");
+    tt->help = tdrpStrDup("If beam is below this height, the precip rate is set to 0.");
+    tt->val_offset = (char *) &min_beam_height_km_msl - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'max_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_range_km");
+    tt->descr = tdrpStrDup("Max range from radar for valid precip rate (km).");
+    tt->help = tdrpStrDup("If range is greater, the precip rate is set to 0.");
+    tt->val_offset = (char *) &max_range_km - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
     // Parameter 'min_valid_precip_rate'
     // ctype is 'double'
     
@@ -874,6 +898,18 @@
     tt->single_val.s = tdrpStrDup("BEAME");
     tt++;
     
+    // Parameter 'beam_peak_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("beam_peak_field_name");
+    tt->descr = tdrpStrDup("Field name for maximum terrain height with range.");
+    tt->help = tdrpStrDup("This field contains a height value - between -1000 and 5000 - of maximum terrain height.");
+    tt->val_offset = (char *) &beam_peak_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("PEAK");
+    tt++;
+    
     // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1022,7 +1058,7 @@
       tt->struct_def.fields[5].rel_offset = 
         (char *) &_output_fields->type - (char *) _output_fields;
         tt->struct_def.fields[5].enum_def.name = tdrpStrDup("output_data_t");
-        tt->struct_def.fields[5].enum_def.nfields = 8;
+        tt->struct_def.fields[5].enum_def.nfields = 9;
         tt->struct_def.fields[5].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[5].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[5].enum_def.fields[0].name = tdrpStrDup("PID");
@@ -1041,6 +1077,8 @@
         tt->struct_def.fields[5].enum_def.fields[6].val = NUM_CLUTTER;
         tt->struct_def.fields[5].enum_def.fields[7].name = tdrpStrDup("MASK");
         tt->struct_def.fields[5].enum_def.fields[7].val = MASK;
+        tt->struct_def.fields[5].enum_def.fields[8].name = tdrpStrDup("PCAPPI");
+        tt->struct_def.fields[5].enum_def.fields[8].val = PCAPPI;
     tt->n_struct_vals = 48;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));

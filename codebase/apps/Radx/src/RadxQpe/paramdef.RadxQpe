@@ -37,6 +37,18 @@ paramdef double {
 } max_beam_height_km_msl;
 
 paramdef double {
+  p_descr = "Min height of beam for valid precip rate (km MSL).";
+  p_help = "If beam is below this height, the precip rate is set to 0.";
+  p_default = 1.0;
+} min_beam_height_km_msl;
+
+paramdef double {
+  p_descr = "Max range from radar for valid precip rate (km).";
+  p_help = "If range is greater, the precip rate is set to 0.";
+  p_default = 1.0;
+} max_range_km;
+
+paramdef double {
   p_descr = "Minimum valid precip rate (mm/hr).";
   p_help = "If rate is less than this, it is set to 0.";
   p_default = 1.0;
@@ -165,6 +177,12 @@ paramdef string {
   p_help = "This field contains a fraction - between 0 and 1 - of the power blocked.";
 } beam_block_field_name;
 
+paramdef string {
+  p_default = "PEAK";
+  p_descr = "Field name for maximum terrain height with range.";
+  p_help = "This field contains a height value - between -1000 and 5000 - of maximum terrain height.";
+} beam_peak_field_name;
+
 commentdef {
   p_header = "PRECIP RATE FIELDS";
 }
@@ -212,7 +230,7 @@ commentdef {
 }
 
 typedef enum {
-  PID, ELEVATION, HEIGHT, RANGE, NUM_BLOCKED, NUM_LOW_SNR, NUM_CLUTTER, MASK
+  PID, ELEVATION, HEIGHT, RANGE, NUM_BLOCKED, NUM_LOW_SNR, NUM_CLUTTER, MASK, PCAPPI
 } output_data_t;
 
 typedef struct {
