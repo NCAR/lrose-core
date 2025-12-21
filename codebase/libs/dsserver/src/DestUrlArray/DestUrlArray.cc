@@ -370,8 +370,8 @@ int DestUrlArray::load(const string &dest_url_list_file_path)
   // read in entries
 
 
-  char line[256];
-  while (fgets(line, 256, urlFile) != NULL) {
+  char line[1024];
+  while (fgets(line, 1024, urlFile) != NULL) {
     
     if (line[0] == '#') continue; // comment line
     line[strcspn(line, "\r\n")] = '\0'; // fix trailing return or new-line
