@@ -374,14 +374,17 @@ int DestUrlArray::load(const string &dest_url_list_file_path)
   while (fgets(line, 256, urlFile) != NULL) {
     
     if (line[0] == '#') continue; // comment line
-    
-    char url[256];
-    if (snprintf(url,256, "%s", line) < 1) continue; // cannot parse
-    if (strlen(url) == 0) continue; // zero-length
+    line[strcspn(line, "\r\n")] = '\0'; // fix trailing return or new-line
+    if (line[0] == '\0') continue; // zero length
+    add(line);
 
-    // add
-
-    add(url);
+    // original
+    // if (line[0] == '#') continue; // comment line
+    // char url[256];
+    // if (snprintf(url,256, "%s", line) < 1) continue; // cannot parse
+    // if (strlen(url) == 0) continue; // zero-length
+    // // add
+    // add(url);
 
   } // while
 
