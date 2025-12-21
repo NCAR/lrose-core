@@ -471,11 +471,11 @@ int RadxCartDP::_processFile(const string &filePath)
     _computeScalarsThreads[ii]->setTempProfile(_tempProfile);
   }
   
-  // add geometry and pid fields to the volume
+  // add geometry fields to the volume
   
   _addGeomFieldsToInput();
 
-  // compute the pid fields
+  // compute the scalar (kdp, pid, precip rate) fields
   
   if (_computeScalars()) {
     cerr << "ERROR - RadxCartDP::Run" << endl;
