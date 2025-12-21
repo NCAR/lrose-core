@@ -63,6 +63,8 @@
 #include <toolsa/DateTime.hh>
 #include <cstdio>
 #include <cerrno>
+#include <fstream>
+#include <string>
 using namespace std;
 
 ///////////////////////////////////////////////////////////////
@@ -191,6 +193,149 @@ int DestUrlArray::load(const string &dest_host_list_file_path,
 
 }
 
+///////////////////////////////////////////////////////////////
+// chatgpt improved version
+
+static inline char* ltrim(char* s) {
+  while (*s && std::isspace(static_cast<unsigned char>(*s))) ++s;
+  return s;
+}
+
+static inline void rtrim_inplace(char* s) {
+  size_t n = std::strlen(s);
+  while (n > 0 && std::isspace(static_cast<unsigned char>(s[n - 1]))) {
+    s[--n] = '\0';
+  }
+}
+
+int DestUrlArray::load2(const std::string &dest_host_list_file_path,
+                        const std::string &dest_url_template_str)
+{
+
+  _clearErrStr();
+  _errStr += "ERROR - ";
+  _errStr += _progName;
+  _errStr += "::DestUrlArray::load()\n";
+  TaStr::AddStr(_errStr, "  ", DateTime::str());
+
+  erase();
+
+  // Decode template URL string
+  DsURL templateUrl(dest_url_template_str);
+  if (!templateUrl.checkValid()) {
+    _addStrErr("  Invalid template URL: ", dest_url_template_str);
+    return -1;
+  }
+
+  // Open host list file
+  FILE *hostFile = std::fopen(dest_host_list_file_path.c_str(), "r");
+  if (hostFile == nullptr) {
+    int errNum = errno;
+    _addStrErr("  Cannot open host list file: ", dest_host_list_file_path);
+    _addStrErr("  ", std::strerror(errNum));
+    return -1;
+  }
+
+  GetHost getHost;
+
+  // Slightly larger buffer than 256 to reduce chance of truncation.
+  // (Hostnames are small; this is mostly for robustness.)
+  char line[1024];
+
+  while (std::fgets(line, sizeof(line), hostFile) != nullptr) {
+
+    // If we didn't read a newline, the line may be longer than our buffer.
+    // Consume the remainder so we don't treat the tail as another host entry.
+    if (std::strchr(line, '\n') == nullptr) {
+      int c;
+      while ((c = std::fgetc(hostFile)) != '\n' && c != EOF) {}
+      // Skip this overlong line (or log it in debug).
+      if (_debug) {
+        cerr << "WARNING - " << _progName << ":DestUrlArray::load()\n"
+             << "  Skipping overlong line in host list file: "
+             << dest_host_list_file_path << "\n";
+      }
+      continue;
+    }
+    
+    // Strip CR/LF
+    line[std::strcspn(line, "\r\n")] = '\0';
+    
+    // Trim leading spaces
+    char* p = ltrim(line);
+
+    // Skip blank
+    if (*p == '\0') continue;
+
+    // Skip comment (allow leading spaces)
+    if (*p == '#') continue;
+
+    // Trim trailing whitespace
+    rtrim_inplace(p);
+    if (*p == '\0') continue;
+
+    // Optional: support inline comments: "host # comment"
+    // (Uncomment if desired)
+    // if (char* hash = std::strchr(p, '#')) {
+    //   *hash = '\0';
+    //   rtrim_inplace(p);
+    //   if (*p == '\0') continue;
+    // }
+
+    // Optional: support host:port entries
+    std::string host(p);
+    int port = -1;
+    {
+      // Split on last ':' (but be careful: IPv6 would complicate this)
+      auto pos = host.rfind(':');
+      if (pos != std::string::npos && pos != 0 && pos + 1 < host.size()) {
+        bool allDigits = true;
+        for (size_t i = pos + 1; i < host.size(); ++i) {
+          if (!std::isdigit(static_cast<unsigned char>(host[i]))) {
+            allDigits = false;
+            break;
+          }
+        }
+        if (allDigits) {
+          port = std::stoi(host.substr(pos + 1));
+          host.resize(pos);
+        }
+      }
+    }
+
+    if (_ignoreLocal) {
+      // GetHost likely expects a clean hostname, no whitespace/newlines.
+      if (_strictLocalCheck) {
+        if (getHost.hostIsLocal2(host.c_str())) continue;
+      } else {
+        if (getHost.hostIsLocal(host.c_str())) continue;
+      }
+    }
+
+    DsURL url(templateUrl);
+    url.setHost(host);
+    if (port > 0) url.setPort(port);
+
+    if (url.checkValid()) {
+      _destUrls.push_back(url.getURLStr());
+    } else if (_debug) {
+      cerr << "WARNING - " << _progName << ":DestUrlArray::load()\n"
+           << "  Invalid URL from host '" << host << "' using template '"
+           << dest_url_template_str << "'\n";
+    }
+  }
+
+  std::fclose(hostFile);
+
+  if (_debug && _destUrls.empty()) {
+    cerr << "WARNING - " << _progName << ":DestUrlArray::load()" << endl;
+    cerr << "  " << DateTime::str() << endl;
+    cerr << "  No valid hosts in file: " << dest_host_list_file_path << endl;
+  }
+
+  return 0;
+}
+
 ///////////////////////////////////////////////////////////////a
 // load()
 //
@@ -250,6 +395,57 @@ int DestUrlArray::load(const string &dest_url_list_file_path)
 
   return (0);
 
+
+}
+
+///////////////////////////////////////////////////////////////a
+// load2()
+// chatgpt improved version
+//
+// Load up the destination URL array from the URL list file
+//
+// Returns 0 on success, -1 on failure.
+
+int DestUrlArray::load2(const string &dest_url_list_file_path)
+
+{
+
+  _clearErrStr();
+  _errStr += "ERROR - ";
+  _errStr += _progName;
+  _errStr += "::DestUrlArray::load()\n";
+  TaStr::AddStr(_errStr, "  ", DateTime::str());
+
+  erase();
+  
+  string destUrlListFilePath(dest_url_list_file_path);
+
+  std::ifstream in(dest_url_list_file_path);
+  if (!in) {
+    _addStrErr("  Cannot open url list file: ", destUrlListFilePath);
+    return -1;
+  }
+  
+  std::string s;
+  while (std::getline(in, s)) {
+    
+    // handle CRLF
+    if (!s.empty() && s.back() == '\r') s.pop_back();
+    
+    // trim leading whitespace to detect comments
+    auto i = s.find_first_not_of(" \t");
+    if (i == std::string::npos) continue;
+    if (s[i] == '#') continue;
+    
+    // optional: trim trailing whitespace
+    auto j = s.find_last_not_of(" \t");
+    s = s.substr(i, j - i + 1);
+    
+    add(s);
+
+  }
+
+  return 0;
 
 }
 

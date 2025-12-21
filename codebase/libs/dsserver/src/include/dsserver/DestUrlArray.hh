@@ -105,12 +105,15 @@ public:
   
   int load(const string &dest_host_list_file_path,
 	   const string &dest_url_template_str);
+  int load2(const string &dest_host_list_file_path,
+            const string &dest_url_template_str);
 
   // Load up the destination URL array from the URL list file
   //
   // Returns 0 on success, -1 on failure.
   
   int load(const string &dest_url_list_file_path);
+  int load2(const string &dest_url_list_file_path);
 
   // Add a URL to the array
   //
