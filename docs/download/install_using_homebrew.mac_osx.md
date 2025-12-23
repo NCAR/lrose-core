@@ -32,7 +32,7 @@ You also need to install Homebrew. See:
 Homebrew now gets the install formula files from:
 
 ```
-  https://github.com/NCAR/homebrew-lrose/tree/main/Formula
+  https://github.com/NCAR/homebrew-lrose/Formula
 ```
 
 Run homebrew to install the package you want.
@@ -181,8 +181,6 @@ To upgrade:
 The ```vortrac``` application analyses rotations in single Doppler data. It is maintained by CSU.
 
 ```vortrac``` is dependent on ```lrose-core```.
-
-```vortrac``` can be installed using the ```lrose-vortrac.rb``` brew formula.
 
 First install ```lrose-core```.
 
