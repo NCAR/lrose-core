@@ -94,3 +94,7 @@ The DOI entry information is stored at:
 
 [https://ncar.github.io/lrose-core](https://ncar.github.io/lrose-core)
 
+### How to contribute:
+
+[CONTRIBUTING.md](https://github.com/NCAR/lrose-docs/blob/master/CONTRIBUTING.md)
+
