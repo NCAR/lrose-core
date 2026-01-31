@@ -77,7 +77,7 @@ Calib::~Calib()
 
 //-----------------------------------------------------------------------
 bool Calib::init(const Params &params, const RefParms &refparms,
-		     RefractInput *input_handler)
+                 RefractInput *input_handler)
 {
   // Set global members
   _inputHandler = input_handler;

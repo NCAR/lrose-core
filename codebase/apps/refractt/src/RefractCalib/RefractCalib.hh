@@ -32,6 +32,7 @@
 #ifndef RefractCalib_HH
 #define RefractCalib_HH
 
+#include "Args.hh"
 #include "Params.hh"
 #include "Calib.hh"
 #include <Refract/RefParms.hh>
@@ -46,35 +47,38 @@
  */
 class RefractCalib
 {
- public:
+  
+public:
 
+  // constructor
+
+  RefractCalib(int argc, char **argv);
+  
   /**
    * Flag indicating whether the program status is currently okay.
    */
+
   bool okay;
-
-
+  
   /**
    * @brief Destructor
    */
-  virtual ~RefractCalib(void);
+  virtual ~RefractCalib();
   
   /**
-   * @brief Retrieve the singleton instance of this class.
-   *
-   * @param[in] argc Number of command line arguments.
-   * @param[in] argv List of command line arguments.
-   *
-   * @return Returns a pointer to the program instance.
+   * @brief Run the program.
    */
-  static RefractCalib *Inst(int argc, char **argv);
 
-  /**
-   * @brief Retrieve the singleton instance of this class.
-   *
-   * @return Returns a pointer to the program instance.
-   */
-  static RefractCalib *Inst(void);
+  int run();
+
+ private:
+
+  string _progName; /**< program name */
+  char *_paramsPath;
+  Args _args;
+  Params _params; /**< Parameter file paramters. */
+  RefParms _refparms;
+  Calib _driver; /**< Data processing object. */
   
   /**
    * @brief Initialize the local data.
@@ -82,44 +86,22 @@ class RefractCalib
    * @return Returns true if the initialization was successful,
    *         false otherwise.
    */
-  bool init(void);
   
-
-  /**
-   * @brief Run the program.
-   */
-  void run(void);
-  
-
- private:
-
-  static RefractCalib *_instance; /**< Singleton instance pointer */
-  char *_progName; /**< program name */
-  Params _params; /**< Parameter file paramters. */
-  RefParms _refparms;
-  Calib _driver; /**< Data processing object. */
-  
-  /**
-   * @brief Constructor
-   *
-   * @param[in] argc Number of command line arguments.
-   * @param[in] argv List of command line arguments.
-   *
-   * @note Private because this is a singleton object.
-   */
-  RefractCalib(int argc, char **argv);
+  int _init();
   
   /**
    * @brief Create the quality field colorscale used in the original
    *        applications.
    */
-  void _createQualityColorscale(void) const;
+
+  void _createQualityColorscale() const;
 
   /**
    * @brief Create the strength field colorscale used in the original
    *        applications.
    */
-  void _createStrengthColorscale(void) const;
+
+  void _createStrengthColorscale() const;
 
   std::vector<string>_setupFiles(int numFiles,
 				 char ** fileList,
@@ -131,6 +113,7 @@ class RefractCalib
    * @parm[in] p  The struct
    * @return the time
    */
+
   time_t _timeFromParams(const Params::Time_t &p) const;
 
   /**
@@ -142,8 +125,11 @@ class RefractCalib
    *
    * @return true if able to get some files onto the vector
    */
-  bool _identifyFiles(const std::string &host, const std::string &path,
-		      const time_t &t0, const time_t &t1,
+
+  bool _identifyFiles(const std::string &host,
+                      const std::string &path,
+		      const time_t &t0,
+                      const time_t &t1,
 		      std::vector<string> &files) const;
 
 };

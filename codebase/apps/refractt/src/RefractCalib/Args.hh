@@ -21,65 +21,44 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/**
- *
- * @file Main.cc
- *
- * @class Main
- *
- * Main program
- *  
- * @date 1/15/2009
- *
- */
+/////////////////////////////////////////////////////////////
+// Args.hh: Command line object
+//
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Jan 2026
+//
+/////////////////////////////////////////////////////////////
 
-#include "RefractCalib.hh"
+#ifndef ARGS_H
+#define ARGS_H
 
-#include <cstdio>
-#include <toolsa/port.h>
-#include <toolsa/umisc.h>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <tdrp/tdrp.h>
+using namespace std;
 
-
-// Prototypes for static functions
-
-static void tidy_and_exit(int sig);
-
-
-// Global variables
-
-RefractCalib *Prog = nullptr;
-
-//---------------------------------------------------------------------------
-int main(int argc, char **argv)
-{
-
-  // Create program object.
-
-  Prog = new RefractCalib(argc, argv);
-  if (!Prog->okay) {
-    return -1;
-  }
-
-  // Register function to trap termination and interrupt signals
-
-  PORTsignal(SIGQUIT, tidy_and_exit);
-  PORTsignal(SIGTERM, tidy_and_exit);
-  PORTsignal(SIGINT, tidy_and_exit);
-
-  // Run the program.
-
-  Prog->run();
+class Args {
   
-  // clean up
+public:
 
-  tidy_and_exit(0);
+  // parse
 
-  return 0;
+  int parse(int argc, char **argv, string &prog_name);
 
-}
+  // public data
 
-//---------------------------------------------------------------------------
-static void tidy_and_exit(int sig)
-{
-  exit(sig);
-}
+  tdrp_override_t override;
+  time_t startTime, endTime;
+  vector<string> inputFileList;
+
+  void usage(string &prog_name, ostream &out);
+  
+protected:
+  
+private:
+
+};
+
+#endif

@@ -32,8 +32,23 @@
 commentdef
 {
   p_header = "RefractCalib";
-  p_text = "This program creates the calibration file used by Refract.";
+  p_text = "RefractCalib (a) reads radar scan files, in polar coordinates; (b) identifies suitable clutter targets; (c) computes the mean phase of those targets for a baseline calibration; and (d) writes the calibration details to a file. Typically we use 6 hours of scans for this purpose. Ideally the moisture field should be uniform for this procedure to work well.";
 };
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
 
 paramdef boolean
 {
@@ -47,6 +62,19 @@ paramdef string
   p_default = "mdvp:://localhost::mdv/debug/RefractCalib";
 } debug_mdv_url;
 
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Processing mode";
+  p_help = "In ARCHIVE mode, we loop through the data between the start and end times. In FILELIST mode, we moves through the list of files specified on the command line. Paths in FILELIST mode MUST contain a day-directory below the data file -- ./data_file.mdv will not work as a file path.";
+} mode;
 
 paramdef boolean
 {
@@ -57,59 +85,9 @@ paramdef boolean
 
 paramdef string
 {
-  p_descr = "Host on which target files are found";
-  p_default = "localhost";
-} target_files_host;
-
-paramdef string
-{
-  p_descr = "Host on which calibration files are found";
-  p_default = "localhost";
-} calibration_files_host;
-
-paramdef string
-{
-  p_descr = "List of files to use for target identification, when file_list_inputs=true";
-  p_default = { "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804183718.KFTG_RVP.0.0.4_SUR_v368",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804183832.KFTG_RVP.0.0.4_SUR_v370",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804184738.KFTG_RVP.0.0.4_SUR_v375",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804185329.KFTG_RVP.0.0.4_SUR_v383",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804185919.KFTG_RVP.0.0.4_SUR_v391",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804190509.KFTG_RVP.0.0.4_SUR_v399",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804191100.KFTG_RVP.0.0.4_SUR_v407",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804191650.KFTG_RVP.0.0.4_SUR_v415",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804192240.KFTG_RVP.0.0.4_SUR_v423",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804192830.KFTG_RVP.0.0.4_SUR_v431",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804193420.KFTG_RVP.0.0.4_SUR_v439",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804194010.KFTG_RVP.0.0.4_SUR_v447",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804194600.KFTG_RVP.0.0.4_SUR_v455",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804195150.KFTG_RVP.0.0.4_SUR_v463",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804195740.KFTG_RVP.0.0.4_SUR_v471",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804200330.KFTG_RVP.0.0.4_SUR_v479",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804200919.KFTG_RVP.0.0.4_SUR_v487",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804201508.KFTG_RVP.0.0.4_SUR_v495",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804202058.KFTG_RVP.0.0.4_SUR_v503",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804202647.KFTG_RVP.0.0.4_SUR_v511",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804210134.KFTG_RVP.0.0.4_SUR_v517",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804210207.KFTG_RVP.0.0.4_SUR_v518",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804210756.KFTG_RVP.0.0.4_SUR_v526",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804211346.KFTG_RVP.0.0.4_SUR_v534",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804211936.KFTG_RVP.0.0.4_SUR_v542" };
-} target_id_file_list[];
-
-paramdef string
-{
-  p_descr = "List of files to use for calibration, when file_list_inputs=true";
-  p_default = { "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807000458.KFTG_RVP.0.0.5_SUR_v8",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807000602.KFTG_RVP.0.0.6_SUR_v10",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807001047.KFTG_RVP.0.0.5_SUR_v16",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807001635.KFTG_RVP.0.0.5_SUR_v24",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807002224.KFTG_RVP.0.0.5_SUR_v32",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807002813.KFTG_RVP.0.0.5_SUR_v40",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807003401.KFTG_RVP.0.0.5_SUR_v48",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807003950.KFTG_RVP.0.0.5_SUR_v56",
-                "$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807004539.KFTG_RVP.0.0.5_SUR_v64" };
-} calibration_file_list[];
+  p_descr = "Directory for input data files";
+  p_default = "/tmp/Refract/input_dir";
+} input_dir;
 
 typedef struct
 {
@@ -119,31 +97,31 @@ typedef struct
   int hour;
   int min;
   int sec;
-} Time_t;
+} DateTime_t;
+
+paramdef struct DateTime_t
+{
+  p_descr = "Start time for mode = ARCHIVE";
+  p_help = "Files in input_dir miust have times between start_time and end_time inclusive.";
+  p_default = {2017, 3, 21, 0, 0, 0};
+} start_time;
+
+paramdef struct DateTime_t
+{
+  p_descr = "End time for mode = ARCHIVE";
+  p_help = "Files in input_dir miust have times between start_time and end_time inclusive.";
+  p_default = {2017, 3, 21, 6, 0, 0};
+} end_time;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
 
 paramdef string
 {
-  p_descr = "Path with files to use for target identification when file_list_inputs = false, can be relative to $RAP_DATA_DIR";
-  p_default = "./data";
-} target_files_path;
-
-paramdef struct Time_t
-{
-  p_descr = "Starting/ending time for target identification data when file_list_inputs = false";
-  p_default = {{2017, 3, 21, 0, 0, 0}, {2017, 3, 22, 0, 0, 0}};
-} target_files_time_range[2];
-
-paramdef string
-{
-  p_descr = "Path with files to use for calibration when file_list_inputs = false, can be relative to $RAP_DATA_DIR";
-  p_default = "./data";
-} calibration_files_path;
-
-paramdef struct Time_t
-{
-  p_descr = "Starting/ending time for calibration data when file_list_inputs = false";
-  p_default = {{2017, 3, 21, 0, 0, 0}, {2017, 3, 22, 0, 0, 0}};
-} calibration_files_time_range[2];
+  p_descr = "Directory for output data files";
+  p_default = "/tmp/Refract/output_dir";
+} output_dir;
 
 /***********************************************************************
  * Algorithm parameters.
@@ -246,19 +224,15 @@ paramdef double
 commentdef
 {
   p_header = "COLORSCALE PARAMETERS";
-  p_text = "These colorscale files can be generated as a convenience to the "
-           "user. "
-           "They are not required for the calculating of the calibration.";
+  p_text = "Create colorscales and quit. These colorscale files can be generated as a convenience to the user. They are not required for the calculating of the calibration.";
 };
 
 paramdef boolean
 {
-  p_descr = "Flag indicating whether to create the strength colorscale "
-            "file.";
-  p_help = "This creates a CIDD colorscale file that matches the colors "
-           "used by Frederic Fabry in his original n_viewcalib program.";
+  p_descr = "Create colorscales.";
+  p_help = "This creates CIDD-type colorscale files that matches the colors used by Frederic Fabry in his original n_viewcalib program.";
   p_default = false;
-} create_strength_colorscale;
+} create_colorscales;
 
 paramdef string
 {
@@ -267,17 +241,10 @@ paramdef string
   p_default = "colorscales/strength.colors";
 } strength_colorscale_path;
 
-paramdef boolean
-{
-  p_descr = "Flag indicating whether to create the quality colorscale file.";
-  p_help = "This creates a CIDD colorscale file that matches the colors "
-           "used by Frederic Fabry in his original n_viewcalib program.";
-  p_default = false;
-} create_quality_colorscale;
-
 paramdef string
 {
   p_descr = "Full path for the quality colorscale file.";
   p_help = "Used only if create_quality_colorscale is set to true.";
   p_default = "colorscales/quality.colors";
 } quality_colorscale_path;
+

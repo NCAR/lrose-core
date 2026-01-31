@@ -560,7 +560,38 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("RefractCalib");
-    tt->comment_text = tdrpStrDup("This program creates the calibration file used by Refract.");
+    tt->comment_text = tdrpStrDup("RefractCalib (a) reads radar scan files, in polar coordinates; (b) identifies suitable clutter targets; (c) computes the mean phase of those targets for a baseline calibration; and (d) writes the calibration details to a file. Typically we use 6 hours of scans for this purpose. Ideally the moisture field should be uniform for this procedure to work well.");
+    tt++;
+    
+    // Parameter 'Comment 1'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 1");
+    tt->comment_hdr = tdrpStrDup("DEBUGGING AND PROCESS CONTROL");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'debug'
+    // ctype is '_debug_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("debug");
+    tt->descr = tdrpStrDup("Debug option");
+    tt->help = tdrpStrDup("If set, debug messages will be printed appropriately");
+    tt->val_offset = (char *) &debug - &_start_;
+    tt->enum_def.name = tdrpStrDup("debug_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("DEBUG_OFF");
+      tt->enum_def.fields[0].val = DEBUG_OFF;
+      tt->enum_def.fields[1].name = tdrpStrDup("DEBUG_NORM");
+      tt->enum_def.fields[1].val = DEBUG_NORM;
+      tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_VERBOSE");
+      tt->enum_def.fields[2].val = DEBUG_VERBOSE;
+    tt->single_val.e = DEBUG_OFF;
     tt++;
     
     // Parameter 'write_debug_mdv_files'
@@ -587,6 +618,35 @@
     tt->single_val.s = tdrpStrDup("mdvp:://localhost::mdv/debug/RefractCalib");
     tt++;
     
+    // Parameter 'Comment 2'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 2");
+    tt->comment_hdr = tdrpStrDup("DATA INPUT");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'mode'
+    // ctype is '_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("mode");
+    tt->descr = tdrpStrDup("Processing mode");
+    tt->help = tdrpStrDup("In ARCHIVE mode, we loop through the data between the start and end times. In FILELIST mode, we moves through the list of files specified on the command line. Paths in FILELIST mode MUST contain a day-directory below the data file -- ./data_file.mdv will not work as a file path.");
+    tt->val_offset = (char *) &mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("mode_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("ARCHIVE");
+      tt->enum_def.fields[0].val = ARCHIVE;
+      tt->enum_def.fields[1].name = tdrpStrDup("FILELIST");
+      tt->enum_def.fields[1].val = FILELIST;
+    tt->single_val.e = ARCHIVE;
+    tt++;
+    
     // Parameter 'file_list_inputs'
     // ctype is 'tdrp_bool_t'
     
@@ -599,127 +659,28 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'target_files_host'
+    // Parameter 'input_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("target_files_host");
-    tt->descr = tdrpStrDup("Host on which target files are found");
+    tt->param_name = tdrpStrDup("input_dir");
+    tt->descr = tdrpStrDup("Directory for input data files");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &target_files_host - &_start_;
-    tt->single_val.s = tdrpStrDup("localhost");
+    tt->val_offset = (char *) &input_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/Refract/input_dir");
     tt++;
     
-    // Parameter 'calibration_files_host'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("calibration_files_host");
-    tt->descr = tdrpStrDup("Host on which calibration files are found");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &calibration_files_host - &_start_;
-    tt->single_val.s = tdrpStrDup("localhost");
-    tt++;
-    
-    // Parameter 'target_id_file_list'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("target_id_file_list");
-    tt->descr = tdrpStrDup("List of files to use for target identification, when file_list_inputs=true");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_target_id_file_list - &_start_;
-    tt->array_n_offset = (char *) &target_id_file_list_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 25;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804183718.KFTG_RVP.0.0.4_SUR_v368");
-      tt->array_vals[1].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804183832.KFTG_RVP.0.0.4_SUR_v370");
-      tt->array_vals[2].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804184738.KFTG_RVP.0.0.4_SUR_v375");
-      tt->array_vals[3].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804185329.KFTG_RVP.0.0.4_SUR_v383");
-      tt->array_vals[4].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804185919.KFTG_RVP.0.0.4_SUR_v391");
-      tt->array_vals[5].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804190509.KFTG_RVP.0.0.4_SUR_v399");
-      tt->array_vals[6].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804191100.KFTG_RVP.0.0.4_SUR_v407");
-      tt->array_vals[7].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804191650.KFTG_RVP.0.0.4_SUR_v415");
-      tt->array_vals[8].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804192240.KFTG_RVP.0.0.4_SUR_v423");
-      tt->array_vals[9].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804192830.KFTG_RVP.0.0.4_SUR_v431");
-      tt->array_vals[10].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804193420.KFTG_RVP.0.0.4_SUR_v439");
-      tt->array_vals[11].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804194010.KFTG_RVP.0.0.4_SUR_v447");
-      tt->array_vals[12].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804194600.KFTG_RVP.0.0.4_SUR_v455");
-      tt->array_vals[13].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804195150.KFTG_RVP.0.0.4_SUR_v463");
-      tt->array_vals[14].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804195740.KFTG_RVP.0.0.4_SUR_v471");
-      tt->array_vals[15].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804200330.KFTG_RVP.0.0.4_SUR_v479");
-      tt->array_vals[16].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804200919.KFTG_RVP.0.0.4_SUR_v487");
-      tt->array_vals[17].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804201508.KFTG_RVP.0.0.4_SUR_v495");
-      tt->array_vals[18].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804202058.KFTG_RVP.0.0.4_SUR_v503");
-      tt->array_vals[19].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804202647.KFTG_RVP.0.0.4_SUR_v511");
-      tt->array_vals[20].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804210134.KFTG_RVP.0.0.4_SUR_v517");
-      tt->array_vals[21].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804210207.KFTG_RVP.0.0.4_SUR_v518");
-      tt->array_vals[22].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804210756.KFTG_RVP.0.0.4_SUR_v526");
-      tt->array_vals[23].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804211346.KFTG_RVP.0.0.4_SUR_v534");
-      tt->array_vals[24].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/target_id/swp.1060804211936.KFTG_RVP.0.0.4_SUR_v542");
-    tt++;
-    
-    // Parameter 'calibration_file_list'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("calibration_file_list");
-    tt->descr = tdrpStrDup("List of files to use for calibration, when file_list_inputs=true");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_calibration_file_list - &_start_;
-    tt->array_n_offset = (char *) &calibration_file_list_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 9;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807000458.KFTG_RVP.0.0.5_SUR_v8");
-      tt->array_vals[1].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807000602.KFTG_RVP.0.0.6_SUR_v10");
-      tt->array_vals[2].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807001047.KFTG_RVP.0.0.5_SUR_v16");
-      tt->array_vals[3].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807001635.KFTG_RVP.0.0.5_SUR_v24");
-      tt->array_vals[4].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807002224.KFTG_RVP.0.0.5_SUR_v32");
-      tt->array_vals[5].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807002813.KFTG_RVP.0.0.5_SUR_v40");
-      tt->array_vals[6].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807003401.KFTG_RVP.0.0.5_SUR_v48");
-      tt->array_vals[7].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807003950.KFTG_RVP.0.0.5_SUR_v56");
-      tt->array_vals[8].s = tdrpStrDup("$(RAP_DATA_DIR)/apps/refractt/src/RefractCalib/KFTG/raw/calib/swp.1060807004539.KFTG_RVP.0.0.5_SUR_v64");
-    tt++;
-    
-    // Parameter 'target_files_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("target_files_path");
-    tt->descr = tdrpStrDup("Path with files to use for target identification when file_list_inputs = false, can be relative to $RAP_DATA_DIR");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &target_files_path - &_start_;
-    tt->single_val.s = tdrpStrDup("./data");
-    tt++;
-    
-    // Parameter 'target_files_time_range'
-    // ctype is '_Time_t'
+    // Parameter 'start_time'
+    // ctype is '_DateTime_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("target_files_time_range");
-    tt->descr = tdrpStrDup("Starting/ending time for target identification data when file_list_inputs = false");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_target_files_time_range - &_start_;
-    tt->array_n_offset = (char *) &target_files_time_range_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = TRUE;
-    tt->array_elem_size = sizeof(Time_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("Time_t");
+    tt->param_name = tdrpStrDup("start_time");
+    tt->descr = tdrpStrDup("Start time for mode = ARCHIVE");
+    tt->help = tdrpStrDup("Files in input_dir miust have times between start_time and end_time inclusive.");
+    tt->val_offset = (char *) &start_time - &_start_;
+    tt->struct_def.name = tdrpStrDup("DateTime_t");
     tt->struct_def.nfields = 6;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
@@ -727,33 +688,33 @@
       tt->struct_def.fields[0].fname = tdrpStrDup("year");
       tt->struct_def.fields[0].ptype = INT_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_target_files_time_range->year - (char *) _target_files_time_range;
+        (char *) &start_time.year - (char *) &start_time;
       tt->struct_def.fields[1].ftype = tdrpStrDup("int");
       tt->struct_def.fields[1].fname = tdrpStrDup("month");
       tt->struct_def.fields[1].ptype = INT_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_target_files_time_range->month - (char *) _target_files_time_range;
+        (char *) &start_time.month - (char *) &start_time;
       tt->struct_def.fields[2].ftype = tdrpStrDup("int");
       tt->struct_def.fields[2].fname = tdrpStrDup("day");
       tt->struct_def.fields[2].ptype = INT_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_target_files_time_range->day - (char *) _target_files_time_range;
+        (char *) &start_time.day - (char *) &start_time;
       tt->struct_def.fields[3].ftype = tdrpStrDup("int");
       tt->struct_def.fields[3].fname = tdrpStrDup("hour");
       tt->struct_def.fields[3].ptype = INT_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_target_files_time_range->hour - (char *) _target_files_time_range;
+        (char *) &start_time.hour - (char *) &start_time;
       tt->struct_def.fields[4].ftype = tdrpStrDup("int");
       tt->struct_def.fields[4].fname = tdrpStrDup("min");
       tt->struct_def.fields[4].ptype = INT_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_target_files_time_range->min - (char *) _target_files_time_range;
+        (char *) &start_time.min - (char *) &start_time;
       tt->struct_def.fields[5].ftype = tdrpStrDup("int");
       tt->struct_def.fields[5].fname = tdrpStrDup("sec");
       tt->struct_def.fields[5].ptype = INT_TYPE;
       tt->struct_def.fields[5].rel_offset = 
-        (char *) &_target_files_time_range->sec - (char *) _target_files_time_range;
-    tt->n_struct_vals = 12;
+        (char *) &start_time.sec - (char *) &start_time;
+    tt->n_struct_vals = 6;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].i = 2017;
@@ -762,41 +723,18 @@
       tt->struct_vals[3].i = 0;
       tt->struct_vals[4].i = 0;
       tt->struct_vals[5].i = 0;
-      tt->struct_vals[6].i = 2017;
-      tt->struct_vals[7].i = 3;
-      tt->struct_vals[8].i = 22;
-      tt->struct_vals[9].i = 0;
-      tt->struct_vals[10].i = 0;
-      tt->struct_vals[11].i = 0;
     tt++;
     
-    // Parameter 'calibration_files_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("calibration_files_path");
-    tt->descr = tdrpStrDup("Path with files to use for calibration when file_list_inputs = false, can be relative to $RAP_DATA_DIR");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &calibration_files_path - &_start_;
-    tt->single_val.s = tdrpStrDup("./data");
-    tt++;
-    
-    // Parameter 'calibration_files_time_range'
-    // ctype is '_Time_t'
+    // Parameter 'end_time'
+    // ctype is '_DateTime_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("calibration_files_time_range");
-    tt->descr = tdrpStrDup("Starting/ending time for calibration data when file_list_inputs = false");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_calibration_files_time_range - &_start_;
-    tt->array_n_offset = (char *) &calibration_files_time_range_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = TRUE;
-    tt->array_elem_size = sizeof(Time_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("Time_t");
+    tt->param_name = tdrpStrDup("end_time");
+    tt->descr = tdrpStrDup("End time for mode = ARCHIVE");
+    tt->help = tdrpStrDup("Files in input_dir miust have times between start_time and end_time inclusive.");
+    tt->val_offset = (char *) &end_time - &_start_;
+    tt->struct_def.name = tdrpStrDup("DateTime_t");
     tt->struct_def.nfields = 6;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
@@ -804,54 +742,69 @@
       tt->struct_def.fields[0].fname = tdrpStrDup("year");
       tt->struct_def.fields[0].ptype = INT_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_calibration_files_time_range->year - (char *) _calibration_files_time_range;
+        (char *) &end_time.year - (char *) &end_time;
       tt->struct_def.fields[1].ftype = tdrpStrDup("int");
       tt->struct_def.fields[1].fname = tdrpStrDup("month");
       tt->struct_def.fields[1].ptype = INT_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_calibration_files_time_range->month - (char *) _calibration_files_time_range;
+        (char *) &end_time.month - (char *) &end_time;
       tt->struct_def.fields[2].ftype = tdrpStrDup("int");
       tt->struct_def.fields[2].fname = tdrpStrDup("day");
       tt->struct_def.fields[2].ptype = INT_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_calibration_files_time_range->day - (char *) _calibration_files_time_range;
+        (char *) &end_time.day - (char *) &end_time;
       tt->struct_def.fields[3].ftype = tdrpStrDup("int");
       tt->struct_def.fields[3].fname = tdrpStrDup("hour");
       tt->struct_def.fields[3].ptype = INT_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_calibration_files_time_range->hour - (char *) _calibration_files_time_range;
+        (char *) &end_time.hour - (char *) &end_time;
       tt->struct_def.fields[4].ftype = tdrpStrDup("int");
       tt->struct_def.fields[4].fname = tdrpStrDup("min");
       tt->struct_def.fields[4].ptype = INT_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_calibration_files_time_range->min - (char *) _calibration_files_time_range;
+        (char *) &end_time.min - (char *) &end_time;
       tt->struct_def.fields[5].ftype = tdrpStrDup("int");
       tt->struct_def.fields[5].fname = tdrpStrDup("sec");
       tt->struct_def.fields[5].ptype = INT_TYPE;
       tt->struct_def.fields[5].rel_offset = 
-        (char *) &_calibration_files_time_range->sec - (char *) _calibration_files_time_range;
-    tt->n_struct_vals = 12;
+        (char *) &end_time.sec - (char *) &end_time;
+    tt->n_struct_vals = 6;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].i = 2017;
       tt->struct_vals[1].i = 3;
       tt->struct_vals[2].i = 21;
-      tt->struct_vals[3].i = 0;
+      tt->struct_vals[3].i = 6;
       tt->struct_vals[4].i = 0;
       tt->struct_vals[5].i = 0;
-      tt->struct_vals[6].i = 2017;
-      tt->struct_vals[7].i = 3;
-      tt->struct_vals[8].i = 22;
-      tt->struct_vals[9].i = 0;
-      tt->struct_vals[10].i = 0;
-      tt->struct_vals[11].i = 0;
     tt++;
     
-    // Parameter 'Comment 1'
+    // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 1");
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_dir");
+    tt->descr = tdrpStrDup("Directory for output data files");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/Refract/output_dir");
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("ALGORITHM PARAMETERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -988,24 +941,24 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 2'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 2");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("COLORSCALE PARAMETERS");
-    tt->comment_text = tdrpStrDup("These colorscale files can be generated as a convenience to the user. They are not required for the calculating of the calibration.");
+    tt->comment_text = tdrpStrDup("Create colorscales and quit. These colorscale files can be generated as a convenience to the user. They are not required for the calculating of the calibration.");
     tt++;
     
-    // Parameter 'create_strength_colorscale'
+    // Parameter 'create_colorscales'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("create_strength_colorscale");
-    tt->descr = tdrpStrDup("Flag indicating whether to create the strength colorscale file.");
-    tt->help = tdrpStrDup("This creates a CIDD colorscale file that matches the colors used by Frederic Fabry in his original n_viewcalib program.");
-    tt->val_offset = (char *) &create_strength_colorscale - &_start_;
+    tt->param_name = tdrpStrDup("create_colorscales");
+    tt->descr = tdrpStrDup("Create colorscales.");
+    tt->help = tdrpStrDup("This creates CIDD-type colorscale files that matches the colors used by Frederic Fabry in his original n_viewcalib program.");
+    tt->val_offset = (char *) &create_colorscales - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -1019,18 +972,6 @@
     tt->help = tdrpStrDup("Used only if create_strength_colorscale is set to true.");
     tt->val_offset = (char *) &strength_colorscale_path - &_start_;
     tt->single_val.s = tdrpStrDup("colorscales/strength.colors");
-    tt++;
-    
-    // Parameter 'create_quality_colorscale'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("create_quality_colorscale");
-    tt->descr = tdrpStrDup("Flag indicating whether to create the quality colorscale file.");
-    tt->help = tdrpStrDup("This creates a CIDD colorscale file that matches the colors used by Frederic Fabry in his original n_viewcalib program.");
-    tt->val_offset = (char *) &create_quality_colorscale - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'quality_colorscale_path'

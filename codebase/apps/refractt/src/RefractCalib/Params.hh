@@ -68,6 +68,17 @@ public:
   // enum typedefs
 
   typedef enum {
+    DEBUG_OFF = 0,
+    DEBUG_NORM = 1,
+    DEBUG_VERBOSE = 2
+  } debug_t;
+
+  typedef enum {
+    ARCHIVE = 0,
+    FILELIST = 1
+  } mode_t;
+
+  typedef enum {
     ENTER_N = 0,
     ENTER_P_T_TD = 1
   } entry_type_t;
@@ -81,7 +92,7 @@ public:
     int hour;
     int min;
     int sec;
-  } Time_t;
+  } DateTime_t;
 
   ///////////////////////////
   // Member functions
@@ -377,31 +388,23 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
+  debug_t debug;
+
   tdrp_bool_t write_debug_mdv_files;
 
   char* debug_mdv_url;
 
+  mode_t mode;
+
   tdrp_bool_t file_list_inputs;
 
-  char* target_files_host;
+  char* input_dir;
 
-  char* calibration_files_host;
+  DateTime_t start_time;
 
-  char* *_target_id_file_list;
-  int target_id_file_list_n;
+  DateTime_t end_time;
 
-  char* *_calibration_file_list;
-  int calibration_file_list_n;
-
-  char* target_files_path;
-
-  Time_t *_target_files_time_range;
-  int target_files_time_range_n;
-
-  char* calibration_files_path;
-
-  Time_t *_calibration_files_time_range;
-  int calibration_files_time_range_n;
+  char* output_dir;
 
   char* ref_file_path;
 
@@ -423,11 +426,9 @@ public:
 
   double calib_dewpoint_temperature;
 
-  tdrp_bool_t create_strength_colorscale;
+  tdrp_bool_t create_colorscales;
 
   char* strength_colorscale_path;
-
-  tdrp_bool_t create_quality_colorscale;
 
   char* quality_colorscale_path;
 

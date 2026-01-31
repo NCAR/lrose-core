@@ -50,17 +50,15 @@ LOC_LIBS = \
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
-LOC_CFLAGS =
-LOC_CPPC_CFLAGS = -DLINUX -DSYSV
-
-
 HDRS = \
+	Args.hh \
 	Params.hh \
 	Input.hh \
 	Calib.hh \
 	RefractCalib.hh
 
 CPPC_SRCS = \
+	Args.cc \
 	Params.cc \
 	Main.cc \
 	Input.cc \
