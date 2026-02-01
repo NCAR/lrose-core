@@ -143,9 +143,6 @@ int RefractCalib::_init()
     _createQualityColorscale();
   }
   
-  if (_params.create_quality_colorscale) {
-  }
-  
   // Initialize the input handler
 
   RefractInput *input_handler = _refparms.initInput();
@@ -265,6 +262,7 @@ void RefractCalib::_createStrengthColorscale() const
     LOG(ERROR) << "Error opening colorscale file for output";
     perror(_params.strength_colorscale_path);
     return;
+
   }
   
   for (int i = 0; i < 120; ++i) {
