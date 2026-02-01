@@ -54,14 +54,13 @@ class Calib
   /**
    * @brief Constructor
    */
-  Calib(void);
-  
 
+  Calib(const Params &params);
+  
   /**
    * @brief Destructor
    */
-  virtual ~Calib(void);
-  
+  virtual ~Calib();
 
   /**
    * @brief Initialize the local member data.
@@ -73,7 +72,7 @@ class Calib
    * @return Returns true if the initialization was successful,
    *         false otherwise.
    */
-  bool init(const Params &params, const RefParms &refparms,
+  bool init(const RefParms &refparms,
 	    RefractInput *input_handler);
   
 
@@ -141,7 +140,8 @@ class Calib
   /////////////////////
   // Private members //
   /////////////////////
-  
+
+  const Params &_params;
   RefractInput *_inputHandler;  /**< Input data handler */
   int _numAzim;  /**< Number of azimuths in the data. */
   int _numRangeBins;  /**< Number of range bins in the data. */

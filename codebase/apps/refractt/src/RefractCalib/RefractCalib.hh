@@ -21,13 +21,24 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/**
- *
- * @file RefractCalib.hh
- * @class RefractCalib
- * RefractCalib program object.
- * @date 1/15/2008
- */
+/////////////////////////////////////////////////////////////
+// RefractCalib Main
+//
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Jan 2026
+//
+/////////////////////////////////////////////////////////////
+//
+// RefractCalib:
+//    (a) reads radar scan files, in polar coordinates
+//    (b) identifies suitable clutter targets
+//    (c) computes the mean phase of those targets for a baseline calibration
+//    (d) writes the calibration details to a file.
+// Typically we use 6 hours of scans for this purpose.
+// Ideally the moisture field should be uniform for this procedure to work well.
+//
+//////////////////////////////////////////////////////////////
 
 #ifndef RefractCalib_HH
 #define RefractCalib_HH
@@ -78,60 +89,12 @@ public:
   Args _args;
   Params _params; /**< Parameter file paramters. */
   RefParms _refparms;
-  Calib _driver; /**< Data processing object. */
+  Calib *_calib; /**< Data processing object. */
+
+  // analysis time limits
   
-  /**
-   * @brief Initialize the local data.
-   *
-   * @return Returns true if the initialization was successful,
-   *         false otherwise.
-   */
+  time_t _startTime, _endTime;
   
-  int _init();
-  
-  /**
-   * @brief Create the quality field colorscale used in the original
-   *        applications.
-   */
-
-  void _createQualityColorscale() const;
-
-  /**
-   * @brief Create the strength field colorscale used in the original
-   *        applications.
-   */
-
-  void _createStrengthColorscale() const;
-
-  std::vector<string>_setupFiles(int numFiles,
-				 char ** fileList,
-				 Params::Time_t *timeRange,
-				 const std::string &host,
-				 const std::string &filesPath);
-  /**
-   * Create a time_t from the Time_t struct in the params class
-   * @parm[in] p  The struct
-   * @return the time
-   */
-
-  time_t _timeFromParams(const Params::Time_t &p) const;
-
-  /**
-   * Create and return a list of files within a time range
-   * @param[in] path  Place to search for files
-   * @param[in] t0  Earliest time
-   * @param[in] t1  Latest time
-   * @param[out] files  The file names
-   *
-   * @return true if able to get some files onto the vector
-   */
-
-  bool _identifyFiles(const std::string &host,
-                      const std::string &path,
-		      const time_t &t0,
-                      const time_t &t1,
-		      std::vector<string> &files) const;
-
 };
 
 

@@ -21,29 +21,33 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/**
- *
- * @file Main.cc
- *
- * @class Main
- *
- * Main program
- *  
- * @date 1/15/2009
- *
- */
+/////////////////////////////////////////////////////////////
+// RefractCalib Main
+//
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Jan 2026
+//
+/////////////////////////////////////////////////////////////
+//
+// RefractCalib:
+//    (a) reads radar scan files, in polar coordinates
+//    (b) identifies suitable clutter targets
+//    (c) computes the mean phase of those targets for a baseline calibration
+//    (d) writes the calibration details to a file.
+// Typically we use 6 hours of scans for this purpose.
+// Ideally the moisture field should be uniform for this procedure to work well.
+//
+//////////////////////////////////////////////////////////////
 
 #include "RefractCalib.hh"
-
 #include <cstdio>
 #include <toolsa/port.h>
 #include <toolsa/umisc.h>
 
-
 // Prototypes for static functions
 
 static void tidy_and_exit(int sig);
-
 
 // Global variables
 

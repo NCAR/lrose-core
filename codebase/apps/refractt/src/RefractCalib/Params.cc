@@ -634,7 +634,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Processing mode");
-    tt->help = tdrpStrDup("In ARCHIVE mode, we loop through the data between the start and end times. In FILELIST mode, we moves through the list of files specified on the command line. Paths in FILELIST mode MUST contain a day-directory below the data file -- ./data_file.mdv will not work as a file path.");
+    tt->help = tdrpStrDup("In ARCHIVE mode, we loop through the data between the start and end times. In FILELIST mode, we moves through the list of files specified on the command line. Typically we use about 6 hours of data for this step.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
     tt->enum_def.nfields = 2;
@@ -645,18 +645,6 @@
       tt->enum_def.fields[1].name = tdrpStrDup("FILELIST");
       tt->enum_def.fields[1].val = FILELIST;
     tt->single_val.e = ARCHIVE;
-    tt++;
-    
-    // Parameter 'file_list_inputs'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("file_list_inputs");
-    tt->descr = tdrpStrDup("Flag indicating whether to use a file list for input data, or a range of times");
-    tt->help = tdrpStrDup("TRUE means use the file list, FALSE means use a range of times.");
-    tt->val_offset = (char *) &file_list_inputs - &_start_;
-    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'input_dir'
@@ -672,111 +660,27 @@
     tt++;
     
     // Parameter 'start_time'
-    // ctype is '_DateTime_t'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
+    tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("start_time");
-    tt->descr = tdrpStrDup("Start time for mode = ARCHIVE");
-    tt->help = tdrpStrDup("Files in input_dir miust have times between start_time and end_time inclusive.");
+    tt->descr = tdrpStrDup("Set the start time for ARCHIVE mode analysis.");
+    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'.");
     tt->val_offset = (char *) &start_time - &_start_;
-    tt->struct_def.name = tdrpStrDup("DateTime_t");
-    tt->struct_def.nfields = 6;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[0].fname = tdrpStrDup("year");
-      tt->struct_def.fields[0].ptype = INT_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &start_time.year - (char *) &start_time;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[1].fname = tdrpStrDup("month");
-      tt->struct_def.fields[1].ptype = INT_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &start_time.month - (char *) &start_time;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[2].fname = tdrpStrDup("day");
-      tt->struct_def.fields[2].ptype = INT_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &start_time.day - (char *) &start_time;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[3].fname = tdrpStrDup("hour");
-      tt->struct_def.fields[3].ptype = INT_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &start_time.hour - (char *) &start_time;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[4].fname = tdrpStrDup("min");
-      tt->struct_def.fields[4].ptype = INT_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &start_time.min - (char *) &start_time;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[5].fname = tdrpStrDup("sec");
-      tt->struct_def.fields[5].ptype = INT_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &start_time.sec - (char *) &start_time;
-    tt->n_struct_vals = 6;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].i = 2017;
-      tt->struct_vals[1].i = 3;
-      tt->struct_vals[2].i = 21;
-      tt->struct_vals[3].i = 0;
-      tt->struct_vals[4].i = 0;
-      tt->struct_vals[5].i = 0;
+    tt->single_val.s = tdrpStrDup("2017 03 21 00 00 00");
     tt++;
     
     // Parameter 'end_time'
-    // ctype is '_DateTime_t'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
+    tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("end_time");
-    tt->descr = tdrpStrDup("End time for mode = ARCHIVE");
-    tt->help = tdrpStrDup("Files in input_dir miust have times between start_time and end_time inclusive.");
+    tt->descr = tdrpStrDup("Set the end time for ARCHIVE mode analysis.");
+    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'.");
     tt->val_offset = (char *) &end_time - &_start_;
-    tt->struct_def.name = tdrpStrDup("DateTime_t");
-    tt->struct_def.nfields = 6;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[0].fname = tdrpStrDup("year");
-      tt->struct_def.fields[0].ptype = INT_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &end_time.year - (char *) &end_time;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[1].fname = tdrpStrDup("month");
-      tt->struct_def.fields[1].ptype = INT_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &end_time.month - (char *) &end_time;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[2].fname = tdrpStrDup("day");
-      tt->struct_def.fields[2].ptype = INT_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &end_time.day - (char *) &end_time;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[3].fname = tdrpStrDup("hour");
-      tt->struct_def.fields[3].ptype = INT_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &end_time.hour - (char *) &end_time;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[4].fname = tdrpStrDup("min");
-      tt->struct_def.fields[4].ptype = INT_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &end_time.min - (char *) &end_time;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[5].fname = tdrpStrDup("sec");
-      tt->struct_def.fields[5].ptype = INT_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &end_time.sec - (char *) &end_time;
-    tt->n_struct_vals = 6;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].i = 2017;
-      tt->struct_vals[1].i = 3;
-      tt->struct_vals[2].i = 21;
-      tt->struct_vals[3].i = 6;
-      tt->struct_vals[4].i = 0;
-      tt->struct_vals[5].i = 0;
+    tt->single_val.s = tdrpStrDup("2017 03 21 06 00 00");
     tt++;
     
     // Parameter 'Comment 3'
@@ -939,51 +843,6 @@
     tt->help = tdrpStrDup("Unsed only if entry_type is set to ENTER_P_T_TD.");
     tt->val_offset = (char *) &calib_dewpoint_temperature - &_start_;
     tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("COLORSCALE PARAMETERS");
-    tt->comment_text = tdrpStrDup("Create colorscales and quit. These colorscale files can be generated as a convenience to the user. They are not required for the calculating of the calibration.");
-    tt++;
-    
-    // Parameter 'create_colorscales'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("create_colorscales");
-    tt->descr = tdrpStrDup("Create colorscales.");
-    tt->help = tdrpStrDup("This creates CIDD-type colorscale files that matches the colors used by Frederic Fabry in his original n_viewcalib program.");
-    tt->val_offset = (char *) &create_colorscales - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'strength_colorscale_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("strength_colorscale_path");
-    tt->descr = tdrpStrDup("Full path for the strength colorscale file.");
-    tt->help = tdrpStrDup("Used only if create_strength_colorscale is set to true.");
-    tt->val_offset = (char *) &strength_colorscale_path - &_start_;
-    tt->single_val.s = tdrpStrDup("colorscales/strength.colors");
-    tt++;
-    
-    // Parameter 'quality_colorscale_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("quality_colorscale_path");
-    tt->descr = tdrpStrDup("Full path for the quality colorscale file.");
-    tt->help = tdrpStrDup("Used only if create_quality_colorscale is set to true.");
-    tt->val_offset = (char *) &quality_colorscale_path - &_start_;
-    tt->single_val.s = tdrpStrDup("colorscales/quality.colors");
     tt++;
     
     // trailing entry has param_name set to NULL

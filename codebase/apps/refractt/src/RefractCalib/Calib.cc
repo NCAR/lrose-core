@@ -47,19 +47,21 @@ using std::vector;
 const size_t Calib::MINIMUM_TARGET_LIST_FILES = 2;
 
 //-----------------------------------------------------------------------
-Calib::Calib() :
-  _inputHandler(0),
-  _numAzim(0),
-  _numRangeBins(0),
-  _rMin(0),
-  _beamWidth(0.0),
-  _sideLobePower(0.0),
-  _refFilePath(""),
-  _fluctSnr(0),
-  _pixelCount(0),
-  _writeDebugMdvFiles(false),
-  _debugMdvUrl("")
+Calib::Calib(const Params &params) :
+        _params(params),
+        _inputHandler(0),
+        _numAzim(0),
+        _numRangeBins(0),
+        _rMin(0),
+        _beamWidth(0.0),
+        _sideLobePower(0.0),
+        _refFilePath(""),
+        _fluctSnr(0),
+        _pixelCount(0),
+        _writeDebugMdvFiles(false),
+        _debugMdvUrl("")
 {
+
 }
 
 //-----------------------------------------------------------------------
@@ -76,34 +78,34 @@ Calib::~Calib()
 }
 
 //-----------------------------------------------------------------------
-bool Calib::init(const Params &params, const RefParms &refparms,
+bool Calib::init(const RefParms &refparms,
                  RefractInput *input_handler)
 {
   // Set global members
   _inputHandler = input_handler;
   _numAzim = 0;   // refparms.num_azim;
   _numRangeBins = 0; //refparms.num_range_bins;
-  _rMin = params.r_min;
-  _beamWidth = params.beam_width;
-  _sideLobePower = params.side_lobe_pow;
-  _refFilePath = params.ref_file_path;
-  _refUrl = params.ref_url;
+  _rMin = _params.r_min;
+  _beamWidth = _params.beam_width;
+  _sideLobePower = _params.side_lobe_pow;
+  _refFilePath = _params.ref_file_path;
+  _refUrl = _params.ref_url;
   
-  if (params.write_debug_mdv_files)
+  if (_params.write_debug_mdv_files)
   {
-    setDebugMdvUrl(params.debug_mdv_url);
+    setDebugMdvUrl(_params.debug_mdv_url);
   }
   
-  switch (params.entry_type)
+  switch (_params.entry_type)
   {
   case Params::ENTER_P_T_TD :
-    _nValue = RefractUtil::deriveNValue(params.calib_pressure,
-					params.calib_temperature,
-					params.calib_dewpoint_temperature);
+    _nValue = RefractUtil::deriveNValue(_params.calib_pressure,
+					_params.calib_temperature,
+					_params.calib_dewpoint_temperature);
     break;
   case Params::ENTER_N :
   default:
-    _nValue = params.calib_n;
+    _nValue = _params.calib_n;
     break;
   }
   

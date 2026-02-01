@@ -83,17 +83,6 @@ public:
     ENTER_P_T_TD = 1
   } entry_type_t;
 
-  // struct typedefs
-
-  typedef struct {
-    int year;
-    int month;
-    int day;
-    int hour;
-    int min;
-    int sec;
-  } DateTime_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -396,13 +385,11 @@ public:
 
   mode_t mode;
 
-  tdrp_bool_t file_list_inputs;
-
   char* input_dir;
 
-  DateTime_t start_time;
+  char* start_time;
 
-  DateTime_t end_time;
+  char* end_time;
 
   char* output_dir;
 
@@ -426,12 +413,6 @@ public:
 
   double calib_dewpoint_temperature;
 
-  tdrp_bool_t create_colorscales;
-
-  char* strength_colorscale_path;
-
-  char* quality_colorscale_path;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -439,7 +420,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[29];
+  mutable TDRPtable _table[24];
 
   const char *_className;
 

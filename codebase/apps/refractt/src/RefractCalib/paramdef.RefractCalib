@@ -73,15 +73,8 @@ typedef enum {
 paramdef enum mode_t {
   p_default = ARCHIVE;
   p_descr = "Processing mode";
-  p_help = "In ARCHIVE mode, we loop through the data between the start and end times. In FILELIST mode, we moves through the list of files specified on the command line. Paths in FILELIST mode MUST contain a day-directory below the data file -- ./data_file.mdv will not work as a file path.";
+  p_help = "In ARCHIVE mode, we loop through the data between the start and end times. In FILELIST mode, we moves through the list of files specified on the command line. Typically we use about 6 hours of data for this step.";
 } mode;
-
-paramdef boolean
-{
-  p_descr = "Flag indicating whether to use a file list for input data, or a range of times";
-  p_help = "TRUE means use the file list, FALSE means use a range of times.";
-  p_default = true;
-} file_list_inputs;
 
 paramdef string
 {
@@ -89,28 +82,16 @@ paramdef string
   p_default = "/tmp/Refract/input_dir";
 } input_dir;
 
-typedef struct
-{
-  int year;
-  int month;
-  int day;
-  int hour;
-  int min;
-  int sec;
-} DateTime_t;
-
-paramdef struct DateTime_t
-{
-  p_descr = "Start time for mode = ARCHIVE";
-  p_help = "Files in input_dir miust have times between start_time and end_time inclusive.";
-  p_default = {2017, 3, 21, 0, 0, 0};
+paramdef string {
+  p_default = "2017 03 21 00 00 00";
+  p_descr = "Set the start time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
 } start_time;
 
-paramdef struct DateTime_t
-{
-  p_descr = "End time for mode = ARCHIVE";
-  p_help = "Files in input_dir miust have times between start_time and end_time inclusive.";
-  p_default = {2017, 3, 21, 6, 0, 0};
+paramdef string {
+  p_default = "2017 03 21 06 00 00";
+  p_descr = "Set the end time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
 } end_time;
 
 commentdef {
@@ -216,35 +197,4 @@ paramdef double
   p_default = 1.0;
 } calib_dewpoint_temperature;
 
-
-/***********************************************************************
- * Colorscale parameters.
- */
-
-commentdef
-{
-  p_header = "COLORSCALE PARAMETERS";
-  p_text = "Create colorscales and quit. These colorscale files can be generated as a convenience to the user. They are not required for the calculating of the calibration.";
-};
-
-paramdef boolean
-{
-  p_descr = "Create colorscales.";
-  p_help = "This creates CIDD-type colorscale files that matches the colors used by Frederic Fabry in his original n_viewcalib program.";
-  p_default = false;
-} create_colorscales;
-
-paramdef string
-{
-  p_descr = "Full path for the strength colorscale file.";
-  p_help = "Used only if create_strength_colorscale is set to true.";
-  p_default = "colorscales/strength.colors";
-} strength_colorscale_path;
-
-paramdef string
-{
-  p_descr = "Full path for the quality colorscale file.";
-  p_help = "Used only if create_quality_colorscale is set to true.";
-  p_default = "colorscales/quality.colors";
-} quality_colorscale_path;
 

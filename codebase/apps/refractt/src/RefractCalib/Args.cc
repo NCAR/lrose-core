@@ -78,28 +78,6 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-color_scales")) {
-      
-      sprintf(tmp_str, "create_colorscales = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-i")) {
-      if (i < argc - 1) {
-        sprintf(tmp_str, "instance = \"%s\";", argv[i+1]);
-        TDRP_add_override(&override, tmp_str);
-      } else {
-        iret = -1;
-      }
-
-    } else if (!strcmp(argv[i], "-mode")) {
-      
-      if (i < argc - 1) {
-        sprintf(tmp_str, "mode = %s;", argv[i+1]);
-        TDRP_add_override(&override, tmp_str);
-      } else {
-        iret = -1;
-      }
-        
     } else if (!strcmp(argv[i], "-in_dir")) {
 
       if(i < argc - 1) {
@@ -119,13 +97,24 @@ int Args::parse(int argc, char **argv, string &prog_name)
         iret = -1;
       }
 
+    } else if (!strcmp(argv[i], "-mode")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "mode = %s;", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+        iret = -1;
+      }
+        
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
         startTime = DateTime::parseDateTime(argv[++i]);
-        if (startTime == DateTime::NEVER)
-        {
+        if (startTime == DateTime::NEVER) {
           iret = -1;
+        } else {
+          sprintf(tmp_str, "mode = ARCHIVE;");
+          TDRP_add_override(&override, tmp_str);
         }
       } else {
         iret = -1;
@@ -135,9 +124,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
       
       if (i < argc - 1) {
         endTime = DateTime::parseDateTime(argv[++i]);
-        if (endTime == DateTime::NEVER)
-        {
+        if (endTime == DateTime::NEVER) {
           iret = -1;
+        } else {
+          sprintf(tmp_str, "mode = ARCHIVE;");
+          TDRP_add_override(&override, tmp_str);
         }
       } else {
         iret = -1;
@@ -179,7 +170,6 @@ void Args::usage(string &prog_name, ostream &out)
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
-      << "       [ -color_scales ] create color scales and exit\n"
       << "       [ -d, -debug ] print debug messages\n"
       << "       [ -end \"yyyy mm dd hh mm ss\"] end time\n"
       << "       [ -in_dir ? ] Input directory\n"
