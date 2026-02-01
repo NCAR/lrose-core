@@ -221,7 +221,7 @@ bool Calib::calibTargets(const std::vector< std::string > &file_list,
   LOG(DEBUG) << "Calibrating ground targets for N = " << _nValue << "...";
   
   _sumABField.setAllZero();
-
+  
   _numAzim = _sumABField.numAzim();
   _numRangeBins = _sumABField.numGates();
   int scan_size = _sumABField.scanSize();

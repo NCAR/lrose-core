@@ -644,9 +644,9 @@ void Input::_repositionData(DsMdvx &mdvx) const
 
 void Input::setDebug(const MdvxPjg &proj)
 {
-  _debugX = _debugY = -1.0;
+  _debugX = _debugY = -9999.0;
   _debugIpt.clear();
-  if (_debugLat == -1 || _debugLon == -1)
+  if (_debugLat < -9990.0 || _debugLon < -9990.0)
   {
     return;
   }
