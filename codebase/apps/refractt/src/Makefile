@@ -14,6 +14,7 @@ SUB_DIRS = \
 	DsrAddSnr \
 	MdvAddSnr \
 	PhaseDiff \
+	RefractColorScales \
 	RefractCalib \
 	RefractCompute \
 	RefractParams2Tdrp \

@@ -570,6 +570,7 @@ codebase/apps/refractt/src/DsrAddSnr/DsrAddSnr
 codebase/apps/refractt/src/MdvAddSnr/MdvAddSnr
 codebase/apps/refractt/src/PhaseDiff/PhaseDiff
 codebase/apps/refractt/src/RefrMerge/RefrMerge
+codebase/apps/refractt/src/RefractColorScales/RefractColorScales
 codebase/apps/refractt/src/RefractCalib/RefractCalib
 codebase/apps/refractt/src/RefractCompute/RefractCompute
 codebase/apps/refractt/src/RefractParams2Tdrp/RefractParams2Tdrp
