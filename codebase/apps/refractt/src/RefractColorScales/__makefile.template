@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for RefractCalib.
+# Makefile for RefractColorScales.
 #
 # Nancy Rehak, RAP, NCAR, Boulder, CO, 80307, USA
 #
@@ -33,43 +33,18 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-MODULE_TYPE=progcpp
+TARGET_FILE = RefractColorScales
 
-TARGET_FILE = RefractCalib
-
-LOC_INCLUDES = $(NETCDF4_INCS)
-LOC_INC_DIR = .
-MY_CPPCHECKFLAGS = -E Params.hh -E Params.cc 
-
-LOC_LIBS = \
-	-lRefract -ldsdata -lMdv -lSpdb \
-	-lFmq -lrapformats -ldsserver -ldidss \
-	-leuclid -lrapmath -ltoolsa -ldataport \
-	-ltdrp -lRadx -lNcxx -lphysics \
-	-lpthread $(NETCDF4_LIBS) -lbz2 -lz
-
-LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+LOC_LIBS = -ltoolsa
 
 HDRS = \
 	Args.hh \
-	Params.hh \
-	Input.hh \
-	Calib.hh \
-	RefractCalib.hh
+	RefractColorScales.hh
 
 CPPC_SRCS = \
 	Args.cc \
-	Params.cc \
 	Main.cc \
-	Input.cc \
-	Calib.cc \
-	RefractCalib.cc
-
-#
-# tdrp macros
-#
-
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
+	RefractColorScales.cc
 
 #
 # standard C++ targets

@@ -2,24 +2,21 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: RefractCalib
+# app name: RefractColorScales
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/refractt/src/RefractCalib
+# dir: lrose-core/codebase/apps/refractt/src/RefractColorScales
 ###############################################################
 
-project (RefractCalib)
+project (RefractColorScales)
 
 # source files
 
 set (SRCS
       Args.cc
-      Params.cc
       Main.cc
-      Input.cc
-      Calib.cc
-      RefractCalib.cc
+      RefractColorScales.cc
     )
 
 # include directories
@@ -113,30 +110,7 @@ endif()
 
 # link libs
 
-link_libraries (Refract)
-link_libraries (dsdata)
-link_libraries (Mdv)
-link_libraries (Spdb)
-link_libraries (Fmq)
-link_libraries (rapformats)
-link_libraries (dsserver)
-link_libraries (didss)
-link_libraries (euclid)
-link_libraries (rapmath)
 link_libraries (toolsa)
-link_libraries (dataport)
-link_libraries (tdrp)
-link_libraries (Radx)
-link_libraries (Ncxx)
-link_libraries (physics)
-link_libraries (pthread)
-link_libraries (netcdf)
-link_libraries (hdf5_hl)
-link_libraries (hdf5)
-link_libraries (z)
-link_libraries (bz2)
-link_libraries (bz2)
-link_libraries (z)
 
 # If needed, generate TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file
@@ -145,7 +119,7 @@ makeTdrpParams()
 
 # application
 
-add_executable (RefractCalib ${SRCS})
+add_executable (RefractColorScales ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)
