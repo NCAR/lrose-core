@@ -33,7 +33,7 @@
 #define Calib_HH
 
 #include "Params.hh"
-#include <Refract/RefParms.hh>
+#include "Input.hh"
 #include <Refract/FieldWithData.hh>
 #include <Refract/FieldDataPair.hh>
 #include <dataport/port_types.h>
@@ -43,7 +43,6 @@
 #include <cmath>
 
 class DateTime;
-class RefractInput;
 class MdvxField;
 class DsMdvx;
 
@@ -63,21 +62,6 @@ class Calib
   virtual ~Calib();
 
   /**
-   * @brief Initialize the local member data.
-   *
-   * @param[in] params App params
-   * @param[in] refparms  Refractivity params shared between apps
-   * @param[in] input_handler Input handler pointer.
-   *
-   * @return Returns true if the initialization was successful,
-   *         false otherwise.
-   */
-  bool init(const RefParms &refparms,
-	    RefractInput *input_handler);
-  
-
-
-  /**
    * @brief Set the debug MDV URL.
    *
    * @param[in] debug_mdv_url The desired debug MDV URL.
@@ -94,7 +78,6 @@ class Calib
    *        of each targets for that period.
    *
    * @param[in] file_list List of calibration files.
-   * @param[in] host  Machine on which the files are residing
    * @param[in] required_gate_spacing The gate spacing expected in the input
    *                                  files.  If any of the calibration files
    *                                  use a different gate spacing, an error
@@ -104,7 +87,6 @@ class Calib
    */
 
   bool calibTargets(const std::vector< std::string > &file_list,
-		    const std::string &host, 
 		    const double required_gate_spacing);
   
 
@@ -114,7 +96,6 @@ class Calib
    *        the computation of N.
    *
    * @param[in] file_list List of target identification files.
-   * @param[in] host  Machine on which files are residing
    * @param[out] gate_spacing Gate spacing found in the input files.  This 
    *                          must be constant across all of the input files.
    *
@@ -122,7 +103,7 @@ class Calib
    */
 
   bool findReliableTargets(const std::vector< std::string > &file_list,
-			   const std::string &host, double &gate_spacing);
+			   double &gate_spacing);
   
  private:
 
@@ -142,7 +123,7 @@ class Calib
   /////////////////////
 
   const Params &_params;
-  RefractInput *_inputHandler;  /**< Input data handler */
+  Input _inputHandler;  /**< Input data handler */
   int _numAzim;  /**< Number of azimuths in the data. */
   int _numRangeBins;  /**< Number of range bins in the data. */
   int _rMin; /**< Minimum range gate with ground echo. */
@@ -179,10 +160,9 @@ class Calib
   /////////////////////
 
   bool _calibTargetsOneFile(int file_num, const std::string &file_iter,
-			    const std::string &host, time_t &lastDataTime);
+			    time_t &lastDataTime);
   
   bool _findReliableTargetsOneFile(int file_num, const std::string &filename,
-				   const std::string &host, 
 				   double &gate_spacing,
 				   bool &first_file,
 				   FieldDataPair **av_iq_field,

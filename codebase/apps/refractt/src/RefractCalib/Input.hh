@@ -34,8 +34,11 @@
 #define Input_H
 
 #include <string>
+#include <Refract/FieldWithData.hh>
+#include "Params.hh"
 class DsMdvx;
 class MdvxField;
+class DateTime;
 
 /** 
  * @class Input
@@ -45,141 +48,113 @@ class Input
 {
   
 public:
-
-  //////////////////////
-  // Public constants //
-  //////////////////////
-
-  /**
-   * @brief The index of the I field in the input file.
-   */
-
-  static const int I_FIELD_INDEX;
-
-  /**
-   * @brief The index of the Q field in the input file.
-   */
-
-  static const int Q_FIELD_INDEX;
-
-  /**
-   * @brief The index of the SNR field in the input file.
-   */
-
-  static const int SNR_FIELD_INDEX;
-
+  
   ////////////////////
   // Public methods //
   ////////////////////
 
-  /**
-   * @brief Constructor
-   *
-   * @param[in] raw_iq_in_input Flag indicating whether the input stream
-   *                            contains raw I/Q values.  If false, the input
-   *                            stream must contain NIQ/AIQ values.
-   * @param[in] raw_i_field_name The name of the raw I field in the input
-   *                             stream, if included.
-   * @param[in] raw_q_field_name The name of the raw ! field in the input
-   *                             stream, if included.
-   * @param[in] niq_field_name The name of the NIQ field in the input stream,
-   *                           if included.
-   * @param[in] aiq_field_name The name of the AIQ field in the input stream,
-   *                           if included.
-   * @param[in] snr_field_name The name of the signal-to-noise ratio field in
-   *                           the input stream.
-   * @param[in] input_niq_scale Scale value for input NIQ values.  The NIQ
-   *                            values from the input file are multiplied
-   *                            by this value before they are used.
-   * @param[in] invert_target_angle_sign Flag indicating whether to invert the
-   *                                     target angle sign when computing I/Q
-   *                                     from NIQ/AIQ.
-   * @param[in] elevation_num Elevation number to use in the input MDV files.
-   * @param[in] num_output_beams Number of beams in the output fixed grid.
-   * @param[in] num_output_gates Number of gates in the output fixed grid.
-   * @param[in] debug_flag Debug flag.
-   * @param[in] verbose_flag Verbose debug flag.
-   */
+  // constructor
 
-  Input(const bool raw_iq_in_input,
-	const std::string &raw_i_field_name,
-	const std::string &raw_q_field_name,
-	const std::string &niq_field_name,
-	const std::string &aiq_field_name,
-	const std::string &snr_field_name,
-	const double input_niq_scale,
-	const bool invert_target_angle_sign,
-	const int elevation_num,
-	const int num_output_beams,
-	const int num_output_gates,
-	const bool debug_flag = false,
-	const bool verbose_flag = false);
+  Input(const Params &params);
+
+  /// destructor
   
-  /**
-   * @brief Constructor
-   *
-   * @param[in] raw_iq_in_input Flag indicating whether the input stream
-   *                            contains raw I/Q values.  If false, the input
-   *                            stream must contain NIQ/AIQ values.
-   * @param[in] raw_i_field_name The name of the raw I field in the input
-   *                             stream, if included.
-   * @param[in] raw_q_field_name The name of the raw ! field in the input
-   *                             stream, if included.
-   * @param[in] niq_field_name The name of the NIQ field in the input stream,
-   *                           if included.
-   * @param[in] aiq_field_name The name of the AIQ field in the input stream,
-   *                           if included.
-   * @param[in] snr_field_name The name of the signal-to-noise ratio field in
-   *                           the input stream.
-   * @param[in] input_niq_scale Scale value for input NIQ values.  The NIQ
-   *                            values from the input file are multiplied
-   *                            by this value before they are used.
-   * @param[in] invert_target_angle_sign Flag indicating whether to invert the
-   *                                     target angle sign when computing I/Q
-   *                                     from NIQ/AIQ.
-   * @param[in] min_elevation_angle The minimum elevation angle for sweeps.
-   * @param[in] max_elevation_angle The maximum elevation angle for sweeps.
-   * @param[in] num_output_beams Number of beams in the output fixed grid.
-   * @param[in] num_output_gates Number of gates in the output fixed grid.
-   * @param[in] debug_flag Debug flag.
-   * @param[in] verbose_flag Verbose debug flag.
-   */
-
-  Input(const bool raw_iq_in_input,
-	const std::string &raw_i_field_name,
-	const std::string &raw_q_field_name,
-	const std::string &niq_field_name,
-	const std::string &aiq_field_name,
-	const std::string &snr_field_name,
-	const double input_niq_scale,
-	const bool invert_target_angle_sign,
-	const double min_elevation_angle,
-	const double max_elevation_angle,
-	const int num_output_beams,
-	const int num_output_gates,
-	const bool debug_flag = false,
-	const bool verbose_flag = false);
-  
-  /**
-   * @brief Destructor
-   */
-
   virtual ~Input();
 
-
   /**
-   * @brief Read in the data for the next scan to process.  Interpolate the
+   * Read in the data for a particular scan to process.  Interpolate the
    *        data onto an indexed grid.
    *
-   * &param[in] input_file_path Input file path.
+   * @param[in] data_time  Time to search for
+   * @param[in] search_margin  Allowed time diff
+   * @param[in] url  Where to look
    * @param[out] mdvx The MDV file.
    *
    * @return Returns true on success, false on failure.
    */
 
-  virtual bool getNextScan(const std::string &input_file_path,
-			   const std::string &host, DsMdvx &mdvx);
+  bool getScan(const DateTime &data_time, int search_margin,
+	       const std::string &url, DsMdvx &mdvx);
 
+  /**
+   * @brief Read in the data for the next scan to process.  Interpolate the
+   *        data onto an indexed grid.
+   *
+   * @param[in] input_file_path Input file path.
+   * @param[out] mdvx The MDV file.
+   *
+   * @return Returns true on success, false on failure.
+   */
+  
+  virtual bool getNextScan(const std::string &input_file_path,
+			   DsMdvx &mdvx);
+    
+  /**
+   * @return field for the raw I field
+   *
+   * @param[in] source  Object that should have I
+   */
+  FieldWithData getI(DsMdvx &source) const;
+
+  /**
+   * @return field for raw Q
+   *
+   * @param[in] source  Object that should have Q
+   */
+  FieldWithData getQ(DsMdvx &source) const;
+
+  /**
+   * @return field for SNR
+   *
+   * @param[in] source  Object that should have SNR
+   */
+  FieldWithData getSNR(DsMdvx &source) const;
+
+  /**
+   * @return field for Quality
+   *
+   * @param[in] source  Object that should have Quality
+   */
+  FieldWithData getQuality(DsMdvx &source) const;
+
+  /**
+   * @return field for Phase Error
+   *
+   * @param[in] source  Object that should have Phase Error
+   */
+  FieldWithData getPhaseError(DsMdvx &source) const;
+
+  /**
+   * @return field name for I
+   */
+  inline std::string fieldNameI(void) const {return _rawIFieldName;}
+
+  /**
+   * @return field name for Q
+   */
+  inline std::string fieldNameQ(void) const {return _rawQFieldName;}
+  
+  /**
+   * @return field name for SNR
+   */
+  inline std::string fieldNameSNR(void) const {return _snrFieldName;}
+
+  /**
+   * @return field name for quality
+   */
+  inline std::string fieldNameQuality(void) const {return _qualityFieldName;}
+
+  /**
+   * Fill in debug indices using input projection
+   * @param[in] proj
+   */
+  void setDebug(const MdvxPjg &proj);
+
+  /**
+   * @return true if index is a debug point
+   * @param[in] i
+   */
+  bool isDebugPt(int i) const;
 
 protected:
   
@@ -188,147 +163,122 @@ protected:
   /////////////////////////
 
   /**
-   * @brief 
+   * Allowed extra noise in NIQ data
    */
-
   static const double OFFSET_ABOVE_AVERAGE;
 
   /**
-   * @brief
+   *  Maximum SNR value considered noise
    */
-
   static const double SNR_NOISE_MAX;
   
   /**
-   * @brief
-   */
-
+   *  noise = 10^DM_NOISE / 10
+   */ 
   static const double DM_NOISE;
-  
 
-  ///////////////////////
-  // Protected members //
-  ///////////////////////
+  // members
 
-  /**
-   * @brief Debug flag.
-   */
-
-  bool _debug;
-  
-  /**
-   * @brief Verbose debug flag.
-   */
-
-  bool _verbose;
+  const Params &_params;
   
   /**
    * @brief Flag indicating whether the input stream contains raw I/Q values.
    *        If false, the input stream must contain NIQ/AIQ values.
    */
-
   bool _rawIQinInput;
   
   /**
    * @brief The name of the raw I field in the input stream, if included.
    */
-
   std::string _rawIFieldName;
   
   /**
    * @brief The name of the raw ! field in the input stream, if included.
    */
-
   std::string _rawQFieldName;
   
   /**
    * @brief The name of the NIQ field in the input stream, if included.
    */
-
   std::string _niqFieldName;
   
   /**
    * @brief The name of the AIQ field in the input stream, if included.
    */
-
   std::string _aiqFieldName;
   
+  
+  /**
+   * True if quality is computed from input width data
+   */
+  bool _qualityFromWidth;
+  
+  /**
+   * @brief The name of the quality field in the input stream, if included.
+   */
+  std::string _qualityFieldName;
+  
+  /**
+   * True if SNR data is in input
+   */
+  bool _snrInInput;
+
   /**
    * @brief The name of the signal-to-noise ratio field in the input stream.
    */
-
   std::string _snrFieldName;
-  
+
+  /**
+   * Name of power in the input
+   */
+  std::string _powerFieldName;
+
+  /**
+   * Name of phase error in the input
+   */
+  std::string _phaseErrorFieldName;
+
   /**
    * @brief Scale value for input NIQ values.  The NIQ values from the
    *        input file are multiplied by this value before they are used.
    */
-
   double _inputNiqScale;
   
   /**
    * @brief Flag indicating whether to invert the target angle sign when
    *        computing I/Q from NIQ/AIQ.
    */
-
   bool _invertTargetAngleSign;
-  
-  /**
-   * @brief Flag indicating whether to use elevation number or elevation
-   *        angle limits when finding sweeps.
-   */
-
-  bool _useElevationNum;
-  
-  /**
-   * @brief Elevation number to use from the input MDV files.
-   */
-
-  size_t _elevationNum;
   
   /**
    * @brief The minimum elevation angle to use.
    */
-
   double _minElevationAngle;
   
   /**
    * @brief The maximum elevation angle to use.
    */
-
   double _maxElevationAngle;
   
   /**
    * @brief Number of gates in the output data.
    */
-
   int _numOutputGates;
   
   /**
    * @brief Number of beams in the output data.
    */
-
   int _numOutputBeams;
   
+  // debugging
+
+  double _debugLat;  /**< Debug latitude */
+  double _debugLon;  /**< Debug longitude */
+  int _debugX;  /**< Debug grid index */
+  int _debugY;  /**< Debug grid index */
+  int _debugNpt;     /**< Number of debug points around the center */
+  std::vector<int> _debugIpt;  /**< index into grid at debug pts*/
   
-  ////////////////////
-  // Static methods //
-  ////////////////////
-
-  /**
-   * @brief Calculate the square of the given value.
-   *
-   * @param[in] value Value to square.
-   *
-   * @return Returns the square of the given input value.
-   */
-
-  static double SQR(double value)
-  {
-    return value * value;
-  }
-  
-
   ///////////////////////
   // Protected methods //
   ///////////////////////
@@ -346,8 +296,7 @@ protected:
    * @param[in] snr_field The input SNR field.
    */
 
-  void _calcIQ(MdvxField &niq_field,
-	       MdvxField &aiq_field,
+  void _calcIQ(MdvxField &niq_field, MdvxField &aiq_field,
 	       const MdvxField &snr_field) const;
   
 
@@ -362,11 +311,11 @@ protected:
    * @return Returns true on success, false on failure.
    */
 
-  bool _readInputFile(const std::string &file_path,
-		      const std::string &host,
-		      DsMdvx &mdvx) const;
+  bool _readInputFile(DsMdvx &mdvx);
   
 
+  void _calcSnr(MdvxField &power_field) const;
+  
   /**
    * @brief Reposition the input data into the locations required for the
    *        output data.

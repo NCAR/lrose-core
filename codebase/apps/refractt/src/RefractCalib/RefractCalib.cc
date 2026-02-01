@@ -203,25 +203,19 @@ int RefractCalib::run()
   }
     
   
-  // initialize cal object
-  
-  if (!_calib->init(_refparms, input_handler)) {
-    cerr << "ERROR - cannot initialize calibration object" << endl;
-    return -1;
-  }
+  // find suitable targets
+  // sets input_gate_spacing
   
   double input_gate_spacing;
-  if (!_calib->.findReliableTargets(fileList,
-                                    "dummy_host",
-                                    input_gate_spacing)) {
+  if (!_calib->findReliableTargets(fileList,
+                                   input_gate_spacing)) {
     return -1;
   }
   
-  // Do the calibration step
+  // perform the calibration step
   
-  if (!_calib->.calibTargets(fileList,
-                             "dummy_host",
-                             input_gate_spacing)) {
+  if (!_calib->calibTargets(fileList,
+                            input_gate_spacing)) {
     return -1;
   }
   

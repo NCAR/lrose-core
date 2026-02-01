@@ -79,9 +79,27 @@ public:
   } mode_t;
 
   typedef enum {
+    QUALITY_FROM_WIDTH = 0,
+    QUALITY_FROM_CPA = 1
+  } quality_source_t;
+
+  typedef enum {
+    ALL_SCAN_STRATEGIES = 0,
+    MULTIPLE_ELEV_ONLY = 1,
+    SINGLE_ELEV_ONLY = 2
+  } scan_mode_t;
+
+  typedef enum {
     ENTER_N = 0,
     ENTER_P_T_TD = 1
   } entry_type_t;
+
+  // struct typedefs
+
+  typedef struct {
+    double min_angle;
+    double max_angle;
+  } elevation_angle_t;
 
   ///////////////////////////
   // Member functions
@@ -383,6 +401,12 @@ public:
 
   char* debug_mdv_url;
 
+  double debug_lat;
+
+  double debug_lon;
+
+  int debug_npt;
+
   mode_t mode;
 
   char* input_dir;
@@ -392,6 +416,38 @@ public:
   char* end_time;
 
   char* output_dir;
+
+  tdrp_bool_t raw_iq_in_input;
+
+  char* raw_i_field_name;
+
+  char* raw_q_field_name;
+
+  char* niq_field_name;
+
+  double input_niq_scale;
+
+  tdrp_bool_t invert_target_angle_sign;
+
+  char* aiq_field_name;
+
+  tdrp_bool_t snr_in_input;
+
+  char* snr_field_name;
+
+  char* power_field_name;
+
+  quality_source_t quality_source;
+
+  char* quality_field_name;
+
+  elevation_angle_t elevation_angle;
+
+  scan_mode_t scan_mode;
+
+  long num_azim;
+
+  long num_range_bins;
 
   char* ref_file_path;
 
@@ -420,7 +476,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[24];
+  mutable TDRPtable _table[44];
 
   const char *_className;
 

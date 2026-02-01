@@ -618,6 +618,42 @@
     tt->single_val.s = tdrpStrDup("mdvp:://localhost::mdv/debug/RefractCalib");
     tt++;
     
+    // Parameter 'debug_lat'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("debug_lat");
+    tt->descr = tdrpStrDup("debug latitude");
+    tt->help = tdrpStrDup("Extreme debugging at a point, set to -9999 to disable");
+    tt->val_offset = (char *) &debug_lat - &_start_;
+    tt->single_val.d = -9999;
+    tt++;
+    
+    // Parameter 'debug_lon'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("debug_lon");
+    tt->descr = tdrpStrDup("debug longitude");
+    tt->help = tdrpStrDup("Extreme debugging at a point, set to -9999 to disable");
+    tt->val_offset = (char *) &debug_lon - &_start_;
+    tt->single_val.d = -9999;
+    tt++;
+    
+    // Parameter 'debug_npt'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("debug_npt");
+    tt->descr = tdrpStrDup("debug npt");
+    tt->help = tdrpStrDup("Extreme debugging radius around the debug point to keep showing debugging, number of gridpoints");
+    tt->val_offset = (char *) &debug_npt - &_start_;
+    tt->single_val.i = 1;
+    tt++;
+    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -709,6 +745,247 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("DATA FIELD DETAILS");
+    tt->comment_text = tdrpStrDup("Details of the fields to be retrieved from the data files.");
+    tt++;
+    
+    // Parameter 'raw_iq_in_input'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("raw_iq_in_input");
+    tt->descr = tdrpStrDup("Flag indicating whether the raw I and Q values are included in the input stream.");
+    tt->help = tdrpStrDup("If true, the raw fields will be read from the input stream. If false, the raw fields will be calculated from the NIQ/AIQ values which must be inluded in the input stream instead.");
+    tt->val_offset = (char *) &raw_iq_in_input - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'raw_i_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("raw_i_field_name");
+    tt->descr = tdrpStrDup("Raw I field name in the input stream.");
+    tt->help = tdrpStrDup("Used only if raw_iq_in_input is set to TRUE.");
+    tt->val_offset = (char *) &raw_i_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("MeanI");
+    tt++;
+    
+    // Parameter 'raw_q_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("raw_q_field_name");
+    tt->descr = tdrpStrDup("Raw Q field name in the input stream.");
+    tt->help = tdrpStrDup("Used only if raw_iq_in_input is set to TRUE.");
+    tt->val_offset = (char *) &raw_q_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("MeanQ");
+    tt++;
+    
+    // Parameter 'niq_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("niq_field_name");
+    tt->descr = tdrpStrDup("NIQ field name in the input stream.");
+    tt->help = tdrpStrDup("Used only if raw_iq_in_input is set to FALSE.");
+    tt->val_offset = (char *) &niq_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("NIQ");
+    tt++;
+    
+    // Parameter 'input_niq_scale'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("input_niq_scale");
+    tt->descr = tdrpStrDup("Input NIQ scale value");
+    tt->help = tdrpStrDup("The NIQ value from the input source is multiplied by this value before the data is used. For most radars this value should be 0.1. For SPOL this value should be 0.025.");
+    tt->val_offset = (char *) &input_niq_scale - &_start_;
+    tt->single_val.d = 0.1;
+    tt++;
+    
+    // Parameter 'invert_target_angle_sign'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("invert_target_angle_sign");
+    tt->descr = tdrpStrDup("Flag indicating whether to invert the sign of the target angles.");
+    tt->help = tdrpStrDup("This fix should be done upstream, but is added here just in case.\nUsed only if raw_iq_in_input is set to FALSE.");
+    tt->val_offset = (char *) &invert_target_angle_sign - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'aiq_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("aiq_field_name");
+    tt->descr = tdrpStrDup("AIQ field name in the input stream.");
+    tt->help = tdrpStrDup("Used only if raw_iq_in_input is set to FALSE.");
+    tt->val_offset = (char *) &aiq_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("AIQ");
+    tt++;
+    
+    // Parameter 'snr_in_input'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("snr_in_input");
+    tt->descr = tdrpStrDup("Flag indicating whether the SNR field is included in the input stream.");
+    tt->help = tdrpStrDup("If true, the SNR field will be read from the input stream. If false, the SNR field will be calculated from the power field which must be inluded in the input stream.\nThe SNR field is only needed if the raw I/Q values are not included in the input files and so must be calculated from the NIQ/AIQ values.");
+    tt->val_offset = (char *) &snr_in_input - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'snr_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("snr_field_name");
+    tt->descr = tdrpStrDup("Signal-to-noise ratio field name in the input stream.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &snr_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("SNR");
+    tt++;
+    
+    // Parameter 'power_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("power_field_name");
+    tt->descr = tdrpStrDup("Power field name in the input stream.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &power_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DM");
+    tt++;
+    
+    // Parameter 'quality_source'
+    // ctype is '_quality_source_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("quality_source");
+    tt->descr = tdrpStrDup("Which field to use when calculating the quality value.");
+    tt->help = tdrpStrDup("\tQUALITY_FROM_WIDTH - The quality field is calculated using a spectrum width field.\n\tQUALITY_FROM_CPA - The quality field is calculated using a CPA field.\n");
+    tt->val_offset = (char *) &quality_source - &_start_;
+    tt->enum_def.name = tdrpStrDup("quality_source_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("QUALITY_FROM_WIDTH");
+      tt->enum_def.fields[0].val = QUALITY_FROM_WIDTH;
+      tt->enum_def.fields[1].name = tdrpStrDup("QUALITY_FROM_CPA");
+      tt->enum_def.fields[1].val = QUALITY_FROM_CPA;
+    tt->single_val.e = QUALITY_FROM_WIDTH;
+    tt++;
+    
+    // Parameter 'quality_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("quality_field_name");
+    tt->descr = tdrpStrDup("Name of field to use in the quality calculations.");
+    tt->help = tdrpStrDup("If quality_source is set to QUALITY_FROM_WIDTH then this should be a spectrum width field.\nIf quality_source is set to QUALITY_FROM_CPA then this shoudl be a probability of clutter field. The probability of clutter field should range from 0.0 to 1.0 with 0.0 indicating the gate definitely doesn't contain clutter and 1.0 indicating that the gate definitely is clutter.\n");
+    tt->val_offset = (char *) &quality_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("WIDTH");
+    tt++;
+    
+    // Parameter 'elevation_angle'
+    // ctype is '_elevation_angle_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("elevation_angle");
+    tt->descr = tdrpStrDup("The angle limits for the desired elevation angle. Only sweeps with elevation angles between these limits will be used in the calibration.");
+    tt->help = tdrpStrDup("Used only if specify_elevation_by_index is set to false.");
+    tt->val_offset = (char *) &elevation_angle - &_start_;
+    tt->struct_def.name = tdrpStrDup("elevation_angle_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("min_angle");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &elevation_angle.min_angle - (char *) &elevation_angle;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("max_angle");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &elevation_angle.max_angle - (char *) &elevation_angle;
+    tt->n_struct_vals = 2;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 0.3;
+      tt->struct_vals[1].d = 0.5;
+    tt++;
+    
+    // Parameter 'scan_mode'
+    // ctype is '_scan_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("scan_mode");
+    tt->descr = tdrpStrDup("Input scan mode");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &scan_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("scan_mode_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("ALL_SCAN_STRATEGIES");
+      tt->enum_def.fields[0].val = ALL_SCAN_STRATEGIES;
+      tt->enum_def.fields[1].name = tdrpStrDup("MULTIPLE_ELEV_ONLY");
+      tt->enum_def.fields[1].val = MULTIPLE_ELEV_ONLY;
+      tt->enum_def.fields[2].name = tdrpStrDup("SINGLE_ELEV_ONLY");
+      tt->enum_def.fields[2].val = SINGLE_ELEV_ONLY;
+    tt->single_val.e = MULTIPLE_ELEV_ONLY;
+    tt++;
+    
+    // Parameter 'num_azim'
+    // ctype is 'long'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = LONG_TYPE;
+    tt->param_name = tdrpStrDup("num_azim");
+    tt->descr = tdrpStrDup("Number of azimuths used in data processing");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &num_azim - &_start_;
+    tt->has_min = TRUE;
+    tt->min_val.l = 1;
+    tt->single_val.l = 360;
+    tt++;
+    
+    // Parameter 'num_range_bins'
+    // ctype is 'long'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = LONG_TYPE;
+    tt->param_name = tdrpStrDup("num_range_bins");
+    tt->descr = tdrpStrDup("Number of range bins used in data processing");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &num_range_bins - &_start_;
+    tt->has_min = TRUE;
+    tt->min_val.l = 1;
+    tt->single_val.l = 450;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("ALGORITHM PARAMETERS");
     tt->comment_text = tdrpStrDup("");
     tt++;

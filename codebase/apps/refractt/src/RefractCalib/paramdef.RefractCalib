@@ -35,6 +35,8 @@ commentdef
   p_text = "RefractCalib (a) reads radar scan files, in polar coordinates; (b) identifies suitable clutter targets; (c) computes the mean phase of those targets for a baseline calibration; and (d) writes the calibration details to a file. Typically we use 6 hours of scans for this purpose. Ideally the moisture field should be uniform for this procedure to work well.";
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 commentdef {
   p_header = "DEBUGGING AND PROCESS CONTROL";
 }
@@ -61,6 +63,29 @@ paramdef string
   p_descr = "Debug MDV file URL";
   p_default = "mdvp:://localhost::mdv/debug/RefractCalib";
 } debug_mdv_url;
+
+paramdef double
+{
+  p_descr = "debug latitude";
+  p_help = "Extreme debugging at a point, set to -9999 to disable";
+  p_default = -9999.0;
+} debug_lat;
+
+paramdef double
+{
+  p_descr = "debug longitude";
+  p_help = "Extreme debugging at a point, set to -9999 to disable";
+  p_default = -9999;
+} debug_lon;
+
+paramdef int
+{
+  p_descr = "debug npt";
+  p_help = "Extreme debugging radius around the debug point to keep showing debugging, number of gridpoints";
+  p_default = 1;
+} debug_npt;
+
+///////////////////////////////////////////////////////////////////////////////
 
 commentdef {
   p_header = "DATA INPUT";
@@ -94,6 +119,8 @@ paramdef string {
   p_help = "Format is 'yyyy mm dd hh mm ss'.";
 } end_time;
 
+///////////////////////////////////////////////////////////////////////////////
+
 commentdef {
   p_header = "DATA OUTPUT";
 }
@@ -104,9 +131,168 @@ paramdef string
   p_default = "/tmp/Refract/output_dir";
 } output_dir;
 
-/***********************************************************************
- * Algorithm parameters.
- */
+///////////////////////////////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "DATA FIELD DETAILS";
+  p_text = "Details of the fields to be retrieved from the data files.";
+};
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the raw I and Q values are included in "
+            "the input stream.";
+  p_help = "If true, the raw fields will be read from the input stream. "
+           "If false, the raw fields will be calculated from the NIQ/AIQ "
+           "values which must be inluded in the input stream instead.";
+  p_default = true;
+} raw_iq_in_input;
+
+paramdef string
+{
+  p_descr = "Raw I field name in the input stream.";
+  p_help = "Used only if raw_iq_in_input is set to TRUE.";
+  p_default = "MeanI";
+} raw_i_field_name;
+
+paramdef string
+{
+  p_descr = "Raw Q field name in the input stream.";
+  p_help = "Used only if raw_iq_in_input is set to TRUE.";
+  p_default = "MeanQ";
+} raw_q_field_name;
+
+paramdef string
+{
+  p_descr = "NIQ field name in the input stream.";
+  p_help = "Used only if raw_iq_in_input is set to FALSE.";
+  p_default = "NIQ";
+} niq_field_name;
+
+paramdef double
+{
+  p_descr = "Input NIQ scale value";
+  p_help = "The NIQ value from the input source is multiplied by this "
+           "value before the data is used. "
+           "For most radars this value should be 0.1. "
+           "For SPOL this value should be 0.025.";
+  p_default = 0.1;
+} input_niq_scale;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether to invert the sign of the target angles.";
+  p_help = "This fix should be done upstream, but is added here "
+           "just in case.\n"
+           "Used only if raw_iq_in_input is set to FALSE.";
+  p_default = false;
+} invert_target_angle_sign;
+
+paramdef string
+{
+  p_descr = "AIQ field name in the input stream.";
+  p_help = "Used only if raw_iq_in_input is set to FALSE.";
+  p_default = "AIQ";
+} aiq_field_name;
+
+paramdef boolean
+{
+  p_descr = "Flag indicating whether the SNR field is included in "
+            "the input stream.";
+  p_help = "If true, the SNR field will be read from the input stream. "
+           "If false, the SNR field will be calculated from the "
+           "power field which must be inluded in the input stream.\n"
+           "The SNR field is only needed if the raw I/Q values are not "
+           "included in the input files and so must be calculated from the "
+           "NIQ/AIQ values.";
+  p_default = true;
+} snr_in_input;
+
+paramdef string
+{
+  p_descr = "Signal-to-noise ratio field name in the input stream.";
+  p_default = "SNR";
+} snr_field_name;
+
+paramdef string
+{
+  p_descr = "Power field name in the input stream.";
+  p_default = "DM";
+} power_field_name;
+
+typedef enum
+{
+  QUALITY_FROM_WIDTH,
+  QUALITY_FROM_CPA
+} quality_source_t;
+
+paramdef enum quality_source_t
+{
+  p_descr = "Which field to use when calculating the quality value.";
+  p_help = "\tQUALITY_FROM_WIDTH - The quality field is calculated using "
+           "a spectrum width field.\n"
+           "\tQUALITY_FROM_CPA - The quality field is calculated using "
+           "a CPA field.\n";
+  p_default = QUALITY_FROM_WIDTH;
+} quality_source;
+
+paramdef string
+{
+  p_descr = "Name of field to use in the quality calculations.";
+  p_help = "If quality_source is set to QUALITY_FROM_WIDTH then this should be "
+           "a spectrum width field.\n"
+           "If quality_source is set to QUALITY_FROM_CPA then this shoudl be a "
+           "probability of clutter field. "
+           "The probability of clutter field should range from 0.0 to 1.0 with "
+           "0.0 indicating the gate definitely doesn't contain clutter and 1.0 "
+           "indicating that the gate definitely is clutter.\n";
+  p_default = "WIDTH";
+} quality_field_name;
+
+typedef struct
+{
+  double min_angle;
+  double max_angle;
+} elevation_angle_t;
+
+paramdef struct elevation_angle_t
+{
+  p_descr = "The angle limits for the desired elevation angle. "
+            "Only sweeps with elevation angles between these limits will "
+            "be used in the calibration.";
+  p_help = "Used only if specify_elevation_by_index is set to false.";
+  p_default = { 0.3, 0.5 };
+} elevation_angle;
+
+typedef enum
+{
+  ALL_SCAN_STRATEGIES,
+  MULTIPLE_ELEV_ONLY,
+  SINGLE_ELEV_ONLY
+} scan_mode_t;
+
+paramdef enum scan_mode_t
+{
+  p_descr = "Input scan mode";
+  p_default = MULTIPLE_ELEV_ONLY;
+} scan_mode;
+
+paramdef long
+{
+  p_descr = "Number of azimuths used in data processing";
+  p_min = 1;
+  p_default = 360;
+} num_azim;
+
+paramdef long
+{
+  p_descr = "Number of range bins used in data processing";
+  p_min = 1;
+  p_default = 450;
+} num_range_bins;
+
+///////////////////////////////////////////////////////////////////////////////
 
 commentdef
 {

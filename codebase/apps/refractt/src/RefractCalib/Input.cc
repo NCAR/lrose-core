@@ -33,9 +33,8 @@
  *
  */
 
-#include "Input.hh"
-#include "Calib.hh"
 #include <Refract/RefractConstants.hh>
+#include <Refract/FieldWithData.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxField.hh>
@@ -45,96 +44,85 @@
 #include <toolsa/str.h>
 #include <cmath>
 #include <cstdlib>
+#include <algorithm>
+#include "Input.hh"
 using std::string;
 
 // Globals
 
-const int Input::I_FIELD_INDEX = 0;
-const int Input::Q_FIELD_INDEX = 1;
-const int Input::SNR_FIELD_INDEX = 2;
-
-const double Input::OFFSET_ABOVE_AVERAGE = 0.2;  // Noise threshold set to .2*10 dB above average
+// Noise threshold set to .2*10 dB above average
+const double Input::OFFSET_ABOVE_AVERAGE = 0.2;  
 const double Input::SNR_NOISE_MAX = 0.25;
 const double Input::DM_NOISE = -114.4132;
 
-
 //------------------------------------------------------------------------
-Input::Input(const bool raw_iq_in_input,
-	     const std::string &raw_i_field_name,
-	     const std::string &raw_q_field_name,
-	     const std::string &niq_field_name,
-	     const std::string &aiq_field_name,
-	     const std::string &snr_field_name,
-	     const double input_niq_scale,
-	     const bool invert_target_angle_sign,
-	     const int elevation_num,
-	     const int num_output_beams, const int num_output_gates,
-	     const bool debug_flag, const bool verbose_flag) :
-  _debug(debug_flag || verbose_flag),
-  _verbose(verbose_flag),
-  _rawIQinInput(raw_iq_in_input),
-  _rawIFieldName(raw_i_field_name),
-  _rawQFieldName(raw_q_field_name),
-  _niqFieldName(niq_field_name),
-  _aiqFieldName(aiq_field_name),
-  _snrFieldName(snr_field_name),
-  _inputNiqScale(input_niq_scale),
-  _invertTargetAngleSign(invert_target_angle_sign),
-  _useElevationNum(true),
-  _elevationNum(elevation_num),
-  _minElevationAngle(-1.0),
-  _maxElevationAngle(-1.0),
-  _numOutputGates(num_output_gates),
-  _numOutputBeams(num_output_beams)
+
+Input::Input(const Params &params) :
+        _params(params),
+        _rawIQinInput(_params.raw_iq_in_input),
+        _rawIFieldName(_params.raw_i_field_name),
+        _rawQFieldName(_params.raw_q_field_name),
+        _niqFieldName(_params.niq_field_name),
+        _aiqFieldName(_params.aiq_field_name),
+        _qualityFromWidth(_params.quality_source == Params::QUALITY_FROM_WIDTH),
+        _qualityFieldName(_params.quality_field_name),
+        _snrInInput(_params.snr_in_input),
+        _snrFieldName(_params.snr_field_name),
+        _powerFieldName(_params.power_field_name),
+        _phaseErrorFieldName("phase_er"), // fix this later
+        _inputNiqScale(_params.input_niq_scale),
+        _invertTargetAngleSign(_params.invert_target_angle_sign),
+        _minElevationAngle(_params.elevation_angle.min_angle),
+        _maxElevationAngle(_params.elevation_angle.max_angle),
+        _numOutputGates(_params.num_range_bins),
+        _numOutputBeams(_params.num_azim),
+        _debugLat(_params.debug_lat),
+        _debugLon(_params.debug_lon),
+        _debugNpt(_params.debug_npt)
+
 {
+
+  _debugX = -9999.0;
+  _debugX = -9999.0;
+  _debugIpt.clear();
+
 }
 
-//------------------------------------------------------------------------
-Input::Input(const bool raw_iq_in_input,
-	     const std::string &raw_i_field_name,
-	     const std::string &raw_q_field_name,
-	     const std::string &niq_field_name,
-	     const std::string &aiq_field_name,
-	     const std::string &snr_field_name,
-	     const double input_niq_scale,
-	     const bool invert_target_angle_sign,
-	     const double min_elevation_angle,
-	     const double max_elevation_angle,
-	     const int num_output_beams, const int num_output_gates,
-	     const bool debug_flag, const bool verbose_flag) :
-  _debug(debug_flag || verbose_flag),
-  _verbose(verbose_flag),
-  _rawIQinInput(raw_iq_in_input),
-  _rawIFieldName(raw_i_field_name),
-  _rawQFieldName(raw_q_field_name),
-  _niqFieldName(niq_field_name),
-  _aiqFieldName(aiq_field_name),
-  _snrFieldName(snr_field_name),
-  _inputNiqScale(input_niq_scale),
-  _invertTargetAngleSign(invert_target_angle_sign),
-  _useElevationNum(false),
-  _elevationNum(0),
-  _minElevationAngle(min_elevation_angle),
-  _maxElevationAngle(max_elevation_angle),
-  _numOutputGates(num_output_gates),
-  _numOutputBeams(num_output_beams)
-{
-}
-
-  
 //------------------------------------------------------------------------
 Input::~Input()
 {
 }
 
-//------------------------------------------------------------------------
-bool Input::getNextScan(const std::string &file_path, const std::string &host,
-			DsMdvx &mdvx)
+//-------------------------------------------------------------------------
+bool Input::getScan(const DateTime &data_time, int search_margin,
+                    const std::string &url, DsMdvx &mdvx)
 {
-  // Read the raw data from the file.  On return, the file contains the
-  // following fields:  I, Q, SNR.
+  mdvx.clearRead();
+  mdvx.setReadTime(Mdvx::READ_CLOSEST, url, search_margin, data_time.utime());
+  if (!_readInputFile(mdvx))
+  {
+    return false;
+  }
+  // Reposition the data so the gates will match up between scans
+  _repositionData(mdvx);
+  return true;
+}
 
-  if (!_readInputFile(file_path, host, mdvx))
+
+//------------------------------------------------------------------------
+bool Input::getNextScan(const std::string &file_path,
+                        DsMdvx &mdvx)
+{
+
+  // Set up the read request.  Note that if you change the order of the 
+  // fields in the request, you will have to change code in other places.
+
+  mdvx.clearRead();
+  mdvx.setReadPath(file_path);
+  
+  // Read the raw data from the file.  On return, the file contains the
+  // fields configured for
+  if (!_readInputFile(mdvx))
   {
     return false;
   }
@@ -142,6 +130,41 @@ bool Input::getNextScan(const std::string &file_path, const std::string &host,
   // Reposition the data so the gates will match up between scans
   _repositionData(mdvx);
   return true;
+}
+
+//------------------------------------------------------------------------
+FieldWithData Input::getI(DsMdvx &source) const
+{
+  FieldWithData f(source.getFieldByName(_rawIFieldName));
+  return f;
+}
+
+//------------------------------------------------------------------------
+FieldWithData Input::getQ(DsMdvx &source) const
+{
+  FieldWithData f(source.getFieldByName(_rawQFieldName));
+  return f;
+}
+
+//------------------------------------------------------------------------
+FieldWithData Input::getSNR(DsMdvx &source) const
+{
+  FieldWithData f(source.getFieldByName(_snrFieldName));
+  return f;
+}
+
+//------------------------------------------------------------------------
+FieldWithData Input::getQuality(DsMdvx &source) const
+{
+  FieldWithData f(source.getFieldByName(_qualityFieldName));
+  return f;
+}
+
+//------------------------------------------------------------------------
+FieldWithData Input::getPhaseError(DsMdvx &source) const
+{
+  FieldWithData f(source.getFieldByName(_phaseErrorFieldName));
+  return f;
 }
 
 //------------------------------------------------------------------------
@@ -169,7 +192,6 @@ void Input::_calcIQ(MdvxField &niq_field, MdvxField &aiq_field,
   memset(q_data, 0, scan_size * sizeof(fl32));
   
   // First, some preparation work: rescaling of NIQ
-
   for (int i = 0; i < scan_size; ++i)
     niq_data[i] *= _inputNiqScale;
 
@@ -177,10 +199,21 @@ void Input::_calcIQ(MdvxField &niq_field, MdvxField &aiq_field,
 
   for (int i = 0; i < scan_size; ++i)
   {
+    bool debug = isDebugPt(i);
+    if (debug)
+    {
+      printf("niq[%d] = %lf    aiq[%d]=%lf\n", i, niq_data[i], i, aiq_data[i]);
+    }
     if (niq_data[i] > 35.0 || niq_data[i] < -35.0)
+    {
+      if (debug) printf("set niq to missing\n");
       niq_data[i] = niq_field_hdr.missing_data_value;
+    }
     if (aiq_data[i] < -180.0 || aiq_data[i] > 360.0)
+    {
+      if (debug) printf("set aiq to missing\n");
       aiq_data[i] = aiq_field_hdr.missing_data_value;
+    }
   }
 
   // Calculate raw I/Q from NIQ/AIQ and calculate the average NIQ noise
@@ -190,6 +223,8 @@ void Input::_calcIQ(MdvxField &niq_field, MdvxField &aiq_field,
   
   for (int i = 0; i < scan_size; ++i)
   {
+    bool debug = isDebugPt(i);
+
     // Calculate the initial I/Q values.  These values will be updated
     // below based on the noise found in the input fields
 
@@ -215,6 +250,11 @@ void Input::_calcIQ(MdvxField &niq_field, MdvxField &aiq_field,
 	q_data[i] =
 	  pow((double)10.0,
 	      (double)niq_data[i]) * sin(aiq_data[i] * DEG_TO_RAD);
+	if (debug)
+	{
+	  printf("Set i and q from niq and aiq, i[%d]=%lf  q[%d]=%lf\n",
+		 i, i_data[i], i, q_data[i]);
+	}
       }
     }
 
@@ -260,24 +300,38 @@ void Input::_calcIQ(MdvxField &niq_field, MdvxField &aiq_field,
   
   float noise_i = 0.0;
   float noise_q = 0.0;
-
   if (num_noise_values > 0)
   {
     noise_i = noise_i_sum / (float)num_noise_values;
     noise_q = noise_q_sum / (float)num_noise_values;
   }
+  LOG(DEBUG_VERBOSE) << "Number of points with niq less than average noise = "
+		     << num_noise_values;
+  LOG(DEBUG_VERBOSE) << "noise_i = " << noise_i << " noise_q = " << noise_q;
+
 
   // Subtract it from the NIQ/AIQ in vector form (rawi, rawq)
 
   for (int i = 0; i < scan_size; ++i)
   {
+    bool debug = isDebugPt(i);
     if (niq_data[i] != niq_field_hdr.bad_data_value &&
 	niq_data[i] != niq_field_hdr.missing_data_value &&
 	aiq_data[i] != aiq_field_hdr.bad_data_value &&
 	aiq_data[i] != aiq_field_hdr.missing_data_value)
     {
+      if (debug)
+      {
+	printf("subtract noise from i[%d]=%lf and q[%d]=%lf",
+	       i, i_data[i], i, q_data[i]);
+      }
       i_data[i] -= noise_i;
       q_data[i] -= noise_q;
+      if (debug)
+      {
+	printf("  result:  i[%d]=%lf and q[%d]=%lf\n",
+	       i, i_data[i], i, q_data[i]);
+      }
     }
   }
 
@@ -316,72 +370,79 @@ void Input::_calcIQ(MdvxField &niq_field, MdvxField &aiq_field,
 }
 
 //------------------------------------------------------------------------
-bool Input::_readInputFile(const std::string &file_path,
-			   const std::string &host,
-			   DsMdvx &mdvx) const
+bool Input::_readInputFile(DsMdvx &mdvx)
 {
-  // Set up the read request.  Note that if you change the order of the 
-  // fields in the request, you will have to change code in other places.
-
-  mdvx.clearRead();
-  
-  string fpath = "mdvp:://";
-  fpath = fpath + host;
-  fpath = fpath + "::";
-  fpath = fpath + file_path;
-  mdvx.setReadPath(fpath);
-  
   mdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
   mdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
   mdvx.setReadScalingType(Mdvx::SCALING_NONE);
   
-  if (_useElevationNum)
-    mdvx.setReadPlaneNumLimits(_elevationNum, _elevationNum);
-  else
-    mdvx.setReadVlevelLimits(_minElevationAngle,
-			     _maxElevationAngle);
+  mdvx.setReadVlevelLimits(_minElevationAngle, _maxElevationAngle);
   
+  std::vector<string> names;
   if (_rawIQinInput)
   {
-    mdvx.addReadField(_rawIFieldName);
-    mdvx.addReadField(_rawQFieldName);
+    names.push_back(_rawIFieldName);
+    names.push_back(_rawQFieldName);
   }
   else
   {
-    mdvx.addReadField(_niqFieldName);
-    mdvx.addReadField(_aiqFieldName);
+    names.push_back(_niqFieldName);
+    names.push_back(_aiqFieldName);
   }
-  
-  mdvx.addReadField(_snrFieldName);
+  if (_snrInInput)
+  {
+    names.push_back(_snrFieldName);
+  }
+  else
+  {
+    names.push_back(_powerFieldName);
+  }
+
+  // for now require this always
+  names.push_back(_qualityFieldName);
+
+  for (size_t i=0; i<names.size(); ++i)
+  {
+    mdvx.addReadField(names[i].c_str());
+  }
 
   // Read the file
-
   if (mdvx.readVolume() != 0)
   {
-    LOG(ERROR) << "reading input file: " << fpath;
+    LOG(ERROR) << "reading input file:";
     LOG(ERROR) << mdvx.getErrStr();
     return false;
   }
 
-  if (mdvx.getNFields() != 3)
+  if (mdvx.getNFields() != 4)
   {
     LOG(ERROR) << "File did not have requested fields";
-    LOG(ERROR) << "File:" << fpath;
+    LOG(ERROR) << "  tried to read: ";
+    for (size_t i=0; i<names.size(); ++i)
+    {
+      LOG(ERROR) << "     " << names[i];
+    }
+    LOG(ERROR) << "Was able to read " << mdvx.getNFields() << " of them";
     return false;
   }
   
   // Check the field projections to make sure they match and make sure 
   // the data meets all of the requirements of this algorithm
-
-  Mdvx::field_header_t field_hdr0 = mdvx.getField(0)->getFieldHeader();
-  Mdvx::field_header_t field_hdr1 = mdvx.getField(1)->getFieldHeader();
-  Mdvx::field_header_t field_hdr2 = mdvx.getField(2)->getFieldHeader();
+  Mdvx::field_header_t field_hdr0 =
+    mdvx.getField(names[0].c_str())->getFieldHeader();
+  Mdvx::field_header_t field_hdr1 = 
+    mdvx.getField(names[1].c_str())->getFieldHeader();
+  Mdvx::field_header_t field_hdr2 = 
+    mdvx.getField(names[2].c_str())->getFieldHeader();
+  Mdvx::field_header_t field_hdr3 = 
+    mdvx.getField(names[3].c_str())->getFieldHeader();
   
   MdvxPjg proj0(field_hdr0);
   MdvxPjg proj1(field_hdr1);
   MdvxPjg proj2(field_hdr2);
+  MdvxPjg proj3(field_hdr3);
   
-  if (proj0 != proj1 || proj0 != proj2)
+  if (proj0 != proj1 || proj0 != proj2 || proj0 != proj3)
   {
     LOG(ERROR) << "Input field projections don't match";
     LOG(ERROR) << "Field 0 (NIQ or I) projection:";
@@ -390,6 +451,8 @@ bool Input::_readInputFile(const std::string &file_path,
     proj1.print(cerr);
     LOG(ERROR) << "Field 2 (SNR or power) projection:";
     proj2.print(cerr);
+    LOG(ERROR) << "Field 3 (quality) projection:";
+    proj3.print(cerr);
     return false;
   }
   
@@ -401,34 +464,95 @@ bool Input::_readInputFile(const std::string &file_path,
     return false;
   }
   
-  // Calculate I and Q if they are not taken directly from the input file.
+  setDebug(proj0);
 
+  // Calculate I and Q if they are not taken directly from the input file.
+  MdvxField *snr = mdvx.getField(names[2].c_str());;
+  if (!_snrInInput)
+  {
+    // overwrite and change names
+    _calcSnr(*snr);
+  }
   if (!_rawIQinInput)
   {
-    _calcIQ(*(mdvx.getField(0)), *(mdvx.getField(1)), *(mdvx.getField(2)));
+    // overwrit and change names
+    _calcIQ(*(mdvx.getField(names[0].c_str())),
+	    *(mdvx.getField(names[1].c_str())),
+	    *snr);
   }
   
   return true;
 }
 
 
+/*********************************************************************
+ * _calcSnr()
+ */
+
+void Input::_calcSnr(MdvxField &power_field) const
+{
+  // Get pointers to the power field info.  Note that the order of the fields
+  // in the file matches the order in the read request.
+
+  Mdvx::field_header_t power_field_hdr = power_field.getFieldHeader();
+  fl32 *power_data = (fl32 *)power_field.getVol();
+  
+  int scan_size = power_field_hdr.nx * power_field_hdr.ny;
+  
+  // Calculate SNR from power and replace the power values with the
+  // calculated SNR values
+
+  for (int i = 0; i < scan_size; ++i)
+  {
+    if (power_data[i] == power_field_hdr.bad_data_value ||
+	power_data[i] == power_field_hdr.missing_data_value)
+    {
+      power_data[i] = refract::MISSING_DATA_VALUE;
+      continue;
+    }
+
+    double noise = pow(10.0, DM_NOISE / 10.0);
+    double power_plus_noise = pow(10.0, power_data[i] / 10.0);
+    double power = power_plus_noise - noise;
+      
+    if (power > 0.0)
+      power_data[i] = 10.0 * log10(power);
+    else
+      power_data[i] = refract::MISSING_DATA_VALUE;
+  } /* endfor - i */
+
+  // Update the SNR field information.  The SNR field replaces the
+  // original power field
+
+  power_field_hdr.min_value = 0.0;
+  power_field_hdr.max_value = 0.0;
+  power_field_hdr.bad_data_value = refract::MISSING_DATA_VALUE;
+  power_field_hdr.missing_data_value = refract::MISSING_DATA_VALUE;
+  STRcopy(power_field_hdr.field_name_long, _snrFieldName.c_str(),
+	  MDV_LONG_FIELD_LEN);
+  STRcopy(power_field_hdr.field_name, _snrFieldName.c_str(),
+	  MDV_SHORT_FIELD_LEN);
+  power_field_hdr.units[0] ='\0';
+  power_field.setFieldHeader(power_field_hdr);
+}
+
 //------------------------------------------------------------------------
 void Input::_repositionData(DsMdvx &mdvx) const
 {
   // Handle each field individually
 
-  for (int field_num = 0; field_num < mdvx.getNFields(); ++field_num)
+  for (size_t field_num = 0; field_num < mdvx.getNFields(); ++field_num)
   {
     MdvxField *field = mdvx.getField(field_num);
     
     // Get the needed field information and allocate space for the
-    // new data.  Our new data field will have 360 degrees of data
-    // containing the specified number of gates.
+    // new data.  Our new data field will have the specified dimensions
 
     Mdvx::field_header_t field_hdr = field->getFieldHeader();
     fl32 *in_data = (fl32 *)field->getVol();
 
-    int num_output_azim = (int)(360.0 / field_hdr.grid_dy);
+    int num_output_azim = (int)(_numOutputBeams / field_hdr.grid_dy);
+    // int num_output_azim = (int)(360.0 / field_hdr.grid_dy);
 
     fl32 *out_data = new fl32[num_output_azim * _numOutputGates];
     
@@ -514,3 +638,43 @@ void Input::_repositionData(DsMdvx &mdvx) const
   } /* endfor - field_num */
   
 }
+
+///////////////////////////////////////////////////////////////////////////
+// debugging
+
+void Input::setDebug(const MdvxPjg &proj)
+{
+  _debugX = _debugY = -1.0;
+  _debugIpt.clear();
+  if (_debugLat == -1 || _debugLon == -1)
+  {
+    return;
+  }
+  proj.latlon2xyIndex(_debugLat, _debugLon, _debugX, _debugY);
+  for (int y=_debugY-_debugNpt; y<=_debugY+_debugNpt; ++y)
+  {
+    if (y >= 0 && y<proj.getNy())
+    {
+      for (int x=_debugX-_debugNpt; x<=_debugX+_debugNpt; ++x)
+      {
+	if (x >= 0 && x<proj.getNx())
+	{
+	  _debugIpt.push_back(proj.getNx() + x);
+	}
+      }
+    }
+  }
+}
+
+bool Input::isDebugPt(int i) const
+{
+  if (_debugIpt.empty())
+  {
+    return false;
+  }
+  else
+  {
+    return find(_debugIpt.begin(), _debugIpt.end(), i) != _debugIpt.end();
+  }
+}
+
