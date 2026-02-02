@@ -97,6 +97,16 @@ int Args::parse(int argc, char **argv, string &prog_name)
         iret = -1;
       }
 
+    } else if (!strcmp(argv[i], "-out_path")) {
+
+      if(i < argc - 1) {
+        sprintf(tmp_str, "output_file_path = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+      }
+      else {
+        iret = -1;
+      }
+
     } else if (!strcmp(argv[i], "-mode")) {
       
       if (i < argc - 1) {
@@ -174,6 +184,7 @@ void Args::usage(string &prog_name, ostream &out)
       << "       [ -end \"yyyy mm dd hh mm ss\"] end time\n"
       << "       [ -in_dir ? ] Input directory\n"
       << "       [ -out_dir ? ] Output directory\n"
+      << "       [ -out_path ? ] Name of output file path\n"
       << "       [ -f ?] input file list\n"
       << "         Sets mode to FILELIST\n"
       << "       [ -mode ?] ARCHIVE, FILELIST\n"
