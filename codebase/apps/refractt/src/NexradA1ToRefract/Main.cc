@@ -34,7 +34,7 @@
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
- * Main: CalcNexrad main routine
+ * Main: NexradA1ToRefract main routine
  *
  * RAP, NCAR, Boulder CO
  *
@@ -44,11 +44,19 @@
  *
  *********************************************************************/
 
+///////////////////////////////////////////////////////////////////////
+//
+// This program reads netCDF floating point time-series files produced
+// by the NEXRAD A1DA converter program and calculates the variables
+// needed for the Frederic Fabry's refractivity algorithm.
+//
+////////////////////////////////////////////////////////////////////////
+
 #include <stdio.h>
 
 #include <toolsa/port.h>
 
-#include "CalcNexrad.hh"
+#include "NexradA1ToRefract.hh"
 
 using namespace std;
 
@@ -59,7 +67,7 @@ static void tidy_and_exit(int sig);
 
 // Global variables
 
-CalcNexrad *Prog = (CalcNexrad *)NULL;
+NexradA1ToRefract *Prog = (NexradA1ToRefract *)NULL;
 
 
 /*********************************************************************
@@ -70,7 +78,7 @@ int main(int argc, char **argv)
 {
   // Create program object.
 
-  Prog = CalcNexrad::Inst(argc, argv);
+  Prog = NexradA1ToRefract::Inst(argc, argv);
   if (!Prog->okay)
     return -1;
 
@@ -101,7 +109,7 @@ static void tidy_and_exit(int sig)
 {
   // Delete the program object.
 
-  if (Prog != (CalcNexrad *)NULL)
+  if (Prog != (NexradA1ToRefract *)NULL)
     delete Prog;
 
   // Now exit the program.

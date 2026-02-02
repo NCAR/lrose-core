@@ -336,7 +336,7 @@ bool SweepFile::_writeTmp(const double *beam_duration,
   out.add_att("Production_Date", cbuf);
 
   out.add_att("Producer_Name", "NSF/UCAR/NCAR/RAP");
-  out.add_att("Software", "CalcNexrad");
+  out.add_att("Software", "NexradA1ToRefract");
   out.add_att("Range_Segments", "All data has fixed cell spacing");
 
   // add dimensions

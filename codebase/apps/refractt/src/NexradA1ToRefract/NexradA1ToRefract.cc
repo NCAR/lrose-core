@@ -27,14 +27,14 @@
 //   $Author: jcraig $
 //   $Locker:  $
 //   $Date: 2018/01/26 20:33:40 $
-//   $Id: CalcNexrad.cc,v 1.17 2018/01/26 20:33:40 jcraig Exp $
+//   $Id: NexradA1ToRefract.cc,v 1.17 2018/01/26 20:33:40 jcraig Exp $
 //   $Revision: 1.17 $
 //   $State: Exp $
 //
  
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 /*********************************************************************
- * CalcNexrad: CalcNexrad program object.
+ * NexradA1ToRefract: NexradA1ToRefract program object.
  *
  * RAP, NCAR, Boulder CO
  *
@@ -43,6 +43,14 @@
  * Nancy Rehak
  *
  *********************************************************************/
+
+///////////////////////////////////////////////////////////////////////
+//
+// This program reads netCDF floating point time-series files produced
+// by the NEXRAD A1DA converter program and calculates the variables
+// needed for the Frederic Fabry's refractivity algorithm.
+//
+////////////////////////////////////////////////////////////////////////
 
 #include <cassert>
 #include <iostream>
@@ -58,48 +66,48 @@
 #include <toolsa/str.h>
 #include <toolsa/umisc.h>
 
-#include "CalcNexrad.hh"
+#include "NexradA1ToRefract.hh"
 #include "SweepFile.hh"
 
 using namespace std;
 
 // Global variables
 
-const string CalcNexrad::TIME_DIM_NAME = "Time";
-const string CalcNexrad::GATES_DIM_NAME = "Gates";
+const string NexradA1ToRefract::TIME_DIM_NAME = "Time";
+const string NexradA1ToRefract::GATES_DIM_NAME = "Gates";
 
-const string CalcNexrad::I_VAR_NAME = "I";
-const string CalcNexrad::Q_VAR_NAME = "Q";
-const string CalcNexrad::SAMPLE_NUM_VAR_NAME = "SampleNum";
-const string CalcNexrad::AZIMUTH_VAR_NAME = "Azimuth";
-const string CalcNexrad::ELEVATION_VAR_NAME = "Elevation";
-const string CalcNexrad::PRT_VAR_NAME = "Prt";
-const string CalcNexrad::TIME_VAR_NAME = "Time";
-const string CalcNexrad::UNIX_TIME_VAR_NAME = "UnixTime";
-const string CalcNexrad::NANO_SEC_VAR_NAME = "NanoSeconds";
-const string CalcNexrad::FLAGS_VAR_NAME = "Flags";
+const string NexradA1ToRefract::I_VAR_NAME = "I";
+const string NexradA1ToRefract::Q_VAR_NAME = "Q";
+const string NexradA1ToRefract::SAMPLE_NUM_VAR_NAME = "SampleNum";
+const string NexradA1ToRefract::AZIMUTH_VAR_NAME = "Azimuth";
+const string NexradA1ToRefract::ELEVATION_VAR_NAME = "Elevation";
+const string NexradA1ToRefract::PRT_VAR_NAME = "Prt";
+const string NexradA1ToRefract::TIME_VAR_NAME = "Time";
+const string NexradA1ToRefract::UNIX_TIME_VAR_NAME = "UnixTime";
+const string NexradA1ToRefract::NANO_SEC_VAR_NAME = "NanoSeconds";
+const string NexradA1ToRefract::FLAGS_VAR_NAME = "Flags";
 
-const double CalcNexrad::RADAR_LAT = 39.7867;
-const double CalcNexrad::RADAR_LON = -104.5458;
-const double CalcNexrad::RADAR_ALT = 1.7102;
+const double NexradA1ToRefract::RADAR_LAT = 39.7867;
+const double NexradA1ToRefract::RADAR_LON = -104.5458;
+const double NexradA1ToRefract::RADAR_ALT = 1.7102;
 
-const int CalcNexrad::NUM_AZIMUTHS = 360;
-const double CalcNexrad::WAVELENGTH = 0.1075;
-const int CalcNexrad::SAMPLES_PER_BEAM = 64;     /******/
-const double CalcNexrad::RADAR_CONSTANT = 11.0;
-const double CalcNexrad::POWER_CONSTANT = -57.8;
-const double CalcNexrad::START_RANGE = 0.625;
-const double CalcNexrad::GATE_SPACING = 0.25;
+const int NexradA1ToRefract::NUM_AZIMUTHS = 360;
+const double NexradA1ToRefract::WAVELENGTH = 0.1075;
+const int NexradA1ToRefract::SAMPLES_PER_BEAM = 64;     /******/
+const double NexradA1ToRefract::RADAR_CONSTANT = 11.0;
+const double NexradA1ToRefract::POWER_CONSTANT = -57.8;
+const double NexradA1ToRefract::START_RANGE = 0.625;
+const double NexradA1ToRefract::GATE_SPACING = 0.25;
 
-CalcNexrad *CalcNexrad::_instance =
-     (CalcNexrad *)NULL;
+NexradA1ToRefract *NexradA1ToRefract::_instance =
+     (NexradA1ToRefract *)NULL;
 
 
 /*********************************************************************
  * Constructor
  */
 
-CalcNexrad::CalcNexrad(int argc, char **argv) :
+NexradA1ToRefract::NexradA1ToRefract(int argc, char **argv) :
   _numGates(0),
   _beamDuration(new double[NUM_AZIMUTHS]),
   _power(0),
@@ -127,11 +135,11 @@ CalcNexrad::CalcNexrad(int argc, char **argv) :
   _elevationTotal(0.0),
   _numSamples(0)
 {
-  static const string method_name = "CalcNexrad::CalcNexrad()";
+  static const string method_name = "NexradA1ToRefract::NexradA1ToRefract()";
   
   // Make sure the singleton wasn't already created.
 
-  assert(_instance == (CalcNexrad *)NULL);
+  assert(_instance == (NexradA1ToRefract *)NULL);
   
   // Initialize the okay flag.
 
@@ -154,7 +162,7 @@ CalcNexrad::CalcNexrad(int argc, char **argv) :
 
   // Get the command line arguments.
 
-  _args = new Args(argc, argv, (char *) "CalcNexrad");
+  _args = new Args(argc, argv, (char *) "NexradA1ToRefract");
 
   // Get TDRP parameters.
 
@@ -179,7 +187,7 @@ CalcNexrad::CalcNexrad(int argc, char **argv) :
  * Destructor
  */
 
-CalcNexrad::~CalcNexrad()
+NexradA1ToRefract::~NexradA1ToRefract()
 {
   // Free contained objects
 
@@ -207,17 +215,17 @@ CalcNexrad::~CalcNexrad()
  * Inst() - Retrieve the singleton instance of this class.
  */
 
-CalcNexrad *CalcNexrad::Inst(int argc, char **argv)
+NexradA1ToRefract *NexradA1ToRefract::Inst(int argc, char **argv)
 {
-  if (_instance == (CalcNexrad *)NULL)
-    new CalcNexrad(argc, argv);
+  if (_instance == (NexradA1ToRefract *)NULL)
+    new NexradA1ToRefract(argc, argv);
   
   return(_instance);
 }
 
-CalcNexrad *CalcNexrad::Inst()
+NexradA1ToRefract *NexradA1ToRefract::Inst()
 {
-  assert(_instance != (CalcNexrad *)NULL);
+  assert(_instance != (NexradA1ToRefract *)NULL);
   
   return(_instance);
 }
@@ -229,9 +237,9 @@ CalcNexrad *CalcNexrad::Inst()
  * Returns true if the initialization was successful, false otherwise.
  */
 
-bool CalcNexrad::init()
+bool NexradA1ToRefract::init()
 {
-  static const string method_name = "CalcNexrad::init()";
+  static const string method_name = "NexradA1ToRefract::init()";
   
   // Initialize the azimuth and elevation arrays
 
@@ -297,9 +305,9 @@ bool CalcNexrad::init()
  * run() - run the program.
  */
 
-void CalcNexrad::run()
+void NexradA1ToRefract::run()
 {
-  static const string method_name = "CalcNexrad::run()";
+  static const string method_name = "NexradA1ToRefract::run()";
   
   while (!_dataTrigger->endOfData())
   {
@@ -331,11 +339,11 @@ void CalcNexrad::run()
  * Returns a pointer to the values on success, 0 on failure.
  */
 
-Nc3Values *CalcNexrad::_extractValues(const string &var_name,
+Nc3Values *NexradA1ToRefract::_extractValues(const string &var_name,
 				     Nc3File &input_file,
 				     const string &input_file_path) const
 {
-  static const string method_name = "CalcNexrad::_extractValues()";
+  static const string method_name = "NexradA1ToRefract::_extractValues()";
 
   Nc3Var *variable = 0;
 
@@ -365,7 +373,7 @@ Nc3Values *CalcNexrad::_extractValues(const string &var_name,
  * _initializeArrays() - Initialize the arrays of calculated fields.
  */
 
-void CalcNexrad::_initializeArrays(const int num_gates)
+void NexradA1ToRefract::_initializeArrays(const int num_gates)
 {
   if (_params->debug)
     cerr << "Initializing arrays at " << num_gates << " gates" << endl;
@@ -449,9 +457,9 @@ void CalcNexrad::_initializeArrays(const int num_gates)
  * _processFile() - Process the given input file
  */
 
-bool CalcNexrad::_processFile(const string &input_file_path)
+bool NexradA1ToRefract::_processFile(const string &input_file_path)
 {
-  static const string method_name = "CalcNexrad::_processFile()";
+  static const string method_name = "NexradA1ToRefract::_processFile()";
   
   if (_params->debug)
     cerr << "*** Processing file: " << input_file_path << endl;
@@ -817,14 +825,14 @@ bool CalcNexrad::_processFile(const string &input_file_path)
  *                  the same beam.
  */
 
-void CalcNexrad::_processBeam(const vector< float > &i_values_beam,
+void NexradA1ToRefract::_processBeam(const vector< float > &i_values_beam,
 			      const vector< float > &q_values_beam,
 			      const size_t num_gates,
 			      const int azimuth, const float elevation,
 			      const double prf,
 			      const double beam_duration)
 {
-  static const string method_name = "CalcNexrad::_processBeam()";
+  static const string method_name = "NexradA1ToRefract::_processBeam()";
 
   // Check for errors
 
@@ -1003,7 +1011,7 @@ void CalcNexrad::_processBeam(const vector< float > &i_values_beam,
  * _writeSweepFile() - Write the saved data to a sweep file.
  */
 
-bool CalcNexrad::_writeSweepFile()
+bool NexradA1ToRefract::_writeSweepFile()
 {
   if (_params->debug)
   {

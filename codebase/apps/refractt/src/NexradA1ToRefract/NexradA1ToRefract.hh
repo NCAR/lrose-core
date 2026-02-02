@@ -27,7 +27,7 @@
  *   $Author: jcraig $
  *   $Locker:  $
  *   $Date: 2018/01/26 20:33:40 $
- *   $Id: CalcNexrad.hh,v 1.7 2018/01/26 20:33:40 jcraig Exp $
+ *   $Id: NexradA1ToRefract.hh,v 1.7 2018/01/26 20:33:40 jcraig Exp $
  *   $Revision: 1.7 $
  *   $State: Exp $
  */
@@ -35,7 +35,7 @@
 /**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
 
 /************************************************************************
- * CalcNexrad: CalcNexrad program object.
+ * NexradA1ToRefract: NexradA1ToRefract program object.
  *
  * RAP, NCAR, Boulder CO
  *
@@ -45,8 +45,8 @@
  *
  ************************************************************************/
 
-#ifndef CalcNexrad_HH
-#define CalcNexrad_HH
+#ifndef NexradA1ToRefract_HH
+#define NexradA1ToRefract_HH
 
 #include <string>
 #include <sys/time.h>
@@ -60,7 +60,7 @@
 
 using namespace std;
 
-class CalcNexrad
+class NexradA1ToRefract
 {
  public:
 
@@ -85,15 +85,15 @@ class CalcNexrad
    * Destructor
    */
 
-  ~CalcNexrad(void);
+  ~NexradA1ToRefract(void);
   
 
   /*********************************************************************
    * Inst() - Retrieve the singleton instance of this class.
    */
 
-  static CalcNexrad *Inst(int argc, char **argv);
-  static CalcNexrad *Inst();
+  static NexradA1ToRefract *Inst(int argc, char **argv);
+  static NexradA1ToRefract *Inst();
   
 
   /*********************************************************************
@@ -161,7 +161,7 @@ class CalcNexrad
 
   // Singleton instance pointer
 
-  static CalcNexrad *_instance;
+  static NexradA1ToRefract *_instance;
   
   // Program parameters.
 
@@ -226,7 +226,7 @@ class CalcNexrad
    * Constructor -- private because this is a singleton object
    */
 
-  CalcNexrad(int argc, char **argv);
+  NexradA1ToRefract(int argc, char **argv);
   
 
   /*********************************************************************

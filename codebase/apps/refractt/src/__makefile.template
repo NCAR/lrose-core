@@ -8,11 +8,11 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
 	CalcMoisture \
-	CalcNexrad \
 	Chill2netCDFSweep \
 	CleanupRvp8Data \
 	DsrAddSnr \
 	MdvAddSnr \
+	NexradA1ToRefract \
 	PhaseDiff \
 	RefractColorScales \
 	RefractCalib \

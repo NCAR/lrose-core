@@ -6,7 +6,7 @@
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/refractt/src/CalcNexrad
+# dir: lrose-core/codebase/apps/refractt/src/NexradA1ToRefract
 ###############################################################
 
 project (CalcNexrad)
@@ -16,7 +16,7 @@ project (CalcNexrad)
 set (SRCS
       Params.cc
       Args.cc
-      CalcNexrad.cc
+      NexradA1ToRefract.cc
       Main.cc
       SweepFile.cc
     )

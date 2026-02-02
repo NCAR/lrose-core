@@ -1,0 +1,165 @@
+/**********************************************************************
+ * TDRP params for ./NexradA1ToRefract
+ **********************************************************************/
+
+//======================================================================
+//
+// NexradA1ToRefract.
+//
+// This program reads netCDF floating point time-series files produced 
+//   by the NEXRAD A1DA converter program and calculates the variables 
+//   needed for the Frederic Fabry's refractivity algorithm.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING PARAMETERS.
+//
+// Parameters controlling debug outputs.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// debug flag.
+//
+// Debug flag.
+//
+// Type: boolean
+
+debug = FALSE;
+
+//======================================================================
+//
+// PROCESS PARAMETERS.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+// Type: string
+
+instance = "Test";
+
+//======================================================================
+//
+// PROCESS I/O PARAMETERS.
+//
+// Parameters describing the input and output locations.
+//
+//======================================================================
+ 
+///////////// trigger_mode ////////////////////////////
+//
+// Input triggering mode.
+//
+// In TIME_LIST mode, the program operates on archive data as specified 
+//   in the time_list_trigger parameter.
+// In INPUT_DIR mode, the program will process new files as they appear 
+//   in the input_dir directory.
+//
+// Type: enum
+// Options:
+//     FILE_LIST
+//     INPUT_DIR
+
+trigger_mode = FILE_LIST;
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+//
+// Type: string
+
+input_dir = "$(RAP_DATA_DIR)/raw/sweepNetCDF";
+
+///////////// output_url //////////////////////////////
+//
+// Output URL.
+//
+// Type: string
+
+output_url = "mdvp:://localhost::mdv/sweepNetCDF";
+
+//======================================================================
+//
+// ALGORITHM PARAMETERS.
+//
+//======================================================================
+ 
+///////////// elevation_limits ////////////////////////
+//
+// Limits on the elevations to be included in the output file.
+//
+// Pulses with elevation values outside of this range will be ignored.
+//
+// Type: struct
+//   typedef struct {
+//      double min;
+//      double max;
+//   }
+//
+
+elevation_limits = {
+    min = 0.3,
+    max = 0.9
+};
+
+///////////// prf_limits //////////////////////////////
+//
+// Limits on the PRF values to be included in the output file.
+//
+// Pulses with PRF values outside of this range will be ignored.
+//
+// Type: struct
+//   typedef struct {
+//      double min;
+//      double max;
+//   }
+//
+
+prf_limits = {
+    min = 990,
+    max = 1400
+};
+
+///////////// max_secs_between_pulses /////////////////
+//
+// The maximum number of seconds allowed between pulses.
+//
+// This is used to force a sweep to be output at a point where we think 
+//   we have gone through a volume between pulses. Set to -1 to output 
+//   everything as though it were sequential.
+//
+// Type: long
+
+max_secs_between_pulses = 2;
+
+///////////// min_secs_between_sweeps /////////////////
+//
+// The miniumum number of seconds allowed between sweeps being output.
+//
+// This is used to weed out sweeps where the radar is slow to move up in 
+//   its scan strategy. Set to -1 to output every sweep regardless of 
+//   timing.
+//
+// Type: long
+
+min_secs_between_sweeps = -1;
+
+///////////// num_beams_to_skip ///////////////////////
+//
+// Number of beams to skip at the beginning of each sweep.
+//
+// This parameter was added because it looked like the first 5 beams of 
+//   each sweep was messed up.
+//
+// Type: long
+
+num_beams_to_skip = 0;
+

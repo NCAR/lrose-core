@@ -49,13 +49,13 @@ LOC_LIBS = \
 HDRS = \
 	Params.hh \
 	Args.hh \
-	CalcNexrad.hh \
+	NexradA1ToRefract.hh \
 	SweepFile.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
-	CalcNexrad.cc \
+	NexradA1ToRefract.cc \
 	Main.cc \
 	SweepFile.cc
 

@@ -14,8 +14,8 @@ project (RefractCalib)
 # source files
 
 set (SRCS
-      Args.cc
       Params.cc
+      Args.cc
       Main.cc
       Input.cc
       Calib.cc

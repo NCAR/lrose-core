@@ -22,16 +22,16 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /**********************************************************
- * paramdef.SweepNetCDF2Mdv
+ * paramdef.NexradA1ToRefract
  *
  * This file contains the TDRP parameter definitions for
- * SweepNetCDF2Mdv
+ * NexradA1ToRefract
  */
 
 commentdef
 {
-  p_header = "SweepNetCDF2Mdv";
-  p_text = "This program converts netCDF sweep files into MDV format.";
+  p_header = "NexradA1ToRefract";
+  p_text = "This program reads netCDF floating point time-series files produced by the NEXRAD A1DA converter program and calculates the variables needed for the Frederic Fabry's refractivity algorithm.";
 };
 
 

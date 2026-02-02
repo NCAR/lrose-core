@@ -563,11 +563,11 @@ codebase/apps/radar/src/TerrainHtServer/TerrainHtServer
 codebase/apps/radar/src/TerrainHtServer/TestClientTerrainHt
 
 codebase/apps/refractt/src/CalcMoisture/CalcMoisture
-codebase/apps/refractt/src/CalcNexrad/CalcNexrad
 codebase/apps/refractt/src/Chill2netCDFSweep/Chill2netCDFSweep
 codebase/apps/refractt/src/CleanupRvp8Data/CleanupRvp8Data
 codebase/apps/refractt/src/DsrAddSnr/DsrAddSnr
 codebase/apps/refractt/src/MdvAddSnr/MdvAddSnr
+codebase/apps/refractt/src/NexradA1ToRefract/NexradA1ToRefract
 codebase/apps/refractt/src/PhaseDiff/PhaseDiff
 codebase/apps/refractt/src/RefrMerge/RefrMerge
 codebase/apps/refractt/src/RefractColorScales/RefractColorScales
