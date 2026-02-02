@@ -84,12 +84,6 @@ public:
   } quality_source_t;
 
   typedef enum {
-    ALL_SCAN_STRATEGIES = 0,
-    MULTIPLE_ELEV_ONLY = 1,
-    SINGLE_ELEV_ONLY = 2
-  } scan_mode_t;
-
-  typedef enum {
     ENTER_N = 0,
     ENTER_P_T_TD = 1
   } entry_type_t;
@@ -415,6 +409,8 @@ public:
 
   char* end_time;
 
+  char* output_file_path;
+
   char* output_dir;
 
   tdrp_bool_t raw_iq_in_input;
@@ -447,15 +443,9 @@ public:
 
   elevation_angle_t elevation_angle;
 
-  scan_mode_t scan_mode;
-
   long num_azim;
 
   long num_range_bins;
-
-  char* ref_file_path;
-
-  char* ref_url;
 
   double beam_width;
 
@@ -480,7 +470,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[46];
+  mutable TDRPtable _table[44];
 
   const char *_className;
 

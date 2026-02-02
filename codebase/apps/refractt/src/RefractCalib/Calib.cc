@@ -67,8 +67,8 @@ Calib::Calib(const Params &params) :
   _rMin = _params.r_min;
   _beamWidth = _params.beam_width;
   _sideLobePower = _params.side_lobe_pow;
-  _refFilePath = _params.ref_file_path;
-  _refUrl = _params.ref_url;
+  _refFilePath = _params.output_file_path;
+  _refUrl = _params.output_dir;
   
   if (_params.write_debug_mdv_files) {
     setDebugMdvUrl(_params.debug_mdv_url);

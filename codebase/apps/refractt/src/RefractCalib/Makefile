@@ -51,15 +51,15 @@ LOC_LIBS = \
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 HDRS = \
-	Args.hh \
 	Params.hh \
+	Args.hh \
 	Input.hh \
 	Calib.hh \
 	RefractCalib.hh
 
 CPPC_SRCS = \
-	Args.cc \
 	Params.cc \
+	Args.cc \
 	Main.cc \
 	Input.cc \
 	Calib.cc \

@@ -127,8 +127,16 @@ commentdef {
 
 paramdef string
 {
-  p_descr = "Directory for output data files";
+  p_default = "/tmp/RefractCalib.mdv.nc";
+  p_descr = "Full path, including file name, for output";
+  p_help = "Full path for the file containing calibration information. This is the file that is created by the calibration and used as input to the RefractCompute algorithm.";
+} output_file_path;
+
+paramdef string
+{
   p_default = "/tmp/Refract/output_dir";
+  p_descr = "Directory for output data files";
+  p_descr = "This is a copy of the output file, using the standard time stamps for day directories and output file name. It is suitable for displaying in CIDD and Lucid.";
 } output_dir;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -270,19 +278,6 @@ paramdef struct elevation_angle_t
   p_default = { 0.3, 0.5 };
 } elevation_angle;
 
-typedef enum
-{
-  ALL_SCAN_STRATEGIES,
-  MULTIPLE_ELEV_ONLY,
-  SINGLE_ELEV_ONLY
-} scan_mode_t;
-
-paramdef enum scan_mode_t
-{
-  p_descr = "Input scan mode";
-  p_default = MULTIPLE_ELEV_ONLY;
-} scan_mode;
-
 paramdef long
 {
   p_descr = "Number of azimuths used in data processing";
@@ -303,22 +298,6 @@ commentdef
 {
   p_header = "ALGORITHM PARAMETERS";
 };
-
-paramdef string
-{
-  p_descr = "Reference file path";
-  p_help = "Full path for the file containing calibration information.  "
-           "This is the file that is created by the calibration and used "
-           "as input to the Refract algorithm.";
-  p_default = "";
-} ref_file_path;
-
-paramdef string
-{
-  p_descr = "Reference file url";
-  p_help = "Second path in which time stamped MDV is written so as to be useful in display";
-  p_default = "";
-} ref_url;
 
 paramdef double
 {
@@ -361,7 +340,7 @@ paramdef enum entry_type_t
 
 paramdef double
 {
-  p_descr = "N value to use in the calibration.";
+  p_descr = "Default N value to use in the calibration.";
   p_help = "Used only if entry_type is set to ENTER_N.";
   p_default = 1.0;
 } calib_n;

@@ -728,6 +728,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'output_file_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_file_path");
+    tt->descr = tdrpStrDup("Full path, including file name, for output");
+    tt->help = tdrpStrDup("Full path for the file containing calibration information. This is the file that is created by the calibration and used as input to the RefractCompute algorithm.");
+    tt->val_offset = (char *) &output_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/RefractCalib.mdv.nc");
+    tt++;
+    
     // Parameter 'output_dir'
     // ctype is 'char*'
     
@@ -955,28 +967,6 @@
       tt->struct_vals[1].d = 0.5;
     tt++;
     
-    // Parameter 'scan_mode'
-    // ctype is '_scan_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("scan_mode");
-    tt->descr = tdrpStrDup("Input scan mode");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &scan_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("scan_mode_t");
-    tt->enum_def.nfields = 3;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("ALL_SCAN_STRATEGIES");
-      tt->enum_def.fields[0].val = ALL_SCAN_STRATEGIES;
-      tt->enum_def.fields[1].name = tdrpStrDup("MULTIPLE_ELEV_ONLY");
-      tt->enum_def.fields[1].val = MULTIPLE_ELEV_ONLY;
-      tt->enum_def.fields[2].name = tdrpStrDup("SINGLE_ELEV_ONLY");
-      tt->enum_def.fields[2].val = SINGLE_ELEV_ONLY;
-    tt->single_val.e = MULTIPLE_ELEV_ONLY;
-    tt++;
-    
     // Parameter 'num_azim'
     // ctype is 'long'
     
@@ -1012,30 +1002,6 @@
     tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("ALGORITHM PARAMETERS");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'ref_file_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ref_file_path");
-    tt->descr = tdrpStrDup("Reference file path");
-    tt->help = tdrpStrDup("Full path for the file containing calibration information.  This is the file that is created by the calibration and used as input to the Refract algorithm.");
-    tt->val_offset = (char *) &ref_file_path - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'ref_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ref_url");
-    tt->descr = tdrpStrDup("Reference file url");
-    tt->help = tdrpStrDup("Second path in which time stamped MDV is written so as to be useful in display");
-    tt->val_offset = (char *) &ref_url - &_start_;
-    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'beam_width'
@@ -1104,7 +1070,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("calib_n");
-    tt->descr = tdrpStrDup("N value to use in the calibration.");
+    tt->descr = tdrpStrDup("Default N value to use in the calibration.");
     tt->help = tdrpStrDup("Used only if entry_type is set to ENTER_N.");
     tt->val_offset = (char *) &calib_n - &_start_;
     tt->single_val.d = 1;
