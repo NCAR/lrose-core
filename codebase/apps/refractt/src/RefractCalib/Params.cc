@@ -833,15 +833,15 @@
     tt->single_val.s = tdrpStrDup("AIQ");
     tt++;
     
-    // Parameter 'snr_in_input'
+    // Parameter 'snr_available'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("snr_in_input");
-    tt->descr = tdrpStrDup("Flag indicating whether the SNR field is included in the input stream.");
-    tt->help = tdrpStrDup("If true, the SNR field will be read from the input stream. If false, the SNR field will be calculated from the power field which must be inluded in the input stream.\nThe SNR field is only needed if the raw I/Q values are not included in the input files and so must be calculated from the NIQ/AIQ values.");
-    tt->val_offset = (char *) &snr_in_input - &_start_;
+    tt->param_name = tdrpStrDup("snr_available");
+    tt->descr = tdrpStrDup("Is SNR data available?");
+    tt->help = tdrpStrDup("If not, SNR will be computed from the DBZ field. See 'noise_dbz_at_100km'.");
+    tt->val_offset = (char *) &snr_available - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
@@ -851,10 +851,34 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("snr_field_name");
-    tt->descr = tdrpStrDup("Signal-to-noise ratio field name in the input stream.");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Field name for SNR.");
+    tt->help = tdrpStrDup("Signal-to-noise ratio (dB).");
     tt->val_offset = (char *) &snr_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("SNR");
+    tt++;
+    
+    // Parameter 'noise_dbz_at_100km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("noise_dbz_at_100km");
+    tt->descr = tdrpStrDup("The noise value, represented as dBZ at a range of 100km.");
+    tt->help = tdrpStrDup("This is used for computing the SNR from the DBZ field. It is only used if SNR_available is FALSE. The SNR will be computed by range-correcting this value and using it as the noise value.");
+    tt->val_offset = (char *) &noise_dbz_at_100km - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'dbz_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("dbz_field_name");
+    tt->descr = tdrpStrDup("Field name for DBZ.");
+    tt->help = tdrpStrDup("Horizontally-polarized reflectivity factor.");
+    tt->val_offset = (char *) &dbz_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DBZ");
     tt++;
     
     // Parameter 'power_field_name'

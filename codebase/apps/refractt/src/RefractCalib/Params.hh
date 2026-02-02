@@ -431,9 +431,13 @@ public:
 
   char* aiq_field_name;
 
-  tdrp_bool_t snr_in_input;
+  tdrp_bool_t snr_available;
 
   char* snr_field_name;
+
+  double noise_dbz_at_100km;
+
+  char* dbz_field_name;
 
   char* power_field_name;
 
@@ -476,7 +480,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[44];
+  mutable TDRPtable _table[46];
 
   const char *_className;
 

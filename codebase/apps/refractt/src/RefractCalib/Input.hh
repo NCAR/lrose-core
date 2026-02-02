@@ -229,9 +229,9 @@ protected:
   std::string _snrFieldName;
 
   /**
-   * Name of power in the input
+   * Name of dbz in the input - used to compute SNR if not available
    */
-  std::string _powerFieldName;
+  std::string _dbzFieldName;
 
   /**
    * Name of phase error in the input
