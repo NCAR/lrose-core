@@ -32,148 +32,115 @@
 commentdef
 {
   p_header = "CalcMoisture";
-  p_text = "This program calculates water vapor pressure (e) and "
-           "dew point temperature based on the refractivity N field and "
-           "the mean temperature and pressure values from a group of "
-           "weather stations.";
+  p_text = "CalcMoisture calculates water vapor pressure (e) and dew point temperature based on the refractivity N field and the mean temperature and pressure values from a group of weather stations.";
 };
 
-/***********************************************************************
- * Debugging
- */
+//////////////////////////////////////////////////////////////////
 
-commentdef
-{
-  p_header = "DEBUGGING PARAMETERS";
-  p_text = "Parameters controlling debug outputs.";
-};
+commentdef {
+  p_header = "DEBUGGING";
+}
 
-paramdef boolean
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
 {
-  p_descr = "debug flag";
-  p_help = "Debug flag.";
-  p_default = false;
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
+//////////////////////////////////////////////////////////////////
 
-/***********************************************************************
- * Process parameters
- */
+commentdef {
+  p_header = "REALTIME PROCESS CONTROL";
+}
 
-commentdef
-{
-  p_header = "PROCESS PARAMETERS";
-};
-
-paramdef string
-{
-  p_descr = "Process instance";
-  p_help = "Used for registration with procmap.";
-  p_default = "Test";
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "REALTIME mode only. This application registers with procmap. This is the instance used for registration.";
 } instance;
 
+paramdef int {
+  p_default = 60;
+  p_descr = "Interval for registering with procmap (secs).";
+  p_help = "REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.";
+} procmap_register_interval;
 
-/***********************************************************************
- * Process triggering.
- */
-
-commentdef
-{
-  p_header = "PROCESS TRIGGERING PARAMETERS";
-  p_text = "Parameters describing the process triggering.";
-};
-
-typedef enum
-{
-  LATEST_DATA,
-  TIME_LIST
-} trigger_mode_t;
-
-paramdef enum trigger_mode_t
-{
-  p_descr = "Input triggering mode";
-  p_help = "In LATEST_DATA mode, the program waits for N field data before "
-           "doing any processing.\n"
-           "In TIME_LIST mode, the program operates on archive data as "
-           "specified in the time_list_trigger parameter.\n";
-  p_default = "LATEST_DATA";
-} trigger_mode;
-
-typedef struct
-{
-  string start_time;
-  string end_time;
-} time_list_trigger_t;
-
-paramdef struct time_list_trigger_t
-{
-  p_descr = "Trigger information used when using the TIME_LIST trigger";
-  p_help = "\tstart_time specifies the archive start time in any format "
-           "recognized by the DateTime class.\n"
-           "\tend_time specifies the archive end time in any format "
-           "recognized by the DateTime class.";
-  p_default = { "2001/1/1 00:00:00",
-                "2002/1/2 00:00:00" };
-} time_list_trigger;
-
-
-/***********************************************************************
- * Process I/O.
- */
+//////////////////////////////////////////////////////////////////
 
 commentdef
 {
-  p_header = "PROCESS I/O PARAMETERS";
-  p_text = "Parameters describing the input and output locations.";
-};
-
-typedef struct
-{
-  string url;
-  boolean use_field_name;
-  string field_name;
-  long field_num;
-} input_info_t;
-
-paramdef struct input_info_t
-{
-  p_descr = "Field which contains the calculated N values";
-  p_help = "\turl - URL for the N field.\n"
-           "\tuse_field_name - Flag indicating whether to use the field name "
-           "or the field number to identify the N field.\n"
-           "\tfield_name - Field name for the N field in the MDV file. "
-           "Used only if use_field_name is set to true.\n"
-           "\tfield_num - Field number for the N field in the MDV file. "
-           "Used only if use_field_name is set to false.\n";
-  p_default = { "mdvp:://localhost::mdv/refract", true, "N", 0 };
-} n_field;
-
-paramdef string
-{
-  p_descr = "Output URL";
-  p_default = "mdvp:://localhost::mdv/moisture";
-} output_url;
-
-paramdef boolean
-{
-  p_descr = "Flag indicating whether to compress the calculated fields "
-            "before writing them to the output file.";
-  p_default = true;
-} compress_output_fields;
-
-
-/***********************************************************************
- * Algorithm parameters.
- */
-
-commentdef
-{
-  p_header = "ALGORITHM PARAMETERS";
+  p_header = "DATA INPUT";
 };
 
 paramdef string
 {
-  p_descr = "URL of SPDB database containing station information";
+  p_default = "/tmp/mdv/refractivity";
+  p_descr = "Input directory";
+  p_help = "Directory for input refractivity files.";
+} input_dir;
+
+paramdef string
+{
+  p_descr = "Name of field with calculated N values";
+  p_default = "N";
+} n_field_name;
+
+typedef enum {
+  FILELIST, ARCHIVE, REALTIME
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = FILELIST;
+  p_descr = "Operating mode";
+  p_help = "In FILELIST mode, we move through the list of file names specified on the command line.\n\nIn REALTIME mode, the program waits for a new input file to arrive in 'input_dir'.\n\nIn ARCHIVE mode, we move through the files in input_dir between the start and end times set on the command line.\n\nIn ARCHIVE mode, input_dir must be one above the day-directory.";
+} mode;
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "REALTIME mode only. Only data files less old than this will be processed.";
+} max_realtime_data_age_secs;
+
+paramdef string {
+  p_default = "2015 06 26 00 00 00";
+  p_descr = "Set the start time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} start_time;
+
+paramdef string {
+  p_default = "2015 06 26 12 00 00";
+  p_descr = "Set the end time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} end_time;
+
+//////////////////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "DATA OUTPUT";
+};
+
+paramdef string
+{
+  p_descr = "Directory for moisture files in MDV format";
+  p_default = "/tmp/mdv/moisture";
+} output_dir;
+
+//////////////////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "SURFACE STATION DATA INPUT";
+};
+
+paramdef string
+{
+  p_descr = "URL of SPDB database containing surface station information";
   p_default = "spdbp:://localhost::spdb/stations";
 } station_url;
 

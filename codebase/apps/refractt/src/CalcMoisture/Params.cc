@@ -560,7 +560,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("CalcMoisture");
-    tt->comment_text = tdrpStrDup("This program calculates water vapor pressure (e) and dew point temperature based on the refractivity N field and the mean temperature and pressure values from a group of weather stations.");
+    tt->comment_text = tdrpStrDup("CalcMoisture calculates water vapor pressure (e) and dew point temperature based on the refractivity N field and the mean temperature and pressure values from a group of weather stations.");
     tt++;
     
     // Parameter 'Comment 1'
@@ -568,20 +568,30 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 1");
-    tt->comment_hdr = tdrpStrDup("DEBUGGING PARAMETERS");
-    tt->comment_text = tdrpStrDup("Parameters controlling debug outputs.");
+    tt->comment_hdr = tdrpStrDup("DEBUGGING");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'debug'
-    // ctype is 'tdrp_bool_t'
+    // ctype is '_debug_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
+    tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("debug");
-    tt->descr = tdrpStrDup("debug flag");
-    tt->help = tdrpStrDup("Debug flag.");
+    tt->descr = tdrpStrDup("Debug option");
+    tt->help = tdrpStrDup("If set, debug messages will be printed appropriately");
     tt->val_offset = (char *) &debug - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->enum_def.name = tdrpStrDup("debug_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("DEBUG_OFF");
+      tt->enum_def.fields[0].val = DEBUG_OFF;
+      tt->enum_def.fields[1].name = tdrpStrDup("DEBUG_NORM");
+      tt->enum_def.fields[1].val = DEBUG_NORM;
+      tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_VERBOSE");
+      tt->enum_def.fields[2].val = DEBUG_VERBOSE;
+    tt->single_val.e = DEBUG_OFF;
     tt++;
     
     // Parameter 'Comment 2'
@@ -589,7 +599,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("PROCESS PARAMETERS");
+    tt->comment_hdr = tdrpStrDup("REALTIME PROCESS CONTROL");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -599,10 +609,22 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("instance");
-    tt->descr = tdrpStrDup("Process instance");
-    tt->help = tdrpStrDup("Used for registration with procmap.");
+    tt->descr = tdrpStrDup("Program instance for process registration.");
+    tt->help = tdrpStrDup("REALTIME mode only. This application registers with procmap. This is the instance used for registration.");
     tt->val_offset = (char *) &instance - &_start_;
-    tt->single_val.s = tdrpStrDup("Test");
+    tt->single_val.s = tdrpStrDup("test");
+    tt++;
+    
+    // Parameter 'procmap_register_interval'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("procmap_register_interval");
+    tt->descr = tdrpStrDup("Interval for registering with procmap (secs).");
+    tt->help = tdrpStrDup("REALTIME mode only. The app will register with procmap at this interval, to update its status. If it does not register within twice this interval, the auto_restart script will restart the app.");
+    tt->val_offset = (char *) &procmap_register_interval - &_start_;
+    tt->single_val.i = 60;
     tt++;
     
     // Parameter 'Comment 3'
@@ -610,58 +632,90 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("PROCESS TRIGGERING PARAMETERS");
-    tt->comment_text = tdrpStrDup("Parameters describing the process triggering.");
+    tt->comment_hdr = tdrpStrDup("DATA INPUT");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'trigger_mode'
-    // ctype is '_trigger_mode_t'
+    // Parameter 'input_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_dir");
+    tt->descr = tdrpStrDup("Input directory");
+    tt->help = tdrpStrDup("Directory for input refractivity files.");
+    tt->val_offset = (char *) &input_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/mdv/refractivity");
+    tt++;
+    
+    // Parameter 'n_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("n_field_name");
+    tt->descr = tdrpStrDup("Name of field with calculated N values");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &n_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("N");
+    tt++;
+    
+    // Parameter 'mode'
+    // ctype is '_mode_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("trigger_mode");
-    tt->descr = tdrpStrDup("Input triggering mode");
-    tt->help = tdrpStrDup("In LATEST_DATA mode, the program waits for N field data before doing any processing.\nIn TIME_LIST mode, the program operates on archive data as specified in the time_list_trigger parameter.\n");
-    tt->val_offset = (char *) &trigger_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("trigger_mode_t");
-    tt->enum_def.nfields = 2;
+    tt->param_name = tdrpStrDup("mode");
+    tt->descr = tdrpStrDup("Operating mode");
+    tt->help = tdrpStrDup("In FILELIST mode, we move through the list of file names specified on the command line.\n\nIn REALTIME mode, the program waits for a new input file to arrive in 'input_dir'.\n\nIn ARCHIVE mode, we move through the files in input_dir between the start and end times set on the command line.\n\nIn ARCHIVE mode, input_dir must be one above the day-directory.");
+    tt->val_offset = (char *) &mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("mode_t");
+    tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("LATEST_DATA");
-      tt->enum_def.fields[0].val = LATEST_DATA;
-      tt->enum_def.fields[1].name = tdrpStrDup("TIME_LIST");
-      tt->enum_def.fields[1].val = TIME_LIST;
-    tt->single_val.e = LATEST_DATA;
+      tt->enum_def.fields[0].name = tdrpStrDup("FILELIST");
+      tt->enum_def.fields[0].val = FILELIST;
+      tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
+      tt->enum_def.fields[1].val = ARCHIVE;
+      tt->enum_def.fields[2].name = tdrpStrDup("REALTIME");
+      tt->enum_def.fields[2].val = REALTIME;
+    tt->single_val.e = FILELIST;
     tt++;
     
-    // Parameter 'time_list_trigger'
-    // ctype is '_time_list_trigger_t'
+    // Parameter 'max_realtime_data_age_secs'
+    // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("time_list_trigger");
-    tt->descr = tdrpStrDup("Trigger information used when using the TIME_LIST trigger");
-    tt->help = tdrpStrDup("\tstart_time specifies the archive start time in any format recognized by the DateTime class.\n\tend_time specifies the archive end time in any format recognized by the DateTime class.");
-    tt->val_offset = (char *) &time_list_trigger - &_start_;
-    tt->struct_def.name = tdrpStrDup("time_list_trigger_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("start_time");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &time_list_trigger.start_time - (char *) &time_list_trigger;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("end_time");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &time_list_trigger.end_time - (char *) &time_list_trigger;
-    tt->n_struct_vals = 2;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("2001/1/1 00:00:00");
-      tt->struct_vals[1].s = tdrpStrDup("2002/1/2 00:00:00");
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("max_realtime_data_age_secs");
+    tt->descr = tdrpStrDup("Maximum age of realtime data (secs)");
+    tt->help = tdrpStrDup("REALTIME mode only. Only data files less old than this will be processed.");
+    tt->val_offset = (char *) &max_realtime_data_age_secs - &_start_;
+    tt->single_val.i = 300;
+    tt++;
+    
+    // Parameter 'start_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("start_time");
+    tt->descr = tdrpStrDup("Set the start time for ARCHIVE mode analysis.");
+    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'.");
+    tt->val_offset = (char *) &start_time - &_start_;
+    tt->single_val.s = tdrpStrDup("2015 06 26 00 00 00");
+    tt++;
+    
+    // Parameter 'end_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("end_time");
+    tt->descr = tdrpStrDup("Set the end time for ARCHIVE mode analysis.");
+    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'.");
+    tt->val_offset = (char *) &end_time - &_start_;
+    tt->single_val.s = tdrpStrDup("2015 06 26 12 00 00");
     tt++;
     
     // Parameter 'Comment 4'
@@ -669,74 +723,20 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("PROCESS I/O PARAMETERS");
-    tt->comment_text = tdrpStrDup("Parameters describing the input and output locations.");
+    tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'n_field'
-    // ctype is '_input_info_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("n_field");
-    tt->descr = tdrpStrDup("Field which contains the calculated N values");
-    tt->help = tdrpStrDup("\turl - URL for the N field.\n\tuse_field_name - Flag indicating whether to use the field name or the field number to identify the N field.\n\tfield_name - Field name for the N field in the MDV file. Used only if use_field_name is set to true.\n\tfield_num - Field number for the N field in the MDV file. Used only if use_field_name is set to false.\n");
-    tt->val_offset = (char *) &n_field - &_start_;
-    tt->struct_def.name = tdrpStrDup("input_info_t");
-    tt->struct_def.nfields = 4;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("url");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &n_field.url - (char *) &n_field;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[1].fname = tdrpStrDup("use_field_name");
-      tt->struct_def.fields[1].ptype = BOOL_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &n_field.use_field_name - (char *) &n_field;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("field_name");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &n_field.field_name - (char *) &n_field;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("long");
-      tt->struct_def.fields[3].fname = tdrpStrDup("field_num");
-      tt->struct_def.fields[3].ptype = LONG_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &n_field.field_num - (char *) &n_field;
-    tt->n_struct_vals = 4;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("mdvp:://localhost::mdv/refract");
-      tt->struct_vals[1].b = pTRUE;
-      tt->struct_vals[2].s = tdrpStrDup("N");
-      tt->struct_vals[3].l = 0;
-    tt++;
-    
-    // Parameter 'output_url'
+    // Parameter 'output_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_url");
-    tt->descr = tdrpStrDup("Output URL");
+    tt->param_name = tdrpStrDup("output_dir");
+    tt->descr = tdrpStrDup("Directory for moisture files in MDV format");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdvp:://localhost::mdv/moisture");
-    tt++;
-    
-    // Parameter 'compress_output_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compress_output_fields");
-    tt->descr = tdrpStrDup("Flag indicating whether to compress the calculated fields before writing them to the output file.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &compress_output_fields - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->val_offset = (char *) &output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/mdv/moisture");
     tt++;
     
     // Parameter 'Comment 5'
@@ -744,7 +744,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("ALGORITHM PARAMETERS");
+    tt->comment_hdr = tdrpStrDup("SURFACE STATION DATA INPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -754,7 +754,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("station_url");
-    tt->descr = tdrpStrDup("URL of SPDB database containing station information");
+    tt->descr = tdrpStrDup("URL of SPDB database containing surface station information");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &station_url - &_start_;
     tt->single_val.s = tdrpStrDup("spdbp:://localhost::spdb/stations");

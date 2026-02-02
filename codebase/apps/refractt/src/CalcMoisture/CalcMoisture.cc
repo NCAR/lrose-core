@@ -21,28 +21,22 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/07 18:17:26 $
-//   $Id: CalcMoisture.cc,v 1.9 2016/03/07 18:17:26 dixon Exp $
-//   $Revision: 1.9 $
-//   $State: Exp $
+/////////////////////////////////////////////////////////////
+// CalcMoisture Main
 //
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-/*********************************************************************
- * CalcMoisture: CalcMoisture program object.
- *
- * RAP, NCAR, Boulder CO
- *
- * June 2006
- *
- * Nancy Rehak
- *
- *********************************************************************/
+// Nancy Rehak, RAL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// June 2006
+//
+/////////////////////////////////////////////////////////////
+//
+// CalcMoisture calculates water vapor pressure (e) and dew
+// point temperature based on the refractivity N field and
+// the mean temperature and pressure values
+// from a group of weather stations.
+//
+/////////////////////////////////////////////////////////////
 
 #include <assert.h>
 #include <iostream>
@@ -70,64 +64,100 @@
 
 using namespace std;
 
-// Global variables
-
-CalcMoisture *CalcMoisture::_instance =
-     (CalcMoisture *)NULL;
-
-
 /*********************************************************************
  * Constructor
  */
 
-CalcMoisture::CalcMoisture(int argc, char **argv) :
-  _dataTrigger(0)
+CalcMoisture::CalcMoisture(int argc, char **argv)
+
 {
-  static const string method_name = "CalcMoisture::CalcMoisture()";
-  
-  // Make sure the singleton wasn't already created.
 
-  assert(_instance == (CalcMoisture *)NULL);
-  
-  // Initialize the okay flag.
-
+  _input = NULL;
   okay = true;
+
+  // set programe name
+
+  _progName = "CalcMoisture";
+  ucopyright((char *) _progName.c_str());
+
+  // get command line args
   
-  // Set the singleton instance pointer
-
-  _instance = this;
-
-  // Set the program name.
-
-  path_parts_t progname_parts;
-  
-  uparse_path(argv[0], &progname_parts);
-  _progName = STRdup(progname_parts.base);
-  
-  // Display ucopyright message.
-
-  ucopyright(_progName);
-
-  // Get the command line arguments.
-
-  _args = new Args(argc, argv, _progName);
-  
-  // Get TDRP parameters.
-
-  _params = new Params();
-  char *params_path = (char *) "unknown";
-  
-  if (_params->loadFromArgs(argc, argv,
-			    _args->override.list,
-			    &params_path))
-  {
-    cerr << "ERROR: " << method_name << endl;
-    cerr << "Problem with TDRP parameters in file: " << params_path << endl;
-    
+  if (_args.parse(argc, argv, _progName)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with command line args" << endl;
     okay = false;
-    
     return;
   }
+
+  // get TDRP params
+  
+  _paramsPath = (char *) "unknown";
+  if (_params.loadFromArgs(argc, argv, _args.override.list,
+			   &_paramsPath)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with TDRP parameters" << endl;
+    okay = false;
+  }
+
+  // initialize the data input object
+  
+  if (_params.mode == Params::REALTIME) {
+
+    _input = new DsInputPath(_progName,
+			     _params.debug >= Params::DEBUG_VERBOSE,
+			     _params.input_dir,
+			     _params.max_realtime_data_age_secs,
+			     PMU_auto_register, true);
+
+  } else if (_params.mode == Params::ARCHIVE) {
+
+    time_t startTime = DateTime::parseDateTime(_params.start_time);
+    time_t endTime = DateTime::parseDateTime(_params.end_time);
+    if (startTime == DateTime::NEVER) {
+      cerr << "ERROR: CalcMoisture" << endl;
+      cerr << "  bad start time: " << _params.start_time << endl;
+      okay = false;
+    }
+    if (endTime == DateTime::NEVER) {
+      cerr << "ERROR: CalcMoisture" << endl;
+      cerr << "  bad end time: " << _params.end_time << endl;
+      okay = false;
+    }
+
+    _input = new DsInputPath(_progName,
+			     _params.debug >= Params::DEBUG_VERBOSE,
+			     _params.input_dir,
+			     startTime, endTime);
+
+  } else if (_params.mode == Params::FILELIST) {
+
+    if (_args.inputFileList.size() == 0) {
+
+      cerr << "ERROR: CalcMoisture" << endl;
+      cerr << "  Mode is FILELIST"; 
+      cerr << "  You must use -f to specify files on the command line."
+           << endl;
+      _args.usage(_progName, cerr);
+      okay = false;
+      
+    } else {
+      
+      _input = new DsInputPath(_progName,
+                               _params.debug >= Params::DEBUG_VERBOSE,
+                               _args.inputFileList);
+
+    }
+    
+  } // if (_params.mode == ...
+
+  // init process mapper registration
+  
+  if (_params.mode == Params::REALTIME) {
+    PMU_auto_init(_progName.c_str(),
+                  _params.instance,
+                  _params.procmap_register_interval);
+  }
+  
 }
 
 
@@ -143,94 +173,54 @@ CalcMoisture::~CalcMoisture()
 
   // Free contained objects
 
-  delete _params;
-  delete _args;
+  if (_input) {
+    delete _input;
+  }
   
-  delete _dataTrigger;
-  
-  // Free included strings
-
-  STRfree(_progName);
 }
-
-
-/*********************************************************************
- * Inst() - Retrieve the singleton instance of this class.
- */
-
-CalcMoisture *CalcMoisture::Inst(int argc, char **argv)
-{
-  if (_instance == (CalcMoisture *)NULL)
-    new CalcMoisture(argc, argv);
-  
-  return(_instance);
-}
-
-CalcMoisture *CalcMoisture::Inst()
-{
-  assert(_instance != (CalcMoisture *)NULL);
-  
-  return(_instance);
-}
-
-
-/*********************************************************************
- * init() - Initialize the local data.
- *
- * Returns true if the initialization was successful, false otherwise.
- */
-
-bool CalcMoisture::init()
-{
-  static const string method_name = "CalcMoisture::init()";
-  
-  // Initialize the data trigger
-
-  if (!_initTrigger())
-    return false;
-  
-  // initialize process registration
-
-  if (_params->trigger_mode == Params::LATEST_DATA)
-    PMU_auto_init(_progName, _params->instance,
-		  PROCMAP_REGISTER_INTERVAL);
-
-  return true;
-}
-
 
 /*********************************************************************
  * run() - run the program.
  */
 
-void CalcMoisture::run()
+int CalcMoisture::run()
 {
-  static const string method_name = "CalcMoisture::run()";
-  
-  DateTime trigger_time;
-  
-  while (!_dataTrigger->endOfData())
-  {
-    if (_dataTrigger->nextIssueTime(trigger_time) != 0)
-    {
-      cerr << "ERROR: " << method_name << endl;
-      cerr << "Error getting next trigger time" << endl;
-      
+
+  int nSuccess = 0;
+
+  char *inputPath = nullptr;
+  while ((inputPath = _input->next()) != nullptr) {
+
+    time_t inputTime;
+    if (DsInputPath::getDataTime(inputPath, inputTime)) {
+      cerr << "ERROR: CalcMoisture::run()" << endl;
+      cerr << "  Cannot compute time from input file path: " << inputPath << endl;
+      cerr << "  Ignoring this file" << endl;
       continue;
     }
+
+    DateTime fileTime(inputTime);
     
-    if (!_processData(trigger_time))
+    if (!_processData(inputPath, fileTime))
     {
-      cerr << "ERROR: " << method_name << endl;
-      cerr << "Error processing data for time: " << trigger_time << endl;
-      
+      cerr << "ERROR: CalcMoisture::run()" << endl;
+      cerr << "  processing data for time: " << fileTime << endl;
       continue;
     }
+
+    nSuccess++;
     
-  } /* endwhile - !_dataTrigger->endOfData() */
+  } // while ...
   
-  if (_params->debug)
-    cerr << "_dataTrigger->endOfData() returned true" << endl;
+  if (_params.debug) {
+    cerr << "==>>end of data" << endl;
+  }
+
+  if (nSuccess > 0) {
+    return 0;
+  } else {
+    return -1;
+  }
   
 }
 
@@ -238,6 +228,140 @@ void CalcMoisture::run()
 /**********************************************************************
  *              Private Member Functions                              *
  **********************************************************************/
+
+/*********************************************************************
+ * _processData() - Process data for the given trigger time.
+ *
+ * Returns 0 on success, -1 on failure.
+ */
+
+int CalcMoisture::_processData(const string filePath,
+                               const DateTime &fileTime)
+  
+{
+
+  static const string method_name = "CalcMoisture::_processData()";
+  
+  if (_params.debug) {
+    cerr << endl << "*** Processing data for time: " << fileTime << endl;
+  }
+  
+  PMU_auto_register("Processing data");
+  
+  // Read in the N field
+
+  DsMdvx input_file;
+  input_file.setReadTime(Mdvx::READ_CLOSEST,
+                         _params.input_dir,
+                         0, fileTime.utime());
+  
+  input_file.addReadField(_params.n_field_name);
+  input_file.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
+  input_file.setReadCompressionType(Mdvx::COMPRESSION_NONE);
+  input_file.setReadScalingType(Mdvx::SCALING_NONE);
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    input_file.printReadRequest(cerr);
+  }
+  
+  if (input_file.readVolume() != 0) {
+    cerr << "ERROR: " << method_name << endl;
+    cerr << "Error reading N field:" << endl;
+    cerr << "   time: " << fileTime.asString(0) << endl;
+    cerr << "   dir: " << _params.input_dir << endl;
+    cerr << "   field name: " << _params.n_field_name << endl;
+    cerr << input_file.getErrStr() << endl;
+    return -1;
+  }
+  
+  MdvxField *n_field;
+  if ((n_field = input_file.getField(0)) == 0) {
+    cerr << "ERROR: " << method_name << endl;
+    cerr << "Error retrieving N field from MDV file" << endl;
+    return -1;
+  }
+  
+  // Get the mean temperature and pressure from the given stations
+
+  double temp_k, press_mb;
+  if (!_getTempPress(fileTime, temp_k, press_mb)) {
+    return -1;
+  }
+
+  if (_params.debug) {
+    cerr << "---> Mean temp = " << temp_k << " K" << endl;
+    cerr << "     Mean press = " << press_mb << " mb" << endl;
+  }
+  
+  // Calculate the water vapor pressure field
+
+  MdvxField *e_field;
+  if ((e_field = _calcWaterVaporField(*n_field, temp_k, press_mb)) == nullptr) {
+    return -1;
+  }
+  
+  // Calculate the dew point field
+
+  MdvxField *td_field;
+  if ((td_field = _calcDewPointField(*e_field)) == nullptr) {
+    return -1;
+  }
+  
+  // Calculate the relative humidity field
+
+  MdvxField *rh_field;
+  if ((rh_field = _calcRelativeHumidityField(*td_field, temp_k)) == nullptr) {
+    return -1;
+  }
+  
+  // Create the output file
+
+  DsMdvx output_file;
+  
+  Mdvx::master_header_t master_hdr = input_file.getMasterHeader();
+  
+  master_hdr.num_data_times = 0;
+  master_hdr.index_number = 0;
+  master_hdr.n_fields = 0;
+  master_hdr.max_nx = 0;
+  master_hdr.max_ny = 0;
+  master_hdr.max_nz = 0;
+  master_hdr.n_chunks = 0;
+  STRcopy(master_hdr.data_set_info, "CalcMoisture", MDV_INFO_LEN);
+  STRcopy(master_hdr.data_set_name, "CalcMoisture", MDV_NAME_LEN);
+  STRcopy(master_hdr.data_set_source, input_file.getPathInUse().c_str(),
+	  MDV_NAME_LEN);
+  
+  output_file.setMasterHeader(master_hdr);
+  
+  // compress
+
+  e_field->convertType(Mdvx::ENCODING_FLOAT32,
+                       Mdvx::COMPRESSION_GZIP);
+  
+  td_field->convertType(Mdvx::ENCODING_FLOAT32,
+                        Mdvx::COMPRESSION_GZIP);
+  
+  rh_field->convertType(Mdvx::ENCODING_FLOAT32,
+                        Mdvx::COMPRESSION_GZIP);
+  
+  output_file.addField(e_field);
+  output_file.addField(td_field);
+  output_file.addField(rh_field);
+  
+  // Write the output file
+
+  output_file.setWriteLdataInfo();
+  if (output_file.writeToDir(_params.output_dir)) {
+    cerr << "ERROR: " << method_name << endl;
+    cerr << "Error writing to output URL: " << _params.output_dir << endl;
+    cerr << output_file.getErrStr() << endl;
+    return -1;
+  }
+  
+  return 0;
+  
+}
 
 /*********************************************************************
  * _calcDewPointField() - Calculate the dew point field from the given
@@ -424,11 +548,11 @@ MdvxField *CalcMoisture::_calcWaterVaporField(const MdvxField &n_field,
  *                   values using the stations specifiec in the parameter
  *                   file.
  *
- * Returns true on success, false on failure.
+ * Returns 0 on success, -1 on failure.
  */
 
-bool CalcMoisture::_getTempPress(const DateTime &data_time,
-				 double &temp_k, double &press_mb)
+int CalcMoisture::_getTempPress(const DateTime &data_time,
+                                double &temp_k, double &press_mb)
 {
   static const string method_name = "CalcMoisture::_getTempPress()";
   
@@ -439,37 +563,37 @@ bool CalcMoisture::_getTempPress(const DateTime &data_time,
   int num_temp_stations = 0;
   int num_press_stations = 0;
   
-  for (int i = 0; i < _params->station_list_n; ++i)
+  for (int i = 0; i < _params.station_list_n; ++i)
   {
-    int data_type = Spdb::hash4CharsToInt32(_params->_station_list[i].name);
+    int data_type = Spdb::hash4CharsToInt32(_params._station_list[i].name);
     
     DsSpdb spdb;
     
-    if (spdb.getClosest(_params->station_url,
+    if (spdb.getClosest(_params.station_url,
 			data_time.utime(),
-			_params->max_station_valid_secs,
+			_params.max_station_valid_secs,
 			data_type) != 0)
     {
       cerr << "ERROR: " << method_name << endl;
       cerr << "Error reading station data for station: "
-	   << _params->_station_list[i].name << endl;
+	   << _params._station_list[i].name << endl;
       cerr << spdb.getErrStr() << endl;
       
-      return false;
+      return -1;
     }
     
     if (spdb.getNChunks() <= 0)
     {
-      if (_params->debug)
+      if (_params.debug)
 	cerr << "No chunks found in database for station "
-	     << _params->_station_list[i].name << endl;
+	     << _params._station_list[i].name << endl;
       
       continue;
     }
     
-    if (_params->debug)
+    if (_params.debug)
       cerr << "Successfully read " << spdb.getNChunks()
-	   << " chunks for station " << _params->_station_list[i].name << endl;
+	   << " chunks for station " << _params._station_list[i].name << endl;
     
     // If we get here, we got some weather obs data.  There should only be one
     // chunk of data, but if there is more for some reason, then just use
@@ -480,9 +604,9 @@ bool CalcMoisture::_getTempPress(const DateTime &data_time,
     WxObs obs;
     obs.disassemble(chunks[0].data, chunks[0].len);
 
-    if (_params->debug)
+    if (_params.debug)
     {
-      cerr << "Station " << _params->_station_list[i].name << " info:" << endl;
+      cerr << "Station " << _params._station_list[i].name << " info:" << endl;
       cerr << "    station_id: " << obs.getStationId() << endl;
     }
     
@@ -492,11 +616,11 @@ bool CalcMoisture::_getTempPress(const DateTime &data_time,
     if (pressure == obs.missing)
     {
       double msl_pressure = obs.getSeaLevelPressureMb();
-      double elevation = _params->_station_list[i].elevation;
-      if (_params->get_elevation_from_data)
+      double elevation = _params._station_list[i].elevation;
+      if (_params.get_elevation_from_data)
         elevation = obs.getElevationMeters();
 
-      if (_params->debug)
+      if (_params.debug)
       {
         cerr << "    station pressure value missing -- calculating" << endl;
         if (msl_pressure == obs.missing)
@@ -513,7 +637,7 @@ bool CalcMoisture::_getTempPress(const DateTime &data_time,
         pressure = SL2StnPressure(msl_pressure, elevation);
     }
 
-    if (_params->debug)
+    if (_params.debug)
     {
       if (temperature == obs.missing)
 	cerr << "    temperature: MISSING" << endl;
@@ -548,256 +672,12 @@ bool CalcMoisture::_getTempPress(const DateTime &data_time,
       cerr << "No pressure data found for time period for given stations" << endl;
     cerr << "Cannot calculate moisture fields" << endl;
     
-    return false;
+    return -1;
   }
   
   temp_k = TEMP_C_TO_K(temp_sum / (double)num_temp_stations);
   press_mb = press_sum / (double)num_press_stations;
   
-  return true;
+  return 0;
 }
 
-
-/*********************************************************************
- * _initTrigger() - Initialize the data trigger.
- *
- * Returns true on success, false on failure.
- */
-
-bool CalcMoisture::_initTrigger(void)
-{
-  static const string method_name = "CalcMoisture::_initTrigger()";
-  
-  switch (_params->trigger_mode)
-  {
-  case Params::LATEST_DATA :
-  {
-    if (_params->debug)
-      cerr << "Initializing LATEST_DATA trigger using url: " <<
-	_params->n_field.url << endl;
-    
-    DsLdataTrigger *trigger = new DsLdataTrigger();
-    if (trigger->init(_params->n_field.url,
-		      -1,
-		      PMU_auto_register) != 0)
-    {
-      cerr << "ERROR: " << method_name << endl;
-      cerr << "Error initializing LATEST_DATA trigger using url: " <<
-	_params->n_field.url << endl;
-      cerr << trigger->getErrStr() << endl;
-      
-      return false;
-    }
-
-    _dataTrigger = trigger;
-    
-    break;
-  }
-  
-  case Params::TIME_LIST :
-  {
-    time_t start_time =
-      DateTime::parseDateTime(_params->time_list_trigger.start_time);
-    time_t end_time
-      = DateTime::parseDateTime(_params->time_list_trigger.end_time);
-    
-    if (start_time == DateTime::NEVER)
-    {
-      cerr << "ERROR: " << method_name << endl;
-      cerr << "Error parsing start_time string for TIME_LIST trigger: " <<
-	_params->time_list_trigger.start_time << endl;
-      
-      return false;
-    }
-    
-    if (end_time == DateTime::NEVER)
-    {
-      cerr << "ERROR: " << method_name << endl;
-      cerr << "Error parsing end_time string for TIME_LIST trigger: " <<
-	_params->time_list_trigger.end_time << endl;
-      
-      return false;
-    }
-    
-    if (_params->debug)
-    {
-      cerr << "Initializing TIME_LIST trigger: " << endl;
-      cerr << "   url: " << _params->n_field.url << endl;
-      cerr << "   start time: " << DateTime::str(start_time) << endl;
-      cerr << "   end time: " << DateTime::str(end_time) << endl;
-    }
-    
-    
-    DsTimeListTrigger *trigger = new DsTimeListTrigger();
-    if (trigger->init(_params->n_field.url,
-		      start_time, end_time) != 0)
-    {
-      cerr << "ERROR: " << method_name << endl;
-      cerr << "Error initializing TIME_LIST trigger for url: " <<
-	_params->n_field.url << endl;
-      cerr << "    Start time: " << _params->time_list_trigger.start_time <<
-	endl;
-      cerr << "    End time: " << _params->time_list_trigger.end_time << endl;
-      cerr << trigger->getErrStr() << endl;
-      
-      return false;
-    }
-    
-    _dataTrigger = trigger;
-    
-    break;
-  }
-  
-  } /* endswitch - _params->trigger_mode */
-
-  return true;
-}
-
-
-/*********************************************************************
- * _processData() - Process data for the given trigger time.
- *
- * Returns true on success, false on failure.
- */
-
-bool CalcMoisture::_processData(const DateTime &trigger_time)
-{
-  static const string method_name = "CalcMoisture::_processData()";
-  
-  if (_params->debug)
-    cerr << endl << "*** Processing data for time: " << trigger_time << endl;
-  
-  PMU_auto_register("Processing data");
-  
-  // Read in the N field
-
-  DsMdvx input_file;
-  
-  input_file.setReadTime(Mdvx::READ_CLOSEST,
-		   _params->n_field.url,
-		   0, trigger_time.utime());
-  
-  if (_params->n_field.use_field_name)
-    input_file.addReadField(_params->n_field.field_name);
-  else
-    input_file.addReadField(_params->n_field.field_num);
-  
-  input_file.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
-  input_file.setReadCompressionType(Mdvx::COMPRESSION_NONE);
-  input_file.setReadScalingType(Mdvx::SCALING_NONE);
-  
-  if (_params->debug)
-    input_file.printReadRequest(cerr);
-  
-  if (input_file.readVolume() != 0)
-  {
-    cerr << "ERROR: " << method_name << endl;
-    cerr << "Error reading N field:" << endl;
-    cerr << "   Request time: " << trigger_time << endl;
-    cerr << "   URL: " << _params->n_field.url;
-    if (_params->n_field.use_field_name)
-      cerr << "   Field name: " << _params->n_field.field_name << endl;
-    else
-      cerr << "   Field num: " << _params->n_field.field_num << endl;
-    cerr << input_file.getErrStr() << endl;
-    
-    return false;
-  }
-  
-  MdvxField *n_field;
-  
-  if ((n_field = input_file.getField(0)) == 0)
-  {
-    cerr << "ERROR: " << method_name << endl;
-    cerr << "Error retrieving N field from MDV file" << endl;
-    
-    return false;
-  }
-  
-  // Get the mean temperature and pressure from the given stations
-
-  double temp_k, press_mb;
-  
-  if (!_getTempPress(trigger_time, temp_k, press_mb))
-    return false;
-
-  if (_params->debug)
-  {
-    cerr << "---> Mean temp = " << temp_k << " K" << endl;
-    cerr << "     Mean press = " << press_mb << " mb" << endl;
-  }
-  
-  // Calculate the water vapor pressure field
-
-  MdvxField *e_field;
-  
-  if ((e_field = _calcWaterVaporField(*n_field, temp_k, press_mb)) == 0)
-    return false;
-  
-  // Calculate the dew point field
-
-  MdvxField *td_field;
-  
-  if ((td_field = _calcDewPointField(*e_field)) == 0)
-    return false;
-  
-  // Calculate the relative humidity field
-
-  MdvxField *rh_field;
-  
-  if ((rh_field = _calcRelativeHumidityField(*td_field, temp_k)) == 0)
-    return false;
-  
-  // Create the output file
-
-  DsMdvx output_file;
-  
-  Mdvx::master_header_t master_hdr = input_file.getMasterHeader();
-  
-  master_hdr.num_data_times = 0;
-  master_hdr.index_number = 0;
-  master_hdr.n_fields = 0;
-  master_hdr.max_nx = 0;
-  master_hdr.max_ny = 0;
-  master_hdr.max_nz = 0;
-  master_hdr.n_chunks = 0;
-  STRcopy(master_hdr.data_set_info, "CalcMoisture", MDV_INFO_LEN);
-  STRcopy(master_hdr.data_set_name, "CalcMoisture", MDV_NAME_LEN);
-  STRcopy(master_hdr.data_set_source, input_file.getPathInUse().c_str(),
-	  MDV_NAME_LEN);
-  
-  output_file.setMasterHeader(master_hdr);
-  
-  if (_params->compress_output_fields)
-  {
-    e_field->convertType(Mdvx::ENCODING_INT8,
-			 Mdvx::COMPRESSION_BZIP,
-			 Mdvx::SCALING_DYNAMIC);
-
-    td_field->convertType(Mdvx::ENCODING_INT8,
-			  Mdvx::COMPRESSION_BZIP,
-			  Mdvx::SCALING_DYNAMIC);
-
-    rh_field->convertType(Mdvx::ENCODING_INT8,
-			  Mdvx::COMPRESSION_BZIP,
-			  Mdvx::SCALING_DYNAMIC);
-  }
-
-  output_file.addField(e_field);
-  output_file.addField(td_field);
-  output_file.addField(rh_field);
-  
-  // Write the output file
-
-  output_file.setWriteLdataInfo();
-  
-  if (output_file.writeToDir(_params->output_url) != 0)
-  {
-    cerr << "ERROR: " << method_name << endl;
-    cerr << "Error writing to output URL: " << _params->output_url << endl;
-    
-    return false;
-  }
-  
-  return true;
-}

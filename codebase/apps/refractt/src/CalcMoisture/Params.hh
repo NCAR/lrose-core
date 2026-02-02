@@ -68,23 +68,18 @@ public:
   // enum typedefs
 
   typedef enum {
-    LATEST_DATA = 0,
-    TIME_LIST = 1
-  } trigger_mode_t;
+    DEBUG_OFF = 0,
+    DEBUG_NORM = 1,
+    DEBUG_VERBOSE = 2
+  } debug_t;
+
+  typedef enum {
+    FILELIST = 0,
+    ARCHIVE = 1,
+    REALTIME = 2
+  } mode_t;
 
   // struct typedefs
-
-  typedef struct {
-    char* start_time;
-    char* end_time;
-  } time_list_trigger_t;
-
-  typedef struct {
-    char* url;
-    tdrp_bool_t use_field_name;
-    char* field_name;
-    long field_num;
-  } input_info_t;
 
   typedef struct {
     char* name;
@@ -385,19 +380,25 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  tdrp_bool_t debug;
+  debug_t debug;
 
   char* instance;
 
-  trigger_mode_t trigger_mode;
+  int procmap_register_interval;
 
-  time_list_trigger_t time_list_trigger;
+  char* input_dir;
 
-  input_info_t n_field;
+  char* n_field_name;
 
-  char* output_url;
+  mode_t mode;
 
-  tdrp_bool_t compress_output_fields;
+  int max_realtime_data_age_secs;
+
+  char* start_time;
+
+  char* end_time;
+
+  char* output_dir;
 
   char* station_url;
 
@@ -415,7 +416,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[18];
+  mutable TDRPtable _table[21];
 
   const char *_className;
 

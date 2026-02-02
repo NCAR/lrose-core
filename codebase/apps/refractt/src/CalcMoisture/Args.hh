@@ -21,71 +21,44 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+/////////////////////////////////////////////////////////////
+// Args.hh: Command line object
+//
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Jan 2026
+//
+/////////////////////////////////////////////////////////////
 
-/* RCS info
- *   $Author: dixon $
- *   $Locker:  $
- *   $Date: 2016/03/07 18:17:26 $
- *   $Id: Args.hh,v 1.2 2016/03/07 18:17:26 dixon Exp $
- *   $Revision: 1.2 $
- *   $State: Exp $
- */
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
+#ifndef ARGS_H
+#define ARGS_H
 
-/************************************************************************
- * Args.hh : header file for the Args class.
- *
- * RAP, NCAR, Boulder CO
- *
- * June 2006
- *
- * Nancy Rehak
- *
- ************************************************************************/
-
-#ifndef Args_HH
-#define Args_HH
-
-#include <stdio.h>
 #include <string>
-#include <time.h>
-
+#include <vector>
+#include <iostream>
 #include <tdrp/tdrp.h>
-
 using namespace std;
 
-
-class Args
-{
- public:
-
-  // Constructor
-
-  Args(int argc, char **argv, char *prog_name);
+class Args {
   
-  // Destructor
+public:
 
-  ~Args(void);
-  
-  // TDRP overrides specified in the command line arguments.
+  // parse
+
+  int parse(int argc, char **argv, string &prog_name);
+
+  // public data
 
   tdrp_override_t override;
+  time_t startTime, endTime;
+  vector<string> inputFileList;
+
+  void usage(string &prog_name, ostream &out);
   
-
- private:
-
-  // The program name for error messages
-
-  string _progName;
+protected:
   
+private:
 
-  // Print the usage for this program.
-
-  void _usage(FILE *stream);
-  
 };
-
 
 #endif

@@ -21,219 +21,170 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/07 18:17:26 $
-//   $Id: Args.cc,v 1.3 2016/03/07 18:17:26 dixon Exp $
-//   $Revision: 1.3 $
-//   $State: Exp $
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-/*********************************************************************
- * Args.cc: class controlling the command line arguments for the
- *          program.
- *
- * RAP, NCAR, Boulder CO
- *
- * June 2006
- *
- * Nancy Rehak
- *
- *********************************************************************/
-
-#include <iostream>
-#include <string>
-
-#include <string.h>
-
-#include <toolsa/os_config.h>
-#include <tdrp/tdrp.h>
-#include <toolsa/DateTime.hh>
-#include <toolsa/str.h>
-#include <toolsa/umisc.h>
+//////////////////////////////////////////////////////////
+// Args.cc : command line args
+//
+// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// July 1999
+//
+//////////////////////////////////////////////////////////
 
 #include "Args.hh"
-
+#include "Params.hh"
+#include <cstring>
+#include <iostream>
+#include <toolsa/DateTime.hh>
+#include <toolsa/umisc.h>
 using namespace std;
 
-/**********************************************************************
- * Constructor
- */
+// parse
 
-Args::Args (int argc, char **argv, char *prog_name) :
-  _progName(prog_name)
+int Args::parse(int argc, char **argv, string &prog_name)
+
 {
-  string tmp_str;
 
-  DateTime start_time(DateTime::NEVER);
-  DateTime end_time(DateTime::NEVER);
-  string mode;
-  
-  // Intialize
+  int iret = 0;
+  char tmp_str[256];
 
-  bool okay = true;
+  // intialize
 
   TDRP_init_override(&override);
-  
-  // search for command options
-  
-  for (int i =  1; i < argc; i++)
-  {
-    if (STRequal_exact(argv[i], "--") ||
-	STRequal_exact(argv[i], "-help") ||
-	STRequal_exact(argv[i], "-man"))
-    {
-      _usage(stdout);
-      exit(0);
-    }
-    else if (STRequal_exact(argv[i], "-debug"))
-    {
-      tmp_str = "debug = true;";
-      TDRP_add_override(&override, tmp_str.c_str());
-    }
-    else if (STRequal_exact(argv[i], "-end") ||
-	     STRequal_exact(argv[i], "-endtime"))
-    {
-      if (i < argc - 1)
-      {
-	if (end_time.set(argv[++i]) == DateTime::NEVER)
-	{
-	  cerr << "*** Invalid end time string entered: " <<
-	    argv[i] << endl << endl;
-	  
-	  okay = false;
-	}
-      }
-      else
-      {
-	okay = false;
-      }
-    }	
-    else if (STRequal_exact(argv[i], "-mode"))
-    {
-      if (i < argc - 1)
-      {
-	mode = argv[++i];
-	
-	if (STRequal_exact(argv[i], "LATEST_DATA") ||
-	    STRequal_exact(argv[i], "TIME_LIST"))
-	{
-	  tmp_str = "trigger_mode = " + mode + ";";
-	  TDRP_add_override(&override, tmp_str.c_str());
-	}
-	else
-	{
-	  cerr << "*** Invalid mode entered: " << mode << endl << endl;
-	  okay = false;
-	}
-      }
-      else
-      {
-	okay = false;
-      }
-    }
-    else if (STRequal_exact(argv[i], "-start") ||
-	     STRequal_exact(argv[i], "-starttime"))
-    {
-      if (i < argc - 1)
-      {
-	if (start_time.set(argv[++i]) == DateTime::NEVER)
-	{
-	  cerr << "*** Invalid start time string entered: " <<
-	    argv[i] << endl << endl;
-	  
-	  okay = false;
-	}
-      }
-      else
-      {
-	okay = false;
-      }
-    }	
-  } /* i */
+  startTime = 0;
+  endTime = 0;
 
-  if (!okay)
-  {
-    _usage(stderr);
-    exit(-1);
+  // loop through args
+  
+  for (int i =  1; i < argc; i++) {
+
+    if (!strcmp(argv[i], "--") ||
+        !strcmp(argv[i], "-h") ||
+        !strcmp(argv[i], "-help") ||
+        !strcmp(argv[i], "-man")) {
+      
+      usage(prog_name, cout);
+      exit (0);
+      
+    } else if (!strcmp(argv[i], "-d") ||
+               !strcmp(argv[i], "-debug")) {
+      
+      sprintf(tmp_str, "debug = DEBUG_NORM;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-v") ||
+               !strcmp(argv[i], "-verbose")) {
+      
+      sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-in_dir")) {
+
+      if(i < argc - 1) {
+        sprintf(tmp_str, "input_dir = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+        iret = -1;
+      }
+
+    } else if (!strcmp(argv[i], "-out_dir")) {
+
+      if(i < argc - 1) {
+        sprintf(tmp_str, "output_dir = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+      }
+      else {
+        iret = -1;
+      }
+
+    } else if (!strcmp(argv[i], "-mode")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "mode = %s;", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+        iret = -1;
+      }
+        
+    } else if (!strcmp(argv[i], "-start")) {
+      
+      if (i < argc - 1) {
+        startTime = DateTime::parseDateTime(argv[++i]);
+        if (startTime == DateTime::NEVER) {
+          iret = -1;
+        } else {
+          sprintf(tmp_str, "start_time = \"%s\";", argv[i+1]);
+          TDRP_add_override(&override, tmp_str);
+          sprintf(tmp_str, "mode = ARCHIVE;");
+          TDRP_add_override(&override, tmp_str);
+        }
+      } else {
+        iret = -1;
+      }
+        
+    } else if (!strcmp(argv[i], "-end")) {
+      
+      if (i < argc - 1) {
+        endTime = DateTime::parseDateTime(argv[++i]);
+        if (endTime == DateTime::NEVER) {
+          iret = -1;
+        } else {
+          sprintf(tmp_str, "end_time = \"%s\";", argv[i+1]);
+          TDRP_add_override(&override, tmp_str);
+          sprintf(tmp_str, "mode = ARCHIVE;");
+          TDRP_add_override(&override, tmp_str);
+        }
+      } else {
+        iret = -1;
+      }
+        
+    } else if (!strcmp(argv[i], "-f")) {
+        
+      if (i < argc - 1) {
+        // load up file list vector. Break at next arg which
+        // start with -
+        for (int j = i + 1; j < argc; j++) {
+          if (argv[j][0] == '-') {
+            break;
+          } else {
+            inputFileList.push_back(argv[j]);
+          }
+        }
+        sprintf(tmp_str, "mode = FILELIST;");
+        TDRP_add_override(&override, tmp_str);
+      } else {
+        iret = -1;
+      }
+      
+    } // if
+    
+  } // i
+
+  if (iret) {
+    usage(prog_name, cerr);
   }
-    
-  // If a mode was entered on the command line, make sure that
-  // the other appropriate information was also entered.
 
-  if (mode == "TIME_LIST")
-  {
-    if (start_time == DateTime::NEVER)
-    {
-      cerr <<
-	"*** Must include -start in command line when using TIME_LIST mode" <<
-	endl << endl;
-      _usage(stderr);
-      exit(-1);
-    }
+  return (iret);
     
-    if (end_time == DateTime::NEVER)
-    {
-      cerr <<
-	"*** Must include -end in command line when using TIME_LIST mode" <<
-	endl << endl;
-      _usage(stderr);
-      exit(-1);
-    }
-    
-    tmp_str = "time_list_trigger = { \"" +
-      string(start_time.dtime()) + "\", \"" + end_time.dtime() + "\" };";
-    TDRP_add_override(&override, tmp_str.c_str());
-  }
 }
 
-
-/**********************************************************************
- * Destructor
- */
-
-Args::~Args(void)
+void Args::usage(string &prog_name, ostream &out)
 {
-  TDRP_free_override(&override);
+
+  out << "Usage: " << prog_name << " [options as below]\n"
+      << "options:\n"
+      << "       [ --, -h, -help, -man ] produce this list.\n"
+      << "       [ -d, -debug ] print debug messages\n"
+      << "       [ -end \"yyyy mm dd hh mm ss\"] end time\n"
+      << "       [ -in_dir ? ] Input directory\n"
+      << "       [ -out_dir ? ] Output directory\n"
+      << "       [ -f ?] input file list\n"
+      << "         Sets mode to FILELIST\n"
+      << "       [ -mode ?] ARCHIVE, FILELIST, REALTIME\n"
+      << "       [ -start \"yyyy mm dd hh mm ss\"] start time\n"
+      << "       [ -v, -verbose ] print verbose debug messages\n"
+      << endl;
+
+  Params::usage(out);
+
 }
-  
 
-/**********************************************************************
- *              Private Member Functions                              *
- **********************************************************************/
-
-/**********************************************************************
- * _usage() - Print the usage for this program.
- */
-
-void Args::_usage(FILE *stream)
-{
-  fprintf(stream, "%s%s%s",
-	  "This program calculates water vapor pressure (e) and\n"
-	  "dew point temperature based on the refractivity N field and\n"
-	  "the mean temperature and pressure values from a group of\n"
-           "weather stations.\n"
-	  "\n"
-	  "Usage:\n\n", _progName.c_str(), " [options] as below:\n\n"
-	  "       [ --, -help, -man ] produce this list.\n"
-	  "       [ -debug ] debugging on\n"
-	  "       [ -end yyyy/mm/dd_hh:mm:ss ] end time (TIME_LIST mode)\n"
-	  "       [ -mode ?] LATEST_DATA or TIME_LIST\n"
-	  "       [ -start yyyy/mm/dd_hh:mm:ss ] start time (TIME_LIST mode)\n"
-	  "\n"
-	  "When specifying a mode on the command line, the following must also\n"
-	  "be specified:\n"
-	  "\n"
-	  "     LATEST_DATA mode:\n"
-	  "           nothing\n"
-	  "     TIME_LIST mode:\n"
-	  "           -start, -end\n"
-	  "\n"
-    );
-
-
-  TDRP_usage(stream);
-}

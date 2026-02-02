@@ -23,46 +23,36 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2016/03/07 18:17:26 $
-//   $Id: Main.cc,v 1.2 2016/03/07 18:17:26 dixon Exp $
-//   $Revision: 1.2 $
-//   $State: Exp $
+/////////////////////////////////////////////////////////////
+// CalcMoisture Main
 //
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-/*********************************************************************
- * Main.cc: CalcMoisture main routine
- *
- * RAP, NCAR, Boulder CO
- *
- * June 2006
- *
- * Nancy Rehak
- *
- *********************************************************************/
+// Nancy Rehak, RAL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// June 2006
+//
+/////////////////////////////////////////////////////////////
+//
+// CalcMoisture calculates water vapor pressure (e) and dew
+// point temperature based on the refractivity N field and
+// the mean temperature and pressure values
+// from a group of weather stations.
+//
+/////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-
+#include <cstdio>
 #include <toolsa/port.h>
 #include <toolsa/umisc.h>
-
 #include "CalcMoisture.hh"
 
 using namespace std;
-
 
 // Prototypes for static functions
 
 static void tidy_and_exit(int sig);
 
-
 // Global variables
 
 CalcMoisture *Prog = (CalcMoisture *)NULL;
-
 
 /*********************************************************************
  * main()
@@ -70,15 +60,14 @@ CalcMoisture *Prog = (CalcMoisture *)NULL;
 
 int main(int argc, char **argv)
 {
+
   // Create program object.
-
-  Prog = CalcMoisture::Inst(argc, argv);
-  if (!Prog->okay)
-    return -1;
-
-  if (!Prog->init())
-    return -1;
   
+  Prog = new CalcMoisture(argc, argv);
+  if (!Prog->okay) {
+    return -1;
+  }
+
   // Register function to trap termination and interrupts.
 
   PORTsignal(SIGQUIT, tidy_and_exit);
@@ -109,4 +98,5 @@ static void tidy_and_exit(int sig)
   // Now exit the program.
 
   exit(sig);
+
 }
