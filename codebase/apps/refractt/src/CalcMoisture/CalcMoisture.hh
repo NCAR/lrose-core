@@ -106,8 +106,7 @@ private:
    * Returns a pointer to the dew point field on success, 0 on failure.
    */
 
-  MdvxField *_calcDewPointField(const MdvxField &e_field) const;
-  
+  MdvxField *_calcDewPointField(const MdvxField &e_field);
 
   /*********************************************************************
    * _calcDewPointField() - Calculate the relative humidity field from
@@ -117,7 +116,7 @@ private:
    */
 
   MdvxField *_calcRelativeHumidityField(const MdvxField &dp_field,
-                                        const double temp_k) const;
+                                        const double temp_k);
 
   /*********************************************************************
    * _calcWaterVaporField() - Calculate the water vapor field from the
@@ -128,8 +127,7 @@ private:
 
   MdvxField *_calcWaterVaporField(const MdvxField &n_field,
 				  const double temp_k,
-				  const double press_mb) const;
-  
+				  const double press_mb);
 
   /*********************************************************************
    * _getTempPress() - Get the mean temperature (in K) and pressure (in mb)

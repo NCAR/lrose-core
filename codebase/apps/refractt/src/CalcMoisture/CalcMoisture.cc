@@ -200,9 +200,7 @@ int CalcMoisture::run()
     }
 
     DateTime fileTime(inputTime);
-    
-    if (!_processData(inputPath, fileTime))
-    {
+    if (!_processData(inputPath, fileTime)) {
       cerr << "ERROR: CalcMoisture::run()" << endl;
       cerr << "  processing data for time: " << fileTime << endl;
       continue;
@@ -223,11 +221,6 @@ int CalcMoisture::run()
   }
   
 }
-
-
-/**********************************************************************
- *              Private Member Functions                              *
- **********************************************************************/
 
 /*********************************************************************
  * _processData() - Process data for the given trigger time.
@@ -370,8 +363,9 @@ int CalcMoisture::_processData(const string filePath,
  * Returns a pointer to the dew point field on success, 0 on failure.
  */
 
-MdvxField *CalcMoisture::_calcDewPointField(const MdvxField &e_field) const
+MdvxField *CalcMoisture::_calcDewPointField(const MdvxField &e_field)
 {
+  
   static const string method_name = "CalcMoisture::_calcDewPointField()";
   
   // Start with a copy of the water vapor pressure field
@@ -430,8 +424,10 @@ MdvxField *CalcMoisture::_calcDewPointField(const MdvxField &e_field) const
  */
 
 MdvxField *CalcMoisture::_calcRelativeHumidityField(const MdvxField &dp_field,
-                                                    const double temp_k) const
+                                                    const double temp_k)
+
 {
+
   static const string method_name = "CalcMoisture::_calcRelativeHumidityField()";
   
   // Start with a copy of the dewpoint field
@@ -459,24 +455,26 @@ MdvxField *CalcMoisture::_calcRelativeHumidityField(const MdvxField &dp_field,
   fl32 *data = (fl32 *)rh_field->getVol();
   int vol_size = field_hdr.nx * field_hdr.ny * field_hdr.nz;
   
-  for (int i = 0; i < vol_size; ++i)
-  {
+  for (int i = 0; i < vol_size; ++i) {
+
     if (data[i] == field_hdr.missing_data_value ||
-	data[i] == field_hdr.bad_data_value)
+	data[i] == field_hdr.bad_data_value) {
       continue;
+    }
     
     // Cannot take the log of a negative number
-
-    if (data[i] <= 0.0)
-    {
+    
+    if (data[i] <= 0.0) {
       data[i] = field_hdr.bad_data_value;
       continue;
     }
     
-    data[i] = PHYhumidity(temp_k, TEMP_C_TO_K(data[i])); 
+    data[i] = PHYhumidity(temp_k, TEMP_C_TO_K(data[i]));
+    
   }
   
   return rh_field;
+  
 }
 
 
@@ -489,12 +487,13 @@ MdvxField *CalcMoisture::_calcRelativeHumidityField(const MdvxField &dp_field,
 
 MdvxField *CalcMoisture::_calcWaterVaporField(const MdvxField &n_field,
 					      const double temp_k,
-					      const double press_mb) const
+					      const double press_mb)
 {
+
   static const string method_name = "CalcMoisture::_calcWaterVaporField()";
   
   // Start with a copy of the N field
-
+  
   MdvxField *e_field = new MdvxField(n_field);
   
   // Update the field header values
@@ -519,27 +518,29 @@ MdvxField *CalcMoisture::_calcWaterVaporField(const MdvxField &n_field,
   fl32 *data = (fl32 *)e_field->getVol();
   int vol_size = field_hdr.nx * field_hdr.ny * field_hdr.nz;
   
-  for (int i = 0; i < vol_size; ++i)
-  {
+  for (int i = 0; i < vol_size; ++i) {
+
     if (data[i] == field_hdr.missing_data_value ||
-	data[i] == field_hdr.bad_data_value)
+	data[i] == field_hdr.bad_data_value) {
       continue;
+    }
     
     // There's a problem with the N field where the missing data value
     // is being handled incorrectly somehow.  Artificially correct for this
     // for now.
 
-    if (data[i] < -300.0)
-    {
+    if (data[i] < -300.0) {
       data[i] = field_hdr.bad_data_value;
       continue;
     }
     
     data[i] = (temp_k * temp_k) *
               (data[i] - 77.6 * (press_mb / temp_k)) / 373000.0;
+    
   }
   
   return e_field;
+  
 }
 
 
@@ -553,7 +554,9 @@ MdvxField *CalcMoisture::_calcWaterVaporField(const MdvxField &n_field,
 
 int CalcMoisture::_getTempPress(const DateTime &data_time,
                                 double &temp_k, double &press_mb)
+  
 {
+
   static const string method_name = "CalcMoisture::_getTempPress()";
   
   // Read in the station data
@@ -563,27 +566,26 @@ int CalcMoisture::_getTempPress(const DateTime &data_time,
   int num_temp_stations = 0;
   int num_press_stations = 0;
   
-  for (int i = 0; i < _params.station_list_n; ++i)
-  {
+  for (int i = 0; i < _params.station_list_n; ++i) {
+
     int data_type = Spdb::hash4CharsToInt32(_params._station_list[i].name);
     
     DsSpdb spdb;
-    
     if (spdb.getClosest(_params.station_url,
 			data_time.utime(),
 			_params.max_station_valid_secs,
-			data_type) != 0)
-    {
+			data_type) != 0) {
+
       cerr << "ERROR: " << method_name << endl;
       cerr << "Error reading station data for station: "
 	   << _params._station_list[i].name << endl;
       cerr << spdb.getErrStr() << endl;
       
       return -1;
+
     }
     
-    if (spdb.getNChunks() <= 0)
-    {
+    if (spdb.getNChunks() <= 0) {
       if (_params.debug)
 	cerr << "No chunks found in database for station "
 	     << _params._station_list[i].name << endl;
@@ -591,21 +593,20 @@ int CalcMoisture::_getTempPress(const DateTime &data_time,
       continue;
     }
     
-    if (_params.debug)
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Successfully read " << spdb.getNChunks()
 	   << " chunks for station " << _params._station_list[i].name << endl;
+    }
     
     // If we get here, we got some weather obs data.  There should only be one
     // chunk of data, but if there is more for some reason, then just use
     // the first chunk.
 
     const vector< Spdb::chunk_t > &chunks = spdb.getChunks();
-    
     WxObs obs;
     obs.disassemble(chunks[0].data, chunks[0].len);
 
-    if (_params.debug)
-    {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Station " << _params._station_list[i].name << " info:" << endl;
       cerr << "    station_id: " << obs.getStationId() << endl;
     }
@@ -613,65 +614,69 @@ int CalcMoisture::_getTempPress(const DateTime &data_time,
     double temperature = obs.getTempC();
     double pressure = obs.getPressureMb();
 
-    if (pressure == obs.missing)
-    {
+    if (pressure == obs.missing) {
+
       double msl_pressure = obs.getSeaLevelPressureMb();
       double elevation = _params._station_list[i].elevation;
-      if (_params.get_elevation_from_data)
+      if (_params.get_elevation_from_data) {
         elevation = obs.getElevationMeters();
+      }
 
-      if (_params.debug)
-      {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
         cerr << "    station pressure value missing -- calculating" << endl;
-        if (msl_pressure == obs.missing)
+        if (msl_pressure == obs.missing) {
           cerr << "    msl_pressure: MISSING" << endl;
-        else
+        } else {
           cerr << "    msl_pressure: " << msl_pressure << " mb" << endl;
-        if (elevation == obs.missing)
+        }
+        if (elevation == obs.missing) {
           cerr << "    elevation: MISSING" << endl;
-        else
+        } else {
           cerr << "    elevation: " << elevation << " m" << endl;
+        }
       }
     
-      if (msl_pressure != obs.missing && elevation != obs.missing)
+      if (msl_pressure != obs.missing && elevation != obs.missing) {
         pressure = SL2StnPressure(msl_pressure, elevation);
-    }
+      }
+      
+    } // if (pressure == obs.missing)
 
-    if (_params.debug)
-    {
-      if (temperature == obs.missing)
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+
+      if (temperature == obs.missing) {
 	cerr << "    temperature: MISSING" << endl;
-      else
+      } else {
 	cerr << "    temperature: " << temperature << " C" << endl;
-      if (pressure == obs.missing)
+      }
+      if (pressure == obs.missing) {
 	cerr << "    pressure: MISSING" << endl;
-      else
+      } else {
 	cerr << "    pressure: " << pressure << " mb" << endl;
+      }
     }
     
-    if (temperature != obs.missing)
-    {
+    if (temperature != obs.missing) {
       temp_sum += temperature;
       ++num_temp_stations;
     }
     
-    if (pressure != obs.missing)
-    {
+    if (pressure != obs.missing) {
       press_sum += pressure;
       ++num_press_stations;
     }
     
   } /* endfor - i */
   
-  if (num_temp_stations <= 0 || num_press_stations <= 0)
-  {
+  if (num_temp_stations <= 0 || num_press_stations <= 0) {
     cerr << "ERROR: " << method_name << endl;
-    if (num_temp_stations <= 0)
+    if (num_temp_stations <= 0) {
       cerr << "No temperature data found for time period for given stations" << endl;
-    if (num_press_stations <= 0)
+    }
+    if (num_press_stations <= 0) {
       cerr << "No pressure data found for time period for given stations" << endl;
+    }
     cerr << "Cannot calculate moisture fields" << endl;
-    
     return -1;
   }
   
@@ -679,5 +684,6 @@ int CalcMoisture::_getTempPress(const DateTime &data_time,
   press_mb = press_sum / (double)num_press_stations;
   
   return 0;
+  
 }
 
