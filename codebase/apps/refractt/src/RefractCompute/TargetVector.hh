@@ -53,7 +53,7 @@ class TargetVector
 
 public:
 
-  // TargetVector(void);
+  // TargetVector();
   TargetVector(int scanSize=0);
   ~TargetVector();
   void compute_phase_diff(const FieldDataPair &difPrevScan,
@@ -84,8 +84,8 @@ public:
   bool phase_dif_er_is_valid(int offset) const;
   double iqNorm(int offset) const;
 
-  inline const VectorData & getPhaseDiffErr(void) const {return _phase_diff_er;}
-  inline const VectorIQ & getIQ(void) const {return _iq;}
+  inline const VectorData & getPhaseDiffErr() const {return _phase_diff_er;}
+  inline const VectorIQ & getIQ() const {return _iq;}
 
 private:
 

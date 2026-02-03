@@ -893,18 +893,6 @@
     tt->single_val.s = tdrpStrDup("DBZ");
     tt++;
     
-    // Parameter 'power_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("power_field_name");
-    tt->descr = tdrpStrDup("Power field name in the input stream.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &power_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("DM");
-    tt++;
-    
     // Parameter 'quality_source'
     // ctype is '_quality_source_t'
     

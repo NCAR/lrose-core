@@ -68,6 +68,18 @@ public:
   // enum typedefs
 
   typedef enum {
+    DEBUG_OFF = 0,
+    DEBUG_NORM = 1,
+    DEBUG_VERBOSE = 2
+  } debug_t;
+
+  typedef enum {
+    FILELIST = 0,
+    ARCHIVE = 1,
+    REALTIME = 2
+  } mode_t;
+
+  typedef enum {
     QUALITY_FROM_WIDTH = 0,
     QUALITY_FROM_CPA = 1
   } quality_source_t;
@@ -347,7 +359,7 @@ public:
   // Frees up all TDRP dynamic memory.
   //
 
-  void freeAll(void);
+  void freeAll();
 
   ////////////////////////////////////////////
   // usage()
@@ -366,13 +378,67 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
+  debug_t debug;
+
+  tdrp_bool_t write_debug_mdv_files;
+
+  char* debug_mdv_url;
+
+  double debug_lat;
+
+  double debug_lon;
+
+  int debug_npt;
+
+  tdrp_bool_t debug_show_source_code_method_and_line;
+
+  char* instance;
+
+  int procmap_register_interval;
+
+  char* input_dir;
+
+  char* n_field_name;
+
+  mode_t mode;
+
+  int max_realtime_data_age_secs;
+
+  char* start_time;
+
+  char* end_time;
+
+  char* calib_file_path_day;
+
+  char* calib_file_path_night;
+
+  tdrp_bool_t raw_iq_in_input;
+
+  char* raw_i_field_name;
+
+  char* raw_q_field_name;
+
+  char* niq_field_name;
+
+  double input_niq_scale;
+
+  tdrp_bool_t invert_target_angle_sign;
+
+  char* aiq_field_name;
+
+  tdrp_bool_t snr_available;
+
+  char* snr_field_name;
+
+  double noise_dbz_at_100km;
+
+  char* dbz_field_name;
+
+  char* output_dir;
+
   quality_source_t quality_source;
 
   char* quality_field_name;
-
-  char* ref_file_name_day;
-
-  char* ref_file_name_night;
 
   int *_hms_night;
   int hms_night_n;
@@ -407,7 +473,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[20];
+  mutable TDRPtable _table[51];
 
   const char *_className;
 

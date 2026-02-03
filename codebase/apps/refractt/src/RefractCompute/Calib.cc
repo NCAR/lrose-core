@@ -6,11 +6,11 @@ const string Calib::CALIB_AV_I_FIELD_NAME = "av_i";
 const string Calib::CALIB_AV_Q_FIELD_NAME = "av_q";
 const string Calib::CALIB_PHASE_ER_FIELD_NAME = "phase_er";
 
-Calib::Calib(void) : _refN(0.0)
+Calib::Calib() : _refN(0.0)
 {
 }
 
-Calib::~Calib(void)
+Calib::~Calib()
 {
 }
 

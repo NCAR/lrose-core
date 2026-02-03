@@ -49,12 +49,12 @@
 #define CalcMoisture_HH
 
 #include <string>
-#include <didss/DsInputPath.hh>
 #include <Mdv/MdvxField.hh>
 #include <toolsa/DateTime.hh>
 
 #include "Args.hh"
 #include "Params.hh"
+class DsInputPath;
 
 using namespace std;
 

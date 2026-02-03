@@ -64,7 +64,7 @@ public:
     _init_slope = init_slope;
   }
 
-  inline ~LinearInterpArgs(void) {}
+  inline ~LinearInterpArgs() {}
 
   inline void initForAz(int azn, int azjump, int rjump)
   {

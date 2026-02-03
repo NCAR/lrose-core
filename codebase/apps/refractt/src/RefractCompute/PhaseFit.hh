@@ -72,7 +72,7 @@ class PhaseFit
    * @brief Destructor
    */
 
-  virtual ~PhaseFit(void);
+  virtual ~PhaseFit();
   
   /**
    * @brief Initialize the object.
@@ -380,7 +380,7 @@ class PhaseFit
    *         error.
    */
 
-  double _meanPhaseSlopeAvg(void) const;
+  double _meanPhaseSlopeAvg() const;
   
 
   /**
@@ -391,7 +391,7 @@ class PhaseFit
    *         error.
    */
 
-  double _meanPhaseSlopeInit(void) const;
+  double _meanPhaseSlopeInit() const;
   
   IQ _sectorMeanPhaseSlope(int az, int max_r, int smear_az) const;
   // void _meanPhaseSlopeIncrementAtAz(int az, int max_r, int smear_az,
@@ -406,7 +406,7 @@ class PhaseFit
    * @return Returns the calculated phase value.
    */
 
-  double _phaseRange0(void);
+  double _phaseRange0();
   
   void _setNOneBeam(int azn, float slope_to_n, float tmp, float er_decorel);
 
@@ -461,7 +461,7 @@ void _lowQualityAdjust(const LinearInterpArgs &args,
 
   int _relax(float *ndata);
   
-  inline double _defaultSlope(void) const
+  inline double _defaultSlope() const
   {
     return 1000000.0 / _gateSpacing * _wavelength / 720.0;
   }

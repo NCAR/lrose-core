@@ -57,7 +57,7 @@ class Processor
   /**
    * @brief Destructor
    */
-  virtual ~Processor(void);
+  virtual ~Processor();
   
 
   /**

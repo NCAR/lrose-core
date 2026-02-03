@@ -46,11 +46,8 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "Calib.hh"
-#include <Refract/RefParms.hh>
 
 #include <string>
-#include <vector>
-#include <sys/stat.h>
 
 /** 
  * @class RefractCalib
@@ -85,10 +82,9 @@ public:
  private:
 
   string _progName; /**< program name */
-  char *_paramsPath;
   Args _args;
+  char *_paramsPath;
   Params _params; /**< Parameter file paramters. */
-  RefParms _refparms;
   Calib *_calib; /**< Data processing object. */
 
   // analysis time limits

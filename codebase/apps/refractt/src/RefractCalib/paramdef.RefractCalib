@@ -228,12 +228,6 @@ paramdef string {
   p_help = "Horizontally-polarized reflectivity factor.";
 } dbz_field_name;
 
-paramdef string
-{
-  p_descr = "Power field name in the input stream.";
-  p_default = "DM";
-} power_field_name;
-
 typedef enum
 {
   QUALITY_FROM_WIDTH,

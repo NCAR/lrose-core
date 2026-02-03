@@ -61,28 +61,28 @@ class Calib
    * @note Private because this is a singleton object.
    */
 
-  Calib(void);
+  Calib();
   
 
   /**
    * @brief Destructor
    */
 
-  virtual ~Calib(void);
+  virtual ~Calib();
   
   bool initialize(const std::string &ref_file_name);
 
-  inline const FieldDataPair *avIqPtr(void) const
+  inline const FieldDataPair *avIqPtr() const
   {
     return &_averageIQ;
   }
 
-  inline const FieldWithData *phaseErPtr(void) const
+  inline const FieldWithData *phaseErPtr() const
   {
     return &_phaseEr;
   }
 
-  inline double refN(void) const {return _refN;}
+  inline double refN() const {return _refN;}
 
  private:
 

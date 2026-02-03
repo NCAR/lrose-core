@@ -15,11 +15,11 @@ static double _getTimeFraction(const int *hms)
   return _getTimeFraction(hms[0], hms[1], hms[2]);
 }
 
-CalibDayNight::CalibDayNight(void)
+CalibDayNight::CalibDayNight()
 {
 }
 
-CalibDayNight::~CalibDayNight(void)
+CalibDayNight::~CalibDayNight()
 {
 }
 

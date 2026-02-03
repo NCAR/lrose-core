@@ -21,63 +21,46 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dave $
-//   $Locker:  $
-//   $Date: 2017/07/28 22:38:28 $
-//   $Id: Main.cc,v 1.3 2017/07/28 22:38:28 dave Exp $
-//   $Revision: 1.3 $
-//   $State: Exp $
+/////////////////////////////////////////////////////////////
+// RefractCompute Main
 //
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-/*********************************************************************
- * Main.cc: RefractCompute main routine
- *
- * RAP, NCAR, Boulder CO
- *
- * January 2008
- *
- * Nancy Rehak
- *
- *********************************************************************/
-
-#include <stdio.h>
-
-#include <toolsa/port.h>
-#include <toolsa/umisc.h>
+// Nancy Rehak, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Jan 2026
+//
+/////////////////////////////////////////////////////////////
+//
+// RefractCompute computes the refractivity value at each radar
+// gate, given the AIQ/NIQ data, plus the calibration results
+// from previously running RefractCalib.
+//
+//////////////////////////////////////////////////////////////
 
 #include "RefractCompute.hh"
-
+#include <cstdio>
+#include <toolsa/port.h>
+#include <toolsa/umisc.h>
 
 // Prototypes for static functions
 
 static void tidy_and_exit(int sig);
 
-
 // Global variables
 
-RefractCompute *Prog = (RefractCompute *)NULL;
+RefractCompute *Prog = nullptr;
 
-
-/*********************************************************************
- * main()
- */
-
+//---------------------------------------------------------------------------
 int main(int argc, char **argv)
 {
+
   // Create program object.
 
-  Prog = RefractCompute::Inst(argc, argv);
-  if (!Prog->okay)
+  Prog = new RefractCompute(argc, argv);
+  if (!Prog->okay) {
     return -1;
+  }
 
-  if (!Prog->init())
-    return -1;
-  
-  // Register function to trap termination and interrupts.
+  // Register function to trap termination and interrupt signals
 
   PORTsignal(SIGQUIT, tidy_and_exit);
   PORTsignal(SIGTERM, tidy_and_exit);
@@ -86,25 +69,18 @@ int main(int argc, char **argv)
   // Run the program.
 
   Prog->run();
-
+  
   // clean up
 
   tidy_and_exit(0);
+
   return 0;
+
 }
 
-/*********************************************************************
- * tidy_and_exit()
- */
-
+//---------------------------------------------------------------------------
 static void tidy_and_exit(int sig)
 {
-  // Delete the program object.
-
-  if (Prog != (RefractCompute *)NULL)
-    delete Prog;
-
-  // Now exit the program.
-
   exit(sig);
 }
+

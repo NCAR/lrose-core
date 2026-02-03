@@ -22,68 +22,43 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// RefractCalib Main
+// Args.hh: Command line object
 //
-// Nancy Rehak, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Jan 2026
 //
 /////////////////////////////////////////////////////////////
-//
-// RefractCalib:
-//    (a) reads radar scan files, in polar coordinates
-//    (b) identifies suitable clutter targets
-//    (c) computes the mean phase of those targets for a baseline calibration
-//    (d) writes the calibration details to a file.
-// Typically we use 6 hours of scans for this purpose.
-// Ideally the moisture field should be uniform for this procedure to work well.
-//
-//////////////////////////////////////////////////////////////
 
-#include "RefractCalib.hh"
-#include <cstdio>
-#include <toolsa/port.h>
-#include <toolsa/umisc.h>
+#ifndef ARGS_H
+#define ARGS_H
 
-// Prototypes for static functions
+#include <string>
+#include <vector>
+#include <iostream>
+#include <tdrp/tdrp.h>
+using namespace std;
 
-static void tidy_and_exit(int sig);
-
-// Global variables
-
-RefractCalib *Prog = nullptr;
-
-//---------------------------------------------------------------------------
-int main(int argc, char **argv)
-{
-
-  // Create program object.
-
-  Prog = new RefractCalib(argc, argv);
-  if (!Prog->okay) {
-    return -1;
-  }
-
-  // Register function to trap termination and interrupt signals
-
-  PORTsignal(SIGQUIT, tidy_and_exit);
-  PORTsignal(SIGTERM, tidy_and_exit);
-  PORTsignal(SIGINT, tidy_and_exit);
-
-  // Run the program.
-
-  Prog->run();
+class Args {
   
-  // clean up
+public:
 
-  tidy_and_exit(0);
+  // parse
 
-  return 0;
+  int parse(int argc, char **argv, string &prog_name);
 
-}
+  // public data
 
-//---------------------------------------------------------------------------
-static void tidy_and_exit(int sig)
-{
-  exit(sig);
-}
+  tdrp_override_t override;
+  time_t startTime, endTime;
+  vector<string> inputFileList;
+
+  void usage(string &prog_name, ostream &out);
+  
+protected:
+  
+private:
+
+};
+
+#endif

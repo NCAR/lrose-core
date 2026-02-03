@@ -435,8 +435,6 @@ public:
 
   char* dbz_field_name;
 
-  char* power_field_name;
-
   quality_source_t quality_source;
 
   char* quality_field_name;
@@ -470,7 +468,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[44];
+  mutable TDRPtable _table[43];
 
   const char *_className;
 

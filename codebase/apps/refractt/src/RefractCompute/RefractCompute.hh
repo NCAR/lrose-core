@@ -21,27 +21,34 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/**
- *
- * @file RefractCompute.hh
- *
- * @class RefractCompute
- *
- * RefractCompute program object.
- *  
- * @date 12/1/2008
- *
- */
+/////////////////////////////////////////////////////////////
+// RefractCompute
+//
+// Nancy Rehak, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Jan 2026
+//
+/////////////////////////////////////////////////////////////
+//
+// RefractCompute computes the refractivity value at each radar
+// gate, given the AIQ/NIQ data, plus the calibration results
+// from previously running RefractCalib.
+//
+//////////////////////////////////////////////////////////////
 
 #ifndef RefractCompute_HH
 #define RefractCompute_HH
 
-#include "Processor.hh"
+#include <string>
+#include <didss/DsInputPath.hh>
+#include <toolsa/DateTime.hh>
+
+#include "Args.hh"
 #include "Params.hh"
 #include "CalibDayNight.hh"
-#include <Refract/RefParms.hh>
+#include "Processor.hh"
 
-class RefractInput;
+class Input;
 class DsMdvx;
 
 /** 
@@ -62,42 +69,15 @@ class RefractCompute
 
   bool okay;
 
-
   ////////////////////
   // Public methods //
   ////////////////////
 
-  //////////////////////////////
-  // Constructors/Destructors //
-  //////////////////////////////
+  // Constructor/Destructor
 
-  /**
-   * @brief Destructor
-   */
-
-  virtual ~RefractCompute(void);
+  RefractCompute(int argc, char **argv);
+  virtual ~RefractCompute();
   
-
-  /**
-   * @brief Retrieve the singleton instance of this class.
-   *
-   * @param[in] argc Number of command line arguments.
-   * @param[in] argv List of command line arguments.
-   *
-   * @return Returns a pointer to the program instance.
-   */
-
-  static RefractCompute *Inst(int argc, char **argv);
-
-  /**
-   * @brief Retrieve the singleton instance of this class.
-   *
-   * @return Returns a pointer to the program instance.
-   */
-
-  static RefractCompute *Inst();
-  
-
   /**
    * @brief Initialize the local data.
    *
@@ -121,16 +101,28 @@ class RefractCompute
 
  private:
 
+  string _progName; /**< program name */
+  Args _args;
+  char *_paramsPath;
+  Params _params; /**< Parameter file paramters. */
+  time_t _startTime, _endTime;
+  
+  // The calibration files.
+
+  CalibDayNight *_calib; /**< calibration file access */
+
+  // Refractivity processor object
+
+  Processor _processor;
+
+  // analysis time limits
+  
+  
+#ifdef NOTNOW
   /////////////////////
   // Private members //
   /////////////////////
 
-  /**
-   * @brief Singleton instance pointer.
-   */
-
-  static RefractCompute *_instance;
-  
   /**
    * @brief Program name.
    */
@@ -159,12 +151,12 @@ class RefractCompute
    * @brief Refractivity processor object
    */
 
-  Processor _processor;
   
   // Global objects
 
   RefractInput *_inputHandler;
-  
+
+#endif
 
   /////////////////////
   // Private methods //
@@ -179,7 +171,6 @@ class RefractCompute
    * @note Private because this is a singleton object.
    */
 
-  RefractCompute(int argc, char **argv);
   
 
   /**

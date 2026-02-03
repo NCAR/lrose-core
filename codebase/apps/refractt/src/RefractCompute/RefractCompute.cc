@@ -21,33 +21,24 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
-// RCS info
-//   $Author: dixon $
-//   $Locker:  $
-//   $Date: 2018/06/03 19:37:09 $
-//   $Id: Refract.cc,v 1.25 2018/06/03 19:37:09 dixon Exp $
-//   $Revision: 1.25 $
-//   $State: Exp $
+/////////////////////////////////////////////////////////////
+// RefractCompute
 //
- 
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-/*********************************************************************
- * Refract: Refract program object.
- *
- * RAP, NCAR, Boulder CO
- *
- * January 2008
- *
- * Nancy Rehak
- *
- *********************************************************************/
+// Nancy Rehak, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Jan 2026
+//
+/////////////////////////////////////////////////////////////
+//
+// RefractCompute computes the refractivity value at each radar
+// gate, given the AIQ/NIQ data, plus the calibration results
+// from previously running RefractCalib.
+//
+//////////////////////////////////////////////////////////////
 
 #include "RefractCompute.hh"
 #include "Params.hh"
-#include <Refract/ParmApp.hh>
-#include <Refract/RefractInput.hh>
+#include "Input.hh"
 #include <dsdata/DsTrigger.hh>
 #include <toolsa/LogStream.hh>
 #include <toolsa/umisc.h>
@@ -57,26 +48,105 @@
 
 // Global variables
 
-RefractCompute *RefractCompute::_instance = (RefractCompute *)NULL;
-
 /*********************************************************************
  * Constructor
  */
 
 RefractCompute::RefractCompute(int argc, char **argv)
 {
-  // Make sure the singleton wasn't already created.
 
-  assert(_instance == (RefractCompute *)NULL);
+  _input = NULL;
+  okay = true;
+
+  // set programe name
+
+  _progName = "RefractCompute";
+  ucopyright((char *) _progName.c_str());
+
+  // get command line args
+  
+  if (_args.parse(argc, argv, _progName)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with command line args" << endl;
+    okay = false;
+    return;
+  }
+
+  // get TDRP params
+  
+  _paramsPath = (char *) "unknown";
+  if (_params.loadFromArgs(argc, argv, _args.override.list,
+			   &_paramsPath)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with TDRP parameters" << endl;
+    okay = false;
+  }
+
+  // initialize the data input object
+  
+  if (_params.mode == Params::REALTIME) {
+
+    _input = new DsInputPath(_progName,
+			     _params.debug >= Params::DEBUG_VERBOSE,
+			     _params.input_dir,
+			     _params.max_realtime_data_age_secs,
+			     PMU_auto_register, true);
+
+  } else if (_params.mode == Params::ARCHIVE) {
+
+    time_t startTime = DateTime::parseDateTime(_params.start_time);
+    time_t endTime = DateTime::parseDateTime(_params.end_time);
+    if (startTime == DateTime::NEVER) {
+      cerr << "ERROR: RefractCompute" << endl;
+      cerr << "  bad start time: " << _params.start_time << endl;
+      okay = false;
+    }
+    if (endTime == DateTime::NEVER) {
+      cerr << "ERROR: RefractCompute" << endl;
+      cerr << "  bad end time: " << _params.end_time << endl;
+      okay = false;
+    }
+
+    _input = new DsInputPath(_progName,
+			     _params.debug >= Params::DEBUG_VERBOSE,
+			     _params.input_dir,
+			     startTime, endTime);
+
+  } else if (_params.mode == Params::FILELIST) {
+
+    if (_args.inputFileList.size() == 0) {
+
+      cerr << "ERROR: RefractCompute" << endl;
+      cerr << "  Mode is FILELIST"; 
+      cerr << "  You must use -f to specify files on the command line."
+           << endl;
+      _args.usage(_progName, cerr);
+      okay = false;
+      
+    } else {
+      
+      _input = new DsInputPath(_progName,
+                               _params.debug >= Params::DEBUG_VERBOSE,
+                               _args.inputFileList);
+
+    }
+    
+  } // if (_params.mode == ...
+
+  // init process mapper registration
+  
+  if (_params.mode == Params::REALTIME) {
+    PMU_auto_init(_progName.c_str(),
+                  _params.instance,
+                  _params.procmap_register_interval);
+  }
+
+#ifdef JUNK
   
   // Initialize the okay flag.
 
   okay = true;
   
-  // Set the singleton instance pointer
-
-  _instance = this;
-
   // Set the program name.
 
   path_parts_t progname_parts;
@@ -116,6 +186,9 @@ RefractCompute::RefractCompute(int argc, char **argv)
     }  
   }
   parmAppFinish(_params, _refparms);
+
+#endif
+  
 }
 
 
@@ -125,43 +198,26 @@ RefractCompute::RefractCompute(int argc, char **argv)
 
 RefractCompute::~RefractCompute()
 {
-  LOG(FORCE) << "N extraction completed!";
 
+  LOG(FORCE) << "N extraction completed!";
+  
   // Unregister process
 
   PMU_auto_unregister();
 
   // Free contained objects
+
   delete _dataTrigger;
   delete _inputHandler;
-
+  
   // Free included strings
 
   STRfree(_progName);
 
-  // Remove temporary files
+  // Remove temporary files ?????
 
-  system("rm -f targets.tmp.*");
-}
+  // system("rm -f targets.tmp.*");
 
-
-/*********************************************************************
- * Inst() - Retrieve the singleton instance of this class.
- */
-
-RefractCompute *RefractCompute::Inst(int argc, char **argv)
-{
-  if (_instance == (RefractCompute *)NULL)
-    new RefractCompute(argc, argv);
-  
-  return(_instance);
-}
-
-RefractCompute *RefractCompute::Inst()
-{
-  assert(_instance != (RefractCompute *)NULL);
-  
-  return(_instance);
 }
 
 
@@ -173,6 +229,7 @@ RefractCompute *RefractCompute::Inst()
 
 bool RefractCompute::init()
 {
+
   // Initialize the data trigger
   if (!_refparms.initTrigger(&_dataTrigger))
   {

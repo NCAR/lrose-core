@@ -124,38 +124,6 @@ RefractCalib::RefractCalib(int argc, char **argv)
 
   _calib = new Calib(_params);
 
-  // set up time range
-
-  if (!parmAppInit(_params, argc, argv)) {
-    exit(0);
-  }
-  
-  if (RefParms::isPrintMode()) {
-
-    _refparms.print(stdout, PRINT_VERBOSE);
-
-  } else {
-
-    if (_refparms.load(RefParms::parmPath().c_str(), NULL,
-		       !RefParms::isParmPrint(), false)) {
-
-      LOG(ERROR) << "cant load " <<  RefParms::parmPath();
-      okay = false;
-
-    } else {
-
-      _refparms.setOk();
-
-    }
-
-    if (RefParms::isPrintAndLoadMode()) {
-      _refparms.print(stdout, PRINT_VERBOSE);
-    }
-    
-  }
-  
-  parmAppFinish(_params, _refparms);
-
 }
 
 //---------------------------------------------------------------------

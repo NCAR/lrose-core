@@ -63,14 +63,13 @@ class CalibDayNight
    * @note Private because this is a singleton object.
    */
 
-  CalibDayNight(void);
-  
+  CalibDayNight();
 
   /**
    * @brief Destructor
    */
 
-  virtual ~CalibDayNight(void);
+  virtual ~CalibDayNight();
   
   bool initialize(const std::string &ref_file_name_day,
 		  const std::string &ref_file_name_night,
@@ -79,7 +78,7 @@ class CalibDayNight
 
   FieldDataPair avIqPtr(const time_t &t) const;
   FieldWithData phaseErPtr(const time_t &t) const;
-  inline double refNDay(void) const {return _calibDay.refN();}
+  inline double refNDay() const {return _calibDay.refN();}
 
  private:
 

@@ -38,26 +38,18 @@
 //
 /////////////////////////////////////////////////////////////
 
-#include <assert.h>
 #include <iostream>
-#include <math.h>
-#include <signal.h>
 #include <string>
 
-#include <toolsa/os_config.h>
-#include <dsdata/DsLdataTrigger.hh>
-#include <dsdata/DsTimeListTrigger.hh>
 #include <Mdv/DsMdvx.hh>
 #include <physics/physics.h>
 #include <physics/stn_pressure.h>
 #include <rapformats/WxObs.hh>
-#include <rapmath/math_macros.h>
 #include <Spdb/DsSpdb.hh>
 #include <toolsa/DateTime.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/procmap.h>
-#include <toolsa/str.h>
-#include <toolsa/umisc.h>
+#include <didss/DsInputPath.hh>
 
 #include "CalcMoisture.hh"
 #include "Params.hh"
