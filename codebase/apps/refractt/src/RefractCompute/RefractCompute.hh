@@ -113,7 +113,7 @@ class RefractCompute
 
   // Refractivity processor object
 
-  Processor _processor;
+  Processor *_processor;
 
   // analysis time limits
   

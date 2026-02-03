@@ -84,6 +84,13 @@ public:
     QUALITY_FROM_CPA = 1
   } quality_source_t;
 
+  // struct typedefs
+
+  typedef struct {
+    double min_angle;
+    double max_angle;
+  } elevation_angle_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -359,7 +366,7 @@ public:
   // Frees up all TDRP dynamic memory.
   //
 
-  void freeAll();
+  void freeAll(void);
 
   ////////////////////////////////////////////
   // usage()
@@ -411,6 +418,12 @@ public:
   char* calib_file_path_day;
 
   char* calib_file_path_night;
+
+  elevation_angle_t elevation_angle;
+
+  long num_azim;
+
+  long num_range_bins;
 
   tdrp_bool_t raw_iq_in_input;
 
@@ -473,7 +486,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[51];
+  mutable TDRPtable _table[54];
 
   const char *_className;
 

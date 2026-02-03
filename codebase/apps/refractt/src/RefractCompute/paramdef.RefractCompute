@@ -168,6 +168,35 @@ paramdef string
   p_default = "refr_calib.night.mdv";
 } calib_file_path_night;
 
+typedef struct
+{
+  double min_angle;
+  double max_angle;
+} elevation_angle_t;
+
+paramdef struct elevation_angle_t
+{
+  p_descr = "The angle limits for the desired elevation angle. "
+            "Only sweeps with elevation angles between these limits will "
+            "be used in the calibration.";
+  p_help = "Used only if specify_elevation_by_index is set to false.";
+  p_default = { 0.3, 0.5 };
+} elevation_angle;
+
+paramdef long
+{
+  p_descr = "Number of azimuths used in data processing";
+  p_min = 1;
+  p_default = 360;
+} num_azim;
+
+paramdef long
+{
+  p_descr = "Number of range bins used in data processing";
+  p_min = 1;
+  p_default = 450;
+} num_range_bins;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 commentdef

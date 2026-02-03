@@ -409,7 +409,7 @@
   // Therefore it can be regarded as const.
   //
 
-  void Params::sync() const
+  void Params::sync(void) const
   {
     tdrpUser2Table(_table, (char *) &_start_);
   }
@@ -465,7 +465,7 @@
   // Frees up all TDRP dynamic memory.
   //
 
-  void Params::freeAll()
+  void Params::freeAll(void)
   {
     tdrpFreeAll(_table, &_start_);
   }
@@ -812,6 +812,64 @@
     tt->help = tdrpStrDup("Full path, file containing calibration information. Nighttime");
     tt->val_offset = (char *) &calib_file_path_night - &_start_;
     tt->single_val.s = tdrpStrDup("refr_calib.night.mdv");
+    tt++;
+    
+    // Parameter 'elevation_angle'
+    // ctype is '_elevation_angle_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("elevation_angle");
+    tt->descr = tdrpStrDup("The angle limits for the desired elevation angle. Only sweeps with elevation angles between these limits will be used in the calibration.");
+    tt->help = tdrpStrDup("Used only if specify_elevation_by_index is set to false.");
+    tt->val_offset = (char *) &elevation_angle - &_start_;
+    tt->struct_def.name = tdrpStrDup("elevation_angle_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("min_angle");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &elevation_angle.min_angle - (char *) &elevation_angle;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("max_angle");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &elevation_angle.max_angle - (char *) &elevation_angle;
+    tt->n_struct_vals = 2;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 0.3;
+      tt->struct_vals[1].d = 0.5;
+    tt++;
+    
+    // Parameter 'num_azim'
+    // ctype is 'long'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = LONG_TYPE;
+    tt->param_name = tdrpStrDup("num_azim");
+    tt->descr = tdrpStrDup("Number of azimuths used in data processing");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &num_azim - &_start_;
+    tt->has_min = TRUE;
+    tt->min_val.l = 1;
+    tt->single_val.l = 360;
+    tt++;
+    
+    // Parameter 'num_range_bins'
+    // ctype is 'long'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = LONG_TYPE;
+    tt->param_name = tdrpStrDup("num_range_bins");
+    tt->descr = tdrpStrDup("Number of range bins used in data processing");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &num_range_bins - &_start_;
+    tt->has_min = TRUE;
+    tt->min_val.l = 1;
+    tt->single_val.l = 450;
     tt++;
     
     // Parameter 'Comment 4'

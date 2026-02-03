@@ -35,7 +35,7 @@
 
 #include "Processor.hh"
 #include "PhaseFit.hh"
-#include <Refract/RefractInput.hh>
+#include "Input.hh"
 #include <Refract/RefractConstants.hh>
 #include <Refract/FieldWithData.hh>
 #include <Mdv/DsMdvx.hh>

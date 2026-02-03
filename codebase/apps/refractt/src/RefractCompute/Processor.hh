@@ -37,7 +37,6 @@
 #include "Params.hh"
 #include "TargetVector.hh"
 #include "CalibDayNight.hh"
-#include <Refract/RefParms.hh>
 #include <Refract/FieldWithData.hh>
 #include <Refract/FieldDataPair.hh>
 
