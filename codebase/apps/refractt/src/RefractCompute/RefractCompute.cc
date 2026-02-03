@@ -41,6 +41,7 @@
 #include "Reader.hh"
 #include <dsdata/DsTrigger.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/LogStreamInit.hh>
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
 #include <toolsa/pmu.h>
@@ -149,6 +150,24 @@ RefractCompute::RefractCompute(int argc, char **argv)
     PMU_auto_init(_progName.c_str(),
                   _params.instance,
                   _params.procmap_register_interval);
+  }
+
+  // initialize logging
+  LogStreamInit::init(false, false, true, true);
+  LOG_STREAM_DISABLE(LogStream::WARNING);
+  LOG_STREAM_DISABLE(LogStream::DEBUG);
+  LOG_STREAM_DISABLE(LogStream::DEBUG_VERBOSE);
+  LOG_STREAM_DISABLE(LogStream::DEBUG_EXTRA);
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    LOG_STREAM_ENABLE(LogStream::DEBUG_EXTRA);
+    LOG_STREAM_ENABLE(LogStream::DEBUG_VERBOSE);
+    LOG_STREAM_ENABLE(LogStream::DEBUG);
+  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+    LOG_STREAM_ENABLE(LogStream::DEBUG_VERBOSE);
+    LOG_STREAM_ENABLE(LogStream::DEBUG);
+  } else if (_params.debug) {
+    LOG_STREAM_ENABLE(LogStream::DEBUG);
+    LOG_STREAM_ENABLE(LogStream::WARNING);
   }
 
 }

@@ -38,7 +38,7 @@ commentdef {
 }
 
 typedef enum {
-  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
 } debug_t;
 
 paramdef enum debug_t
