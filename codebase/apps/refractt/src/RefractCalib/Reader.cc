@@ -23,9 +23,9 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
  *
- * @file Input.cc
+ * @file Reader.cc
  *
- * @class Input
+ * @class Reader
  *
  * Base class for Refract input classes.
  *  
@@ -45,19 +45,19 @@
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>
-#include "Input.hh"
+#include "Reader.hh"
 using std::string;
 
 // Globals
 
 // Noise threshold set to .2*10 dB above average
-const double Input::OFFSET_ABOVE_AVERAGE = 0.2;  
-const double Input::SNR_NOISE_MAX = 0.25;
-const double Input::DM_NOISE = -114.4132;
+const double Reader::OFFSET_ABOVE_AVERAGE = 0.2;  
+const double Reader::SNR_NOISE_MAX = 0.25;
+const double Reader::DM_NOISE = -114.4132;
 
 //------------------------------------------------------------------------
 
-Input::Input(const Params &params) :
+Reader::Reader(const Params &params) :
         _params(params),
         _rawIQinInput(_params.raw_iq_in_input),
         _rawIFieldName(_params.raw_i_field_name),
@@ -89,12 +89,12 @@ Input::Input(const Params &params) :
 }
 
 //------------------------------------------------------------------------
-Input::~Input()
+Reader::~Reader()
 {
 }
 
 //-------------------------------------------------------------------------
-bool Input::getScan(const DateTime &data_time, int search_margin,
+bool Reader::getScan(const DateTime &data_time, int search_margin,
                     const std::string &url, DsMdvx &mdvx)
 {
   mdvx.clearRead();
@@ -109,7 +109,7 @@ bool Input::getScan(const DateTime &data_time, int search_margin,
 
 
 //------------------------------------------------------------------------
-bool Input::getNextScan(const std::string &file_path,
+bool Reader::getNextScan(const std::string &file_path,
                         DsMdvx &mdvx)
 {
 
@@ -131,42 +131,42 @@ bool Input::getNextScan(const std::string &file_path,
 }
 
 //------------------------------------------------------------------------
-FieldWithData Input::getI(DsMdvx &source) const
+FieldWithData Reader::getI(DsMdvx &source) const
 {
   FieldWithData f(source.getFieldByName(_rawIFieldName));
   return f;
 }
 
 //------------------------------------------------------------------------
-FieldWithData Input::getQ(DsMdvx &source) const
+FieldWithData Reader::getQ(DsMdvx &source) const
 {
   FieldWithData f(source.getFieldByName(_rawQFieldName));
   return f;
 }
 
 //------------------------------------------------------------------------
-FieldWithData Input::getSNR(DsMdvx &source) const
+FieldWithData Reader::getSNR(DsMdvx &source) const
 {
   FieldWithData f(source.getFieldByName(_snrFieldName));
   return f;
 }
 
 //------------------------------------------------------------------------
-FieldWithData Input::getQuality(DsMdvx &source) const
+FieldWithData Reader::getQuality(DsMdvx &source) const
 {
   FieldWithData f(source.getFieldByName(_qualityFieldName));
   return f;
 }
 
 //------------------------------------------------------------------------
-FieldWithData Input::getPhaseError(DsMdvx &source) const
+FieldWithData Reader::getPhaseError(DsMdvx &source) const
 {
   FieldWithData f(source.getFieldByName(_phaseErrorFieldName));
   return f;
 }
 
 //------------------------------------------------------------------------
-void Input::_calcIQ(MdvxField &niq_field, MdvxField &aiq_field,
+void Reader::_calcIQ(MdvxField &niq_field, MdvxField &aiq_field,
 		    const MdvxField &snr_field) const
 {
   // Get pointers to the NIQ/AIQ fields.  Note that the order of the fields
@@ -352,7 +352,7 @@ void Input::_calcIQ(MdvxField &niq_field, MdvxField &aiq_field,
 }
 
 //------------------------------------------------------------------------
-bool Input::_readInputFile(DsMdvx &mdvx)
+bool Reader::_readInputFile(DsMdvx &mdvx)
 {
 
   mdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
@@ -474,7 +474,7 @@ bool Input::_readInputFile(DsMdvx &mdvx)
 // Calculate SNR from dbz and replace the dbz values with the
 // calculated SNR values
 
-void Input::_calcSnr(MdvxField &dbz_field) const
+void Reader::_calcSnr(MdvxField &dbz_field) const
 {
 
   // Get pointers to the dbz field info.  Note that the order of the fields
@@ -534,7 +534,7 @@ void Input::_calcSnr(MdvxField &dbz_field) const
 }
 
 //------------------------------------------------------------------------
-void Input::_repositionData(DsMdvx &mdvx) const
+void Reader::_repositionData(DsMdvx &mdvx) const
 {
   // Handle each field individually
 
@@ -635,7 +635,7 @@ void Input::_repositionData(DsMdvx &mdvx) const
 ///////////////////////////////////////////////////////////////////////////
 // debugging
 
-void Input::setDebug(const MdvxPjg &proj)
+void Reader::setDebug(const MdvxPjg &proj)
 {
   _debugX = _debugY = -9999.0;
   _debugIpt.clear();
@@ -654,7 +654,7 @@ void Input::setDebug(const MdvxPjg &proj)
   }
 }
 
-bool Input::isDebugPt(int i) const
+bool Reader::isDebugPt(int i) const
 {
   if (_debugIpt.empty()) {
     return false;

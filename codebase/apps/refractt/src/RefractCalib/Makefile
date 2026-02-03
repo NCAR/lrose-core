@@ -53,16 +53,16 @@ LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 HDRS = \
 	Params.hh \
 	Args.hh \
-	Input.hh \
 	Calib.hh \
+	Reader.hh \
 	RefractCalib.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
-	Main.cc \
-	Input.cc \
 	Calib.cc \
+	Main.cc \
+	Reader.cc \
 	RefractCalib.cc
 
 #

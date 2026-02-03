@@ -23,15 +23,15 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
  *
- * @file Input.hh
- * @class Input
+ * @file Reader.hh
+ * @class Reader
  * Base class for Refract input classes.
  * @date 12/1/2008
  *
  */
 
-#ifndef Input_H
-#define Input_H
+#ifndef Reader_H
+#define Reader_H
 
 #include <string>
 #include <Refract/FieldWithData.hh>
@@ -41,10 +41,10 @@ class MdvxField;
 class DateTime;
 
 /** 
- * @class Input
+ * @class Reader
  */
 
-class Input
+class Reader
 {
   
 public:
@@ -55,11 +55,11 @@ public:
 
   // constructor
 
-  Input(const Params &params);
+  Reader(const Params &params);
 
   /// destructor
   
-  virtual ~Input();
+  virtual ~Reader();
 
   /**
    * Read in the data for a particular scan to process.  Interpolate the

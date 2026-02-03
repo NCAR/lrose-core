@@ -33,7 +33,7 @@
 #define Calib_HH
 
 #include "Params.hh"
-#include "Input.hh"
+#include "Reader.hh"
 #include <Refract/FieldWithData.hh>
 #include <Refract/FieldDataPair.hh>
 #include <dataport/port_types.h>
@@ -123,7 +123,7 @@ class Calib
   /////////////////////
 
   const Params &_params;
-  Input _inputHandler;  /**< Input data handler */
+  Reader _inputHandler;  /**< Input data handler */
   int _numAzim;  /**< Number of azimuths in the data. */
   int _numRangeBins;  /**< Number of range bins in the data. */
   int _rMin; /**< Minimum range gate with ground echo. */

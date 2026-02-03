@@ -34,7 +34,7 @@
  */
 
 #include "Calib.hh"
-#include "Input.hh"
+#include "Reader.hh"
 #include <Refract/RefractConstants.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
