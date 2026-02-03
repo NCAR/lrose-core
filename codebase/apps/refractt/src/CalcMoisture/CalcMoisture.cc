@@ -49,6 +49,8 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/procmap.h>
+#include <toolsa/LogStream.hh>
+#include <toolsa/LogStreamInit.hh>
 #include <didss/DsInputPath.hh>
 
 #include "CalcMoisture.hh"
@@ -150,6 +152,24 @@ CalcMoisture::CalcMoisture(int argc, char **argv)
                   _params.procmap_register_interval);
   }
   
+  // initialize logging
+  LogStreamInit::init(false, false, true, true);
+  LOG_STREAM_DISABLE(LogStream::WARNING);
+  LOG_STREAM_DISABLE(LogStream::DEBUG);
+  LOG_STREAM_DISABLE(LogStream::DEBUG_VERBOSE);
+  LOG_STREAM_DISABLE(LogStream::DEBUG_EXTRA);
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    LOG_STREAM_ENABLE(LogStream::DEBUG_EXTRA);
+    LOG_STREAM_ENABLE(LogStream::DEBUG_VERBOSE);
+    LOG_STREAM_ENABLE(LogStream::DEBUG);
+  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+    LOG_STREAM_ENABLE(LogStream::DEBUG_VERBOSE);
+    LOG_STREAM_ENABLE(LogStream::DEBUG);
+  } else if (_params.debug) {
+    LOG_STREAM_ENABLE(LogStream::DEBUG);
+    LOG_STREAM_ENABLE(LogStream::WARNING);
+  }
+
 }
 
 

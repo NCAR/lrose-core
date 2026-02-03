@@ -78,6 +78,12 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-vv") ||
+               !strcmp(argv[i], "-extra")) {
+      
+      sprintf(tmp_str, "debug = DEBUG_EXTRA;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-in_dir")) {
 
       if(i < argc - 1) {
