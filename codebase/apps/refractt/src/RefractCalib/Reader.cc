@@ -95,7 +95,7 @@ Reader::~Reader()
 
 //-------------------------------------------------------------------------
 bool Reader::getScan(const DateTime &data_time, int search_margin,
-                    const std::string &url, DsMdvx &mdvx)
+                     const std::string &url, DsMdvx &mdvx)
 {
   mdvx.clearRead();
   mdvx.setReadTime(Mdvx::READ_CLOSEST, url, search_margin, data_time.utime());
@@ -110,7 +110,7 @@ bool Reader::getScan(const DateTime &data_time, int search_margin,
 
 //------------------------------------------------------------------------
 bool Reader::getNextScan(const std::string &file_path,
-                        DsMdvx &mdvx)
+                         DsMdvx &mdvx)
 {
 
   // Set up the read request.  Note that if you change the order of the 
@@ -167,7 +167,7 @@ FieldWithData Reader::getPhaseError(DsMdvx &source) const
 
 //------------------------------------------------------------------------
 void Reader::_calcIQ(MdvxField &niq_field, MdvxField &aiq_field,
-		    const MdvxField &snr_field) const
+                     const MdvxField &snr_field) const
 {
   // Get pointers to the NIQ/AIQ fields.  Note that the order of the fields
   // in the file matches the order in the read request.
