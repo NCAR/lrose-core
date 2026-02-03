@@ -52,23 +52,17 @@ Calib::Calib(const Params &params) :
         _inputHandler(_params),
         _numAzim(0),
         _numRangeBins(0),
-        _rMin(0),
-        _beamWidth(0.0),
-        _sideLobePower(0.0),
-        _refFilePath(""),
+        _rMin(_params.r_min),
+        _beamWidth(_params.beam_width),
+        _sideLobePower(_params.side_lobe_pow),
+        _refFilePath(_params.output_file_path),
+        _refUrl(_params.output_dir),
         _fluctSnr(0),
         _pixelCount(0),
         _writeDebugMdvFiles(false),
         _debugMdvUrl("")
 {
 
-  _numAzim = 0;
-  _numRangeBins = 0;
-  _rMin = _params.r_min;
-  _beamWidth = _params.beam_width;
-  _sideLobePower = _params.side_lobe_pow;
-  _refFilePath = _params.output_file_path;
-  _refUrl = _params.output_dir;
   
   if (_params.write_debug_mdv_files) {
     setDebugMdvUrl(_params.debug_mdv_url);
@@ -85,8 +79,10 @@ Calib::Calib(const Params &params) :
       _nValue = _params.calib_n;
       break;
   }
-  
-  cerr << "---> Setting N value to " << _nValue << endl;
+
+  if (_params.debug) {
+    cerr << "---> Setting N value to " << _nValue << endl;
+  }
   
 }
 
@@ -651,24 +647,25 @@ bool Calib::_writeCalibrationFile(const DateTime &data_time) const
   calib_file.addField(_calibPhaseErField.fieldCopy());
   calib_file.addField(_calibQualityField.fieldCopy());
   calib_file.addField(_calibNcpField.fieldCopy());
+
+  // write refract file to specified path
   
-  if (calib_file.writeToPath(_refFilePath.c_str()) != 0)
-  {
+  if (calib_file.writeToPath(_refFilePath.c_str()) != 0) {
     LOG(ERROR) << "Error writing calibration MDV file to path: "
 	       << _refFilePath;
     LOG(ERROR) << calib_file.getErrStr();
     return false;
   }
-  LOG(DEBUG) << "Wrote reference calibration file: " << calib_file.getPathInUse();
+  LOG(DEBUG) << "Wrote reference calibration file: " << _refFilePath;
   
-  if (calib_file.writeToDir(_refUrl.c_str()) != 0)
-  {
+  // write refract time-stamped file to specified dir
+  
+  if (calib_file.writeToDir(_refUrl.c_str()) != 0) {
     LOG(ERROR) << "Error writing calibration MDV file to URL: "
 	       << _refUrl;
     LOG(ERROR) << calib_file.getErrStr();
     return false;
   }
-  
   LOG(DEBUG) << "Wrote time-stamped calibration file: " << calib_file.getPathInUse();
 
   return true;

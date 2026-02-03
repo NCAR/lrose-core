@@ -97,18 +97,19 @@ RefractCalib::RefractCalib(int argc, char **argv)
   // check that start and end time is set in archive mode
   
   if (_params.mode == Params::ARCHIVE) {
-    if (_args.startTime == 0 || _args.endTime == 0) {
-      cerr << "ERROR - must specify start and end dates." << endl << endl;
-      _args.usage(_progName, cerr);
-      okay = false;
-    }
     if (_args.startTime != 0 && _args.endTime != 0) {
       _startTime = _args.startTime;
       _endTime = _args.endTime;
-      if (_params.debug) {
-        cerr << "Using time limits from command line:" << endl;
-        cerr << "  start time: " << DateTime::strm(_startTime) << endl;
-        cerr << "  end time: " << DateTime::strm(_endTime) << endl;
+      if (_args.startTime == 0 || _args.endTime == 0) {
+        cerr << "ERROR - must specify both start and end dates." << endl << endl;
+        _args.usage(_progName, cerr);
+        okay = false;
+      } else {
+        if (_params.debug) {
+          cerr << "Using time limits from command line:" << endl;
+          cerr << "  start time: " << DateTime::strm(_startTime) << endl;
+          cerr << "  end time: " << DateTime::strm(_endTime) << endl;
+        }
       }
     } else {
       _startTime = DateTime::parseDateTime(_params.start_time);
@@ -188,7 +189,16 @@ int RefractCalib::run()
     cerr << "  No files found" << endl;
     return -1;
   }
-    
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "RefractCalib, input file list:" << endl;
+    for (size_t ii = 0; ii < fileList.size(); ii++) {
+      cerr << "  file num: " << ii << ", path: " << fileList[ii] << endl;
+    }
+  } else if (_params.debug) {
+    cerr << "RefractCalib, input dir: " << _params.input_dir << endl;
+    cerr << "  N files found: " << fileList.size() << endl;
+  }
   
   // find suitable targets
   // sets input_gate_spacing

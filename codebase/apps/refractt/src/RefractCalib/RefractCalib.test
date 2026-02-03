@@ -1,0 +1,455 @@
+/**********************************************************************
+ * TDRP params for ./RefractCalib
+ **********************************************************************/
+
+//======================================================================
+//
+// RefractCalib.
+//
+// RefractCalib (a) reads radar scan files, in polar coordinates; (b) 
+//   identifies suitable clutter targets; (c) computes the mean phase of 
+//   those targets for a baseline calibration; and (d) writes the 
+//   calibration details to a file. Typically we use 6 hours of scans for 
+//   this purpose. Ideally the moisture field should be uniform for this 
+//   procedure to work well.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+
+debug = DEBUG_OFF;
+
+///////////// write_debug_mdv_files ///////////////////
+//
+// Flag indicating whether to write debug MDV files.
+//
+// Type: boolean
+
+write_debug_mdv_files = TRUE;
+
+///////////// debug_mdv_url ///////////////////////////
+//
+// Debug MDV file URL.
+//
+// Type: string
+
+debug_mdv_url = "/scr/cirrus1/rsfdata/projects/pecan/refract/cal_debug";
+
+///////////// debug_lat ///////////////////////////////
+//
+// debug latitude.
+//
+// Extreme debugging at a point, set to -9999 to disable.
+//
+// Type: double
+
+debug_lat = -9999;
+
+///////////// debug_lon ///////////////////////////////
+//
+// debug longitude.
+//
+// Extreme debugging at a point, set to -9999 to disable.
+//
+// Type: double
+
+debug_lon = -9999;
+
+///////////// debug_npt ///////////////////////////////
+//
+// debug npt.
+//
+// Extreme debugging radius around the debug point to keep showing 
+//   debugging, number of gridpoints.
+//
+// Type: int
+
+debug_npt = 1;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Processing mode.
+//
+// In ARCHIVE mode, we loop through the data between the start and end 
+//   times. In FILELIST mode, we moves through the list of files specified 
+//   on the command line. Typically we use about 6 hours of data for this 
+//   step.
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     FILELIST
+
+mode = ARCHIVE;
+
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data files.
+//
+// Type: string
+
+input_dir = "/scr/cirrus1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur";
+
+///////////// start_time //////////////////////////////
+//
+// Set the start time for ARCHIVE mode analysis.
+//
+// Format is 'yyyy mm dd hh mm ss'.
+//
+// Type: string
+
+start_time = "2015 06 28 05 00 00";
+
+///////////// end_time ////////////////////////////////
+//
+// Set the end time for ARCHIVE mode analysis.
+//
+// Format is 'yyyy mm dd hh mm ss'.
+//
+// Type: string
+
+end_time = "2015 06 28 11 00 00";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_file_path ////////////////////////
+//
+// Full path, including file name, for output.
+//
+// Full path for the file containing calibration information. This is 
+//   the file that is created by the calibration and used as input to the 
+//   RefractCompute algorithm.
+//
+// Type: string
+
+output_file_path = "/tmp/RefractCalib/RefractCalib.pecan.day.mdv.nc";
+
+///////////// output_dir //////////////////////////////
+//
+// Directory for output data files.
+//
+// Type: string
+
+output_dir = "/tmp/RefractCalib/output_dir";
+
+//======================================================================
+//
+// DATA FIELD DETAILS.
+//
+// Details of the fields to be retrieved from the data files.
+//
+//======================================================================
+ 
+///////////// raw_iq_in_input /////////////////////////
+//
+// Flag indicating whether the raw I and Q values are included in the 
+//   input stream.
+//
+// If true, the raw fields will be read from the input stream. If false, 
+//   the raw fields will be calculated from the NIQ/AIQ values which must 
+//   be inluded in the input stream instead.
+//
+// Type: boolean
+
+raw_iq_in_input = FALSE;
+
+///////////// raw_i_field_name ////////////////////////
+//
+// Raw I field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to TRUE.
+//
+// Type: string
+
+raw_i_field_name = "MeanI";
+
+///////////// raw_q_field_name ////////////////////////
+//
+// Raw Q field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to TRUE.
+//
+// Type: string
+
+raw_q_field_name = "MeanQ";
+
+///////////// niq_field_name //////////////////////////
+//
+// NIQ field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to FALSE.
+//
+// Type: string
+
+niq_field_name = "NIQ";
+
+///////////// input_niq_scale /////////////////////////
+//
+// Input NIQ scale value.
+//
+// The NIQ value from the input source is multiplied by this value 
+//   before the data is used. For most radars this value should be 0.1. 
+//   For SPOL this value should be 0.025.
+//
+// Type: double
+
+input_niq_scale = 0.025;
+
+///////////// invert_target_angle_sign ////////////////
+//
+// Flag indicating whether to invert the sign of the target angles.
+//
+// This fix should be done upstream, but is added here just in case.
+// Used only if raw_iq_in_input is set to FALSE.
+//
+// Type: boolean
+
+invert_target_angle_sign = FALSE;
+
+///////////// aiq_field_name //////////////////////////
+//
+// AIQ field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to FALSE.
+//
+// Type: string
+
+aiq_field_name = "AIQ";
+
+///////////// snr_available ///////////////////////////
+//
+// Is SNR data available?.
+//
+// If not, SNR will be computed from the DBZ field. See 
+//   'noise_dbz_at_100km'.
+//
+// Type: boolean
+
+snr_available = TRUE;
+
+///////////// snr_field_name //////////////////////////
+//
+// Field name for SNR.
+//
+// Signal-to-noise ratio (dB).
+//
+// Type: string
+
+snr_field_name = "SNRHC";
+
+///////////// noise_dbz_at_100km //////////////////////
+//
+// The noise value, represented as dBZ at a range of 100km.
+//
+// This is used for computing the SNR from the DBZ field. It is only 
+//   used if SNR_available is FALSE. The SNR will be computed by 
+//   range-correcting this value and using it as the noise value.
+//
+// Type: double
+
+noise_dbz_at_100km = -5;
+
+///////////// dbz_field_name //////////////////////////
+//
+// Field name for DBZ.
+//
+// Horizontally-polarized reflectivity factor.
+//
+// Type: string
+
+dbz_field_name = "DBZ";
+
+///////////// quality_source //////////////////////////
+//
+// Which field to use when calculating the quality value.
+//
+// 	QUALITY_FROM_WIDTH - The quality field is calculated using a 
+//   spectrum width field.
+// 	QUALITY_FROM_CPA - The quality field is calculated using a CPA 
+//   field.
+//
+// Type: enum
+// Options:
+//     QUALITY_FROM_WIDTH
+//     QUALITY_FROM_CPA
+
+quality_source = QUALITY_FROM_CPA;
+
+///////////// quality_field_name //////////////////////
+//
+// Name of field to use in the quality calculations.
+//
+// If quality_source is set to QUALITY_FROM_WIDTH then this should be a 
+//   spectrum width field.
+// If quality_source is set to QUALITY_FROM_CPA then this shoudl be a 
+//   probability of clutter field. The probability of clutter field should 
+//   range from 0.0 to 1.0 with 0.0 indicating the gate definitely doesn't 
+//   contain clutter and 1.0 indicating that the gate definitely is 
+//   clutter.
+//
+// Type: string
+
+quality_field_name = "CPA";
+
+///////////// elevation_angle /////////////////////////
+//
+// The angle limits for the desired elevation angle. Only sweeps with 
+//   elevation angles between these limits will be used in the 
+//   calibration.
+//
+// Used only if specify_elevation_by_index is set to false.
+//
+// Type: struct
+//   typedef struct {
+//      double min_angle;
+//      double max_angle;
+//   }
+//
+
+elevation_angle = {
+    min_angle = 0.4,
+    max_angle = 0.6
+};
+
+///////////// num_azim ////////////////////////////////
+//
+// Number of azimuths used in data processing.
+//
+// Minimum val: 1
+//
+// Type: long
+
+num_azim = 360;
+
+///////////// num_range_bins //////////////////////////
+//
+// Number of range bins used in data processing.
+//
+// Minimum val: 1
+//
+// Type: long
+
+num_range_bins = 533;
+
+//======================================================================
+//
+// ALGORITHM PARAMETERS.
+//
+//======================================================================
+ 
+///////////// beam_width //////////////////////////////
+//
+// Antenna beam width in degrees.
+//
+// Type: double
+
+beam_width = 0.92;
+
+///////////// r_min ///////////////////////////////////
+//
+// Min range gate of ground echo.
+//
+// Minimum val: 1
+//
+// Type: long
+
+r_min = 4;
+
+///////////// side_lobe_pow ///////////////////////////
+//
+// Side lobe power.
+//
+// Echoes below this value of integrated power are considered to be from 
+//   sidelobes.
+//
+// Maximum val: -10
+//
+// Type: double
+
+side_lobe_pow = -50;
+
+///////////// entry_type //////////////////////////////
+//
+// Type of data entry for the calibration calculation.
+//
+// 	ENTER_N - N is entered directly in the calib_n parameter.
+// 	ENTER_P_T_TD - Pressure is entered in the calib_pressure parameter, 
+//   temperature is entered in the calib_temperature parameter and dew 
+//   point temperature is entered in the calib_dewpoint_temperature 
+//   paramtere.
+//
+// Type: enum
+// Options:
+//     ENTER_N
+//     ENTER_P_T_TD
+
+entry_type = ENTER_P_T_TD;
+
+///////////// calib_n /////////////////////////////////
+//
+// Default N value to use in the calibration.
+//
+// Used only if entry_type is set to ENTER_N.
+//
+// Type: double
+
+calib_n = 1;
+
+///////////// calib_pressure //////////////////////////
+//
+// Pressure value to use in the calibration.
+//
+// This is the station pressure, NOT the sea level pressure. Used only 
+//   if entry_type is set to ENTER_P_T_TD.
+//
+// Type: double
+
+calib_pressure = 936;
+
+///////////// calib_temperature ///////////////////////
+//
+// Temperature value to use in the calibration.
+//
+// Used only if entry_type is set to ENTER_P_T_TD.
+//
+// Type: double
+
+calib_temperature = 19;
+
+///////////// calib_dewpoint_temperature //////////////
+//
+// Dewpoint temperature to use in the calibration.
+//
+// Unsed only if entry_type is set to ENTER_P_T_TD.
+//
+// Type: double
+
+calib_dewpoint_temperature = 9;
+

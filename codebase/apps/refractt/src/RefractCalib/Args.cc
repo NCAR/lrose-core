@@ -196,6 +196,7 @@ void Args::usage(string &prog_name, ostream &out)
       << "       [ -mode ?] ARCHIVE, FILELIST\n"
       << "       [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"
+      << "       [ -vv, -extra ] print extra verbose debug messages\n"
       << endl;
 
   Params::usage(out);
