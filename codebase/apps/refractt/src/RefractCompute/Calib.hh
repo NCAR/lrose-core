@@ -63,15 +63,18 @@ class Calib
 
   Calib();
   
-
   /**
    * @brief Destructor
    */
-
+  
   virtual ~Calib();
+
+  // initialize
   
   bool initialize(const std::string &ref_file_name);
 
+  // field data
+  
   inline const FieldDataPair *avIqPtr() const
   {
     return &_averageIQ;
@@ -82,6 +85,8 @@ class Calib
     return &_phaseEr;
   }
 
+  // N value
+  
   inline double refN() const {return _refN;}
 
  private:

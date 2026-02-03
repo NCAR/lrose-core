@@ -36,6 +36,7 @@
 #ifndef CalibDayNight_HH
 #define CalibDayNight_HH
 
+#include "Params.hh"
 #include "Calib.hh"
 #include <Mdv/DsMdvx.hh>
 
@@ -63,7 +64,7 @@ class CalibDayNight
    * @note Private because this is a singleton object.
    */
 
-  CalibDayNight();
+  CalibDayNight(const Params &params);
 
   /**
    * @brief Destructor
@@ -71,17 +72,13 @@ class CalibDayNight
 
   virtual ~CalibDayNight();
   
-  bool initialize(const std::string &ref_file_name_day,
-		  const std::string &ref_file_name_night,
-		  const int *hms_night, const int *hms_day,
-		  int day_night_transition_delta_seconds);
-
   FieldDataPair avIqPtr(const time_t &t) const;
   FieldWithData phaseErPtr(const time_t &t) const;
   inline double refNDay() const {return _calibDay.refN();}
 
  private:
 
+  const Params &_params;
   Calib _calibDay;
   Calib _calibNight;
   int _hms_day[3];
@@ -91,6 +88,9 @@ class CalibDayNight
   int _transition_delta_seconds;
 
   void _weights(const time_t &t, double &wDay, double &wNight) const;
+  double _getTimeFraction(int h, int m, int s) const;
+  double _getTimeFraction(const int *hms) const;
+
 };
 
 

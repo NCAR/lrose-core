@@ -35,7 +35,7 @@
 
 #include "Processor.hh"
 #include "PhaseFit.hh"
-#include "Input.hh"
+#include "Reader.hh"
 #include <Refract/RefractConstants.hh>
 #include <Refract/FieldWithData.hh>
 #include <Mdv/DsMdvx.hh>
@@ -44,6 +44,7 @@
 #include <toolsa/str.h>
 #include <rapmath/math_macros.h>
 #include <cmath>
+#include <cassert>
 
 // Global variables
 
@@ -65,14 +66,26 @@ const double Processor::MAX_SIGMA_DN_VALUE = 100.0;
  * Constructor
  */
 
-Processor::Processor() :
-  _calib(0),
-  _refparms(),
-  _parms(),
-  _firstFile(true),
-  _nptScan(0),
-  _first(true)
+Processor::Processor(const Params &params) :
+        _params(params),
+        _calib(params),
+        _reader(params),
+        _firstFile(true),
+        _firstScan(true),
+        _nptScan(0)
+        
 {
+
+  _wavelength = C_VACUUM / params.frequency;
+
+  // Check the parameter values in the parameter file for consistency
+  if (params.r_min >= _params.num_range_bins) {
+    LOG(ERROR) << "r_min value (" << params.r_min << ") out of range.";
+    LOG(ERROR) << "Must be less than num_range_bins ("
+	       << _params.num_range_bins;
+  }
+  assert(params.r_min < _params.num_range_bins);
+  
 }
 
 
@@ -89,56 +102,27 @@ Processor::~Processor()
 
 
 /*********************************************************************
- * init()
- */
-
-bool Processor::init(CalibDayNight *calib, const RefParms &refparms,
-		     const Params &params)
-{
-  // Copy the paramter values
-
-  _calib = calib;
-  _refparms = refparms;
-  _parms = params;
-
-  // Check the parameter values in the parameter file for consistency
-  if (params.r_min >= refparms.num_range_bins)
-  {
-    LOG(ERROR) << "r_min value (" << params.r_min << ") out of range.";
-    LOG(ERROR) << "Must be less than num_range_bins ("
-	       << _refparms.num_range_bins;
-    return false;
-  }
-  
-  _wavelength = C_VACUUM / params.frequency;
-  _first = true;
-  _nptScan = 0;
-  return true;
-}
-
-
-/*********************************************************************
  * processScan()
  */
-bool Processor::processScan(const RefractInput &input, const time_t &t,
+bool Processor::processScan(const time_t &t,
 			    DsMdvx &data_file)
 {
   // Get pointers to the data fields.  We know that all of the fields
   // exist if we get to this point.
-  FieldWithData I = input.getI(data_file);
-  FieldWithData Q = input.getQ(data_file);
+  FieldWithData I = _reader.getI(data_file);
+  FieldWithData Q = _reader.getQ(data_file);
   FieldDataPair iq(I, Q);
-  FieldWithData Qual = input.getQuality(data_file);
-  FieldWithData Snr = input.getSNR(data_file);
+  FieldWithData Qual = _reader.getQuality(data_file);
+  FieldWithData Snr = _reader.getSNR(data_file);
   
   // Create the output fields
-  if (_first)
+  if (_firstScan)
   {
     if (!_createOutputFields(iq))
     {
       return false;
     }
-    _first = false;
+    _firstScan = false;
   }
   
   // Copy the raw phase data.  Set missing data values to 0.0 as needed
@@ -172,27 +156,27 @@ bool Processor::processScan(const RefractInput &input, const time_t &t,
   MdvxField  *sigmaN = _maskOutputField(*(iq.getI()), _sigmaNField,
 					MIN_SIGMA_N_VALUE, MAX_SIGMA_N_VALUE);
 
-  if (_parms.threshold_using_sigma_n)
+  if (_params.threshold_using_sigma_n)
   {
     data_file.addField(_maskOutputField(*(iq.getI()), *sigmaN,
-					_parms.max_sigma_n, _nField,
+					_params.max_sigma_n, _nField,
 					MIN_N_VALUE, MAX_N_VALUE, qualityField,
-					_parms.quality_threshold));
+					_params.quality_threshold));
     data_file.addField(_maskOutputField(*(iq.getI()), *sigmaN,
-					_parms.max_sigma_n, _dnField,
+					_params.max_sigma_n, _dnField,
 					MIN_DN_VALUE, MAX_DN_VALUE,
 					qualityField,
-					_parms.quality_threshold));
+					_params.quality_threshold));
   }
   else
   {
     data_file.addField(_maskOutputField(*(iq.getI()), *sigmaN, _nField,
 					MIN_N_VALUE, MAX_N_VALUE, qualityField,
-					_parms.quality_threshold));
+					_params.quality_threshold));
     data_file.addField(_maskOutputField(*(iq.getI()), *sigmaN, _dnField,
 					MIN_DN_VALUE, MAX_DN_VALUE,
 					qualityField,
-					_parms.quality_threshold));
+					_params.quality_threshold));
   }
     
 
@@ -244,7 +228,7 @@ bool Processor::_difPhase(const time_t &t)
 {
   LOG(DEBUG) << "And phase / phase difference arrays";
 
-  const FieldDataPair calib_av_iq = _calib->avIqPtr(t);
+  const FieldDataPair calib_av_iq = _calib.avIqPtr(t);
 
   _difPrevScan.phaseDiffV(_rawPhase);
 
@@ -288,7 +272,7 @@ bool Processor::_fitPhases(int numBeams, int numGates,  double gate_spacing)
   PhaseFit phase_fit;
 
   if (!phase_fit.init(numBeams, numGates, gate_spacing,
-		      _wavelength, _parms.min_consistency, _parms.r_min))
+		      _wavelength, _params.min_consistency, _params.r_min))
 
     return false;
   
@@ -299,12 +283,12 @@ bool Processor::_fitPhases(int numBeams, int numGates,  double gate_spacing)
     LOG(DEBUG) << "Fitting the difference between last two scans";
     phase_fit.initFit(_target, _difPrevScan, true);
     phase_fit.setRefN(0.0);
-    phase_fit.setSmoothSideLen(_parms.dn_smoothing_side_len);
+    phase_fit.setSmoothSideLen(_params.dn_smoothing_side_len);
     phase_fit.setNOutput(_dnField.getDataPtr());
     phase_fit.setNError((_sigmaDnField.getDataPtr()));
     
     // Perform the fit for DN
-    if (!phase_fit.fitPhaseField(_parms.do_relax))
+    if (!phase_fit.fitPhaseField(_params.do_relax))
     {
       _firstFile = true;
       return false;
@@ -315,13 +299,13 @@ bool Processor::_fitPhases(int numBeams, int numGates,  double gate_spacing)
   // Now proceed with N calculation: reset the data structure
   LOG(DEBUG) << "Now fitting the absolute phase difference";
   phase_fit.initFit(_target, _difFromRef, false);
-  phase_fit.setRefN(_calib->refNDay());
-  phase_fit.setSmoothSideLen(_parms.n_smoothing_side_len);
+  phase_fit.setRefN(_calib.refNDay());
+  phase_fit.setSmoothSideLen(_params.n_smoothing_side_len);
   phase_fit.setNOutput(_nField.getDataPtr());
   phase_fit.setNError(_sigmaNField.getDataPtr());
 
   // Perform the fit for N
-  if (!phase_fit.fitPhaseField(_parms.do_relax))
+  if (!phase_fit.fitPhaseField(_params.do_relax))
   {
     _firstFile = true;
     return false;
@@ -369,15 +353,15 @@ bool Processor::_getQuality(const FieldWithData &snr,
 {
   LOG(DEBUG) << "Computing echo quality";
 
-  const FieldWithData calib_phase_er = _calib->phaseErPtr(t);
-  const FieldDataPair calib_av_iq = _calib->avIqPtr(t);
+  const FieldWithData calib_phase_er = _calib.phaseErPtr(t);
+  const FieldDataPair calib_av_iq = _calib.avIqPtr(t);
   
   // set a quality array from snr and qual data
   vector<double> quality =
     snr.setQualityVector(qual,
-			_refparms.quality_source ==RefParms::QUALITY_FROM_WIDTH,
-			_refparms.quality_source == RefParms::QUALITY_FROM_CPA,
-			THRESH_WIDTH, ABRUPT_FACTOR);
+                         _params.quality_source == Params::QUALITY_FROM_WIDTH,
+                         _params.quality_source == Params::QUALITY_FROM_CPA,
+                         THRESH_WIDTH, ABRUPT_FACTOR);
 
   for (size_t i=0; i<quality.size(); ++i)
     qualityOutputField[i] = quality[i];
@@ -385,7 +369,7 @@ bool Processor::_getQuality(const FieldWithData &snr,
   // set a phase error array from the quality array
   vector<double> phase_er =
     calib_phase_er.setPhaseErVector(quality, calib_av_iq,
-				    _refparms.num_range_bins/6);
+				    _params.num_range_bins/6);
 
   _target.setStrengthAndPhaseErr(snr, _rawPhase, phase_er);
 

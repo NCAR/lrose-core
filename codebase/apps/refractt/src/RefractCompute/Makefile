@@ -51,21 +51,25 @@ LOC_CPPC_CFLAGS =
 
 HDRS = \
 	Params.hh \
+	Args.hh \
 	Calib.hh \
 	CalibDayNight.hh \
 	PhaseFit.hh \
 	Processor.hh \
+	Reader.hh \
 	RefractCompute.hh \
 	TargetInfo.hh \
 	TargetVector.hh
 
 CPPC_SRCS = \
 	Params.cc \
+	Args.cc \
 	Calib.cc \
 	CalibDayNight.cc \
 	Main.cc \
 	PhaseFit.cc \
 	Processor.cc \
+	Reader.cc \
 	RefractCompute.cc \
 	TargetInfo.cc \
 	TargetVector.cc

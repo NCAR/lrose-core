@@ -1,54 +1,37 @@
-#include "CalibDayNight.hh"
+#include <cassert>
 #include <toolsa/LogStream.hh>
 #include <toolsa/DateTime.hh>
+#include "CalibDayNight.hh"
 
-//------------------------------------------------------------------
-static double _getTimeFraction(int h, int m, int s)
+// constructor
+
+CalibDayNight::CalibDayNight(const Params &params) :
+        _params(params)
+
 {
-  return static_cast<double>(h) + static_cast<double>(m)/60.0 +
-    static_cast<double>(s)/3600.0;
+
+  for (int i = 0; i < 3; ++i) {
+    _hms_day[i] = _params._hms_day[i];
+    _hms_night[i] = _params._hms_night[i];
+  }
+  
+  _hourDay = _getTimeFraction(_hms_day);
+  _hourNight = _getTimeFraction(_hms_night);
+  
+  _transition_delta_seconds = _params.day_night_transition_delta_minutes * 60;
+
+  assert(_calibDay.initialize(_params.calib_file_path_day));
+  assert(_calibNight.initialize(_params.calib_file_path_night));
+  
 }
 
-//------------------------------------------------------------------
-static double _getTimeFraction(const int *hms)
-{
-  return _getTimeFraction(hms[0], hms[1], hms[2]);
-}
-
-CalibDayNight::CalibDayNight()
-{
-}
+// destructor
 
 CalibDayNight::~CalibDayNight()
 {
 }
 
-bool CalibDayNight::initialize(const std::string &ref_file_name_day,
-			       const std::string &ref_file_name_night,
-			       const int *hms_night, const int *hms_day,
-			       int day_night_transition_delta_seconds)
-{
-  for (int i=0; i<3; ++i)
-  {
-    _hms_day[i] = hms_day[i];
-    _hms_night[i] = hms_night[i];
-  }
-  _hourDay = _getTimeFraction(_hms_day);
-  _hourNight = _getTimeFraction(_hms_night);
-
-  _transition_delta_seconds = day_night_transition_delta_seconds;
-
-  bool ret = true;
-  if (!_calibDay.initialize(ref_file_name_day))
-  {
-    ret = false;
-  }
-  if (!_calibNight.initialize(ref_file_name_night))
-  {
-    ret = false;
-  }
-  return ret;
-}
+// computations
 
 FieldDataPair CalibDayNight::avIqPtr(const time_t &t) const
 {
@@ -69,6 +52,7 @@ FieldWithData CalibDayNight::phaseErPtr(const time_t &t) const
 void CalibDayNight::_weights(const time_t &t, double &wDay,
 			     double &wNight) const
 {
+
   DateTime dt(t);
   int h = dt.getHour();
   int m = dt.getMin();
@@ -163,3 +147,19 @@ void CalibDayNight::_weights(const time_t &t, double &wDay,
     }
   }
 }  
+
+//------------------------------------------------------------------
+
+double CalibDayNight::_getTimeFraction(int h, int m, int s) const
+{
+  return static_cast<double>(h) + static_cast<double>(m)/60.0 +
+    static_cast<double>(s)/3600.0;
+}
+
+//------------------------------------------------------------------
+
+double CalibDayNight::_getTimeFraction(const int *hms) const
+{
+  return _getTimeFraction(hms[0], hms[1], hms[2]);
+}
+

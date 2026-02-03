@@ -35,6 +35,7 @@
 
 #include <string>
 #include "Params.hh"
+#include "Reader.hh"
 #include "TargetVector.hh"
 #include "CalibDayNight.hh"
 #include <Refract/FieldWithData.hh>
@@ -50,26 +51,14 @@ class Processor
   /**
    * @brief Constructor
    */
-  Processor();
-  
 
+  Processor(const Params &params);
+  
   /**
    * @brief Destructor
    */
+
   virtual ~Processor();
-  
-
-  /**
-   * @brief Initialize the local data.
-   *
-   * @param[in] calib_file Pointer to the calibration file information.
-   * @param[in] parms  params
-   * @return Returns true if the initialization was successful,
-   *         false otherwise.
-   */
-
-  bool init(CalibDayNight *calib, const RefParms &refparms,
-	    const Params &params);
 
   /**
    * @brief Process the given scan data.
@@ -80,7 +69,7 @@ class Processor
    * @return true on success, false on failure.
    */
 
-  bool processScan(const RefractInput &input, const time_t &t,
+  bool processScan(const time_t &t,
 		   DsMdvx &data_file);
   
 
@@ -152,22 +141,34 @@ class Processor
    */
 
   static const double MAX_SIGMA_DN_VALUE;
+
+  // params
   
+  const Params &_params;
+  
+  // calibration reader
+  
+  CalibDayNight _calib;
 
-  /**
-   * @brief Pointer to the calibration file.  This pointer is owned by the
-   *        parent class and must not be deleted here.
-   */
-  CalibDayNight *_calib;
+  // input reader
 
-  RefParms _refparms;  /**< Parameters */
-  Params _parms;       /**< Parameters */
+  Reader _reader;
 
   /**
    * @brief Flag indicating whether we are currently processing the first
    *        input file.
    */
   bool _firstFile;
+
+  /**
+   * True for first scan
+   */
+  bool _firstScan;
+
+  /**
+   * Number of points per scan
+   */
+  int _nptScan;
 
   /**
    * @brief Phase difference between current and reference target phase.
@@ -214,16 +215,6 @@ class Processor
    */
   double _wavelength;
   
-  /**
-   * Number of points per scan
-   */
-  int _nptScan;
-
-  /**
-   * True for first scan
-   */
-  bool _first;
-
 
   /////////////////////
   // Private methods //

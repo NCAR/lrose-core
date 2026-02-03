@@ -45,6 +45,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include "Reader.hh"
 #include "CalibDayNight.hh"
 #include "Processor.hh"
 
@@ -59,46 +60,23 @@ class RefractCompute
 {
  public:
 
-  ////////////////////
-  // Public members //
-  ////////////////////
-
   /**
-   * @brief Flag indicating whether the program status is currently okay.
+   * @brief Flag indicating whether constructor completes OK
    */
-
+  
   bool okay;
-
-  ////////////////////
-  // Public methods //
-  ////////////////////
-
+  
   // Constructor/Destructor
 
   RefractCompute(int argc, char **argv);
   virtual ~RefractCompute();
   
   /**
-   * @brief Initialize the local data.
-   *
-   * @return Returns true if the initialization was successful,
-   *         false otherwise.
-   */
-
-  bool init();
-  
-
-  /////////////////////
-  // Running methods //
-  /////////////////////
-
-  /**
    * @brief Run the program.
    */
 
-  void run();
+  int run();
   
-
  private:
 
   string _progName; /**< program name */
@@ -106,72 +84,18 @@ class RefractCompute
   char *_paramsPath;
   Params _params; /**< Parameter file paramters. */
   time_t _startTime, _endTime;
+
+  // data trigger
+
+  DsInputPath *_input;
   
-  // The calibration files.
+  // data reader
 
-  CalibDayNight *_calib; /**< calibration file access */
-
-  // Refractivity processor object
+  Reader *_reader;
+  
+  // Refractivity data processor object
 
   Processor *_processor;
-
-  // analysis time limits
-  
-  
-#ifdef NOTNOW
-  /////////////////////
-  // Private members //
-  /////////////////////
-
-  /**
-   * @brief Program name.
-   */
-
-  char *_progName;
-
-  /**
-   * @brief Parameter file paramters.
-   */
-  Params _params;
-  RefParms _refparms;
-  
-  /**
-   * @brief Triggering object
-   */
-
-  DsTrigger *_dataTrigger;
-  
-  /**
-   * @brief The calibration files.
-   */
-
-  CalibDayNight _calib;
-  
-  /**
-   * @brief Refractivity processor object
-   */
-
-  
-  // Global objects
-
-  RefractInput *_inputHandler;
-
-#endif
-
-  /////////////////////
-  // Private methods //
-  /////////////////////
-
-  /**
-   * @brief Constructor
-   *
-   * @param[in] argc Number of command line arguments.
-   * @param[in] argv List of command line arguments.
-   *
-   * @note Private because this is a singleton object.
-   */
-
-  
 
   /**
    * @brief Process data for the given trigger time.
@@ -182,10 +106,11 @@ class RefractCompute
    * Returns true on success, false on failure.
    */
 
-  bool _processData(const DateTime &trigger_time);
-  
+  bool _processData(string inputPath,
+                    const DateTime &trigger_time);
 
   bool _readInputFile(DsMdvx &mdvx, const DateTime &data_time);
+
 };
 
 

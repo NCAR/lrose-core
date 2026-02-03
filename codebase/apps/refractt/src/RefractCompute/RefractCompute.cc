@@ -38,7 +38,7 @@
 
 #include "RefractCompute.hh"
 #include "Params.hh"
-#include "Input.hh"
+#include "Reader.hh"
 #include <dsdata/DsTrigger.hh>
 #include <toolsa/LogStream.hh>
 #include <toolsa/umisc.h>
@@ -55,8 +55,10 @@
 RefractCompute::RefractCompute(int argc, char **argv)
 {
 
-  _input = NULL;
   okay = true;
+  _input = nullptr;
+  _reader = nullptr;
+  _processor = nullptr;
 
   // set programe name
 
@@ -132,6 +134,14 @@ RefractCompute::RefractCompute(int argc, char **argv)
     }
     
   } // if (_params.mode == ...
+  
+  // create reader
+  
+  _reader = new Reader(_params);
+
+  // create processor
+  
+  _processor = new Processor(_params);
 
   // init process mapper registration
   
@@ -141,54 +151,6 @@ RefractCompute::RefractCompute(int argc, char **argv)
                   _params.procmap_register_interval);
   }
 
-#ifdef JUNK
-  
-  // Initialize the okay flag.
-
-  okay = true;
-  
-  // Set the program name.
-
-  path_parts_t progname_parts;
-  
-  uparse_path(argv[0], &progname_parts);
-  _progName = STRdup(progname_parts.base);
-  
-  // Display ucopyright message.
-
-  ucopyright(_progName);
-
-  // Get TDRP parameters.
-  if (!parmAppInit(_params, argc, argv))
-  {
-    exit(0);
-  }
-
-  if (RefParms::isPrintMode())
-  {
-    _refparms.print(stdout, PRINT_VERBOSE);
-  }
-  else
-  {
-    if (_refparms.load(RefParms::parmPath().c_str(), NULL,
-		       !RefParms::isParmPrint(), false))
-    {
-      LOG(ERROR) << "cant load " <<  RefParms::parmPath();
-      okay = false;
-    }
-    else
-    {
-      _refparms.setOk();
-    }
-    if (RefParms::isPrintAndLoadMode())
-    {
-      _refparms.print(stdout, PRINT_VERBOSE);
-    }  
-  }
-  parmAppFinish(_params, _refparms);
-
-#endif
-  
 }
 
 
@@ -198,137 +160,99 @@ RefractCompute::RefractCompute(int argc, char **argv)
 
 RefractCompute::~RefractCompute()
 {
-
-  LOG(FORCE) << "N extraction completed!";
   
   // Unregister process
-
+  
   PMU_auto_unregister();
-
+  
   // Free contained objects
 
-  delete _dataTrigger;
-  delete _inputHandler;
+  delete _input;
+  delete _reader;
+  delete _processor;
   
-  // Free included strings
-
-  STRfree(_progName);
-
-  // Remove temporary files ?????
-
-  // system("rm -f targets.tmp.*");
-
 }
-
-
-/*********************************************************************
- * init() - Initialize the local data.
- *
- * Returns true if the initialization was successful, false otherwise.
- */
-
-bool RefractCompute::init()
-{
-
-  // Initialize the data trigger
-  if (!_refparms.initTrigger(&_dataTrigger))
-  {
-    return false;
-  }
-
-  _inputHandler = _refparms.initInput();
-  
-  // Read in the reference file
-  if (!_calib.initialize(_params.ref_file_name_day,
-			 _params.ref_file_name_night,
-			 _params._hms_night,
-			 _params._hms_day, 
-			 _params.day_night_transition_delta_minutes*60))
-  {
-    LOG(ERROR) << "reading calibration files";
-    return false;
-  }
-    
-  // Initialize the processor
-
-  if (!_processor.init(&_calib, _refparms, _params))
-    return false;
-  
-  // initialize process registration
-
-  PMU_auto_init(_progName, _refparms.instance, PROCMAP_REGISTER_INTERVAL);
-
-  return true;
-}
-
 
 /*********************************************************************
  * run()
  */
 
-void RefractCompute::run()
+int RefractCompute::run()
 {
-  DateTime trigger_time;
-  
-  while (!_dataTrigger->endOfData())
-  {
-    if (_dataTrigger->nextIssueTime(trigger_time) != 0)
-    {
-      LOG(ERROR) << "Error getting next trigger time";
-      continue;
-    }
+
+  int nSuccess = 0;
+  char *inputPath = nullptr;
+  while ((inputPath = _input->next()) != nullptr) {
     
-    if (!_processData(trigger_time))
-    {
-      LOG(ERROR) << "Error processing data for time: " << trigger_time;
+    time_t inputTime;
+    if (DsInputPath::getDataTime(inputPath, inputTime)) {
+      cerr << "ERROR: RefractCompute::run()" << endl;
+      cerr << "  Cannot compute time from input file path: " << inputPath << endl;
+      cerr << "  Ignoring this file" << endl;
       continue;
     }
-  } /* endwhile - !_dataTrigger->endOfData() */
+
+    DateTime fileTime(inputTime);
+    if (!_processData(inputPath, fileTime)) {
+      cerr << "ERROR: RefractCompute::run()" << endl;
+      cerr << "  processing data for time: " << fileTime << endl;
+      continue;
+    }
+
+    nSuccess++;
+    
+  } // while ...
+  
+  if (_params.debug) {
+    cerr << "==>>end of data" << endl;
+  }
+
+  if (nSuccess > 0) {
+    return 0;
+  } else {
+    return -1;
+  }
+  
 }
-
-
-/**********************************************************************
- *              Private Member Functions                              *
- **********************************************************************/
 
 
 /*********************************************************************
  * _processData()
  */
 
-bool RefractCompute::_processData(const DateTime &trigger_time)
+bool RefractCompute::_processData(string inputPath,
+                                  const DateTime &dataTime)
 {
+
   PMU_auto_register("Processing data");
   
-  LOG(DEBUG) << "**** Processing data for time: " << trigger_time;
+  LOG(DEBUG) << "**** Input file: " << inputPath;
+  LOG(DEBUG) << "**** Processing data for time: " << dataTime;
   
   // Get the next scan from the input handler
+
   DsMdvx data_file;
-  
-  if (!_readInputFile(data_file, trigger_time))
-  {
+  if (!_readInputFile(data_file, dataTime)) {
     return false;
   }
-
-  if (_processor.processScan(*_inputHandler, trigger_time.utime(), data_file))
-  {
+  
+  if (_processor->processScan(dataTime.utime(), data_file)) {
     // Generate output file
     LOG(DEBUG) << "---> Writing data for scan at time "
 	       << DateTime::str(data_file.getMasterHeader().time_centroid);
   
-    if (data_file.writeToDir(_refparms.output_url) != 0)
+    if (data_file.writeToDir(_params.output_dir) != 0)
     {
-      LOG(ERROR) << "writing output file to URL: " << _refparms.output_url;
+      LOG(ERROR) << "writing output file to URL: " << _params.output_dir;
       LOG(ERROR) << data_file.getErrStr();
       return false;
     }
     LOG(DEBUG) << "Wrote output file: " << data_file.getPathInUse();
     return true;
-  }
-  else
-  {
+  } else {
     return false;
   }
+  
 }
 
 
@@ -338,7 +262,7 @@ bool RefractCompute::_processData(const DateTime &trigger_time)
 
 bool RefractCompute::_readInputFile(DsMdvx &mdvx, const DateTime &data_time)
 {
-  if (!_inputHandler->getScan(data_time, 0, _refparms.input_url, mdvx))
+  if (!_reader->getScan(data_time, 0, _params.input_dir, mdvx))
   {
     LOG(ERROR) << "Could not read in data";
     return false;
