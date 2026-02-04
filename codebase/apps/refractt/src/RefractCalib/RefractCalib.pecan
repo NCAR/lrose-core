@@ -157,7 +157,7 @@ output_file_path = "/tmp/RefractCalib/RefractCalib.pecan.day.mdv.nc";
 //
 // Type: string
 
-output_dir = "/tmp/RefractCalib/output_dir";
+output_dir = "/tmp/RefractCalib/polar";
 
 //======================================================================
 //
