@@ -109,15 +109,6 @@ field_list = {
 # PECAN
 #
 
-REFR_======== ==REFR==  mdvp:://front.eol.ucar.edu:8080:pecan/cfradial/spol/moments/sband/sur?use_http=true&DBZ_F      dbz.colors   dBZ -5 80 5 radial 1 0
-REFR_======== ==REFR==  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-REFR_======== ==REFR==  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-REFR_======== ==REFR==  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-REFR_======== ==REFR==  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-REFR_======== ==REFR==  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-REFR_======== ==REFR==  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-REFR_======== ==REFR==  mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-
 REFR_CAL_STRENGTH  REFR_CAL_STRENGTH  /tmp/RefractCalib/polar/&strength power_AIQ.colors  dB -5 80 5 radial 1 0
 REFR_CAL_AV_I      REFR_CAL_AV_I      /tmp/RefractCalib/polar/&av_i     power_AIQ.colors  dB -5 80 5 radial 1 0
 REFR_CAL_AV_Q      REFR_CAL_AV_Q      /tmp/RefractCalib/polar/&av_q     power_AIQ.colors  dB -5 80 5 radial 1 0
@@ -127,23 +118,14 @@ REFR_CAL_NCP       REFR_CAL_NCP       /tmp/RefractCalib/polar/&ncp      ncp.colo
 REFR_========     ==REFR==           mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
 REFR_========     ==REFR==           mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
 
-REFR_CAL_STRENGTH  REFR_CAL_STRENGTH  /tmp/RefractCalib/polar/&strength power_AIQ.colors  dB -5 80 5 radial 1 0
-REFR_CAL_AV_I      REFR_CAL_AV_I      /tmp/RefractCalib/polar/&av_i     power_AIQ.colors  dB -5 80 5 radial 1 0
-REFR_CAL_AV_Q      REFR_CAL_AV_Q      /tmp/RefractCalib/polar/&av_q     power_AIQ.colors  dB -5 80 5 radial 1 0
-REFR_CAL_PHASE_ERR REFR_CAL_PHASE_ERR /tmp/RefractCalib/polar/&phase_er  power_AIQ.colors  dB -5 80 5 radial 1 0
-REFR_CAL_QUALOTY   REFR_CAL_QUALITY   /tmp/RefractCalib/polar/&quality  power_AIQ.colors  dB -5 80 5 radial 1 0
-REFR_CAL_NCP       REFR_CAL_NCP       /tmp/RefractCalib/polar/&ncp      ncp.colors  dB -5 80 5 radial 1 0
-REFR_========     ==REFR==           mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-REFR_========     ==REFR==           mdvp::static//localhost::/spacer?&None  none.colors   m   0 0 0 dcont 0 0
-
-REFR_MEAN_I        REFR_MEAN_I        mdvp:://front.eol.ucar.edu:8080:pecan/mdv/refract/spol_refr?use_http=true&MeanI   iqz.colors  dB -5 80 5 radial 1 0
-REFR_MEAN_Q        REFR_MEAN_Q        mdvp:://front.eol.ucar.edu:8080:pecan/mdv/refract/spol_refr?use_http=true&MeanI   iqz.colors  dB -5 80 5 radial 1 0
-REFR_CPA           REFR_CPA           mdvp:://front.eol.ucar.edu:8080:pecan/mdv/refract/spol_refr?use_http=true&CPA     cpa.colors  dB -5 80 5 radial 1 0
-REFR_SNR           REFR_SNR           mdvp:://front.eol.ucar.edu:8080:pecan/mdv/refract/spol_refr?use_http=true&SNRHC   cpa.colors  dB -5 80 5 radial 1 0
-REFR_N             REFR_N             mdvp:://front.eol.ucar.edu:8080:pecan/mdv/refract/spol_refr?use_http=true&N       refrac_N_fabry2.colors  dB -5 80 5 radial 1 0
-REFR_DELTA_N       REFR_DELTA_N       mdvp:://front.eol.ucar.edu:8080:pecan/mdv/refract/spol_refr?use_http=true&DELTA_N delta_N.colors  dB -5 80 5 radial 1 0
-REFR_SIGMA_N       REFR_SIGMA_N       mdvp:://front.eol.ucar.edu:8080:pecan/mdv/refract/spol_refr?use_http=true&SIGMA_N refrac_sigmaN.colors  dB -5 80 5 radial 1 0
-REFR_SIGMA_DN      REFR_SIGMA_DN      mdvp:://front.eol.ucar.edu:8080:pecan/mdv/refract/spol_refr?use_http=true&SIGMA_DN refrac_sigmaN.colors  dB -5 80 5 radial 1 0
+REFR_MEAN_I        REFR_MEAN_I        /tmp/RefractCompute/polar&MeanI   iqz.colors  dB -5 80 5 radial 1 0
+REFR_MEAN_Q        REFR_MEAN_Q        /tmp/RefractCompute/polar&MeanI   iqz.colors  dB -5 80 5 radial 1 0
+REFR_CPA           REFR_CPA           /tmp/RefractCompute/polar&CPA     cpa.colors  dB -5 80 5 radial 1 0
+REFR_SNR           REFR_SNR           /tmp/RefractCompute/polar&SNRHC   cpa.colors  dB -5 80 5 radial 1 0
+REFR_N             REFR_N             /tmp/RefractCompute/polar&N       refrac_N_fabry2.colors  dB -5 80 5 radial 1 0
+REFR_DELTA_N       REFR_DELTA_N       /tmp/RefractCompute/polar&DELTA_N delta_N.colors  dB -5 80 5 radial 1 0
+REFR_SIGMA_N       REFR_SIGMA_N       /tmp/RefractCompute/polar&SIGMA_N refrac_sigmaN.colors  dB -5 80 5 radial 1 0
+REFR_SIGMA_DN      REFR_SIGMA_DN      /tmp/RefractCompute/polar&SIGMA_DN refrac_sigmaN.colors  dB -5 80 5 radial 1 0
 
 #############################################
 # SPOL QC MOMENTS

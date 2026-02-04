@@ -1,0 +1,567 @@
+/**********************************************************************
+ * TDRP params for ./RefractCompute
+ **********************************************************************/
+
+//======================================================================
+//
+// RefractCompute.
+//
+// RefractCompute computes the refractivity value at each radar gate, 
+//   given the AIQ/NIQ data, plus the calibration results from previously 
+//   running RefractCalib.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+
+debug = DEBUG_OFF;
+
+///////////// write_debug_mdv_files ///////////////////
+//
+// Flag indicating whether to write debug MDV files.
+//
+// Type: boolean
+
+write_debug_mdv_files = FALSE;
+
+///////////// debug_mdv_url ///////////////////////////
+//
+// Debug MDV file URL.
+//
+// Type: string
+
+debug_mdv_url = "/tmp/RefractCompute/debug";
+
+///////////// debug_lat ///////////////////////////////
+//
+// debug latitude.
+//
+// Extreme debugging at a point, set to -9999 to disable.
+//
+// Type: double
+
+debug_lat = -9999;
+
+///////////// debug_lon ///////////////////////////////
+//
+// debug longitude.
+//
+// Extreme debugging at a point, set to -9999 to disable.
+//
+// Type: double
+
+debug_lon = -9999;
+
+///////////// debug_npt ///////////////////////////////
+//
+// debug npt.
+//
+// Extreme debugging radius around the debug point to keep showing 
+//   debugging, number of gridpoints.
+//
+// Type: int
+
+debug_npt = 1;
+
+///////////// debug_show_source_code_method_and_line //
+//
+// Source code methods/line numbers flag.
+//
+// true to show with debug output, ,false to hide.
+//
+// Type: boolean
+
+debug_show_source_code_method_and_line = FALSE;
+
+//======================================================================
+//
+// REALTIME PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// REALTIME mode only. This application registers with procmap. This is 
+//   the instance used for registration.
+//
+// Type: string
+
+instance = "pecan";
+
+///////////// procmap_register_interval ///////////////
+//
+// Interval for registering with procmap (secs).
+//
+// REALTIME mode only. The app will register with procmap at this 
+//   interval, to update its status. If it does not register within twice 
+//   this interval, the auto_restart script will restart the app.
+//
+// Type: int
+
+procmap_register_interval = 60;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory.
+//
+// Directory for input refractivity files.
+//
+// Type: string
+
+input_dir = "/scr/cirrus1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur";
+
+///////////// n_field_name ////////////////////////////
+//
+// Name of field with calculated N values.
+//
+// Type: string
+
+n_field_name = "N";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In FILELIST mode, we move through the list of file names specified on 
+//   the command line.
+//
+// In REALTIME mode, the program waits for a new input file to arrive in 
+//   'input_dir'.
+//
+// In ARCHIVE mode, we move through the files in input_dir between the 
+//   start and end times set on the command line.
+//
+// In ARCHIVE mode, input_dir must be one above the day-directory.
+//
+// Type: enum
+// Options:
+//     FILELIST
+//     ARCHIVE
+//     REALTIME
+
+mode = ARCHIVE;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// REALTIME mode only. Only data files less old than this will be 
+//   processed.
+//
+// Type: int
+
+max_realtime_data_age_secs = 300;
+
+///////////// start_time //////////////////////////////
+//
+// Set the start time for ARCHIVE mode analysis.
+//
+// Format is 'yyyy mm dd hh mm ss'.
+//
+// Type: string
+
+start_time = "2015 06 26 00 00 00";
+
+///////////// end_time ////////////////////////////////
+//
+// Set the end time for ARCHIVE mode analysis.
+//
+// Format is 'yyyy mm dd hh mm ss'.
+//
+// Type: string
+
+end_time = "2015 06 26 12 00 00";
+
+///////////// calib_file_path_day /////////////////////
+//
+// Calibration reference file path for daytime.
+//
+// Full path, file containing calibration information. Daytime.
+//
+// Type: string
+
+calib_file_path_day = "/tmp/RefractCalib/RefractCalib.pecan.day.mdv.nc";
+
+///////////// calib_file_path_night ///////////////////
+//
+// Calibration reference file path for nighttime.
+//
+// Full path, file containing calibration information. Nighttime.
+//
+// Type: string
+
+calib_file_path_night = "/tmp/RefractCalib/RefractCalib.pecan.day.mdv.nc";
+
+///////////// elevation_angle /////////////////////////
+//
+// The angle limits for the desired elevation angle. Only sweeps with 
+//   elevation angles between these limits will be used in the 
+//   calibration.
+//
+// Used only if specify_elevation_by_index is set to false.
+//
+// Type: struct
+//   typedef struct {
+//      double min_angle;
+//      double max_angle;
+//   }
+//
+
+elevation_angle = {
+    min_angle = 0.4,
+    max_angle = 0.6
+};
+
+///////////// num_azim ////////////////////////////////
+//
+// Number of azimuths used in data processing.
+//
+// Minimum val: 1
+//
+// Type: long
+
+num_azim = 360;
+
+///////////// num_range_bins //////////////////////////
+//
+// Number of range bins used in data processing.
+//
+// Minimum val: 1
+//
+// Type: long
+
+num_range_bins = 533;
+
+//======================================================================
+//
+// DATA FIELD DETAILS.
+//
+// Details of the fields to be retrieved from the data files.
+//
+//======================================================================
+ 
+///////////// raw_iq_in_input /////////////////////////
+//
+// Flag indicating whether the raw I and Q values are included in the 
+//   input stream.
+//
+// If true, the raw fields will be read from the input stream. If false, 
+//   the raw fields will be calculated from the NIQ/AIQ values which must 
+//   be inluded in the input stream instead.
+//
+// Type: boolean
+
+raw_iq_in_input = FALSE;
+
+///////////// raw_i_field_name ////////////////////////
+//
+// Raw I field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to TRUE.
+//
+// Type: string
+
+raw_i_field_name = "MeanI";
+
+///////////// raw_q_field_name ////////////////////////
+//
+// Raw Q field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to TRUE.
+//
+// Type: string
+
+raw_q_field_name = "MeanQ";
+
+///////////// niq_field_name //////////////////////////
+//
+// NIQ field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to FALSE.
+//
+// Type: string
+
+niq_field_name = "NIQ";
+
+///////////// input_niq_scale /////////////////////////
+//
+// Input NIQ scale value.
+//
+// The NIQ value from the input source is multiplied by this value 
+//   before the data is used. For most radars this value should be 0.1. 
+//   For SPOL this value should be 0.025.
+//
+// Type: double
+
+input_niq_scale = 0.025;
+
+///////////// invert_target_angle_sign ////////////////
+//
+// Flag indicating whether to invert the sign of the target angles.
+//
+// This fix should be done upstream, but is added here just in case.
+// Used only if raw_iq_in_input is set to FALSE.
+//
+// Type: boolean
+
+invert_target_angle_sign = FALSE;
+
+///////////// aiq_field_name //////////////////////////
+//
+// AIQ field name in the input stream.
+//
+// Used only if raw_iq_in_input is set to FALSE.
+//
+// Type: string
+
+aiq_field_name = "AIQ";
+
+///////////// snr_available ///////////////////////////
+//
+// Is SNR data available?.
+//
+// If not, SNR will be computed from the DBZ field. See 
+//   'noise_dbz_at_100km'.
+//
+// Type: boolean
+
+snr_available = TRUE;
+
+///////////// snr_field_name //////////////////////////
+//
+// Field name for SNR.
+//
+// Signal-to-noise ratio (dB).
+//
+// Type: string
+
+snr_field_name = "SNRHC";
+
+///////////// noise_dbz_at_100km //////////////////////
+//
+// The noise value, represented as dBZ at a range of 100km.
+//
+// This is used for computing the SNR from the DBZ field. It is only 
+//   used if SNR_available is FALSE. The SNR will be computed by 
+//   range-correcting this value and using it as the noise value.
+//
+// Type: double
+
+noise_dbz_at_100km = 0;
+
+///////////// dbz_field_name //////////////////////////
+//
+// Field name for DBZ.
+//
+// Horizontally-polarized reflectivity factor.
+//
+// Type: string
+
+dbz_field_name = "DBZ";
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Directory for moisture files in MDV format.
+//
+// Type: string
+
+output_dir = "/tmp/RefractCompute/polar";
+
+//======================================================================
+//
+// ALGORITHM PARAMETERS.
+//
+//======================================================================
+ 
+///////////// quality_source //////////////////////////
+//
+// Which field to use when calculating the quality value.
+//
+// 	QUALITY_FROM_WIDTH - The quality field is calculated using a 
+//   spectrum width field.
+// 	QUALITY_FROM_CPA - The quality field is calculated using a CPA 
+//   field.
+//
+// Type: enum
+// Options:
+//     QUALITY_FROM_WIDTH
+//     QUALITY_FROM_CPA
+
+quality_source = QUALITY_FROM_CPA;
+
+///////////// quality_field_name //////////////////////
+//
+// Name of field to use in the quality calculations.
+//
+// If quality_source is set to QUALITY_FROM_WIDTH then this should be a 
+//   spectrum width field.
+// If quality_source is set to QUALITY_FROM_CPA then this shoudl be a 
+//   probability of clutter field. The probability of clutter field should 
+//   range from 0.0 to 1.0 with 0.0 indicating the gate definitely doesn't 
+//   contain clutter and 1.0 indicating that the gate definitely is 
+//   clutter.
+//
+// Type: string
+
+quality_field_name = "CPA";
+
+///////////// hms_night ///////////////////////////////
+//
+// Hour min second for start of night.
+//
+// Type: int
+// 1D array - fixed length - 3 elements.
+
+hms_night = {
+ 2,
+ 40,
+ 0
+};
+
+///////////// hms_day /////////////////////////////////
+//
+// Hour min second for start of day.
+//
+// Type: int
+// 1D array - fixed length - 3 elements.
+
+hms_day = {
+ 10,
+ 15,
+ 0
+};
+
+///////////// day_night_transition_delta_minutes //////
+//
+// Transition from day to night or night to day, with interpolation.
+//
+// up to this number of minutes, the day/night interface is 
+//   interpolated, for example if t = hms_night - x, then percent given to 
+//   day is (x+delta)/(2*delta) and percent given to night is 
+//   (delta-x)/(2*delta)   up to where x exceeds delta.
+//
+// Type: int
+
+day_night_transition_delta_minutes = 0;
+
+///////////// frequency ///////////////////////////////
+//
+// Frequency in Hz.
+//
+// Type: double
+
+frequency = 2.809e+09;
+
+///////////// r_min ///////////////////////////////////
+//
+// Min range gate of ground echo.
+//
+// Minimum val: 1
+//
+// Type: long
+
+r_min = 4;
+
+///////////// n_smoothing_side_len ////////////////////
+//
+// N smoothing side length.
+//
+// Smooth N phases with square of 4-km side lengths.
+//
+// Type: double
+
+n_smoothing_side_len = 4000;
+
+///////////// dn_smoothing_side_len ///////////////////
+//
+// DN smoothing side length.
+//
+// Smooth DN dif. phases with square of 4-km side length.
+//
+// Type: double
+
+dn_smoothing_side_len = 4000;
+
+///////////// min_consistency /////////////////////////
+//
+// Minimum consistency.
+//
+// Minimum consistency of phase to accept N (DN) measurement. HIgher 
+//   means smaller coverage of (hopefully) better data.
+//
+// Minimum val: 0
+// Maximum val: 1
+//
+// Type: double
+
+min_consistency = 0.015;
+
+///////////// do_relax ////////////////////////////////
+//
+// Flag indicating whether to do the relaxation stage.
+//
+// Type: boolean
+
+do_relax = FALSE;
+
+///////////// quality_threshold ///////////////////////
+//
+// Quality threshold.
+//
+// Type: double
+
+quality_threshold = 0.9;
+
+///////////// threshold_using_sigma_n /////////////////
+//
+// Threshold on SigmaN for N and DN.
+//
+// Set to TRUE if you want to threshold N and DN using SigmaN values.
+//
+// Type: boolean
+
+threshold_using_sigma_n = FALSE;
+
+///////////// max_sigma_n /////////////////////////////
+//
+// maximum sigmaN value when threshold_using_sigma_n = TRUE.
+//
+// if threshold_using_sigma_n = TRUE and sigmaN > max_sigma_n, N and DN 
+//   are set to missing.  If threshold_using_sigma_n = FALSE, this value 
+//   is ignored.
+//
+// Type: double
+
+max_sigma_n = 30;
+
