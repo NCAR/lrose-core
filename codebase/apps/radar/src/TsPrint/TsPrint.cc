@@ -370,6 +370,11 @@ int TsPrint::_runPrintMode()
     if (_pulseCount == 0) {
       _clearStats();
     }
+    if (pulse->isHoriz()) {
+      _latestIsH = true;
+    } else {
+      _latestIsH = false;
+    }
     if (_fastAlternating) {
       _addToAlternating(*pulse);
     } else {
@@ -2118,6 +2123,14 @@ void TsPrint::_printSummaryData(FILE *out)
   
   for (size_t ii = 0; ii < _extraColMeans.size(); ii++) {
     fprintf(out, "%12g", _extraColMeans[ii]);
+  }
+
+  if (_nSamples == 1 && _fastAlternating) {
+    if (_latestIsH) {
+      fprintf(out, " H");
+    } else {
+      fprintf(out, " V");
+    }
   }
 
   if (_midTransition) {

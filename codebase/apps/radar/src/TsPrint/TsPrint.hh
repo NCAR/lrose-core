@@ -121,6 +121,7 @@ private:
 
   bool _haveChan1;
   bool _fastAlternating;
+  bool _latestIsH;
   bool _labviewRequest;
 
   // previous values - to check for changes
