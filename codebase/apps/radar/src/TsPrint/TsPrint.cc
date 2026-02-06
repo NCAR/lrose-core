@@ -367,14 +367,17 @@ int TsPrint::_runPrintMode()
     // add to data as appropriate
 
     pulse->convertToFL32();
+
     if (_pulseCount == 0) {
       _clearStats();
     }
+
     if (pulse->isHoriz()) {
       _latestIsH = true;
     } else {
       _latestIsH = false;
     }
+
     if (_fastAlternating) {
       _addToAlternating(*pulse);
     } else {
