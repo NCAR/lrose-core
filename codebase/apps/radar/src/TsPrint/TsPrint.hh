@@ -92,6 +92,7 @@ private:
   IwrfTsPulse *_firstPulse;
   IwrfTsPulse *_secondPulse;
 
+  iwrf_pulse_header _prevPulseHdr;
   si64 _prevPulseSeqNum;
   ssize_t _totalPulseCount;
   ssize_t _pulseCount;
