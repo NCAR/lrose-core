@@ -71,7 +71,7 @@ class Calib
 
   // initialize
   
-  bool initialize(const std::string &ref_file_name);
+  int initialize(const std::string &ref_file_name);
 
   // field data
   

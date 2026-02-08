@@ -153,7 +153,7 @@ bool Calib::findReliableTargets(const std::vector< std::string > &file_list,
 
   // debugging
   vector<double> phase_targ = av_iq_field->createDebugPhaseVector();
-  if (!phase_targ.empty())
+  if (_params.debug >= Params::DEBUG_VERBOSE && !phase_targ.empty())
   {
     _writeDebugPhaseCalibFiles(phase_targ, num_azim, num_gates);
   }
@@ -619,7 +619,7 @@ bool Calib::_writeCalibrationFile(const DateTime &data_time) const
   Mdvx::master_header_t master_hdr;
   memset(&master_hdr, 0, sizeof(master_hdr));
   
-  master_hdr.time_gen = time(0);
+  master_hdr.time_gen = data_time.utime();
   master_hdr.time_begin = data_time.utime();
   master_hdr.time_end = data_time.utime();
   master_hdr.time_centroid = data_time.utime();
@@ -695,20 +695,25 @@ void Calib::_writeDebugPhaseCalibFiles(const std::vector<double> &phase_targ,
   
   // Write the image file
 
+  string phasecalib_path;
+  phasecalib_path = _params.output_dir;
+  phasecalib_path += PATH_DELIM;
+  phasecalib_path += "debug_phasecalib.ppm";
+
+  if (ta_makedir_recurse(_params.output_dir)) {
+    LOG(ERROR) << "Cannot make dir: " << _params.output_dir;
+    return;
+  }
+  
   FILE *debug_phasecalib_ppm_fp;
 
-  if ((debug_phasecalib_ppm_fp = fopen("debug_phasecalib.ppm", "wb")) == 0)
-  {
-    LOG(ERROR) << "Error opening debug_phasecalib.ppm file for writing";
-  }
-  else
-  {
+  if ((debug_phasecalib_ppm_fp = fopen(phasecalib_path.c_str(), "wb")) == 0) {
+    LOG(ERROR) << "Error opening " << phasecalib_path << " file for writing";
+  } else {
     fprintf(debug_phasecalib_ppm_fp, "P5 %d %d 255 ",
 	    (int)num_gates, (int)num_azim);
-    for (int index = 0; index < scan_size; ++index)
-    {
+    for (int index = 0; index < scan_size; ++index) {
       char c;
-    
       if (phase_targ[index] == refract::INVALID)
 	c = 0;
       else

@@ -20,9 +20,20 @@ CalibDayNight::CalibDayNight(const Params &params) :
   
   _transition_delta_seconds = _params.day_night_transition_delta_minutes * 60;
 
-  assert(_calibDay.initialize(_params.calib_file_path_day));
-  assert(_calibNight.initialize(_params.calib_file_path_night));
-  
+  if (_params.debug) {
+    cerr << "Day calib path: " << _params.calib_file_path_day << endl;
+    cerr << "Night calib path: " << _params.calib_file_path_night << endl;
+  }
+
+  if (_calibDay.initialize(_params.calib_file_path_day)) {
+    cerr << "Error reading day calib path: " << _params.calib_file_path_day << endl;
+    assert(_calibDay.initialize(_params.calib_file_path_day));
+  }
+  if (_calibNight.initialize(_params.calib_file_path_night)) {
+    cerr << "Error reading night calib path: " << _params.calib_file_path_night << endl;
+    assert(_calibNight.initialize(_params.calib_file_path_night));
+  }
+
 }
 
 // destructor

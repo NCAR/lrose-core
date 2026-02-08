@@ -60,6 +60,8 @@ RefractCompute::RefractCompute(int argc, char **argv)
   _input = nullptr;
   _reader = nullptr;
   _processor = nullptr;
+  _startTime = 0;
+  _endTime = 0;
 
   // set programe name
 
@@ -97,28 +99,49 @@ RefractCompute::RefractCompute(int argc, char **argv)
 
   } else if (_params.mode == Params::ARCHIVE) {
 
-    time_t startTime = DateTime::parseDateTime(_params.start_time);
-    time_t endTime = DateTime::parseDateTime(_params.end_time);
-    if (startTime == DateTime::NEVER) {
+    _startTime = DateTime::parseDateTime(_params.start_time);
+    _endTime = DateTime::parseDateTime(_params.end_time);
+
+    if (_args.startTime != 0 && _args.endTime != 0) {
+      _startTime = _args.startTime;
+      _endTime = _args.endTime;
+      if (_args.startTime == 0 || _args.endTime == 0) {
+        cerr << "ERROR - must specify both start and end dates." << endl << endl;
+        _args.usage(_progName, cerr);
+        okay = false;
+      } else {
+        if (_params.debug) {
+          cerr << "Using time limits from command line:" << endl;
+          cerr << "  start time: " << DateTime::strm(_startTime) << endl;
+          cerr << "  end time: " << DateTime::strm(_endTime) << endl;
+        }
+      }
+    }
+    
+    if (_startTime == DateTime::NEVER) {
       cerr << "ERROR: RefractCompute" << endl;
       cerr << "  bad start time: " << _params.start_time << endl;
       okay = false;
     }
-    if (endTime == DateTime::NEVER) {
+    if (_endTime == DateTime::NEVER) {
       cerr << "ERROR: RefractCompute" << endl;
       cerr << "  bad end time: " << _params.end_time << endl;
       okay = false;
     }
 
+    if (!okay) {
+      return;
+    }
+    
     _input = new DsInputPath(_progName,
-			     _params.debug >= Params::DEBUG_VERBOSE,
-			     _params.input_dir,
-			     startTime, endTime);
-
+                             _params.debug >= Params::DEBUG_VERBOSE,
+                             _params.input_dir,
+                             _startTime, _endTime);
+    
   } else if (_params.mode == Params::FILELIST) {
-
+    
     if (_args.inputFileList.size() == 0) {
-
+      
       cerr << "ERROR: RefractCompute" << endl;
       cerr << "  Mode is FILELIST"; 
       cerr << "  You must use -f to specify files on the command line."
@@ -153,11 +176,7 @@ RefractCompute::RefractCompute(int argc, char **argv)
   }
 
   // initialize logging
-  LogStreamInit::init(false, false, true, true);
-  LOG_STREAM_DISABLE(LogStream::WARNING);
-  LOG_STREAM_DISABLE(LogStream::DEBUG);
-  LOG_STREAM_DISABLE(LogStream::DEBUG_VERBOSE);
-  LOG_STREAM_DISABLE(LogStream::DEBUG_EXTRA);
+  // LogStreamInit::init(false, false, true, true);
   if (_params.debug >= Params::DEBUG_EXTRA) {
     LOG_STREAM_ENABLE(LogStream::DEBUG_EXTRA);
     LOG_STREAM_ENABLE(LogStream::DEBUG_VERBOSE);
@@ -201,8 +220,9 @@ int RefractCompute::run()
 
   int nSuccess = 0;
   char *inputPath = nullptr;
+  
   while ((inputPath = _input->next()) != nullptr) {
-    
+
     time_t inputTime;
     if (DsInputPath::getDataTime(inputPath, inputTime)) {
       cerr << "ERROR: RefractCompute::run()" << endl;
@@ -221,7 +241,7 @@ int RefractCompute::run()
     nSuccess++;
     
   } // while ...
-  
+
   if (_params.debug) {
     cerr << "==>>end of data" << endl;
   }
@@ -244,7 +264,7 @@ bool RefractCompute::_processData(string inputPath,
 {
 
   PMU_auto_register("Processing data");
-  
+
   LOG(DEBUG) << "**** Input file: " << inputPath;
   LOG(DEBUG) << "**** Processing data for time: " << dataTime;
   
