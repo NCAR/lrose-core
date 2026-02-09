@@ -105,7 +105,15 @@ class Calib
   bool findReliableTargets(const std::vector< std::string > &file_list,
 			   double &gate_spacing);
   
- private:
+ // names of fields in calibration files
+  
+  static const std::string CALIB_STRENGTH_FIELD_NAME;
+  static const std::string CALIB_AV_I_FIELD_NAME;
+  static const std::string CALIB_AV_Q_FIELD_NAME;
+  static const std::string CALIB_PHASE_ER_FIELD_NAME;
+  static const std::string CALIB_QUALITY_FIELD_NAME;
+
+private:
 
   ///////////////////////
   // Private constants //

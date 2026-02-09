@@ -45,8 +45,12 @@ using std::string;
 using std::vector;
 
 const size_t Calib::MINIMUM_TARGET_LIST_FILES = 2;
+const string Calib::CALIB_STRENGTH_FIELD_NAME = "strength";
+const string Calib::CALIB_AV_I_FIELD_NAME = "av_i";
+const string Calib::CALIB_AV_Q_FIELD_NAME = "av_q";
+const string Calib::CALIB_PHASE_ER_FIELD_NAME = "phase_er";
+const string Calib::CALIB_QUALITY_FIELD_NAME = "quality";
 
-//-----------------------------------------------------------------------
 Calib::Calib(const Params &params) :
         _params(params),
         _inputHandler(_params),
@@ -388,7 +392,7 @@ bool
       
   // Allocate space for local fields
 
-  *av_iq_field = new FieldDataPair(iq, "av_i", "none", "av_q", "none");
+  *av_iq_field = new FieldDataPair(iq, CALIB_AV_I_FIELD_NAME, "none", CALIB_AV_Q_FIELD_NAME, "none");
   *dif_from_ref_iq_field = new FieldDataPair(iq, "dif_from_ref_i", "none",
 					     "dif_from_ref_q", "none");
       
@@ -525,11 +529,11 @@ bool Calib::_allocateGlobalFields(const FieldDataPair &IQ)
   _difPrevScanIQField = FieldDataPair(IQ, "dif_prev_scan_i", "none",
                                       "dif_prev_scan_q", "none");
 
-  _calibStrengthField = IQ.createFromI("strength", "none", 0.0);
-  _calibAvIQField = FieldDataPair(IQ, "av_i", "none", 0.0,
-				  "av_q", "none", 0.0);
-  _calibPhaseErField = IQ.createFromI("phase_er", "none", refract::VERY_LARGE);
-  _calibQualityField = IQ.createFromI("quality", "none", 0.0);
+  _calibStrengthField = IQ.createFromI(CALIB_STRENGTH_FIELD_NAME, "none", 0.0);
+  _calibAvIQField = FieldDataPair(IQ, CALIB_AV_I_FIELD_NAME, "none", 0.0,
+				  CALIB_AV_Q_FIELD_NAME, "none", 0.0);
+  _calibPhaseErField = IQ.createFromI(CALIB_PHASE_ER_FIELD_NAME, "none", refract::VERY_LARGE);
+  _calibQualityField = IQ.createFromI(CALIB_QUALITY_FIELD_NAME, "none", 0.0);
   _calibNcpField = IQ.createFromI("ncp", "none", 0.0);
   return true;
 }

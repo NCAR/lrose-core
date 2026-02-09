@@ -1,4 +1,5 @@
 #include "Data.hh"
+#include "Calib.hh"
 #include <Refract/FieldWithData.hh>
 #include <Mdv/DsMdvx.hh>
 #include <toolsa/LogStream.hh>
@@ -100,14 +101,16 @@ void Data::allocate(const FieldDataPair &iq)
 
   _meanSnr = iq.createField("mean_snr", "dB", 0.0);
   _sumP = iq.createField("sum_p", "none", 0.0);
-  _calibStrength = iq.createField("strength", "none", 0.0);
-  _calibPhaseEr = iq.createField("phase_er", "none", Data::VERY_LARGE);
-  _calibQuality = iq.createField("quality", "none", 0.0);
+  _calibStrength = iq.createField(Calib::CALIB_STRENGTH_FIELD_NAME, "none", 0.0);
+  _calibPhaseEr = iq.createField(Calib::CALIB_PHASE_ER_FIELD_NAME, "none", Data::VERY_LARGE);
+  _calibQuality = iq.createField(Calib::CALIB_QUALITY_FIELD_NAME, "none", 0.0);
   _calibNcp = iq.createField("ncp", "none", 0.0);
  
   _sumAB = FieldDataPair(iq, "sum_a", "none", 0.0, "sum_b", "none", 0.0);
-  _calibAvIQ = FieldDataPair(iq, "av_i", "none", 0.0, "av_q", "none", 0.0);
-  _avIQ = FieldDataPair(iq, "av_i", "none", "av_q", "none");  // init to IQ
+  _calibAvIQ = FieldDataPair(iq, Calib::CALIB_AV_I_FIELD_NAME, "none", 0.0,
+                             Calib::CALIB_AV_Q_FIELD_NAME, "none", 0.0);
+  _avIQ = FieldDataPair(iq, Calib::CALIB_AV_I_FIELD_NAME, "none",
+                        Calib::CALIB_AV_Q_FIELD_NAME, "none");  // init to IQ
   _difFromRefIQ = FieldDataPair(iq, "dif_from_ref_i", "none",
 				iq.missingValueI(),
 				"dif_from_ref_q", "none",
