@@ -46,6 +46,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include "Reader.hh"
+#include "Calib.hh"
 using std::string;
 
 // Globals
@@ -69,7 +70,7 @@ Reader::Reader(const Params &params) :
         _snrInInput(_params.snr_available),
         _snrFieldName(_params.snr_field_name),
         _dbzFieldName(_params.dbz_field_name),
-        _phaseErrorFieldName("phase_er"), // fix this later
+        _phaseErrorFieldName(Calib::CALIB_PHASE_ER_FIELD_NAME), // fix this later
         _inputNiqScale(_params.input_niq_scale),
         _invertTargetAngleSign(_params.invert_target_angle_sign),
         _minElevationAngle(_params.elevation_angle.min_angle),

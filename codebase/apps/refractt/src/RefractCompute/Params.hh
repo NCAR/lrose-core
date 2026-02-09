@@ -388,18 +388,6 @@ public:
 
   debug_t debug;
 
-  tdrp_bool_t write_debug_mdv_files;
-
-  char* debug_mdv_url;
-
-  double debug_lat;
-
-  double debug_lon;
-
-  int debug_npt;
-
-  tdrp_bool_t debug_show_source_code_method_and_line;
-
   char* instance;
 
   int procmap_register_interval;
@@ -480,6 +468,12 @@ public:
 
   double max_sigma_n;
 
+  double debug_lat;
+
+  double debug_lon;
+
+  int debug_npt;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -487,7 +481,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[54];
+  mutable TDRPtable _table[52];
 
   const char *_className;
 

@@ -89,25 +89,14 @@ class Calib
   
   inline double refN() const {return _refN;}
 
- private:
-
-  /**
-   * @brief The field name of the average I field in the calibration file.
-   */
-
+ // names of fields in calibration files
+  
   static const std::string CALIB_AV_I_FIELD_NAME;
-  
-  /**
-   * @brief The field name of the average Q field in the calibration file.
-   */
-
   static const std::string CALIB_AV_Q_FIELD_NAME;
-  
-  /**
-   * @brief The field name of the phase error field in the calibration file.
-   */
-
   static const std::string CALIB_PHASE_ER_FIELD_NAME;
+  static const std::string CALIB_QUALITY_FIELD_NAME;
+
+private:
 
   /**
    * @brief The calibration file for daytime.

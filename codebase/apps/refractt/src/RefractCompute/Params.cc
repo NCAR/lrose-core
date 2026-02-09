@@ -596,78 +596,6 @@
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
-    // Parameter 'write_debug_mdv_files'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_debug_mdv_files");
-    tt->descr = tdrpStrDup("Flag indicating whether to write debug MDV files");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &write_debug_mdv_files - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'debug_mdv_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("debug_mdv_url");
-    tt->descr = tdrpStrDup("Debug MDV file URL");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &debug_mdv_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdvp:://localhost::mdv/debug/RefractCalib");
-    tt++;
-    
-    // Parameter 'debug_lat'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("debug_lat");
-    tt->descr = tdrpStrDup("debug latitude");
-    tt->help = tdrpStrDup("Extreme debugging at a point, set to -9999 to disable");
-    tt->val_offset = (char *) &debug_lat - &_start_;
-    tt->single_val.d = -9999;
-    tt++;
-    
-    // Parameter 'debug_lon'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("debug_lon");
-    tt->descr = tdrpStrDup("debug longitude");
-    tt->help = tdrpStrDup("Extreme debugging at a point, set to -9999 to disable");
-    tt->val_offset = (char *) &debug_lon - &_start_;
-    tt->single_val.d = -9999;
-    tt++;
-    
-    // Parameter 'debug_npt'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("debug_npt");
-    tt->descr = tdrpStrDup("debug npt");
-    tt->help = tdrpStrDup("Extreme debugging radius around the debug point to keep showing debugging, number of gridpoints");
-    tt->val_offset = (char *) &debug_npt - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'debug_show_source_code_method_and_line'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("debug_show_source_code_method_and_line");
-    tt->descr = tdrpStrDup("Source code methods/line numbers flag");
-    tt->help = tdrpStrDup("true to show with debug output, ,false to hide");
-    tt->val_offset = (char *) &debug_show_source_code_method_and_line - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1243,6 +1171,51 @@
     tt->help = tdrpStrDup("if threshold_using_sigma_n = TRUE and sigmaN > max_sigma_n, N and DN are set to missing.  If threshold_using_sigma_n = FALSE, this value is ignored");
     tt->val_offset = (char *) &max_sigma_n - &_start_;
     tt->single_val.d = 30;
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("DEBUGGING READING INPUT FILES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'debug_lat'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("debug_lat");
+    tt->descr = tdrpStrDup("debug latitude");
+    tt->help = tdrpStrDup("Extreme debugging at a point, set to -9999 to disable");
+    tt->val_offset = (char *) &debug_lat - &_start_;
+    tt->single_val.d = -9999;
+    tt++;
+    
+    // Parameter 'debug_lon'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("debug_lon");
+    tt->descr = tdrpStrDup("debug longitude");
+    tt->help = tdrpStrDup("Extreme debugging at a point, set to -9999 to disable");
+    tt->val_offset = (char *) &debug_lon - &_start_;
+    tt->single_val.d = -9999;
+    tt++;
+    
+    // Parameter 'debug_npt'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("debug_npt");
+    tt->descr = tdrpStrDup("debug npt");
+    tt->help = tdrpStrDup("Extreme debugging radius around the debug point to keep showing debugging, number of gridpoints");
+    tt->val_offset = (char *) &debug_npt - &_start_;
+    tt->single_val.i = 1;
     tt++;
     
     // trailing entry has param_name set to NULL

@@ -129,7 +129,8 @@ bool Processor::processScan(const time_t &t,
   // for the algorithm.
   _rawPhase.copyIQFilterBadOrMissing(iq);
 
-  FieldWithData qualityField(I.getFieldPtrConst(), "Quality", "none", 0.0);
+  FieldWithData qualityField(I.getFieldPtrConst(), Calib::CALIB_QUALITY_FIELD_NAME,
+                             "none", 0.0);
 
   // Compute the quality
   _getQuality(Snr, Qual, t, qualityField);

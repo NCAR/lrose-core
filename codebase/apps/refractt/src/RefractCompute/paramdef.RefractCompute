@@ -48,46 +48,6 @@ paramdef enum debug_t
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
-paramdef boolean
-{
-  p_descr = "Flag indicating whether to write debug MDV files";
-  p_default = false;
-} write_debug_mdv_files;
-
-paramdef string
-{
-  p_descr = "Debug MDV file URL";
-  p_default = "mdvp:://localhost::mdv/debug/RefractCalib";
-} debug_mdv_url;
-
-paramdef double
-{
-  p_descr = "debug latitude";
-  p_help = "Extreme debugging at a point, set to -9999 to disable";
-  p_default = -9999.0;
-} debug_lat;
-
-paramdef double
-{
-  p_descr = "debug longitude";
-  p_help = "Extreme debugging at a point, set to -9999 to disable";
-  p_default = -9999;
-} debug_lon;
-
-paramdef int
-{
-  p_descr = "debug npt";
-  p_help = "Extreme debugging radius around the debug point to keep showing debugging, number of gridpoints";
-  p_default = 1;
-} debug_npt;
-
-paramdef boolean
-{
-  p_descr = "Source code methods/line numbers flag";
-  p_help = "true to show with debug output, ,false to hide";
-  p_default = false;
-} debug_show_source_code_method_and_line;
-
 //////////////////////////////////////////////////////////////////
 
 commentdef {
@@ -417,3 +377,29 @@ paramdef double
   p_help = "if threshold_using_sigma_n = TRUE and sigmaN > max_sigma_n, N and DN are set to missing.  If threshold_using_sigma_n = FALSE, this value is ignored";
   p_default = 30;
 } max_sigma_n;
+
+commentdef {
+  p_header = "DEBUGGING READING INPUT FILES";
+}
+
+paramdef double
+{
+  p_descr = "debug latitude";
+  p_help = "Extreme debugging at a point, set to -9999 to disable";
+  p_default = -9999.0;
+} debug_lat;
+
+paramdef double
+{
+  p_descr = "debug longitude";
+  p_help = "Extreme debugging at a point, set to -9999 to disable";
+  p_default = -9999;
+} debug_lon;
+
+paramdef int
+{
+  p_descr = "debug npt";
+  p_help = "Extreme debugging radius around the debug point to keep showing debugging, number of gridpoints";
+  p_default = 1;
+} debug_npt;
+
