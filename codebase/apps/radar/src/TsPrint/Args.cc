@@ -409,7 +409,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	TDRP_add_override(&override, tmp_str);
       }
 
-    } else if (argv[i][0] == '-') {
+    } else if (argv[i][0] == '-' && strcmp(argv[i], "-params")) {
 
       cerr<< "====>> WARNING - invalid command line argument: '"
           << argv[i] << "' <<====" << endl;

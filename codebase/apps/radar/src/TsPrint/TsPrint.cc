@@ -75,6 +75,7 @@ TsPrint::TsPrint(int argc, char **argv)
   _nPulsesRead = 0;
   _firstPulse = NULL;
   _secondPulse = NULL;
+  memset(&_prevPulseHdr, 0, sizeof(_prevPulseHdr));
   
   _prevAzimuth = -9999.0;
   _prevElevation = -9999.0;
@@ -367,9 +368,17 @@ int TsPrint::_runPrintMode()
     // add to data as appropriate
 
     pulse->convertToFL32();
+
     if (_pulseCount == 0) {
       _clearStats();
     }
+
+    if (pulse->isHoriz()) {
+      _latestIsH = true;
+    } else {
+      _latestIsH = false;
+    }
+
     if (_fastAlternating) {
       _addToAlternating(*pulse);
     } else {
@@ -421,9 +430,6 @@ int TsPrint::_runPrintMode()
 int TsPrint::_printPrtDetails()
   
 {
-
-  iwrf_pulse_header prevPulseHdr;
-  memset(&prevPulseHdr, 0, sizeof(prevPulseHdr));
 
   while (true) {
     
@@ -479,15 +485,15 @@ int TsPrint::_printPrtDetails()
                        true,
                        (double) pulseHdr.packet.time_nano_secs / 1.0e9);
 
-    DateTime prevTime(prevPulseHdr.packet.time_secs_utc,
+    DateTime prevTime(_prevPulseHdr.packet.time_secs_utc,
                       true,
-                      (double) prevPulseHdr.packet.time_nano_secs / 1.0e9);
+                      (double) _prevPulseHdr.packet.time_nano_secs / 1.0e9);
     
     double timeDiffSecs = 0.0;
     if (_totalPulseCount > 0) {
       timeDiffSecs =
-        (double) (prevPulseHdr.packet.time_secs_utc - pulseHdr.packet.time_secs_utc) +
-        ((double) pulseHdr.packet.time_nano_secs - prevPulseHdr.packet.time_nano_secs) / 1.0e9;
+        (double) (_prevPulseHdr.packet.time_secs_utc - pulseHdr.packet.time_secs_utc) +
+        ((double) pulseHdr.packet.time_nano_secs - _prevPulseHdr.packet.time_nano_secs) / 1.0e9;
     }
 
     fprintf(stdout,
@@ -508,7 +514,6 @@ int TsPrint::_printPrtDetails()
       cout << _pulseString(*pulse) << endl;
     }
     
-    prevPulseHdr = pulseHdr;
     _pulseCount++;
     _totalPulseCount++;
     
@@ -931,6 +936,16 @@ IwrfTsPulse *TsPrint::_getNextPulse()
     cerr << "  file: " << _pulseReader->getPathInUse() << endl;
   }
   _prevPulseSeqNum = pulseSeqNum;
+
+  // check for alternating mode
+
+  iwrf_pulse_header pulseHdr = pulse->getHdr();
+  if (pulseHdr.hv_flag != _prevPulseHdr.hv_flag) {
+    _fastAlternating = true;
+  } else {
+    _fastAlternating = false;
+  }
+  _prevPulseHdr = pulseHdr;
 
   return pulse;
 
@@ -2118,6 +2133,14 @@ void TsPrint::_printSummaryData(FILE *out)
   
   for (size_t ii = 0; ii < _extraColMeans.size(); ii++) {
     fprintf(out, "%12g", _extraColMeans[ii]);
+  }
+
+  if (_nSamples == 1 && _fastAlternating) {
+    if (_latestIsH) {
+      fprintf(out, " H");
+    } else {
+      fprintf(out, " V");
+    }
   }
 
   if (_midTransition) {
