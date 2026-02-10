@@ -212,7 +212,7 @@ int CalcMoisture::run()
     }
 
     DateTime fileTime(inputTime);
-    if (!_processData(inputPath, fileTime)) {
+    if (_processData(inputPath, fileTime)) {
       cerr << "ERROR: CalcMoisture::run()" << endl;
       cerr << "  processing data for time: " << fileTime << endl;
       continue;
@@ -289,7 +289,8 @@ int CalcMoisture::_processData(const string filePath,
   // Get the mean temperature and pressure from the given stations
 
   double temp_k, press_mb;
-  if (!_getTempPress(fileTime, temp_k, press_mb)) {
+  if (_getTempPress(fileTime, temp_k, press_mb)) {
+    cerr << "ERROR - cannot compute temp and pressure from surface stations" << endl;
     return -1;
   }
 
@@ -362,6 +363,9 @@ int CalcMoisture::_processData(const string filePath,
     cerr << "Error writing to output URL: " << _params.output_dir << endl;
     cerr << output_file.getErrStr() << endl;
     return -1;
+  }
+  if (_params.debug) {
+    cerr << "Wrote output file: " << output_file.getPathInUse() << endl;
   }
   
   return 0;
@@ -679,7 +683,7 @@ int CalcMoisture::_getTempPress(const DateTime &data_time,
     }
     
   } /* endfor - i */
-  
+
   if (num_temp_stations <= 0 || num_press_stations <= 0) {
     cerr << "ERROR: " << method_name << endl;
     if (num_temp_stations <= 0) {
@@ -694,7 +698,7 @@ int CalcMoisture::_getTempPress(const DateTime &data_time,
   
   temp_k = TEMP_C_TO_K(temp_sum / (double)num_temp_stations);
   press_mb = press_sum / (double)num_press_stations;
-  
+
   return 0;
   
 }
