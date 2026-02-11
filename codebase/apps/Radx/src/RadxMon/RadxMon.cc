@@ -573,6 +573,9 @@ void RadxMon::_printSummary(const RadxRay *ray)
     case Radx::SWEEP_MODE_IDLE:
       sprintf(scanModeStr, "IDLE");
       break;
+    case Radx::SWEEP_MODE_FILL:
+      sprintf(scanModeStr, "FILL");
+      break;
     default:
       sprintf(scanModeStr, "%4d", ray->getSweepMode());
   }

@@ -192,6 +192,7 @@ void RadxVol::_init()
   _sweepModeAparAftDopplerRhiLabel = "RHI";
   _sweepModeAparDualpolRhiLabel = "RHI";
   _sweepModeAparSectorPpiLabel = "PPI";
+  _sweepModeFillLabel = "FIL";
 
 }
 
@@ -762,6 +763,7 @@ Radx::SweepMode_t RadxVol::getPredomSweepMode() const
   modeMap[Radx::SWEEP_MODE_APAR_AFT_DOPPLER] = 0;
   modeMap[Radx::SWEEP_MODE_APAR_DUALPOL_RHI] = 0;
   modeMap[Radx::SWEEP_MODE_APAR_SECTOR_PPI] = 0;
+  modeMap[Radx::SWEEP_MODE_FILL] = 0;
   
   // accumulate the number of rays for each mode
   
@@ -862,6 +864,9 @@ string RadxVol::getSweepModeLabel(Radx::SweepMode_t mode) const
     }
     case Radx::SWEEP_MODE_APAR_SECTOR_PPI: {
       return _sweepModeAparSectorPpiLabel;
+    }
+    case Radx::SWEEP_MODE_FILL: {
+      return _sweepModeFillLabel;
     }
     default: {
       return _sweepModeAzSurLabel;

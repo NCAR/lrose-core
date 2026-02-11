@@ -324,6 +324,7 @@ public:
     SWEEP_MODE_APAR_AFT_DOPPLER = 22,  ///< aft Doppler for APAR
     SWEEP_MODE_APAR_DUALPOL_RHI = 23,  ///< dual pol RHI for APAR
     SWEEP_MODE_APAR_SECTOR_PPI = 24,  ///< surveillance sector PPI for APAR
+    SWEEP_MODE_FILL = 25, ///< interruption for timing purposes
     SWEEP_MODE_LAST
 
   } SweepMode_t;
@@ -472,6 +473,7 @@ public:
   const static char* DUAL;
   const static char* ELECTRONIC_STEERING;
   const static char* ELEVATION_SURVEILLANCE;
+  const static char* FILL;
   const static char* FIXED;
   const static char* HORIZONTAL;
   const static char* HV_ALT;

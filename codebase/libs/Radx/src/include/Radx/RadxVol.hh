@@ -2017,6 +2017,7 @@ private:
   string _sweepModeAparAftDopplerRhiLabel;
   string _sweepModeAparDualpolRhiLabel;
   string _sweepModeAparSectorPpiLabel;
+  string _sweepModeFillLabel;
   
   // times
 

@@ -104,6 +104,7 @@ const char* Radx::DOPPLER_BEAM_SWINGING = "doppler_beam_swinging";
 const char* Radx::DUAL = "dual";
 const char* Radx::ELECTRONIC_STEERING = "electronic_steering";
 const char* Radx::ELEVATION_SURVEILLANCE = "elevation_surveillance";
+const char* Radx::FILL = "fill";
 const char* Radx::FIXED = "fixed";
 const char* Radx::HORIZONTAL = "horizontal";
 const char* Radx::HV_ALT = "hv_alt";
@@ -489,6 +490,9 @@ string Radx::sweepModeToStr(SweepMode_t mode)
     case SWEEP_MODE_APAR_SECTOR_PPI: {
       return Radx::APAR_SECTOR_PPI;
     }
+    case SWEEP_MODE_FILL: {
+      return Radx::FILL;
+    }
     default: {
       return Radx::UNKNOWN;
     }
@@ -656,6 +660,9 @@ Radx::SweepMode_t Radx::sweepModeFromStr(const string &str)
   }
   if (str.find(Radx::CALIBRATION) != string::npos) {
     return SWEEP_MODE_CALIBRATION;
+  }
+  if (str.find(Radx::FILL) != string::npos) {
+    return SWEEP_MODE_FILL;
   }
   return SWEEP_MODE_NOT_SET;
 }
