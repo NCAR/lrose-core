@@ -34,7 +34,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = CalcNexrad
+TARGET_FILE = NexradA1ToRefract
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 LOC_CFLAGS =

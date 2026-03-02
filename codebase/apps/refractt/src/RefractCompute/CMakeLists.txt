@@ -15,11 +15,13 @@ project (RefractCompute)
 
 set (SRCS
       Params.cc
+      Args.cc
       Calib.cc
       CalibDayNight.cc
       Main.cc
       PhaseFit.cc
       Processor.cc
+      Reader.cc
       RefractCompute.cc
       TargetInfo.cc
       TargetVector.cc

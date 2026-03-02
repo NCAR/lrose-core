@@ -16,9 +16,9 @@ project (RefractCalib)
 set (SRCS
       Params.cc
       Args.cc
-      Main.cc
-      Input.cc
       Calib.cc
+      Main.cc
+      Reader.cc
       RefractCalib.cc
     )
 

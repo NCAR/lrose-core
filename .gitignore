@@ -194,6 +194,7 @@ codebase/apps/dsserver/src/ResolveUrl/ResolveUrl
 codebase/apps/dsserver/src/Rhi2Symprod/Rhi2Symprod
 codebase/apps/dsserver/src/SigAirMet2Symprod/SigAirMet2Symprod
 codebase/apps/dsserver/src/SpdbQuery/SpdbQuery
+codebase/apps/dsserver/src/SpdbXml2Table/SpdbXml2Table
 codebase/apps/dsserver/src/StnAscii2Symprod/StnAscii2Symprod
 codebase/apps/dsserver/src/SunCal2Symprod/SunCal2Symprod
 codebase/apps/dsserver/src/SyncDataMap/SyncDataMap
@@ -459,6 +460,7 @@ codebase/apps/radar/src/HawkEye/HawkEye
 codebase/apps/radar/src/HawkEye/Makefile.qmake
 codebase/apps/radar/src/HawkEye/moc_*cpp
 codebase/apps/radar/src/HawkEye/moc_predefs.h
+codebase/apps/radar/src/HawkEye/qrc_resources.cpp
 
 codebase/apps/radar/src/HawkEdit/HawkEdit
 codebase/apps/radar/src/HawkEdit/Makefile.qmake
@@ -474,6 +476,7 @@ codebase/apps/radar/src/IpsEye/IpsEye
 codebase/apps/radar/src/IpsEye/Makefile.qmake
 codebase/apps/radar/src/IpsEye/moc_*cpp
 codebase/apps/radar/src/IpsEye/moc_predefs.h
+codebase/apps/radar/src/IpsEye/qrc_resources.cpp
 
 codebase/apps/radar/src/IpsTsArchive/IpsTsArchive
 codebase/apps/radar/src/IpsTsPrint/IpsTsPrint

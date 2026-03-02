@@ -2,14 +2,14 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: CalcNexrad
+# app name: NexradA1ToRefract
 #
 # written by script createCMakeLists.py
 #
 # dir: lrose-core/codebase/apps/refractt/src/NexradA1ToRefract
 ###############################################################
 
-project (CalcNexrad)
+project (NexradA1ToRefract)
 
 # source files
 
@@ -143,7 +143,7 @@ makeTdrpParams()
 
 # application
 
-add_executable (CalcNexrad ${SRCS})
+add_executable (NexradA1ToRefract ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)
