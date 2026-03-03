@@ -111,6 +111,9 @@ endif()
 # link libs
 
 link_libraries (toolsa)
+link_libraries (dataport)
+link_libraries (bz2)
+link_libraries (z)
 
 # If needed, generate TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file

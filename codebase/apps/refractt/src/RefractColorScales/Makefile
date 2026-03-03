@@ -35,7 +35,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = RefractColorScales
 
-LOC_LIBS = -ltoolsa
+LOC_LIBS = -ltoolsa -ldataport -lbz2 -lz
 
 HDRS = \
 	Args.hh \
