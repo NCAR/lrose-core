@@ -48,7 +48,6 @@ int main(int argc, char **argv)
   // create program object
 
   QApplication app(argc, argv);
-  HawkEyeGl *Prog;
   Prog = new HawkEyeGl(argc, argv, NULL);
   if (!Prog->OK) {
     return(-1);

@@ -43,7 +43,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  Cidd_params *Prog;
   Prog = new Cidd_params(argc, argv);
   if (!Prog->OK) {
     return(-1);

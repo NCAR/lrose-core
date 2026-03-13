@@ -39,7 +39,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  ReadEgm2008 *Prog;
   Prog = new ReadEgm2008(argc, argv);
   if (!Prog->OK) {
     return(-1);

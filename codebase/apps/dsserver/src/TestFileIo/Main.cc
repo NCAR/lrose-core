@@ -58,7 +58,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  TestFileIo *Prog;
   Prog = new TestFileIo(argc, argv);
   if (!Prog->OK) {
     return(-1);

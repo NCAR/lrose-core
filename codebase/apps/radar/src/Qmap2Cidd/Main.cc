@@ -51,7 +51,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  Qmap2Cidd *Prog;
   Prog = new Qmap2Cidd(argc, argv);
   if (!Prog->OK) {
     return(-1);

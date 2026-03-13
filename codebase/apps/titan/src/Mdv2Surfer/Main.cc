@@ -57,7 +57,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  Mdv2Surfer *Prog;
   Prog = new Mdv2Surfer(argc, argv);
   if (!Prog->OK) {
     cerr << "Error: Could not create Mdv2Surfer object." << endl;

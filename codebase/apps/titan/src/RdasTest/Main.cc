@@ -53,7 +53,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  RdasTest *Prog;
   Prog = new RdasTest(argc, argv);
   if (!Prog->OK) {
     cerr << "Error: Could not create RdasTest object." << endl;

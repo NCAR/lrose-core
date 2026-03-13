@@ -52,7 +52,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  SeedTable2CaseTracks *Prog;
   Prog = new SeedTable2CaseTracks(argc, argv);
   if (!Prog->OK) {
     return(-1);

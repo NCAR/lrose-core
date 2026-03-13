@@ -51,7 +51,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  TdrpThreaded *Prog;
   Prog = new TdrpThreaded(argc, argv);
   if (!Prog->OK) {
     return(-1);

@@ -51,7 +51,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  TsSim *Prog;
   Prog = new TsSim(argc, argv);
   if (!Prog->OK) {
     return(-1);

@@ -48,7 +48,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  ReadZebraMaps *Prog;
   Prog = new ReadZebraMaps(argc, argv);
   if (!Prog->OK) {
     return(-1);

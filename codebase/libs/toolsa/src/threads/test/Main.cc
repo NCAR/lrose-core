@@ -39,7 +39,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  ThreadTest *Prog;
   Prog = new ThreadTest(argc, argv);
   if (!Prog->OK) {
     return(-1);

@@ -57,7 +57,6 @@ int main(int argc, char **argv)
 {
   // create program object
 
-  Polygon2Xml *Prog;
   Prog = new Polygon2Xml(argc, argv);
   if (!Prog->isOK) {
     return(1);

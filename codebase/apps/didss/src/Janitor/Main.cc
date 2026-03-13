@@ -72,7 +72,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  Janitor *Prog;
 
   // Set up out_of_store routine.
   set_new_handler(out_of_store);

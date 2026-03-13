@@ -75,7 +75,6 @@ int main(int argc, char **argv)
     app->setWindowIcon(QIcon("://CycloneIcon.icns"));
     //app->setWindowIcon(QIcon(":/radar.IpsEye.png"));
     LOG(DEBUG_VERBOSE) << "After setting Window Icon\n";
-    IpsEye *Prog;
     Prog = new IpsEye(argc, argv);
     if (!Prog->OK) {
       return(-1);

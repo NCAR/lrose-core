@@ -61,7 +61,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  RdasSim *Prog;
   Prog = new RdasSim(argc, argv);
   if (!Prog->OK) {
     return(-1);

@@ -51,7 +51,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  TdrpTest *Prog;
   Prog = new TdrpTest(argc, argv);
   if (!Prog->OK) {
     return(-1);

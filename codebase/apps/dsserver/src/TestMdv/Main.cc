@@ -57,7 +57,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  TestMdv *Prog;
   Prog = new TestMdv(argc, argv);
   if (!Prog->OK) {
     cerr << "Error: Could not create TestMdv object." << endl;

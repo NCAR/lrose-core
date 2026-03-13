@@ -61,7 +61,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  Test2Dsr *Prog;
   Prog = new Test2Dsr(argc, argv);
   if (!Prog->OK) {
     return(-1);

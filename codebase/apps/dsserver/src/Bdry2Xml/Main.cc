@@ -57,7 +57,6 @@ int main(int argc, char **argv)
 {
   // create program object
 
-  Bdry2Xml *Prog;
   Prog = new Bdry2Xml(argc, argv);
   if (!Prog->isOK) {
     return(1);

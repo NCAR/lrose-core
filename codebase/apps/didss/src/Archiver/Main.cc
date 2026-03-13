@@ -55,7 +55,6 @@ int main(int argc, char **argv)
 {
   // create program object
 
-  Archiver *Prog;
 
   // Trap signals.
 

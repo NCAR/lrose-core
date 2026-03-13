@@ -74,7 +74,6 @@ int main(int argc, char **argv)
     app->setWindowIcon(QIcon("://HawkEyeCycloneIcon.icns"));
     //app->setWindowIcon(QIcon(":/radar.HawkEye.png"));
     LOG(DEBUG_VERBOSE) << "After setting Window Icon\n";
-    HawkEye *Prog;
     Prog = new HawkEye(argc, argv);
     if (!Prog->OK) {
       return(-1);

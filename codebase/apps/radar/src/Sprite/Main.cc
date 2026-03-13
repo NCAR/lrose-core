@@ -61,7 +61,6 @@ int main(int argc, char **argv)
 
     app = new QApplication(argc, argv);
     app->setWindowIcon(QIcon("://Sprite.icns"));
-    Sprite *Prog;
     Prog = new Sprite(argc, argv);
     if (!Prog->OK) {
       return(-1);

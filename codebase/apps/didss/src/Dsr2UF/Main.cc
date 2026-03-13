@@ -49,7 +49,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  Dsr2UF *Prog;
   Prog = new Dsr2UF(argc, argv);
   if (!Prog->isOK) {
     return(-1);

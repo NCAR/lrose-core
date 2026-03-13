@@ -55,7 +55,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  AreaCompute *Prog;
   Prog = new AreaCompute(argc, argv);
   if (!Prog->OK) {
     return(-1);

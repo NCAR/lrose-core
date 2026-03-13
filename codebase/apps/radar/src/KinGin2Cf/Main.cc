@@ -55,7 +55,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  KinGin2Cf *Prog;
   Prog = new KinGin2Cf(argc, argv);
   if (!Prog->OK) {
     cerr << "Error: Could not create KinGin2Cf object." << endl;

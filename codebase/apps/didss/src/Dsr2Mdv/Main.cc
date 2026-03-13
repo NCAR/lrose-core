@@ -64,7 +64,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  Dsr2Mdv *Prog;
   Prog = new Dsr2Mdv(argc, argv);
   if (!Prog->OK) {
     return(-1);

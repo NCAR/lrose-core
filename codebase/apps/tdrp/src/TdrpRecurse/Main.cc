@@ -51,7 +51,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  TdrpRecurse *Prog;
   Prog = new TdrpRecurse(argc, argv);
   if (!Prog->OK) {
     return(-1);

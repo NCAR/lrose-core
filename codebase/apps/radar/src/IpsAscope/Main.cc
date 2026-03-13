@@ -62,7 +62,6 @@ int main(int argc, char **argv)
     //app->setWindowIcon(QIcon(":/radar.IpsAscope.png"));
     // cerr << "After setting Window Icon\n" << endl;
 
-    IpsAscope *Prog;
     Prog = new IpsAscope(argc, argv);
     if (!Prog->OK) {
       return(-1);

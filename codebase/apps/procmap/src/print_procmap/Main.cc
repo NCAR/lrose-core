@@ -58,7 +58,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  print_procmap *Prog;
   Prog = new print_procmap(argc, argv);
   if (!Prog->OK) {
     cerr << "Error: Could not create print_procmap object." << endl;

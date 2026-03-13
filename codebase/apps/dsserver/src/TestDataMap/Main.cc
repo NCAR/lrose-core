@@ -58,7 +58,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  TestDataMap *Prog;
   Prog = new TestDataMap(argc, argv);
   if (!Prog->OK) {
     return(-1);

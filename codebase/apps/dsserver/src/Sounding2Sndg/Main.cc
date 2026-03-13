@@ -57,7 +57,6 @@ int main(int argc, char **argv)
 {
   // create program object
 
-  Sounding2Sndg *Prog;
   Prog = new Sounding2Sndg(argc, argv);
   if (!Prog->isOK) {
     return(1);

@@ -51,7 +51,6 @@ int main(int argc, char **argv)
 
   // create program object
 
-  TdrpSingleton *Prog;
   Prog = new TdrpSingleton(argc, argv);
   if (!Prog->OK) {
     return(-1);
