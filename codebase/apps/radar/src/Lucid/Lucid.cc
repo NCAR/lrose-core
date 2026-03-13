@@ -1065,14 +1065,13 @@ void Lucid::_initWindComponent(MdvReader *wrec,
     } // jj
   }
   
-  // Append the field name
-
+  // Set the field name for this component
   if (isU) {
-    wrec->url = windp.u_field_name;
+    wrec->field_label = windp.u_field_name;
   } else if (isV) {
-    wrec->url = windp.v_field_name;
+    wrec->field_label = windp.v_field_name;
   } else {
-    wrec->url = windp.w_field_name;
+    wrec->field_label = windp.w_field_name;
   }
   
   // units
@@ -1436,7 +1435,7 @@ int Lucid::_initMaps()
     
     over->color_name = omap.color;
 
-    if (mapFileName.find(".shp") != string::npos &&
+    if (mapFileName.find(".shp") != string::npos ||
         mapFileName.find(".shx") != string::npos) {
 
       string cachePathShp, cachePathShx;
@@ -2995,8 +2994,16 @@ int Lucid::_getMapCachePath(const string &mapName,
     // shape file
 
     Path mapPath(mapName);
-    string shpFileName = mapPath.getFile() + ".shp";
-    string shxFileName = mapPath.getFile() + ".shx";
+    string baseName = mapPath.getFile();
+    size_t dotPos = baseName.rfind('.');
+    if (dotPos != string::npos) {
+      string ext = baseName.substr(dotPos);
+      if (ext == ".shp" || ext == ".shx") {
+        baseName = baseName.substr(0, dotPos);
+      }
+    }
+    string shpFileName = baseName + ".shp";
+    string shxFileName = baseName + ".shx";
     
     for (size_t ii = 0; ii < urlList.size(); ii++) {
       if ((_getResourceCachePath(_gd.mapCacheDir, urlList[ii], shpFileName, cachePath) == 0) &&

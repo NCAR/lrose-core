@@ -44,7 +44,8 @@ FieldTableItem::FieldTableItem(GuiManager *manager,
                                const QString &text, int type) :
         QTableWidgetItem(text, type),
         _manager(manager),
-        _fparams(NULL)
+        _fparams(NULL),
+        _index(-1)
 {
   
 
@@ -57,4 +58,3 @@ FieldTableItem::~FieldTableItem()
 {
 
 }
-

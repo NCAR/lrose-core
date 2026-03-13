@@ -1063,6 +1063,7 @@ void GuiManager::_createFieldMenu()
       FieldTableItem *item = new FieldTableItem(this, "");
       item->setFlags(item->flags() & ~Qt::ItemIsEditable);
       if (fieldNum < _params.fields_n) {
+        item->setFieldParams(&_params._fields[fieldNum]);
         if (strlen(_params._fields[fieldNum].group_name) > 0) {
           item->setText(_params._fields[fieldNum].button_label);
           item->setFieldIndex(fieldNum);
@@ -1073,8 +1074,12 @@ void GuiManager::_createFieldMenu()
             item->setForeground(Qt::gray);
           }
         }
+      } else {
+        item->setFieldIndex(-1);
+        item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+        item->setBackground(Qt::lightGray);
+        item->setForeground(Qt::gray);
       }
-      item->setFieldParams(&_params._fields[fieldNum]);
       _fieldTable->setItem(irow, icol, item);
     } // icol
   } // irow
@@ -1167,6 +1172,10 @@ void GuiManager::_fieldTableCellClicked(int row, int col)
 
   _prevFieldNum = _fieldNum;
   _fieldNum = item->getFieldIndex();
+  if (_fieldNum < 0 || _fieldNum >= _params.fields_n) {
+    _fieldHasChanged = false;
+    return;
+  }
   
   _gd.prev_field = _gd.h_win.page;
   _setField(_fieldNum);

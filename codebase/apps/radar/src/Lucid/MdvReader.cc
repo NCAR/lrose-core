@@ -1121,7 +1121,7 @@ void MdvReader::startReadVolH() {
   // Connect signals and slots
   connect(thread, &QThread::started, worker, &ReadVolH::doRead);
   connect(worker, &ReadVolH::readDone, this, &MdvReader::readDoneH);
-  // connect(worker, &ReadVolH::readDone, thread, &QThread::quit);
+  connect(worker, &ReadVolH::readDone, thread, &QThread::quit);
   connect(thread, &QThread::finished, worker, &ReadVolH::deleteLater);
   connect(thread, &QThread::finished, thread, &QThread::deleteLater);
   thread->start();
@@ -1294,4 +1294,3 @@ string MdvReader::heightLabel()
   return label;
   
 }
-

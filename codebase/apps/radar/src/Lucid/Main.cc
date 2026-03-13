@@ -43,8 +43,8 @@
 
 static void init_signal_handlers();
 static void tidy_and_exit(int sig);
-static Lucid *Prog;
-static QApplication *app;
+static Lucid *Prog = nullptr;
+static QApplication *app = nullptr;
 
 // main
 
@@ -64,7 +64,6 @@ int main(int argc, char **argv)
     app = new QApplication(argc, argv);
     app->setWindowIcon(QIcon("://LucidCycloneIcon.icns"));
     LOG(DEBUG_VERBOSE) << "After setting Window Icon\n";
-    Lucid *Prog;
     Prog = new Lucid(argc, argv);
     if (!Prog->OK) {
       return(-1);
@@ -94,8 +93,11 @@ int main(int argc, char **argv)
 static void tidy_and_exit (int sig)
 
 {
-  app->exit();
+  if (app != nullptr) {
+    app->exit();
+  }
   delete(Prog);
+  Prog = nullptr;
   umsleep(1000);
   exit(sig);
 }
@@ -107,7 +109,7 @@ static void tidy_and_exit (int sig)
 static void signal_trap(int signal)
 {
   fprintf(stderr,"Lucid: received signal %d\n",signal);
-  exit(0);
+  tidy_and_exit(signal);
 }
 
 /*****************************************************************
