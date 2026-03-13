@@ -71,7 +71,6 @@ int main(int argc, char **argv)
   // set signal handling
   
   PORTsignal(SIGINT, tidy_and_exit);
-  PORTsignal(SIGHUP, tidy_and_exit);
   PORTsignal(SIGTERM, tidy_and_exit);
   PORTsignal(SIGHUP, set_send_commands_flag);
   PORTsignal(SIGPIPE, (PORTsigfunc)SIG_IGN);
