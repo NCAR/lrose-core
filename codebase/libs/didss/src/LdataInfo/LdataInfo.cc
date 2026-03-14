@@ -2922,10 +2922,9 @@ void LdataInfo::_debugPrint(const char* format, ...)
   char formattedMsg[4096];
   va_list args;
   va_start(args, format);
-  vsprintf(formattedMsg, format, args);
+  vsnprintf(formattedMsg, sizeof(formattedMsg), format, args);
   va_end(args);
   cerr << "WARNING - LdataInfo class" << endl;
   cerr << "  " << formattedMsg << endl;
 
 }
-
