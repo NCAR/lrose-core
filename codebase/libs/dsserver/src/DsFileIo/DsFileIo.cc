@@ -255,7 +255,7 @@ int DsFileIo::fPrintf(const char *format, ... )
 
   va_list ap;
   va_start(ap, format);
-  int nprint = vsprintf(str, format, ap);
+  int nprint = vsnprintf(str, sizeof(str), format, ap);
   va_end(ap);
 
   if (nprint < 0) {
@@ -879,4 +879,3 @@ int DsFileIo::_communicate(void *buf,
   return (0);
 
 }
-
