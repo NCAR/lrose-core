@@ -122,7 +122,7 @@ void MsgLog::postMsg( const char* format, ... )
 {
    va_list args;
    va_start( args, format );
-   vsprintf( formattedMsg, format, args );
+   vsnprintf(formattedMsg, sizeof(formattedMsg), format, args);
    va_end( args );
 
    doMsg( NOTE, formattedMsg );
@@ -138,7 +138,7 @@ void MsgLog::postMsg( severity level, const char* format, ... )
       return;
    }
    va_start( args, format );
-   vsprintf( formattedMsg, format, args );
+   vsnprintf(formattedMsg, sizeof(formattedMsg), format, args);
    va_end( args );
 
    doMsg( level, formattedMsg );
@@ -155,7 +155,7 @@ void MsgLog::postMsg( severity level, int catId, const char* format, ... )
    }
 
    va_start( args, format );
-   vsprintf( formattedMsg, format, args );
+   vsnprintf(formattedMsg, sizeof(formattedMsg), format, args);
    va_end( args );
 
    doMsg( level, formattedMsg );

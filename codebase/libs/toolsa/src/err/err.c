@@ -283,7 +283,7 @@ void ERRprintf(int level, char *format, ...)
 
       /* construct the text to display, using the variable list of args */
       va_start( args, format);
-      vsprintf( buffer, format, args);
+      vsnprintf(buffer, ERR_MESS_MAX, format, args);
       va_end( args);
 
       /* call the outputter */
@@ -341,4 +341,3 @@ void main( argc, argv)
 
 }
 #endif
-

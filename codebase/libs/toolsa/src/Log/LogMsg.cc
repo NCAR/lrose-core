@@ -160,7 +160,7 @@ void LogMsg::logf(const std::string &fname, const int line,
   va_list args;
   va_start( args, format );
   char buf[ARRAY_LEN_LONG];
-  vsprintf( buf, format.c_str(), args );
+  vsnprintf(buf, sizeof(buf), format.c_str(), args);
   msg += buf;
   va_end( args );
   pLog(msg);
@@ -222,7 +222,7 @@ void LogMsg::accumulatef(string format, ...) const
   va_list args;
   va_start( args, format );
   char buf[ARRAY_LEN_LONG];
-  vsprintf( buf, format.c_str(), args );
+  vsnprintf(buf, sizeof(buf), format.c_str(), args);
   sAccum += buf;
   va_end( args );
 }
