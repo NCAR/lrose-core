@@ -281,18 +281,18 @@ void LogState::logprint(LogStream::Log_t severity,
 
   if (nargs == 1)
   {
-    sprintf(buf, fmt.c_str());
+    snprintf(buf, sizeof(buf), "%s", fmt.c_str());
   }
   else if (nargs > 1)
   {
     va_list args;
     va_start( args, fmt );
-    vsprintf( buf, fmt.c_str(), args );
+    vsnprintf(buf, sizeof(buf), fmt.c_str(), args);
     va_end( args );
   }
   else
   {
-    sprintf(buf, "ERROR in forming logprint message");
+    snprintf(buf, sizeof(buf), "%s", "ERROR in forming logprint message");
   }
   msg += buf;
 
@@ -307,13 +307,13 @@ void LogState::accumulate(int nargs, std::string format, ...)
 
   if (nargs == 1)
   {
-    sprintf(buf, format.c_str());
+    snprintf(buf, sizeof(buf), "%s", format.c_str());
   }
   else if (nargs > 1)
   {
     va_list args;
     va_start( args, format );
-    vsprintf( buf, format.c_str(), args );
+    vsnprintf(buf, sizeof(buf), format.c_str(), args);
     va_end( args );
   }
   else
