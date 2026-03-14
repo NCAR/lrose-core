@@ -3735,7 +3735,7 @@ void Fmq::_print_error(const char *routine, const char *format, ...) const
 
   if (format != NULL) {
     va_start (args, format);
-    vsprintf (errTxt, format, args);
+    vsnprintf(errTxt, sizeof(errTxt), format, args);
     _errStr += errTxt;
     _errStr += "\n";
     va_end (args);
@@ -3784,7 +3784,7 @@ void Fmq::_print_info(const char *routine, const char *format, ...) const
   
   if (format != NULL) {
     va_start (args, format);
-    vsprintf (infoTxt, format, args);
+    vsnprintf(infoTxt, sizeof(infoTxt), format, args);
     va_end (args);
   }
 
@@ -4093,4 +4093,3 @@ int Fmq::_recover ()
   return 0;
 
 }
-
