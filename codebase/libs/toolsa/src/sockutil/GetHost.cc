@@ -33,6 +33,7 @@
 
 
 #include <toolsa/GetHost.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/toolsa_macros.h>
 #include <cstdio>
 #include <cstring>
@@ -462,7 +463,7 @@ string GetHost::_loadIpAddr(const struct hostent &hh)
   string ipAddr;
   for (int i = 0; i < hh.h_length; i++) {
     char tmpStr[32];
-    sprintf (tmpStr, "%d", (unsigned char) hh.h_addr_list[0][i]);
+    safe_snprintf(tmpStr, "%d", (unsigned char) hh.h_addr_list[0][i]);
     ipAddr += tmpStr;
     if (i < hh.h_length - 1) {
       ipAddr += ".";
@@ -471,6 +472,5 @@ string GetHost::_loadIpAddr(const struct hostent &hh)
   return ipAddr;
 
 }
-
 
 

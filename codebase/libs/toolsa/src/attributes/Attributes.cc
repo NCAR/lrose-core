@@ -25,6 +25,7 @@
 #include <toolsa/Attributes.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <algorithm>
 #include <cstdio>
 #include <cmath>
@@ -407,15 +408,14 @@ std::string Attributes::sprintAtt(void) const
   map<std::string, int>::const_iterator i;
   for (i=_di.begin(); i!=_di.end(); ++i)
   {
-    sprintf(buf, "%s=%d ", i->first.c_str(), i->second);
+    safe_snprintf(buf, "%s=%d ", i->first.c_str(), i->second);
     ret += buf;
   }
   map<std::string, double>::const_iterator j;
   for (j=_da.begin(); j!=_da.end(); ++j)
   {
-    sprintf(buf, "%s=%lf ", j->first.c_str(), j->second);
+    safe_snprintf(buf, "%s=%lf ", j->first.c_str(), j->second);
     ret += buf;
   }
   return ret;
 }
-

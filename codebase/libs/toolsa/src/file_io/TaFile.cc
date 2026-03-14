@@ -48,6 +48,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <unistd.h>
+#include <toolsa/safe_snprintf.hh>
 using namespace std;
 
 using std::endl;
@@ -475,7 +476,7 @@ int TaFile::_uncompress(const string &path)
     // uncompress file
 
     char call_str[4096];
-    sprintf(call_str, "uncompress -f %s", path.c_str());
+    safe_snprintf(call_str, "uncompress -f %s", path.c_str());
 
     int iret = system(call_str);
     
@@ -510,7 +511,7 @@ int TaFile::_gunzip(const string &path)
     // uncompress file
     
     char call_str[4096];
-    sprintf(call_str, "gunzip -f %s", path.c_str());
+    safe_snprintf(call_str, "gunzip -f %s", path.c_str());
     
     int iret = system (call_str);
     
@@ -545,7 +546,7 @@ int TaFile::_bunzip2(const string &path)
     // uncompress file
     
     char call_str[4096];
-    sprintf(call_str, "bunzip2 -f %s", path.c_str());
+    safe_snprintf(call_str, "bunzip2 -f %s", path.c_str());
 
     int iret = system (call_str);
     
@@ -565,4 +566,3 @@ int TaFile::_bunzip2(const string &path)
   return -1;
 
 }
-

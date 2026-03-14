@@ -38,6 +38,7 @@
 #include <dataport/bigend.h>
 #include <toolsa/umisc.h>
 #include <toolsa/ThreadSocket.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <pthread.h>
 #include <limits.h>
 #include <iostream>
@@ -110,8 +111,8 @@ int ThreadSocket::readMessageIncr(ssize_t &nbytesExpected, ssize_t &nbytesRead)
     _errString += "ERROR - ThreadSocket::readMessageIncr()\n";
     _errString += "  Too few bytes read.\n";
     char tmpStr[128];
-    sprintf(tmpStr, "%lld bytes requested, %lld read.",
-	    (long long) nbytesExpected, (long long) nbytesRead);
+    safe_snprintf(tmpStr, "%lld bytes requested, %lld read.",
+                  (long long) nbytesExpected, (long long) nbytesRead);
     _errString += tmpStr;
     return (-1);
   }
@@ -173,8 +174,8 @@ int ThreadSocket::writeMessageIncr(const int product_id,
     _errString += "ERROR - ThreadSocket::writeMessageIncr()\n";
     _errString += "  Too few bytes written.\n";
     char tmpStr[128];
-    sprintf(tmpStr, "  %lld bytes in message, %lld written.",
-	    (long long) len, (long long) nbytesWritten);
+    safe_snprintf(tmpStr, "  %lld bytes in message, %lld written.",
+                  (long long) len, (long long) nbytesWritten);
     _errString += tmpStr;
     return (-1);
   }
@@ -464,4 +465,3 @@ int ThreadSocket::_writeIncr(const void *mess,
   return (0);
 
 }
-

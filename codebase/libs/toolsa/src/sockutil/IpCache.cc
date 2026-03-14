@@ -35,6 +35,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include <toolsa/IpCache.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstdio>
 #include <cstring>
 using namespace std;
@@ -231,8 +232,8 @@ int IpCache::ByName::resolve() {
 	       sizeof(in_addr));
 	unsigned char *ucharptr = (unsigned char *)&inaddr;
 	char addrstr[128];
-	sprintf(addrstr, "%d.%d.%d.%d",
-		ucharptr[0], ucharptr[1], ucharptr[2], ucharptr[3]);
+	safe_snprintf(addrstr, "%d.%d.%d.%d",
+	              ucharptr[0], ucharptr[1], ucharptr[2], ucharptr[3]);
 	inAddrString = addrstr;
       } // if (count == 1)
       

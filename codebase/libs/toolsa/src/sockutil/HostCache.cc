@@ -36,6 +36,7 @@
 
 #include <toolsa/umisc.h>
 #include <toolsa/HostCache.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstdio>
 #include <utility>
 using namespace std;
@@ -445,7 +446,7 @@ string HostCache::_loadIpAddr(const struct hostent *hh)
   string ipAddr;
   for (int i = 0; i < hh->h_length; i++) {
     char tmpStr[32];
-    sprintf (tmpStr, "%d", (unsigned char) hh->h_addr_list[0][i]);
+    safe_snprintf(tmpStr, "%d", (unsigned char) hh->h_addr_list[0][i]);
     ipAddr += tmpStr;
     if (i < hh->h_length - 1) {
       ipAddr += ".";
@@ -454,6 +455,5 @@ string HostCache::_loadIpAddr(const struct hostent *hh)
   return ipAddr;
 
 }
-
 
 

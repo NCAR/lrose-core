@@ -38,6 +38,7 @@
 
 #include <toolsa/ldmFileStrobe.hh>
 #include <toolsa/file_io.h>
+#include <toolsa/safe_snprintf.hh>
 
 using namespace std;
 
@@ -51,9 +52,9 @@ ldmFileStrobe::ldmFileStrobe(char *directory,
 			     char *tempFile,
 			     long maxAge){
 
-  sprintf(_directory, "%s", directory);
-  sprintf(_subString, "%s", subString);
-  sprintf(_tempFile,  "%s", tempFile);
+  safe_snprintf(_directory, "%s", directory);
+  safe_snprintf(_subString, "%s", subString);
+  safe_snprintf(_tempFile, "%s", tempFile);
   _maxAge = maxAge;
   _debug = 0;
 

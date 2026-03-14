@@ -30,6 +30,7 @@
 #include <toolsa/LogFile.hh>
 #include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -189,9 +190,9 @@ bool LogFile::logFileLog(const std::string &s)
   if (redo)
   {
     char buf[1000];
-    sprintf(buf,"%s/%04d%02d%02d", _logPath.c_str(), year, month, day);
+    safe_snprintf(buf, "%s/%04d%02d%02d", _logPath.c_str(), year, month, day);
     string path = buf;
-    sprintf(buf, "%s.%s.Log", _app.c_str(), _instance.c_str());
+    safe_snprintf(buf, "%s.%s.Log", _app.c_str(), _instance.c_str());
     string fname = buf;
     Path p(path, fname);
     p.makeDirRecurse();
@@ -216,4 +217,3 @@ bool LogFile::logFileLog(const std::string &s)
     return false;
   }
 }
-

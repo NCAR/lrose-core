@@ -38,6 +38,7 @@
 #include <toolsa/HttpSocket.hh>
 #include <toolsa/ServerSocket.hh>
 #include <toolsa/mem.h>
+#include <toolsa/safe_snprintf.hh>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -92,7 +93,7 @@ int ServerSocket::openServer(const int port)
     _errNum = SERVER_OPEN_FAILED;
     _errString = "ERROR - COMM - Could not open socket: ";
     char tmpStr[128];
-    sprintf(tmpStr, "port %d", port);
+    safe_snprintf(tmpStr, "port %d", port);
     _errString += tmpStr;
     return (-1);
   }
@@ -127,7 +128,7 @@ int ServerSocket::openServer(const int port)
     _errNum = SERVER_BIND_FAILED;
     _errString = "ERROR - COMM - Could not bind: ";
     char tmpStr[128];
-    sprintf(tmpStr, "port %d", port);
+    safe_snprintf(tmpStr, "port %d", port);
     _errString += tmpStr;
     _close_server_socket(_protoSd);
     return (-1);
@@ -147,7 +148,7 @@ int ServerSocket::openServer(const int port)
     _errNum = SERVER_LISTEN_FAILED;
     _errString = "ERROR - COMM - Could not listen: ";
     char tmpStr[128];
-    sprintf(tmpStr, "port %d", port);
+    safe_snprintf(tmpStr, "port %d", port);
     _errString += tmpStr;
     _close_server_socket(_protoSd);
     return (-1);

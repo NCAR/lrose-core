@@ -34,6 +34,7 @@
 #include <cstdio>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <ctype.h>
 #include <toolsa/DateTime.hh>
 #include <vector>
@@ -505,9 +506,9 @@ string DateTime::getW3cStr() const
   mtime.unix_time = _uTime;
   uconvert_from_utime(&mtime);
   char str[32];
-  sprintf(str, "%.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
-          mtime.year, mtime.month, mtime.day,
-          mtime.hour, mtime.min, mtime.sec);
+  safe_snprintf(str, "%.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
+                mtime.year, mtime.month, mtime.day,
+                mtime.hour, mtime.min, mtime.sec);
  
   return str;
 }
@@ -627,9 +628,9 @@ const char *
 
   if(_uTime > 0) {
     when = udate_time(_uTime);
-    sprintf(whenChar, "%4d/%02d/%02d %02d:%02d:%02d",
-            when->year, when->month, when->day,
-            when->hour, when->min, when->sec);
+    safe_snprintf(whenChar, "%4d/%02d/%02d %02d:%02d:%02d",
+                  when->year, when->month, when->day,
+                  when->hour, when->min, when->sec);
   }
   else {
     strcpy(whenChar, "0000/00/00 00:00:00");
@@ -652,9 +653,9 @@ const char *
 
   if(_uTime > 0) {
     when = udate_time(_uTime);
-    sprintf(whenChar, "%4d-%02d-%02dT%02d:%02d:%02d",
-            when->year, when->month, when->day,
-            when->hour, when->min, when->sec);
+    safe_snprintf(whenChar, "%4d-%02d-%02dT%02d:%02d:%02d",
+                  when->year, when->month, when->day,
+                  when->hour, when->min, when->sec);
   }
   else {
     strcpy(whenChar, "0000-00-00T00:00:00");
@@ -681,23 +682,23 @@ string DateTime::getStr(bool utc_label) const
   int usecs = (int) (_subSec * 1.0e6 + 0.5);
   if (utc_label) {
     if (_subSec != 0) {
-      sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d.%.6d UTC",
-              mtime.year, mtime.month, mtime.day,
-              mtime.hour, mtime.min, mtime.sec, usecs);
+      safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d.%.6d UTC",
+                    mtime.year, mtime.month, mtime.day,
+                    mtime.hour, mtime.min, mtime.sec, usecs);
     } else {
-      sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d UTC",
-              mtime.year, mtime.month, mtime.day,
-              mtime.hour, mtime.min, mtime.sec);
+      safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d UTC",
+                    mtime.year, mtime.month, mtime.day,
+                    mtime.hour, mtime.min, mtime.sec);
     }
   } else {
     if (_subSec != 0) {
-      sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d.%.6d",
-              mtime.year, mtime.month, mtime.day,
-              mtime.hour, mtime.min, mtime.sec, usecs);
+      safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d.%.6d",
+                    mtime.year, mtime.month, mtime.day,
+                    mtime.hour, mtime.min, mtime.sec, usecs);
     } else {
-      sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-              mtime.year, mtime.month, mtime.day,
-              mtime.hour, mtime.min, mtime.sec);
+      safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                    mtime.year, mtime.month, mtime.day,
+                    mtime.hour, mtime.min, mtime.sec);
     }
   }
   return str;
@@ -714,9 +715,9 @@ string DateTime::getStrPlain() const
   mtime.unix_time = _uTime;
   uconvert_from_utime(&mtime);
   char str[32];
-  sprintf(str, "%.4d%.2d%.2d%.2d%.2d%.2d",
-          mtime.year, mtime.month, mtime.day,
-          mtime.hour, mtime.min, mtime.sec);
+  safe_snprintf(str, "%.4d%.2d%.2d%.2d%.2d%.2d",
+                mtime.year, mtime.month, mtime.day,
+                mtime.hour, mtime.min, mtime.sec);
   return str;
 }
 
@@ -730,8 +731,8 @@ string DateTime::getDateStr() const
   mtime.unix_time = _uTime;
   uconvert_from_utime(&mtime);
   char str[32];
-  sprintf(str, "%.4d/%.2d/%.2d",
-          mtime.year, mtime.month, mtime.day);
+  safe_snprintf(str, "%.4d/%.2d/%.2d",
+                mtime.year, mtime.month, mtime.day);
   return str;
 }
 
@@ -746,8 +747,8 @@ string DateTime::getDateStrPlain() const
   mtime.unix_time = _uTime;
   uconvert_from_utime(&mtime);
   char str[32];
-  sprintf(str, "%.4d%.2d%.2d",
-          mtime.year, mtime.month, mtime.day);
+  safe_snprintf(str, "%.4d%.2d%.2d",
+                mtime.year, mtime.month, mtime.day);
   return str;
 }
 
@@ -761,8 +762,8 @@ string DateTime::getDateStrMDY() const
   mtime.unix_time = _uTime;
   uconvert_from_utime(&mtime);
   char str[32];
-  sprintf(str, "%.2d/%.2d/%.4d",
-          mtime.month, mtime.day, mtime.year);
+  safe_snprintf(str, "%.2d/%.2d/%.4d",
+                mtime.month, mtime.day, mtime.year);
   return str;
 }
 
@@ -780,11 +781,11 @@ string DateTime::getTimeStr(bool utc_label) const
   uconvert_from_utime(&mtime);
   char str[32];
   if (utc_label) {
-    sprintf(str, "%.2d:%.2d:%.2d UTC",
-            mtime.hour, mtime.min, mtime.sec);
+    safe_snprintf(str, "%.2d:%.2d:%.2d UTC",
+                  mtime.hour, mtime.min, mtime.sec);
   } else {
-    sprintf(str, "%.2d:%.2d:%.2d",
-            mtime.hour, mtime.min, mtime.sec);
+    safe_snprintf(str, "%.2d:%.2d:%.2d",
+                  mtime.hour, mtime.min, mtime.sec);
   }
   return str;
 }
@@ -801,8 +802,8 @@ string DateTime::getTimeStrPlain() const
   mtime.unix_time = _uTime;
   uconvert_from_utime(&mtime);
   char str[32];
-  sprintf(str, "%.2d%.2d%.2d",
-          mtime.hour, mtime.min, mtime.sec);
+  safe_snprintf(str, "%.2d%.2d%.2d",
+                mtime.hour, mtime.min, mtime.sec);
   return str;
 }
 
@@ -826,13 +827,13 @@ string DateTime::str(const time_t mytime, const bool utc_label)
 
   char str[32];
   if (utc_label) {
-    sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d UTC",
-            mtime.year, mtime.month, mtime.day,
-            mtime.hour, mtime.min, mtime.sec);
+    safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d UTC",
+                  mtime.year, mtime.month, mtime.day,
+                  mtime.hour, mtime.min, mtime.sec);
   } else {
-    sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-            mtime.year, mtime.month, mtime.day,
-            mtime.hour, mtime.min, mtime.sec);
+    safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                  mtime.year, mtime.month, mtime.day,
+                  mtime.hour, mtime.min, mtime.sec);
   }
   return str;
 
@@ -856,9 +857,9 @@ string DateTime::strm(const time_t mytime)
   mtime.unix_time = mytime;
   uconvert_from_utime(&mtime);
   char str[32];
-  sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-          mtime.year, mtime.month, mtime.day,
-          mtime.hour, mtime.min, mtime.sec);
+  safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                mtime.year, mtime.month, mtime.day,
+                mtime.hour, mtime.min, mtime.sec);
   return str;
 
 }
@@ -881,9 +882,9 @@ string DateTime::stru(const time_t mytime)
   mtime.unix_time = mytime;
   uconvert_from_utime(&mtime);
   char str[32];
-  sprintf(str, "%.4d/%.2d/%.2d_%.2d:%.2d:%.2d",
-          mtime.year, mtime.month, mtime.day,
-          mtime.hour, mtime.min, mtime.sec);
+  safe_snprintf(str, "%.4d/%.2d/%.2d_%.2d:%.2d:%.2d",
+                mtime.year, mtime.month, mtime.day,
+                mtime.hour, mtime.min, mtime.sec);
   return str;
 
 }
@@ -904,9 +905,9 @@ string DateTime::strs(const time_t mytime)
   uconvert_from_utime(&mtime);
 
   char str[32];
-  sprintf(str, "%.4d %.2d %.2d %.2d %.2d %.2d",
-	  mtime.year, mtime.month, mtime.day,
-	  mtime.hour, mtime.min, mtime.sec);
+  safe_snprintf(str, "%.4d %.2d %.2d %.2d %.2d %.2d",
+                mtime.year, mtime.month, mtime.day,
+                mtime.hour, mtime.min, mtime.sec);
   return str;
 
 }
@@ -921,9 +922,9 @@ string DateTime::asString(int subsecPrecision /* = 6*/) const
   char text[1024];
   DateTime mtime(_uTime);
   if (_subSec == 0 || subsecPrecision == 0) {
-    sprintf(text, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-            mtime.getYear(), mtime.getMonth(), mtime.getDay(),
-            mtime.getHour(), mtime.getMin(), mtime.getSec());
+    safe_snprintf(text, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                  mtime.getYear(), mtime.getMonth(), mtime.getDay(),
+                  mtime.getHour(), mtime.getMin(), mtime.getSec());
   } else { 
     if (subsecPrecision > 12) {
       subsecPrecision = 12;
@@ -933,11 +934,11 @@ string DateTime::asString(int subsecPrecision /* = 6*/) const
     double power = pow(10.0, subsecPrecision);
     int usecs = (int) (_subSec * power + 0.5);
     char format[128];
-    sprintf(format, "%%.4d/%%.2d/%%.2d %%.2d:%%.2d:%%.2d.%%.%dd",
-            subsecPrecision);
-    sprintf(text, format,
-            mtime.getYear(), mtime.getMonth(), mtime.getDay(),
-            mtime.getHour(), mtime.getMin(), mtime.getSec(), usecs);
+    safe_snprintf(format, "%%.4d/%%.2d/%%.2d %%.2d:%%.2d:%%.2d.%%.%dd",
+                  subsecPrecision);
+    safe_snprintf(text, format,
+                  mtime.getYear(), mtime.getMonth(), mtime.getDay(),
+                  mtime.getHour(), mtime.getMin(), mtime.getSec(), usecs);
   }
   return text;
 }
@@ -1522,20 +1523,20 @@ ostream& operator<< (ostream &os, const DateTime &d)
   dtime.unix_time = d.utime();
   uconvert_from_utime(&dtime);
   if (d.isForecastTime()) {
-    sprintf(buf, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d %ld",
-            dtime.year, dtime.month, dtime.day,
-            dtime.hour, dtime.min, dtime.sec,
-            d.getLeadDeltaTime()->getDurationInSeconds());
+    safe_snprintf(buf, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d %ld",
+                  dtime.year, dtime.month, dtime.day,
+                  dtime.hour, dtime.min, dtime.sec,
+                  d.getLeadDeltaTime()->getDurationInSeconds());
   } else {
     if (d._subSec != 0) {
       int usecs = (int) (d._subSec * 1.0e6 + 0.5);
-      sprintf(buf, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d.%.6d",
-              dtime.year, dtime.month, dtime.day,
-              dtime.hour, dtime.min, dtime.sec, usecs);
+      safe_snprintf(buf, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d.%.6d",
+                    dtime.year, dtime.month, dtime.day,
+                    dtime.hour, dtime.min, dtime.sec, usecs);
     } else {
-      sprintf(buf, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-              dtime.year, dtime.month, dtime.day,
-              dtime.hour, dtime.min, dtime.sec);
+      safe_snprintf(buf, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                    dtime.year, dtime.month, dtime.day,
+                    dtime.hour, dtime.min, dtime.sec);
     }
   }
   string str(buf);
@@ -1561,4 +1562,3 @@ void DateTime::_normalize()
   _subSec = fracPart;
   _uTime += (int) intPart;
 }
-

@@ -30,6 +30,7 @@
 #include <toolsa/LogStream.hh>
 #include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -318,7 +319,7 @@ void LogState::accumulate(int nargs, std::string format, ...)
   }
   else
   {
-    sprintf(buf, "ERROR in forming logprint accumulate");
+    safe_snprintf(buf, "%s", "ERROR in forming logprint accumulate");
   }
   _accumBuf += buf;
 }
@@ -378,7 +379,7 @@ std::string LogState::_header(const std::string &fname, const int line,
   if (LOG_STREAM_CLASSMETHOD_ENABLED() && severity != LogStream::PRINT)
   {
     char buf[1000];
-    sprintf(buf, "%s[%d]:%s()::", fname.c_str(), line, method.c_str());
+    safe_snprintf(buf, "%s[%d]:%s()::", fname.c_str(), line, method.c_str());
     ret = ret +buf;
   }
   return ret;

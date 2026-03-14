@@ -33,6 +33,7 @@
 #include <cstdio>
 #include <toolsa/LogMsg.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/safe_snprintf.hh>
 
 #define ARRAY_LEN_LONG 1024
 
@@ -358,7 +359,7 @@ string LogMsg::pHeader(const string &fname, const int line,
   if (severity != PRINT)
   {
     char buf[ARRAY_LEN_LONG];
-    sprintf(buf, "%s[%d]:", fname.c_str(), line);
+    safe_snprintf(buf, "%s[%d]:", fname.c_str(), line);
     ret = buf;
     ret += method;
     ret += "()::";

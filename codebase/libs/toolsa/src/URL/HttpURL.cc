@@ -26,6 +26,7 @@
 /////////////////////////////////////////////////////////
 
 #include <toolsa/HttpURL.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <string>
 #include <cstdio>
 #include <cstdlib>
@@ -186,7 +187,7 @@ string HttpURL::getURLStr() const
   if (_port != 80) {
     _urlStr += Colon;
     char buf[20];
-    sprintf(buf, "%d", _port);
+    safe_snprintf(buf, "%d", _port);
     _urlStr += buf;
   }
   
@@ -274,4 +275,3 @@ void HttpURL::print(ostream &out) const
   out << "computed urlStr: " << getURLStr() << endl;
   
 }
-

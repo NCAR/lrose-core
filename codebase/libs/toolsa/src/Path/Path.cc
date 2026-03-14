@@ -38,6 +38,7 @@
 #include <sys/time.h>
 #include <toolsa/Path.hh>
 #include <toolsa/file_io.h>
+#include <toolsa/safe_snprintf.hh>
 #include <unistd.h> // Added by Niles for getpid() proto
 #include <stdlib.h>
 
@@ -217,7 +218,7 @@ void Path::setDirectory( const string &topDir,
 
    if ( !topDir.empty() ) {
       char dirName[10];
-      sprintf( dirName, "%4ld%02ld%02ld", year, month, day );
+      safe_snprintf(dirName, "%4ld%02ld%02ld", year, month, day);
       if ( topDir != dot) {
 	directory = topDir + delimiter + dirName;
       } else {
@@ -263,7 +264,7 @@ void Path::setFile( const time_t hour, const time_t min, const time_t sec, const
    file = EMPTY_STRING;
 
    char fileName[10];
-   sprintf( fileName, "%02ld%02ld%02ld", hour, min, sec );
+   safe_snprintf(fileName, "%02ld%02ld%02ld", hour, min, sec);
    file = fileName;
 
    if ( !ext.empty() )
@@ -283,8 +284,8 @@ void Path::setFile( const DateTime &file_time, const string &ext )
    file = EMPTY_STRING;
 
    char fileName[10];
-   sprintf( fileName, "%02d%02d%02d",
-	    file_time.getHour(), file_time.getMin(), file_time.getSec() );
+   safe_snprintf(fileName, "%02d%02d%02d",
+                 file_time.getHour(), file_time.getMin(), file_time.getSec());
    file = fileName;
 
    if ( !ext.empty() )
@@ -468,12 +469,12 @@ string Path::computeTmpPath(const char *tmp_name /* = NULL*/ )
   struct timeval tv;
   gettimeofday(&tv, NULL);
   char timeStr[128];
-  sprintf(timeStr, "%ld.%ld_", tv.tv_sec, (long) tv.tv_usec);
+  safe_snprintf(timeStr, "%ld.%ld_", tv.tv_sec, (long) tv.tv_usec);
 
   // get PID and make a string from it
   
   char pidStr[128];
-  sprintf(pidStr, "%d_", (int) getpid());
+  safe_snprintf(pidStr, "%d_", (int) getpid());
   
   // concatenate strings into tmp name
 
@@ -677,6 +678,5 @@ string Path::getPathRelToExec(const string &relPath)
   return absPath;
 
 }
-
 
 

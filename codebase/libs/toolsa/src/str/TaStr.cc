@@ -35,6 +35,7 @@
 
 #include <cstdio>
 #include <toolsa/TaStr.hh>
+#include <toolsa/safe_snprintf.hh>
 using namespace std;
 
 
@@ -60,7 +61,7 @@ void TaStr::AddInt(string &target,
 {
   target += label;
   char str[32];
-  sprintf(str, "%d", iarg);
+  safe_snprintf(str, "%d", iarg);
   target += str;
   if (cr) {
     target += "\n";
@@ -89,7 +90,7 @@ void TaStr::AddLong(string &target,
 {
   target += label;
   char str[32];
-  sprintf(str, "%ld", larg);
+  safe_snprintf(str, "%ld", larg);
   target += str;
   if (cr) {
     target += "\n";
@@ -124,7 +125,7 @@ void TaStr::AddDbl(string &target,
 {
   target += label;
   char str[128];
-  sprintf(str, format.c_str(), darg);
+  safe_snprintf(str, format.c_str(), darg);
   target += str;
   if (cr) {
     target += "\n";
@@ -258,4 +259,3 @@ void TaStr::replaceSubStr(std::string &str,
   }
 
 }
-

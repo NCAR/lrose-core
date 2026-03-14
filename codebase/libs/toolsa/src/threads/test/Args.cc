@@ -19,6 +19,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/umisc.h>
 using namespace std;
 
@@ -68,18 +69,18 @@ int Args::parse (const int argc, const char **argv)
       
     } else if (!strcmp(argv[i], "-debug")) {
       
-      sprintf(tmp_str, "debug = DEBUG_NORM;");
+      safe_snprintf(tmp_str, "%s", "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-verbose")) {
       
-      sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
+      safe_snprintf(tmp_str, "%s", "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-n_threads")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "n_threads = %s;", argv[i+1]);
+        safe_snprintf(tmp_str, "n_threads = %s;", argv[i+1]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -88,7 +89,7 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-n_vals_per_thread")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "n_vals_per_thread = %s;", argv[i+1]);
+        safe_snprintf(tmp_str, "n_vals_per_thread = %s;", argv[i+1]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -97,7 +98,7 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-max_val")) {
       
       if (i < argc - 1) {
-        sprintf(tmp_str, "max_val = %s;", argv[i+1]);
+        safe_snprintf(tmp_str, "max_val = %s;", argv[i+1]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -105,12 +106,12 @@ int Args::parse (const int argc, const char **argv)
       
     } else if (!strcmp(argv[i], "-run_once")) {
       
-      sprintf(tmp_str, "thread_mode = THREADS_RUN_ONCE;");
+      safe_snprintf(tmp_str, "%s", "thread_mode = THREADS_RUN_ONCE;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-use_pool")) {
       
-      sprintf(tmp_str, "thread_mode = THREAD_POOL;");
+      safe_snprintf(tmp_str, "%s", "thread_mode = THREAD_POOL;");
       TDRP_add_override(&override, tmp_str);
       
     } // if
@@ -144,7 +145,6 @@ void Args::_usage(ostream &out)
   Params::usage(out);
 
 }
-
 
 
 

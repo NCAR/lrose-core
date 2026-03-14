@@ -37,6 +37,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/Log.hh>
 #include <toolsa/file_io.h>
+#include <toolsa/safe_snprintf.hh>
 using namespace std;
 
 Log::Log()
@@ -175,7 +176,7 @@ Log::openFile()
       int year, month, day;
       dayTime.getAll(&year, &month, &day);
       char dayStr[64];
-      sprintf(dayStr, "%.4d%.2d%.2d", year, month, day);
+      safe_snprintf(dayStr, "%.4d%.2d%.2d", year, month, day);
       logPath = outDir;
       logPath += PATH_DELIM;
       logPath += dayStr;
@@ -214,9 +215,9 @@ Log::openFile()
       int year, month, day, hour;
       hourTime.getAll(&year, &month, &day, &hour);
       char dayStr[64];
-      sprintf(dayStr, "%.4d%.2d%.2d", year, month, day);
+      safe_snprintf(dayStr, "%.4d%.2d%.2d", year, month, day);
       char hourStr[4];
-      sprintf(hourStr, "%.2d", hour);
+      safe_snprintf(hourStr, "%.2d", hour);
 
       logPath = outDir;
       logPath += PATH_DELIM;

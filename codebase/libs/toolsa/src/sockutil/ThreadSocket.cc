@@ -36,6 +36,7 @@
 
 #include <cstdio>
 #include <cerrno>
+#include <toolsa/safe_snprintf.hh>
 #include <netinet/in.h>
 #include <pthread.h>
 #include <dataport/bigend.h>
@@ -126,7 +127,7 @@ int ThreadSocket::open(const char *hostname,
       _errString += hostname;
       _errString += " port: ";
       char buf[10];
-      sprintf(buf, "%d", port);
+      safe_snprintf(buf, "%d", port);
       _errString += buf;
       _errString += ".";
       break;
@@ -272,4 +273,3 @@ int ThreadSocket::_openClient(const char *hostname,
   return(0);
   
 }
-

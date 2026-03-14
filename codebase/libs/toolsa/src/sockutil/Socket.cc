@@ -37,6 +37,7 @@
 #include <toolsa/umisc.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/Socket.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/TaStr.hh>
 #include <dataport/bigend.h>
 #include <cstdio>
@@ -187,7 +188,7 @@ int Socket::open(const char *hostname,
       _errString += hostname;
       _errString += " port: ";
       char buf[10];
-      sprintf(buf, "%d", port);
+      safe_snprintf(buf, "%d", port);
       _errString += buf;
       _errString += ".";
       break;
@@ -390,8 +391,8 @@ int Socket::readBuffer(void * const buf,
       _errString  = "ERROR - COMM - readBuffer()\n";
       _errString += "  Number of bytes read does not match read length.\n";
       char tmpStr[128];
-      sprintf(tmpStr, "%lld bytes requested, %lld read.", 
-              (long long) len, (long long) nRead);
+      safe_snprintf(tmpStr, "%lld bytes requested, %lld read.",
+                    (long long) len, (long long) nRead);
       _errString += tmpStr;
     }
     return (-1);
@@ -440,8 +441,8 @@ int Socket::peek(void * const buf,
       _errString  = "ERROR - COMM - peek()\n";
       _errString += "  Number of bytes read does not match read length.\n";
       char tmpStr[128];
-      sprintf(tmpStr, "%lld bytes requested, %lld read.", 
-              (long long) len, (long long) nRead);
+      safe_snprintf(tmpStr, "%lld bytes requested, %lld read.",
+                    (long long) len, (long long) nRead);
       _errString += tmpStr;
     }
     return (-1);
@@ -499,8 +500,8 @@ int Socket::readBufferHb(void * const buf,
       _errString  = "ERROR - COMM - readBufferHb()\n";
       _errString += "  Number of bytes read does not match read length.\n";
       char tmpStr[128];
-      sprintf(tmpStr, "%lld bytes requested, %lld read.", 
-              (long long) len, (long long) nRead);
+      safe_snprintf(tmpStr, "%lld bytes requested, %lld read.",
+                    (long long) len, (long long) nRead);
       _errString += tmpStr;
     }
     return (-1);
@@ -673,7 +674,7 @@ int Socket::readHeader(const ssize_t wait_msecs /* = -1*/ )
   _errNum = BAD_MAGIC_COOKIE;
   _errString = "ERROR - COMM - Socket::readHeader(): bad magic cookie.";
   char errTxt[1024];
-  sprintf(errTxt, "magic[0], magic[1]: %x, %x\n", magic[0], magic[1]);
+  safe_snprintf(errTxt, "magic[0], magic[1]: %x, %x\n", magic[0], magic[1]);
   _errString += errTxt;
   return -1;
 
@@ -1279,4 +1280,3 @@ void _close_socket(int sd)
 {
   close(sd);
 }
-
