@@ -41,6 +41,7 @@
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxXml.hh>
 #include <Radx/ByteOrder.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <iostream>
 #include <cstring>
 #include <cstdio>
@@ -379,7 +380,7 @@ string RadxRay::_addToFieldNameMap(const string &name,
   while (true) {
 
     char numStr[128];
-    sprintf(numStr, "_%d", count);
+    safe_snprintf(numStr, "_%d", count);
 
     string modName(name);
     modName += numStr;
@@ -1499,9 +1500,9 @@ void RadxRay::print(ostream &out) const
     out << "  timeSecs: " << RadxTime::strm(_timeSecs) << ".0" << endl;
   } else {
     char text[128];
-    sprintf(text, "  timeSecs: %s.%.6d",
-            RadxTime::strm(_timeSecs).c_str(),
-            (int) ((_nanoSecs / 1000.0) + 0.5));
+    safe_snprintf(text, "  timeSecs: %s.%.6d",
+                  RadxTime::strm(_timeSecs).c_str(),
+                  (int) ((_nanoSecs / 1000.0) + 0.5));
     out << text << endl;
   }
   out << "  az: " << _az << endl;
@@ -1578,18 +1579,18 @@ void RadxRay::printSummary(ostream &out) const
   char trans[16];
 
   if (_antennaTransition) {
-    sprintf(trans, "*");
+    safe_snprintf(trans, "*");
   } else {
-    sprintf(trans, " ");
+    safe_snprintf(trans, " ");
   }
 
-  sprintf(line,
-          "Time el az mode prf ngates sweep# vol#: "
-          "%s.%.3d %6.2f %6.2f %s %4d %4d %2d %5d %s",
-          RadxTime::strm(_timeSecs).c_str(),
-          (int) (_nanoSecs / 1000000),
-          _elev,
-          _az,
+  safe_snprintf(line,
+                "Time el az mode prf ngates sweep# vol#: "
+                "%s.%.3d %6.2f %6.2f %s %4d %4d %2d %5d %s",
+                RadxTime::strm(_timeSecs).c_str(),
+                (int) (_nanoSecs / 1000000),
+                _elev,
+                _az,
           Radx::sweepModeToShortStr(_sweepMode).c_str(),
           (int) (1.0 / _prtSec + 0.5),
           (int) _nGates,

@@ -47,6 +47,7 @@
 #include <Radx/PseudoRhi.hh>
 #include <Radx/RadxXml.hh>
 #include <Radx/ByteOrder.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -3154,7 +3155,7 @@ void RadxVol::trimSweepsToSelectedAngles(vector<double> &selectedAngles,
       }
       // update history
       char note[1024];
-      sprintf(note, "Removing sweep fixed angle: %g\n", fixedAngle);
+      safe_snprintf(note, "Removing sweep fixed angle: %g\n", fixedAngle);
       _history += note;
       
     } // if (deltaAngle < angleTolerance)
@@ -3199,8 +3200,8 @@ void RadxVol::applyTimeOffsetSecs(double offsetSecs)
 
   time_t now = time(NULL);
   char note[1024];
-  sprintf(note, "Applying time offset (secs): %g, mod time %s\n",
-          offsetSecs, RadxTime::strm(now).c_str());
+  safe_snprintf(note, "Applying time offset (secs): %g, mod time %s\n",
+                offsetSecs, RadxTime::strm(now).c_str());
   _history += note;
 
 }
@@ -3234,8 +3235,8 @@ void RadxVol::applyAzimuthOffset(double offset)
 
   time_t now = time(NULL);
   char note[1024];
-  sprintf(note, "Applying azimuth offset: %g, mod time %s\n",
-          offset, RadxTime::strm(now).c_str());
+  safe_snprintf(note, "Applying azimuth offset: %g, mod time %s\n",
+                offset, RadxTime::strm(now).c_str());
   _history += note;
 
 }
@@ -3265,8 +3266,8 @@ void RadxVol::applyElevationOffset(double offset)
 
   time_t now = time(NULL);
   char note[1024];
-  sprintf(note, "Applying elevation offset: %g, mod time %s\n",
-          offset, RadxTime::strm(now).c_str());
+  safe_snprintf(note, "Applying elevation offset: %g, mod time %s\n",
+                offset, RadxTime::strm(now).c_str());
   _history += note;
 
 }
@@ -7983,4 +7984,3 @@ void RadxVol::censorRangeRing(double minRingRangeKm,
   } // iray
   
 }
-

@@ -45,6 +45,7 @@
 #include <Radx/ByteOrder.hh>
 #include <Radx/RadxBuf.hh>
 #include <Radx/RadxGeoref.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstring>
 #include <cmath>
 #include <cerrno>
@@ -166,13 +167,13 @@ int UfRadxFile::writeToDir(const RadxVol &vol,
   string outDir(dir);
   if (addYearSubDir) {
     char yearStr[BUFSIZ];
-    sprintf(yearStr, "%s%.4d", PATH_SEPARATOR, ftime.getYear());
+    safe_snprintf(yearStr, "%s%.4d", PATH_SEPARATOR, ftime.getYear());
     outDir += yearStr;
   }
   if (addDaySubDir) {
     char dayStr[BUFSIZ];
-    sprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
-            ftime.getYear(), ftime.getMonth(), ftime.getDay());
+    safe_snprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
+                  ftime.getYear(), ftime.getMonth(), ftime.getDay());
     outDir += dayStr;
   }
 
@@ -342,9 +343,9 @@ string UfRadxFile::computeFileName(int volNum,
   }
 
   char outName[BUFSIZ];
-  sprintf(outName, "%04d%02d%02d_%02d%02d%02d_%s_v%03d_%s.uf",
-          year, month, day, hour, min, sec,
-          instrumentName.c_str(), volNum, scanType.c_str());
+  safe_snprintf(outName, "%04d%02d%02d_%02d%02d%02d_%s_v%03d_%s.uf",
+                year, month, day, hour, min, sec,
+                instrumentName.c_str(), volNum, scanType.c_str());
 
   return outName;
 
@@ -2547,4 +2548,3 @@ void UfRadxFile::_printRecord(ostream &out,
   } // ii
 
 }
-

@@ -47,6 +47,7 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxXml.hh>
 #include <Radx/RadxStr.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <iomanip>
 #include <cstdio>
 using namespace std;
@@ -195,13 +196,13 @@ int NsslMrdRadxFile::writeToDir(const RadxVol &vol,
   string outDir(dir);
   if (addYearSubDir) {
     char yearStr[BUFSIZ];
-    sprintf(yearStr, "%s%.4d", PATH_SEPARATOR, ftime.getYear());
+    safe_snprintf(yearStr, "%s%.4d", PATH_SEPARATOR, ftime.getYear());
     outDir += yearStr;
   }
   if (addDaySubDir) {
     char dayStr[BUFSIZ];
-    sprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
-            ftime.getYear(), ftime.getMonth(), ftime.getDay());
+    safe_snprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
+                  ftime.getYear(), ftime.getMonth(), ftime.getDay());
     outDir += dayStr;
   }
 
@@ -643,9 +644,9 @@ string NsslMrdRadxFile::computeFileName(int volNum,
   }
 
   char outName[BUFSIZ];
-  sprintf(outName, "mrd.%d%02d%02d%02d%02d%02d.%s.%d.tape",
-          year - 1900, month, day, hour, min, sec,
-          instrumentName.c_str(), volNum);
+  safe_snprintf(outName, "mrd.%d%02d%02d%02d%02d%02d.%s.%d.tape",
+                year - 1900, month, day, hour, min, sec,
+                instrumentName.c_str(), volNum);
 
   return outName;
 
@@ -1212,11 +1213,11 @@ void NsslMrdRadxFile::_setVolMetaData(const string &instrumentName)
   _readVol->setPrimaryAxis(Radx::PRIMARY_AXIS_Y_PRIME);
   _readVol->setTitle("NOAA TAIL RADAR");
   
-  sprintf(text, "flight_number=%s",
-          Radx::makeString(_hdr.flight_number, 8).c_str());
+  safe_snprintf(text, "flight_number=%s",
+                Radx::makeString(_hdr.flight_number, 8).c_str());
   _readVol->setSource(text);
-  sprintf(text, "aircraft_id=%s",
-          Radx::makeString(_hdr.aircraft_id, 2).c_str());
+  safe_snprintf(text, "aircraft_id=%s",
+                Radx::makeString(_hdr.aircraft_id, 2).c_str());
   _readVol->setReferences(text);
   
   _readVol->setHistory("Read in from raw NSSL MRD file");
@@ -1592,12 +1593,12 @@ void NsslMrdRadxFile::_printPacked(ostream &out, int count,
     out << "MISS ";
   } else {
     if (fabs(val) > 0.01) {
-      sprintf(outstr, "%.3f ", val);
+      safe_snprintf(outstr, "%.3f ", val);
       out << outstr;
     } else if (val == 0.0) {
       out << "0.0 ";
     } else {
-      sprintf(outstr, "%.3e ", val);
+      safe_snprintf(outstr, "%.3e ", val);
       out << outstr;
     }
   }

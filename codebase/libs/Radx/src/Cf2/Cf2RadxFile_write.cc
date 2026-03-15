@@ -44,6 +44,7 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxStr.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <unistd.h>
 #include <cstring>
 #include <cstdio>
@@ -119,13 +120,13 @@ int Cf2RadxFile::writeToDir(const RadxVol &vol,
   string outDir(dir);
   if (addYearSubDir) {
     char yearStr[BUFSIZ];
-    sprintf(yearStr, "%s%.4d", PATH_SEPARATOR, fileTime.getYear());
+    safe_snprintf(yearStr, "%s%.4d", PATH_SEPARATOR, fileTime.getYear());
     outDir += yearStr;
   }
   if (addDaySubDir) {
     char dayStr[BUFSIZ];
-    sprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
-            fileTime.getYear(), fileTime.getMonth(), fileTime.getDay());
+    safe_snprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
+                  fileTime.getYear(), fileTime.getMonth(), fileTime.getDay());
     outDir += dayStr;
   }
 
@@ -248,13 +249,13 @@ int Cf2RadxFile::_writeSweepToDir(const RadxVol &vol,
   string outDir(dir);
   if (addYearSubDir) {
     char yearStr[BUFSIZ];
-    sprintf(yearStr, "%s%.4d", PATH_SEPARATOR, fileTime.getYear());
+    safe_snprintf(yearStr, "%s%.4d", PATH_SEPARATOR, fileTime.getYear());
     outDir += yearStr;
   }
   if (addDaySubDir) {
     char dayStr[BUFSIZ];
-    sprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
-            fileTime.getYear(), fileTime.getMonth(), fileTime.getDay());
+    safe_snprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
+                  fileTime.getYear(), fileTime.getMonth(), fileTime.getDay());
     outDir += dayStr;
   }
 
@@ -281,36 +282,36 @@ int Cf2RadxFile::_writeSweepToDir(const RadxVol &vol,
 
   char fileName[BUFSIZ];
   if (_writeFileNameMode == FILENAME_WITH_START_AND_END_TIMES) {
-    sprintf(fileName,
-            "cfrad2.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
-            "_to_%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
-            "_%s_v%d_s%.2d_%s%.2f_%s.nc",
-            startTime.getYear(), startTime.getMonth(), startTime.getDay(),
-            startTime.getHour(), startTime.getMin(), startTime.getSec(),
-            startMillisecs,
-            endTime.getYear(), endTime.getMonth(), endTime.getDay(),
-            endTime.getHour(), endTime.getMin(), endTime.getSec(),
-            endMillisecs,
-            instName.c_str(),
-            volNum, sweepNum,
-            fixedAngleLabel.c_str(), fixedAngle,
-            scanType.c_str());
+    safe_snprintf(fileName,
+                  "cfrad2.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+                  "_to_%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+                  "_%s_v%d_s%.2d_%s%.2f_%s.nc",
+                  startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+                  startTime.getHour(), startTime.getMin(), startTime.getSec(),
+                  startMillisecs,
+                  endTime.getYear(), endTime.getMonth(), endTime.getDay(),
+                  endTime.getHour(), endTime.getMin(), endTime.getSec(),
+                  endMillisecs,
+                  instName.c_str(),
+                  volNum, sweepNum,
+                  fixedAngleLabel.c_str(), fixedAngle,
+                  scanType.c_str());
   } else {
-    sprintf(fileName,
-            "cfrad2.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
-            "_%s_v%d_s%.2d_%s%.2f_%s.nc",
-            fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
-            fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
-            fileMillisecs,
-            instName.c_str(),
-            volNum, sweepNum,
-            fixedAngleLabel.c_str(), fixedAngle,
-            scanType.c_str());
+    safe_snprintf(fileName,
+                  "cfrad2.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+                  "_%s_v%d_s%.2d_%s%.2f_%s.nc",
+                  fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
+                  fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
+                  fileMillisecs,
+                  instName.c_str(),
+                  volNum, sweepNum,
+                  fixedAngleLabel.c_str(), fixedAngle,
+                  scanType.c_str());
   }
   
   char outPath[BUFSIZ];
-  sprintf(outPath, "%s%s%s",
-          outDir.c_str(), PATH_SEPARATOR,  fileName);
+  safe_snprintf(outPath, "%s%s%s",
+                outDir.c_str(), PATH_SEPARATOR,  fileName);
   
   int iret = writeToPath(*_writeVol, outPath);
 
@@ -1381,7 +1382,7 @@ void Cf2RadxFile::_addSweeps()
     // create name
   
     char name[128];
-    sprintf(name, "sweep_%.4d", isweep + 1);
+    safe_snprintf(name, "sweep_%.4d", isweep + 1);
     _sweepGroupNames.push_back(name);
 
     if (_debug) {
@@ -1611,9 +1612,9 @@ void Cf2RadxFile::_addSweepVariables(const RadxSweep *sweep,
   
   char timeUnitsStr[256];
   RadxTime stime(_writeVol->getStartTimeSecs());
-  sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
-          stime.getYear(), stime.getMonth(), stime.getDay(),
-          stime.getHour(), stime.getMin(), stime.getSec());
+  safe_snprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
+                stime.getYear(), stime.getMonth(), stime.getDay(),
+                stime.getHour(), stime.getMin(), stime.getSec());
   timeVar.putAtt(UNITS, timeUnitsStr);
   timeVar.putAtt(COMMENT, "times are relative to the volume start_time");
 
@@ -3358,7 +3359,7 @@ string Cf2RadxFile::_computeWritePath(const RadxVol &vol,
   int volNum = vol.getVolumeNumber();
   char volNumStr[1024];
   if (_writeVolNumInFileName && volNum >= 0) {
-    sprintf(volNumStr, "_v%d", volNum);
+    safe_snprintf(volNumStr, "_v%d", volNum);
   } else {
     volNumStr[0] = '\0'; // NULL str
   }
@@ -3384,50 +3385,50 @@ string Cf2RadxFile::_computeWritePath(const RadxVol &vol,
     char startSubsecsStr[64];
     char endSubsecsStr[64];
     if (_writeSubsecsInFileName) {
-      sprintf(startSubsecsStr, ".%.3d", startMillisecs);
-      sprintf(endSubsecsStr, ".%.3d", endMillisecs);
+      safe_snprintf(startSubsecsStr, ".%.3d", startMillisecs);
+      safe_snprintf(endSubsecsStr, ".%.3d", endMillisecs);
     } else {
       startSubsecsStr[0] = '\0';
       endSubsecsStr[0] = '\0';
     }
 
-    sprintf(fileName,
-            "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-            "_to_%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-            "%s%s%s"
-            "%s%s%s.nc",
-            prefix.c_str(),
-            startTime.getYear(), startTime.getMonth(), startTime.getDay(),
-            dateTimeConnector,
-            startTime.getHour(), startTime.getMin(), startTime.getSec(),
-            startSubsecsStr,
-            endTime.getYear(), endTime.getMonth(), endTime.getDay(),
-            dateTimeConnector,
-            endTime.getHour(), endTime.getMin(), endTime.getSec(),
-            endSubsecsStr,
-            instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str(), scanType.c_str(), suffix.c_str());
+    safe_snprintf(fileName,
+                  "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+                  "_to_%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+                  "%s%s%s"
+                  "%s%s%s.nc",
+                  prefix.c_str(),
+                  startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+                  dateTimeConnector,
+                  startTime.getHour(), startTime.getMin(), startTime.getSec(),
+                  startSubsecsStr,
+                  endTime.getYear(), endTime.getMonth(), endTime.getDay(),
+                  dateTimeConnector,
+                  endTime.getHour(), endTime.getMin(), endTime.getSec(),
+                  endSubsecsStr,
+                  instName.c_str(), siteName.c_str(), volNumStr,
+                  scanName.c_str(), scanType.c_str(), suffix.c_str());
 
   } else {
     
     char fileSubsecsStr[64];
     if (_writeSubsecsInFileName) {
-      sprintf(fileSubsecsStr, ".%.3d", fileMillisecs);
+      safe_snprintf(fileSubsecsStr, ".%.3d", fileMillisecs);
     } else {
       fileSubsecsStr[0] = '\0';
     }
 
-    sprintf(fileName,
-            "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-            "%s%s%s"
-            "%s%s%s.nc",
-            prefix.c_str(),
-            fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
-            dateTimeConnector,
-            fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
-            fileSubsecsStr,
-            instName.c_str(), siteName.c_str(), volNumStr,
-            scanName.c_str(), scanType.c_str(), suffix.c_str());
+    safe_snprintf(fileName,
+                  "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
+                  "%s%s%s"
+                  "%s%s%s.nc",
+                  prefix.c_str(),
+                  fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
+                  dateTimeConnector,
+                  fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
+                  fileSubsecsStr,
+                  instName.c_str(), siteName.c_str(), volNumStr,
+                  scanName.c_str(), scanType.c_str(), suffix.c_str());
 
   }
 
