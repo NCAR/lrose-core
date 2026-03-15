@@ -50,6 +50,7 @@
 
 #include <Ncxx/Ncxx.hh>
 #include <Ncxx/NcxxPort.hh>
+#include <toolsa/safe_snprintf.hh>
 
 // missing values in meta-data
 
@@ -281,7 +282,7 @@ void Ncxx::addErrInt(string &errStr, string label,
 {
   errStr += label;
   char str[32];
-  sprintf(str, "%d", iarg);
+  safe_snprintf(str, "%d", iarg);
   errStr += str;
   if (cr) {
     errStr += "\n";
@@ -300,7 +301,7 @@ void Ncxx::addErrDbl(string &errStr,
 {
   errStr += label;
   char str[128];
-  sprintf(str, format.c_str(), darg);
+  safe_snprintf(str, format.c_str(), darg);
   errStr += str;
   if (cr) {
     errStr += "\n";
@@ -375,4 +376,3 @@ void Ncxx::printString(const string &label, const char *text,
 {
   out << "  " << label << ": " << makeString(text, len) << endl;
 }
-

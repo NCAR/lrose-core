@@ -84,6 +84,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Ncxx/NcxxErrStr.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstdio>
 //////////////
 // Constructor
@@ -111,7 +112,7 @@ void NcxxErrStr::addErrInt(string label, int iarg,
 {
   _errStr += label;
   char str[32];
-  sprintf(str, "%d", iarg);
+  safe_snprintf(str, "%d", iarg);
   _errStr += str;
   if (cr) {
     _errStr += "\n";
@@ -129,7 +130,7 @@ void NcxxErrStr::addErrDbl(string label, double darg,
 {
   _errStr += label;
   char str[128];
-  sprintf(str, format.c_str(), darg);
+  safe_snprintf(str, format.c_str(), darg);
   _errStr += str;
   if (cr) {
     _errStr += "\n";
@@ -150,4 +151,3 @@ void NcxxErrStr::addErrStr(string label, string strarg,
     _errStr += "\n";
   }
 }
-
