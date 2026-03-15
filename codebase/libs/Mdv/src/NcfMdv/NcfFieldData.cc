@@ -37,6 +37,7 @@
 //////////////////////////////////////////////////////////////
 
 #include <Ncxx/Ncxx.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/TaStr.hh>
 #include <Mdv/NcfMdv.hh>
 #include <Mdv/NcfFieldData.hh>
@@ -339,14 +340,14 @@ int NcfFieldData::addToNc(Nc3File *ncFile, Nc3Dim *timeDim,
     if (_outputLatlonArrays &&
         _gridInfo->getNcLonVar() != NULL &&
         _gridInfo->getNcLatVar() != NULL) {
-      sprintf(auxVarNames, "%s %s",
-              _gridInfo->getNcLonVar()->name(),
-              _gridInfo->getNcLatVar()->name());
+      safe_snprintf(auxVarNames, "%s %s",
+                    _gridInfo->getNcLonVar()->name(),
+                    _gridInfo->getNcLatVar()->name());
       iret |= !_ncVar->add_att(NcfMdv::coordinates, auxVarNames);
     }
 
     if (_gridInfo->getNcProjVar() != NULL) {
-      sprintf(auxVarNames, "%s", _gridInfo->getNcProjVar()->name());
+      safe_snprintf(auxVarNames, "%s", _gridInfo->getNcProjVar()->name());
       iret |= !_ncVar->add_att(NcfMdv::grid_mapping, auxVarNames);
     }
 
@@ -648,4 +649,3 @@ int NcfFieldData::_setChunking(Nc3File *ncFile,
   return 0;
 
 }
-

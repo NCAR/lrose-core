@@ -45,6 +45,7 @@
 #include <didss/DsURL.hh>
 #include <dsserver/DsLocator.hh>
 #include <dsserver/DmapAccess.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/mem.h>
 #include <cerrno>
@@ -761,10 +762,10 @@ int Mdvx::_writeToNcfBuf(const string &path)
   DateTime dnow(now);
   pid_t pid = getpid();
   char tmpFilePath[FILENAME_MAX];
-  sprintf(tmpFilePath,
-          "/tmp/Mdvx_writeToNcfBuf_%.4d%.2d%.2d_%.2d%.2d%.2d_%.5d.nc",
-          dnow.getYear(), dnow.getMonth(), dnow.getDay(),
-          dnow.getHour(), dnow.getMin(), dnow.getSec(), pid);
+  safe_snprintf(tmpFilePath,
+                "/tmp/Mdvx_writeToNcfBuf_%.4d%.2d%.2d_%.2d%.2d%.2d_%.5d.nc",
+                dnow.getYear(), dnow.getMonth(), dnow.getDay(),
+                dnow.getHour(), dnow.getMin(), dnow.getSec(), pid);
           
   Mdv2NcfTrans trans;
   trans.clearData();
@@ -891,10 +892,10 @@ int Mdvx::_readFromNcfBuf(const string &path)
   DateTime dnow(now);
   pid_t pid = getpid();
   char tmpFilePath[FILENAME_MAX];
-  sprintf(tmpFilePath,
-          "/tmp/Mdvx_readFromNcfBuf_%.4d%.2d%.2d_%.2d%.2d%.2d_%.5d.nc",
-          dnow.getYear(), dnow.getMonth(), dnow.getDay(),
-          dnow.getHour(), dnow.getMin(), dnow.getSec(), pid);
+  safe_snprintf(tmpFilePath,
+                "/tmp/Mdvx_readFromNcfBuf_%.4d%.2d%.2d_%.2d%.2d%.2d_%.5d.nc",
+                dnow.getYear(), dnow.getMonth(), dnow.getDay(),
+                dnow.getHour(), dnow.getMin(), dnow.getSec(), pid);
 
   // write nc buffer to file
 
@@ -1386,4 +1387,3 @@ void Mdvx::printConvertMdv2NcfRequest(ostream &out) const
   cerr << endl;
 
 }
-

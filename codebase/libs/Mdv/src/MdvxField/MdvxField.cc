@@ -43,6 +43,7 @@
 #include <dataport/bigend.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/compress.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
 #include <toolsa/pjg.h>
@@ -891,7 +892,7 @@ int MdvxField::convertType
     if (output_encoding != Mdvx::ENCODING_RGBA32 &&
 	output_encoding != Mdvx::ENCODING_ASIS) {
       _errStr += "ERROR - MdvxField::convertType()\n";
-      sprintf(errstr, "  Cannot convert between RBGA32 and other types\n");
+      safe_snprintf(errstr, "  Cannot convert between RBGA32 and other types\n");
       _errStr += errstr;
       return -1;
     }
@@ -903,8 +904,8 @@ int MdvxField::convertType
 	_fhdr.encoding_type != Mdvx::ENCODING_INT16 &&
 	_fhdr.encoding_type != Mdvx::ENCODING_FLOAT32) {
       _errStr += "ERROR - MdvxField::convertType()\n";
-      sprintf(errstr, "  Input encoding type %d not supported\n",
-	      _fhdr.encoding_type);
+      safe_snprintf(errstr, "  Input encoding type %d not supported\n",
+                    _fhdr.encoding_type);
       _errStr += errstr;
       return -1;
     }
@@ -914,8 +915,8 @@ int MdvxField::convertType
 	output_encoding != Mdvx::ENCODING_INT16 &&
 	output_encoding != Mdvx::ENCODING_FLOAT32) {
       _errStr += "ERROR - MdvxField::convertType()\n";
-      sprintf(errstr, "  Output encoding type %d not supported\n",
-	      output_encoding);
+      safe_snprintf(errstr, "  Output encoding type %d not supported\n",
+                    output_encoding);
       _errStr += errstr;
       return -1;
     }
@@ -925,8 +926,8 @@ int MdvxField::convertType
   if (output_compression < Mdvx::COMPRESSION_ASIS ||
       output_compression >= Mdvx::COMPRESSION_TYPES_N) {
     _errStr += "ERROR - MdvxField::convertType()\n";
-    sprintf(errstr, "  Output compression type %d not supported\n",
-	    output_compression);
+    safe_snprintf(errstr, "  Output compression type %d not supported\n",
+                  output_compression);
     _errStr += errstr;
     return -1;
   }
@@ -934,8 +935,8 @@ int MdvxField::convertType
   if (output_scaling < Mdvx::SCALING_NONE ||
       output_scaling > Mdvx::SCALING_SPECIFIED) {
     _errStr += "ERROR - MdvxField::convertType()\n";
-    sprintf(errstr, "  Output scaling type %d not supported\n",
-	    output_scaling);
+    safe_snprintf(errstr, "  Output scaling type %d not supported\n",
+                  output_scaling);
     _errStr += errstr;
     return -1;
   }
@@ -6110,8 +6111,8 @@ int MdvxField::decompress() const
       _errStr += "ERROR - MdvxField::decompress.\n";
       _errStr +=  "  Wrong number of bytes in plane.\n";
       char errstr[128];
-      sprintf(errstr, "  %ld expected, %ld found.\n",
-	      (long) nbytes_plane, (long) nbytes_uncompressed);
+      safe_snprintf(errstr, "  %ld expected, %ld found.\n",
+                    (long) nbytes_plane, (long) nbytes_uncompressed);
       _errStr += errstr;
       ta_compress_free(uncompressed_plane);
       return -1;
@@ -6128,8 +6129,8 @@ int MdvxField::decompress() const
     _errStr += "ERROR - MdvxField::decompress.\n";
     _errStr +=  "  Wrong number of bytes in vol.\n";
     char errstr[128];
-    sprintf(errstr, "  %ld expected, %ld found.\n",
-	    (long) nbytes_vol, (long) workBuf.getLen());
+    safe_snprintf(errstr, "  %ld expected, %ld found.\n",
+                  (long) nbytes_vol, (long) workBuf.getLen());
     _errStr += errstr;
     return -1;
   }
@@ -6928,7 +6929,7 @@ void MdvxField::_print_voldata_verbose(ostream &out,
           } else if (this_val == missing) {
             out << "MISS ";
           } else {
-            sprintf(outstr, "%3d ", *val);
+            safe_snprintf(outstr, "%3d ", *val);
             out << outstr;
           }
         }
@@ -6952,7 +6953,7 @@ void MdvxField::_print_voldata_verbose(ostream &out,
           } else if (this_val == missing) {
             out << "MISS ";
           } else {
-            sprintf(outstr, "%5d ", *val);
+            safe_snprintf(outstr, "%5d ", *val);
             out << outstr;
           }
         }
@@ -6977,9 +6978,9 @@ void MdvxField::_print_voldata_verbose(ostream &out,
             out << "MISS ";
           } else {
             if (fabs(*val) > 0.01) {
-              sprintf(outstr, "%.3f ", *val);
+              safe_snprintf(outstr, "%.3f ", *val);
             } else {
-              sprintf(outstr, "%.3e ", *val);
+              safe_snprintf(outstr, "%.3e ", *val);
             }
             out << outstr;
           }
@@ -7004,7 +7005,7 @@ void MdvxField::_print_voldata_verbose(ostream &out,
           } else if (this_val == missing) {
             out << "MISS ";
           } else {
-            sprintf(outstr, "%5x ", *val);
+            safe_snprintf(outstr, "%5x ", *val);
             out << outstr;
           }
         }
@@ -7281,8 +7282,8 @@ void MdvxField::_print_int8_packed(ostream &out, int count,
   } else if (val == bad) {
     out << "BAD ";
   } else {
-    if (printCanonical) sprintf(outstr, "%d ", val);
-    else sprintf(outstr, "%.3d ", val);
+    if (printCanonical) safe_snprintf(outstr, "%d ", val);
+    else safe_snprintf(outstr, "%.3d ", val);
     out << outstr;
   }
 
@@ -7306,8 +7307,8 @@ void MdvxField::_print_int16_packed(ostream &out, int count,
   } else if (val == bad) {
     out << "BAD ";
   } else {
-    if (printCanonical) sprintf(outstr, "%d ", val);
-    else sprintf(outstr, "%.5d ", val);
+    if (printCanonical) safe_snprintf(outstr, "%d ", val);
+    else safe_snprintf(outstr, "%.5d ", val);
     out << outstr;
   }
 
@@ -7332,17 +7333,17 @@ void MdvxField::_print_float32_packed(ostream &out, int count,
     out << "BAD ";
   } else {
     if (printCanonical) {
-      sprintf(outstr, "%.17E", val);
+      safe_snprintf(outstr, "%.17E", val);
       out << outstr;
     }
     else {
       if (fabs(val) > 0.01) {
-        sprintf(outstr, "%.3f ", val);
+        safe_snprintf(outstr, "%.3f ", val);
         out << outstr;
       } else if (val == 0.0) {
         out << "0.0 ";
       } else {
-        sprintf(outstr, "%.3e ", val);
+        safe_snprintf(outstr, "%.3e ", val);
         out << outstr;
       }
     }
@@ -7369,8 +7370,8 @@ void MdvxField::_print_rgba32_packed(ostream &out, int count,
   } else if (val == bad) {
     out << "BAD ";
   } else {
-    if (printCanonical) sprintf(outstr, "%x ", val);
-    else sprintf(outstr, "%.5x ", val);
+    if (printCanonical) safe_snprintf(outstr, "%x ", val);
+    else safe_snprintf(outstr, "%.5x ", val);
     out << outstr;
   }
 
@@ -8429,4 +8430,3 @@ bool MdvxField::_volbufSizeValid() const
   }
   return false;
 }
-

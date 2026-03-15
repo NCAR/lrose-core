@@ -37,6 +37,7 @@
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxChunk.hh>
 #include <toolsa/umisc.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/Path.hh>
 #include <dataport/bigend.h>
 #include <didss/RapDataDir.hh>
@@ -1177,8 +1178,8 @@ int Mdvx::_writeFieldHeader32(const int field_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_writeFieldHeader32\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to field header offset: %lld\n",
-            (long long) offset);
+    safe_snprintf(tmpstr, "Cannot seek to field header offset: %lld\n",
+                  (long long) offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1214,7 +1215,7 @@ int Mdvx::_writeFieldHeader32(const int field_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_writeFieldHeader32\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot write field header for field: %d\n", field_num);
+    safe_snprintf(tmpstr, "Cannot write field header for field: %d\n", field_num);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1244,8 +1245,8 @@ int Mdvx::_writeFieldHeader64(const int field_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_writeFieldHeader64\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to field header offset: %lld\n",
-            (long long) offset);
+    safe_snprintf(tmpstr, "Cannot seek to field header offset: %lld\n",
+                  (long long) offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1276,7 +1277,7 @@ int Mdvx::_writeFieldHeader64(const int field_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_writeFieldHeader64\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot write field header for field: %d\n", field_num);
+    safe_snprintf(tmpstr, "Cannot write field header for field: %d\n", field_num);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1305,8 +1306,8 @@ int Mdvx::_writeVlevelHeader32(const int field_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_writeVlevelHeader32\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to vlevel header offset: %lld\n", 
-            (long long) offset);
+    safe_snprintf(tmpstr, "Cannot seek to vlevel header offset: %lld\n", 
+                  (long long) offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1329,7 +1330,7 @@ int Mdvx::_writeVlevelHeader32(const int field_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_writeVlevelHeader32\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot write vlevel header for field: %d\n", field_num);
+    safe_snprintf(tmpstr, "Cannot write vlevel header for field: %d\n", field_num);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1360,8 +1361,8 @@ int Mdvx::_writeVlevelHeader64(const int field_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_writeVlevelHeader64\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to vlevel header offset: %lld\n", 
-            (long long) offset);
+    safe_snprintf(tmpstr, "Cannot seek to vlevel header offset: %lld\n", 
+                  (long long) offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1382,7 +1383,7 @@ int Mdvx::_writeVlevelHeader64(const int field_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_writeVlevelHeader64\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot write vlevel header for field: %d\n", field_num);
+    safe_snprintf(tmpstr, "Cannot write vlevel header for field: %d\n", field_num);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1411,8 +1412,8 @@ int Mdvx::_writeChunkHeader32(const int chunk_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_writeChunkHeader32\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to chunk header offset: %lld\n",
-            (long long) offset);
+    safe_snprintf(tmpstr, "Cannot seek to chunk header offset: %lld\n",
+                  (long long) offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1435,7 +1436,7 @@ int Mdvx::_writeChunkHeader32(const int chunk_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_writeChunkHeader32\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot write chunk header for chunk: %d\n", chunk_num);
+    safe_snprintf(tmpstr, "Cannot write chunk header for chunk: %d\n", chunk_num);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1466,8 +1467,8 @@ int Mdvx::_writeChunkHeader64(const int chunk_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_writeChunkHeader64\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot seek to chunk header offset: %lld\n",
-            (long long) offset);
+    safe_snprintf(tmpstr, "Cannot seek to chunk header offset: %lld\n",
+                  (long long) offset);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1488,7 +1489,7 @@ int Mdvx::_writeChunkHeader64(const int chunk_num,
     int errNum = errno;
     _errStr += "ERROR - Mdvx::_writeChunkHeader64\n";
     char tmpstr[128];
-    sprintf(tmpstr, "Cannot write chunk header for chunk: %d\n", chunk_num);
+    safe_snprintf(tmpstr, "Cannot write chunk header for chunk: %d\n", chunk_num);
     _errStr += tmpstr;
     _errStr += strerror(errNum);
     _errStr += "\n";
@@ -1607,41 +1608,41 @@ void Mdvx::_computeOutputPath(const string &outputDir,
     genTime.unix_time = getGenTime();
     uconvert_from_utime(&genTime);
     
-    sprintf(yearSubdir, "%.4d", genTime.year);
+    safe_snprintf(yearSubdir, "%.4d", genTime.year);
 
     if (!_useExtendedPaths) {
       if (forecastDelta < 0)  {
-        sprintf(outputBase, "%.4d%.2d%.2d%sg_%.2d%.2d%.2d%sf_%.7d",
-                genTime.year, genTime.month, genTime.day,
-                PATH_DELIM, genTime.hour, genTime.min, genTime.sec,
-                PATH_DELIM, forecastDelta);
+        safe_snprintf(outputBase, "%.4d%.2d%.2d%sg_%.2d%.2d%.2d%sf_%.7d",
+                      genTime.year, genTime.month, genTime.day,
+                      PATH_DELIM, genTime.hour, genTime.min, genTime.sec,
+                      PATH_DELIM, forecastDelta);
       } else {
-        sprintf(outputBase, "%.4d%.2d%.2d%sg_%.2d%.2d%.2d%sf_%.8d",
-                genTime.year, genTime.month, genTime.day,
-                PATH_DELIM, genTime.hour, genTime.min, genTime.sec,
-                PATH_DELIM, forecastDelta);
+        safe_snprintf(outputBase, "%.4d%.2d%.2d%sg_%.2d%.2d%.2d%sf_%.8d",
+                      genTime.year, genTime.month, genTime.day,
+                      PATH_DELIM, genTime.hour, genTime.min, genTime.sec,
+                      PATH_DELIM, forecastDelta);
       }
     } else {
       if (forecastDelta < 0) {
-        sprintf(outputBase,
-                "%.4d%.2d%.2d%s"
-                "g_%.2d%.2d%.2d%s"
-                "%.4d%.2d%.2d_g_%.2d%.2d%.2d_f_%.7d",
-                genTime.year, genTime.month, genTime.day, PATH_DELIM,
-                genTime.hour, genTime.min, genTime.sec, PATH_DELIM,
-                genTime.year, genTime.month, genTime.day,
-                genTime.hour, genTime.min, genTime.sec,
-                forecastDelta);
+        safe_snprintf(outputBase,
+                      "%.4d%.2d%.2d%s"
+                      "g_%.2d%.2d%.2d%s"
+                      "%.4d%.2d%.2d_g_%.2d%.2d%.2d_f_%.7d",
+                      genTime.year, genTime.month, genTime.day, PATH_DELIM,
+                      genTime.hour, genTime.min, genTime.sec, PATH_DELIM,
+                      genTime.year, genTime.month, genTime.day,
+                      genTime.hour, genTime.min, genTime.sec,
+                      forecastDelta);
       } else {
-        sprintf(outputBase,
-                "%.4d%.2d%.2d%s"
-                "g_%.2d%.2d%.2d%s"
-                "%.4d%.2d%.2d_g_%.2d%.2d%.2d_f_%.8d",
-                genTime.year, genTime.month, genTime.day, PATH_DELIM,
-                genTime.hour, genTime.min, genTime.sec, PATH_DELIM,
-                genTime.year, genTime.month, genTime.day,
-                genTime.hour, genTime.min, genTime.sec,
-                forecastDelta);
+        safe_snprintf(outputBase,
+                      "%.4d%.2d%.2d%s"
+                      "g_%.2d%.2d%.2d%s"
+                      "%.4d%.2d%.2d_g_%.2d%.2d%.2d_f_%.8d",
+                      genTime.year, genTime.month, genTime.day, PATH_DELIM,
+                      genTime.hour, genTime.min, genTime.sec, PATH_DELIM,
+                      genTime.year, genTime.month, genTime.day,
+                      genTime.hour, genTime.min, genTime.sec,
+                      forecastDelta);
       }
     } // if (!_useExtendedPaths)
 
@@ -1650,18 +1651,18 @@ void Mdvx::_computeOutputPath(const string &outputDir,
     date_time_t validTime;
     validTime.unix_time = getValidTime();
     uconvert_from_utime(&validTime);
-    sprintf(yearSubdir, "%.4d", validTime.year);
+    safe_snprintf(yearSubdir, "%.4d", validTime.year);
     if (!_useExtendedPaths) {
-      sprintf(outputBase, "%.4d%.2d%.2d%s%.2d%.2d%.2d",
-              validTime.year, validTime.month, validTime.day,
-              PATH_DELIM, validTime.hour, validTime.min, validTime.sec);
+      safe_snprintf(outputBase, "%.4d%.2d%.2d%s%.2d%.2d%.2d",
+                    validTime.year, validTime.month, validTime.day,
+                    PATH_DELIM, validTime.hour, validTime.min, validTime.sec);
     } else {
-      sprintf(outputBase,
-              "%.4d%.2d%.2d%s"
-              "%.4d%.2d%.2d_%.2d%.2d%.2d",
-              validTime.year, validTime.month, validTime.day, PATH_DELIM,
-              validTime.year, validTime.month, validTime.day,
-              validTime.hour, validTime.min, validTime.sec);
+      safe_snprintf(outputBase,
+                    "%.4d%.2d%.2d%s"
+                    "%.4d%.2d%.2d_%.2d%.2d%.2d",
+                    validTime.year, validTime.month, validTime.day, PATH_DELIM,
+                    validTime.year, validTime.month, validTime.day,
+                    validTime.hour, validTime.min, validTime.sec);
     }
 
   } // if (writeAsForecast)
@@ -1796,4 +1797,3 @@ int Mdvx::_writeBufferToFile(const string &pathStr,
   return 0;
 
 }
-
