@@ -59,6 +59,7 @@
 #include <dsserver/DestUrlArray.hh>
 #include <didss/RapDataDir.hh>
 #include <toolsa/GetHost.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
 #include <cstdio>
@@ -581,7 +582,7 @@ void DestUrlArray::_addIntErr(const char *err_str, const int iarg)
 {
   _errStr += err_str;
   char str[32];
-  sprintf(str, "%d\n", iarg);
+  safe_snprintf(str, "%d\n", iarg);
   _errStr += str;
 }
 
@@ -595,5 +596,3 @@ void DestUrlArray::_addStrErr(const char *err_str, const string &sarg)
   _errStr += sarg;
   _errStr += "\n";
 }
-
-

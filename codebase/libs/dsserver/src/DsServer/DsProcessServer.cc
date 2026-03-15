@@ -34,6 +34,7 @@
 #include <toolsa/ServerSocket.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/safe_snprintf.hh>
 
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -95,7 +96,7 @@ DsProcessServer::DsProcessServer(const string & executableName,
   // If the instance name is empty, use the port number.
   if (_instanceName.size() == 0) {
     char buf[100];
-    sprintf(buf, "%d", _port);
+    safe_snprintf(buf, "%d", _port);
     _instanceName = buf;
   }
 
@@ -952,10 +953,10 @@ void * DsProcessServer::__serveClient(void * svrsockstruct)
 
   if (status != 0) {
     char buf[10];
-    sprintf(buf, "%d", status);
+    safe_snprintf(buf, "%d", status);
     string errMsg  = "Error: Server could not read. Got status: ";
     errMsg += buf;
-    sprintf(buf, "%d", socket->getErrNum());
+    safe_snprintf(buf, "%d", socket->getErrNum());
     errMsg += " Error Num: ";
     errMsg += buf;
     errMsg += ". Error String: ";

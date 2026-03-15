@@ -42,6 +42,7 @@
 #include <toolsa/MemBuf.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <dsserver/DsFileCopyMsg.hh>
 #include <didss/DsMsgPart.hh>
 using namespace std;
@@ -397,7 +398,7 @@ int DsFileCopyMsg::disassemble(void *inMsg, const int msgLen)
     TaStr::AddStr(_errStr, "  ", DateTime::str());
     _errStr += "  Bad message header\n";
     _errStr += "  Message len: ";
-    sprintf(tmpStr, "%d\n", msgLen);
+    safe_snprintf(tmpStr, "%d\n", msgLen);
     _errStr += tmpStr;
     return (-1);
   }
@@ -406,10 +407,10 @@ int DsFileCopyMsg::disassemble(void *inMsg, const int msgLen)
     _errStr = "ERROR - DsFileCopyMsg::disassemble\n";
     TaStr::AddStr(_errStr, "  ", DateTime::str());
     _errStr += "  Unknown message type: \n";
-    sprintf(tmpStr, "%d\n", _type);
+    safe_snprintf(tmpStr, "%d\n", _type);
     _errStr += tmpStr;
     _errStr += "  Message len: ";
-    sprintf(tmpStr, "%d\n", msgLen);
+    safe_snprintf(tmpStr, "%d\n", msgLen);
     _errStr += tmpStr;
     return (-1);
   }
@@ -625,7 +626,7 @@ void DsFileCopyMsg::_intErr(const char *err_str, const int iarg)
 {
   _errStr += err_str;
   char str[32];
-  sprintf(str, "%d\n", iarg);
+  safe_snprintf(str, "%d\n", iarg);
   _errStr += str;
 }
 
@@ -638,4 +639,3 @@ void DsFileCopyMsg::_strErr(const char *err_str, const string &sarg)
   _errStr += sarg;
   _errStr += "\n";
 }
-

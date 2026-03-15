@@ -34,6 +34,7 @@
 #include <dataport/bigend.h>
 #include <toolsa/URL.hh>
 #include <toolsa/GetHost.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <didss/DsMsgPart.hh>
 #include <dsserver/DsServerMsg.hh>
 #include <iostream>
@@ -517,7 +518,7 @@ void DsServerMsg::printHeader(ostream &out, const char *spacer) const
   // Check if there were any un-handled error bits.
   if (localError != 0) {
     char buf[128];
-    sprintf(buf, "%d", localError);
+    safe_snprintf(buf, "%d", localError);
     errString += "\n";
     errString += "Unrecognized error num: ";
     errString += buf;
@@ -593,4 +594,3 @@ DsServerMsg &DsServerMsg::_copy(const DsServerMsg &rhs)
   return *this;
   
 }
-

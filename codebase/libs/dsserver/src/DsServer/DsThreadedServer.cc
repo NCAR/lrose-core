@@ -34,6 +34,7 @@
 #include <toolsa/ServerSocket.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/safe_snprintf.hh>
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -184,7 +185,7 @@ bool DsThreadedServer::timeoutMethod()
 
   pthread_mutex_lock(&_procmapInfoMutex);
   char label[128];
-  sprintf(label, "Listening, port: %d", _port);
+  safe_snprintf(label, "Listening, port: %d", _port);
   PMU_auto_register(label);
   pthread_mutex_unlock(&_procmapInfoMutex);
 #endif
@@ -244,7 +245,7 @@ bool DsThreadedServer::postHandlerMethod()
 
   pthread_mutex_lock(&_procmapInfoMutex);
   char label[128];
-  sprintf(label, "Received client, port: %d", _port);
+  safe_snprintf(label, "Received client, port: %d", _port);
   PMU_auto_register(label);
   pthread_mutex_unlock(&_procmapInfoMutex);
 #endif
@@ -397,4 +398,3 @@ void DsThreadedServer::purgeCompletedThreads()
   pthread_mutex_unlock(&_threadStatusMutex);
 
 }
-

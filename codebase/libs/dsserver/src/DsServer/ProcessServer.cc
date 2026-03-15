@@ -28,6 +28,7 @@
 #include <toolsa/ServerSocket.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/safe_snprintf.hh>
 
 #include <sys/wait.h>
 #include <csignal>
@@ -78,7 +79,7 @@ ProcessServer::ProcessServer(const string & executableName,
   // If the instance name is empty, use the port number.
   if (_instanceName.size() == 0) {
     char buf[100];
-    sprintf(buf, "%d", _port);
+    safe_snprintf(buf, "%d", _port);
     _instanceName = buf;
   }
 

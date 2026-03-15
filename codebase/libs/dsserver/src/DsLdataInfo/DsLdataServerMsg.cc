@@ -28,6 +28,7 @@
 #include <toolsa/umisc.h>
 #include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <dsserver/DsLdataServerMsg.hh>
 #include <didss/DsMsgPart.hh>
 using namespace std;
@@ -347,7 +348,7 @@ int DsLdataServerMsg::disassemble(void *inMsg, const int msgLen)
     TaStr::AddStr(_errorStr, "  ", DateTime::str());
     _errorStr += "  Bad message header\n";
     _errorStr += "  Message len: ";
-    sprintf(tmpStr, "%d\n", msgLen);
+    safe_snprintf(tmpStr, "%d\n", msgLen);
     _errorStr += tmpStr;
     return (-1);
   }
@@ -356,10 +357,10 @@ int DsLdataServerMsg::disassemble(void *inMsg, const int msgLen)
     _errorStr = "ERROR - DsLdataServerMsg::disassemble\n";
     TaStr::AddStr(_errorStr, "  ", DateTime::str());
     _errorStr += "  Unknown message type: \n";
-    sprintf(tmpStr, "%d\n", _type);
+    safe_snprintf(tmpStr, "%d\n", _type);
     _errorStr += tmpStr;
     _errorStr += "  Message len: ";
-    sprintf(tmpStr, "%d\n", msgLen);
+    safe_snprintf(tmpStr, "%d\n", msgLen);
     _errorStr += tmpStr;
     return (-1);
   }
@@ -576,4 +577,3 @@ const LdataInfo *DsLdataServerMsg::getNextLdataInfo() const
   return _ldataQ[_ldataPos++];
   
 }
-
