@@ -37,6 +37,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <toolsa/safe_snprintf.hh>
 #include <dataport/bigend.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/TaXml.hh>
@@ -422,7 +423,7 @@ string ac_georef_load_as_xml(const ac_georef_t *georef,
   for (int ii = 0; ii < AC_GEOREF_N_UNUSED; ii++) {
     if (georef->unused[ii] != missingFl32) {
       char label[128];
-      sprintf(label, "unused[%d]", ii);
+      safe_snprintf(label, "unused[%d]", ii);
       xml += TaXml::writeDouble(label, sil+1, georef->unused[ii], "%.6f");
     }
   }
@@ -430,7 +431,7 @@ string ac_georef_load_as_xml(const ac_georef_t *georef,
   for (int ii = 0; ii < AC_GEOREF_N_CUSTOM; ii++) {
     if (georef->custom[ii] != missingFl32) {
       char label[128];
-      sprintf(label, "custom[%d]", ii);
+      safe_snprintf(label, "custom[%d]", ii);
       xml += TaXml::writeDouble(label, sil+1, georef->custom[ii], "%.6f");
     }
   }

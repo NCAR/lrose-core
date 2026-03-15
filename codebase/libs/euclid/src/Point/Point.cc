@@ -182,7 +182,7 @@ string Point::sprint(void) const
 {
   string ret = sprintAtt();
   char buf[100];
-  sprintf(buf, "(%.2lf,%.2lf)", _x, _y);
+  safe_snprintf(buf, "(%.2lf,%.2lf)", _x, _y);
   ret += buf;
   return ret;
 }

@@ -103,7 +103,7 @@ void MotionVector::print(FILE *fp) const
 std::string MotionVector::sprint(void) const
 {
   char buf[100];
-  sprintf(buf, "v=(%.2f,%.2f)", _vx, _vy);
+  safe_snprintf(buf, "v=(%.2f,%.2f)", _vx, _vy);
   std::string ret = buf;
   return ret;
 }

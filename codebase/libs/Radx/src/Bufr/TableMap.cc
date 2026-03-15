@@ -10,6 +10,7 @@
 #include <string.h>
 #include <algorithm>
 #include <stdexcept>
+#include <toolsa/safe_snprintf.hh>
 #include <Radx/TableMap.hh>
 #include <Radx/TableMapKey.hh>
 #include "BufrTables.hh"
@@ -664,24 +665,24 @@ int TableMap::ImportTablesFromPath(unsigned int masterTableVersion,
 				   char *path) {
   char fileName[2048];
 
-  sprintf(fileName, "%s/bufrtabb_%u.csv", path, masterTableVersion);
+  safe_snprintf(fileName, "%s/bufrtabb_%u.csv", path, masterTableVersion);
   if (_debug)
     cerr << "reading master Table B from " << fileName << endl;
   ReadTableB(fileName);
 
-  sprintf(fileName, "%s/bufrtabd_%u.csv", path, masterTableVersion);
+  safe_snprintf(fileName, "%s/bufrtabd_%u.csv", path, masterTableVersion);
   if (_debug)
     cerr << "reading master Table D from " << fileName << endl;
   ReadTableD(fileName);
 
-  sprintf(fileName, "%s/localtabb_%u_%u.csv", path, generatingCenter,
-	  localTableVersion);
+  safe_snprintf(fileName, "%s/localtabb_%u_%u.csv", path, generatingCenter,
+                localTableVersion);
   if (_debug)
     cerr << "reading local Table B from " << fileName << endl;
   ReadTableB(fileName);
 
-  sprintf(fileName, "%s/localtabd_%u_%u.csv", path, generatingCenter,
-	  localTableVersion);
+  safe_snprintf(fileName, "%s/localtabd_%u_%u.csv", path, generatingCenter,
+                localTableVersion);
   if (_debug)
     cerr << "reading local Table D from " << fileName << endl;
   ReadTableD(fileName); 
@@ -696,24 +697,24 @@ int TableMap::ImportTables2(unsigned int masterTableVersion,
   char fileName[1024];
 
   //ReadInternalTableB(masterTableVersion, generatingCenter, localTableVersion);
-  sprintf(fileName, "../share/bbufr/tables/bufrtabb_%u.csv", masterTableVersion);
+  safe_snprintf(fileName, "../share/bbufr/tables/bufrtabb_%u.csv", masterTableVersion);
   if (_debug)
     cerr << "reading master Table B from " << fileName << endl;
   ReadTableB(fileName);
 
-  sprintf(fileName, "../share/bbufr/tables/bufrtabd_%u.csv", masterTableVersion);
+  safe_snprintf(fileName, "../share/bbufr/tables/bufrtabd_%u.csv", masterTableVersion);
   if (_debug)
     cerr << "reading master Table D from " << fileName << endl;
   ReadTableD(fileName);
 
-  sprintf(fileName, "../share/bbufr/tables/localtabb_%u_%u.csv", generatingCenter,
-	  localTableVersion);
+  safe_snprintf(fileName, "../share/bbufr/tables/localtabb_%u_%u.csv", generatingCenter,
+                localTableVersion);
   if (_debug)
     cerr << "reading local Table B from " << fileName << endl;
   ReadTableB(fileName);
 
-  sprintf(fileName, "../share/bbufr/tables/localtabd_%u_%u.csv", generatingCenter,
-	  localTableVersion);
+  safe_snprintf(fileName, "../share/bbufr/tables/localtabd_%u_%u.csv", generatingCenter,
+                localTableVersion);
   if (_debug)
     cerr << "reading local Table D from " << fileName << endl;
   ReadTableD(fileName); 
@@ -843,4 +844,3 @@ vector<string>  TableMap::split(const std::string &s, char delim) {
      }
      return result;
  }
-

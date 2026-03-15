@@ -48,6 +48,7 @@
 #include <Radx/ByteOrder.hh>
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxRcalib.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <Radx/RadxStr.hh>
 #include <cstring>
 #include <cstdio>
@@ -623,7 +624,7 @@ int NidsRadxFile::_finalizeReadVolume()
   _readVol->setScanId(_scanId);
   
   char vcpStr[128];
-  sprintf(vcpStr, "vcp-%d", _vcpNum);
+  safe_snprintf(vcpStr, "vcp-%d", _vcpNum);
   _readVol->setScanName(vcpStr);
 
   _readVol->setVolumeNumber(_volNum);
@@ -964,4 +965,3 @@ int NidsRadxFile::_printRays(ostream &out, bool printData)
   return 0;
 
 }
-

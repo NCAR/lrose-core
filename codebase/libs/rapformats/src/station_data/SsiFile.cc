@@ -296,13 +296,13 @@ void SsiFile::_outputDataLine(time_t data_time,
     
     // Determine the output file name
 
-    sprintf(output_filename,
-	    "%s/%04ld%02ld%02ld.%s",
-	    _outputPath,
-	    data_time_struct.year,
-	    data_time_struct.month,
-	    data_time_struct.day,
-	    _outputExtension);
+    safe_snprintf(output_filename,
+                  "%s/%04ld%02ld%02ld.%s",
+                  _outputPath,
+                  data_time_struct.year,
+                  data_time_struct.month,
+                  data_time_struct.day,
+                  _outputExtension);
     
 #ifdef DEBUG
     fprintf(stdout,

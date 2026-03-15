@@ -33,6 +33,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <toolsa/safe_snprintf.hh>
 
 #include <grib2/Template4.1.hh>
 #include <grib2/ProdDefTemp.hh>
@@ -190,7 +191,7 @@ void Template4_pt_1::getRecSummary (Grib2Record::rec_summary_t *summary)
   summary->forecastTime = _getTimeUnitName(_forecastTime, _timeRangeUnit);
 
   char ensemble[50];
-  sprintf(ensemble, "Ensemble #%d", _perturbationNum);
+  safe_snprintf(ensemble, "Ensemble #%d", _perturbationNum);
   summary->additional.assign (ensemble);
 
   ndex = _getSurfaceIndex(_firstSurfaceType);
@@ -225,7 +226,7 @@ void Template4_pt_1::getRecSummary (Grib2Record::rec_summary_t *summary)
 	summary->levelVal2 *= pow(10.0, _scaleFactorSecondSurface & 127);
     }
 
-  sprintf(ensemble, "_PERT%d", _perturbationNum);
+  safe_snprintf(ensemble, "_PERT%d", _perturbationNum);
   summary->name.append( ensemble );
 
   return;
@@ -284,4 +285,3 @@ void Template4_pt_1::print(FILE *stream) const
 }
 
 } // namespace Grib2
-

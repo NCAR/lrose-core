@@ -3708,7 +3708,7 @@ void Fmq::initErrStr() const
 
   char errTxt[8192];
 
-  sprintf(errTxt, "ERROR - FMQ, fmq path: %s\n", _fmqPath.c_str());
+  safe_snprintf(errTxt, "ERROR - FMQ, fmq path: %s\n", _fmqPath.c_str());
   _errStr += errTxt;
 
 }
@@ -3727,9 +3727,9 @@ void Fmq::_print_error(const char *routine, const char *format, ...) const
   char errTxt[8192];
 
   if (routine != NULL) {
-    sprintf(errTxt, "ERROR - %s:Fmq::%s\n", _progName.c_str(), routine);
+    safe_snprintf(errTxt, "ERROR - %s:Fmq::%s\n", _progName.c_str(), routine);
     _errStr += errTxt;
-    sprintf(errTxt, "Fmq path: %s\n", _fmqPath.c_str());
+    safe_snprintf(errTxt, "Fmq path: %s\n", _fmqPath.c_str());
     _errStr += errTxt;
   }
 

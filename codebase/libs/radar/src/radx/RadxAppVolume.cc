@@ -11,6 +11,7 @@
 #include <Radx/RadxPath.hh>
 #include <toolsa/LogStream.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/pmu.h>
 
 //------------------------------------------------------------------
@@ -173,7 +174,7 @@ RadxAppVolume::RadxAppVolume(const RadxAppParms *parms,
       for (int i=iymd0; i<=iymd1; ++i)
       {
 	char buf[1000];
-	sprintf(buf, "%s/%08d", _parms->_inputs._primaryGroup.dir.c_str(), i);
+        safe_snprintf(buf, "%s/%08d", _parms->_inputs._primaryGroup.dir.c_str(), i);
 	dirs.push_back(buf);
       }
     }
@@ -665,7 +666,7 @@ bool RadxAppVolume::_mergeVol(const RadxVol &secondaryVol)
 
     int pMilli = pRay->getNanoSecs() / 1.0e6;
     char pMStr[16];
-    sprintf(pMStr, "%.3d", pMilli);
+    safe_snprintf(pMStr, "%.3d", pMilli);
 
     // find matching ray in secondary volume
 
@@ -680,7 +681,7 @@ bool RadxAppVolume::_mergeVol(const RadxVol &secondaryVol)
       
       int sMilli = sRay->getNanoSecs() / 1.0e6;
       char sMStr[16];
-      sprintf(sMStr, "%.3d", sMilli);
+      safe_snprintf(sMStr, "%.3d", sMilli);
 
       double diffTime;
       if (!_activeGroup.isClimo)
@@ -871,4 +872,3 @@ void RadxAppVolume::_setupWrite(RadxFile &file)
 
   file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
 }
-

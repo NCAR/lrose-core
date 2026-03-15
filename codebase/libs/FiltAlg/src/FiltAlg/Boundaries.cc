@@ -40,6 +40,7 @@
 #include <toolsa/DateTime.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
+#include <toolsa/safe_snprintf.hh>
 
 
 using std::vector;
@@ -120,7 +121,7 @@ bool Boundaries::write_lines(const time_t &time,
     bdry.addSpareFloat(weight);
 
     char sbuf[1000];
-    sprintf(sbuf, "%d", id);
+    safe_snprintf(sbuf, "%d", id);
     string label = sbuf;
     
     for (int j=0; j<l[i].num(); ++j)
@@ -191,7 +192,7 @@ bool Boundaries::write_connected_lines(const time_t &time,
     // bdry.addSpareFloat(weight);
 
     char sbuf[1000];
-    sprintf(sbuf, "%d", id);
+    safe_snprintf(sbuf, "%d", id);
     string label = sbuf;
     
     for (int j=0; j<l[i].num(); ++j)
@@ -277,7 +278,7 @@ bool Boundaries::write_connected_points(const time_t &time,
     // bdry.addSpareFloat(weight);
 
     char sbuf[1000];
-    sprintf(sbuf, "%d", id);
+    safe_snprintf(sbuf, "%d", id);
     string label = sbuf;
     
     BdryPolyline poly(0, label);
@@ -324,7 +325,7 @@ bool Boundaries::write_connected_points(const time_t &time,
 
     // bdry.addSpareFloat(weight);
 
-    sprintf(sbuf, "%d", id);
+    safe_snprintf(sbuf, "%d", id);
     label = sbuf;
     
     BdryPolyline polyE(3600, label);

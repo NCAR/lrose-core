@@ -36,6 +36,7 @@
 #include <Radx/DoradeData.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/ByteOrder.hh>
+#include <toolsa/safe_snprintf.hh>
 
 #include <cstring>
 #include <cstdio>
@@ -1694,13 +1695,13 @@ void DoradeData::printFormat(const DoradeData::super_SWIB_t &val, FILE *out)
   for (int ii = 0; ii < 8; ii++) {
     if (ii < 2 || ii > 5) {
       char name[32];
-      sprintf(name, "key_table[%d].offset", ii);
+      safe_snprintf(name, "key_table[%d].offset", ii);
       fprintf(out, _dform, "si32", name, (int) sizeof(Radx::si32), offset);
       offset += sizeof(Radx::si32);
-      sprintf(name, "key_table[%d].size  ", ii);
+      safe_snprintf(name, "key_table[%d].size  ", ii);
       fprintf(out, _dform, "si32", name, (int) sizeof(Radx::si32), offset);
       offset += sizeof(Radx::si32);
-      sprintf(name, "key_table[%d].type  ", ii);
+      safe_snprintf(name, "key_table[%d].type  ", ii);
       fprintf(out, _dform, "si32", name, (int) sizeof(Radx::si32), offset);
       offset += sizeof(Radx::si32);
     } else {
@@ -2344,10 +2345,10 @@ void DoradeData::printFormat(const DoradeData::insitu_descript_t &val, FILE *out
   for (int ii = 0; ii < 256; ii++) {
     if (ii < 3 || ii > 252) {
       char label[32];
-      sprintf(label, "params[%d].name[8] ", ii);
+      safe_snprintf(label, "params[%d].name[8] ", ii);
       fprintf(out, _dform, "char", label, size, offset);
       offset += size;
-      sprintf(label, "params[%d].units[8]", ii);
+      safe_snprintf(label, "params[%d].units[8]", ii);
       fprintf(out, _dform, "char", label, size, offset);
       offset += size;
     } else if (ii < 6){

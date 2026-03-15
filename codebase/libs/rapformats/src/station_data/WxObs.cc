@@ -1431,134 +1431,134 @@ void WxObs::_printReport(ostream &out,
   char tmpStr[1024];
   time_t print_time;
   
-  sprintf(tmpStr, "%smsg_id = %d\n", spacer.c_str(), _report.msg_id);
+  safe_snprintf(tmpStr, "%smsg_id = %d\n", spacer.c_str(), _report.msg_id);
   str += tmpStr;
 
   print_time = _report.time;
-  sprintf(tmpStr, "%stime = %s", spacer.c_str(), asctime(gmtime(&print_time)));
+  safe_snprintf(tmpStr, "%stime = %s", spacer.c_str(), asctime(gmtime(&print_time)));
   str += tmpStr;
   
   print_time = _report.accum_start_time;
-  sprintf(tmpStr, "%saccum_start_time = %s",
-	  spacer.c_str(), asctime(gmtime(&print_time)));
+  safe_snprintf(tmpStr, "%saccum_start_time = %s",
+                spacer.c_str(), asctime(gmtime(&print_time)));
   str += tmpStr;
   
-  sprintf(tmpStr, "%sweather_type = %s\n",
-	  spacer.c_str(), weather_type2string(_report.weather_type));
+  safe_snprintf(tmpStr, "%sweather_type = %s\n",
+                spacer.c_str(), weather_type2string(_report.weather_type));
   str += tmpStr;
   
   if(_report.lat != STATION_NAN) {
-      sprintf(tmpStr, "%slat = %.3f deg\n", spacer.c_str(), _report.lat);
+      safe_snprintf(tmpStr, "%slat = %.3f deg\n", spacer.c_str(), _report.lat);
   } else {
-      sprintf(tmpStr, "%slat = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%slat = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
   if(_report.lon != STATION_NAN) {
-      sprintf(tmpStr, "%slon = %.3f deg\n", spacer.c_str(), _report.lon);
+      safe_snprintf(tmpStr, "%slon = %.3f deg\n", spacer.c_str(), _report.lon);
   } else {
-      sprintf(tmpStr, "%slon = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%slon = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
   if(_report.alt != STATION_NAN) {
-      sprintf(tmpStr, "%salt = %.3f m\n", spacer.c_str(), _report.alt);
+      safe_snprintf(tmpStr, "%salt = %.3f m\n", spacer.c_str(), _report.alt);
   } else {
-      sprintf(tmpStr, "%salt = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%salt = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
   if(_report.temp != STATION_NAN) {
-      sprintf(tmpStr, "%stemp = %.3f deg C\n", spacer.c_str(), _report.temp);
+      safe_snprintf(tmpStr, "%stemp = %.3f deg C\n", spacer.c_str(), _report.temp);
   } else {
-      sprintf(tmpStr, "%stemp = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%stemp = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
   if(_report.dew_point != STATION_NAN) {
-      sprintf(tmpStr, "%sdew_point = %.3f deg C\n", spacer.c_str(), _report.dew_point);
+      safe_snprintf(tmpStr, "%sdew_point = %.3f deg C\n", spacer.c_str(), _report.dew_point);
   } else {
-      sprintf(tmpStr, "%sdew_point = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%sdew_point = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
   if(_report.relhum != STATION_NAN) {
-      sprintf(tmpStr, "%srelhum = %.3f %%\n", spacer.c_str(), _report.relhum);
+      safe_snprintf(tmpStr, "%srelhum = %.3f %%\n", spacer.c_str(), _report.relhum);
   } else {
-      sprintf(tmpStr, "%srelhum = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%srelhum = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
   if(_report.windspd != STATION_NAN) {
-      sprintf(tmpStr, "%swindspd = %.3f m/s\n", spacer.c_str(), _report.windspd);
+      safe_snprintf(tmpStr, "%swindspd = %.3f m/s\n", spacer.c_str(), _report.windspd);
   } else {
-      sprintf(tmpStr, "%swindspd = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%swindspd = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
   if(_report.winddir != STATION_NAN) {
     if (SignBit::isSet(_report.winddir)) { // variable
-      sprintf(tmpStr, "%swinddir = variable\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%swinddir = variable\n", spacer.c_str());
     } else {
-      sprintf(tmpStr, "%swinddir = %.3f deg\n", spacer.c_str(), _report.winddir);
+      safe_snprintf(tmpStr, "%swinddir = %.3f deg\n", spacer.c_str(), _report.winddir);
     }
   } else {
-      sprintf(tmpStr, "%swinddir = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%swinddir = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
   if(_report.windgust != STATION_NAN) {
-      sprintf(tmpStr, "%swindgust = %.3f m/s\n", spacer.c_str(), _report.windgust);
+      safe_snprintf(tmpStr, "%swindgust = %.3f m/s\n", spacer.c_str(), _report.windgust);
   } else {
-      sprintf(tmpStr, "%swindgust = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%swindgust = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
   if(_report.pres != STATION_NAN) {
-      sprintf(tmpStr, "%spres = %.3f mb\n", spacer.c_str(), _report.pres);
+      safe_snprintf(tmpStr, "%spres = %.3f mb\n", spacer.c_str(), _report.pres);
   } else {
-      sprintf(tmpStr, "%spres = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%spres = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
   if(_report.liquid_accum != STATION_NAN) {
-      sprintf(tmpStr, "%sliquid_accum = %.3f mm\n",
-	  spacer.c_str(), _report.liquid_accum);
+      safe_snprintf(tmpStr, "%sliquid_accum = %.3f mm\n",
+                    spacer.c_str(), _report.liquid_accum);
   } else {
-      sprintf(tmpStr, "%sliquid_accum = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%sliquid_accum = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
   if(_report.precip_rate != STATION_NAN) {
-      sprintf(tmpStr, "%sprecip_rate = %.3f mm/hr\n", 
-	  spacer.c_str(), _report.precip_rate);
+      safe_snprintf(tmpStr, "%sprecip_rate = %.3f mm/hr\n", 
+                    spacer.c_str(), _report.precip_rate);
   } else {
-      sprintf(tmpStr, "%sprecip_rate = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%sprecip_rate = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
   if(_report.visibility != STATION_NAN) {
     if (_report.visibility >= 0) {
-      sprintf(tmpStr, "%svisibility = %.3f km\n", spacer.c_str(), _report.visibility);
+      safe_snprintf(tmpStr, "%svisibility = %.3f km\n", spacer.c_str(), _report.visibility);
     } else {
-      sprintf(tmpStr, "%sExtinction coeff: = %.3f /km\n", spacer.c_str(), _report.visibility * -1.0);
+      safe_snprintf(tmpStr, "%sExtinction coeff: = %.3f /km\n", spacer.c_str(), _report.visibility * -1.0);
     }
   } else {
-      sprintf(tmpStr, "%svisibility = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%svisibility = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
    
   if(_report.rvr != STATION_NAN) {
-      sprintf(tmpStr, "%srvr = %.3f km\n", spacer.c_str(), _report.rvr);
+      safe_snprintf(tmpStr, "%srvr = %.3f km\n", spacer.c_str(), _report.rvr);
   } else {
-      sprintf(tmpStr, "%srvr = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%srvr = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
    
   if(_report.ceiling != STATION_NAN) {
-      sprintf(tmpStr, "%sceiling = %.3f km\n", spacer.c_str(), _report.ceiling);
+      safe_snprintf(tmpStr, "%sceiling = %.3f km\n", spacer.c_str(), _report.ceiling);
   } else {
-      sprintf(tmpStr, "%sceiling = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%sceiling = NOT SET\n", spacer.c_str());
   }
   str += tmpStr;
 
@@ -1572,26 +1572,26 @@ void WxObs::_printReport(ostream &out,
   case STATION_REPORT :
   case STATION_REPORT_ARRAY :
     if(_report.shared.station.liquid_accum2 != STATION_NAN) {
-      sprintf(tmpStr, "%sliquid_accum2 = %.3f mm\n",
-	      spacer.c_str(), _report.shared.station.liquid_accum2);
+      safe_snprintf(tmpStr, "%sliquid_accum2 = %.3f mm\n",
+                    spacer.c_str(), _report.shared.station.liquid_accum2);
     } else {
-      sprintf(tmpStr, "%sliquid_accum2 = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%sliquid_accum2 = NOT SET\n", spacer.c_str());
     }
     str += tmpStr;
 	   
     if(_report.shared.station.Spare1 != STATION_NAN) {
-      sprintf(tmpStr, "%sSpare1 = %.3f \n",
-	      spacer.c_str(), _report.shared.station.Spare1);
+      safe_snprintf(tmpStr, "%sSpare1 = %.3f \n",
+                    spacer.c_str(), _report.shared.station.Spare1);
     } else {
-      sprintf(tmpStr, "%sSpare1 = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%sSpare1 = NOT SET\n", spacer.c_str());
     }
     str += tmpStr;
     
     if(_report.shared.station.Spare2 != STATION_NAN) {
-      sprintf(tmpStr, "%sSpare2 = %.3f \n",
-	      spacer.c_str(), _report.shared.station.Spare2);
+      safe_snprintf(tmpStr, "%sSpare2 = %.3f \n",
+                    spacer.c_str(), _report.shared.station.Spare2);
     } else {
-      sprintf(tmpStr, "%sSpare2 = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%sSpare2 = NOT SET\n", spacer.c_str());
     }
     str += tmpStr;
     break;
@@ -1599,56 +1599,56 @@ void WxObs::_printReport(ostream &out,
   case METAR_REPORT :
   case REPORT_PLUS_METAR_XML:
   case REPORT_PLUS_FULL_XML:
-    sprintf(tmpStr, "%sMetar weather = <%s>\n",
-	    spacer.c_str(), _report.shared.metar.weather_str);
+    safe_snprintf(tmpStr, "%sMetar weather = <%s>\n",
+                  spacer.c_str(), _report.shared.metar.weather_str);
     str += tmpStr;
     break;
     
   case PRESSURE_STATION_REPORT :
     if(_report.shared.pressure_station.stn_pres != STATION_NAN) {
-      sprintf(tmpStr, "%sstn_pres = %.3f mb\n",
-	      spacer.c_str(), _report.shared.pressure_station.stn_pres);
+      safe_snprintf(tmpStr, "%sstn_pres = %.3f mb\n",
+                    spacer.c_str(), _report.shared.pressure_station.stn_pres);
     } else {
-      sprintf(tmpStr, "%sstn_pres = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%sstn_pres = NOT SET\n", spacer.c_str());
     }
     str += tmpStr;
 	   
     if(_report.shared.pressure_station.Spare1 != STATION_NAN) {
-      sprintf(tmpStr, "%sSpare1 = %.3f \n",
-	      spacer.c_str(), _report.shared.pressure_station.Spare1);
+      safe_snprintf(tmpStr, "%sSpare1 = %.3f \n",
+                    spacer.c_str(), _report.shared.pressure_station.Spare1);
     } else {
-      sprintf(tmpStr, "%sSpare1 = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%sSpare1 = NOT SET\n", spacer.c_str());
     }
     str += tmpStr;
     
     if(_report.shared.pressure_station.Spare2 != STATION_NAN) {
-      sprintf(tmpStr, "%sSpare2 = %.3f \n",
-	      spacer.c_str(), _report.shared.pressure_station.Spare2);
+      safe_snprintf(tmpStr, "%sSpare2 = %.3f \n",
+                    spacer.c_str(), _report.shared.pressure_station.Spare2);
     } else {
-      sprintf(tmpStr, "%sSpare2 = NOT SET\n", spacer.c_str());
+      safe_snprintf(tmpStr, "%sSpare2 = NOT SET\n", spacer.c_str());
     }
     str += tmpStr;
     break;
   case METAR_WITH_REMARKS_REPORT :
-    sprintf(tmpStr, "%sStation indicator = <%s>\n",
-	    spacer.c_str(), _report.shared.remark_info.stn_indicator);
+    safe_snprintf(tmpStr, "%sStation indicator = <%s>\n",
+                  spacer.c_str(), _report.shared.remark_info.stn_indicator);
     str += tmpStr;
-    sprintf(tmpStr, "%spwi_down = <%d>\n",
-	    spacer.c_str(), _report.shared.remark_info.pwi_no);
+    safe_snprintf(tmpStr, "%spwi_down = <%d>\n",
+                  spacer.c_str(), _report.shared.remark_info.pwi_no);
     str += tmpStr;
-    sprintf(tmpStr, "%sfzra_down = <%d>\n",
-	    spacer.c_str(), _report.shared.remark_info.fzra_no);
+    safe_snprintf(tmpStr, "%sfzra_down = <%d>\n",
+                  spacer.c_str(), _report.shared.remark_info.fzra_no);
     str += tmpStr;
-    sprintf(tmpStr, "%sts_down = <%d>\n",
-	    spacer.c_str(), _report.shared.remark_info.ts_no);
+    safe_snprintf(tmpStr, "%sts_down = <%d>\n",
+                  spacer.c_str(), _report.shared.remark_info.ts_no);
     str += tmpStr;
     break;
     
     
   }
   
-  sprintf(tmpStr, "%sstation_label = <%s>\n",
-	  spacer.c_str(), _report.station_label);
+  safe_snprintf(tmpStr, "%sstation_label = <%s>\n",
+                spacer.c_str(), _report.station_label);
   str += tmpStr;
   out << str;
   

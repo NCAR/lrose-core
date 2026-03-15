@@ -47,6 +47,7 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/ByteOrder.hh>
 #include <Radx/Radx.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstring>
 #include <cmath>
 #include <cerrno>
@@ -246,13 +247,13 @@ int DoradeRadxFile::_writeSweepToDir(RadxVol &vol,
   string outDir(dir);
   if (addYearSubDir) {
     char yearStr[BUFSIZ];
-    sprintf(yearStr, "%s%.4d", PATH_SEPARATOR, ftime.getYear());
+    safe_snprintf(yearStr, "%s%.4d", PATH_SEPARATOR, ftime.getYear());
     outDir += yearStr;
   }
   if (addDaySubDir) {
     char dayStr[BUFSIZ];
-    sprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
-            ftime.getYear(), ftime.getMonth(), ftime.getDay());
+    safe_snprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
+                  ftime.getYear(), ftime.getMonth(), ftime.getDay());
     outDir += dayStr;
   }
 
@@ -635,10 +636,10 @@ string DoradeRadxFile::computeFileName(int volNum,
   }
 
   char outName[BUFSIZ];
-  sprintf(outName, "swp.%d%02d%02d%02d%02d%02d.%s.%d.%.1f_%s_v%03d",
-          year - 1900, month, day, hour, min, sec,
-          instrumentName.c_str(), millisecs, fixedAngle,
-          scanType.c_str(), volNum);
+  safe_snprintf(outName, "swp.%d%02d%02d%02d%02d%02d.%s.%d.%.1f_%s_v%03d",
+                year - 1900, month, day, hour, min, sec,
+                instrumentName.c_str(), millisecs, fixedAngle,
+                scanType.c_str(), volNum);
 
   return outName;
 
@@ -1179,9 +1180,9 @@ int DoradeRadxFile::_getVolumePaths(const string &path,
   if (rhour == 0) {
     RadxTime prevDate(rtime.utime() - RadxTime::RADX_SECS_IN_DAY);
     char prevDir[RadxPath::RADX_MAX_PATH_LEN];
-    sprintf(prevDir, "%s%s%.4d%.2d%.2d",
-            parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
-            prevDate.getYear(), prevDate.getMonth(), prevDate.getDay());
+    safe_snprintf(prevDir, "%s%s%.4d%.2d%.2d",
+                  parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
+                  prevDate.getYear(), prevDate.getMonth(), prevDate.getDay());
     _addToPathList(prevDir, 23, 23, pathList);
   }
 
@@ -1190,9 +1191,9 @@ int DoradeRadxFile::_getVolumePaths(const string &path,
   if (rhour == 23) {
     RadxTime nextDate(rtime.utime() + RadxTime::RADX_SECS_IN_DAY);
     char nextDir[RadxPath::RADX_MAX_PATH_LEN];
-    sprintf(nextDir, "%s%s%.4d%.2d%.2d",
-            parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
-            nextDate.getYear(), nextDate.getMonth(), nextDate.getDay());
+    safe_snprintf(nextDir, "%s%s%.4d%.2d%.2d",
+                  parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
+                  nextDate.getYear(), nextDate.getMonth(), nextDate.getDay());
     _addToPathList(nextDir, 0, 0, pathList);
   }
 
@@ -3494,12 +3495,12 @@ void DoradeRadxFile::_printPacked(ostream &out, int count, double val) const
     out << "MISS ";
   } else {
     if (fabs(val) > 0.01) {
-      sprintf(outstr, "%.3f ", val);
+      safe_snprintf(outstr, "%.3f ", val);
       out << outstr;
     } else if (val == 0.0) {
       out << "0.0 ";
     } else {
-      sprintf(outstr, "%.3e ", val);
+      safe_snprintf(outstr, "%.3e ", val);
       out << outstr;
     }
   }
@@ -3520,8 +3521,8 @@ int DoradeRadxFile::_writeComment()
   commStr.resize(499);
   strncpy(_ddComment.comment, commStr.c_str(), 499);
   if (strlen(_ddComment.comment) == 0) {
-    sprintf(_ddComment.comment, "%s",
-            "Written by DoradeRadxFile object");
+    safe_snprintf(_ddComment.comment, "%s",
+                  "Written by DoradeRadxFile object");
   }
 
   // byte swap as needed
@@ -5265,4 +5266,3 @@ double DoradeRadxFile::_getScale(const string &name)
   return scale;
 
 }
-

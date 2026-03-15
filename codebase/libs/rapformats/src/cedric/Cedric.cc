@@ -290,8 +290,8 @@ int Cedric::writeToDir(const string &dir,
   DateTime fileTime = startTime;
 
   char dayStr[BUFSIZ];
-  sprintf(dayStr, "%s%.4d%.2d%.2d", PATH_DELIM,
-          fileTime.getYear(), fileTime.getMonth(), fileTime.getDay());
+  safe_snprintf(dayStr, "%s%.4d%.2d%.2d", PATH_DELIM,
+                fileTime.getYear(), fileTime.getMonth(), fileTime.getDay());
   string outDir(dir);
   outDir += dayStr;
 
@@ -300,20 +300,20 @@ int Cedric::writeToDir(const string &dir,
   string scanType = "SUR";
 
   char fileName[BUFSIZ];
-  sprintf(fileName,
-          "%s_%.4d%.2d%.2d_%.2d%.2d%.2d"
-          "_to_%.4d%.2d%.2d_%.2d%.2d%.2d"
-          "_%s_%s.ced",
-          volLabel.c_str(),
-          startTime.getYear(), startTime.getMonth(), startTime.getDay(),
-          startTime.getHour(), startTime.getMin(), startTime.getSec(),
-          endTime.getYear(), endTime.getMonth(), endTime.getDay(),
-          endTime.getHour(), endTime.getMin(), endTime.getSec(),
-          getRadar().c_str(), getCoordType().c_str());
+  safe_snprintf(fileName,
+                "%s_%.4d%.2d%.2d_%.2d%.2d%.2d"
+                "_to_%.4d%.2d%.2d_%.2d%.2d%.2d"
+                "_%s_%s.ced",
+                volLabel.c_str(),
+                startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+                startTime.getHour(), startTime.getMin(), startTime.getSec(),
+                endTime.getYear(), endTime.getMonth(), endTime.getDay(),
+                endTime.getHour(), endTime.getMin(), endTime.getSec(),
+                getRadar().c_str(), getCoordType().c_str());
   
   char outPath[BUFSIZ];
-  sprintf(outPath, "%s%s%s",
-          outDir.c_str(), PATH_DELIM, fileName);
+  safe_snprintf(outPath, "%s%s%s",
+                outDir.c_str(), PATH_DELIM, fileName);
   
   if (writeToPath(outPath, volLabel)) {
     cerr << "ERROR - Cedric::writeToPath()" << endl;
@@ -942,10 +942,10 @@ void Cedric::setDateTimeRun(time_t runTime)
 {
   DateTime rtime(runTime);
   char timeStr[32], dateStr[32];
-  sprintf(timeStr, "%.2d:%.2d:%.2d",
-          rtime.getHour(), rtime.getMin(), rtime.getSec());
-  sprintf(dateStr, "%.2d/%.2d/%.2d",
-          rtime.getMonth(), rtime.getDay(), rtime.getYear() % 100);
+  safe_snprintf(timeStr, "%.2d:%.2d:%.2d",
+                rtime.getHour(), rtime.getMin(), rtime.getSec());
+  safe_snprintf(dateStr, "%.2d/%.2d/%.2d",
+                rtime.getMonth(), rtime.getDay(), rtime.getYear() % 100);
   setDateRun(dateStr);
   setTimeRun(timeStr);
 }
@@ -1262,12 +1262,12 @@ void Cedric::_printPacked(ostream &out, int count, fl32 val, fl32 missingFl32)
     out << "MISS ";
   } else {
     if (fabs(val) > 0.01) {
-      sprintf(outstr, "%.3f ", val);
+      safe_snprintf(outstr, "%.3f ", val);
       out << outstr;
     } else if (val == 0.0) {
       out << "0.0 ";
     } else {
-      sprintf(outstr, "%.3e ", val);
+      safe_snprintf(outstr, "%.3e ", val);
       out << outstr;
     }
   }
@@ -1549,4 +1549,3 @@ void Cedric::_swap(CED_level_head_t &hdr)
 {
   SWAP_array_16(&hdr.coord, sizeof(CED_level_head_t) - 6);
 }
-

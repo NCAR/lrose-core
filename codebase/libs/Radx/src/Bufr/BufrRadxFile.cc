@@ -48,6 +48,7 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxXml.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <Radx/RadxStr.hh>
 #include <cerrno>
 #include <cstring>
@@ -1469,7 +1470,7 @@ int BufrRadxFile::_setPositionVariables()
   if ((_latitudeDeg < -90) || (_latitudeDeg > 90)) {
     _addErrStr("ERROR - BufrRadxFile::_setPositionVariables");
     char temp[1024];
-    sprintf(temp, "%g", _latitudeDeg);
+    safe_snprintf(temp, "%g", _latitudeDeg);
     _addErrStr("  Latitude outside boundaries (-90 to 90): ", temp);
 
     iret = -1;
@@ -1479,7 +1480,7 @@ int BufrRadxFile::_setPositionVariables()
   if ((_longitudeDeg < -180) || (_longitudeDeg > 180)) {
     _addErrStr("ERROR - BufrRadxFile::_setPositionVariables");
     char temp[1024];
-    sprintf(temp, "%g", _longitudeDeg);
+    safe_snprintf(temp, "%g", _longitudeDeg);
     _addErrStr("  Longitude outside boundaries (-180 to 180): ", temp);
     iret = -1;
   }
@@ -1503,7 +1504,7 @@ int BufrRadxFile::_verifyPositionVariables()
   if (_latitudeDeg != _file.getLatitude()) {
     _addErrStr("ERROR - BufrRadxFile::_verifyPositionVariables");
     char temp[1024];
-    sprintf(temp, "%g", _latitudeDeg);
+    safe_snprintf(temp, "%g", _latitudeDeg);
     _addErrStr("  Latitude incompatible: ", temp);
     iret = -1;
   }
@@ -1511,7 +1512,7 @@ int BufrRadxFile::_verifyPositionVariables()
   if(_longitudeDeg != _file.getLongitude()) {
     _addErrStr("ERROR - BufrRadxFile::_verifyPositionVariables");
     char temp[1024];
-    sprintf(temp, "%g", _longitudeDeg);
+    safe_snprintf(temp, "%g", _longitudeDeg);
     _addErrStr("  Longitude incompatible: ", temp);
     iret = -1;
   }
@@ -1519,7 +1520,7 @@ int BufrRadxFile::_verifyPositionVariables()
   if (_heightKm != _file.getHeight() / 1000.0) {  // convert to Km
     _addErrStr("ERROR - BufrRadxFile::_verifyPositionVariables");
     char temp[1024];
-    sprintf(temp, "%g", _file.getHeight());
+    safe_snprintf(temp, "%g", _file.getHeight());
     _addErrStr("  Height incompatible, found height (Km): ", temp);
     iret = -1;
   }
@@ -2018,4 +2019,3 @@ void BufrRadxFile::_computeFixedAngles()
   _readVol->loadFixedAnglesFromSweepsToRays();
 
 }
-

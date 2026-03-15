@@ -43,6 +43,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <algorithm>
+#include <toolsa/safe_snprintf.hh>
 #include <Radx/ByteOrder.hh>
 #include <Radx/TableMapKey.hh>
 #include <Radx/RadxStr.hh>
@@ -1831,7 +1832,7 @@ int BufrFile::_descend(DNode *tree) {
   } catch (const std::out_of_range& e) {
     Radx::addErrStr(_errString, "", "ERROR - BufrFile::_descend", true);
     char desString[200];
-    sprintf(desString, "unknown descriptor: (%u;%u;%u) ", f,x,y);
+    safe_snprintf(desString, "unknown descriptor: (%u;%u;%u) ", f,x,y);
     Radx::addErrInt(_errString, desString, des, true);
     cerr << _errString;
     throw _errString;
@@ -1868,5 +1869,4 @@ int BufrFile::print(ostream &out, bool printRays, bool printData) {
   out << "=============== end of BufrFile =========" << endl;
   return 0;
 }
-
 

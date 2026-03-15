@@ -34,6 +34,7 @@
 //////////////////////////////////////////////////////////
 
 #include <euclid/Rotate3d.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cmath>
 #include <cstdio>
 using namespace std;
@@ -297,8 +298,8 @@ void Rotate3d::print(const Rotate3d::Vector &vec, ostream &out)
 string Rotate3d::vector2Str(const Rotate3d::Vector &vec)
 {
   char text[1024];
-  sprintf(text, "(%g,%g,%g)",
-          vec.xx, vec.yy, vec.zz);
+  safe_snprintf(text, "(%g,%g,%g)",
+                vec.xx, vec.yy, vec.zz);
   return text;
 }
 
@@ -321,7 +322,7 @@ string Rotate3d::vector2ElAzStr(const Rotate3d::Vector &vec)
   double azDeg = atan2(x, y) * Rad2Deg;
   if (azDeg < 0) azDeg += 360.0;
   char text[1024];
-  sprintf(text, "(el: %g, az: %g)", elDeg, azDeg);
+  safe_snprintf(text, "(el: %g, az: %g)", elDeg, azDeg);
   return text;
 }
 
@@ -337,10 +338,9 @@ void Rotate3d::print(const Rotate3d::Matrix &mat, ostream &out)
 string Rotate3d::matrix2Str(const Rotate3d::Matrix &mat)
 {
   char text[1024];
-  sprintf(text, "(%s,%s,%s)",
-          Rotate3d::vector2Str(mat.row1).c_str(),
-          Rotate3d::vector2Str(mat.row2).c_str(),
-          Rotate3d::vector2Str(mat.row3).c_str());
+  safe_snprintf(text, "(%s,%s,%s)",
+                Rotate3d::vector2Str(mat.row1).c_str(),
+                Rotate3d::vector2Str(mat.row2).c_str(),
+                Rotate3d::vector2Str(mat.row3).c_str());
   return text;
 }
-

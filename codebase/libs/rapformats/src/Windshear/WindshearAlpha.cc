@@ -350,11 +350,11 @@ std::string WindshearAlpha::sprintMagnitude(int mag)
 
   if (mag < 0)
   {
-    sprintf(buf, "-%02d", -mag);
+    safe_snprintf(buf, "-%02d", -mag);
   }
   else
   {
-    sprintf(buf, " %02d", mag);
+    safe_snprintf(buf, " %02d", mag);
   }
 
   string s = buf;
@@ -471,14 +471,14 @@ std::string WindshearAlpha::writeAlphanumeric(void) const
       char buf[100];
       if (_location != 0)
       {
-	sprintf(buf, "%s%s %3dM%s", sprintMagnitude(_magnitude).c_str(),
-		sprintUnits(_type).c_str(), _location, 
-		sprintArenaDesignator(_runwayType).c_str());
+        safe_snprintf(buf, "%s%s %3dM%s", sprintMagnitude(_magnitude).c_str(),
+                      sprintUnits(_type).c_str(), _location, 
+                      sprintArenaDesignator(_runwayType).c_str());
       }
       else
       {
-	sprintf(buf, "%s%s    RW", sprintMagnitude(_magnitude).c_str(),
-		sprintUnits(_type).c_str());
+        safe_snprintf(buf, "%s%s    RW", sprintMagnitude(_magnitude).c_str(),
+                      sprintUnits(_type).c_str());
       }
       s += buf;
     }
@@ -501,4 +501,3 @@ std::string WindshearAlpha::writeAlphanumeric(void) const
 //   s += impairedMsg;
 //   return s;
 // }  
-

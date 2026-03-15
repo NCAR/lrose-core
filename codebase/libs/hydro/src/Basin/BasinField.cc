@@ -37,6 +37,7 @@
 #include <string>
 
 #include <hydro/BasinField.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <shapelib/shapefil.h>
 using namespace std;
 
@@ -116,11 +117,11 @@ string BasinField::getValueAsString(void) const
   switch (_fieldType)
   {
   case TYPE_INTEGER :
-    sprintf(value_string, "%d", _intValue);
+    safe_snprintf(value_string, "%d", _intValue);
     return value_string;
       
   case TYPE_DOUBLE :
-    sprintf(value_string, "%f", _doubleValue);
+    safe_snprintf(value_string, "%f", _doubleValue);
     return value_string;
       
   case TYPE_STRING :

@@ -38,6 +38,7 @@
 #include <toolsa/str.h>
 #include <toolsa/mem.h>
 #include <toolsa/TaArray.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <iomanip>
 using namespace std;
 
@@ -340,7 +341,7 @@ void RadarSpectra::printHeader(ostream &out, string spacer /* = ""*/ ) const
   int msecs = (int) ((_doubleTime - _timeSecs) * 1000.0 + 0.5);
   out << spacer << "  timeSecs : " << DateTime::strm(_timeSecs) << endl;
   char timeStr[128];
-  sprintf(timeStr, "%s.%.3d", DateTime::strm(_timeSecs).c_str(), msecs);
+  safe_snprintf(timeStr, "%s.%.3d", DateTime::strm(_timeSecs).c_str(), msecs);
   out << spacer << "  time : " << timeStr << endl;
   
   out << spacer << "  nSamples : " << _nSamples << endl;
@@ -384,7 +385,7 @@ void RadarSpectra::print(ostream &out, string spacer /* = ""*/ ) const
     vector<radar_iq_t> gateIq = getGateIq(igate);
     for (int jj = 0; jj < (int) gateIq.size(); jj++) {
       char text[256];
-      sprintf(text, "%4d %15.3e %15.3e",  jj, gateIq[jj].ival, gateIq[jj].qval);
+      safe_snprintf(text, "%4d %15.3e %15.3e",  jj, gateIq[jj].ival, gateIq[jj].qval);
       out << "    " << text << endl;
     }
   }
@@ -392,4 +393,3 @@ void RadarSpectra::print(ostream &out, string spacer /* = ""*/ ) const
   out << endl;
   
 }
-

@@ -28,6 +28,7 @@
 #include <toolsa/TaFile.hh>
 #include <toolsa/MemBuf.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -167,7 +168,7 @@ ColorMap::CmapEntry::CmapEntry(int red,
 {
 
   char name[64];
-  sprintf(name, "#%.2x%.2x%.2x", red, green, blue);
+  safe_snprintf(name, "#%.2x%.2x%.2x", red, green, blue);
   colorName = name;
 
 }

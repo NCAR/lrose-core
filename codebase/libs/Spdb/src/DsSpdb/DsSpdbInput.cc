@@ -481,7 +481,7 @@ void DsSpdbInput::_addIntErr(const char *err_str, const int iarg)
 {
   _errStr += err_str;
   char str[32];
-  sprintf(str, "%d\n", iarg);
+  safe_snprintf(str, "%d\n", iarg);
   _errStr += str;
 }
 
@@ -494,4 +494,3 @@ void DsSpdbInput::_addStrErr(const char *err_str, const string &sarg)
   _errStr += sarg;
   _errStr += "\n";
 }
-

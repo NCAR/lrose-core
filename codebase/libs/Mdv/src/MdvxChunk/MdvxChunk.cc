@@ -38,6 +38,7 @@
 ///////////////////////////////////////////////////////////
 
 #include <Mdv/MdvxChunk.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/mem.h>
 #include <toolsa/umisc.h>
 #include <dataport/bigend.h>
@@ -182,7 +183,7 @@ int MdvxChunk::_read_data(TaFile &infile)
   int64_t offset = _chdr.chunk_data_offset;
   if (infile.fseek(offset, SEEK_SET) != 0) {
     _errStr += "ERROR - MdvxChunk::_read_data.\n";
-    sprintf(errstr, "  Seeking chunk data at offset %lld\n", (long long) offset);
+    safe_snprintf(errstr, "  Seeking chunk data at offset %lld\n", (long long) offset);
     _errStr += errstr;
     _errStr += " Chunk info: ";
     _errStr += _chdr.info;
@@ -199,7 +200,7 @@ int MdvxChunk::_read_data(TaFile &infile)
   
   if (infile.fread(_dataBuf.getPtr(), 1, size) != size) {
     _errStr += "ERROR - MdvxChunk::_read_data.\n";
-    sprintf(errstr, "  Cannot read chunk. size %lld\n", (long long) size);
+    safe_snprintf(errstr, "  Cannot read chunk. size %lld\n", (long long) size);
     _errStr += errstr;
     _errStr += " Chunk info: ";
     _errStr += _chdr.info;
@@ -254,7 +255,7 @@ int MdvxChunk::_write_data(TaFile &outfile,
 
   if (outfile.fseek(this_offset, SEEK_SET) != 0) {
     _errStr += "ERROR - MdvxChunk::_write_data.\n";
-    sprintf(errstr, "  Seeking chunk data at this_offset %lld\n", (long long) this_offset);
+    safe_snprintf(errstr, "  Seeking chunk data at this_offset %lld\n", (long long) this_offset);
     _errStr += errstr;
     _errStr += " Chunk info: ";
     _errStr += _chdr.info;

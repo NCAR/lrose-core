@@ -1228,7 +1228,7 @@ void PointList::_printAsciiPortrait(void) const
     if (fmod(ax, 10.0) == 0)
     {
       ix = (int)((ax-x0)/(double)delta);
-      sprintf(tmp, "%d", (int)ax);
+      safe_snprintf(tmp, "%d", (int)ax);
       memcpy(&xlabel[ix], tmp, strlen(tmp));
       if (ix + (int)strlen(tmp) > maxx)
 	maxx = ix + strlen(tmp);
@@ -1243,7 +1243,7 @@ void PointList::_printAsciiPortrait(void) const
     if (fmod(ay, 10.0) == 0.0)
     {
       iy = (int)((ay-y0)/(double)delta);
-      sprintf(tmp, "%d", (int)ay);
+      safe_snprintf(tmp, "%d", (int)ay);
       memcpy(&ylabel[iy], tmp, strlen(tmp));
       if (iy + (int)strlen(tmp) > maxy)
 	maxy = iy + strlen(tmp);
@@ -1328,7 +1328,7 @@ void PointList::_printAsciiLandscape(void) const
     if (fmod(ay, 10.0) == 0)
     {
       iy = (int)((ay-y0)/(double)delta);
-      sprintf(tmp, "%d", (int)ay);
+      safe_snprintf(tmp, "%d", (int)ay);
       memcpy(&ylabel[iy], tmp, strlen(tmp));
       if (iy + (int)strlen(tmp) > maxy)
 	maxy = iy + strlen(tmp);
@@ -1345,7 +1345,7 @@ void PointList::_printAsciiLandscape(void) const
     {
       ix = (int)((ax-x0)/(double)delta);
       ix = nx-1-ix;
-      sprintf(tmp, "%d", (int)ax);
+      safe_snprintf(tmp, "%d", (int)ax);
       memcpy(&xlabel[ix], tmp, strlen(tmp));
       if (ix + (int)strlen(tmp) > maxx)
 	maxx = ix + strlen(tmp);

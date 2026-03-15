@@ -345,12 +345,12 @@ StationDataStatus
   data_end_time_struct = gmtime(&data_end_time);      
 
   if (_demoMode)
-    sprintf(fname, "%s/%s", _inputDir, _demoFilename);
+    safe_snprintf(fname, "%s/%s", _inputDir, _demoFilename);
   else
   {
     strftime(buf, 32, "%y%m%d", data_end_time_struct);
-    sprintf(fname, "%s/%s%s.%s",
-	    _inputDir,_stationPrefix, buf, _stationSuffix);
+    safe_snprintf(fname, "%s/%s%s.%s",
+                  _inputDir,_stationPrefix, buf, _stationSuffix);
   } /* endif - _demoMode */
      
   // Check to see if the file has been updated. 
@@ -498,7 +498,7 @@ StationDataStatus
       {
 	// Build name of previous day's file and open a Station_file
 	strftime(buf, 32, "%y%m%d", data_start_time_struct);
-	sprintf(fname, "%s%s.%s", _stationPrefix, buf, _stationSuffix);
+        safe_snprintf(fname, "%s%s.%s", _stationPrefix, buf, _stationSuffix);
 	if (_debugMode)
 	  printf("File %s is also being examined\n",fname);
 	Station_file prev_station_file(fname);

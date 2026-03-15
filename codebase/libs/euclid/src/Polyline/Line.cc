@@ -371,11 +371,11 @@ string Line::sprint(void) const
 {
   char buf[1000];
   if (!_is_vertical)
-    sprintf(buf, "(%5.2f,%5.2f) to (%5.2f,%5.2f) m=%5.2f b=%5.2f ",
-	    _x0, _y0, _x1, _y1, _slope, _intercept);
+    safe_snprintf(buf, "(%5.2f,%5.2f) to (%5.2f,%5.2f) m=%5.2f b=%5.2f ",
+                  _x0, _y0, _x1, _y1, _slope, _intercept);
   else
-    sprintf(buf, "(%5.2f,%5.2f) to (%5.2f,%5.2f) vertical ",
-	    _x0, _y0, _x1, _y1);
+    safe_snprintf(buf, "(%5.2f,%5.2f) to (%5.2f,%5.2f) vertical ",
+                  _x0, _y0, _x1, _y1);
   string ret = buf;
 
   ret += sprintAtt();
@@ -2546,4 +2546,3 @@ MotionVector Line::_bestSpeed(const MotionVector &best_unit_dir,
   v.rotate(-angle, false);
   return v;
 }
-

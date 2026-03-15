@@ -32,6 +32,7 @@
 
 #include <toolsa/umisc.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <dataport/bigend.h>
 #include <rapformats/DsPlatformGeoref.hh>
 #include <iostream>
@@ -200,8 +201,8 @@ void
 
   time_t ptime = _georef.packet.time_secs_utc;
   char timestr[128];
-  sprintf(timestr, "  time UTC: %s.%.9d\n",
-	  DateTime::strm(ptime).c_str(), _georef.packet.time_nano_secs);
+  safe_snprintf(timestr, "  time UTC: %s.%.9d\n",
+                DateTime::strm(ptime).c_str(), _georef.packet.time_nano_secs);
   out << "  packet_t time UTC: " << timestr << endl;
 
   out << "  unit_num: " << _georef.unit_num << endl;
@@ -232,4 +233,3 @@ void
   out << endl;
 
 }
-

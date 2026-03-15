@@ -48,6 +48,7 @@
 #include <Radx/ByteOrder.hh>
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxRcalib.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <Radx/RadxStr.hh>
 #include <Radx/RadxReadDir.hh>
 #include <cstring>
@@ -218,13 +219,13 @@ int NexradRadxFile::writeToDir(const RadxVol &vol,
   string outDir(dir);
   if (addYearSubDir) {
     char yearStr[BUFSIZ];
-    sprintf(yearStr, "%s%.4d", PATH_SEPARATOR, ftime.getYear());
+    safe_snprintf(yearStr, "%s%.4d", PATH_SEPARATOR, ftime.getYear());
     outDir += yearStr;
   }
   if (addDaySubDir) {
     char dayStr[BUFSIZ];
-    sprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
-            ftime.getYear(), ftime.getMonth(), ftime.getDay());
+    safe_snprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
+                  ftime.getYear(), ftime.getMonth(), ftime.getDay());
     outDir += dayStr;
   }
 
@@ -1886,7 +1887,7 @@ int NexradRadxFile::_finalizeReadVolume()
 
   _readVol->setScanId(_vcpNum);
   char vcpStr[128];
-  sprintf(vcpStr, "vcp-%d", _vcpNum);
+  safe_snprintf(vcpStr, "vcp-%d", _vcpNum);
   _readVol->setScanName(vcpStr);
   _readVol->setVolumeNumber(_volumeNumber);
   _readVol->setInstrumentType(_instrumentType);
@@ -2661,12 +2662,12 @@ void NexradRadxFile::_printPacked(ostream &out, int count, double val) const
     out << "MISS ";
   } else {
     if (fabs(val) > 0.01) {
-      sprintf(outstr, "%.3f ", val);
+      safe_snprintf(outstr, "%.3f ", val);
       out << outstr;
     } else if (val == 0.0) {
       out << "0.0 ";
     } else {
-      sprintf(outstr, "%.3e ", val);
+      safe_snprintf(outstr, "%.3e ", val);
       out << outstr;
     }
   }
@@ -2703,9 +2704,9 @@ string NexradRadxFile::_computeFileName(int volNum,
   }
 
   char outName[BUFSIZ];
-  sprintf(outName, "nexrad.%04d%02d%02d_%02d%02d%02d_%s_v%03d_%s.msg31",
-          year, month, day, hour, min, sec,
-          instrumentName.c_str(), volNum, scanType.c_str());
+  safe_snprintf(outName, "nexrad.%04d%02d%02d_%02d%02d%02d_%s_v%03d_%s.msg31",
+                year, month, day, hour, min, sec,
+                instrumentName.c_str(), volNum, scanType.c_str());
 
   return outName;
 
@@ -2723,7 +2724,7 @@ int NexradRadxFile::_writeMetaDataHdrs(const RadxVol &vol)
   NexradData::vol_title_t title;
   memset(&title, 0, sizeof(title));
   char text[128];
-  sprintf(text, "AR2V0002.%.3d", vol.getVolumeNumber()); 
+  safe_snprintf(text, "AR2V0002.%.3d", vol.getVolumeNumber()); 
   memcpy(title.filetype, text, 12);
 
   int julianDate = vol.getEndTimeSecs() / 86400;
@@ -3779,7 +3780,7 @@ int NexradRadxFile::_unzipFile(const string &path)
   char tmpName[128];
   long long now = time(NULL);
   long long pid = getpid();
-  sprintf(tmpName, "NexradRadxFile.%s.%lld.%lld", rpath.getFile().c_str(), now, pid);
+  safe_snprintf(tmpName, "NexradRadxFile.%s.%lld.%lld", rpath.getFile().c_str(), now, pid);
   tmpPath += tmpName;
 
   // open output file

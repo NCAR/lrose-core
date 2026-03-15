@@ -36,6 +36,7 @@
 #include <Radx/NexradData.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/ByteOrder.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstring>
 #include <cstdio>
 #include <iostream>
@@ -570,7 +571,7 @@ void NexradData::printTime(int julianDate, int msecsInDay, ostream &out)
   time_t utime = (julianDate-1) * 86400 + secs;
   RadxTime rtime(utime);
   char msecsStr[16];
-  sprintf(msecsStr, "%.3d", msecs);
+  safe_snprintf(msecsStr, "%.3d", msecs);
   out << "  time: " << RadxTime::strm(utime) << "." << msecsStr << endl;
 }
 
@@ -761,5 +762,4 @@ bool NexradData::msgTypeIsValid(int msgType)
   }
 
 }
-
 

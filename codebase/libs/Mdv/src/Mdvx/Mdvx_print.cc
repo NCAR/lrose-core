@@ -38,6 +38,7 @@
 #include <Mdv/MdvxChunk.hh>
 #include <Mdv/MdvxRadar.hh>
 #include <Mdv/MdvxTimeStamp.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
 #include <iomanip>
@@ -1387,7 +1388,7 @@ const char *Mdvx::_labelledInt(const char*label, int num)
   if (strlen(label) > _printStrLen - 32) {
     STRncopy(_printStr, label, _printStrLen);
   } else {
-    sprintf(_printStr, "%s: %d", label, num);
+    safe_snprintf(_printStr, "%s: %d", label, num);
   }
 
   return (_printStr);
@@ -2127,4 +2128,3 @@ void Mdvx::printTimeHeight(ostream &out,
   } // i
 
 }
-

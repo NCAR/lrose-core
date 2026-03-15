@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <toolsa/safe_snprintf.hh>
 
 //#include <se_utils.hh>
 //#include <sii_utils.hh>
@@ -68,7 +69,7 @@ std::string ColorTableManager::absorbTable(const char *filename)
   {
     char mess[256];
     
-    sprintf(mess, "Unable to open color table file %s\n", filename);
+    safe_snprintf(mess, "Unable to open color table file %s\n", filename);
     sii_message(mess);
     return "";
   }
@@ -166,7 +167,7 @@ bool ColorTableManager::dumpTables(FILE *stream) const
     if ((nn = fwrite(&gd, sizeof(char), sizeof(gd), stream)) < sizeof(gd))
     {
       char mess[256];
-      sprintf(mess, "Problem writing color table: %s\n", aa);
+      safe_snprintf(mess, "Problem writing color table: %s\n", aa);
       solo_message(mess);
       return false;
     }
@@ -174,7 +175,7 @@ bool ColorTableManager::dumpTables(FILE *stream) const
     if ((nn = fwrite((void *)bb, sizeof(char), len, stream)) < len)
     {
       char mess[256];
-      sprintf(mess, "Problem writing color table: %s\n", aa);
+      safe_snprintf(mess, "Problem writing color table: %s\n", aa);
       solo_message(mess);
       return false;
     }

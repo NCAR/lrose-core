@@ -65,10 +65,10 @@ string Box::sprint(void) const
 {
   char buf[1000];
   if (emptyBox())
-    sprintf(buf, "Box [empty]");
+    safe_snprintf(buf, "Box [empty]");
   else
-    sprintf(buf, "Box [%.1f,%.1f] to [%.1f,%.1f]",
-	    _minx, _miny, _maxx, _maxy);
+    safe_snprintf(buf, "Box [%.1f,%.1f] to [%.1f,%.1f]",
+                  _minx, _miny, _maxx, _maxy);
   string ret = buf;
   return ret;
 }
@@ -132,4 +132,3 @@ void Box::_truncateAtEdges(int nx, int ny)
   if (_maxx >= x) _maxx = x;
   if (_maxy >= y) _maxy = y;
 }
-

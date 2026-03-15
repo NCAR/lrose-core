@@ -180,9 +180,8 @@ void Endpts::print(void) const
 std::string Endpts::sprint(void) const
 {
   char buf[1000];
-  sprintf(buf, "0:(%d,%d) 1:(%d,%d)", _index0, _endpt0, _index1,
-	  _endpt1);
+  safe_snprintf(buf, "0:(%d,%d) 1:(%d,%d)", _index0, _endpt0, _index1,
+                _endpt1);
   std::string ret = buf;
   return ret;
 }
-

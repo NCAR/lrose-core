@@ -853,8 +853,8 @@ string LineList::sprintEndsAndNum(const string &name) const
   if (!_ends(x0, y0, x1, y1))
     return ret;
   char buf[100];
-  sprintf(buf, "%s: [(%.2f,%.2f)  (%.2f,%.2f)]  nline:%d",
-	  name.c_str(), x0, y0, x1, y1, num());
+  safe_snprintf(buf, "%s: [(%.2f,%.2f)  (%.2f,%.2f)]  nline:%d",
+                name.c_str(), x0, y0, x1, y1, num());
   ret = buf;
   return ret;
 }
@@ -868,8 +868,8 @@ string LineList::sprintEndsAndNum(const string &name, int index) const
   if (!_ends(x0, y0, x1, y1))
     return ret;
   char buf[100];
-  sprintf(buf, "%s[%d]: [(%.2f,%.2f)  (%.2f,%.2f)]  nline:%d",
-	  name.c_str(), index, x0, y0, x1, y1, num());
+  safe_snprintf(buf, "%s[%d]: [(%.2f,%.2f)  (%.2f,%.2f)]  nline:%d",
+                name.c_str(), index, x0, y0, x1, y1, num());
   ret = buf;
   return ret;
 }
@@ -2531,4 +2531,3 @@ bool LineList::_bestLocalSpeed(const Line &o, double maxdist,
     return true;
   }
 }
-

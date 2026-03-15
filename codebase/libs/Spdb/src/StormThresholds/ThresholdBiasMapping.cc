@@ -410,7 +410,7 @@ std::string ThresholdBiasMapping::setEnvString(void) const
   for (i=_threshMap.begin(); i!=_threshMap.end(); ++i)
   {
     char  buf[1000];
-    sprintf(buf, "setenv THRESH_%d  %10.6lf\n", i->first, i->second);
+    safe_snprintf(buf, "setenv THRESH_%d  %10.6lf\n", i->first, i->second);
     ret += buf;
   }
   return ret;
@@ -610,8 +610,8 @@ bool ThresholdBiasMapping::compare(const ThresholdBiasMapping &inp,
       // double thresh1 = inp._threshMap.at(lt);
       double thresh1 = iInp->second;
       char buf[1000];
-      sprintf(buf, "%6d   %6.4lf  %6.4lf   diff:%6.4lf\n",
-	      lt, thresh0, thresh1, thresh1-thresh0);
+      safe_snprintf(buf, "%6d   %6.4lf  %6.4lf   diff:%6.4lf\n",
+                    lt, thresh0, thresh1, thresh1-thresh0);
       comparisons += buf;
       if (fabs(thresh1-thresh0) > maxDiff)
       {
@@ -705,7 +705,7 @@ std::string ThresholdBiasMapping::asciiTable(void) const
       double thresh = it->second;
       double bias = ib->second;
       char buf[1000];
-      sprintf(buf, "%6d    %3.2lf   %3.2lf\n", lt, thresh, bias);
+      safe_snprintf(buf, "%6d    %3.2lf   %3.2lf\n", lt, thresh, bias);
       ret += buf;
     }
   }
@@ -735,8 +735,8 @@ std::string ThresholdBiasMapping::asciiTable(const time_t &t) const
       double thresh = it->second;
       double bias = ib->second;
       char buf[1000];
-      sprintf(buf, "%s %6d    %3.2lf   %3.2lf\n", stime.c_str(), lt,
-	      thresh, bias);
+      safe_snprintf(buf, "%s %6d    %3.2lf   %3.2lf\n", stime.c_str(), lt,
+                    thresh, bias);
       ret += buf;
     }
   }
