@@ -39,6 +39,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/file_io.h>
 #include <toolsa/uusleep.h>
+#include <toolsa/safe_snprintf.hh>
 #include <dsserver/DmapAccess.hh>
 #include <Fmq/Fmq.hh>
 #include <climits>
