@@ -36,6 +36,7 @@
 #include <Ncxx/Hdf5xx.hh>
 #include <Ncxx/Ncxx.hh>
 #include <Ncxx/ByteOrder.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstring>
 #include <cmath>
 
@@ -2869,19 +2870,19 @@ void Hdf5xx::_printPacked(NcxxPort::fl64 val,
   
   char text[1024];
   if (count > 1) {
-    sprintf(text, "%d*", count);
+    safe_snprintf(text, "%d*", count);
     outStr += text;
   }
   if (val == Ncxx::missingMetaDouble) {
     outStr += "MISS";
   } else {
     if (fabs(val) > 0.01) {
-      sprintf(text, "%.3f", val);
+      safe_snprintf(text, "%.3f", val);
       outStr += text;
     } else if (val == 0.0) {
       outStr += "0.0";
     } else {
-      sprintf(text, "%.3e", val);
+      safe_snprintf(text, "%.3e", val);
       outStr += text;
     }
   }
@@ -2896,13 +2897,13 @@ void Hdf5xx::_printPacked(NcxxPort::si64 val,
   
   char text[1024];
   if (count > 1) {
-    sprintf(text, "%d*", count);
+    safe_snprintf(text, "%d*", count);
     outStr += text;
   }
   if (val == Ncxx::missingMetaInt) {
     outStr += "MISS";
   } else {
-    sprintf(text, "%lld", (long long) val);
+    safe_snprintf(text, "%lld", (long long) val);
     outStr += text;
   }
   outStr += " ";
@@ -3212,7 +3213,7 @@ void Hdf5xx::_addErrInt(string label, int iarg, bool cr)
 {
   _errStr += label;
   char str[32];
-  sprintf(str, "%d", iarg);
+  safe_snprintf(str, "%d", iarg);
   _errStr += str;
   if (cr) {
     _errStr += "\n";
@@ -3230,7 +3231,7 @@ void Hdf5xx::_addErrDbl(string label, double darg,
 {
   _errStr += label;
   char str[128];
-  sprintf(str, format.c_str(), darg);
+  safe_snprintf(str, format.c_str(), darg);
   _errStr += str;
   if (cr) {
     _errStr += "\n";
