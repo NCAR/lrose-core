@@ -557,7 +557,6 @@ void mf_rfd_read_field_data( char *fname,
     fprintf(stderr,
 	    "Given array not big enough for data -- array has %d bytes, data has %d bytes\n",
 	    *array_size, *return_data_size);
-    fclose(mdv_file);
     *return_status = MDV_READ_DATA_ARRAY_TOO_SMALL;
     return;
   }

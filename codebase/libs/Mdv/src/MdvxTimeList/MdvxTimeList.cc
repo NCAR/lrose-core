@@ -40,6 +40,7 @@
 #include <didss/RapDataDir.hh>
 #include <didss/LdataInfo.hh>
 #include <toolsa/ReadDir.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/str.h>
 #include <iomanip>
 #include <iterator>
@@ -742,16 +743,16 @@ void MdvxTimeList::_compileGenerate(const string &topDir)
 
     // normal format
 
-    sprintf(dayDir, "%s%s%.4d%.2d%.2d",
-	    topDir.c_str(), PATH_DELIM,
-	    midday.getYear(), midday.getMonth(), midday.getDay());
+    safe_snprintf(dayDir, "%s%s%.4d%.2d%.2d",
+                  topDir.c_str(), PATH_DELIM,
+                  midday.getYear(), midday.getMonth(), midday.getDay());
     _searchDayGen(dayDir, midday, true, _startTime, _endTime, timePaths);
 
     // extended format
     
-    sprintf(dayDir, "%s%s%.4d%s%.4d%.2d%.2d",
-	    topDir.c_str(), PATH_DELIM, midday.getYear(), PATH_DELIM,
-	    midday.getYear(), midday.getMonth(), midday.getDay());
+    safe_snprintf(dayDir, "%s%s%.4d%s%.4d%.2d%.2d",
+                  topDir.c_str(), PATH_DELIM, midday.getYear(), PATH_DELIM,
+                  midday.getYear(), midday.getMonth(), midday.getDay());
     _searchDayGen(dayDir, midday, true, _startTime, _endTime, timePaths);
     
   } // iday
@@ -785,23 +786,23 @@ void MdvxTimeList::_compileForecast(const string &topDir)
 
   // normal paths
 
-  sprintf(subDir, "%s%s%.4d%.2d%.2d%sg_%.2d%.2d%.2d",
-	  topDir.c_str(),
-	  PATH_DELIM,
-	  genTime.getYear(), genTime.getMonth(), genTime.getDay(),
-	  PATH_DELIM,
-	  genTime.getHour(), genTime.getMin(), genTime.getSec());
+  safe_snprintf(subDir, "%s%s%.4d%.2d%.2d%sg_%.2d%.2d%.2d",
+                topDir.c_str(),
+                PATH_DELIM,
+                genTime.getYear(), genTime.getMonth(), genTime.getDay(),
+                PATH_DELIM,
+                genTime.getHour(), genTime.getMin(), genTime.getSec());
   
   _compileForecastForSubDir(subDir);
 
   // extended paths
 
-  sprintf(subDir, "%s%s%.4d%s%.4d%.2d%.2d%sg_%.2d%.2d%.2d",
-	  topDir.c_str(), PATH_DELIM,
-	  genTime.getYear(), PATH_DELIM,
-	  genTime.getYear(), genTime.getMonth(), genTime.getDay(),
-	  PATH_DELIM,
-	  genTime.getHour(), genTime.getMin(), genTime.getSec());
+  safe_snprintf(subDir, "%s%s%.4d%s%.4d%.2d%.2d%sg_%.2d%.2d%.2d",
+                topDir.c_str(), PATH_DELIM,
+                genTime.getYear(), PATH_DELIM,
+                genTime.getYear(), genTime.getMonth(), genTime.getDay(),
+                PATH_DELIM,
+                genTime.getHour(), genTime.getMin(), genTime.getSec());
   
   _compileForecastForSubDir(subDir);
 
@@ -1040,22 +1041,22 @@ void MdvxTimeList::_compileSpecifiedForecast(const string &topDir)
 
   // normal paths
 
-  sprintf(subDir, "%s%s%.4d%.2d%.2d%sg_%.2d%.2d%.2d",
-	  topDir.c_str(),
-	  PATH_DELIM,
-	  genTime.getYear(), genTime.getMonth(), genTime.getDay(),
-	  PATH_DELIM,
-	  genTime.getHour(), genTime.getMin(), genTime.getSec());
+  safe_snprintf(subDir, "%s%s%.4d%.2d%.2d%sg_%.2d%.2d%.2d",
+                topDir.c_str(),
+                PATH_DELIM,
+                genTime.getYear(), genTime.getMonth(), genTime.getDay(),
+                PATH_DELIM,
+                genTime.getHour(), genTime.getMin(), genTime.getSec());
   _compileSpecForecastForSubDir(subDir);
 
   // extended paths
   
-  sprintf(subDir, "%s%s%.4d%s%.4d%.2d%.2d%sg_%.2d%.2d%.2d",
-	  topDir.c_str(), PATH_DELIM,
-	  genTime.getYear(), PATH_DELIM,
-	  genTime.getYear(), genTime.getMonth(), genTime.getDay(),
-	  PATH_DELIM,
-	  genTime.getHour(), genTime.getMin(), genTime.getSec());
+  safe_snprintf(subDir, "%s%s%.4d%s%.4d%.2d%.2d%sg_%.2d%.2d%.2d",
+                topDir.c_str(), PATH_DELIM,
+                genTime.getYear(), PATH_DELIM,
+                genTime.getYear(), genTime.getMonth(), genTime.getDay(),
+                PATH_DELIM,
+                genTime.getHour(), genTime.getMin(), genTime.getSec());
   _compileSpecForecastForSubDir(subDir);
 
 }
@@ -1166,16 +1167,16 @@ void MdvxTimeList::_searchDayRangeForValid(const string &dir,
 
     // normal format
 
-    sprintf(dayDir, "%s%s%.4d%.2d%.2d",
-	    dir.c_str(), PATH_DELIM,
-	    midday.getYear(), midday.getMonth(), midday.getDay());
+    safe_snprintf(dayDir, "%s%s%.4d%.2d%.2d",
+                  dir.c_str(), PATH_DELIM,
+                  midday.getYear(), midday.getMonth(), midday.getDay());
     _searchDayForValid(dayDir, midday, true, startTime, endTime, timePaths);
 
     // extended format
     
-    sprintf(dayDir, "%s%s%.4d%s%.4d%.2d%.2d",
-	    dir.c_str(), PATH_DELIM, midday.getYear(), PATH_DELIM, 
-	    midday.getYear(), midday.getMonth(), midday.getDay());
+    safe_snprintf(dayDir, "%s%s%.4d%s%.4d%.2d%.2d",
+                  dir.c_str(), PATH_DELIM, midday.getYear(), PATH_DELIM,
+                  midday.getYear(), midday.getMonth(), midday.getDay());
     _searchDayForValid(dayDir, midday, true, startTime, endTime, timePaths);
 
   } // iday
@@ -2151,4 +2152,3 @@ int MdvxTimeList::_getVolNum(const string &fileName)
   }
   return volNum;
 }
-

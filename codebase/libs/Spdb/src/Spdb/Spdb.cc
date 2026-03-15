@@ -45,6 +45,7 @@
 #include <toolsa/mem.h>
 #include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/compress.h>
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/RapDataDir.hh>
@@ -1011,8 +1012,8 @@ int Spdb::_put(int prod_id,
 
   char tmpStr[128];
   DateTime vtime(latestValidTime);
-  sprintf(tmpStr, "%.4d%.2d%.2d.%s",
-	  vtime.getYear(), vtime.getMonth(), vtime.getDay(), _indxExt);
+  safe_snprintf(tmpStr, "%.4d%.2d%.2d.%s",
+                vtime.getYear(), vtime.getMonth(), vtime.getDay(), _indxExt);
   ldata.setRelDataPath(tmpStr);
 
   time_t storeTime = latestValidTime;
@@ -1130,11 +1131,11 @@ int Spdb::_getFirstAndLastTimes(time_t &first_time,
     // check that the index and data files exist
 
     char indxPath[MAX_PATH_LEN];
-    sprintf(indxPath, "%s%s%.4d%.2d%.2d.%s",
-	    _path.c_str(), PATH_DELIM, year, month, day, _indxExt);
+    safe_snprintf(indxPath, "%s%s%.4d%.2d%.2d.%s",
+                  _path.c_str(), PATH_DELIM, year, month, day, _indxExt);
     char dataPath[MAX_PATH_LEN];
-    sprintf(dataPath, "%s%s%.4d%.2d%.2d.%s",
-	    _path.c_str(), PATH_DELIM, year, month, day, _dataExt);
+    safe_snprintf(dataPath, "%s%s%.4d%.2d%.2d.%s",
+                  _path.c_str(), PATH_DELIM, year, month, day, _dataExt);
 
     if (!ta_stat_exists_compress(indxPath)) {
       continue;
@@ -2089,15 +2090,15 @@ int Spdb::_openFiles(int prod_id,
   vtime.unix_time = valid_time;
   uconvert_from_utime(&vtime);
   
-  sprintf(_indxPath, "%s%s%.4d%.2d%.2d.%s",
-	  _path.c_str(), PATH_DELIM,
-	  vtime.year, vtime.month, vtime.day,
-	  _indxExt);
+  safe_snprintf(_indxPath, "%s%s%.4d%.2d%.2d.%s",
+                _path.c_str(), PATH_DELIM,
+                vtime.year, vtime.month, vtime.day,
+                _indxExt);
 
-  sprintf(_dataPath, "%s%s%.4d%.2d%.2d.%s",
-	  _path.c_str(), PATH_DELIM,
-	  vtime.year, vtime.month, vtime.day,
-	  _dataExt);
+  safe_snprintf(_dataPath, "%s%s%.4d%.2d%.2d.%s",
+                _path.c_str(), PATH_DELIM,
+                vtime.year, vtime.month, vtime.day,
+                _dataExt);
 
   // decide if files exist
   
@@ -2551,7 +2552,7 @@ int Spdb::_setLock(open_mode_t mode)
 
   string fullDir;
   RapDataDir.fillPath(_dir, fullDir);
-  sprintf(_lockPath, "%s%s%s", fullDir.c_str(), PATH_DELIM, "_lock");
+  safe_snprintf(_lockPath, "%s%s%s", fullDir.c_str(), PATH_DELIM, "_lock");
   if ((_lockFile = fopen(_lockPath, "w+")) == NULL) {
     _errStr += "ERROR - Spdb::_setLocks\n";
     _addStrErr("  Cannot create lock file, dir: ", fullDir);
@@ -2636,7 +2637,7 @@ void Spdb::_addIntErr(const char *err_str, int iarg)
 {
   _errStr += err_str;
   char str[32];
-  sprintf(str, "%d\n", iarg);
+  safe_snprintf(str, "%d\n", iarg);
   _errStr += str;
 }
 
