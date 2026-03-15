@@ -26,6 +26,7 @@
 #include <rapmath/Math.hh>
 #include <toolsa/LogStream.hh>
 #include <toolsa/TaXml.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstdio>
 #include <cmath>
 

@@ -21,7 +21,7 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#include <toolsa/copyright.h>
+#include <toolsa/safe_snprintf.hh>
 #include <euclid/MotionVector.hh>
 #include <rapmath/Math.hh>
 #include <toolsa/LogStream.hh>

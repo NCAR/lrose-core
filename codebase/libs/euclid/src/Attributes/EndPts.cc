@@ -25,6 +25,7 @@
 #include <euclid/EndPts.hh>
 #include <toolsa/LogStream.hh>
 #include <toolsa/TaXml.hh>
+#include <toolsa/safe_snprintf.hh>
 
 /*----------------------------------------------------------------*/
 Endpts::Endpts()
