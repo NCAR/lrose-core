@@ -55,6 +55,7 @@
 #include <Ncxx/NcxxGroup.hh>
 #include <Ncxx/NcxxCheck.hh>
 #include <Ncxx/NcxxException.hh>
+#include <toolsa/safe_snprintf.hh>
 #include<netcdf.h>
 using namespace std;
 
@@ -220,8 +221,8 @@ NcxxDim NcxxVar::getDim(int i) const
   vector<NcxxDim> ncDims = getDims();
   if((size_t)i >= ncDims.size() || i < 0) {
     char errStr[4096];
-    sprintf(errStr, "%s - index out of range: index = %d, size = %d",
-            getDesc().c_str(), i, (int) ncDims.size());
+    safe_snprintf(errStr, "%s - index out of range: index = %d, size = %d",
+                  getDesc().c_str(), i, (int) ncDims.size());
     throw NcxxException(errStr, __FILE__, __LINE__);
   }
   return ncDims[i];
@@ -3708,12 +3709,11 @@ string NcxxVar::getDesc() const
   for (int ii = 0; ii < getDimCount(); ii++) {
     NcxxDim dim = getDim(ii);
     char dimStr[256];
-    sprintf(dimStr, " dim[%d]:%s-size:%ld",
-            ii, dim.getName().c_str(), dim.getSize());
+    safe_snprintf(dimStr, " dim[%d]:%s-size:%ld",
+                  ii, dim.getName().c_str(), dim.getSize());
     desc += dimStr;
   }
   
   return desc;
 
 }
-
