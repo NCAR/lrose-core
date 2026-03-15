@@ -25,6 +25,7 @@
  * @file RadxAzElev.cc
  */
 #include <Radx/RadxAzElev.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstdio>
 
 //------------------------------------------------------------------
@@ -87,6 +88,6 @@ bool RadxAzElev::operator<(const RadxAzElev &a1) const
 std::string RadxAzElev::sprint(void) const
 {
   char buf[1000];
-  sprintf(buf, "(%.3lf,%.3lf)", _az, _elev);
+  safe_snprintf(buf, "(%.3lf,%.3lf)", _az, _elev);
   return buf;
 }

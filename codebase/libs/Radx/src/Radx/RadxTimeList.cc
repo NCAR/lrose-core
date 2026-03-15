@@ -37,6 +37,7 @@
 #include <Radx/RadxStr.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxReadDir.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <iomanip>
 #include <iterator>
 #include <algorithm>
@@ -349,7 +350,7 @@ string RadxTimeList::getRequestString() const
              _mode == MODE_FIRST_BEFORE ||
              _mode == MODE_FIRST_AFTER) {
     req += "  search time: " + _searchTime.asString() + "\n";
-    sprintf(text, "    time margin(secs): %lg\n", _timeMargin);
+    safe_snprintf(text, "    time margin(secs): %lg\n", _timeMargin);
     req += text;
   }
 
@@ -636,17 +637,17 @@ void RadxTimeList::_searchDayRange(const string &dir,
 
     // normal format
 
-    sprintf(dayDir, "%s%s%.4d%.2d%.2d",
-	    dir.c_str(), RadxPath::RADX_PATH_DELIM,
-	    midday.getYear(), midday.getMonth(), midday.getDay());
+    safe_snprintf(dayDir, "%s%s%.4d%.2d%.2d",
+                  dir.c_str(), RadxPath::RADX_PATH_DELIM,
+                  midday.getYear(), midday.getMonth(), midday.getDay());
     _searchDay(dayDir, midday, startTime, endTime, timePaths);
 
     // extended format
     
-    sprintf(dayDir, "%s%s%.4d%s%.4d%.2d%.2d",
-	    dir.c_str(), RadxPath::RADX_PATH_DELIM, 
-            midday.getYear(), RadxPath::RADX_PATH_DELIM, 
-	    midday.getYear(), midday.getMonth(), midday.getDay());
+    safe_snprintf(dayDir, "%s%s%.4d%s%.4d%.2d%.2d",
+                  dir.c_str(), RadxPath::RADX_PATH_DELIM, 
+                  midday.getYear(), RadxPath::RADX_PATH_DELIM, 
+                  midday.getYear(), midday.getMonth(), midday.getDay());
     _searchDay(dayDir, midday, startTime, endTime, timePaths);
 
   } // iday
@@ -1336,4 +1337,3 @@ int RadxTimeList::_getVolNum(const string &fileName)
   }
   return volNum;
 }
-

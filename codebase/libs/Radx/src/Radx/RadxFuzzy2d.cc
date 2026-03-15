@@ -28,6 +28,7 @@
  */
 
 #include <Radx/RadxFuzzy2d.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/str.h>
 #include <algorithm>
 #include <cstring>
@@ -251,7 +252,7 @@ void RadxFuzzy2d::printTable(void) const
   {
     char buf[1000];
     string oneline;
-    sprintf(buf, "%lf", *x);
+    safe_snprintf(buf, "%lf", *x);
     oneline = buf;
     
     for (y = _y.begin(); y!= _y.end(); ++y)
@@ -259,7 +260,7 @@ void RadxFuzzy2d::printTable(void) const
       pair< double, double > index(*x, *y);
       map< pair< double, double>, double >::const_iterator value;
       value = _table.find(index);
-      sprintf(buf, "  %lf", value->second);
+      safe_snprintf(buf, "  %lf", value->second);
       oneline += buf;
     }
     printf("%s\n", oneline.c_str());

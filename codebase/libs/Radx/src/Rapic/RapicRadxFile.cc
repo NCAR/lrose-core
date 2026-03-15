@@ -43,6 +43,7 @@
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxArray.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <Radx/RadxRcalib.hh>
 #include <cmath>
 #include "PPIField.hh"
@@ -534,7 +535,7 @@ void RapicRadxFile::_setVolMetaData()
   _readVol->setInstrumentName(_scanParams->radar_name);
 
   char stationId[128];
-  sprintf(stationId, "%d", _scanParams->station_id);
+  safe_snprintf(stationId, "%d", _scanParams->station_id);
   _readVol->setSiteName(stationId);
 
   _readVol->setScanName("UNKNOWN");
@@ -1386,4 +1387,3 @@ bool RapicRadxFile::_azLessThan(double az1, double az2)
   }
   return false;
 }
-

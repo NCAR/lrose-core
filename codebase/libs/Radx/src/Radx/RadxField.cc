@@ -37,6 +37,7 @@
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxXml.hh>
 #include <Radx/ByteOrder.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <iostream>
 #include <cstdio>
 #include <cstring>
@@ -3106,12 +3107,12 @@ void RadxField::_printPacked(ostream &out, int count, double val) const
     out << "MISS ";
   } else {
     if (fabs(val) > 0.01) {
-      sprintf(outstr, "%.3f ", val);
+      safe_snprintf(outstr, "%.3f ", val);
       out << outstr;
     } else if (val == 0.0) {
       out << "0.0 ";
     } else {
-      sprintf(outstr, "%.3e ", val);
+      safe_snprintf(outstr, "%.3e ", val);
       out << outstr;
     }
   }
@@ -4350,4 +4351,3 @@ int RadxField::_computeMode(const vector<int> &vals)
   return modeVal;
 
 }
-

@@ -43,6 +43,7 @@
 #include <Radx/RadxField.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxGeoref.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
@@ -2277,7 +2278,7 @@ string SigmetRadxFile::_fieldId2Name(int fieldId)
       return "DBZE";
     default: {
       char name[128];
-      sprintf(name, "UNKNOWN-ID-%d", fieldId);
+      safe_snprintf(name, "UNKNOWN-ID-%d", fieldId);
       return name;
     }
   }
@@ -2695,7 +2696,7 @@ string SigmetRadxFile::_time2Str(const sigmet_time_t &time)
   RadxTime stime(time.year, time.month, time.day, 0, 0, time.sec);
   char msecsStr[32];
   int msecs = time.msecs & 1023; // lower 10 bits
-  sprintf(msecsStr, "%.3d", msecs);
+  safe_snprintf(msecsStr, "%.3d", msecs);
   string tstr = RadxTime::strm(stime.utime());
   tstr += ".";
   tstr += msecsStr;

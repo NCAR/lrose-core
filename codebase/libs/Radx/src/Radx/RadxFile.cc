@@ -43,6 +43,7 @@
 #include <Radx/EdgeNcRadxFile.hh>
 #include <Radx/ForayNcRadxFile.hh>
 #include <Radx/GamicHdf5RadxFile.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <Radx/GemRadxFile.hh>
 #include <Radx/HrdRadxFile.hh>
 #include <Radx/LeoRadxFile.hh>
@@ -2165,8 +2166,8 @@ string RadxFile::tmpPathFromDir(const string &dir,
     tmpPath += tmpFileName;
   } else {
     char tmpName[1024];
-    sprintf(tmpName, "tmp.%d.%ld.%ld.tmp", getpid(),
-            (long) now.tv_sec, (long) now.tv_usec);
+    safe_snprintf(tmpName, "tmp.%d.%ld.%ld.tmp", getpid(),
+                  (long) now.tv_sec, (long) now.tv_usec);
     tmpPath += tmpName;
   }
 
@@ -3276,4 +3277,3 @@ int RadxFile::_doReadRaysInInterval(const string &dir,
   return 0;
 
 }
-
