@@ -26,6 +26,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <toolsa/safe_snprintf.hh>
 
 #ifndef AcarsDataPointINCLUDED
 # include <dsdata/AcarsDataPoint.hh>
@@ -495,15 +496,15 @@ void AcarsDataPoint::dump(ostream & os /* == cerr */) const
     os << "AcarsDataPoint: " << _data.callsign 
        << " " << _data.origin << "->" << _data.destination << "." << endl;
     char buf[1000];
-    sprintf(buf, "    Position: %f : %f\n"
-                 "    Altitude: %f\n"
-                 "    Speed/Dir: %f / %f\n"
-                 "    Temp: %f\n"
-                 "    Dew Point: %f\n"
-                 "    Wind u/v: %f / %f\n"
-                 "    Max/Avg Turb: %f / %f",
-            _data.lat, _data.lon,
-            _data.alt,
+    safe_snprintf(buf, "    Position: %f : %f\n"
+                       "    Altitude: %f\n"
+                       "    Speed/Dir: %f / %f\n"
+                       "    Temp: %f\n"
+                       "    Dew Point: %f\n"
+                       "    Wind u/v: %f / %f\n"
+                       "    Max/Avg Turb: %f / %f",
+                  _data.lat, _data.lon,
+                  _data.alt,
             _data.ground_speed, _data.heading,
             _data.temperature, 
             _data.dew_point, 

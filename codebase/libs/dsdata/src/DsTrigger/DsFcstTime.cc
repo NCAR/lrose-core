@@ -26,6 +26,7 @@
  */
 #include <cstdio>
 #include <dsdata/DsFcstTime.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/DateTime.hh>
 
 //----------------------------------------------------------------
@@ -57,7 +58,7 @@ void DsFcstTime::print(void) const
 string DsFcstTime::sprint(void) const
 {
   char buf[100];
-  sprintf(buf, "%s+%d", DateTime::strn(_gt).c_str(), _lt);
+  safe_snprintf(buf, "%s+%d", DateTime::strn(_gt).c_str(), _lt);
   string ret = buf;
   return ret;
 }

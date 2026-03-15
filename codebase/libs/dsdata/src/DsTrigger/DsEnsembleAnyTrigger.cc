@@ -32,6 +32,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/TaThreadSimplePolling.hh>
 #include <toolsa/TaTriggerLog.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <algorithm>
 
 using std::vector;
@@ -536,8 +537,8 @@ DsEnsembleAnyTrigger1::_sprintState(void) const
   if (_has_data)
   {
     char buf[1000];
-    sprintf(buf, "%s  Has data %s+%d", _name.c_str(), 
-	    DateTime::strn(_gt).c_str(), _lt);
+    safe_snprintf(buf, "%s  Has data %s+%d", _name.c_str(),
+                  DateTime::strn(_gt).c_str(), _lt);
     s = buf;
   }
   else
@@ -573,8 +574,8 @@ bool DsEnsembleAnyTrigger1::_next_time_sequence(void)
 				 << _name << " sleep " << _sleepSeconds
 				 << " total sleep " << totalSleep;
       char buf[1000];
-      sprintf(buf, "_next_time_sequence_sleep(%d of %d)", _sleepSeconds,
-	      totalSleep);
+      safe_snprintf(buf, "_next_time_sequence_sleep(%d of %d)", _sleepSeconds,
+                    totalSleep);
       PMU_auto_register(buf);
       sleep(_sleepSeconds);
       totalSleep += _sleepSeconds;
@@ -602,8 +603,8 @@ bool DsEnsembleAnyTrigger1::_next_time_sequence(void)
 	LOGC(TaTriggerLog::name()) << "Same gen and lead as before, "
 				   << _name;
 	char buf[1000];
-	sprintf(buf, "_next_time_sequence_sleep(%d of %d)", _sleepSeconds,
-		totalSleep);
+	safe_snprintf(buf, "_next_time_sequence_sleep(%d of %d)", _sleepSeconds,
+	              totalSleep);
 	PMU_auto_register(buf);
 	sleep(_sleepSeconds);
 	totalSleep += _sleepSeconds;

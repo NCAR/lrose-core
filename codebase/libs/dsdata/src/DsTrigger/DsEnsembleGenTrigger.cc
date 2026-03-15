@@ -33,6 +33,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/TaThreadSimple.hh>
 #include <toolsa/TaTriggerLog.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
@@ -1046,9 +1047,9 @@ DsEnsembleGenTrigger1::_sprintState(void) const
   }
 
   char buf[1000];
-  sprintf(buf, "%s    %s %s, nlead=%d", _name.c_str(), s.c_str(), 
-	  DateTime::strn(_gt).c_str(), 
-	  static_cast<int>(_availableLtSeconds.size()));
+  safe_snprintf(buf, "%s    %s %s, nlead=%d", _name.c_str(), s.c_str(),
+                DateTime::strn(_gt).c_str(),
+                static_cast<int>(_availableLtSeconds.size()));
   std::string ret = buf;
   return ret;
 }

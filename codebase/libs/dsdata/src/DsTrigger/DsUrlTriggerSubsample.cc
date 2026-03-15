@@ -26,6 +26,7 @@
  */
 #include <dsdata/DsUrlTrigger.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <algorithm>
 #include <cstdio>
 
@@ -114,7 +115,7 @@ bool DsUrlTriggerSubsample::leadtimesComplete(const vector<int> available_lt,
       // this lead time is not present, fail
       stat = false;
       char buf[100];
-      sprintf(buf, "%d ", _lt_seconds[i]);
+      safe_snprintf(buf, "%d ", _lt_seconds[i]);
       err += buf;
     }
   }

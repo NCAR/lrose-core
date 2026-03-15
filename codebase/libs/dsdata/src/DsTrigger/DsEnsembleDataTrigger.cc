@@ -27,6 +27,7 @@
 #include <dsdata/DsEnsembleDataTrigger.hh>
 #include <dsdata/DsEnsembleLeadTrigger.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstdio>
 using std::string;
 
@@ -316,7 +317,7 @@ std::string DsEnsembleDataTrigger::memberName(const std::string &urlHeader,
 					      const std::string &format)
 {
   char buf[100];
-  sprintf(buf, format.c_str(), member);
+  safe_snprintf(buf, format.c_str(), member);
   string url = urlHeader + "/e_";
   url += buf;
   return url;
@@ -329,7 +330,7 @@ std::string DsEnsembleDataTrigger::memberName(const std::string &urlHeader,
 					      const std::string &format)
 {
   char buf[100];
-  sprintf(buf, format.c_str(), member);
+  safe_snprintf(buf, format.c_str(), member);
   string url = urlHeader + buf;
   url += urlRemainder;
   return url;
@@ -344,4 +345,3 @@ void DsEnsembleDataTrigger::_buildUrls(int nmember)
     _urls.push_back(memberName(i+1));
   }
 }
-
