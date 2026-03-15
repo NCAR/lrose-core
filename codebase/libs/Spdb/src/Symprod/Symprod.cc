@@ -40,6 +40,7 @@
 #include <toolsa/mem.h>
 #include <toolsa/str.h>
 #include <toolsa/pjg_flat.h>
+#include <toolsa/safe_snprintf.hh>
 using namespace std;
 
 const si32 Symprod::PPT_PENUP = 0x7FFFFFFF;

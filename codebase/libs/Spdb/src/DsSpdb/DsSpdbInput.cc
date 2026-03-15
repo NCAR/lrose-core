@@ -52,6 +52,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/uusleep.h>
+#include <toolsa/safe_snprintf.hh>
 #include <ctime>
 using namespace std;
 

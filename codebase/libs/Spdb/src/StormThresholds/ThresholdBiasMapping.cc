@@ -31,6 +31,7 @@
 #include <toolsa/TaXml.hh>
 #include <toolsa/DateTime.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstdio>
 #include <cstring>
 #include <cmath>
