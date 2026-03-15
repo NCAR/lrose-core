@@ -371,7 +371,7 @@ int HaloRadxFile::readFromPath(const string &path,
 
   // read in ray data
   RadxTime radxTime;
-  time_t seconds;
+  // time_t seconds;
   string startTimeLabel("Start time");
   string dateTime = identifyS(startTimeLabel, _rawHeaderInfo);
   time_t timeT = RadxTime().parseDateTime(dateTime);
@@ -969,37 +969,7 @@ Radx::SweepMode_t HaloRadxFile::decodeScanType(string &scanType) {
   default:
     return Radx::SWEEP_MODE_NOT_SET;
   }
-  //if (_contains(scanType, "Stare")) {
 
-  //}
-        /* sweep mode
-
-    SWEEP_MODE_NOT_SET = -1, ///< Initialized but not yet set
-    SWEEP_MODE_CALIBRATION = 0, ///< pointing for calibration
-    SWEEP_MODE_SECTOR = 1,     ///< sector scan mode
-    SWEEP_MODE_COPLANE = 2,    ///< co-plane dual doppler mode
-    SWEEP_MODE_RHI = 3,        ///< range height vertical scanning mode
-    SWEEP_MODE_VERTICAL_POINTING = 4, ///< vertical pointing for calibration
-    SWEEP_MODE_IDLE = 7,       ///< between scans
-    SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8, /**< 360-degree azimuth mode,
-                                          * (surveillance) 
-    SWEEP_MODE_ELEVATION_SURVEILLANCE = 9, /**< 360-degree elevation
-                                            * mode (Eldora) 
-    SWEEP_MODE_SUNSCAN = 11,   ///< scanning the sun for calibrations
-  Stare ?=  SWEEP_MODE_POINTING = 12,  ///< fixed pointing
-    SWEEP_MODE_FOLLOW_VEHICLE = 13, ///< follow target vehicle
-    SWEEP_MODE_EL_SURV = 14, ///< elevation surveillance (ELDORA)
-    SWEEP_MODE_MANUAL_PPI = 15, /**< Manual PPI mode - elevation does
-                                 * not step automatically 
-    SWEEP_MODE_MANUAL_RHI = 16, /**< Manual RHI mode - azimuth does
-                                 * not step automatically 
-    SWEEP_MODE_SUNSCAN_RHI = 17,  ///< scanning the sun in RHI mode
-    SWEEP_MODE_DOPPLER_BEAM_SWINGING = 18, ///< as in profiler or lidar
-    SWEEP_MODE_COMPLEX_TRAJECTORY = 19,  ///< any sequential angle sequence
-    SWEEP_MODE_ELECTRONIC_STEERING = 20,  ///< as in phased array
-    SWEEP_MODE_LAST
-  } SweepMode_t;      
-  */
 }
 
 
@@ -1235,11 +1205,8 @@ int HaloRadxFile::_readRayData(RadxRay *ray, vector<Field> &fields) {
   char line[65536];
   do {
      // get next line
-     char *cc = fgets(line, 65536, _file);
+     fgets(line, 65536, _file);
      _readNStoreFieldData(line, fields, igate);
-     // get next line
-     // cc = fgets(line, 65536, _file);
-     //if (cc) {} // suppress compiler warning
      igate += 1;
   } while (!feof(_file) && (igate < nGates));
   //if (igate == nGates) {
@@ -1399,7 +1366,7 @@ int HaloRadxFile::_loadReadVolume()
   _readVol->setInstrumentType(Radx::INSTRUMENT_TYPE_LIDAR);
   _readVol->setPlatformType(Radx::PLATFORM_TYPE_FIXED);
   RadxTime radxTime;
-  time_t seconds;
+  // time_t seconds;
   string startTimeLabel("Start time");
   string dateTime = identifyS(startTimeLabel, _rawHeaderInfo);
   time_t timeT = RadxTime().parseDateTime(dateTime);
