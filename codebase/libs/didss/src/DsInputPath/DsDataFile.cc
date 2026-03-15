@@ -39,6 +39,7 @@
 
 #include <toolsa/umisc.h>
 #include <toolsa/file_io.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/ReadDir.hh>
 #include <toolsa/toolsa_macros.h>
 #include <didss/DsDataFile.hh>
@@ -938,7 +939,7 @@ string DsDataFile::getFileStr() const
                 return "";
             }
             char buf[20];
-            sprintf(buf, "%08ld", leadDelta->getDurationInSeconds());
+            safe_snprintf(buf, "%08ld", leadDelta->getDurationInSeconds());
 
             fullFileName += dayInfo + PATH_DELIM;
             fullFileName += "g_" + secInfo + PATH_DELIM;

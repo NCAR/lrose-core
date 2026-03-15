@@ -40,6 +40,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/ReadDir.hh>
 #include <toolsa/file_io.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/toolsa_macros.h>
 #include <sys/stat.h>
 #include <cerrno>
@@ -354,9 +355,9 @@ void DsTimeList::_compileByDay(bool is_gen)
     
     char dayDirPath[MAX_PATH_LEN];
     
-    sprintf(dayDirPath, "%s%s%.4d%.2d%.2d",
-	    _dir.c_str(), PATH_DELIM,
-	    midday.year, midday.month, midday.day);
+    safe_snprintf(dayDirPath, "%s%s%.4d%.2d%.2d",
+                  _dir.c_str(), PATH_DELIM,
+                  midday.year, midday.month, midday.day);
     
     ReadDir rdir;
     if (rdir.open(dayDirPath) == 0) {
@@ -557,10 +558,10 @@ void DsTimeList::_compileLead()
   
   char genDirPath[MAX_PATH_LEN];
   
-  sprintf(genDirPath, "%s%s%.4d%.2d%.2d%sg_%.2d%.2d%.2d",
-	  _dir.c_str(), PATH_DELIM,
-	  gtime.year, gtime.month, gtime.day, PATH_DELIM,
-	  gtime.hour, gtime.min, gtime.sec);
+  safe_snprintf(genDirPath, "%s%s%.4d%.2d%.2d%sg_%.2d%.2d%.2d",
+                _dir.c_str(), PATH_DELIM,
+                gtime.year, gtime.month, gtime.day, PATH_DELIM,
+                gtime.hour, gtime.min, gtime.sec);
   
   ReadDir rdir;
   if (rdir.open(genDirPath) == 0) {
@@ -909,4 +910,3 @@ void DsTimeList::_purgeMultEntries()
   }
 
 }
-

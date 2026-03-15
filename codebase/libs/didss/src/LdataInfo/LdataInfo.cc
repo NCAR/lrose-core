@@ -70,6 +70,7 @@
 #include <toolsa/file_io.h>
 #include <toolsa/TaArray.hh>
 #include <toolsa/TaStr.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <dataport/bigend.h>
 using namespace std;
 
@@ -338,7 +339,7 @@ void LdataInfo::setSaveLatestReadInfo(const string &label,
       delete _latestReadInfo;
     }
     char name[MAX_PATH_LEN];
-    sprintf(name, "latest_read_info.%s.%s", label.c_str(), _dataDir.c_str());
+    safe_snprintf(name, "latest_read_info.%s.%s", label.c_str(), _dataDir.c_str());
     char *delim;
     while ((delim = strstr(name, PATH_DELIM)) != NULL) {
       for (size_t ii = 0; ii < strlen(PATH_DELIM); ii++) {
@@ -1084,12 +1085,12 @@ string LdataInfo::getDataPath() const
   uconvert_from_utime(&ltime);
 
   char data_subdir[16];
-  sprintf(data_subdir, "%.4d%.2d%.2d",
-	  ltime.year, ltime.month, ltime.day);
+  safe_snprintf(data_subdir, "%.4d%.2d%.2d",
+	        ltime.year, ltime.month, ltime.day);
 
   char data_basename[16];
-  sprintf(data_basename, "%.2d%.2d%.2d",
-	  ltime.hour, ltime.min, ltime.sec);
+  safe_snprintf(data_basename, "%.2d%.2d%.2d",
+	        ltime.hour, ltime.min, ltime.sec);
 
   timeFilePath = dir + PATH_DELIM + data_subdir + PATH_DELIM +
     data_basename + "." + _dataFileExt;
@@ -1134,11 +1135,11 @@ string LdataInfo::getDataPath() const
   if (_isFcast) {
 
     char gentime_subdir[16];
-    sprintf(gentime_subdir, "g_%.2d%.2d%.2d",
-	    ltime.hour, ltime.min, ltime.sec);
+    safe_snprintf(gentime_subdir, "g_%.2d%.2d%.2d",
+	          ltime.hour, ltime.min, ltime.sec);
 
     char leadtime_name[16];
-    sprintf(leadtime_name, "f_%.8d", _fcastLeadTime);
+    safe_snprintf(leadtime_name, "f_%.8d", _fcastLeadTime);
 
     filePath = dir + PATH_DELIM + data_subdir + PATH_DELIM +
       gentime_subdir + PATH_DELIM + leadtime_name + "." + _dataFileExt;
@@ -1372,7 +1373,7 @@ int LdataInfo::_setDataPath(const string &dataDir)
   _infoPath += _fileName;
 
   char pidStr[128];
-  sprintf(pidStr, ".%d", getpid());
+  safe_snprintf(pidStr, ".%d", getpid());
 
   _tmpInfoPath = _infoPath;
   _tmpInfoPath += ".tmp";
@@ -1897,7 +1898,7 @@ int LdataInfo::_readFmq(int max_valid_age,
     
     _latestReadInfo->setRelDataPath(getRelDataPath().c_str());
     char idStr[128];
-    sprintf(idStr, "FMQ_id:%d", messageId);
+    safe_snprintf(idStr, "FMQ_id:%d", messageId);
     _latestReadInfo->setUserInfo1(idStr);
     if (_latestReadInfo->write(getLatestValidTime())) {
       cerr << "WARNING - LdataInfo::_readFmq" << endl;
@@ -2335,8 +2336,8 @@ void LdataInfo::_writeCatalog() const
   // check for existence of _ldata_write_catalog file
 
   char catalogTriggerPath[MAX_PATH_LEN];
-  sprintf(catalogTriggerPath, "%s%s%s",
-          _dataDirPath.c_str(), PATH_DELIM, "_ldata_write_catalog");
+  safe_snprintf(catalogTriggerPath, "%s%s%s",
+                _dataDirPath.c_str(), PATH_DELIM, "_ldata_write_catalog");
   struct stat fileStat;
   if (ta_stat(catalogTriggerPath, &fileStat)) {
     // trigger file does not exist, so return now
@@ -2347,9 +2348,9 @@ void LdataInfo::_writeCatalog() const
   
   char dayDir[MAX_PATH_LEN];
   DateTime day(_latestTime);
-  sprintf(dayDir, "%s%s%.4d%.2d%.2d",
-          _dataDirPath.c_str(), PATH_DELIM,
-          day.getYear(), day.getMonth(), day.getDay());
+  safe_snprintf(dayDir, "%s%s%.4d%.2d%.2d",
+                _dataDirPath.c_str(), PATH_DELIM,
+                day.getYear(), day.getMonth(), day.getDay());
   struct stat dirStat;
   if (ta_stat(dayDir, &dirStat)) {
     if (ta_makedir_recurse(dayDir)) {
@@ -2365,8 +2366,8 @@ void LdataInfo::_writeCatalog() const
   // open catalog file for appending
 
   char catalogPath[MAX_PATH_LEN];
-  sprintf(catalogPath, "%s%s%s",
-          dayDir, PATH_DELIM, "ldata_file_catalog");
+  safe_snprintf(catalogPath, "%s%s%s",
+                dayDir, PATH_DELIM, "ldata_file_catalog");
 
   FILE *cat;
   if ((cat = fopen(catalogPath, "a")) == NULL) {
@@ -2440,7 +2441,7 @@ void LdataInfo::_loadXmlBuf() const
   // header
 
   char str[4096];
-  sprintf(str, "<latest_data_info>\n");
+  safe_snprintf(str, "<latest_data_info>\n");
   _xmlBuf.add(str, strlen(str));
 
   // latest_time
@@ -2449,85 +2450,77 @@ void LdataInfo::_loadXmlBuf() const
   ltime.unix_time = getLatestTime();
   uconvert_from_utime(&ltime);
 
-  sprintf(str, "  <unix_time>%ld</unix_time>\n", ltime.unix_time);
+  safe_snprintf(str, "  <unix_time>%ld</unix_time>\n", ltime.unix_time);
   _xmlBuf.add(str, strlen(str));
 
-  sprintf(str, "  <year>%.4d</year>\n", ltime.year);
+  safe_snprintf(str, "  <year>%.4d</year>\n", ltime.year);
   _xmlBuf.add(str, strlen(str));
-  sprintf(str, "  <month>%.2d</month>\n", ltime.month);
+  safe_snprintf(str, "  <month>%.2d</month>\n", ltime.month);
   _xmlBuf.add(str, strlen(str));
-  sprintf(str, "  <day>%.2d</day>\n", ltime.day);
+  safe_snprintf(str, "  <day>%.2d</day>\n", ltime.day);
   _xmlBuf.add(str, strlen(str));
-  sprintf(str, "  <hour>%.2d</hour>\n", ltime.hour);
+  safe_snprintf(str, "  <hour>%.2d</hour>\n", ltime.hour);
   _xmlBuf.add(str, strlen(str));
-  sprintf(str, "  <min>%.2d</min>\n", ltime.min);
+  safe_snprintf(str, "  <min>%.2d</min>\n", ltime.min);
   _xmlBuf.add(str, strlen(str));
-  sprintf(str, "  <sec>%.2d</sec>\n", ltime.sec);
+  safe_snprintf(str, "  <sec>%.2d</sec>\n", ltime.sec);
   _xmlBuf.add(str, strlen(str));
 
   // file path and extension
   
-  sprintf(str, "  <rel_data_path>%s</rel_data_path>\n", _relDataPath.c_str());
+  safe_snprintf(str, "  <rel_data_path>%s</rel_data_path>\n", _relDataPath.c_str());
   _xmlBuf.add(str, strlen(str));
-  sprintf(str, "  <file_ext>%s</file_ext>\n", getDataFileExt().c_str());
+  safe_snprintf(str, "  <file_ext>%s</file_ext>\n", getDataFileExt().c_str());
   _xmlBuf.add(str, strlen(str));
-  sprintf(str, "  <data_type>%s</data_type>\n",getDataType().c_str());
+  safe_snprintf(str, "  <data_type>%s</data_type>\n", getDataType().c_str());
   _xmlBuf.add(str, strlen(str));
-  
-  //    string urlStr = "http://";
-  //    urlStr += PORThostnameFull();
-  //    urlStr += getDataDirPath();
-  //    urlStr += PATH_DELIM;
-  //    urlStr += getRelDataPath();
-  //    sprintf(str, "  <url>%s</url>\n", urlStr.c_str());
-  //    _xmlBuf.add(str, strlen(str));
   
   // user_info_1, user_info_2
   
-  sprintf(str, "  <user_info1>%s</user_info1>\n", _userInfo1.c_str());
+  safe_snprintf(str, "  <user_info1>%s</user_info1>\n", _userInfo1.c_str());
   _xmlBuf.add(str, strlen(str));
-  sprintf(str, "  <user_info2>%s</user_info2>\n", _userInfo2.c_str());
+  safe_snprintf(str, "  <user_info2>%s</user_info2>\n", _userInfo2.c_str());
   _xmlBuf.add(str, strlen(str));
 
   // forecast?
 
   if (_isFcast) {
-    sprintf(str, "  <is_forecast>true</is_forecast>\n");
+    safe_snprintf(str, "  <is_forecast>true</is_forecast>\n");
     _xmlBuf.add(str, strlen(str));
   } else {
-    sprintf(str, "  <is_forecast>false</is_forecast>\n");
+    safe_snprintf(str, "  <is_forecast>false</is_forecast>\n");
     _xmlBuf.add(str, strlen(str));
   }
-  sprintf(str, "  <forecast_lead_secs>%d</forecast_lead_secs>\n", getLeadTime());
+  safe_snprintf(str, "  <forecast_lead_secs>%d</forecast_lead_secs>\n", getLeadTime());
   _xmlBuf.add(str, strlen(str));
 
   // displaced dir path
 
   if (_displacedDirPath.size() > 0) {
-    sprintf(str, "  <displaced_dir_path>%s</displaced_dir_path>\n",
-            _displacedDirPath.c_str());
+    safe_snprintf(str, "  <displaced_dir_path>%s</displaced_dir_path>\n",
+                  _displacedDirPath.c_str());
     _xmlBuf.add(str, strlen(str));
   }
   
   // writer app
 
-  sprintf(str, "  <writer>%s</writer>\n", _writer.c_str());
+  safe_snprintf(str, "  <writer>%s</writer>\n", _writer.c_str());
   _xmlBuf.add(str, strlen(str));
 
   // maximum time for this data set
   // does not go backwards
 
-  sprintf(str, "  <max_time>%ld</max_time>\n", _maxTime);
+  safe_snprintf(str, "  <max_time>%ld</max_time>\n", _maxTime);
   _xmlBuf.add(str, strlen(str));
 
   // previous mod time
 
-  sprintf(str, "  <prev_mod_time>%ld</prev_mod_time>\n", _prevModTime);
+  safe_snprintf(str, "  <prev_mod_time>%ld</prev_mod_time>\n", _prevModTime);
   _xmlBuf.add(str, strlen(str));
 
   // end
 
-  sprintf(str, "</latest_data_info>\n");
+  safe_snprintf(str, "</latest_data_info>\n");
   _xmlBuf.add(str, strlen(str));
   
   // add null
@@ -2554,35 +2547,35 @@ void LdataInfo::_loadXmlForCatalog() const
   ltime.unix_time = getLatestTime();
   uconvert_from_utime(&ltime);
 
-  sprintf(str, "<utime>%ld</utime>", ltime.unix_time);
+  safe_snprintf(str, "<utime>%ld</utime>", ltime.unix_time);
   _xmlBuf.add(str, strlen(str));
   
-  sprintf(str, "<time>%.4d-%.2d-%.2dT%.2d:%.2d:%.2d</time>",
-          ltime.year, ltime.month, ltime.day, ltime.hour, ltime.min, ltime.sec);
+  safe_snprintf(str, "<time>%.4d-%.2d-%.2dT%.2d:%.2d:%.2d</time>",
+                ltime.year, ltime.month, ltime.day, ltime.hour, ltime.min, ltime.sec);
   _xmlBuf.add(str, strlen(str));
   
-  sprintf(str, "<max_time>%ld</max_time>", _maxTime);
+  safe_snprintf(str, "<max_time>%ld</max_time>", _maxTime);
   _xmlBuf.add(str, strlen(str));
   
   // forecast?
 
   if (_isFcast) {
-    sprintf(str, "<lead_secs>%d</lead_secs>", getLeadTime());
+    safe_snprintf(str, "<lead_secs>%d</lead_secs>", getLeadTime());
     _xmlBuf.add(str, strlen(str));
   }
 
   // file path and extension
   
-  sprintf(str, "<rpath>%s</rpath>", _relDataPath.c_str());
+  safe_snprintf(str, "<rpath>%s</rpath>", _relDataPath.c_str());
   _xmlBuf.add(str, strlen(str));
   
   if (getDataFileExt().size() > 0) {
-    sprintf(str, "<ext>%s</ext>", getDataFileExt().c_str());
+    safe_snprintf(str, "<ext>%s</ext>", getDataFileExt().c_str());
     _xmlBuf.add(str, strlen(str));
   }
 
   if (getDataType().size() > 0) {
-    sprintf(str, "<dtype>%s</dtype>",getDataType().c_str());
+    safe_snprintf(str, "<dtype>%s</dtype>", getDataType().c_str());
     _xmlBuf.add(str, strlen(str));
   }
   
@@ -2609,8 +2602,8 @@ int LdataInfo::_findXmlField(const char *xml_buf,
   char *startTok = startArray.alloc(fieldNameLen + 8);
   char *endTok = endArray.alloc(fieldNameLen + 8);
   
-  sprintf(startTok, "<%s>", field_name);
-  sprintf(endTok, "</%s>", field_name);
+  snprintf(startTok, fieldNameLen + 8, "<%s>", field_name);
+  snprintf(endTok, fieldNameLen + 8, "</%s>", field_name);
   
   // find start and end tokens
 

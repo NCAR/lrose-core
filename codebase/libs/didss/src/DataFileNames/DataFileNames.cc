@@ -32,6 +32,7 @@
 
 #include <toolsa/file_io.h>
 #include <toolsa/Path.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cctype>
 #include <unistd.h>
 
@@ -178,7 +179,6 @@ void DataFileNames::GetFileFacts(const char *FileName,
 {
 
   char *ext; // To see if file's extention matches the compressor's.
-  char s[MAX_PATH_LEN]; // For internal workings.
   char *end; // End of the filename - used to get rid of the path.
   struct stat FileStat; // To get file details with stat.
 
@@ -202,7 +202,8 @@ void DataFileNames::GetFileFacts(const char *FileName,
 
 
   // Copy the filename for internal doings.
-  sprintf(s,"%s",FileName);
+  char s[MAX_PATH_LEN]; // For internal workings.
+  safe_snprintf(s, "%s", FileName);
 
   // First, strip the compressed extention from the filename, if compressed.
   if (Compressed){

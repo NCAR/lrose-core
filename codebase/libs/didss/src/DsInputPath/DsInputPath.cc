@@ -49,6 +49,7 @@
 #include <toolsa/Path.hh>
 #include <toolsa/TaArray.hh>
 #include <toolsa/TaStr.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <didss/DsInputPath.hh>
 #include <didss/RapDataDir.hh>
 #include <didss/DataFileNames.hh>
@@ -581,8 +582,8 @@ void DsInputPath::setSaveLatestReadInfo(const string &label,
       _latest_read_info.setDir(RapDataDir.tmpLocation());
       _latest_read_info.setDebug(_debug);
       char name[MAX_PATH_LEN];
-      sprintf(name, "latest_read_info.%s.%s",
-	      label.c_str(), _input_dir.c_str());
+      safe_snprintf(name, "latest_read_info.%s.%s",
+                    label.c_str(), _input_dir.c_str());
       char *delim;
       while ((delim = strstr(name, PATH_DELIM)) != NULL) {
 	for (size_t ii = 0; ii < strlen(PATH_DELIM); ii++) {
@@ -1179,9 +1180,9 @@ void DsInputPath::_load_pathlist_archive_day(const string &input_dir,
   // compute subdir path
   
   char daydir_path[MAX_PATH_LEN];
-  sprintf(daydir_path, "%s%s%.4d%.2d%.2d",
-	  _input_dir.c_str(), PATH_DELIM,
-	  day_time.year, day_time.month, day_time.day);
+  safe_snprintf(daydir_path, "%s%s%.4d%.2d%.2d",
+                _input_dir.c_str(), PATH_DELIM,
+                day_time.year, day_time.month, day_time.day);
   
   // load up file paths for this day
     
@@ -1694,7 +1695,7 @@ void DsInputPath::_load_timelist_realtime(const string &input_dir,
     // check file time
     
     char filePath[MAX_PATH_LEN];
-    sprintf(filePath, "%s%s%s", input_dir.c_str(), PATH_DELIM, dp->d_name);
+    safe_snprintf(filePath, "%s%s%s", input_dir.c_str(), PATH_DELIM, dp->d_name);
     struct stat fileStat;
     if (ta_stat(filePath, &fileStat)) {
       if (_debug) {
@@ -1734,7 +1735,7 @@ void DsInputPath::_load_timelist_realtime(const string &input_dir,
     if (S_ISDIR(fileStat.st_mode)) {
       if (_recurse && _scanThisDir(dp->d_name, age)) {
 	char dirPath[MAX_PATH_LEN];
-	sprintf(dirPath, "%s%s%s", input_dir.c_str(), PATH_DELIM, dp->d_name);
+	safe_snprintf(dirPath, "%s%s%s", input_dir.c_str(), PATH_DELIM, dp->d_name);
 	if (_debug) {
 	  cerr << "-->> Scanning dir, age, depth: "
 	       << dirPath << ", " << age << ", " << (depth + 1) << endl;
@@ -2349,7 +2350,7 @@ void DsInputPath::_loadInotifySubDirs(const string &dir,
     // check file type
     
     char entryPath[MAX_PATH_LEN];
-    sprintf(entryPath, "%s%s%s", dir.c_str(), PATH_DELIM, dp->d_name);
+    safe_snprintf(entryPath, "%s%s%s", dir.c_str(), PATH_DELIM, dp->d_name);
     struct stat fileStat;
     if (ta_stat(entryPath, &fileStat)) {
       if (_debug) {

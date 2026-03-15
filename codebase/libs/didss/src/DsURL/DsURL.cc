@@ -26,6 +26,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <toolsa/TaStr.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <didss/DsURL.hh>
 #include <toolsa/HttpURL.hh>
 #include <toolsa/port.h>
@@ -279,7 +280,7 @@ string DsURL::getURLStr() const
 
   _urlStr += Colon;
   char buf[20];
-  sprintf(buf, "%d", _port);
+  safe_snprintf(buf, "%d", _port);
   _urlStr += buf;
 
   _urlStr += Colon;
@@ -549,22 +550,22 @@ int DsURL::prepareForwarding(const string &calling_info,
     // User-Agent
     
     if (server_port > 0) {
-      sprintf(str, "User-Agent: DsServer 1.0: %s:%d\r\n",
-	      _host.c_str(), server_port);
+      safe_snprintf(str, "User-Agent: DsServer 1.0: %s:%d\r\n",
+                    _host.c_str(), server_port);
     } else {
-      sprintf(str, "User-Agent: DsServer 1.0: %s:%d\r\n",
-	      _host.c_str(), _port);
+      safe_snprintf(str, "User-Agent: DsServer 1.0: %s:%d\r\n",
+                    _host.c_str(), _port);
     }
     _httpHeader += str;
 
-    sprintf(str, "Host: %s:%d\r\n", _host.c_str(), _port);
+    safe_snprintf(str, "Host: %s:%d\r\n", _host.c_str(), _port);
 
     // host and port for proxy to contact
 
     HttpURL t_url(tunnelUrl);
     int port = t_url.getPort();
     const char *hostname = t_url.getHost().c_str();
-    sprintf(str, "Host: %s:%d\r\n", hostname, port);
+    safe_snprintf(str, "Host: %s:%d\r\n", hostname, port);
     _httpHeader += str;
 
     if (port <= 0) {
@@ -601,7 +602,7 @@ int DsURL::prepareForwarding(const string &calling_info,
     // We need to add 20 bytes for the socket header, which
     // is 8 magic-cookie bytes + 12 SKU_header_t bytes
     
-    sprintf(str, "Content-length: %d\r\n\r\n", content_length + 20);
+    safe_snprintf(str, "Content-length: %d\r\n\r\n", content_length + 20);
     _httpHeader += str;
 
     return 0;
@@ -639,7 +640,7 @@ int DsURL::prepareForwarding(const string &calling_info,
 
     // POST line
 
-    sprintf(str, "POST /%s HTTP/1.0\r\n", script.c_str());
+    safe_snprintf(str, "POST /%s HTTP/1.0\r\n", script.c_str());
     _httpHeader += str;
 
     // referer
@@ -663,24 +664,24 @@ int DsURL::prepareForwarding(const string &calling_info,
     // User-Agent
 
     if (server_port > 0) {
-      sprintf(str, "User-Agent: DsServer 1.0: %s:%d\r\n",
-	      _host.c_str(), server_port);
+      safe_snprintf(str, "User-Agent: DsServer 1.0: %s:%d\r\n",
+                    _host.c_str(), server_port);
     } else {
-      sprintf(str, "User-Agent: DsServer 1.0: %s:%d\r\n",
-	      _host.c_str(), _port);
+      safe_snprintf(str, "User-Agent: DsServer 1.0: %s:%d\r\n",
+                    _host.c_str(), _port);
     }
     _httpHeader += str;
 
     // host and port for tunnel to contact
     
-    sprintf(str, "Host: %s:%d\r\n", _host.c_str(), _port);
+    safe_snprintf(str, "Host: %s:%d\r\n", _host.c_str(), _port);
     _httpHeader += str;
 
     // length of content message to follow
     // We need to add 20 bytes for the socket header, which
     // is 8 magic-cookie bytes + 12 SKU_header_t bytes
 
-    sprintf(str, "Content-length: %d\r\n\r\n", content_length + 20);
+    safe_snprintf(str, "Content-length: %d\r\n\r\n", content_length + 20);
     _httpHeader += str;
 
     return 0;
@@ -865,7 +866,7 @@ void DsURL::_loadHttpHeader(const string &userInfo,
 
   // POST line
   
-  sprintf(str, "POST /%s HTTP/1.0\r\n", _urlStr.c_str());
+  safe_snprintf(str, "POST /%s HTTP/1.0\r\n", _urlStr.c_str());
   _httpHeader += str;
   
   // referer
@@ -888,22 +889,21 @@ void DsURL::_loadHttpHeader(const string &userInfo,
 
   // User-Agent
   
-  sprintf(str, "User-Agent: DsServer 1.0: %s:%d\r\n",
-          _host.c_str(), _port);
+  safe_snprintf(str, "User-Agent: DsServer 1.0: %s:%d\r\n",
+                _host.c_str(), _port);
   _httpHeader += str;
 
   // host and port for tunnel to contact
   
-  sprintf(str, "Host: %s:%d\r\n", _host.c_str(), _port);
+  safe_snprintf(str, "Host: %s:%d\r\n", _host.c_str(), _port);
   _httpHeader += str;
   
   // length of content message to follow
   // We need to add 20 bytes for the socket header, which
   // is 8 magic-cookie bytes + 12 SKU_header_t bytes
   
-  sprintf(str, "Content-length: %d\r\n\r\n", contentLength + 20);
+  safe_snprintf(str, "Content-length: %d\r\n\r\n", contentLength + 20);
   _httpHeader += str;
 
 }
-
 
