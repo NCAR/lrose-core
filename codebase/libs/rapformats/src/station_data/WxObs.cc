@@ -45,6 +45,7 @@
 #include <toolsa/mem.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/SignBit.hh>
+#include <toolsa/safe_snprintf.hh>
 using namespace std;
 
 const double WxObs::CLOUD_SKC = 0.0;

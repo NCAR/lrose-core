@@ -38,6 +38,7 @@
 #include <toolsa/str.h>
 #include <toolsa/TaFile.hh>
 #include <toolsa/Path.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <dataport/bigend.h>
 #include <dataport/swap.h>
 #include <cerrno>

@@ -444,9 +444,9 @@ void acPosVector::_BE_to_header(void *buf){
 void acPosVector::_checkMissing(double val, char *representation){
 
   if (val == acPosVector::missingVal){
-    safe_snprintf(representation,"%s", "MISSING");
+    sprintf(representation,"%s", "MISSING");
   } else {
-    safe_snprintf(representation,"%g", val);
+    sprintf(representation,"%g", val);
   }
 }
 //

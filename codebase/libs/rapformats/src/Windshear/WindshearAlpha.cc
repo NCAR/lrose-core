@@ -27,6 +27,7 @@
 #include <rapformats/WindshearAlpha.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstdio>
 #include <cmath>
 using std::string;

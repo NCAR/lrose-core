@@ -50,6 +50,7 @@
 #include <sys/stat.h>
 
 #include <toolsa/os_config.h>
+#include <toolsa/safe_snprintf.hh>
 
 #include <rapformats/station_file.h>
 #include <rapformats/station_reports.h>

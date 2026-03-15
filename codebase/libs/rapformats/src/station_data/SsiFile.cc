@@ -53,6 +53,7 @@
 #include <toolsa/str.h>
 #include <toolsa/utim.h>
 #include <toolsa/file_io.h>
+#include <toolsa/safe_snprintf.hh>
 
 #include <rapformats/SsiFile.h>
 
