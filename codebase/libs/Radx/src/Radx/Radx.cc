@@ -34,6 +34,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/Radx.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <iostream>
 #include <cstring>
 #include <cstdio>
@@ -998,7 +999,7 @@ void Radx::addErrInt(string &errStr, string label,
 {
   errStr += label;
   char str[32];
-  sprintf(str, "%d", iarg);
+  safe_snprintf(str, "%d", iarg);
   errStr += str;
   if (cr) {
     errStr += "\n";
@@ -1017,7 +1018,7 @@ void Radx::addErrDbl(string &errStr,
 {
   errStr += label;
   char str[128];
-  sprintf(str, format.c_str(), darg);
+  safe_snprintf(str, format.c_str(), darg);
   errStr += str;
   if (cr) {
     errStr += "\n";

@@ -35,6 +35,7 @@
 
 #include <cstdio>
 #include <Radx/RadxStr.hh>
+#include <toolsa/safe_snprintf.hh>
 using namespace std;
 
 
@@ -60,7 +61,7 @@ void RadxStr::addInt(string &target,
 {
   target += label;
   char str[32];
-  sprintf(str, "%d", iarg);
+  safe_snprintf(str, "%d", iarg);
   target += str;
   if (cr) {
     target += "\n";
@@ -95,7 +96,7 @@ void RadxStr::addDbl(string &target,
 {
   target += label;
   char str[128];
-  sprintf(str, format.c_str(), darg);
+  safe_snprintf(str, format.c_str(), darg);
   target += str;
   if (cr) {
     target += "\n";

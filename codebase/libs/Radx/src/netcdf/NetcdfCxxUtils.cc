@@ -21,6 +21,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/NetcdfCxxUtils.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -1381,7 +1382,7 @@ void NetcdfCxxUtils::_addErrInt(string label, int iarg, bool cr)
 {
   _errStr += label;
   char str[32];
-  sprintf(str, "%d", iarg);
+  safe_snprintf(str, "%d", iarg);
   _errStr += str;
   if (cr) {
     _errStr += "\n";
@@ -1399,7 +1400,7 @@ void NetcdfCxxUtils::_addErrDbl(string label, double darg,
 {
   _errStr += label;
   char str[128];
-  sprintf(str, format.c_str(), darg);
+  safe_snprintf(str, format.c_str(), darg);
   _errStr += str;
   if (cr) {
     _errStr += "\n";
@@ -1454,4 +1455,3 @@ void NetcdfCxxUtils::_setFillvalue(Nc3Var &var)
   }
   addAttr(var, "_fillValue", missingInt);
 }
-

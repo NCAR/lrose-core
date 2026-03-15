@@ -35,6 +35,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <Radx/RadxPath.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/str.h>
 using namespace std;
 
@@ -216,7 +217,7 @@ void RadxPath::setDirectory(const string &topDir,
   _directory.clear();
   if (!topDir.empty()) {
     char dirName[10];
-    sprintf(dirName, "%4ld%02ld%02ld", year, month, day);
+    safe_snprintf(dirName, "%4ld%02ld%02ld", year, month, day);
     if (topDir != _dot) {
       _directory = topDir + _delimiter + dirName;
     } else {
@@ -258,7 +259,7 @@ void RadxPath::setFile(const time_t hour, const time_t min, const time_t sec, co
 {
   _file.clear();
   char fileName[10];
-  sprintf(fileName, "%02ld%02ld%02ld", hour, min, sec);
+  safe_snprintf(fileName, "%02ld%02ld%02ld", hour, min, sec);
   _file = fileName;
   if (!ext.empty()) {
     _file += DOT + ext;
@@ -275,8 +276,8 @@ void RadxPath::setFile(const RadxTime &file_time, const string &ext)
 {
   _file.clear();
   char fileName[10];
-  sprintf(fileName, "%02d%02d%02d",
-          file_time.getHour(), file_time.getMin(), file_time.getSec());
+  safe_snprintf(fileName, "%02d%02d%02d",
+                file_time.getHour(), file_time.getMin(), file_time.getSec());
   _file = fileName;
   
   if (!ext.empty()) {
@@ -448,7 +449,7 @@ string RadxPath::computeTmpPath(const char *tmp_name /* = NULL*/)
 
   if (tmp_name == NULL) {
     char pid_name[128];
-    sprintf(pid_name, "tmp_%d.tmp", getpid());
+    safe_snprintf(pid_name, "tmp_%d.tmp", getpid());
     tmp_path += pid_name;
   } else {
     tmp_path += tmp_name;
@@ -585,4 +586,3 @@ int RadxPath::makeDirRecurse(const char *path)
   }
 
 }
-

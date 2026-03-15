@@ -3800,7 +3800,6 @@ int NexradRadxFile::_unzipFile(const string &path)
     _addErrStr("ERROR - NexradRadxFile::readFromPath");
     _addErrStr("  Cannot write uncompressed data to tmp file");
     _addErrStr("  Path: ", tmpPath);
-    fclose(in);
     return -1;
   }
   

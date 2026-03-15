@@ -38,6 +38,7 @@
 #include <sys/time.h>
 #include <vector>
 #include <Radx/RadxTime.hh>
+#include <toolsa/safe_snprintf.hh>
 using namespace std;
 
 // days in the month
@@ -540,9 +541,9 @@ string RadxTime::asString(int subsecPrecision /* = 0*/) const
   char text[1024];
   RadxTime mtime(_uTime);
   if (subsecPrecision == 0) {
-    sprintf(text, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-            mtime.getYear(), mtime.getMonth(), mtime.getDay(),
-            mtime.getHour(), mtime.getMin(), mtime.getSec());
+    safe_snprintf(text, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                  mtime.getYear(), mtime.getMonth(), mtime.getDay(),
+                  mtime.getHour(), mtime.getMin(), mtime.getSec());
   } else { 
     if (subsecPrecision > 12) {
       subsecPrecision = 12;
@@ -552,11 +553,11 @@ string RadxTime::asString(int subsecPrecision /* = 0*/) const
     double power = pow(10.0, subsecPrecision);
     int usecs = (int) (_subSec * power + 0.5);
     char format[128];
-    sprintf(format, "%%.4d/%%.2d/%%.2d %%.2d:%%.2d:%%.2d.%%.%dd",
-            subsecPrecision);
-    sprintf(text, format,
-            mtime.getYear(), mtime.getMonth(), mtime.getDay(),
-            mtime.getHour(), mtime.getMin(), mtime.getSec(), usecs);
+    safe_snprintf(format, "%%.4d/%%.2d/%%.2d %%.2d:%%.2d:%%.2d.%%.%dd",
+                  subsecPrecision);
+    safe_snprintf(text, format,
+                  mtime.getYear(), mtime.getMonth(), mtime.getDay(),
+                  mtime.getHour(), mtime.getMin(), mtime.getSec(), usecs);
   }
   return text;
 }
@@ -572,9 +573,9 @@ string RadxTime::asStringDashed(int subsecPrecision /* = 0*/) const
   char text[1024];
   RadxTime mtime(_uTime);
   if (subsecPrecision == 0) {
-    sprintf(text, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d",
-            mtime.getYear(), mtime.getMonth(), mtime.getDay(),
-            mtime.getHour(), mtime.getMin(), mtime.getSec());
+    safe_snprintf(text, "%.4d-%.2d-%.2d %.2d:%.2d:%.2d",
+                  mtime.getYear(), mtime.getMonth(), mtime.getDay(),
+                  mtime.getHour(), mtime.getMin(), mtime.getSec());
   } else { 
     if (subsecPrecision > 12) {
       subsecPrecision = 12;
@@ -584,11 +585,11 @@ string RadxTime::asStringDashed(int subsecPrecision /* = 0*/) const
     double power = pow(10.0, subsecPrecision);
     int usecs = (int) (_subSec * power + 0.5);
     char format[128];
-    sprintf(format, "%%.4d-%%.2d-%%.2d %%.2d:%%.2d:%%.2d.%%.%dd",
-            subsecPrecision);
-    sprintf(text, format,
-            mtime.getYear(), mtime.getMonth(), mtime.getDay(),
-            mtime.getHour(), mtime.getMin(), mtime.getSec(), usecs);
+    safe_snprintf(format, "%%.4d-%%.2d-%%.2d %%.2d:%%.2d:%%.2d.%%.%dd",
+                  subsecPrecision);
+    safe_snprintf(text, format,
+                  mtime.getYear(), mtime.getMonth(), mtime.getDay(),
+                  mtime.getHour(), mtime.getMin(), mtime.getSec(), usecs);
   }
   return text;
 }
@@ -614,9 +615,9 @@ string RadxTime::getW3cStr() const
   mtime.unix_time = _uTime;
   uconvert_from_utime(mtime);
   char str[32];
-  sprintf(str, "%.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
-          mtime.year, mtime.month, mtime.day,
-          mtime.hour, mtime.min, mtime.sec);
+  safe_snprintf(str, "%.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
+                mtime.year, mtime.month, mtime.day,
+                mtime.hour, mtime.min, mtime.sec);
  
   return str;
 }
@@ -655,9 +656,9 @@ const string RadxTime::dtime() const
   
   if (_uTime > 0) {
     date_time_t when = udate_time(_uTime);
-    sprintf(whenChar, "%4d/%02d/%02d %02d:%02d:%02d",
-            when.year, when.month, when.day,
-            when.hour, when.min, when.sec);
+    safe_snprintf(whenChar, "%4d/%02d/%02d %02d:%02d:%02d",
+                  when.year, when.month, when.day,
+                  when.hour, when.min, when.sec);
   } else {
     strcpy(whenChar, "0000/00/00 00:00:00");
   }
@@ -676,9 +677,9 @@ const string RadxTime::kmltime() const
 
   if (_uTime > 0) {
     date_time_t when = udate_time(_uTime);
-    sprintf(whenChar, "%4d-%02d-%02dT%02d:%02d:%02d",
-            when.year, when.month, when.day,
-            when.hour, when.min, when.sec);
+    safe_snprintf(whenChar, "%4d-%02d-%02dT%02d:%02d:%02d",
+                  when.year, when.month, when.day,
+                  when.hour, when.min, when.sec);
   } else {
     strcpy(whenChar, "0000-00-00T00:00:00");
   }
@@ -703,23 +704,23 @@ string RadxTime::getStr(bool utc_label) const
   int usecs = (int) (_subSec * 1.0e6 + 0.5);
   if (utc_label) {
     if (_subSec != 0) {
-      sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d.%.6d UTC",
-              mtime.year, mtime.month, mtime.day,
-              mtime.hour, mtime.min, mtime.sec, usecs);
+      safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d.%.6d UTC",
+                    mtime.year, mtime.month, mtime.day,
+                    mtime.hour, mtime.min, mtime.sec, usecs);
     } else {
-      sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d UTC",
-              mtime.year, mtime.month, mtime.day,
-              mtime.hour, mtime.min, mtime.sec);
+      safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d UTC",
+                    mtime.year, mtime.month, mtime.day,
+                    mtime.hour, mtime.min, mtime.sec);
     }
   } else {
     if (_subSec != 0) {
-      sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d.%.6d",
-              mtime.year, mtime.month, mtime.day,
-              mtime.hour, mtime.min, mtime.sec, usecs);
+      safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d.%.6d",
+                    mtime.year, mtime.month, mtime.day,
+                    mtime.hour, mtime.min, mtime.sec, usecs);
     } else {
-      sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-              mtime.year, mtime.month, mtime.day,
-              mtime.hour, mtime.min, mtime.sec);
+      safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                    mtime.year, mtime.month, mtime.day,
+                    mtime.hour, mtime.min, mtime.sec);
     }
   }
   return str;
@@ -736,9 +737,9 @@ string RadxTime::getStrPlain() const
   mtime.unix_time = _uTime;
   uconvert_from_utime(mtime);
   char str[32];
-  sprintf(str, "%.4d%.2d%.2d%.2d%.2d%.2d",
-          mtime.year, mtime.month, mtime.day,
-          mtime.hour, mtime.min, mtime.sec);
+  safe_snprintf(str, "%.4d%.2d%.2d%.2d%.2d%.2d",
+                mtime.year, mtime.month, mtime.day,
+                mtime.hour, mtime.min, mtime.sec);
   return str;
 }
 
@@ -752,8 +753,8 @@ string RadxTime::getDateStr() const
   mtime.unix_time = _uTime;
   uconvert_from_utime(mtime);
   char str[32];
-  sprintf(str, "%.4d/%.2d/%.2d",
-          mtime.year, mtime.month, mtime.day);
+  safe_snprintf(str, "%.4d/%.2d/%.2d",
+                mtime.year, mtime.month, mtime.day);
   return str;
 }
 
@@ -768,8 +769,8 @@ string RadxTime::getDateStrPlain() const
   mtime.unix_time = _uTime;
   uconvert_from_utime(mtime);
   char str[32];
-  sprintf(str, "%.4d%.2d%.2d",
-          mtime.year, mtime.month, mtime.day);
+  safe_snprintf(str, "%.4d%.2d%.2d",
+                mtime.year, mtime.month, mtime.day);
   return str;
 }
 
@@ -783,8 +784,8 @@ string RadxTime::getDateStrMDY() const
   mtime.unix_time = _uTime;
   uconvert_from_utime(mtime);
   char str[32];
-  sprintf(str, "%.2d/%.2d/%.4d",
-          mtime.month, mtime.day, mtime.year);
+  safe_snprintf(str, "%.2d/%.2d/%.4d",
+                mtime.month, mtime.day, mtime.year);
   return str;
 }
 
@@ -802,11 +803,11 @@ string RadxTime::getTimeStr(bool utc_label) const
   uconvert_from_utime(mtime);
   char str[32];
   if (utc_label) {
-    sprintf(str, "%.2d:%.2d:%.2d UTC",
-            mtime.hour, mtime.min, mtime.sec);
+    safe_snprintf(str, "%.2d:%.2d:%.2d UTC",
+                  mtime.hour, mtime.min, mtime.sec);
   } else {
-    sprintf(str, "%.2d:%.2d:%.2d",
-            mtime.hour, mtime.min, mtime.sec);
+    safe_snprintf(str, "%.2d:%.2d:%.2d",
+                  mtime.hour, mtime.min, mtime.sec);
   }
   return str;
 }
@@ -823,8 +824,8 @@ string RadxTime::getTimeStrPlain() const
   mtime.unix_time = _uTime;
   uconvert_from_utime(mtime);
   char str[32];
-  sprintf(str, "%.2d%.2d%.2d",
-          mtime.hour, mtime.min, mtime.sec);
+  safe_snprintf(str, "%.2d%.2d%.2d",
+                mtime.hour, mtime.min, mtime.sec);
   return str;
 }
 
@@ -847,13 +848,13 @@ string RadxTime::str(const time_t mytime, const bool utc_label)
   uconvert_from_utime(mtime);
   char str[128];
   if (utc_label) {
-    sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d UTC",
-            mtime.year, mtime.month, mtime.day,
-            mtime.hour, mtime.min, mtime.sec);
+    safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d UTC",
+                  mtime.year, mtime.month, mtime.day,
+                  mtime.hour, mtime.min, mtime.sec);
   } else {
-    sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-            mtime.year, mtime.month, mtime.day,
-            mtime.hour, mtime.min, mtime.sec);
+    safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                  mtime.year, mtime.month, mtime.day,
+                  mtime.hour, mtime.min, mtime.sec);
   }
   return str;
 }
@@ -876,9 +877,9 @@ string RadxTime::strm(const time_t mytime)
   mtime.unix_time = mytime;
   uconvert_from_utime(mtime);
   char str[32];
-  sprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-          mtime.year, mtime.month, mtime.day,
-          mtime.hour, mtime.min, mtime.sec);
+  safe_snprintf(str, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                mtime.year, mtime.month, mtime.day,
+                mtime.hour, mtime.min, mtime.sec);
   return str;
 
 }
@@ -1404,13 +1405,13 @@ ostream& operator<< (ostream &os, const RadxTime &d)
   RadxTime::uconvert_from_utime(dtime);
   if (d._subSec != 0) {
     int usecs = (int) (d._subSec * 1.0e6 + 0.5);
-    sprintf(buf, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d.%.6d",
-            dtime.year, dtime.month, dtime.day,
-            dtime.hour, dtime.min, dtime.sec, usecs);
+    safe_snprintf(buf, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d.%.6d",
+                  dtime.year, dtime.month, dtime.day,
+                  dtime.hour, dtime.min, dtime.sec, usecs);
   } else {
-    sprintf(buf, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-            dtime.year, dtime.month, dtime.day,
-            dtime.hour, dtime.min, dtime.sec);
+    safe_snprintf(buf, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                  dtime.year, dtime.month, dtime.day,
+                  dtime.hour, dtime.min, dtime.sec);
   }
   string str(buf);
   return os << str;
@@ -1695,13 +1696,13 @@ string RadxTime::utimestr(const RadxTime::date_time_t &date_time)
 
   char timestr[128];
 
-  sprintf(timestr, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-          date_time.year,
-          date_time.month,
-          date_time.day,
-          date_time.hour,
-          date_time.min,
-          date_time.sec);
+  safe_snprintf(timestr, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                date_time.year,
+                date_time.month,
+                date_time.day,
+                date_time.hour,
+                date_time.min,
+                date_time.sec);
   
   return timestr;
 
@@ -1731,17 +1732,16 @@ string RadxTime::utime_str(const RadxTime::date_time_t &date_time)
 {
 
   char time_str[128];
-  sprintf(time_str, "%.4d/%.2d/%.2d_%.2d:%.2d:%.2d",
-          date_time.year,
-          date_time.month,
-          date_time.day,
-          date_time.hour,
-          date_time.min,
-          date_time.sec);
+  safe_snprintf(time_str, "%.4d/%.2d/%.2d_%.2d:%.2d:%.2d",
+                date_time.year,
+                date_time.month,
+                date_time.day,
+                date_time.hour,
+                date_time.min,
+                date_time.sec);
 
   return time_str;
 
 }
 
 #endif
-

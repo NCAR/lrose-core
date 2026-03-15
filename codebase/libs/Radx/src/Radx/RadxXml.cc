@@ -39,6 +39,7 @@
 #include <cerrno>
 #include <iostream>
 #include <Radx/RadxXml.hh>
+#include <toolsa/safe_snprintf.hh>
 using namespace std;
 
 // set the default indent spaces per level
@@ -1485,9 +1486,9 @@ string RadxXml::writeInt(int val, const char *format /* = NULL */)
 {
   char buf[1024];
   if (format == NULL) {
-    sprintf(buf, "%d", val);
+    safe_snprintf(buf, "%d", val);
   } else {
-    sprintf(buf, format, val);
+    safe_snprintf(buf, format, val);
   }
   string str = buf;
   return str;
@@ -1498,9 +1499,9 @@ string RadxXml::writeLong(long int val, const char *format /* = NULL */)
 {
   char buf[1024];
   if (format == NULL) {
-    sprintf(buf, "%ld", val);
+    safe_snprintf(buf, "%ld", val);
   } else {
-    sprintf(buf, format, val);
+    safe_snprintf(buf, format, val);
   }
   string str = buf;
   return str;
@@ -1511,9 +1512,9 @@ string RadxXml::writeDouble(double val, const char *format /* = NULL */)
 {
   char buf[1024];
   if (format == NULL) {
-    sprintf(buf, "%g", val);
+    safe_snprintf(buf, "%g", val);
   } else {
-    sprintf(buf, format, val);
+    safe_snprintf(buf, format, val);
   }
   string str = buf;
   return str;
@@ -1526,9 +1527,9 @@ string RadxXml::writeUtime(time_t val, const char *format /* = NULL */)
 {
   char buf[1024];
   if (format == NULL) {
-    sprintf(buf, "%ld", (long int) val);
+    safe_snprintf(buf, "%ld", (long int) val);
   } else {
-    sprintf(buf, format, (long int) val);
+    safe_snprintf(buf, format, (long int) val);
   }
   string str = buf;
   return str;
@@ -1541,9 +1542,9 @@ string RadxXml::writeTime(time_t val)
 {
   char buf[64];
   RadxTime dt(val);
-  sprintf(buf, "%.4d-%.2d-%.2dT%.2d:%.2d:%.2d",
-          dt.getYear(), dt.getMonth(), dt.getDay(),
-          dt.getHour(), dt.getMin(), dt.getSec());
+  safe_snprintf(buf, "%.4d-%.2d-%.2dT%.2d:%.2d:%.2d",
+                dt.getYear(), dt.getMonth(), dt.getDay(),
+                dt.getHour(), dt.getMin(), dt.getSec());
   string str = buf;
   return str;
 }
@@ -1862,9 +1863,9 @@ void RadxXml::addIntAttr(const string &name,
 {
   char buf[1024];
   if (format == NULL) {
-    sprintf(buf, "%d", val);
+    safe_snprintf(buf, "%d", val);
   } else {
-    sprintf(buf, format, val);
+    safe_snprintf(buf, format, val);
   }
   string valStr = buf;
   addStringAttr(name, valStr, attributes);
@@ -1880,9 +1881,9 @@ void RadxXml::addLongAttr(const string &name,
 {
   char buf[1024];
   if (format == NULL) {
-    sprintf(buf, "%ld", val);
+    safe_snprintf(buf, "%ld", val);
   } else {
-    sprintf(buf, format, val);
+    safe_snprintf(buf, format, val);
   }
   string valStr = buf;
   addStringAttr(name, valStr, attributes);
@@ -1898,9 +1899,9 @@ void RadxXml::addDoubleAttr(const string &name,
 {
   char buf[1024];
   if (format == NULL) {
-    sprintf(buf, "%g", val);
+    safe_snprintf(buf, "%g", val);
   } else {
-    sprintf(buf, format, val);
+    safe_snprintf(buf, format, val);
   }
   string valStr = buf;
   addStringAttr(name, valStr, attributes);
@@ -1915,9 +1916,9 @@ void RadxXml::addTimeAttr(const string &name,
 {
   RadxTime dt(val);
   char str[64];
-  sprintf(str, "%.4d-%.2d-%.2dT%.2d:%.2d:%.2d",
-          dt.getYear(), dt.getMonth(), dt.getDay(),
-          dt.getHour(), dt.getMin(), dt.getSec());
+  safe_snprintf(str, "%.4d-%.2d-%.2dT%.2d:%.2d:%.2d",
+                dt.getYear(), dt.getMonth(), dt.getDay(),
+                dt.getHour(), dt.getMin(), dt.getSec());
   string valStr = str;
   addStringAttr(name, valStr, attributes);
 }
@@ -1930,7 +1931,7 @@ void RadxXml::addUtimeAttr(const string &name,
 
 {
   char str[64];
-  sprintf(str, "%ld", val);
+  safe_snprintf(str, "%ld", val);
   string valStr = str;
   addStringAttr(name, valStr, attributes);
 }
@@ -2018,5 +2019,4 @@ void RadxXml::setUtimeAttr(const string &name,
   attributes.clear();
   addUtimeAttr(name, val, attributes);
 }
-
 
