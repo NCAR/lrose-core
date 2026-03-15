@@ -44,6 +44,7 @@
 #include <toolsa/umisc.h>
 #include <toolsa/pjg.h>
 #include <toolsa/file_io.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/Path.hh>
 #include <dataport/bigend.h>
@@ -2290,7 +2291,7 @@ int Mdvx::_computeReadPath()
         TaStr::AddStr(_errStr, "  Read closest failed, dir: ", _readDir);
         TaStr::AddInt(_errStr, "  Search margin (secs): ", _readSearchMargin);
         char timeErrStr[1024];
-        sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
+        safe_snprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
         TaStr::AddStr(_errStr, timeErrStr);
         _noFilesFoundOnRead = true;
         return -1;
@@ -2321,7 +2322,7 @@ int Mdvx::_computeReadPath()
         TaStr::AddStr(_errStr, " Read first before failed, dir: ", _readDir);
         TaStr::AddInt(_errStr, " Search margin (secs): ", _readSearchMargin);
         char timeErrStr[1024];
-        sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
+        safe_snprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
         _noFilesFoundOnRead = true;
         return -1;
       }
@@ -2351,7 +2352,7 @@ int Mdvx::_computeReadPath()
         TaStr::AddStr(_errStr, " Read first after failed, dir: ", _readDir);
         TaStr::AddInt(_errStr, " Search margin (secs): ", _readSearchMargin);
         char timeErrStr[1024];
-        sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
+        safe_snprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
         _noFilesFoundOnRead = true;
         return -1;
       }
@@ -2381,7 +2382,7 @@ int Mdvx::_computeReadPath()
         TaStr::AddStr(_errStr, " Read best forecast failed, dir: ", _readDir);
         TaStr::AddInt(_errStr, " Search margin (secs): ", _readSearchMargin);
         char timeErrStr[1024];
-        sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
+        safe_snprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
         _noFilesFoundOnRead = true;
         return -1;
       }
@@ -2408,7 +2409,7 @@ int Mdvx::_computeReadPath()
                       " Read specified forecast failed, dir: ", _readDir);
         TaStr::AddInt(_errStr, " Search margin (secs): ", _readSearchMargin);
         char timeErrStr[1024];
-        sprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
+        safe_snprintf(timeErrStr, "  Search time: %s", utimstr(_readSearchTime));
         _noFilesFoundOnRead = true;
         return -1;
       }
@@ -2421,7 +2422,7 @@ int Mdvx::_computeReadPath()
 
     default: {
       _errStr += "ERROR - computeReadPath\n";
-      sprintf(errstr, "  Unknown search mode: %d\n", _readSearchMode);
+      safe_snprintf(errstr, "  Unknown search mode: %d\n", _readSearchMode);
       _errStr += errstr;
       return -1;
     }
@@ -2507,13 +2508,13 @@ int Mdvx::_readFieldHeader(const int field_num,
       sizeof(master_header_t) + (field_num * sizeof(field_header_t));
     if (infile.fseek(hdr_offset, SEEK_SET)) {
       _errStr += "ERROR - Mdvx::_readFieldHeader\n";
-      sprintf(errstr, "Cannot seek to field header, field %d\n", field_num);
+      safe_snprintf(errstr, "Cannot seek to field header, field %d\n", field_num);
       _errStr += errstr;
       return -1;
     }
     if((infile.fread(&fhdr, sizeof(field_header_t), 1)) != 1) {
       _errStr += "ERROR - Mdvx::_readFieldHeader\n";
-      sprintf(errstr, "Cannot read field header, field %d\n", field_num);
+      safe_snprintf(errstr, "Cannot read field header, field %d\n", field_num);
       _errStr += errstr;
       return -1;
     }
@@ -2525,14 +2526,14 @@ int Mdvx::_readFieldHeader(const int field_num,
       sizeof(master_header_32_t) + (field_num * sizeof(field_header_32_t));
     if (infile.fseek(hdr_offset, SEEK_SET)) {
       _errStr += "ERROR - Mdvx::_readFieldHeader\n";
-      sprintf(errstr, "Cannot seek to field header 32, field %d\n", field_num);
+      safe_snprintf(errstr, "Cannot seek to field header 32, field %d\n", field_num);
       _errStr += errstr;
       return -1;
     }
     field_header_32_t fhdr32;
     if((infile.fread(&fhdr32, sizeof(field_header_32_t), 1)) != 1) {
       _errStr += "ERROR - Mdvx::_readFieldHeader\n";
-      sprintf(errstr, "Cannot read field header 32, field %d\n", field_num);
+      safe_snprintf(errstr, "Cannot read field header 32, field %d\n", field_num);
       _errStr += errstr;
       return -1;
     }
@@ -2613,13 +2614,13 @@ int Mdvx::_readVlevelHeader(const int field_num,
     int64_t offset = first_vlevel_offset + (field_num * sizeof(vlevel_header_t));
     if (infile.fseek(offset, SEEK_SET)) {
       _errStr += "ERROR - Mdvx::_readVlevelHeader\n";
-      sprintf(errstr, "Cannot seek to vlevel header, field %d\n", field_num);
+      safe_snprintf(errstr, "Cannot seek to vlevel header, field %d\n", field_num);
       _errStr += errstr;
       return -1;
     }
     if((infile.fread(&vhdr, sizeof(vlevel_header_t), 1)) != 1) {
       _errStr += "ERROR - Mdvx::_readVlevelHeader\n";
-      sprintf(errstr, "Cannot read vlevel header, field %d\n", field_num);
+      safe_snprintf(errstr, "Cannot read vlevel header, field %d\n", field_num);
       _errStr += errstr;
       return -1;
     }
@@ -2629,14 +2630,14 @@ int Mdvx::_readVlevelHeader(const int field_num,
     int64_t offset = first_vlevel_offset + (field_num * sizeof(vlevel_header_32_t));
     if (infile.fseek(offset, SEEK_SET)) {
       _errStr += "ERROR - Mdvx::_readVlevelHeader\n";
-      sprintf(errstr, "Cannot seek to vlevel header 32, field %d\n", field_num);
+      safe_snprintf(errstr, "Cannot seek to vlevel header 32, field %d\n", field_num);
       _errStr += errstr;
       return -1;
     }
     vlevel_header_32_t vhdr32;
     if((infile.fread(&vhdr32, sizeof(vlevel_header_32_t), 1)) != 1) {
       _errStr += "ERROR - Mdvx::_readVlevelHeader\n";
-      sprintf(errstr, "Cannot read vlevel header 32, field %d\n", field_num);
+      safe_snprintf(errstr, "Cannot read vlevel header 32, field %d\n", field_num);
       _errStr += errstr;
       return -1;
     }
@@ -2676,13 +2677,13 @@ int Mdvx::_readChunkHeader(const int chunk_num,
     int64_t offset = first_chunk_offset + chunk_num * sizeof(chunk_header_t);
     if(infile.fseek(offset, SEEK_SET)) {
       _errStr += "ERROR - Mdvx::_readChunkHeader\n";
-      sprintf(errstr, "Cannot seek to chunk header, field %d\n", chunk_num);
+      safe_snprintf(errstr, "Cannot seek to chunk header, field %d\n", chunk_num);
       _errStr += errstr;
       return -1;
     }
     if((infile.fread(&chdr, sizeof(chunk_header_t), 1)) != 1) {
       _errStr += "ERROR - Mdvx::_readChunkHeader\n";
-      sprintf(errstr, "Cannot read chunk header, field %d\n", chunk_num);
+      safe_snprintf(errstr, "Cannot read chunk header, field %d\n", chunk_num);
       _errStr += errstr;
       return -1;
     }
@@ -2692,14 +2693,14 @@ int Mdvx::_readChunkHeader(const int chunk_num,
     int64_t offset = first_chunk_offset + chunk_num * sizeof(chunk_header_32_t);
     if(infile.fseek(offset, SEEK_SET)) {
       _errStr += "ERROR - Mdvx::_readChunkHeader\n";
-      sprintf(errstr, "Cannot seek to chunk header 32, field %d\n", chunk_num);
+      safe_snprintf(errstr, "Cannot seek to chunk header 32, field %d\n", chunk_num);
       _errStr += errstr;
       return -1;
     }
     chunk_header_32_t chdr32;
     if((infile.fread(&chdr32, sizeof(chunk_header_32_t), 1)) != 1) {
       _errStr += "ERROR - Mdvx::_readChunkHeader\n";
-      sprintf(errstr, "Cannot read chunk header 32, field %d\n", chunk_num);
+      safe_snprintf(errstr, "Cannot read chunk header 32, field %d\n", chunk_num);
       _errStr += errstr;
       return -1;
     }
@@ -3069,7 +3070,7 @@ int Mdvx::_readVolumeMdv(bool fill_missing,
     if (field == NULL) {
       _errStr += "ERROR - Mdvx::_readVolumeMdv.\n";
       char errstr[128];
-      sprintf(errstr, " Allocating field mem");
+      safe_snprintf(errstr, " Allocating field mem");
       _errStr += errstr;
       return -1;
     }
@@ -3079,7 +3080,7 @@ int Mdvx::_readVolumeMdv(bool fill_missing,
 			    is_vsection, vsection_min_lon, vsection_max_lon)) {
       _errStr += "ERROR - Mdvx::_readVolumeMdv.\n";
       char errstr[128];
-      sprintf(errstr, "  Reading field %d\n", (int) i);
+      safe_snprintf(errstr, "  Reading field %d\n", (int) i);
       _errStr += errstr;
       _errStr += field->getErrStr();
       delete field;
@@ -3102,7 +3103,7 @@ int Mdvx::_readVolumeMdv(bool fill_missing,
     if (chunk == NULL){
       _errStr += "ERROR - Mdvx::_readVolumeMdv.\n";
       char errstr[128];
-      sprintf(errstr, " Allocating chunk mem");
+      safe_snprintf(errstr, " Allocating chunk mem");
       _errStr += errstr;
       return -1;
     }
@@ -3110,7 +3111,7 @@ int Mdvx::_readVolumeMdv(bool fill_missing,
     if (chunk->_read_data(infile)) {
       _errStr += "ERROR - Mdvx::_readVolumeMdv.\n";
       char errstr[128];
-      sprintf(errstr, "  Reading chunk %d\n", (int) i);
+      safe_snprintf(errstr, "  Reading chunk %d\n", (int) i);
       _errStr += errstr;
       _errStr += chunk->getErrStr();
       delete chunk;
@@ -3585,6 +3586,5 @@ void Mdvx::constrainHorizontal()
   }
 
 }
-
 
 
