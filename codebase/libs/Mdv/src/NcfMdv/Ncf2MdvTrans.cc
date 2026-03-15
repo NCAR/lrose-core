@@ -38,6 +38,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include <dataport/bigend.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/mem.h>
 #include <toolsa/TaStr.hh>
 #include <toolsa/TaArray.hh>
@@ -1510,7 +1511,7 @@ int Ncf2MdvTrans::_addChunks()
     // dimension
 
     char dimName[128];
-    sprintf(dimName, "%s_%.4d", NcfMdv::nbytes_mdv_chunk, ii);
+    safe_snprintf(dimName, "%s_%.4d", NcfMdv::nbytes_mdv_chunk, ii);
     Nc3Dim *dim = _ncFile->get_dim(dimName);
     if (dim == NULL) {
       return 0;
@@ -1519,7 +1520,7 @@ int Ncf2MdvTrans::_addChunks()
     // variable
     
     char varName[128];
-    sprintf(varName, "%s_%.4d", NcfMdv::mdv_chunk, ii);
+    safe_snprintf(varName, "%s_%.4d", NcfMdv::mdv_chunk, ii);
     Nc3Var *var = _ncFile->get_var(varName);
     if (var == NULL) {
       return 0;
@@ -2733,4 +2734,3 @@ int Ncf2MdvTrans::_getDsPrfMode(Radx::PrtMode_t mode)
       return DS_RADAR_PRF_MODE_FIXED;
   }
 }
-

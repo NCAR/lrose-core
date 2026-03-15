@@ -44,6 +44,7 @@
 #include <cstring>
 #include <Mdv/NcfMdv.hh>
 #include <cstring>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/mem.h>
 
@@ -240,7 +241,7 @@ int NcfVlevelInfo::addDim(int vlevelNum, Nc3File *ncFile, string &errStr)
 {
 
   char zDimName[4];
-  sprintf(zDimName, "z%d", vlevelNum);
+  safe_snprintf(zDimName, "z%d", vlevelNum);
 
   _zDim = ncFile->add_dim(zDimName, _nz);
   if (_zDim == NULL) {
@@ -261,7 +262,7 @@ int NcfVlevelInfo::addVlevelVar(int vlevelNum, Nc3File *ncFile, string &errStr)
   // Add variable to NcFile
   
   char zVarName[32];
-  sprintf(zVarName, "z%d", vlevelNum);
+  safe_snprintf(zVarName, "z%d", vlevelNum);
   
   if ((_zVar = ncFile->add_var(zVarName, nc3Float, _zDim)) == NULL) {
     TaStr::AddStr(errStr, "Mdv2NcfTrans::NcfVlevelInfo::addVlevelVar");

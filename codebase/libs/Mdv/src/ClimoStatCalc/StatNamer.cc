@@ -33,6 +33,7 @@
  *********************************************************************/
 
 #include <cstdio>
+#include <toolsa/safe_snprintf.hh>
 
 #include <Mdv/climo/StatNamer.hh>
 
@@ -94,7 +95,7 @@ string StatNamer::getStatFieldName(const Mdvx::climo_type_t stat_type,
   case Mdvx::CLIMO_TYPE_NUM_OBS_GT :
   {
     char parameter_string[80];
-    sprintf(parameter_string, "%.2f", parameter1);
+    safe_snprintf(parameter_string, "%.2f", parameter1);
     
     return "Obs > " + string(parameter_string) + " " + data_field_name;
   }
@@ -102,7 +103,7 @@ string StatNamer::getStatFieldName(const Mdvx::climo_type_t stat_type,
   case Mdvx::CLIMO_TYPE_NUM_OBS_GE :
   {
     char parameter_string[80];
-    sprintf(parameter_string, "%.2f", parameter1);
+    safe_snprintf(parameter_string, "%.2f", parameter1);
     
     return "Obs >= " + string(parameter_string) + " " + data_field_name;
   }
@@ -110,7 +111,7 @@ string StatNamer::getStatFieldName(const Mdvx::climo_type_t stat_type,
   case Mdvx::CLIMO_TYPE_NUM_OBS_LT :
   {
     char parameter_string[80];
-    sprintf(parameter_string, "%.2f", parameter1);
+    safe_snprintf(parameter_string, "%.2f", parameter1);
     
     return "Obs < " + string(parameter_string) + " " + data_field_name;
   }
@@ -118,7 +119,7 @@ string StatNamer::getStatFieldName(const Mdvx::climo_type_t stat_type,
   case Mdvx::CLIMO_TYPE_NUM_OBS_LE :
   {
     char parameter_string[80];
-    sprintf(parameter_string, "%.2f", parameter1);
+    safe_snprintf(parameter_string, "%.2f", parameter1);
     
     return "Obs <= " + string(parameter_string) + " " + data_field_name;
   }
@@ -132,7 +133,7 @@ string StatNamer::getStatFieldName(const Mdvx::climo_type_t stat_type,
   case Mdvx::CLIMO_TYPE_PERCENT_GT :
   {
     char parameter_string[80];
-    sprintf(parameter_string, "%.2f", parameter1);
+    safe_snprintf(parameter_string, "%.2f", parameter1);
     
     return "Percent > " + string(parameter_string) + " " + data_field_name;
   }
@@ -140,7 +141,7 @@ string StatNamer::getStatFieldName(const Mdvx::climo_type_t stat_type,
   case Mdvx::CLIMO_TYPE_PERCENT_GE :
   {
     char parameter_string[80];
-    sprintf(parameter_string, "%.2f", parameter1);
+    safe_snprintf(parameter_string, "%.2f", parameter1);
     
     return "Percent >= " + string(parameter_string) + " " + data_field_name;
   }
@@ -148,7 +149,7 @@ string StatNamer::getStatFieldName(const Mdvx::climo_type_t stat_type,
   case Mdvx::CLIMO_TYPE_PERCENT_LT :
   {
     char parameter_string[80];
-    sprintf(parameter_string, "%.2f", parameter1);
+    safe_snprintf(parameter_string, "%.2f", parameter1);
     
     return "Percent < " + string(parameter_string) + " " + data_field_name;
   }
@@ -156,7 +157,7 @@ string StatNamer::getStatFieldName(const Mdvx::climo_type_t stat_type,
   case Mdvx::CLIMO_TYPE_PERCENT_LE :
   {
     char parameter_string[80];
-    sprintf(parameter_string, "%.2f", parameter1);
+    safe_snprintf(parameter_string, "%.2f", parameter1);
     
     return "Percent <= " + string(parameter_string) + " " + data_field_name;
   }

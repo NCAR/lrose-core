@@ -57,6 +57,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/uusleep.h>
 #include <toolsa/Path.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <Mdv/NcfMdv.hh>
 #include <Mdv/Mdv2NcfTrans.hh>
 #include <Mdv/MdvxChunk.hh>
@@ -801,7 +802,7 @@ int Mdv2NcfTrans::_addDimensions()
     for (size_t i = 0; i < _mdv->getNChunks(); i++) {
       const MdvxChunk *chunk = _mdv->getChunkByNum(i);
       char chunkName[128];
-      sprintf(chunkName, "%s_%.4lu", NcfMdv::nbytes_mdv_chunk, i);
+      safe_snprintf(chunkName, "%s_%.4lu", NcfMdv::nbytes_mdv_chunk, i);
       Nc3Dim *chunkDim = _ncFile->add_dim(chunkName, chunk->getSize());
       if (chunkDim == NULL) {
         return -1;
@@ -840,8 +841,8 @@ int Mdv2NcfTrans::_addCoordinateVariables()
     bool outputLatLonForThisGrid = _outputLatlonArrays;
     if (outputLatLonForThisGrid) {
       char latVarName[32], lonVarName[32];
-      sprintf(latVarName, "lat%ld", i);
-      sprintf(lonVarName, "lon%ld", i);
+      safe_snprintf(latVarName, "lat%ld", i);
+      safe_snprintf(lonVarName, "lon%ld", i);
       for (size_t jj = 0; jj < _fieldData.size(); jj++) {
         string fieldName = _fieldData[jj]->getName();
         if (fieldName.compare(latVarName) == 0 ||
@@ -1140,7 +1141,7 @@ int Mdv2NcfTrans::_addMdvChunkVariables()
     }
     const MdvxChunk *chunk = _mdv->getChunkByNum(i);
     char chunkName[128];
-    sprintf(chunkName, "%s_%.4lu", NcfMdv::mdv_chunk, i);
+    safe_snprintf(chunkName, "%s_%.4lu", NcfMdv::mdv_chunk, i);
     
      Nc3Var *chunkVar =
        _ncFile->add_var(chunkName, nc3Byte, _timeDim, _chunkDims[i]);
@@ -1224,7 +1225,7 @@ int Mdv2NcfTrans::_addMdvChunkVariables()
         string angleStr;
         for (int ii = 0; ii < elev.getNElev(); ii++) {
           char text[80];
-          sprintf(text, "%g", angles[ii]);
+          safe_snprintf(text, "%g", angles[ii]);
           angleStr += text;
           if (ii < elev.getNElev() - 1) {
             angleStr += ",";
@@ -1244,7 +1245,7 @@ int Mdv2NcfTrans::_addMdvChunkVariables()
         string angleStr;
         for (int ii = 0; ii < az.getNAz(); ii++) {
           char text[80];
-          sprintf(text, "%g", angles[ii]);
+          safe_snprintf(text, "%g", angles[ii]);
           angleStr += text;
           if (ii < az.getNAz() - 1) {
             angleStr += ",";
@@ -1327,7 +1328,7 @@ int Mdv2NcfTrans::_addRadarGlobalAttributes(const MdvxRadar &radar)
     string angleStr;
     for (int ii = 0; ii < elev.getNElev(); ii++) {
       char text[80];
-      sprintf(text, "%g", angles[ii]);
+      safe_snprintf(text, "%g", angles[ii]);
       angleStr += text;
       if (ii < elev.getNElev() - 1) {
         angleStr += ",";
@@ -1345,7 +1346,7 @@ int Mdv2NcfTrans::_addRadarGlobalAttributes(const MdvxRadar &radar)
     string angleStr;
     for (int ii = 0; ii < az.getNAz(); ii++) {
       char text[80];
-      sprintf(text, "%g", angles[ii]);
+      safe_snprintf(text, "%g", angles[ii]);
       angleStr += text;
       if (ii < az.getNAz() - 1) {
         angleStr += ",";
@@ -1573,7 +1574,7 @@ string Mdv2NcfTrans::_getUniqueFieldName(const string &requestedName)
   for (size_t ii = 2; ii < 10000; ii++) {
 
     char version[128];
-    sprintf(version, "_%ld", ii);
+    safe_snprintf(version, "_%ld", ii);
     string uniqueName = requestedName;
     uniqueName += version;
 

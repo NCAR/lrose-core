@@ -41,6 +41,7 @@
 #include <toolsa/TaXml.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/TaArray.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <dataport/bigend.h>
 #include <didss/LdataInfo.hh>
 #include <didss/RapDataDir.hh>
@@ -335,7 +336,7 @@ void Mdvx::_writeToXmlMasterHdr(string &hdr) const
   for (int ii = 0; ii < 8; ii++) {
     if (_mhdr.user_data_si32[ii] != NOT_SET) {
       char tag[32];
-      sprintf(tag, "user-int-%d", ii);
+      safe_snprintf(tag, "user-int-%d", ii);
       hdr += TaXml::writeInt(tag, 2, _mhdr.user_data_si32[ii]);
     }
   }
@@ -343,7 +344,7 @@ void Mdvx::_writeToXmlMasterHdr(string &hdr) const
   for (int ii = 0; ii < 6; ii++) {
     if (_mhdr.user_data_fl32[ii] != NOT_SET) {
       char tag[32];
-      sprintf(tag, "user-float-%d", ii);
+      safe_snprintf(tag, "user-float-%d", ii);
       hdr += TaXml::writeDouble(tag, 2, _mhdr.user_data_fl32[ii]);
     }
   }
@@ -494,7 +495,7 @@ void Mdvx::_writeToXmlFieldHdr(string &hdr, int fieldNum) const
   for (int ii = 0; ii < 10; ii++) {
     if (fhdr.user_data_si32[ii] != NOT_SET) {
       char tag[32];
-      sprintf(tag, "user-int-%d", ii);
+      safe_snprintf(tag, "user-int-%d", ii);
       hdr += TaXml::writeInt(tag, 2, fhdr.user_data_si32[ii]);
     }
   }
@@ -502,7 +503,7 @@ void Mdvx::_writeToXmlFieldHdr(string &hdr, int fieldNum) const
   for (int ii = 0; ii < 4; ii++) {
     if (fhdr.user_data_fl32[ii] != NOT_SET) {
       char tag[32];
-      sprintf(tag, "user-float-%d", ii);
+      safe_snprintf(tag, "user-float-%d", ii);
       hdr += TaXml::writeDouble(tag, 2, fhdr.user_data_fl32[ii]);
     }
   }
@@ -913,7 +914,7 @@ int Mdvx::_readXmlToMasterHdr(const string &xml,
 
   for (int ii = 0; ii < 8; ii++) {
     char tag[32];
-    sprintf(tag, "user-int-%d", ii);
+    safe_snprintf(tag, "user-int-%d", ii);
     if (TaXml::readInt(xml, tag, ival) == 0) {
       _mhdr.user_data_si32[ii] = ival;
     }
@@ -921,7 +922,7 @@ int Mdvx::_readXmlToMasterHdr(const string &xml,
 
   for (int ii = 0; ii < 6; ii++) {
     char tag[32];
-    sprintf(tag, "user-float-%d", ii);
+    safe_snprintf(tag, "user-float-%d", ii);
     if (TaXml::readDouble(xml, tag, dval) == 0) {
       _mhdr.user_data_fl32[ii] = dval;
     }
@@ -1388,7 +1389,7 @@ int Mdvx::_readXmlToFieldHeaders(const string &xml,
 
   for (int ii = 0; ii < 10; ii++) {
     char tag[32];
-    sprintf(tag, "user-int-%d", ii);
+    safe_snprintf(tag, "user-int-%d", ii);
     if (TaXml::readInt(xml, tag, ival) == 0) {
       fhdr.user_data_si32[ii] = ival;
     }
@@ -1396,7 +1397,7 @@ int Mdvx::_readXmlToFieldHeaders(const string &xml,
 
   for (int ii = 0; ii < 4; ii++) {
     char tag[32];
-    sprintf(tag, "user-float-%d", ii);
+    safe_snprintf(tag, "user-float-%d", ii);
     if (TaXml::readDouble(xml, tag, dval) == 0) {
       fhdr.user_data_fl32[ii] = dval;
     }
@@ -2263,4 +2264,3 @@ int Mdvx::_xmlTransformType2Int(const string &transform_type)
   return DATA_TRANSFORM_NONE;
 
 }
-

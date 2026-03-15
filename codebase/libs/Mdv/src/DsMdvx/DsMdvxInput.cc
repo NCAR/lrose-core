@@ -54,6 +54,7 @@
 //////////////////////////////////////////////////////////
 #include <didss/DsInputPath.hh>
 #include <Mdv/DsMdvxInput.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
 using namespace std;
@@ -607,7 +608,7 @@ void DsMdvxInput::_addIntErr(const char *err_str, const int iarg)
 {
   _errStr += err_str;
   char str[32];
-  sprintf(str, "%d\n", iarg);
+  safe_snprintf(str, "%d\n", iarg);
   _errStr += str;
 }
 
