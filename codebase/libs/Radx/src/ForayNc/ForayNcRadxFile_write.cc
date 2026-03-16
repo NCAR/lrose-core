@@ -44,6 +44,7 @@
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxPath.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <unistd.h>
 #include <cstring>
 #include <cstdio>
@@ -149,13 +150,13 @@ int ForayNcRadxFile::_writeSweepToDir(RadxVol &vol,
   string outDir(dir);
   if (addYearSubDir) {
     char yearStr[BUFSIZ];
-    sprintf(yearStr, "%s%.4d", PATH_SEPARATOR, ftime.getYear());
+    safe_snprintf(yearStr, "%s%.4d", PATH_SEPARATOR, ftime.getYear());
     outDir += yearStr;
   }
   if (addDaySubDir) {
     char dayStr[BUFSIZ];
-    sprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
-            ftime.getYear(), ftime.getMonth(), ftime.getDay());
+    safe_snprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
+                  ftime.getYear(), ftime.getMonth(), ftime.getDay());
     outDir += dayStr;
   }
 
@@ -449,16 +450,16 @@ string ForayNcRadxFile::_computeFileName(int volNum,
   }
 
   char outName[BUFSIZ];
-  sprintf(outName,
-          "ncswp_%s_%04d%02d%02d_%02d%02d%02d.%03d_v%03d_s%03d_%05.1f_%s_.nc",
-          instrumentName.c_str(),
-          year, month, day,
-          hour, min, sec,
-          millisecs,
-          volNum,
-          sweepNum,
-          fixedAngle,
-          scanType.c_str());
+  safe_snprintf(outName,
+                "ncswp_%s_%04d%02d%02d_%02d%02d%02d.%03d_v%03d_s%03d_%05.1f_%s_.nc",
+                instrumentName.c_str(),
+                year, month, day,
+                hour, min, sec,
+                millisecs,
+                volNum,
+                sweepNum,
+                fixedAngle,
+                scanType.c_str());
 
   return outName;
 
@@ -510,9 +511,9 @@ int ForayNcRadxFile::_addGlobalAttributes()
 
   RadxTime startTime(_writeVol->getStartTimeSecs());
   char startTimeStr[1024];
-  sprintf(startTimeStr, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-          startTime.getYear(), startTime.getMonth(), startTime.getDay(),
-          startTime.getHour(), startTime.getMin(), startTime.getSec());
+  safe_snprintf(startTimeStr, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+                startTime.getHour(), startTime.getMin(), startTime.getSec());
   if (_file.addGlobAttr("Volume_Start_Time", startTimeStr)) {
     return -1;
   }
@@ -554,9 +555,9 @@ int ForayNcRadxFile::_addGlobalAttributes()
 
   RadxTime now(time(NULL));
   char nowStr[1024];
-  sprintf(nowStr, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-          now.getYear(), now.getMonth(), now.getDay(),
-          now.getHour(), now.getMin(), now.getSec());
+  safe_snprintf(nowStr, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+                now.getYear(), now.getMonth(), now.getDay(),
+                now.getHour(), now.getMin(), now.getSec());
   if (_file.addGlobAttr("Production_Date", nowStr)) {
     return -1;
   }
@@ -1888,4 +1889,3 @@ int ForayNcRadxFile::_setCompression(Nc3Var *var)
   return 0;
 
 }
-

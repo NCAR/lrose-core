@@ -44,6 +44,7 @@
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxPath.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -479,9 +480,9 @@ int ForayNcRadxFile::_getVolumePaths(const string &path,
   if (rhour == 0) {
     RadxTime prevDate(rtime.utime() - RadxTime::RADX_SECS_IN_DAY);
     char prevDir[RadxPath::RADX_MAX_PATH_LEN];
-    sprintf(prevDir, "%s%s%.4d%.2d%.2d",
-            parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
-            prevDate.getYear(), prevDate.getMonth(), prevDate.getDay());
+    safe_snprintf(prevDir, "%s%s%.4d%.2d%.2d",
+                  parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
+                  prevDate.getYear(), prevDate.getMonth(), prevDate.getDay());
     _addToPathList(prevDir, volNum, 23, 23, paths);
   }
 
@@ -490,9 +491,9 @@ int ForayNcRadxFile::_getVolumePaths(const string &path,
   if (rhour == 23) {
     RadxTime nextDate(rtime.utime() + RadxTime::RADX_SECS_IN_DAY);
     char nextDir[RadxPath::RADX_MAX_PATH_LEN];
-    sprintf(nextDir, "%s%s%.4d%.2d%.2d",
-            parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
-            nextDate.getYear(), nextDate.getMonth(), nextDate.getDay());
+    safe_snprintf(nextDir, "%s%s%.4d%.2d%.2d",
+                  parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
+                  nextDate.getYear(), nextDate.getMonth(), nextDate.getDay());
     _addToPathList(nextDir, volNum, 0, 0, paths);
   }
 
@@ -522,7 +523,7 @@ void ForayNcRadxFile::_addToPathList(const string &dir,
   }
   
   char volText[64];
-  sprintf(volText, "_v%03d", volNum);
+  safe_snprintf(volText, "_v%03d", volNum);
 
   struct dirent *dp;
   for(dp = readdir(dirp); dp != NULL; dp = readdir(dirp)) {
@@ -1696,4 +1697,3 @@ int ForayNcRadxFile::_finalizeReadVolume()
   return 0;
 
 }
-

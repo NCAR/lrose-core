@@ -44,6 +44,7 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxStr.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <unistd.h>
 #include <cstring>
 #include <cstdio>
@@ -121,13 +122,13 @@ int NcfRadxFile::writeToDir(const RadxVol &vol,
   string outDir(dir);
   if (addYearSubDir) {
     char yearStr[BUFSIZ];
-    sprintf(yearStr, "%s%.4d", PATH_SEPARATOR, fileTime.getYear());
+    safe_snprintf(yearStr, "%s%.4d", PATH_SEPARATOR, fileTime.getYear());
     outDir += yearStr;
   }
   if (addDaySubDir) {
     char dayStr[BUFSIZ];
-    sprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
-            fileTime.getYear(), fileTime.getMonth(), fileTime.getDay());
+    safe_snprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
+                  fileTime.getYear(), fileTime.getMonth(), fileTime.getDay());
     outDir += dayStr;
   }
 
@@ -250,13 +251,13 @@ int NcfRadxFile::_writeSweepToDir(const RadxVol &vol,
   string outDir(dir);
   if (addYearSubDir) {
     char yearStr[BUFSIZ];
-    sprintf(yearStr, "%s%.4d", PATH_SEPARATOR, fileTime.getYear());
+    safe_snprintf(yearStr, "%s%.4d", PATH_SEPARATOR, fileTime.getYear());
     outDir += yearStr;
   }
   if (addDaySubDir) {
     char dayStr[BUFSIZ];
-    sprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
-            fileTime.getYear(), fileTime.getMonth(), fileTime.getDay());
+    safe_snprintf(dayStr, "%s%.4d%.2d%.2d", PATH_SEPARATOR,
+                  fileTime.getYear(), fileTime.getMonth(), fileTime.getDay());
     outDir += dayStr;
   }
 
@@ -286,31 +287,31 @@ int NcfRadxFile::_writeSweepToDir(const RadxVol &vol,
 
   char fileName[BUFSIZ];
   if (_writeFileNameMode == FILENAME_WITH_START_AND_END_TIMES) {
-    sprintf(fileName,
-            "cfrad.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
-            "_to_%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
-            "_%s_v%d_s%.2d_%s%.2f_%s.nc",
-            startTime.getYear(), startTime.getMonth(), startTime.getDay(),
-            startTime.getHour(), startTime.getMin(), startTime.getSec(),
-            startMillisecs,
-            endTime.getYear(), endTime.getMonth(), endTime.getDay(),
-            endTime.getHour(), endTime.getMin(), endTime.getSec(),
-            endMillisecs,
-            instName.c_str(),
-            volNum, sweepNum,
-            fixedAngleLabel.c_str(), fixedAngle,
-            scanType.c_str());
+    safe_snprintf(fileName,
+                  "cfrad.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+                  "_to_%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+                  "_%s_v%d_s%.2d_%s%.2f_%s.nc",
+                  startTime.getYear(), startTime.getMonth(), startTime.getDay(),
+                  startTime.getHour(), startTime.getMin(), startTime.getSec(),
+                  startMillisecs,
+                  endTime.getYear(), endTime.getMonth(), endTime.getDay(),
+                  endTime.getHour(), endTime.getMin(), endTime.getSec(),
+                  endMillisecs,
+                  instName.c_str(),
+                  volNum, sweepNum,
+                  fixedAngleLabel.c_str(), fixedAngle,
+                  scanType.c_str());
   } else {
-    sprintf(fileName,
-            "cfrad.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
-            "_%s_v%d_s%.2d_%s%.2f_%s.nc",
-            fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
-            fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
-            fileMillisecs,
-            instName.c_str(),
-            volNum, sweepNum,
-            fixedAngleLabel.c_str(), fixedAngle,
-            scanType.c_str());
+    safe_snprintf(fileName,
+                  "cfrad.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+                  "_%s_v%d_s%.2d_%s%.2f_%s.nc",
+                  fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
+                  fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
+                  fileMillisecs,
+                  instName.c_str(),
+                  volNum, sweepNum,
+                  fixedAngleLabel.c_str(), fixedAngle,
+                  scanType.c_str());
   }
   
   // make sure the file name is valid - i.e. no / or whitespace
@@ -322,8 +323,8 @@ int NcfRadxFile::_writeSweepToDir(const RadxVol &vol,
   }
 
   char outPath[BUFSIZ];
-  sprintf(outPath, "%s%s%s",
-          outDir.c_str(), PATH_SEPARATOR,  fileName);
+  safe_snprintf(outPath, "%s%s%s",
+                outDir.c_str(), PATH_SEPARATOR,  fileName);
   
   int iret = writeToPath(*_writeVol, outPath);
 
@@ -949,9 +950,9 @@ int NcfRadxFile::_addCoordinateVariables()
 
   char timeUnitsStr[256];
   RadxTime stime(_writeVol->getStartTimeSecs());
-  sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
-          stime.getYear(), stime.getMonth(), stime.getDay(),
-          stime.getHour(), stime.getMin(), stime.getSec());
+  safe_snprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
+                stime.getYear(), stime.getMonth(), stime.getDay(),
+                stime.getHour(), stime.getMin(), stime.getSec());
   iret |= _file.addAttr(_timeVar, UNITS, timeUnitsStr);
 
   iret |= _file.addAttr(_timeVar, COMMENT,
@@ -3997,8 +3998,8 @@ string NcfRadxFile::computeWritePath(const RadxVol &vol,
   switch (_writeFileNameMode) {
   case FILENAME_WITH_START_AND_END_TIMES:
     if (_writeSubsecsInFileName) {
-      sprintf(startSubsecsStr, ".%.3d", startMillisecs);
-      sprintf(endSubsecsStr, ".%.3d", endMillisecs);
+      safe_snprintf(startSubsecsStr, ".%.3d", startMillisecs);
+      safe_snprintf(endSubsecsStr, ".%.3d", endMillisecs);
     } else {
       startSubsecsStr[0] = '\0';
       endSubsecsStr[0] = '\0';
@@ -4025,7 +4026,7 @@ string NcfRadxFile::computeWritePath(const RadxVol &vol,
     break;
   case FILENAME_WITH_START_TIME_ONLY:
     if (_writeSubsecsInFileName) {
-      sprintf(startSubsecsStr, ".%.3d", startMillisecs);
+      safe_snprintf(startSubsecsStr, ".%.3d", startMillisecs);
     } else {
       startSubsecsStr[0] = '\0';
     }
@@ -4047,7 +4048,7 @@ string NcfRadxFile::computeWritePath(const RadxVol &vol,
     break;
   case FILENAME_WITH_END_TIME_ONLY:
     if (_writeSubsecsInFileName) {
-      sprintf(endSubsecsStr, ".%.3d", endMillisecs);
+      safe_snprintf(endSubsecsStr, ".%.3d", endMillisecs);
     } else {
       endSubsecsStr[0] = '\0';
     }
@@ -4071,7 +4072,7 @@ string NcfRadxFile::computeWritePath(const RadxVol &vol,
   default:
     char fileSubsecsStr[64];
     if (_writeSubsecsInFileName) {
-      sprintf(fileSubsecsStr, ".%.3d", fileMillisecs);
+      safe_snprintf(fileSubsecsStr, ".%.3d", fileMillisecs);
     } else {
       fileSubsecsStr[0] = '\0';
     }

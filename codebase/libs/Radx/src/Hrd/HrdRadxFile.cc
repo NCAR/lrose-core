@@ -43,6 +43,7 @@
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxGeoref.hh>
 #include <Radx/ByteOrder.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <iomanip>
 #include <cstdio>
 using namespace std;
@@ -606,9 +607,9 @@ void HrdRadxFile::_setVolMetaData()
     _readVol->setScanName("surveillance");
   } else {
     if (_hdr.aircraft_id > 0) {
-      sprintf(text, "HRDT%dP3", _hdr.aircraft_id);
+      safe_snprintf(text, "HRDT%dP3", _hdr.aircraft_id);
     } else {
-      sprintf(text, "HRDTP3");
+      safe_snprintf(text, "HRDTP3");
     }
     _readVol->setInstrumentName(text);
     _readVol->setScanName("tail_surveillance");
@@ -628,10 +629,10 @@ void HrdRadxFile::_setVolMetaData()
     _readVol->setTitle("NOAA TAIL RADAR");
   }
   
-  sprintf(text, "flight_id=%s",
-          Radx::makeString(_hdr.flight_id, 8).c_str());
+  safe_snprintf(text, "flight_id=%s",
+                Radx::makeString(_hdr.flight_id, 8).c_str());
   _readVol->setSource(text);
-  sprintf(text, "aircraft_id=%d", _hdr.aircraft_id);
+  safe_snprintf(text, "aircraft_id=%d", _hdr.aircraft_id);
   _readVol->setReferences(text);
   
   _readVol->setHistory("Read in from raw HRD file");
@@ -1814,12 +1815,12 @@ void HrdRadxFile::_printPacked(ostream &out, int count,
     out << "MISS ";
   } else {
     if (fabs(val) > 0.01) {
-      sprintf(outstr, "%.3f ", val);
+      safe_snprintf(outstr, "%.3f ", val);
       out << outstr;
     } else if (val == 0.0) {
       out << "0.0 ";
     } else {
-      sprintf(outstr, "%.3e ", val);
+      safe_snprintf(outstr, "%.3e ", val);
       out << outstr;
     }
   }
@@ -1832,4 +1833,3 @@ double HrdRadxFile::_getAngle(int binaryAngle)
 {
   return ((double) binaryAngle * _angleConversion);
 }
-
