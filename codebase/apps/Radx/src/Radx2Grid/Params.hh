@@ -130,6 +130,11 @@ public:
   // struct typedefs
 
   typedef struct {
+    char* output_name;
+    tdrp_bool_t suppress_this_field;
+  } suppress_field_t;
+
+  typedef struct {
     int nz;
     double minz;
     double dz;
@@ -509,6 +514,11 @@ public:
 
   output_format_t output_format;
 
+  tdrp_bool_t suppress_fields_from_output;
+
+  suppress_field_t *_suppressed_fields;
+  int suppressed_fields_n;
+
   interp_mode_t interp_mode;
 
   tdrp_bool_t use_nearest_neighbor;
@@ -844,7 +854,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[212];
+  mutable TDRPtable _table[214];
 
   const char *_className;
 

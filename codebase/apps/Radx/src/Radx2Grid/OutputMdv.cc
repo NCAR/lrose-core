@@ -1597,3 +1597,22 @@ int OutputMdv::_writeZebraXYNetCDF()
 
 }
 
+/////////////////////////////////////////////////////
+// check for output field suppression
+
+bool OutputMdv::suppressThisField(const string &fieldName)
+{
+  if (!_params.suppress_fields_from_output) {
+    return false;
+  }
+  for (int ii = 0; ii < _params.suppressed_fields_n; ii++) {
+    if (_params._suppressed_fields[ii].suppress_this_field) {;
+      string suppressedName = _params._suppressed_fields[ii].output_name;
+      if (fieldName == suppressedName) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+

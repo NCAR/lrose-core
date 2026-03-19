@@ -2390,13 +2390,15 @@ int CartInterp::_writeOutputFile()
   out.setMasterHeader(_readVol);
   for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
     const Field &ifld = _interpFields[ifield];
-    out.addField(_readVol, _proj, _gridZLevels,
-                 ifld.outputName, ifld.longName, ifld.units,
-                 ifld.inputDataType,
-                 ifld.inputScale,
-                 ifld.inputOffset,
-                 missingFl32,
-                 _outputFields[ifield]);
+    if (!out.suppressThisField(ifld.outputName)) {
+      out.addField(_readVol, _proj, _gridZLevels,
+                   ifld.outputName, ifld.longName, ifld.units,
+                   ifld.inputDataType,
+                   ifld.inputScale,
+                   ifld.inputOffset,
+                   missingFl32,
+                   _outputFields[ifield]);
+    }
   } // ifield
 
   // debug (test) fields

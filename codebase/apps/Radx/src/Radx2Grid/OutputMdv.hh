@@ -105,6 +105,12 @@ public:
 
   inline string getPathInUse() const { return _mdvx.getPathInUse(); }
 
+  /////////////////////////////////////////////////////
+  // check for output field suppression
+  // returns true if field should be suppressed
+  
+  bool suppressThisField(const string &fieldName);
+  
 protected:
   
 private:

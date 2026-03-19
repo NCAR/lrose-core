@@ -83,7 +83,7 @@ paramdef string {
 } end_time;
 
 commentdef {
-  p_header = "DATA OUTPUT DIRECTORY AND FILE NAMES";
+  p_header = "DATA OUTPUT";
 }
 
 paramdef string {
@@ -101,6 +101,26 @@ paramdef enum output_format_t {
   p_descr = "Set the output format";
   p_help = "CF_NETCDF: CF-compliant NetCDF. See http://cf-pcmdi.llnl.gov/documents/cf-conventions. ZEBRA_NETCDF: NetCDF format specifically for ZEBRA display. This forces a conversion to a LATLON projection. MDV: legacy MDV format.";
 } output_format;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to suppress selected fields from the output data set.";
+  p_help = "These fields will not be written to the output files.";
+} suppress_fields_from_output;
+
+typedef struct {
+  string output_name;
+  boolean suppress_this_field;
+} suppress_field_t;
+
+paramdef struct suppress_field_t {
+  p_default = { 
+    { "SNR", TRUE },
+    { "NCP", TRUE }
+  };
+  p_descr = "Select the list of fields to be suppressed.";
+  p_help = "See 'suppress_fields_from_output'. You specify the list of field names to be suppressed. In addition you need to set 'suppress_this_field' to TRUE or FALSE. This is provided as a convenience, so that you can select or deselect fields without having to change the list.";
+} suppressed_fields[];
 
 commentdef {
   p_header = "INTERPOLATION MODE";

@@ -713,7 +713,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("DATA OUTPUT DIRECTORY AND FILE NAMES");
+    tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -751,6 +751,55 @@
       tt->enum_def.fields[3].name = tdrpStrDup("CEDRIC");
       tt->enum_def.fields[3].val = CEDRIC;
     tt->single_val.e = CF_NETCDF;
+    tt++;
+    
+    // Parameter 'suppress_fields_from_output'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("suppress_fields_from_output");
+    tt->descr = tdrpStrDup("Option to suppress selected fields from the output data set.");
+    tt->help = tdrpStrDup("These fields will not be written to the output files.");
+    tt->val_offset = (char *) &suppress_fields_from_output - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'suppressed_fields'
+    // ctype is '_suppress_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("suppressed_fields");
+    tt->descr = tdrpStrDup("Select the list of fields to be suppressed.");
+    tt->help = tdrpStrDup("See 'suppress_fields_from_output'. You specify the list of field names to be suppressed. In addition you need to set 'suppress_this_field' to TRUE or FALSE. This is provided as a convenience, so that you can select or deselect fields without having to change the list.");
+    tt->array_offset = (char *) &_suppressed_fields - &_start_;
+    tt->array_n_offset = (char *) &suppressed_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(suppress_field_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("suppress_field_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("output_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_suppressed_fields->output_name - (char *) _suppressed_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[1].fname = tdrpStrDup("suppress_this_field");
+      tt->struct_def.fields[1].ptype = BOOL_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_suppressed_fields->suppress_this_field - (char *) _suppressed_fields;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("SNR");
+      tt->struct_vals[1].b = pTRUE;
+      tt->struct_vals[2].s = tdrpStrDup("NCP");
+      tt->struct_vals[3].b = pTRUE;
     tt++;
     
     // Parameter 'Comment 5'
