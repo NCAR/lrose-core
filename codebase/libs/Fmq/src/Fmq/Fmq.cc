@@ -63,6 +63,8 @@ Fmq::Fmq()
   _msecSleep = -1;
   _msecBlockingReadTimeout = -1;
 
+  _format = FmqFormat::V64;
+  
   _dev = NULL;
   _msgLog = NULL;
 
@@ -1773,6 +1775,8 @@ int Fmq::_read_stat ()
 
     if (magic_cookie == Q_MAGIC_STAT_64) {
 
+      _format = FmqFormat::V64;
+      
       // read in status struct
 
       if (_read_device(FmqDevice::STAT_IDENT, &status, sizeof(q_stat_t))) {
@@ -1786,9 +1790,10 @@ int Fmq::_read_stat ()
       be_to_stat_64(&status);
 
 
-    }
-    else if (magic_cookie == Q_MAGIC_STAT_32) {
+    } else if (magic_cookie == Q_MAGIC_STAT_32) {
 
+      _format = FmqFormat::V32;
+      
       q_stat_32_t status_32;
 
       if (_read_device(FmqDevice::STAT_IDENT, &status_32, sizeof(q_stat_32_t))) {
@@ -2254,15 +2259,6 @@ int Fmq::_read_msg (int32_t slot_num)
 
 {
 
-  q_slot_t *slot;
-  int32_t id_posn;
-  ui64 nfull;
-  si32 magic_cookie;
-  si32 slot_num_check;
-  si32 id_check;
-  si32 *iptr;
-  void *compressed_msg;
-  
   // Make sure we have a valid slot number.
 
   if (slot_num >= _stat.nslots) {
@@ -2273,7 +2269,7 @@ int Fmq::_read_msg (int32_t slot_num)
     return -1;
   }
   
-  slot = _slots + slot_num;
+  q_slot_t *slot = _slots + slot_num;
 
   // seek to start of message
 
@@ -2292,7 +2288,7 @@ int Fmq::_read_msg (int32_t slot_num)
   if (_read_device(FmqDevice::BUF_IDENT, _entry, slot->stored_len)) {
     _print_error("read_msg",
 		 "Cannot read message from buf file, "
-		 "slot, len, offset: %d, %d, %d",
+		 "slot, len, offset: %d, %ld, %ld",
 		 slot_num, slot->stored_len, slot->offset);
     return -1;
   }
@@ -2309,9 +2305,9 @@ int Fmq::_read_msg (int32_t slot_num)
 
   // check magic cookie
   
-  iptr = (si32 *) _entry;
+  si32 *iptr = (si32 *) _entry;
 
-  magic_cookie = BE_to_si32(iptr[0]);
+  si32 magic_cookie = BE_to_si32(iptr[0]);
 
   if (magic_cookie != Q_MAGIC_BUF) {
     _print_error("_read_msg",
@@ -2325,7 +2321,7 @@ int Fmq::_read_msg (int32_t slot_num)
 
   // check slot_num
 
-  slot_num_check = BE_to_si32(iptr[1]);
+  si32 slot_num_check = BE_to_si32(iptr[1]);
 
   if (slot_num_check != slot_num) {
     _print_error("_read_msg",
@@ -2341,8 +2337,8 @@ int Fmq::_read_msg (int32_t slot_num)
 
   // check id
 
-  id_posn = (slot->stored_len / sizeof(si32)) - 1;
-  id_check = BE_to_si32(iptr[id_posn]);
+  int32_t id_posn = (slot->stored_len / sizeof(si32)) - 1;
+  si32 id_check = BE_to_si32(iptr[id_posn]);
   
   if (id_check != slot->id) {
     _print_error("_read_msg",
@@ -2363,7 +2359,7 @@ int Fmq::_read_msg (int32_t slot_num)
     if (_server) {
       // leave data compressed for server to pass on
       _msgBuf.free();
-      int32_t msg_len = slot->stored_len - 2 * sizeof(si32);
+      int64_t msg_len = slot->stored_len - 2 * sizeof(si32);
       if (_add_read_msg(iptr + 2, msg_len)) {
         cerr << "ERROR - _read_msg" << endl;
         return -1;
@@ -2371,7 +2367,8 @@ int Fmq::_read_msg (int32_t slot_num)
     } else {
       // uncompress the data
       _msgBuf.free();
-      compressed_msg = (void *) (iptr + 2);
+      void *compressed_msg = (void *) (iptr + 2);
+      ui64 nfull;
       void *umsg = ta_decompress(compressed_msg, &nfull);
       if (umsg == NULL || (int) nfull != slot->msg_len) {
         _print_error("read_msg",
@@ -3168,7 +3165,10 @@ int Fmq::_check_buffer_sizes()
   }
   
   int32_t nslots = _stat.nslots;
-  int32_t expectedStatSize = sizeof(q_stat_t) + nslots * sizeof(q_slot_t);
+  int64_t expectedStatSize = sizeof(q_stat_64_t) + nslots * sizeof(q_slot_64_t);
+  if (_format == FmqFormat::V32) {
+    expectedStatSize = sizeof(q_stat_32_t) + nslots * sizeof(q_slot_32_t);
+  }
   int64_t expectedBufSize = _stat.buf_size;
 
   if (_dev->check_size(FmqDevice::STAT_IDENT, expectedStatSize)) {
@@ -3669,10 +3669,9 @@ int Fmq::_slot_in_active_region (int32_t slot_num)
 // offsets.
 ///
 
-int Fmq::_space_avail( int32_t stored_len)
+int64_t Fmq::_space_avail(int64_t stored_len)
 
 {
-  int64_t space;
 
   if (_stat.append_mode) {
 
@@ -3687,7 +3686,7 @@ int Fmq::_space_avail( int32_t stored_len)
 
   } else {
 
-    space = _stat.end_insert - _stat.begin_insert;
+    int64_t space = _stat.end_insert - _stat.begin_insert;
 
     if (space >= stored_len) {
       return true;

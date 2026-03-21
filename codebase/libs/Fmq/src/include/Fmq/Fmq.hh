@@ -74,6 +74,8 @@ public:
 		      FMQ_SEEK_LAST,
 		      FMQ_SEEK_BACK };
 
+  enum class FmqFormat { V32, V64 };
+
   // begin 64-bit implementation
 
   static const int32_t Q_MAGIC_STAT_64 = 88008803;
@@ -682,6 +684,10 @@ protected:
   int32_t _msecSleep;
   int32_t _msecBlockingReadTimeout;
 
+  // 64-bit or 32-bit queue on read
+  
+  FmqFormat _format;
+  
   // logging
   
   MsgLog *_msgLog;
@@ -862,7 +868,7 @@ protected:
    
   // space used
 
-  int _space_avail(int32_t stored_len);
+  int64_t _space_avail(int64_t stored_len);
   int _fraction_used(double *slot_fraction_p,
 		     double *buffer_fraction_p);
 
