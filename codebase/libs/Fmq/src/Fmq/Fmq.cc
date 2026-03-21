@@ -52,6 +52,45 @@ using namespace std;
    
 Fmq::Fmq()   
 {
+  
+  // compile time checks on sizes and offsets
+
+  {
+    assert(sizeof(si32) == 4);
+    assert(sizeof(si64) == 8);
+  }
+
+  // set swap sizes based on struct composition
+
+  {
+
+    q_stat_64_t stat;
+
+    int64_t start = static_cast<int64_t>(reinterpret_cast<intptr_t>(&stat.magic_cookie));
+    int64_t end = static_cast<int64_t>(reinterpret_cast<intptr_t>(&stat.buf_size));
+    Q_NUM_INT_STAT_64 = (end - start) / sizeof(int32_t);
+
+    start = static_cast<int64_t>(reinterpret_cast<intptr_t>(&stat.buf_size));
+    end = static_cast<int64_t>(reinterpret_cast<intptr_t>(&stat.pad_si64[3]));
+    Q_NUM_LONG_STAT_64 = (end - start) / sizeof(int64_t);
+    
+    q_slot_64_t slot;
+
+    start = static_cast<int64_t>(reinterpret_cast<intptr_t>(&slot.active));
+    end = static_cast<int64_t>(reinterpret_cast<intptr_t>(&slot.time));
+    Q_NUM_INT_SLOT_64 = (end - start) / sizeof(int32_t);
+    
+    start = static_cast<int64_t>(reinterpret_cast<intptr_t>(&slot.time));
+    end = static_cast<int64_t>(reinterpret_cast<intptr_t>(&slot.pad_si64[2]));
+    Q_NUM_LONG_SLOT_64 = (end - start) / sizeof(int64_t);
+    
+    assert(Q_NUM_INT_STAT_64 == 16);
+    assert(Q_NUM_LONG_STAT_64 == 8);
+
+    assert(Q_NUM_INT_SLOT_64 == 8);
+    assert(Q_NUM_LONG_SLOT_64 == 6);
+
+  }
 
   _debug = false;
   _openMode = READ_WRITE;

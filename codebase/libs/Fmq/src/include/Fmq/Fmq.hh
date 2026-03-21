@@ -80,11 +80,12 @@ public:
 
   static const int32_t Q_MAGIC_STAT_64 = 88008803;
   static const int32_t Q_MAX_ID_64 = 1000000000;
-  static const int32_t Q_NUM_LONG_STAT_64 = 5;
-  static const int32_t Q_NUM_INT_STAT_64 = 10;
-  static const int32_t Q_NUM_LONG_SLOT_64 = 4;
-  static const int32_t Q_NUM_INT_SLOT_64 = 6;
 
+  static int32_t Q_NUM_INT_STAT_64;
+  static int32_t Q_NUM_LONG_STAT_64;
+
+  static int32_t Q_NUM_INT_SLOT_64;
+  static int32_t Q_NUM_LONG_SLOT_64;
 
   // FMQ status struct
   
@@ -101,20 +102,21 @@ public:
     si32 nslots;          /* number of message slots */
     si32 append_mode;     /* TRUE for append mode, FALSE for insert mode */
     
-
     /* NOTE - blocking write only supported for 1 reader */
     
     si32 blocking_write;  /* flag to indicate blocking write */
     si32 last_id_read;    /* used for blocking write operation */
     si32 checksum;
 
-    si32 pad_si32_1;
+    si32 pad_si32[7];
 
     si64 buf_size;        /* size of buffer */
     si64 begin_insert;    /* offset to start of insert free region */
     si64 end_insert;      /* offset to end of insert free region */
     si64 begin_append;    /* offset to start of append free region */
     si64 time_written;    /* time at which the status struct was last written to file */
+    si64 pad_si64[3];
+
   } q_stat_64_t;
   
   typedef struct {
@@ -125,6 +127,7 @@ public:
     si32 subtype;         /* message subtype - user-defined */
     si32 compress;        /* compress mode - TRUE or FALSE */
     si32 checksum;
+    si32 pad_si32[2];
 
     si64 time;            /* Unix time at which the message is written */
     si64 msg_len;         /* message len in bytes */
@@ -132,6 +135,7 @@ public:
 			                     * for magic-cookie and slot num fields,
 			                     *  plus padding out to even 4 bytes */
     si64 offset;          /* message offset in buffer */
+    si64 pad_si64[2];
 
   } q_slot_64_t;
 
@@ -655,7 +659,7 @@ public:
                          FILE *out);
   
   // byte swapping
-
+  
   static void be_from_slot_32(q_slot_32_t *slot);
   static void be_from_stat_32(q_stat_32_t *stat);
   static void be_to_slot_32(q_slot_32_t *slot);
