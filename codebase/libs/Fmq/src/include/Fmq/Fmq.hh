@@ -81,11 +81,11 @@ public:
   static const int32_t Q_MAGIC_STAT_64 = 88008803;
   static const int32_t Q_MAX_ID_64 = 1000000000;
 
-  static int32_t Q_NUM_INT_STAT_64;
-  static int32_t Q_NUM_LONG_STAT_64;
+  static const int32_t Q_NUM_INT_STAT_64 = 16;
+  static const int32_t Q_NUM_LONG_STAT_64 = 8;
 
-  static int32_t Q_NUM_INT_SLOT_64;
-  static int32_t Q_NUM_LONG_SLOT_64;
+  static const int32_t Q_NUM_INT_SLOT_64 = 8;
+  static const int32_t Q_NUM_LONG_SLOT_64 = 6;
 
   // FMQ status struct
   
@@ -138,6 +138,25 @@ public:
     si64 pad_si64[2];
 
   } q_slot_64_t;
+
+  static_assert(sizeof(si32) == 4, "si32 must be 4 bytes");
+  static_assert(sizeof(si64) == 8, "si64 must be 8 bytes");
+
+  static_assert((offsetof(q_stat_64_t, buf_size) -
+                 offsetof(q_stat_64_t, magic_cookie)) == Q_NUM_INT_STAT_64 * sizeof(si32),
+                "Unexpected layout of q_stat_64_t");
+  
+  static_assert(offsetof(q_stat_64_t, pad_si64[3]) -
+                offsetof(q_stat_64_t, buf_size) == Q_NUM_LONG_STAT_64 * sizeof(si64),
+                "Unexpected layout of q_stat_64_t");
+
+  static_assert(offsetof(q_slot_64_t, time) -
+                offsetof(q_slot_64_t, active) == Q_NUM_INT_SLOT_64 * sizeof(si32),
+                "Unexpected layout of q_slot_64_t");
+  
+  static_assert(offsetof(q_slot_64_t, pad_si64[2]) -
+                offsetof(q_slot_64_t, time) == Q_NUM_LONG_SLOT_64 * sizeof(si64),
+                "Unexpected layout of q_slot_64_t");
 
   // end 64-bit implementation
 
@@ -669,6 +688,11 @@ public:
   static void be_to_slot_64(q_slot_64_t *slot);
   static void be_to_stat_64(q_stat_64_t *stat);
 
+  // 64-bit to 32-bit copying
+  
+  static void stat_64_to_32(q_stat_64_t *stat64, q_stat_32_t *stat32);
+  static void slot_64_to_32(q_slot_64_t *slot64, q_slot_32_t *slot32);
+  
 protected:
 
   // device implementation
@@ -860,6 +884,12 @@ protected:
   int _check_slot_checksum(const q_slot_t *slot);
   int _get_magic_cookie(int32_t& cookie);
 
+  int _compute_stat_checksum(const q_stat_32_t *stat);
+  int _compute_slot_checksum(const q_slot_32_t *slot);
+  void _add_stat_checksum(q_stat_32_t *stat);
+  void _add_slot_checksum(q_slot_32_t *slot);
+  int _check_stat_checksum(const q_stat_32_t *stat);
+  int _check_slot_checksum(const q_slot_32_t *slot);
 
   // search
   
