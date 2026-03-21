@@ -92,9 +92,9 @@ DrawQueue::sendProduct( time_t issueTime, time_t data_time,
    }
 
    // Copy the text data 
-   strncpy(h_prod->id_label, id_label, ID_label_Len);
-   strncpy(h_prod->prod_label_text, prod_label_text, Prod_label_Len);
-   strncpy(h_prod->saysWho, sender_name,Name_Len);
+   strncpy(h_prod->id_label, id_label, ID_label_Len - 1);
+   strncpy(h_prod->prod_label_text, prod_label_text, Prod_label_Len - 1);
+   strncpy(h_prod->saysWho, sender_name, Name_Len - 1);
 
    // put it in the FMQ
    if ( writeMsg( HUMAN_DRAWN_PRODUCT, 0, (void*)(h_prod),message_len)) {

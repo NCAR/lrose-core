@@ -612,7 +612,7 @@ void *FmqDeviceShmem::_ushmGet(key_t key, size_t size)
   // get the shared memory 
 
   int shmid;
-  if ((shmid = shmget(key, size, 06666)) < 0) {
+  if ((shmid = shmget(key, size, 0666)) < 0) {
     return NULL;
   }
 
