@@ -53,45 +53,6 @@ using namespace std;
 Fmq::Fmq()   
 {
   
-  // compile time checks on sizes and offsets
-
-  {
-    assert(sizeof(si32) == 4);
-    assert(sizeof(si64) == 8);
-  }
-
-  // set swap sizes based on struct composition
-
-  {
-
-    q_stat_64_t stat;
-
-    int64_t start = static_cast<int64_t>(reinterpret_cast<intptr_t>(&stat.magic_cookie));
-    int64_t end = static_cast<int64_t>(reinterpret_cast<intptr_t>(&stat.buf_size));
-    Q_NUM_INT_STAT_64 = (end - start) / sizeof(int32_t);
-
-    start = static_cast<int64_t>(reinterpret_cast<intptr_t>(&stat.buf_size));
-    end = static_cast<int64_t>(reinterpret_cast<intptr_t>(&stat.pad_si64[3]));
-    Q_NUM_LONG_STAT_64 = (end - start) / sizeof(int64_t);
-    
-    q_slot_64_t slot;
-
-    start = static_cast<int64_t>(reinterpret_cast<intptr_t>(&slot.active));
-    end = static_cast<int64_t>(reinterpret_cast<intptr_t>(&slot.time));
-    Q_NUM_INT_SLOT_64 = (end - start) / sizeof(int32_t);
-    
-    start = static_cast<int64_t>(reinterpret_cast<intptr_t>(&slot.time));
-    end = static_cast<int64_t>(reinterpret_cast<intptr_t>(&slot.pad_si64[2]));
-    Q_NUM_LONG_SLOT_64 = (end - start) / sizeof(int64_t);
-    
-    assert(Q_NUM_INT_STAT_64 == 16);
-    assert(Q_NUM_LONG_STAT_64 == 8);
-
-    assert(Q_NUM_INT_SLOT_64 == 8);
-    assert(Q_NUM_LONG_SLOT_64 == 6);
-
-  }
-
   _debug = false;
   _openMode = READ_WRITE;
   _openPosition = END;
@@ -2689,25 +2650,44 @@ int Fmq::_write_stat()
 
 {
 
-  // make local copy of stat struct
-  // set byte order to BigEnd
-  
-  q_stat_t stat = _stat;
-  stat.time_written = time(NULL);
-  _add_stat_checksum(&stat);
-  be_from_stat_64(&stat);
-
   // seek to start of stat file
   
   if (_seek_device(FmqDevice::STAT_IDENT, 0)) {
     return -1;
   }
-  
-  // write
-  
-  if (_write_device(FmqDevice::STAT_IDENT, &stat, sizeof(q_stat_t))) {
-    _print_error("_write_stat", "Cannot write stat info.");
-    return -1;
+    
+  if (_format == FmqFormat::V64) {
+    
+    // make local copy of stat struct
+    // set byte order to BigEnd
+    
+    q_stat_64_t stat = _stat;
+    stat.time_written = time(NULL);
+    _add_stat_checksum(&stat);
+    be_from_stat_64(&stat);
+    
+    // write
+    
+    if (_write_device(FmqDevice::STAT_IDENT, &stat, sizeof(stat))) {
+      _print_error("_write_stat", "Cannot write stat info.");
+      return -1;
+    }
+
+  } else {
+
+    // 32-bit writes for legacy fmqs
+    
+    q_stat_32_t stat32;
+    stat_64_to_32(&_stat, &stat32);
+    stat32.time_written = time(NULL);
+    _add_stat_checksum(&stat32);
+    be_from_stat_32(&stat32);
+    
+    if (_write_device(FmqDevice::STAT_IDENT, &stat32, sizeof(stat32))) {
+      _print_error("_write_stat", "Cannot write stat 32 info.");
+      return -1;
+    }
+    
   }
 
   return 0;
@@ -2744,13 +2724,6 @@ int Fmq::_write_slot (int32_t slot_num)
     return -1;
   }
   
-  // make local copy of slot struct
-  // set byte order to BigEnd
-  
-  q_slot_t slot = _slots[slot_num];
-  _add_slot_checksum(&slot);
-  be_from_slot_64(&slot);
-
   // seek to slot
 
   int64_t offset = sizeof(q_stat_t) + slot_num * sizeof(q_slot_t);
@@ -2760,13 +2733,43 @@ int Fmq::_write_slot (int32_t slot_num)
     return -1;
   }
 
-  // write slot
+  if (_format == FmqFormat::V64) {
+    
+    // make local copy of slot struct
+    // set byte order to BigEnd
+    
+    q_slot_t slot = _slots[slot_num];
+    _add_slot_checksum(&slot);
+    be_from_slot_64(&slot);
+    
+    // write slot
+    
+    if (_write_device(FmqDevice::STAT_IDENT, &slot, sizeof(slot))) {
+      _print_error("_write_slot",
+                   "Cannot write slot info, slot num %d.",
+                   (int) slot_num);
+      return -1;
+    }
 
-  if (_write_device(FmqDevice::STAT_IDENT, &slot, sizeof(q_slot_t))) {
-    _print_error("_write_slot",
-		 "Cannot write slot info, slot num %d.",
-		 (int) slot_num);
-    return -1;
+  } else {
+
+    // 32-bit writes for legacy fmqs
+    
+    q_slot_32_t slot32;
+    slot_64_to_32(&_slots[slot_num], &slot32);
+    
+    _add_slot_checksum(&slot32);
+    be_from_slot_32(&slot32);
+    
+    // write slot
+    
+    if (_write_device(FmqDevice::STAT_IDENT, &slot32, sizeof(slot32))) {
+      _print_error("_write_slot",
+                   "Cannot write 32-bit slot info, slot num %d.",
+                   (int) slot_num);
+      return -1;
+    }
+
   }
   
   return 0;
@@ -3386,6 +3389,29 @@ int Fmq::_compute_stat_checksum(const q_stat_t *stat)
 
 }
 
+int Fmq::_compute_stat_checksum(const q_stat_32_t *stat)
+
+{
+
+  int sum = 0;
+  
+  sum += stat->magic_cookie;
+  sum += ~stat->youngest_id;
+  sum += stat->youngest_slot;
+  sum += ~stat->oldest_slot;
+  sum += stat->nslots;
+  sum += stat->buf_size;
+  sum += ~stat->begin_insert;
+  sum += stat->end_insert;
+  sum += ~stat->begin_append;
+  sum += stat->append_mode;
+  sum += stat->time_written;
+  sum += ~stat->blocking_write;
+
+  return sum;
+
+}
+
 ////////////////////////////////////////////////////////////
 //  Compute checksum for slot struct
 //
@@ -3412,17 +3438,40 @@ int Fmq::_compute_slot_checksum(const q_slot_t *slot)
 
 }
 
+int Fmq::_compute_slot_checksum(const q_slot_32_t *slot)
+
+{
+
+  int sum = 0;
+  
+  sum += slot->active;
+  sum += ~slot->id;
+  sum += slot->time;
+  sum += ~slot->msg_len;
+  sum += slot->stored_len;
+  sum += slot->offset;
+  sum += ~slot->type;
+  sum += slot->subtype;
+  sum += ~slot->compress;
+
+  return sum;
+
+}
+
 ////////////////////////////////////////////////////////////
 //  Add a checksum to stat struct
 ///
 
 void Fmq::_add_stat_checksum(q_stat_t *stat)
-
 {
-
   int32_t sum = _compute_stat_checksum(stat);
   stat->checksum = sum;
+}
 
+void Fmq::_add_stat_checksum(q_stat_32_t *stat)
+{
+  int32_t sum = _compute_stat_checksum(stat);
+  stat->checksum = sum;
 }
 
 ////////////////////////////////////////////////////////////
@@ -3430,12 +3479,15 @@ void Fmq::_add_stat_checksum(q_stat_t *stat)
 ///
 
 void Fmq::_add_slot_checksum(q_slot_t *slot)
-
 {
-
   int32_t sum = _compute_slot_checksum(slot);
   slot->checksum = sum;
+}
 
+void Fmq::_add_slot_checksum(q_slot_32_t *slot)
+{
+  int32_t sum = _compute_slot_checksum(slot);
+  slot->checksum = sum;
 }
 
 ////////////////////////////////////////////////////////////
@@ -3446,22 +3498,29 @@ void Fmq::_add_slot_checksum(q_slot_t *slot)
 ///
 
 int Fmq::_check_stat_checksum(const q_stat_t *stat)
-
 {
-
   if (stat->checksum == 0) {
     // backward compatibility
     return 0;
   }
-
   int32_t sum = _compute_stat_checksum(stat);
-
   if (sum != stat->checksum) {
     return -1;
   }
-
   return 0;
+}
 
+int Fmq::_check_stat_checksum(const q_stat_32_t *stat)
+{
+  if (stat->checksum == 0) {
+    // backward compatibility
+    return 0;
+  }
+  int32_t sum = _compute_stat_checksum(stat);
+  if (sum != stat->checksum) {
+    return -1;
+  }
+  return 0;
 }
 
 ////////////////////////////////////////////////////////////
@@ -3472,22 +3531,29 @@ int Fmq::_check_stat_checksum(const q_stat_t *stat)
 ///
 
 int Fmq::_check_slot_checksum(const q_slot_t *slot)
-
 {
-
   if (slot->checksum == 0) {
     // backward compatibility
     return 0;
   }
-
   int32_t sum = _compute_slot_checksum(slot);
-
   if (sum != slot->checksum) {
     return -1;
   }
-
   return 0;
+}
 
+int Fmq::_check_slot_checksum(const q_slot_32_t *slot)
+{
+  if (slot->checksum == 0) {
+    // backward compatibility
+    return 0;
+  }
+  int32_t sum = _compute_slot_checksum(slot);
+  if (sum != slot->checksum) {
+    return -1;
+  }
+  return 0;
 }
 
 ////////////////////////////////////////////////////////////
@@ -4066,6 +4132,47 @@ void Fmq::be_from_slot_64(q_slot_64_t *slot)
 {
   BE_from_array_32((ui08 *) slot, Q_NUM_INT_SLOT_64*sizeof(si32));
   BE_from_array_64((ui08 *) &(slot->time), Q_NUM_LONG_SLOT_64*sizeof(si64));
+}
+
+////////////////////////////////////////////////////////////
+// Convert 64-bit to 32-bit structs
+///
+
+void Fmq::stat_64_to_32(q_stat_64_t *stat64, q_stat_32_t *stat32)
+{
+
+  stat32->magic_cookie = Q_MAGIC_STAT_32;
+  
+  stat32->youngest_id = stat64->youngest_id;
+  stat32->youngest_slot = stat64->youngest_slot;
+  stat32->oldest_slot = stat64->oldest_slot;
+  stat32->nslots = stat64->nslots;
+  stat32->buf_size = static_cast<int32_t>(stat64->buf_size);
+  stat32->begin_insert = static_cast<int32_t>(stat64->begin_insert);
+  stat32->end_insert = static_cast<int32_t>(stat64->end_insert);
+  stat32->begin_append = static_cast<int32_t>(stat64->begin_append);
+  stat32->append_mode = stat64->append_mode;
+  stat32->time_written = static_cast<int32_t>(stat64->time_written);
+  stat32->blocking_write = stat64->blocking_write;
+  stat32->last_id_read = stat64->last_id_read;
+  stat32->checksum = stat64->checksum;
+
+}
+
+void Fmq::slot_64_to_32(q_slot_64_t *slot64, q_slot_32_t *slot32)
+{
+
+  slot32->active = slot64->active;
+  slot32->id = slot64->id;
+  slot32->time = static_cast<int32_t>(slot64->time);
+  slot32->msg_len = static_cast<int32_t>(slot64->msg_len);
+  slot32->stored_len = static_cast<int32_t>(slot64->stored_len);
+  slot32->offset = static_cast<int32_t>(slot64->offset);
+  slot32->type = slot64->type;
+  slot32->subtype = slot64->subtype;
+  slot32->compress = slot64->compress;
+  slot32->checksum = slot64->checksum;
+
 }
 
 ////////////////////////////////////////////////////////////
