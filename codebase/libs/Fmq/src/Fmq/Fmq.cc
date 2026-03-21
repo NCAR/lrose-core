@@ -1792,7 +1792,13 @@ int Fmq::_read_stat ()
     } else if (magic_cookie == Q_MAGIC_STAT_32) {
 
       _format = FmqFormat::V32;
-      
+
+      if (_openMode == CREATE) {
+        _print_error("_read_stat",
+                     "Do not use 32-bit format with openMode == CREATE");
+        return -1;
+      }
+
       q_stat_32_t status_32;
 
       if (_read_device(FmqDevice::STAT_IDENT, &status_32, sizeof(q_stat_32_t))) {
