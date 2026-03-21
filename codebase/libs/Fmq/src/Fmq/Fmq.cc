@@ -1913,8 +1913,7 @@ int Fmq::_read_slots ()
 
     return 0;
 
-  }
-  else if (magic_cookie == Q_MAGIC_STAT_32) {
+  } else if (magic_cookie == Q_MAGIC_STAT_32) {
 
     // seek to start of slots in status file
 
@@ -1986,8 +1985,6 @@ int Fmq::_read_slot ( int32_t slot_num)
 
 {
 
-  int32_t offset;
-
   int32_t magic_cookie;
   if (_get_magic_cookie(magic_cookie)) {
     _print_error("_read_stat", "Cannot read magic cookie");
@@ -2016,7 +2013,7 @@ int Fmq::_read_slot ( int32_t slot_num)
     if (magic_cookie == Q_MAGIC_STAT_64) {
       // seek to given slot
 
-      offset = sizeof(q_stat_t) + slot_num * sizeof(q_slot_t);
+      int64_t offset = sizeof(q_stat_t) + slot_num * sizeof(q_slot_t);
       if (_seek_device(FmqDevice::STAT_IDENT, offset)) {
         _print_error("_read_slot",
                      "Cannot seek to slot %d in status file",
@@ -2041,7 +2038,7 @@ int Fmq::_read_slot ( int32_t slot_num)
     else if (magic_cookie == Q_MAGIC_STAT_32) {
 
 
-      offset = sizeof(q_stat_32_t) + slot_num * sizeof(q_slot_32_t);
+      int64_t offset = sizeof(q_stat_32_t) + slot_num * sizeof(q_slot_32_t);
       if (_seek_device(FmqDevice::STAT_IDENT, offset)) {
         _print_error("_read_slot",
                      "Cannot seek to slot %d in status file",
