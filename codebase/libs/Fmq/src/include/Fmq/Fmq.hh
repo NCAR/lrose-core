@@ -898,7 +898,7 @@ protected:
   int32_t _next_slot(int32_t slot_num);
   int32_t _prev_slot(int32_t slot_num);
   int32_t _find_slot_for_id(int32_t search_id, int32_t *slot_p);
-  int _slot_in_active_region(int32_t slot_num);
+  bool _slot_in_active_region(int32_t slot_num);
    
   // space used
 

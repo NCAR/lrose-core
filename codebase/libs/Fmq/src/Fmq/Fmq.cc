@@ -32,6 +32,7 @@
 ////////////////////////////////////////////////////////////////////////////////
                                  
 #include <cassert>
+#include <cinttypes>
 #include <cstdarg>
 #include <dataport/bigend.h>
 #include <toolsa/MsgLog.hh>
@@ -300,7 +301,7 @@ Fmq::init(const char* fmqPath,
   }
 
   if ((bufSize < 1) || (bufSize >= INT64_MAX)) {
-    _print_error("init", "buffer size (%ld)  outside of valid bounds (0, INT64_MAX)", bufSize);
+    _print_error("init", "buffer size (%" PRId64 ")  outside of valid bounds (0, INT64_MAX)", bufSize);
     return -1;
   }
 
@@ -722,10 +723,10 @@ void Fmq::print_stat(FILE *out) const
   fprintf(out, "  youngest_slot: %d\n", _stat.youngest_slot);
   fprintf(out, "  oldest_slot: %d\n", _stat.oldest_slot);
   fprintf(out, "  nslots: %d\n", _stat.nslots);
-  fprintf(out, "  buf_size: %ld\n", _stat.buf_size);
-  fprintf(out, "  begin_insert: %ld\n", _stat.begin_insert);
-  fprintf(out, "  end_insert: %ld\n", _stat.end_insert);
-  fprintf(out, "  begin_append: %ld\n", _stat.begin_append);
+  fprintf(out, "  buf_size: %" PRId64 "\n", _stat.buf_size);
+  fprintf(out, "  begin_insert: %" PRId64 "\n", _stat.begin_insert);
+  fprintf(out, "  end_insert: %" PRId64 "\n", _stat.end_insert);
+  fprintf(out, "  begin_append: %" PRId64 "\n", _stat.begin_append);
   fprintf(out, "  append_mode: %s\n", BOOL_STR(_stat.append_mode));
   fprintf(out, "  time_written: %s\n", utimstr(_stat.time_written));
   fprintf(out, "  blocking_write: %d\n", _stat.blocking_write);
@@ -953,8 +954,8 @@ int Fmq::_free_oldest_slot()
     fprintf(stderr, "===============================\n");
     fprintf(stderr,
 	    "free_oldest_slot: "
-	    "Offset mismatch: end_insert %ld, "
-	    "oldset_slot offset %ld\n",
+	    "Offset mismatch: end_insert %" PRId64 ", "
+	    "oldset_slot offset %" PRId64 "\n",
 	    _stat.end_insert, oldest_ptr->offset);
     fprintf(stderr, "\n");
     print_stat(stderr);
@@ -2290,7 +2291,7 @@ int Fmq::_read_msg (int32_t slot_num)
   if (_read_device(FmqDevice::BUF_IDENT, _entry, slot->stored_len)) {
     _print_error("read_msg",
 		 "Cannot read message from buf file, "
-		 "slot, len, offset: %d, %ld, %ld",
+		 "slot, len, offset: %d, %" PRId64 ", %" PRId64,
 		 slot_num, slot->stored_len, slot->offset);
     return -1;
   }
@@ -2315,7 +2316,7 @@ int Fmq::_read_msg (int32_t slot_num)
     _print_error("_read_msg",
 		 "Magic cookie not correct in message area, "
 		 "slot_num, len, offset, magic_cookie, desired magic_cookie: "
-		 "%d, %d, %d, %d, %d",
+		 "%d, %" PRId64 ", %" PRId64 ", %d, %d",
 		 slot_num, slot->stored_len, slot->offset,
 		 magic_cookie, Q_MAGIC_BUF);
     return -1;
@@ -2328,7 +2329,7 @@ int Fmq::_read_msg (int32_t slot_num)
   if (slot_num_check != slot_num) {
     _print_error("_read_msg",
 		 "Start check slot_num not correct in message area, "
-		 "len, offset: %d, %d, "
+		 "len, offset: %" PRId64 ", %" PRId64 ", "
 		 "expected slot_num %d, "
 		 "slot_num in file %d",
 		 slot->stored_len, slot->offset,
@@ -2339,13 +2340,13 @@ int Fmq::_read_msg (int32_t slot_num)
 
   // check id
 
-  int32_t id_posn = (slot->stored_len / sizeof(si32)) - 1;
+  int64_t id_posn = (slot->stored_len / sizeof(si32)) - 1;
   si32 id_check = BE_to_si32(iptr[id_posn]);
   
   if (id_check != slot->id) {
     _print_error("_read_msg",
 		 "End check id not correct in message area, "
-		 "len, offset: %d, %d, "
+		 "len, offset: %" PRId64 ", %" PRId64 ", "
 		 "expected id %d, "
 		 "id in file %d",
 		 slot->stored_len, slot->offset,
@@ -2372,17 +2373,17 @@ int Fmq::_read_msg (int32_t slot_num)
       void *compressed_msg = (void *) (iptr + 2);
       ui64 nfull;
       void *umsg = ta_decompress(compressed_msg, &nfull);
-      if (umsg == NULL || (int) nfull != slot->msg_len) {
+      if (umsg == NULL || static_cast<int64_t>(nfull) != slot->msg_len) {
         _print_error("read_msg",
-		     "Error on decompression, expected %d bytes, "
-		     "got %d bytes",
-		     (int) slot->msg_len, (int) nfull);
+		     "Error on decompression, expected %" PRId64 " bytes, "
+		     "got %" PRIu64 " bytes",
+		     slot->msg_len, nfull);
 	if (umsg != NULL) {
 	  ta_compress_free(umsg);
 	}
 	return -1;
       }
-      int32_t msg_len = slot->msg_len;
+      int64_t msg_len = slot->msg_len;
       if (_add_read_msg(umsg, msg_len)) {
         cerr << "ERROR - _read_msg" << endl;
         return -1;
@@ -2392,7 +2393,7 @@ int Fmq::_read_msg (int32_t slot_num)
   } else {
     // data not compressed
     _msgBuf.free();
-    int msg_len = slot->msg_len;
+    int64_t msg_len = slot->msg_len;
     if (_add_read_msg(iptr + 2, msg_len)) {
       cerr << "ERROR - _read_msg" << endl;
       return -1;
@@ -2439,9 +2440,9 @@ int Fmq::_load_read_msg(int32_t msg_type,
     
     if (dmsg == NULL || (int64_t) nfull != uncompressed_len) {
       _print_error("load_read_msg",
-		   "Error on decompression, expected %ld bytes, "
-		   "got %ld bytes",
-		   (int64_t) uncompressed_len, (int64_t) nfull);
+		   "Error on decompression, expected %" PRId64 " bytes, "
+		   "got %" PRIu64 " bytes",
+		   uncompressed_len, nfull);
       if (dmsg != NULL) {
         ta_compress_free(dmsg);
       }
@@ -2717,21 +2718,21 @@ int Fmq::_write_slot (int32_t slot_num)
     _print_error("_write_slot",
 		 "Too few slots allocated.  "
 		 "allocated = %d, needed = %d",
-		 _nslotsAlloc, slot_num);
+		 _nslotsAlloc, slot_num + 1);
     return -1;
   }
   
-  // seek to slot
-
-  int64_t offset = sizeof(q_stat_t) + slot_num * sizeof(q_slot_t);
-  if (_seek_device(FmqDevice::STAT_IDENT, offset)) {
-    _print_error("_write_slot",
-		 "Cannot seek to slot posn, offset %d.", offset);
-    return -1;
-  }
-
   if (_format == FmqFormat::V64) {
     
+    // seek to slot
+
+    int64_t offset = sizeof(q_stat_64_t) + slot_num * sizeof(q_slot_64_t);
+    if (_seek_device(FmqDevice::STAT_IDENT, offset)) {
+      _print_error("_write_slot",
+                   "Cannot seek to slot posn, offset %" PRId64 ".", offset);
+      return -1;
+    }
+
     // make local copy of slot struct
     // set byte order to BigEnd
     
@@ -2752,6 +2753,15 @@ int Fmq::_write_slot (int32_t slot_num)
 
     // 32-bit writes for legacy fmqs
     
+    // seek to slot
+    
+    int64_t offset = sizeof(q_stat_32_t) + slot_num * sizeof(q_slot_32_t);
+    if (_seek_device(FmqDevice::STAT_IDENT, offset)) {
+      _print_error("_write_slot",
+                   "Cannot seek to slot posn, offset %" PRId64 ".", offset);
+      return -1;
+    }
+
     q_slot_32_t slot32;
     slot_64_to_32(&_slots[slot_num], &slot32);
     
@@ -2799,11 +2809,6 @@ int Fmq::_write_msg(void *msg, int64_t msg_len,
 
 {
 
-  bool do_compress;
-  uint64_t clen;
-  int64_t offset;
-  void *cmsg;
-
   // read in status struct 
   
   if (_read_stat()) {
@@ -2812,8 +2817,8 @@ int Fmq::_write_msg(void *msg, int64_t msg_len,
 
   // compute the slot position for writing
   
-  int64_t write_slot = _next_slot (_stat.youngest_slot);
-  int64_t write_id = _next_id(_stat.youngest_id);
+  int32_t write_slot = _next_slot(_stat.youngest_slot);
+  int32_t write_id = _next_id(_stat.youngest_id);
   
   // in blocking write operation, wait if we have caught up
   
@@ -2854,12 +2859,15 @@ int Fmq::_write_msg(void *msg, int64_t msg_len,
 
   // compress if required
   
+  bool do_compress;
   if (_compress && !pre_compressed && (msg != NULL)) {
     do_compress = true;
   } else {
     do_compress = false;
   }
 
+  uint64_t clen = 0;
+  void *cmsg = nullptr;
   if (do_compress) {
     if ((cmsg = ta_compress(_compressMethod,
 			    msg, msg_len, &clen)) == NULL) {
@@ -2873,17 +2881,16 @@ int Fmq::_write_msg(void *msg, int64_t msg_len,
   }
 
   // compute padded length, to keep the total length aligned to
-  // 32-bit words
+  // 64-bit words
   
-  int64_t nbytes_padded = (((clen - 1) / sizeof(si32)) + 1) * sizeof(si32);
-  int64_t stored_len = nbytes_padded + Q_NBYTES_EXTRA;
+  int64_t stored_len = (((clen + Q_NBYTES_EXTRA - 1) / sizeof(si64)) + 1) * sizeof(si64);
   
   // check that message will fit in buffer
   
   if (stored_len > _stat.buf_size) {
     _print_error("_write_msg",
-		 "Message size %d bytes too large for FMQ\n"
-		 "Max msg len %d",
+		 "Message size %" PRIu64 " bytes too large for FMQ\n"
+		 "Max msg len %" PRId64,
 		 clen, _stat.buf_size - Q_NBYTES_EXTRA);
     if (do_compress) {
       ta_compress_free(cmsg);
@@ -2909,6 +2916,7 @@ int Fmq::_write_msg(void *msg, int64_t msg_len,
 
   // write the message
 
+  int64_t offset = 0;
   if (_stat.append_mode) {
     offset = _stat.begin_append;
   } else {
@@ -2928,8 +2936,8 @@ int Fmq::_write_msg(void *msg, int64_t msg_len,
           offset);
 #endif
   
-  int iret = _write_msg_to_slot(write_slot, write_id, cmsg,
-			    clen, stored_len, offset);
+  int iret = _write_msg_to_slot(write_slot, write_id, cmsg, clen,
+                                stored_len, offset);
   if (do_compress) {
     ta_compress_free(cmsg);
   }
@@ -2993,15 +3001,10 @@ int Fmq::_write_msg(void *msg, int64_t msg_len,
 ///
 
 int Fmq::_write_msg_to_slot(int32_t write_slot, int32_t write_id,
-			    void *msg, int64_t msg_len, int64_t stored_len, int64_t offset)
+			    void *msg, int64_t msg_len,
+                            int64_t stored_len, int64_t offset)
      
 {
-
-  int32_t id_posn;
-  int32_t *iptr;
-  int32_t magic_cookie;
-  int32_t slot_num;
-  int32_t id;
 
   // seek to start of message
   
@@ -3017,26 +3020,26 @@ int Fmq::_write_msg_to_slot(int32_t write_slot, int32_t write_id,
 
   // set values in entry
      
-  magic_cookie = BE_from_si32(Q_MAGIC_BUF);
-  slot_num = BE_from_si32(write_slot);
-  id = BE_from_si32(write_id);
+  int32_t magic_cookie = BE_from_si32(Q_MAGIC_BUF);
+  int32_t slot_num = BE_from_si32(write_slot);
+  int32_t id = BE_from_si32(write_id);
 
-  iptr = (si32 *) _entry;
+  int32_t *iptr = (si32 *) _entry;
   iptr[0] = magic_cookie;
   iptr[1] = slot_num;
-  id_posn = (stored_len / sizeof(si32)) - 1;
+  int64_t id_posn = (stored_len / sizeof(si32)) - 1;
   iptr[id_posn] = id;
 
   // copy the message in
 
-  memcpy(iptr + 2, msg, msg_len);
-
+  memcpy(iptr + 2, msg, static_cast<size_t>(msg_len));
+  
   // write out entry
   
   if (_write_device(FmqDevice::BUF_IDENT, _entry, stored_len)) {
     _print_error("write_msg",
 		 "Cannot write message to buf file, "
-		 "slot_num, len, offset: %d, %d, %d",
+		 "slot_num, len, offset: %d, %" PRId64 ", %" PRId64,
 		 write_slot, msg_len, offset);
     return -1;
   }
@@ -3289,7 +3292,7 @@ int Fmq::_check()
 
     // Check whether this slot should be active or not.
     
-    int should_be_active = _slot_in_active_region(islot);
+    bool should_be_active = _slot_in_active_region(islot);
     
     if (slot->active && !should_be_active) {
       _print_error("_check",
@@ -3605,16 +3608,14 @@ int Fmq::_get_magic_cookie(int32_t& cookie)
 //
 ///
 
-int Fmq::_prev_slot (int32_t slot_num)
-
+int32_t Fmq::_prev_slot (int32_t slot_num)
+  
 {
-
   if (slot_num == 0) {
     return (_stat.nslots - 1);
   } else {
     return (slot_num - 1);
   }
-
 }
 
 ////////////////////////////////////////////////////////////
@@ -3624,16 +3625,14 @@ int Fmq::_prev_slot (int32_t slot_num)
 //
 ///
 
-int Fmq::_next_slot(int32_t slot_num)
+int32_t Fmq::_next_slot(int32_t slot_num)
 
 {
-
   if (slot_num >= _stat.nslots - 1) {
     return 0;
   } else {
     return (slot_num + 1);
   }
-
 }
 
 ////////////////////////////////////////////////////////////
@@ -3643,7 +3642,7 @@ int Fmq::_next_slot(int32_t slot_num)
 //
 ///
 
-int Fmq::_prev_id(int32_t id)
+int32_t Fmq::_prev_id(int32_t id)
 
 {
   if (id == 0) {
@@ -3660,16 +3659,14 @@ int Fmq::_prev_id(int32_t id)
 //
 ///
 
-int Fmq::_next_id(int32_t id)
+int32_t Fmq::_next_id(int32_t id)
 
 {
-
   if (id == Q_MAX_ID - 1) {
     return 0;
   } else {
     return (id + 1);
   }
-
 }
 
 ////////////////////////////////////////////////////////////
@@ -3681,8 +3678,8 @@ int Fmq::_next_id(int32_t id)
 //
 ///
 
-int Fmq::_find_slot_for_id(int32_t search_id, int32_t *slot_p)
-     
+int32_t Fmq::_find_slot_for_id(int32_t search_id, int32_t *slot_p)
+  
 {
 
   // special case - search_id is -1, no messages yet.
@@ -3727,7 +3724,7 @@ int Fmq::_find_slot_for_id(int32_t search_id, int32_t *slot_p)
 //   true if YES, false if NO.
 ///
 
-int Fmq::_slot_in_active_region (int32_t slot_num)
+bool Fmq::_slot_in_active_region (int32_t slot_num)
 
 {
 
@@ -3874,8 +3871,8 @@ void Fmq::_print_slot(FILE *out, const char *label, int num) const
 {
   
   fprintf(out,
-	  "%s - %d: active %d, id %d, time %s, msg_len %ld, "
-	  "stored_len %ld, offset %ld, type %d, subtype %d, "
+	  "%s - %d: active %d, id %d, time %s, msg_len %" PRId64 ", "
+	  "stored_len %" PRId64 ", offset %" PRId64 ", type %d, subtype %d, "
           "compress %s, checksum %d\n",
 	  label, num,
 	  _slot.active, 
@@ -3931,9 +3928,9 @@ void Fmq::_basic_print_slot(int32_t slot_num, q_slot_t *slot, FILE *out) const
   fprintf(out, "%d ", slot->active);
   fprintf(out, "%d ", slot->id);
   fprintf(out, "%s ", utimstr(slot->time));
-  fprintf(out, "%ld ", slot->msg_len);
-  fprintf(out, "%ld ", slot->stored_len);
-  fprintf(out, "%ld ", slot->offset);
+  fprintf(out, "%" PRId64 " ", slot->msg_len);
+  fprintf(out, "%" PRId64 " ", slot->stored_len);
+  fprintf(out, "%" PRId64 " ", slot->offset);
   fprintf(out, "%d ", slot->type);
   fprintf(out, "%d ", slot->subtype);
   fprintf(out, "%d ", slot->compress);
@@ -3950,9 +3947,9 @@ void Fmq::_pretty_print_slot(int32_t slot_num, q_slot_t *slot, FILE *out) const
   fprintf(out, "  active: %d \n", slot->active);
   fprintf(out, "  id: %d \n", slot->id);
   fprintf(out, "  time: %s \n", utimstr(slot->time));
-  fprintf(out, "  msg_len: %ld \n", slot->msg_len);
-  fprintf(out, "  stored_len: %ld \n", slot->stored_len);
-  fprintf(out, "  offset: %ld \n", slot->offset);
+  fprintf(out, "  msg_len: %" PRId64 " \n", slot->msg_len);
+  fprintf(out, "  stored_len: %" PRId64 " \n", slot->stored_len);
+  fprintf(out, "  offset: %" PRId64 " \n", slot->offset);
   fprintf(out, "  type: %d \n", slot->type);
   fprintf(out, "  subtype: %d \n", slot->subtype);
   fprintf(out, "  compress: %d \n", slot->compress);
@@ -4409,10 +4406,10 @@ int Fmq::_recover ()
     end_insert = oldest_slot->offset;
   }
   
-  _print_info(NULL, "--> Original BI, EI, BA, AM: %ld, %ld, %ld, %ld",
+  _print_info(NULL, "--> Original BI, EI, BA, AM: %" PRId64 ", %" PRId64 ", %" PRId64 ", %d",
 	      _stat.begin_insert, _stat.end_insert,
 	      _stat.begin_append, _stat.append_mode);
-  _print_info(NULL, "--> Recovered BI, EI, BA, AM: %ld, %ld, %ld, %ld",
+  _print_info(NULL, "--> Recovered BI, EI, BA, AM: %" PRId64 ", %" PRId64 ", %" PRId64 ", %d",
 	      begin_insert, end_insert, begin_append, append_mode);
 
   _stat.begin_insert = begin_insert;
@@ -4427,4 +4424,3 @@ int Fmq::_recover ()
   return 0;
 
 }
-
