@@ -43,6 +43,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/MsgLog.hh>
 #include <toolsa/TaFile.hh>
+#include <toolsa/MemBuf.hh>
 #include "FmqTest.hh"
 using namespace std;
 
@@ -105,7 +106,6 @@ FmqTest::~FmqTest()
   // unregister process
 
   PMU_auto_unregister();
-
 }
 
 //////////////////////////////////////////////////
@@ -188,7 +188,24 @@ int FmqTest::Run ()
   while (true) {
     
     PMU_auto_register("write to output");
-    if (fmq.writeMsg(0, 0, fileContents.data(), fileContents.size())) {
+
+    MemBuf buf;
+    buf.add(fileContents.data(), fileContents.size());
+
+    if (_params.append_count_and_time_to_msg) {
+
+      DateTime dtime;
+      dtime.setToNow();
+      
+      char text[2000];
+      snprintf(text, 1999, "count: %d, time: %s\n",
+               count, dtime.asString(3).c_str());
+
+      buf.add(text, strlen(text + 1));
+      
+    }
+
+    if (fmq.writeMsg(0, 0, buf.getPtr(), buf.getLen())) {
       cerr << "ERROR - FmqTest::Run" << endl;
       cerr << "  Writing message to url: " << _params.output_fmq_url << endl;
       cerr << "  Message len: " << fileContents.size() << endl;

@@ -627,6 +627,18 @@
     tt->single_val.s = tdrpStrDup("/tmp/fmq_input");
     tt++;
     
+    // Parameter 'append_count_and_time_to_msg'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("append_count_and_time_to_msg");
+    tt->descr = tdrpStrDup("Option to append count an time to the message.");
+    tt->help = tdrpStrDup("If TRUE, the app will make a string containing the index count and time, and append that to the buffer for identification purposes.");
+    tt->val_offset = (char *) &append_count_and_time_to_msg - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'write_count'
     // ctype is 'int'
     
@@ -709,15 +721,15 @@
     tt++;
     
     // Parameter 'output_buf_size'
-    // ctype is 'int'
+    // ctype is 'long'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
+    tt->ptype = LONG_TYPE;
     tt->param_name = tdrpStrDup("output_buf_size");
     tt->descr = tdrpStrDup("Size of buffer in output FMQ.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &output_buf_size - &_start_;
-    tt->single_val.i = 10000000;
+    tt->single_val.l = 10000000;
     tt++;
     
     // Parameter 'data_mapper_reg_interval'

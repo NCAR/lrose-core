@@ -42,6 +42,12 @@ paramdef string {
   p_descr = "Path for input file.";
 } input_file_path;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to append count an time to the message.";
+  p_help = "If TRUE, the app will make a string containing the index count and time, and append that to the buffer for identification purposes.";
+} append_count_and_time_to_msg;
+
 paramdef int {
   p_default = 1;
   p_descr = "Number of times to write the file contents to the FMQ.";
@@ -80,7 +86,7 @@ paramdef int {
   p_descr = "Number of slots in output FMQ.";
 } output_n_slots;
 
-paramdef int {
+paramdef long {
   p_default = 10000000;
   p_descr = "Size of buffer in output FMQ.";
 } output_buf_size;
