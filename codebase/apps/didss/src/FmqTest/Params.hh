@@ -373,6 +373,8 @@ public:
 
   char* input_file_path;
 
+  tdrp_bool_t append_count_and_time_to_msg;
+
   int write_count;
 
   int write_sleep_msecs;
@@ -396,7 +398,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[16];
+  mutable TDRPtable _table[17];
 
   const char *_className;
 
