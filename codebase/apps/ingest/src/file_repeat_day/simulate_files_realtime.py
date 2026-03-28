@@ -22,6 +22,17 @@ Destination layout will mirror the day-directory structure:
     20260102/
       ...
 
+Features:
+  - Reads files in time order based on YYYYMMDD_HHMMSS found in filenames
+  - Copies files to destination, preserving YYYYMMDD day structure
+  - Calls LdataWriter after each copied file
+  - Optional sleep interval between files
+  - Optional time filtering
+  - Optional overwrite
+  - Optional dry-run
+  - Optional renaming of output file timestamp to current time
+  - Optional infinite looping over the same file set
+
 Example:
 
   python simulate_radar_archive.py \
@@ -30,13 +41,23 @@ Example:
       --sleep-secs 2.0 \
       --ldir-scope root
 
-If you want latest_data_info written separately for each YYYYMMDD directory:
+Rename files to current time as they are replayed:
 
   python simulate_radar_archive.py \
       --src-root /data/archive \
       --dst-root /data/sim/input \
       --sleep-secs 2.0 \
-      --ldir-scope day
+      --rename-to-now \
+      --ldir-scope root
+
+Loop forever:
+
+  python simulate_radar_archive.py \
+      --src-root /data/archive \
+      --dst-root /data/sim/input \
+      --sleep-secs 2.0 \
+      --rename-to-now \
+      --loop-forever
 """
 
 from __future__ import annotations
@@ -49,7 +70,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
@@ -129,6 +150,19 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Print extra progress messages.",
     )
+    parser.add_argument(
+        "--rename-to-now",
+        action="store_true",
+        help=(
+            "Rename the output file so that the YYYYMMDD_HHMMSS portion of the "
+            "filename is replaced with the current UTC time at write time."
+        ),
+    )
+    parser.add_argument(
+        "--loop-forever",
+        action="store_true",
+        help="Continuously replay the same input file list forever.",
+    )
 
     return parser.parse_args()
 
@@ -206,27 +240,79 @@ def format_ltime(dt: datetime) -> str:
     return dt.strftime("%Y%m%d%H%M%S")
 
 
+def current_utc_times() -> tuple[str, str]:
+    """
+    Returns:
+      filename_ts: YYYYMMDD_HHMMSS
+      ldata_ts:    YYYYMMDDHHMMSS
+    """
+    now = datetime.now(timezone.utc)
+    return now.strftime("%Y%m%d_%H%M%S"), now.strftime("%Y%m%d%H%M%S")
+
+
+def make_output_name(original_name: str, rename_to_now: bool) -> tuple[str, str]:
+    """
+    Returns:
+      output_filename
+      ltime_string_for_LdataWriter (YYYYMMDDHHMMSS)
+
+    If rename_to_now is False:
+      - preserve original filename
+      - ltime is based on filename timestamp already present in original_name
+
+    If rename_to_now is True:
+      - replace timestamp in filename with current UTC timestamp
+      - ltime is set to the same current UTC time
+    """
+    if not rename_to_now:
+        dt = extract_data_time(original_name)
+        if dt is None:
+            raise ValueError(f"Cannot extract timestamp from filename: {original_name}")
+        return original_name, format_ltime(dt)
+
+    now_fname_ts, now_ltime = current_utc_times()
+
+    if TS_RE.search(original_name):
+        new_name = TS_RE.sub(now_fname_ts, original_name, count=1)
+    else:
+        new_name = f"{now_fname_ts}_{original_name}"
+
+    return new_name, now_ltime
+
+
+def compute_dest_paths(
+    dst_root: Path,
+    day_dir: str,
+    output_filename: str,
+) -> tuple[Path, Path]:
+    dst_day_dir = dst_root / day_dir
+    dst_path = dst_day_dir / output_filename
+    return dst_day_dir, dst_path
+
+
 def run_ldatawriter(
     ldatawriter: str,
     dst_root: Path,
-    entry: FileEntry,
+    day_dir: str,
+    output_filename: str,
+    ltime_str: str,
     ldir_scope: str,
     dry_run: bool,
     verbose: bool,
 ) -> None:
     if ldir_scope == "root":
         dir_arg = str(dst_root)
-        rpath_arg = f"{entry.day_dir}/{entry.filename}"
+        rpath_arg = f"{day_dir}/{output_filename}"
     elif ldir_scope == "day":
-        dir_arg = str(dst_root / entry.day_dir)
-        rpath_arg = entry.filename
+        dir_arg = str(dst_root / day_dir)
+        rpath_arg = output_filename
     else:
         raise ValueError(f"Unsupported ldir_scope: {ldir_scope}")
 
     cmd = [
         ldatawriter,
         "-dir", dir_arg,
-        "-ltime", format_ltime(entry.data_time),
+        "-ltime", ltime_str,
         "-rpath", rpath_arg,
     ]
 
@@ -238,37 +324,103 @@ def run_ldatawriter(
 
 
 def copy_one_file(
-    entry: FileEntry,
-    dst_root: Path,
+    src_path: Path,
+    dst_day_dir: Path,
+    dst_path: Path,
     overwrite: bool,
     dry_run: bool,
     verbose: bool,
-) -> Path:
-    dst_day_dir = dst_root / entry.day_dir
-    dst_path = dst_day_dir / entry.filename
-
+) -> None:
     if dry_run or verbose:
-        print(f"Copy: {entry.src_path} -> {dst_path}")
+        print(f"Copy: {src_path} -> {dst_path}")
 
     if dry_run:
-        return dst_path
+        return
 
     dst_day_dir.mkdir(parents=True, exist_ok=True)
 
-    if dst_path.exists() and not overwrite:
-        raise FileExistsError(
-            f"Destination file already exists (use --overwrite to replace): {dst_path}"
-        )
+    if dst_path.exists():
+        if overwrite:
+            pass
+        else:
+            raise FileExistsError(
+                f"Destination file already exists (use --overwrite to replace): {dst_path}"
+            )
 
-    shutil.copy2(entry.src_path, dst_path)
-    return dst_path
+    shutil.copy2(src_path, dst_path)
+
+
+def replay_once(
+    entries: List[FileEntry],
+    args: argparse.Namespace,
+    pass_num: int,
+) -> int:
+    dst_root = Path(args.dst_root).expanduser().resolve()
+
+    if args.loop_forever:
+        print(f"Starting replay pass {pass_num}")
+
+    total = len(entries)
+
+    for i, entry in enumerate(entries, start=1):
+        try:
+            output_filename, ltime_str = make_output_name(
+                entry.filename,
+                rename_to_now=args.rename_to_now,
+            )
+
+            dst_day_dir, dst_path = compute_dest_paths(
+                dst_root=dst_root,
+                day_dir=entry.day_dir,
+                output_filename=output_filename,
+            )
+
+            print(
+                f"[pass {pass_num} file {i}/{total}] "
+                f"src_time={entry.data_time.strftime('%Y-%m-%d %H:%M:%S')} "
+                f"day={entry.day_dir} out={output_filename}"
+            )
+
+            copy_one_file(
+                src_path=entry.src_path,
+                dst_day_dir=dst_day_dir,
+                dst_path=dst_path,
+                overwrite=args.overwrite,
+                dry_run=args.dry_run,
+                verbose=args.verbose,
+            )
+
+            run_ldatawriter(
+                ldatawriter=args.ldatawriter,
+                dst_root=dst_root,
+                day_dir=entry.day_dir,
+                output_filename=output_filename,
+                ltime_str=ltime_str,
+                ldir_scope=args.ldir_scope,
+                dry_run=args.dry_run,
+                verbose=args.verbose,
+            )
+
+        except subprocess.CalledProcessError as exc:
+            print(f"ERROR: LdataWriter failed with exit code {exc.returncode}", file=sys.stderr)
+            return exc.returncode
+        except Exception as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+
+        if args.sleep_secs > 0 and (i < total or args.loop_forever):
+            if args.verbose:
+                print(f"Sleeping {args.sleep_secs:.3f} seconds")
+            if not args.dry_run:
+                time.sleep(args.sleep_secs)
+
+    return 0
 
 
 def main() -> int:
     args = parse_args()
 
     src_root = Path(args.src_root).expanduser().resolve()
-    dst_root = Path(args.dst_root).expanduser().resolve()
 
     start_time = parse_filter_time(args.start_time, "--start-time")
     end_time = parse_filter_time(args.end_time, "--end-time")
@@ -289,43 +441,16 @@ def main() -> int:
 
     print(f"Found {len(entries)} files to replay.")
 
-    for i, entry in enumerate(entries, start=1):
-        print(
-            f"[{i}/{len(entries)}] "
-            f"{entry.data_time.strftime('%Y-%m-%d %H:%M:%S')}  "
-            f"{entry.day_dir}/{entry.filename}"
-        )
+    pass_num = 1
+    while True:
+        ret = replay_once(entries, args, pass_num)
+        if ret != 0:
+            return ret
 
-        try:
-            copy_one_file(
-                entry=entry,
-                dst_root=dst_root,
-                overwrite=args.overwrite,
-                dry_run=args.dry_run,
-                verbose=args.verbose,
-            )
+        if not args.loop_forever:
+            break
 
-            run_ldatawriter(
-                ldatawriter=args.ldatawriter,
-                dst_root=dst_root,
-                entry=entry,
-                ldir_scope=args.ldir_scope,
-                dry_run=args.dry_run,
-                verbose=args.verbose,
-            )
-
-        except subprocess.CalledProcessError as exc:
-            print(f"ERROR: LdataWriter failed with exit code {exc.returncode}", file=sys.stderr)
-            return exc.returncode
-        except Exception as exc:
-            print(f"ERROR: {exc}", file=sys.stderr)
-            return 1
-
-        if args.sleep_secs > 0 and i < len(entries):
-            if args.verbose:
-                print(f"Sleeping {args.sleep_secs:.3f} seconds")
-            if not args.dry_run:
-                time.sleep(args.sleep_secs)
+        pass_num += 1
 
     print("Done.")
     return 0
@@ -334,4 +459,3 @@ def main() -> int:
 if __name__ == "__main__":
     sys.exit(main())
 
-    
