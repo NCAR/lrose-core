@@ -341,11 +341,11 @@ int Server::convertToSymprod(const void *params,
     serverParams->_sigmet_items[iMatch].includeHiddenPolygon;
   bool renderForecasts = serverParams->_sigmet_items[iMatch].renderForecasts;
   bool renderOutlooks = serverParams->_sigmet_items[iMatch].renderOutlooks;
-  bool renderIcon = serverParams->_sigmet_items[iMatch].renderIcon;
+  Params::draw_icon_t renderIcon = serverParams->_sigmet_items[iMatch].renderIcon;
   char *iconName = serverParams->_sigmet_items[iMatch].iconName;
   char *iconNameSouth = serverParams->_sigmet_items[iMatch].iconNameSouth;
   float iconScale = serverParams->_sigmet_items[iMatch].iconScale;
-  bool allowClientScaling =
+  Params::client_scale_icon_t allowClientScaling =
     serverParams->_sigmet_items[iMatch].allowClientScaling;
 
   char *mainColor = serverParams->_sigmet_items[iMatch].mainColor;
@@ -396,7 +396,7 @@ int Server::convertToSymprod(const void *params,
     cerr << "Icon <" << iconName <<
       "> not found in icon list created from parameter file" << endl;
     cerr << "Not rendering icon" << endl;
-    renderIcon = false;
+    renderIcon = Params::ALWAYS_OFF;
   }
     
   // Get the vertices and normalize them

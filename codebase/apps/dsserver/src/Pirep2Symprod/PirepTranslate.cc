@@ -241,5 +241,11 @@ void PirepTranslate::Pirep_to_pirep_t(Pirep in, pirep_t* p)
   }
 
   strncpy(p->callsign, in.getAircraftId(), sizeof(p->callsign));
-  strncpy(p->text, in.getRaw(), sizeof(p->text));
+
+  string text(in.getRaw());
+  if (text.size() > sizeof(p->text - 1)) {
+    text.resize(sizeof(p->text - 1));
+  }
+  snprintf(p->text, sizeof(p->text), "%s", text.c_str());
+
 }
