@@ -1125,6 +1125,15 @@ void DataSet::_printVarVals(Nc3Var *var)
   }
   break;
   
+  case nc3Ushort: {
+    cout << "(ushort)";
+    ushort *vals = (ushort *) values->base();
+    for (long ii = 0; ii < nprint; ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
   case nc3Int: {
     cout << "(int)";
     int *vals = (int *) values->base();

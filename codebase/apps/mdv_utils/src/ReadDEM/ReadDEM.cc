@@ -185,7 +185,8 @@ float ReadDEM::Elevation(float lat, float lon, float bad){
   // Correct roundoff as it may lead
   // to an access violation.
 
-  if (i<0) i=0;        if (j<0) j=0;
+  if (i<0) i=0;
+  if (j<0) j=0;
   if (i>NumCols-1) i=NumCols-1;  
   if (j>NumRows-1) j=NumRows-1;
 

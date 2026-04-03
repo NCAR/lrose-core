@@ -138,8 +138,8 @@ NexradTape::readNexradMsg( ui08* &buffer, bool &volTitleSeen )
       //
       size_t logRecSize;
       bool found = false;
-      char name[9]; char ext[5];
-      name[8] = ext[4] = '\0';
+      char name[16]; char ext[5];
+      name[15] = ext[4] = '\0';
 
       while( !found ) {
 
@@ -163,7 +163,7 @@ NexradTape::readNexradMsg( ui08* &buffer, bool &volTitleSeen )
 
          case sizeof( RIDDS_vol_title ):
               volumeTitleSeen = true;
-              strncpy( name, ((RIDDS_vol_title *)logicalRecord)->filename, 8 );
+              strncpy( name, ((RIDDS_vol_title *)logicalRecord)->filename, 15 );
               strncpy( ext, ((RIDDS_vol_title *)logicalRecord)->extension, 4 );
               POSTMSG( DEBUG, "Skipping over VOLUME TITLE message: %s.%s", 
                               name, ext );

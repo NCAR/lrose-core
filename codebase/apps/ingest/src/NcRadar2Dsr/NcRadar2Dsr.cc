@@ -522,6 +522,15 @@ void NcRadar2Dsr::_printAtt(Nc3Att *att)
   }
   break;
   
+  case nc3Ushort: {
+    cout << "USHORT: ";
+    ushort *vals = (ushort *) values->base();
+    for (long ii = 0; ii < att->num_vals(); ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
   case nc3Int: {
     cout << "INT: ";
     int *vals = (int *) values->base();
@@ -608,6 +617,15 @@ void NcRadar2Dsr::_printVarVals(Nc3Var *var)
   case nc3Short: {
     cout << "(short)";
     short *vals = (short *) values->base();
+    for (long ii = 0; ii < nprint; ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Ushort: {
+    cout << "(ushort)";
+    ushort *vals = (ushort *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
       cout << " " << vals[ii];
     }

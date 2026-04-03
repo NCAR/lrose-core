@@ -541,6 +541,15 @@ void NcRadarSplit::_printAtt(Nc3Att *att)
   }
   break;
   
+  case nc3Ushort: {
+    cerr << "USHORT: ";
+    ushort *vals = (ushort *) values->base();
+    for (long ii = 0; ii < att->num_vals(); ii++) {
+      cerr << " " << vals[ii];
+    }
+  }
+  break;
+  
   case nc3Int: {
     cerr << "INT: ";
     int *vals = (int *) values->base();
@@ -627,6 +636,15 @@ void NcRadarSplit::_printVarVals(Nc3Var *var)
   case nc3Short: {
     cerr << "(short)";
     short *vals = (short *) values->base();
+    for (long ii = 0; ii < nprint; ii++) {
+      cerr << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Ushort: {
+    cerr << "(ushort)";
+    ushort *vals = (ushort *) values->base();
     for (long ii = 0; ii < nprint; ii++) {
       cerr << " " << vals[ii];
     }

@@ -84,17 +84,10 @@ int ltg_decrypt(char *inFilename, Params *P){
   OutSpdb.clearUrls();
   OutSpdb.addUrl(P->OutputUrl);
 
+  int multiplicity, kiloamps, x, log = 0;
+  // int duration, quality_flag;
 
-
-  int            multiplicity, 
-    duration, 
-    kiloamps, 
-    x,
-    log = 0,
-    quality_flag;
-
-  float          latitude, 
-    longitude;
+  float latitude, longitude;
 
   unsigned short num_days = 5,
     byte0, 
@@ -105,11 +98,7 @@ int ltg_decrypt(char *inFilename, Params *P){
     prevByte = 0,
     flash_type;
 
-  unsigned long  calc_time,
-    curr_time,
-    too_old,
-    big_byte,
-    position = 0;
+  unsigned long calc_time, big_byte, position = 0;
 
   char    *inputfile = inFilename;
 
@@ -127,10 +116,10 @@ int ltg_decrypt(char *inFilename, Params *P){
  
 
   /* Get the current time */
-  curr_time = time(NULL);
+  // unsigned long curr_time = time(NULL);
 
   /* how may days old can the data be? */ 
-  too_old = num_days * UNIX_DAY;
+  // unsigned long too_old = num_days * UNIX_DAY;
 
   if (log == 1)
   { 
@@ -178,7 +167,7 @@ int ltg_decrypt(char *inFilename, Params *P){
       { 
          fprintf(logfile, "Flash message is %d\n", flash_type);
          fprintf(logfile, "Number of flashes is %d\n", flash_count);
-         fprintf(logfile, "Timestamp is %d\n", calc_time);
+         fprintf(logfile, "Timestamp is %lu\n", calc_time);
       }
 
       // if the timestamp is bad, then we want to skip back three
@@ -203,7 +192,7 @@ int ltg_decrypt(char *inFilename, Params *P){
                longitude = (two_bytes * LON_CONST) - 130;
 
                two_bytes = get2Bytes();
-               quality_flag = two_bytes >> 15;
+               // quality_flag = two_bytes >> 15;
 
                two_bytes = two_bytes & 0x7FFF;
                latitude = (two_bytes * LAT_CONST) + 18;
@@ -213,7 +202,7 @@ int ltg_decrypt(char *inFilename, Params *P){
                if (byte0 >> 7) { kiloamps = -kiloamps; }
           
                byte0 = getByte();
-               duration = (byte0 >> 4);
+               // duration = (byte0 >> 4);
                multiplicity = byte0 & 0x0F;
             }
             else
@@ -258,7 +247,7 @@ int ltg_decrypt(char *inFilename, Params *P){
                multiplicity = (byte2 * 10) + byte0;
             } 
             if (P->Debug)
-	      fprintf (stderr, "%d %f %f %d %d %x %d\n", calc_time, longitude, latitude, kiloamps, multiplicity, flash_type, flash_count);
+	      fprintf (stderr, "%lu %f %f %d %d %x %d\n", calc_time, longitude, latitude, kiloamps, multiplicity, flash_type, flash_count);
 
 
 	    if( (longitude > P->MinLon) && (longitude < P->MaxLon) &&
@@ -315,10 +304,9 @@ int ltg_decrypt(char *inFilename, Params *P){
 void tossHeader()
 {
    int x = 0;
-   unsigned short byte;
    while (x <= FILE_HEADER)
    {
-     byte = getByte();
+     (void) getByte();
      x++;
    }
 }

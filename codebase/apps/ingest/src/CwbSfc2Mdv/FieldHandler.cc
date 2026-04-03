@@ -229,11 +229,11 @@ float *FieldHandler::_extractFloatVariableArray(const int nc_file_id,
 
       for (int i = 0; i < array_size; ++i)
       {
-	if (missing_value_att_name != "" &&
-	    data[i] == missing_value)
+	if ((missing_value_att_name.size() > 0) & (data[i] == missing_value)) {
 	  continue;
+        }
 	
-	  data[i] = data[i] / scale_val;
+        data[i] = data[i] / scale_val;
       } /* endfor - i */
     }
   }

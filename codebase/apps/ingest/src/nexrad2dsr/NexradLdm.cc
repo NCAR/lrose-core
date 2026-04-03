@@ -379,14 +379,14 @@ NexradLdm::readPhysicalRecord( size_t& physicalBytes )
          volumeTitleSeen = true;
 
  
-	 char name[9];
+	 char name[16];
 	 char ext[5];
-	 name[8] = ext[4] = '\0';
+	 name[15] = ext[4] = '\0';
 
          RIDDS_vol_title title;
          memcpy(&title, ldmBuffer, sizeof(title));
            
-         strncpy(name, title.filename, 8);
+         strncpy(name, title.filename, 15);
 	 strncpy(ext, title.extension, 3);
 	 
 	 if ( DEBUG_ENABLED ) {
