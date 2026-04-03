@@ -62,6 +62,27 @@ public:
 		     bool cr = true);
 
   ///////////////////////////////////////////
+  // format integer value as a string.
+  // Default format is %d.
+
+  static string itostr(int val,
+                       string format = "%d");
+
+  ///////////////////////////////////////////
+  // format long value as a string.
+  // Default format is %ld.
+
+  static string ltostr(long val,
+                       string format = "%ld");
+
+  ///////////////////////////////////////////
+  // format double value as a string.
+  // Default format is %g.
+
+  static string dtostr(double val,
+                       string format = "%g");
+
+  ///////////////////////////////////////////
   // add long integer value to target string,
   // with optional following carriage return.
   

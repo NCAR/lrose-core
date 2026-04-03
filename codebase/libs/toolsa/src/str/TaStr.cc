@@ -60,12 +60,46 @@ void TaStr::AddInt(string &target,
 		   bool cr)
 {
   target += label;
-  char str[32];
-  safe_snprintf(str, "%d", iarg);
-  target += str;
+  target += itostr(iarg);
   if (cr) {
     target += "\n";
   }
+}
+
+///////////////////////////////////////////
+// format integer value as a string.
+// Default format is %d.
+
+string TaStr::itostr(int val,
+                     string format)
+{
+  char str[64];
+  safe_snprintf(str, format.c_str(), val);
+  return str;
+}
+
+///////////////////////////////////////////
+// format long value as a string.
+// Default format is %ld.
+
+string TaStr::ltostr(long val,
+                     string format)
+{
+  char str[64];
+  safe_snprintf(str, format.c_str(), val);
+  return str;
+}
+
+///////////////////////////////////////////
+// format double value as a string.
+// Default format is %g.
+
+string TaStr::dtostr(double val,
+                     string format)
+{
+  char str[64];
+  safe_snprintf(str, format.c_str(), val);
+  return str;
 }
 
 ///////////////////////////////////////////
@@ -89,9 +123,7 @@ void TaStr::AddLong(string &target,
                     bool cr)
 {
   target += label;
-  char str[32];
-  safe_snprintf(str, "%ld", larg);
-  target += str;
+  target += ltostr(larg);
   if (cr) {
     target += "\n";
   }
@@ -124,9 +156,7 @@ void TaStr::AddDbl(string &target,
 
 {
   target += label;
-  char str[128];
-  safe_snprintf(str, format.c_str(), darg);
-  target += str;
+  target += dtostr(darg, format);
   if (cr) {
     target += "\n";
   }
