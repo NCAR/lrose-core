@@ -203,7 +203,7 @@ void RainGage::ParseGageTData()
       char date[9];
       char time[9];
       char SHEF[6];
-      char  *input;
+
       fgets(line, maxline, fp);
       fgets(line, maxline, fp);
       
