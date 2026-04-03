@@ -1307,6 +1307,7 @@ void Server::_addTimeLabels(Symprod &prod,
     loc.time = labelTime;
     loc.lat = -9999.0;
     loc.lon = -9999.0;
+    loc.alt = -9999.0;
     labelLoc.push_back(loc);
     labelTime += intervalSecs;
   }
