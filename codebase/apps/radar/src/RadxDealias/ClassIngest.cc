@@ -792,7 +792,7 @@ int ClassIngest::_extractSelectedData(std::string line) {
 
       status = 1;
       targetCol = (*item).first;
-      strncpy(lineCopy, line.c_str(), BUFSIZ);
+      strncpy(lineCopy, line.c_str(), BUFSIZ - 1);
 
       // Scan for the zero'th column
 

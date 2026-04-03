@@ -115,7 +115,8 @@ bool FourDD::_isMissing(float dataValue, float missingValue) {
 float FourDD::getNyqVelocity(Volume *volume, int sweepIndex) {
   if (volume == NULL) 
     throw std::invalid_argument("volume is NULL");
-  if ((sweepIndex < 0) || (sweepIndex >= volume->h.nsweeps)) 
+  if ((sweepIndex < 0) ||
+      (sweepIndex >= static_cast<int>(volume->h.nsweeps)))
     throw std::invalid_argument("sweepIndex outside range");
   return volume->sweep[sweepIndex]->ray[0]->h.nyq_vel;
 }
@@ -139,7 +140,8 @@ int FourDD::getNumBins(Volume *volume, size_t sweepIndex, size_t rayIndex) {
 int FourDD::getNumRays(Volume *volume, int sweepIndex) {
   if (volume == NULL) 
     throw std::invalid_argument("volume is NULL");
-  if ((sweepIndex < 0) || (sweepIndex >= volume->h.nsweeps)) 
+  if ((sweepIndex < 0) ||
+      (sweepIndex >= static_cast<int>(volume->h.nsweeps)))
     throw std::invalid_argument("sweepIndex outside range");
   return volume->sweep[sweepIndex]->h.nrays;
 }
@@ -332,12 +334,6 @@ int FourDD::Dealias(Volume *lastVelVol, Volume *currVelVol, Volume *currDbzVol,
 //
 int FourDD::findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int
      sweepIndex2, int rayIndex) {
-
-  //     int numRays,
-     int  rayIndex1;
-     float az0, az1, diffaz;
-     float spacing;
-     short direction, lastdir;
 
      // validate arguments ...
      if ((rvVolume1 == NULL) || (rvVolume2 == NULL))  
@@ -546,13 +542,11 @@ void FourDD::prepVolume(Volume* DBZVolume, Volume* rvVolume, int del_num_bins,
 			float velocityMissingValue, float dbzMissingValue,
                         float low_dbz, float high_dbz, bool dbz_rm_rv) {
 
-  int currIndex, sweepIndex, i, j, DBZIndex, numRays, numBins, numDBZRays,
+  int currIndex, sweepIndex, i, numRays, numBins, numDBZRays,
      numSweepsRV, numSweepsDZ;
-  float  dzval; // removing this ...  minpossDBZ = -50.0;
   int DBZGateSize = 0, DBZfloatBin1 = 0;
   // int DBZfactor;  Command decision on DBZfactor: make sure the geometry of the DBZ and velocity volumes
   // are the same, then there is no need for DBZfactor.
-  int limit;
   int rvGateSize = 0, rvfloatBin1 = 0;
   char errorMessage[1024];
 
@@ -779,7 +773,8 @@ void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *sou
   if (rvVolume == NULL) 
     throw std::invalid_argument("rvVolume is NULL");
 
-  if ((sweepIndex < 0) || (sweepIndex >= rvVolume->h.nsweeps)) 
+  if ((sweepIndex < 0) ||
+      (sweepIndex >= static_cast<int>(rvVolume->h.nsweeps)))
     throw std::invalid_argument("sweepIndex outside range");
  
   int numSweeps = rvVolume->h.nsweeps;
@@ -933,10 +928,9 @@ void FourDD::TryToDealiasUsingVerticalAndTemporalContinuity(
     float diff = cval - potentialUnfoldedValue;
     float fractionNyqVelocity = fraction * NyqVelocity;
 
-    float v1 = fabs(abValue-potentialUnfoldedValue); // < fractionNyqVelocity
-	  float v2 = fabs(soundValue-potentialUnfoldedValue); //  < fractionNyqVelocity) {
-        //printf("v1=%g v2=%g\n", v1, v2);
-
+    // float v1 = fabs(abValue-potentialUnfoldedValue); // < fractionNyqVelocity
+    // float v2 = fabs(soundValue-potentialUnfoldedValue); //  < fractionNyqVelocity) {
+    // printf("v1=%g v2=%g\n", v1, v2);
 
     bool good = false;
     if (diff < fractionNyqVelocity) { //  && fabs(valcheck)>_ck_val) { 
@@ -1646,7 +1640,7 @@ void FourDD::SecondPassUsingSoundVolumeOnly(short **STATE, Volume *soundVolume, 
 
   int loopcount=0;
   int flag=1;
-  int step;
+  int step = -1;
   int startindex, endindex;
   // continue while progress is made; i.e. at least one new DEALIAS
   while (flag==1) {       // WHILE ...
@@ -1791,7 +1785,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
 
   int sweepIndex;
   size_t numSweeps;
-  float NyqVelocity, NyqInterval, fraction;
+  float NyqVelocity, fraction;
   float fraction2;
   float pfraction; 
   Volume* original;
@@ -1829,7 +1823,7 @@ void FourDD::unfoldVolume(Volume* rvVolume, Volume* soundVolume, Volume* lastVol
       NyqVelocity = rvVolume->sweep[sweepIndex]->ray[0]->h.nyq_vel;
       // TODO: validate NyqVelocity is NOT TOO SMALL!
 
-      NyqInterval = 2.0 * NyqVelocity;
+      // NyqInterval = 2.0 * NyqVelocity;
       //numRays = rvVolume->sweep[sweepIndex]->h.nrays;
       //numBins = rvVolume->sweep[sweepIndex]->ray[0]->h.nbins;
 

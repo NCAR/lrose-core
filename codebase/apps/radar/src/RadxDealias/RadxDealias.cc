@@ -1030,8 +1030,8 @@ Volume *RadxDealias::_extractVelocityFieldData(const RadxVol &radxVol, string fi
     vector<RadxRay *> radxRays = radxVol.getRays();      
     for (int j = 0; j < static_cast<int>(newSweep->h.nrays); j++) {
  
-      if (j == 481)
-        bool here = TRUE;
+      // if (j == 481)
+      //   bool here = TRUE;
 
       if (startRayIndex + static_cast<size_t>(j) > endRayIndex) 
 	throw "ERROR: _extractVelocityFieldData: Ray index out of bounds";
@@ -1127,7 +1127,7 @@ Volume *RadxDealias::_extractVelocityFieldData(const RadxVol &radxVol, string fi
 // insert in the same order as the extraction; the rays should NOT have moved
 void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *volume) {
 
-  Radx::fl32 missing = 0.0;
+  // Radx::fl32 missing = 0.0;
 
   string unfoldedName = fieldName + "_UNF";
 
