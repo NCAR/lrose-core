@@ -17,7 +17,7 @@ class ColorMapTemplates : public QDialog
     Q_OBJECT
 
 public:
-  ColorMapTemplates *getInstance(QWidget *parent = 0);
+  static ColorMapTemplates *getInstance(QWidget *parent = 0);
 
   ColorMap *getColorMap(string name);
 

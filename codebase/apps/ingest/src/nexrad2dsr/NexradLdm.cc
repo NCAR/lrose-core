@@ -45,6 +45,7 @@
 #include <unistd.h>
 #include <dataport/bigend.h>
 #include <toolsa/pmu.h>
+#include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
 
 #include <bzlib.h>
@@ -1264,39 +1265,40 @@ int NexradLdm::getDir (char *dirName, bool nextDir){
     }
   } // End of if we have to advance to the next directory.
 
-  sprintf(dirName,"%s",radarInputDir);
+  string dirPath = radarInputDir;
 
 
   if (strlen(datedDirFormat)){
-    sprintf(dirName,"%s%s",dirName,"/");
+    dirPath += "/";
     //
     for (unsigned id = 0; id < strlen(datedDirFormat); id++){
       int sc = getSignificanceCode (datedDirFormat[id]);
       switch(sc) {
       
       case 0 : // Year.
-	sprintf(dirName,"%s%4d",dirName,T.year);
+	dirPath += TaStr::itostr(T.year, "%4d");
 	break;
 	
       case 1 : // Month.
-	sprintf(dirName,"%s%02d",dirName,T.month);
+	dirPath += TaStr::itostr(T.month, "%02d");
 	break;
 	
       case 2 : // Day.
-	sprintf(dirName,"%s%02d",dirName,T.day);
+	dirPath += TaStr::itostr(T.day, "%02d");
 	break;
 	
       case 3 : // Hour.
-	sprintf(dirName,"%s%02d",dirName,T.hour);
+	dirPath += TaStr::itostr(T.hour, "%02d");
 	break;
 	
       default :
         // Unrecognised char, must be part of the filename.
-	sprintf(dirName,"%s%c", dirName, datedDirFormat[id]);
+	dirPath += datedDirFormat[id];
 	break;
       }
     }
   }
+  STRncopy(dirName, dirPath.c_str(), MAX_PATH_LEN);
   return 0;
 }
 

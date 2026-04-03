@@ -101,11 +101,12 @@ int OutputMdv::writeVol(Mdvx::master_header_t masterHdr, const char *dataSetInfo
     Mdvx::vlevel_header_t vlevel_hdr;
 
     float levels[MDV_MAX_VLEVELS];
-    int nx, ny, nz;
-    float missing, bad;
+    int nx = 0, ny = 0, nz = 0;
+    float missing = 0.0, bad = 0.0;
     int outz = _params->interpolate_levels_n;
     float *outlevels = _params->_interpolate_levels;
     Mdvx::grid_order_indices_t order = Mdvx::ORDER_XYZ;
+    bool haveInterpInput = false;
 
     //
     // First gather up the input fields to the interpolation function
@@ -124,7 +125,7 @@ int OutputMdv::writeVol(Mdvx::master_header_t masterHdr, const char *dataSetInfo
       field_hdr = field->getFieldHeader();
       vlevel_hdr = field->getVlevelHeader();
 
-      if(b == 1) {
+      if (!haveInterpInput) {
 	nx = field_hdr.nx;
 	ny = field_hdr.ny;
 	nz = field_hdr.nz;
@@ -132,6 +133,7 @@ int OutputMdv::writeVol(Mdvx::master_header_t masterHdr, const char *dataSetInfo
 	bad = field_hdr.bad_data_value;
 	for(int c = 0; c < nz; c++)
 	  levels[c] = vlevel_hdr.level[c];
+        haveInterpInput = true;
       } else {
 	if(field_hdr.nx != nx || field_hdr.ny != ny || field_hdr.nz != nz) {
 	  cerr << "ERROR: Input fields for interpolation " << _params->_interpolate_function[0]
@@ -149,6 +151,9 @@ int OutputMdv::writeVol(Mdvx::master_header_t masterHdr, const char *dataSetInfo
     if(_params->interpolate_function_n < 2)
       cerr << "WARNING: No input fields for interpolation " << _params->_interpolate_function[0]
 	   << ". At least one input field is required for vertical interp functions." << endl;
+    if (!haveInterpInput) {
+      return (-5);
+    }
 
     //
     // Gather all fields in the output file and stored local to be output

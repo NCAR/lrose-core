@@ -66,9 +66,7 @@ namespace gini2MdvUtilities
       int minInt   = timeDateProcessedStruct.tm_min;
       int secInt   = timeDateProcessedStruct.tm_sec;
 
-      char yearCharArray[10];
-      sprintf(yearCharArray, "%d", yearInt);
-      string yearStr  = (string) yearCharArray;
+      string yearStr  = std::to_string(yearInt);
       string monthStr = int2PaddedStr(monthInt, 2);
       string dayStr   = int2PaddedStr(dayInt, 2);
       string hourStr  = int2PaddedStr(hourInt, 2);
@@ -108,10 +106,11 @@ namespace gini2MdvUtilities
          exit(-1);
          }
 
-      TaArray<char> numberCharArray_;
-      char *numberCharArray = numberCharArray_.alloc(padLength+1);
-      sprintf(numberCharArray, "%d", number);
-      string numberStr = (string) numberCharArray;
+      string numberStr = std::to_string(number);
+      if (padLength <= 0)
+         {
+         return numberStr;
+         }
 
       for(int padIndex=1; padIndex < padLength; padIndex++)
          {
@@ -156,9 +155,7 @@ namespace gini2MdvUtilities
       int dayInt   = unixTimeStruct.tm_mday;
 
       // Convert year to string.
-      char yearCharArray[10];
-      sprintf(yearCharArray, "%d", yearInt);
-      string yearStr  = (string) yearCharArray;
+      string yearStr  = std::to_string(yearInt);
 
       // Convert month and day to strings (may need to pad one or both).
       string monthStr = int2PaddedStr(monthInt, 2);

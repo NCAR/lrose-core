@@ -209,20 +209,22 @@ int StormInitFieldExtract::Run(time_t start, time_t end)
 
 
     char outputBuffer[4096];
+    size_t outputLen = 0;
     //
     // Timing stuff.
     //
-    sprintf(outputBuffer,
-	    "%d %02d %02d %02d %02d %02d\t",
-	    T.year, T.month, T.day, T.hour, T.min, T.sec);
+    outputLen = snprintf(outputBuffer, sizeof(outputBuffer),
+                         "%d %02d %02d %02d %02d %02d\t",
+                         T.year, T.month, T.day, T.hour, T.min, T.sec);
     //
     // Data pertaining to the SPDB point.
     //
-    sprintf(outputBuffer, "%s%g\t%g\t%g\t%g\t%g\t",outputBuffer,
-	    lat,lon, maxArea, Duration, maxDbz);
+    outputLen += snprintf(outputBuffer + outputLen, sizeof(outputBuffer) - outputLen,
+                          "%g\t%g\t%g\t%g\t%g\t",
+                          lat,lon, maxArea, Duration, maxDbz);
 
-    sprintf(outputBuffer, "%s%g\t%g\t", outputBuffer,
-	    Sn,Cn);
+    outputLen += snprintf(outputBuffer + outputLen, sizeof(outputBuffer) - outputLen,
+                          "%g\t%g\t", Sn,Cn);
 
     bool OKtoPrint = true;
 
@@ -334,7 +336,9 @@ int StormInitFieldExtract::Run(time_t start, time_t end)
 	} else {
 	  fieldVal = total / double(num);
 	}
-	sprintf(outputBuffer,"%s%g\t", outputBuffer, fieldVal);
+	outputLen += snprintf(outputBuffer + outputLen,
+                              sizeof(outputBuffer) - outputLen,
+                              "%g\t", fieldVal);
       } // End of loop through planes.
     } // End of loop through MDV fields.
 
@@ -351,4 +355,3 @@ int StormInitFieldExtract::Run(time_t start, time_t end)
   return 0;
 
 }
-

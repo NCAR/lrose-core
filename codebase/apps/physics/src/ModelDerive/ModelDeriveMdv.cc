@@ -89,9 +89,10 @@ bool ModelDeriveMdv::processData(TriggerInfo &trigger_info)
     Mdvx::field_header_t field_hdr;
     Mdvx::vlevel_header_t vlevel_hdr;
 
-    int nx, ny, nz;
-    float missing, bad;
-    char *input_units;
+    int nx = 0, ny = 0, nz = 0;
+    float missing = 0.0, bad = 0.0;
+    char *input_units = NULL;
+    bool haveInputField = false;
 
     for(int b = 1; b < _params->derive_functions_n2; b++)
     {
@@ -116,13 +117,14 @@ bool ModelDeriveMdv::processData(TriggerInfo &trigger_info)
       field_hdr = (*field).getFieldHeader();
       vlevel_hdr = (*field).getVlevelHeader();
 
-      if(b == 1) {
+      if (!haveInputField) {
 	nx = field_hdr.nx;
 	ny = field_hdr.ny;
 	nz = field_hdr.nz;
 	missing = field_hdr.missing_data_value;
 	bad = field_hdr.bad_data_value;
 	input_units = field_hdr.units;
+        haveInputField = true;
       } else {
 	if(field_hdr.nx != nx || field_hdr.ny != ny || field_hdr.nz != nz) {
 	  cerr << "Error input fields for function " << _params->__derive_functions[a][0]
@@ -137,6 +139,12 @@ bool ModelDeriveMdv::processData(TriggerInfo &trigger_info)
      
       input_data.push_back((float *)field->getVol());
       
+    }
+
+    if (!haveInputField) {
+      cerr << "Error no input fields specified for derive function "
+           << _params->__derive_functions[a][0] << endl;
+      return false;
     }
 
     DeriveBase *deriveFunction = 

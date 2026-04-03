@@ -292,7 +292,7 @@ bool Pressure2Height::_convertField(MdvxField &input_field,
     // (remember that pressure value decrease with height)
 
     if (pressure > temp_vlevel_hdr.level[0] ||
-	pressure < temp_vlevel_hdr.level[temp_field_hdr.nz])
+	pressure < temp_vlevel_hdr.level[temp_field_hdr.nz - 1])
     {
 //      if (_params->verbose)
 //      {
@@ -304,11 +304,12 @@ bool Pressure2Height::_convertField(MdvxField &input_field,
       continue;
     }
     
-    double pres_bottom;
-    double pres_top;
+    double pres_bottom = 0.0;
+    double pres_top = 0.0;
     
-    double temp_bottom;
-    double temp_top;
+    double temp_bottom = 0.0;
+    double temp_top = 0.0;
+    bool foundLevelPair = false;
     
     for (int z = 0; z < temp_field_hdr.nz - 1; ++z)
     {
@@ -320,9 +321,16 @@ bool Pressure2Height::_convertField(MdvxField &input_field,
 
 	temp_bottom = temp_data[(z * plane_size) + i];
 	temp_top = temp_data[((z+1) * plane_size) + i];
+	foundLevelPair = true;
 	
 	break;
       }
+    }
+
+    if (!foundLevelPair)
+    {
+      input_data[i] = MISSING_HEIGHT_VALUE;
+      continue;
     }
     
     if (temp_bottom == temp_field_hdr.bad_data_value ||

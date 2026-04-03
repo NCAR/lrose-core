@@ -34,7 +34,6 @@
 
 #include "Params.hh"
 
-#define LINE_LENGTH 1 
 #define UNIX_TIME_DIFF 320630400
 #define LON_CONST 0.001068115234
 #define LAT_CONST 0.001281738
@@ -51,7 +50,6 @@ int getByte();
 
 FILE           *source_fd;
 FILE           *logfile;
-char           buffer[LINE_LENGTH];
 char           program_name[128];
 
 
@@ -148,10 +146,10 @@ int ltg_decrypt(char *inFilename, Params *P){
   tossHeader();
 
   /* Read out the lightning data. */
-  while (fgets(buffer, 2, source_fd) != NULL)
+  int nextChar;
+  while ((nextChar = fgetc(source_fd)) != EOF)
   {
-    byte0 = 0;
-    memcpy((void *)&byte0, buffer, 1);
+    byte0 = static_cast<unsigned short>(nextChar & 0xff);
 
     if ((0x96 == byte0) || (0x97 == byte0))
     {
@@ -327,10 +325,11 @@ void tossHeader()
 //--------------------------------------------------------------------------
 int getByte()
 {
-   unsigned short byte = 0;
-   fgets(buffer, 2, source_fd);
-   memcpy((void *)&byte, buffer, 1);
-   return byte;
+   int nextChar = fgetc(source_fd);
+   if (nextChar == EOF) {
+      return 0;
+   }
+   return static_cast<unsigned short>(nextChar & 0xff);
 }
 //--------------------------------------------------------------------------
 int get2Bytes()

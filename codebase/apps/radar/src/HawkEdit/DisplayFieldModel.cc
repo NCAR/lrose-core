@@ -387,8 +387,7 @@ void DisplayFieldModel::colorMapChanged(string fieldName, string newColorMapName
   // look for the colorMap in the import list first.
   // if not found, look in the built in list. 
   // ColorMap returns a default color map if not found in the built in list.
-  ColorMapTemplates *colorMapTemplates;
-  colorMapTemplates = colorMapTemplates->getInstance();
+  ColorMapTemplates *colorMapTemplates = ColorMapTemplates::getInstance();
   colorMap = colorMapTemplates->getColorMap(newColorMapName);
   if (colorMap == NULL) {
     colorMap = new ColorMap(workingVersion->rangeMin(), 
@@ -503,4 +502,3 @@ void DisplayFieldModel::setVisible(size_t fieldIndex) {
   else 
     LOG(ERROR) << "fieldIndex out of bounds " << fieldIndex;
 }
-
