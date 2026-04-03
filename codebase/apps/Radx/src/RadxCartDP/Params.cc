@@ -859,7 +859,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("interpolated_model_output_url");
     tt->descr = tdrpStrDup("URL for interpolated model data, in MDV/Netcdf-CF format.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("We interpolate the model data onto the output grid. Writing out this data is useful for debugging, allowing us to compare the original model with the interpolated model.");
     tt->val_offset = (char *) &interpolated_model_output_url - &_start_;
     tt->single_val.s = tdrpStrDup("mdv/interp_model");
     tt++;
@@ -1386,7 +1386,7 @@
     tt->has_max = TRUE;
     tt->min_val.i = 1;
     tt->max_val.i = 8;
-    tt->single_val.i = 3;
+    tt->single_val.i = 5;
     tt++;
     
     // Parameter 'use_fixed_angle_for_interpolation'

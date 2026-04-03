@@ -871,7 +871,7 @@
     tt->has_max = TRUE;
     tt->min_val.i = 1;
     tt->max_val.i = 8;
-    tt->single_val.i = 3;
+    tt->single_val.i = 5;
     tt++;
     
     // Parameter 'use_fixed_angle_for_interpolation'

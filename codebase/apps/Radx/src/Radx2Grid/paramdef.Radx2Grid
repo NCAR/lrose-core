@@ -156,7 +156,7 @@ paramdef boolean {
 } use_nearest_neighbor;
 
 paramdef int {	
-  p_default = 3;
+  p_default = 5;
   p_min = 1;
   p_max = 8;
   p_descr = "Minimum number of valid data points for theinterpolation.";

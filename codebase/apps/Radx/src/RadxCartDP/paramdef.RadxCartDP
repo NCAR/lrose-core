@@ -139,7 +139,7 @@ paramdef boolean {
 paramdef string {
   p_default = "mdv/interp_model";
   p_descr = "URL for interpolated model data, in MDV/Netcdf-CF format.";
-  p_help = "We interpolate the model data onto the output grid. Writing out this data is useful for debugging, allowing us to compare the original model with the interpolated model."
+  p_help = "We interpolate the model data onto the output grid. Writing out this data is useful for debugging, allowing us to compare the original model with the interpolated model.";
 } interpolated_model_output_url;
 
 commentdef {
@@ -487,7 +487,7 @@ paramdef boolean {
 } use_nearest_neighbor;
 
 paramdef int {	
-  p_default = 3;
+  p_default = 5;
   p_min = 1;
   p_max = 8;
   p_descr = "Minimum number of valid data points for theinterpolation.";

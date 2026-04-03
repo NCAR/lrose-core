@@ -464,7 +464,7 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   
   _loadFieldArray(inputRay, "TEMPC", _tempForPid);
 
-  _addFieldToRay(inputRay, "SD_ZDR", "dB", _sdZdr, _pid.getMissingDouble());
+  // _addFieldToRay(inputRay, "SD_ZDR", "dB", _sdZdr, _pid.getMissingDouble());
 
   return 0;
   
