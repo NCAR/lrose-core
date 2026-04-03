@@ -298,7 +298,7 @@ int Server::convertToSymprod(const void *params,
       ){
 
     char timeLabel[1024];
-    memset(timeLabel,0,1024);
+    memset(timeLabel, 0, sizeof(timeLabel));
 
 
     bool ok = true;
@@ -317,8 +317,10 @@ int Server::convertToSymprod(const void *params,
 
 	uconvert_from_utime( &t );
       
-	sprintf(timeLabel, "%sGenerated %d/%02d/%02d %02d:%02d:%02d ",
-		timeLabel, t.year, t.month, t.day, t.hour, t.min, t.sec);
+	size_t len = strlen(timeLabel);
+	snprintf(timeLabel + len, sizeof(timeLabel) - len,
+	         "Generated %d/%02d/%02d %02d:%02d:%02d ",
+	         t.year, t.month, t.day, t.hour, t.min, t.sec);
       }
     }
 
@@ -329,8 +331,10 @@ int Server::convertToSymprod(const void *params,
       t.unix_time = chunk_ref.valid_time;
       uconvert_from_utime( &t );
       
-      sprintf(timeLabel, "%sValid %d/%02d/%02d %02d:%02d:%02d ",
-	      timeLabel, t.year, t.month, t.day, t.hour, t.min, t.sec);
+      size_t len = strlen(timeLabel);
+      snprintf(timeLabel + len, sizeof(timeLabel) - len,
+               "Valid %d/%02d/%02d %02d:%02d:%02d ",
+               t.year, t.month, t.day, t.hour, t.min, t.sec);
       
     }
 
@@ -340,8 +344,10 @@ int Server::convertToSymprod(const void *params,
 	t.unix_time = chunk_ref.expire_time;
 	uconvert_from_utime( &t );
 
-	sprintf(timeLabel, "%sExpire %d/%02d/%02d %02d:%02d:%02d ",
-		timeLabel, t.year, t.month, t.day, t.hour, t.min, t.sec);
+	size_t len = strlen(timeLabel);
+	snprintf(timeLabel + len, sizeof(timeLabel) - len,
+	         "Expire %d/%02d/%02d %02d:%02d:%02d ",
+	         t.year, t.month, t.day, t.hour, t.min, t.sec);
 
     }
 
