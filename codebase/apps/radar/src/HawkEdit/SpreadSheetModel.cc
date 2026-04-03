@@ -161,17 +161,18 @@ void SpreadSheetModel::setData(string fieldName, float azimuth, int sweepNumber,
   // so we can always add the field; we don't need to modify
   // an existing field.
 
-  size_t nGates = data->size();
+  // size_t nGates = data->size();
 
   DataModel *dataModel = DataModel::Instance();
   dataModel->SetData(fieldName, 
             azimuth, sweepNumber, data);
 
-  bool debug = false;
-  if (debug) {
-    size_t rayIdx = dataModel->findClosestRay(azimuth, sweepNumber);
-    vector<float> *dataVector = dataModel->getRayData(rayIdx, fieldName); //  _currentSweepNumber);
-  }
+  // bool debug = false;
+  // if (debug) {
+  //   size_t rayIdx = dataModel->findClosestRay(azimuth, sweepNumber);
+  //   vector<float> *dataVector =
+  //     dataModel->getRayData(rayIdx, fieldName); //  _currentSweepNumber);
+  // }
 
   LOG(DEBUG) << "exit";
 

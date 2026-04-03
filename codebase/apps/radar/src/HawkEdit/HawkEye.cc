@@ -215,7 +215,7 @@ int HawkEye::_runConsole(QApplication &app)
                                      _haveFilteredFields,
                                      interactive);
 
-    bool noFilename = false;
+    // bool noFilename = false;
     if ((_args.inputFileList.size() > 0) && (_args.scriptFilePath.length() > 0)) {
       _polarManager->setArchiveFileList(_args.inputFileList);
       // override archive data url from input file
@@ -279,7 +279,7 @@ int HawkEye::_runInteractive(QApplication &app)
     _polarManager = new PolarManager(displayFieldController,
 				                             _haveFilteredFields);
 
-    bool noFilename = false;
+    // bool noFilename = false;
     if (_args.inputFileList.size() > 0) {
       _polarManager->setArchiveFileList(_args.inputFileList);
       // override archive data url from input file
@@ -475,7 +475,7 @@ int HawkEye::_setupDisplayFields()
           // if (_params.debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
           map = colorMap;
           // HERE: What is missing from the ColorMap object??? 
-        } catch (std::out_of_range ex) {
+        } catch (const std::out_of_range &ex) {
           cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
 	  // Just set the colormap to a generic color map
 	  // use range to indicate it needs update; update when we have access to the actual data values
@@ -559,4 +559,3 @@ string HawkEye::_getArchiveUrl(const string &filePath)
   return "";
 
 }
-

@@ -201,8 +201,8 @@ const vector<float> *ScriptsDataModel::GetData(string fieldName,
   //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
   //}
   
-  if ((rayIdx > sweep->getEndRayIndex()) ||
-      (rayIdx < startRayIndex)) {
+  if ((rayIdx > static_cast<int>(sweep->getEndRayIndex())) ||
+      (rayIdx < static_cast<int>(startRayIndex))) {
     string msg = "ScriptsDataModel::GetData rayIdx outside sweep ";
     msg.append(std::to_string(rayIdx));
     throw msg;
@@ -601,7 +601,7 @@ void ScriptsDataModel::_selectFieldsNotInVolume(vector<string> *allFieldNames) {
     size_t i = 0;
     bool found = false;
     while (i < allFieldNames->size() && !found) {
-      if (allFieldNames->at(i).compare(*it) != string::npos) {
+      if (allFieldNames->at(i).compare(*it) == 0) {
         found = true;
         // remove from list
         allFieldNames->erase(allFieldNames->begin() + i);
@@ -620,7 +620,7 @@ void ScriptsDataModel::_selectFieldsNotInCurrentVersion(
     size_t i = 0;
     bool found = false;
     while (i < allFieldNames->size() && !found) {
-      if (allFieldNames->at(i).compare(*it) != string::npos) {
+      if (allFieldNames->at(i).compare(*it) == 0) {
         found = true;
         // remove from list
         allFieldNames->erase(allFieldNames->begin() + i);
@@ -673,7 +673,7 @@ void ScriptsDataModel::appendSweep(string currentVersionPath) {
     
   // add secondary rays to primary vol
 
-  int maxSweepNum = 0;
+  // int maxSweepNum = 0;
   vector<RadxRay *> &pRays = primaryVol->getRays();
   const vector<RadxRay *> &sRays = secondaryVol->getRays();
   for (size_t iray = 0; iray < pRays.size(); iray++) {
@@ -740,7 +740,7 @@ RadxVol *ScriptsDataModel::mergeDataFields(string originalSourcePath) {
     
   // add secondary rays to primary vol
 
-  int maxSweepNum = 0;
+  // int maxSweepNum = 0;
   vector<RadxRay *> &pRays = primaryVol->getRays();
   const vector<RadxRay *> &sRays = secondaryVol->getRays();
   for (size_t iray = 0; iray < pRays.size(); iray++) {
@@ -809,7 +809,7 @@ RadxVol *ScriptsDataModel::mergeDataFields(string currentVersionPath, string ori
     
   // add secondary rays to primary vol
 
-  int maxSweepNum = 0;
+  // int maxSweepNum = 0;
   vector<RadxRay *> &pRays = primaryVol->getRays();
   const vector<RadxRay *> &sRays = secondaryVol->getRays();
   for (size_t iray = 0; iray < pRays.size(); iray++) {
@@ -2018,7 +2018,7 @@ size_t ScriptsDataModel::findClosestRay(float azimuth, int sweepNumber) { // flo
   bool foundIt = false;
   double minDiff = 1.0e99;
   size_t minIdx = 0;
-  double delta = 0.1;  // TODO set this to the min diff between elevations/sweeps
+  // double delta = 0.1;  // TODO set this to the min diff between elevations/sweeps
   RadxRay *closestRayToEdit = NULL;
   //vector<RadxRay *>::const_iterator r;
   //r=rays.begin();

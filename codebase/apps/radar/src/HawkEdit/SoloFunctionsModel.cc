@@ -139,7 +139,7 @@ void SoloFunctionsModel::CheckForDefaultMask(size_t rayIdx, //int sweepIdx,
   LOG(DEBUG) << " radIdx=" << rayIdx;
 	     //<< " sweepIdx=" << sweepIdx;
  
-  short *boundary;
+  // short *boundary;
 
   // TODO: make this a call to BoundaryPointModel?
   //BoundaryPointEditor *bpe = BoundaryPointEditor::Instance();
@@ -167,7 +167,7 @@ void SoloFunctionsModel::CheckForDefaultMask(size_t rayIdx, //int sweepIdx,
 void SoloFunctionsModel::SetDefaultMask(size_t rayIdx) {
   //vol->loadRaysFromFields();
 
-  const RadxField *field;
+  // const RadxField *field;
 
   //  get the ray for this field 
   // for the boundary mask, all we care about is the geometry of the ray,
@@ -221,7 +221,7 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(size_t rayIdx, //int sweepIdx,
   LOG(DEBUG) << "enter";
   LOG(DEBUG) << " radIdx=" << rayIdx;
  
-  short *boundary;
+  // short *boundary;
 
   // TODO: make this a call to BoundaryPointModel?
   //BoundaryPointEditor *bpe = BoundaryPointEditor::Instance();
@@ -411,8 +411,6 @@ const vector<float> *SoloFunctionsModel::GetData(string fieldName,  RadxVol *vol
 
   vol->loadRaysFromFields();
   
-  const RadxField *field;
-
   //  get the ray for this field 
   const vector<RadxRay *>  &rays = vol->getRays();
   if (rays.size() > 1) {
@@ -1359,7 +1357,7 @@ string SoloFunctionsModel::BBUnfoldFirstGoodGate(string fieldName, //RadxVol *vo
   } 
 
   float dds_radd_eff_unamb_vel = ray->getNyquistMps(); // doradeData.eff_unamb_vel;
-  int seds_nyquist_velocity = nyquist_velocity; //  what is this value? It is the nyquist velocity set by "one time only" commands
+  // int seds_nyquist_velocity = nyquist_velocity;
 
   // get the data (in) and create space for new data (out)  
   //  field = ray->getField(fieldName);
@@ -1479,7 +1477,7 @@ string SoloFunctionsModel::BBUnfoldAircraftWind(string fieldName, //RadxVol *vol
   } 
 
   float dds_radd_eff_unamb_vel = ray->getNyquistMps(); // doradeData.eff_unamb_vel;
-  int seds_nyquist_velocity = nyquist_velocity; //  what is this value? It is the nyquist velocity set by "one time only" commands
+  // int seds_nyquist_velocity = nyquist_velocity;
 
   float elevation_angle_degrees = ray->getElevationDeg();
   float azimuth_angle_degrees = ray->getAzimuthDeg();
@@ -1618,7 +1616,7 @@ string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, // RadxVol *vol,
   } 
 
   float dds_radd_eff_unamb_vel = ray->getNyquistMps(); // doradeData.eff_unamb_vel;
-  int seds_nyquist_velocity = nyquist_velocity; //  what is this value? It is the nyquist velocity set by "one time only" commands
+  // int seds_nyquist_velocity = nyquist_velocity;
 
   float elevation_angle_degrees = ray->getElevationDeg();
   float azimuth_angle_degrees = ray->getAzimuthDeg();
@@ -1657,7 +1655,7 @@ string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, // RadxVol *vol,
 
   // manage the last good v0, initialized from first good gate in a sweep;
   // and perpetuated for each ray in the sweep
-  static float last_good_v0;
+  // static float last_good_v0;
   float missingValue = field->getMissingFl32();
   if (bad_data_value == FLT_MIN) {
     bad_data_value = missingValue;
@@ -1729,8 +1727,6 @@ string SoloFunctionsModel::_flaggedAddMultiply(string fieldName,  // RadxVol *vo
   LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
 //	     << " sweepIdx=" << sweepIdx;
   
-  const RadxField *field;
-
   //  get the ray for this field 
   //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
   //if (rays.size() > 1) {
@@ -1744,7 +1740,7 @@ string SoloFunctionsModel::_flaggedAddMultiply(string fieldName,  // RadxVol *vo
   } 
 
   // get the data (in) and create space for new data (out)  
-  field = fetchDataField(ray, fieldName);
+  const RadxField *field = fetchDataField(ray, fieldName);
   size_t nGates = ray->getNGates(); 
 
   float *newData = new float[nGates];
@@ -1760,14 +1756,14 @@ string SoloFunctionsModel::_flaggedAddMultiply(string fieldName,  // RadxVol *vo
   }
 
   // cerr << "there arenGates " << nGates;
-  const float *data = field->getDataFl32();
+  // const float *data = field->getDataFl32();
 
-    RadxField *flagField = fetchDataField(ray, flagFieldName);
+  RadxField *flagField = fetchDataField(ray, flagFieldName);
   const bool *bad_flag_mask = (const bool *) flagField->getDataSi08(); 
   
   // perform the function ...
   //bool multiply = false;
-  soloFunctionsApi.FlaggedAdd(constant, multiply, data,  newData, nGates, 
+  soloFunctionsApi.FlaggedAdd(constant, multiply, field->getDataFl32(),  newData, nGates, 
 			      bad_data_value, clip_gate, _boundaryMask,
 			      bad_flag_mask);  
 
@@ -2226,7 +2222,7 @@ string SoloFunctionsModel::ClearBadFlags(string badFlagMaskFieldName,  // RadxVo
   LOG(DEBUG) << "entry with fieldName ... " << badFlagMaskFieldName << " radIdx=" << rayIdx;
 //	     << " sweepIdx=" << sweepIdx;
   
-  const RadxField *field;
+  // const RadxField *field;
 
   //  get the ray for this field 
   //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
@@ -2240,9 +2236,8 @@ string SoloFunctionsModel::ClearBadFlags(string badFlagMaskFieldName,  // RadxVo
     throw "Ray is null";
   } 
 
-  // get the data (in) and create space for new data (out)  
-  // field = ray->getField(badFlagMaskFieldName);
-  field = fetchDataField(ray, badFlagMaskFieldName);
+  // Verify the field exists for this ray before creating the mask field.
+  (void) fetchDataField(ray, badFlagMaskFieldName);
   size_t nGates = ray->getNGates(); 
 
   // create bad_flag_mask for return 
@@ -2361,10 +2356,8 @@ string SoloFunctionsModel::SetBadFlags(string fieldName,  // RadxVol *vol,
 				       string badFlagMaskFieldName) {
 
   LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
-//	     << " sweepIdx=" << sweepIdx;
+  //	     << " sweepIdx=" << sweepIdx;
   
-  const RadxField *field;
-
   //  get the ray for this field 
   //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
   //if (rays.size() > 1) {
@@ -2379,7 +2372,7 @@ string SoloFunctionsModel::SetBadFlags(string fieldName,  // RadxVol *vol,
 
   // get the data (in) and create space for new data (out)  
   //field = ray->getField(fieldName);
-  field = fetchDataField(ray, fieldName);
+  (void) fetchDataField(ray, fieldName);
   size_t nGates = ray->getNGates(); 
 
   // create bad_flag_mask for return 
@@ -2395,7 +2388,7 @@ string SoloFunctionsModel::SetBadFlags(string fieldName,  // RadxVol *vol,
   }
 
   // cerr << "there arenGates " << nGates;
-  const float *data = field->getDataFl32();
+  // const float *data = field->getDataFl32();
   /*
   // perform the function ...
   soloFunctionsApi.SetBadFlags(where.c_str(), lower_threshold, upper_threshold, 
@@ -2423,7 +2416,7 @@ string SoloFunctionsModel::SetBadFlags(string fieldName,  // RadxVol *vol,
   //newField->addDataFl32(nGates, newData);
   RadxField *field1 = ray->addField(badFlagMaskFieldName, "units", nGates, missingValue,
 				    (Radx::si08 *) bad_flag_mask, 1.0, 0.0, isLocal);
-
+  
   // get the name that was actually inserted ...
   string tempFieldName = field1->getName();
   tempFieldName.append("#");
@@ -2996,7 +2989,7 @@ string SoloFunctionsModel::ForceUnfolding(string fieldName,   size_t rayIdx, //i
   } 
 
   float dds_radd_eff_unamb_vel = ray->getNyquistMps(); // doradeData.eff_unamb_vel;
-  int seds_nyquist_velocity = nyquist_velocity; //  what is this value? It is the nyquist velocity set by "one time only" commands
+  // int seds_nyquist_velocity = nyquist_velocity;
 
   // get the data (in) and create space for new data (out)  
   field = fetchDataField(ray, fieldName);
@@ -3494,7 +3487,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(vector<double> data) { /
 
 void SoloFunctionsModel::printBoundaryMask() {
   LOG(DEBUG) << "Boundary Mask ... Length = " << _boundaryMaskLength;
-  for (int i=0; i<_boundaryMaskLength; i++)
+  for (size_t i = 0; i < _boundaryMaskLength; i++)
     LOG(DEBUG) << _boundaryMask[i] << ", ";
 }
 

@@ -451,7 +451,7 @@ void ScriptsDataController::_selectFieldsNotInVolume(vector<string> *allFieldNam
     size_t i = 0;
     bool found = false;
     while (i < allFieldNames->size() && !found) {
-      if (allFieldNames->at(i).compare(*it) != string::npos) {
+      if (allFieldNames->at(i).compare(*it) == 0) {
         found = true;
         // remove from list
         allFieldNames->erase(allFieldNames->begin() + i);
@@ -470,7 +470,7 @@ void ScriptsDataController::_selectFieldsNotInCurrentVersion(
     size_t i = 0;
     bool found = false;
     while (i < allFieldNames->size() && !found) {
-      if (allFieldNames->at(i).compare(*it) != string::npos) {
+      if (allFieldNames->at(i).compare(*it) == 0) {
         found = true;
         // remove from list
         allFieldNames->erase(allFieldNames->begin() + i);

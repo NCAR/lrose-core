@@ -234,7 +234,7 @@ void UndoRedoModel::batchUndo() {
 
 void UndoRedoModel::batchRedo() {
 
-  if (_currentBatchIndex+1 < batches.size()) {
+  if (_currentBatchIndex + 1 < static_cast<int>(batches.size())) {
     _currentBatchIndex += 1;    
     vector<int> *previousBatch = batches.at(_currentBatchIndex);
     for (size_t i = 0; i < currentVersion.size(); i++) {

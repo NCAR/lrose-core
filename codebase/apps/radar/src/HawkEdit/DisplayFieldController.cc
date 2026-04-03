@@ -115,7 +115,7 @@ void DisplayFieldController::reconcileFields(vector<string> *fieldNames,
 
 
   //for (int ifield = 0; ifield < _params->fields_n; ifield++) {
-  int ifield = (int) getNFields() + 1;
+  // int ifield = (int) getNFields() + 1;
   for (vector<string>::iterator it = fieldNames->begin(); it != fieldNames->end(); ++it) {
     string fieldName = *it;
 
@@ -477,7 +477,7 @@ void DisplayFieldController::setupDisplayFields(
           // if (_params.debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
           map = colorMap;
           // HERE: What is missing from the ColorMap object??? 
-        } catch (std::out_of_range ex) {
+        } catch (const std::out_of_range &ex) {
           cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
     // Just set the colormap to a generic color map
     // use range to indicate it needs update; update when we have access to the actual data values

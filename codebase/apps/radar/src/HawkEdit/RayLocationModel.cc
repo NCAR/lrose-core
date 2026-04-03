@@ -61,7 +61,7 @@ void RayLocationModel::_sortRaysIntoRayLocationsUsingAzimuth(
 
   double minDistance = 99999999.0;
   double previousAz = 0.0;
-  size_t minDistanceRayIdx = 0;
+  // size_t minDistanceRayIdx = 0;
   vector<RadxRay *>::const_iterator rayItr;
   for (rayItr = listOfRays.begin(); rayItr != listOfRays.end(); ++rayItr) {
     RadxRay *ray = *rayItr;
@@ -73,7 +73,6 @@ void RayLocationModel::_sortRaysIntoRayLocationsUsingAzimuth(
         LOG(DEBUG) << "az= " << az << " distance=" << distance;
         if (distance < minDistance) {
           minDistance = distance;
-          minDistanceRayIdx = rayItr - listOfRays.begin();
         }
       }
       previousAz = az;
@@ -144,7 +143,9 @@ void RayLocationModel::_sortRaysIntoRayLocationsUsingAzimuth(
       int endIndex = (int) (endAz * RayLoc::RAY_LOC_RES); //  + 1);
       LOG(DEBUG) << "startIndex " << startIndex << " to " << endIndex;
       if (startIndex < 0) startIndex = 0;
-      if (endIndex >= RayLoc::RAY_LOC_N) endIndex = RayLoc::RAY_LOC_N - 1;   
+      if (endIndex >= static_cast<int>(RayLoc::RAY_LOC_N)) {
+        endIndex = static_cast<int>(RayLoc::RAY_LOC_N - 1);
+      }
 
     // Clear out any rays in the locations list that are overlapped by the
     // new ray
@@ -195,7 +196,7 @@ void RayLocationModel::_sortRaysIntoRayLocationsUsingRotation(
 
   double minDistance = 99999999.0;
   double previousAz = 0.0;
-  size_t minDistanceRayIdx = 0;
+  // size_t minDistanceRayIdx = 0;
   vector<RadxRay *>::const_iterator rayItr;
   for (rayItr = listOfRays.begin(); rayItr != listOfRays.end(); ++rayItr) {
     RadxRay *ray = *rayItr;
@@ -228,7 +229,6 @@ void RayLocationModel::_sortRaysIntoRayLocationsUsingRotation(
         LOG(DEBUG) << "az= " << az << " distance=" << distance;
         if (distance < minDistance) {
           minDistance = distance;
-          minDistanceRayIdx = rayItr - listOfRays.begin();
         }
       }
       previousAz = az;
@@ -313,7 +313,9 @@ void RayLocationModel::_sortRaysIntoRayLocationsUsingRotation(
       int endIndex = (int) (endAz * RayLoc::RAY_LOC_RES); //  + 1);
       LOG(DEBUG) << "startIndex " << startIndex << " to " << endIndex;
       if (startIndex < 0) startIndex = 0;
-      if (endIndex >= RayLoc::RAY_LOC_N) endIndex = RayLoc::RAY_LOC_N - 1;   
+      if (endIndex >= static_cast<int>(RayLoc::RAY_LOC_N)) {
+        endIndex = static_cast<int>(RayLoc::RAY_LOC_N - 1);
+      }
 
     // Clear out any rays in the locations list that are overlapped by the
     // new ray
@@ -448,7 +450,7 @@ vector <float> *RayLocationModel::getRayData(size_t rayIdx, string fieldName) {
 
 size_t RayLocationModel::getClosestRayIdx(float azDeg, int offset) {
   int rayIdx = (int) (azDeg * RayLoc::RAY_LOC_RES);
-    if ((rayIdx < 0) || (rayIdx >= RayLoc::RAY_LOC_N)) {
+    if ((rayIdx < 0) || (rayIdx >= static_cast<int>(RayLoc::RAY_LOC_N))) {
       throw "azimuth out of range";
     }
   // now find the ray that is offset
@@ -475,7 +477,7 @@ size_t RayLocationModel::getClosestRayIdx(float azDeg, int offset) {
       // move to next active ray
       do {
         rayIdx += 1;
-        if (rayIdx >= RayLoc::RAY_LOC_N) {
+        if (rayIdx >= static_cast<int>(RayLoc::RAY_LOC_N)) {
           rayIdx = 0;
         }
       } while (!ray_loc.at(rayIdx).active);
@@ -501,14 +503,15 @@ RadxRay *RayLocationModel::getClosestRay(double azDeg) {
   bool activeFound = false;
   int nsteps = 0;
   int indexPlus = rayIndex;
-  while ((indexPlus >= 0) && (indexPlus < RayLoc::RAY_LOC_N)
+  while ((indexPlus >= 0) &&
+         (indexPlus < static_cast<int>(RayLoc::RAY_LOC_N))
     && !activeFound && (nsteps < 50)) {
     if (ray_loc.at(indexPlus).active) {
       activeFound = true;
     } else {
       indexPlus += 1;
       nsteps += 1;
-      if (indexPlus >= RayLoc::RAY_LOC_N)
+      if (indexPlus >= static_cast<int>(RayLoc::RAY_LOC_N))
         indexPlus = 0; 
     }
   }
@@ -517,7 +520,8 @@ RadxRay *RayLocationModel::getClosestRay(double azDeg) {
   activeFound = false;
   nsteps = 0;
   int indexNeg = rayIndex;
-  while ((indexNeg >= 0) && (indexNeg < RayLoc::RAY_LOC_N)
+  while ((indexNeg >= 0) &&
+         (indexNeg < static_cast<int>(RayLoc::RAY_LOC_N))
     && !activeFound && (nsteps < 50)) {
     if (ray_loc.at(indexNeg).active) {
       activeFound = true;
@@ -592,7 +596,7 @@ RadxRay *RayLocationModel::findClosestNonNullRay(size_t rayIndex) {
 
 size_t RayLocationModel::getClosestRayIdx(double azDeg) {
   int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
-    if ((rayIndex < 0) || (rayIndex >= RayLoc::RAY_LOC_N)) {
+    if ((rayIndex < 0) || (rayIndex >= static_cast<int>(RayLoc::RAY_LOC_N))) {
       throw "azimuth out of range";
     }
   return rayIndex;
@@ -658,5 +662,3 @@ float RayLocationModel::_getTrackRelativeRotation(const RadxRay *ray) {
       }  
       return az;
 }
-
-

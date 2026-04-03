@@ -55,47 +55,46 @@ HDRS = \
 	Args.hh \
 	Beam.hh \
 	BoundaryPointEditor.hh \
-	BoundaryPointEditorView.hh \
 	BoundaryPointEditorModel.hh \
+	BoundaryPointEditorView.hh \
 	BoundaryPointTool.hh \
 	BoundaryView.hh \
 	CloseEventFilter.hh \
 	ColorBar.hh \
 	ColorMap.hh \
 	ColorTableManager.hh \
+	DataModel.hh \
+	DisplayFieldController.hh \
+	DisplayFieldModel.hh \
+	DisplayFieldView.hh \
+	FieldColorController.hh \
 	FieldListView.hh \
-	FieldRendererView.hh \
 	FieldRendererController.hh \
+	FieldRendererView.hh \
 	FlowLayout.hh \
 	HawkEye.hh \
 	HawkEyeLogger.hh \
 	PaletteManager.hh \
-        ParameterColorView.hh \
-	Point.hh \
-	PolygonUtils.hh \
-        FieldColorController.hh \
-	DataModel.hh \
-	ScriptsDataModel.hh \
-	ScriptsDataController.hh \
-        DisplayFieldModel.hh \
-        DisplayFieldController.hh \
-        DisplayFieldView.hh \
-	Params.hh \
 	ParamFile.hh \
-	PpiBeam.hh \
+	ParameterColorView.hh \
+	Point.hh \
 	PolarManager.hh \
 	PolarWidget.hh \
+	PolygonUtils.hh \
+	PpiBeam.hh \
 	RayLoc.hh \
 	RayLocationController.hh \
 	RayLocationModel.hh \
 	Reader.hh \
 	ScaledLabel.hh \
-	SiiPalette.hh \
 	ScriptEditorController.hh \
-	ScriptEditorModel.hh \
-	ScriptEditorView.hh \
 	ScriptEditorHelpItem.hh \
 	ScriptEditorHelpModel.hh \
+	ScriptEditorModel.hh \
+	ScriptEditorView.hh \
+	ScriptsDataController.hh \
+	ScriptsDataModel.hh \
+	SiiPalette.hh \
 	SoloDefaultColorWrapper.hh \
 	SoloFunctionsController.hh \
 	SoloScriptTranslator.hh \
@@ -106,12 +105,12 @@ HDRS = \
 	SpreadSheetView.hh \
 	StatusPanelController.hh \
 	StatusPanelView.hh \
-	SweepView.hh \
 	SweepController.hh \
 	SweepModel.hh \
-	TimeNavView.hh \
+	SweepView.hh \
 	TimeNavController.hh \
 	TimeNavModel.hh \
+	TimeNavView.hh \
 	TimeScaleWidget.hh \
 	UndoRedoController.hh \
 	UndoRedoModel.hh \
@@ -127,11 +126,9 @@ NORM_SRCS = \
 	ColorMap.cc \
 	ColorTableManager.cc \
 	DataModel.cc \
-	ScriptsDataModel.cc \
-	ScriptsDataController.cc \
 	DisplayField.cc \
-	DisplayFieldModel.cc \
 	DisplayFieldController.cc \
+	DisplayFieldModel.cc \
 	FlowLayout.cc \
 	HawkEye.cc \
 	HawkEyeLogger.cc \
@@ -144,6 +141,8 @@ NORM_SRCS = \
 	Reader.cc \
 	ScaledLabel.cc \
 	ScriptEditorModel.cc \
+	ScriptsDataController.cc \
+	ScriptsDataModel.cc \
 	SiiPalette.cc \
 	SoloDefaultColorWrapper.cc \
 	SoloFunctionsModel.cc \
@@ -151,75 +150,75 @@ NORM_SRCS = \
 	SpreadSheetItem.cc \
 	SpreadSheetModel.cc \
 	SpreadSheetUtils.cc \
-	SweepModel.cc \
 	SweepController.cc \
-	TimeNavModel.cc \
+	SweepModel.cc \
 	TimeNavController.cc \
-        UndoRedoController.cc \
-        UndoRedoModel.cc \
+	TimeNavModel.cc \
+	UndoRedoController.cc \
+	UndoRedoModel.cc \
 	WorldPlot.cc 
 
 MOC_SRCS = \
-	FieldRendererView.cc \
-	FieldListView.cc \
-	FieldRendererController.cc \
-	PolarManager.cc \
-	PolarWidget.cc \
-	TimeScaleWidget.cc \
-	ParameterColorView.cc \
-        FieldColorController.cc \
 	BoundaryPointEditor.cc \
 	BoundaryPointEditorView.cc \
+	ClickableLabel.cc \
+	ClickableLabelNamed.cc \
 	CloseEventFilter.cc \
 	ColorBar.cc \
 	ColorMapTemplates.cc \
-	ClickableLabel.cc \
-	ClickableLabelNamed.cc \
 	DisplayFieldView.cc \
-	ScriptEditorView.cc \
+	FieldColorController.cc \
+	FieldListView.cc \
+	FieldRendererController.cc \
+	FieldRendererView.cc \
+	FunctionEditor.cc \
+	ParameterColorView.cc \
+	PolarManager.cc \
+	PolarWidget.cc \
 	ScriptEditorController.cc \
 	ScriptEditorHelpItem.cc \
 	ScriptEditorHelpModel.cc \
-	TextEdit.cc \
+	ScriptEditorView.cc \
 	SoloFunctionsController.cc \
-	SpreadSheetView.cc \
 	SpreadSheetController.cc \
 	SpreadSheetDelegate.cc \
+	SpreadSheetView.cc \
 	StatusPanelController.cc \
 	StatusPanelView.cc \
 	SweepView.cc \
+	TextEdit.cc \
 	TimeNavView.cc \
-	FunctionEditor.cc 
+	TimeScaleWidget.cc
 
 MOC_OUTPUT = \
-	moc_BoundaryPointEditorView.cpp \
 	moc_BoundaryPointEditor.cpp \
-	moc_FieldListView.cpp \
-	moc_FieldRendererView.cpp \
-	moc_PolarManager.cpp \
-	moc_PolarWidget.cpp \
-	moc_TimeScaleWidget.cpp \
-	moc_ParameterColorView.cpp \
-        moc_FieldColorController.cpp \
+	moc_BoundaryPointEditorView.cpp \
+	moc_ClickableLabel.cpp \
+	moc_ClickableLabelNamed.cpp \
 	moc_CloseEventFilter.cpp \
 	moc_ColorBar.cpp \
 	moc_ColorMapTemplates.cpp \
-	moc_ClickableLabel.cpp \
-	moc_ClickableLabelNamed.cpp \
 	moc_DisplayFieldView.cpp \
-	moc_ScriptEditorView.cpp \
+	moc_FieldColorController.cpp \
+	moc_FieldListView.cpp \
+	moc_FieldRendererView.cpp \
+	moc_FunctionEditor.cpp \
+	moc_ParameterColorView.cpp \
+	moc_PolarManager.cpp \
+	moc_PolarWidget.cpp \
 	moc_ScriptEditorController.cpp \
 	moc_ScriptEditorHelpModel.cpp \
-	moc_TextEdit.cpp \
+	moc_ScriptEditorView.cpp \
 	moc_SoloFunctionsController.cpp \
-	moc_SpreadSheetView.cpp \
 	moc_SpreadSheetController.cpp \
 	moc_SpreadSheetDelegate.cpp \
+	moc_SpreadSheetView.cpp \
 	moc_StatusPanelController.cpp \
 	moc_StatusPanelView.cpp \
 	moc_SweepView.cpp \
-	moc_FunctionEditor.cpp \
-	moc_TimeNavView.cpp 
+	moc_TextEdit.cpp \
+	moc_TimeNavView.cpp \
+	moc_TimeScaleWidget.cpp
 
 RESOURCES = \
 	qrc_resources.cpp

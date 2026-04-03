@@ -133,7 +133,7 @@ int TimeNavModel::findArchiveFileList(string archiveDataUrl,
   bool keepTimeRange)
 {
 
-  bool _urlOK;
+  // bool _urlOK;
 
   // get the first day/time under this starting point 
   RadxTimeList timeList;
