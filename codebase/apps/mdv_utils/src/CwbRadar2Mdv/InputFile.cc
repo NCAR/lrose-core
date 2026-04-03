@@ -439,8 +439,14 @@ string InputFile::_convert2String(const char *input_text, int max_len)
   
   TaArray<char> stored_text_;
   char *stored_text = stored_text_.alloc(max_len + 1);
-  memcpy(stored_text, input_text, max_len);
-  
+  if (max_len <= 0) {
+    stored_text[0] = '\0';
+    return stored_text;
+  }
+
+  memcpy(stored_text, input_text, static_cast<size_t>(max_len));
+  stored_text[max_len] = '\0';
+
   for (int i = max_len - 1; i >= 0; i--) {
     if (stored_text[i] == ' ') {
       stored_text[i] = '\0';
