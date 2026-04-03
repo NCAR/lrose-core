@@ -42,6 +42,7 @@
 #include <string>
 #include <toolsa/file_io.h>
 #include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/Path.hh>
 #include <toolsa/DateTime.hh>
 #include <toolsa/pjg_flat.h>
@@ -435,7 +436,8 @@ void Storms2Xml::_closeOutput(){
     sleep(1); // Let the file system relax.
 
     char comBuffer[1024];
-    sprintf(comBuffer,"%s %s", _params->scriptToRun,outfileName);
+    safe_snprintf(comBuffer, "%s %s",
+                  _params->scriptToRun, outfileName);
 
     if (_params->debug){
       cerr << "Executing command : " << comBuffer << endl;

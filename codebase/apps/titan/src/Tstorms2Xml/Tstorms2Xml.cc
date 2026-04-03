@@ -43,6 +43,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/pjg.h>
 #include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/file_io.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/TaArray.hh>
@@ -488,7 +489,7 @@ int Tstorms2Xml::_writeXmlFile(time_t valid_time,
 	  _params.xml_name);
   
   char outAbsFilePath[MAX_PATH_LEN];
-  sprintf(outAbsFilePath,"%s/%s",
+  safe_snprintf(outAbsFilePath, "%s/%s",
 	  _params.xml_dir, outRelFileName);
 
   if (_params.debug) {

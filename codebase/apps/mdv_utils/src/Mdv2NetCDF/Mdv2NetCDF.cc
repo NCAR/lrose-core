@@ -25,6 +25,8 @@
 
 #include "Mdv2NetCDF.hh"
 #include <toolsa/Path.hh>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <Mdv/MdvxChunk.hh>
 #ifndef NO_RADX_DATA
 #include <Mdv/MdvxRadar.hh>
@@ -660,8 +662,8 @@ string Mdv2NetCDF::_computeOutputPath(const DsMdvx &mdvx)
 		_params.output_file_suffix);
       }
       string g_hhmmss = genTime.getTimeStrPlain();
-      sprintf(outputPath, "%s/g_%s/%s",
-              _outputDir.c_str(), g_hhmmss.c_str(), filename);
+      safe_snprintf(outputPath, "%s/g_%s/%s",
+                    _outputDir.c_str(), g_hhmmss.c_str(), filename);
     } else {
       if(basename.empty()) {
 	sprintf(filename, "%s%s_%s%s.nc",
@@ -674,7 +676,8 @@ string Mdv2NetCDF::_computeOutputPath(const DsMdvx &mdvx)
 		v_yyyymmdd.c_str(), v_hhmmss.c_str(),
 		_params.output_file_suffix);
       }
-      sprintf(outputPath, "%s/%s", _outputDir.c_str(), filename);
+      safe_snprintf(outputPath, "%s/%s",
+                    _outputDir.c_str(), filename);
     }
     
   }
@@ -750,4 +753,3 @@ void Mdv2NetCDF::_checkForComment(DsMdvx &mdvx)
     }
   }
 }
-

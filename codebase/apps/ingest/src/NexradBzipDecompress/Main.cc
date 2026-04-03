@@ -28,6 +28,8 @@
 #include <dataport/swap.h>
 #include <cstring>
 #include <toolsa/file_io.h>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 
 //
 // Small program to decompress nexrad data from
@@ -204,7 +206,8 @@ int main(int argc, char *argv[]){
 
 	ta_makedir_recurse(targetDir);
 	char com[1024];
-	sprintf(com, "/bin/cp %s %s", inFilename, targetDir);
+	safe_snprintf(com, "/bin/cp %s %s",
+                      inFilename, targetDir);
 	system(com);
       }
       exit(-1);

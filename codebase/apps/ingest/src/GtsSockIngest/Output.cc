@@ -36,6 +36,7 @@
 #include <cerrno>
 #include <sys/stat.h>
 #include <toolsa/umisc.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/file_io.h>
 using namespace std;
 
@@ -140,7 +141,7 @@ int Output::save (time_t data_time)
   }
 
   char outPath[MAX_PATH_LEN];
-  sprintf(outPath, "%s%s%.2d%.2d%.2d.%s",
+  safe_snprintf(outPath, "%s%s%.2d%.2d%.2d.%s",
 	  dateDirPath, PATH_DELIM,
 	  dtime.hour, dtime.min, dtime.sec,
 	  _params.output_file_ext);
@@ -206,5 +207,3 @@ int Output::putBuf(MemBuf &buf)
   return (0);
 
 }
-
-

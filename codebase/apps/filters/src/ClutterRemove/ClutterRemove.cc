@@ -36,6 +36,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <toolsa/umisc.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/pmu.h>
 #include "ClutterRemove.hh"
 using namespace std;
@@ -307,7 +308,7 @@ int ClutterRemove::_processFile(DsMdvx &mdvx)
 
   const Mdvx::master_header_t &mhdr = mdvx.getMasterHeader();
   char info[2048];
-  sprintf(info, "%s\n%s\n%s%g\n%s%g\n%s%g",
+  safe_snprintf(info, "%s\n%s\n%s%g\n%s%g\n%s%g",
 	  mhdr.data_set_info,
 	  "Clutter removed using ClutterRemove.",
 	  "clutter threshold: ", _params.clutter_threshold,

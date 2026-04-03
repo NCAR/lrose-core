@@ -57,6 +57,8 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/procmap.h>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 
 #include "Mdv2Grib.hh"
 #include "Params.hh"
@@ -513,12 +515,15 @@ void Mdv2Grib::_getOutputPath(const DsMdvx &input_mdv,
     
       char rel_file_path[MAX_PATH_LEN];
     
-      sprintf(rel_file_path, "%04d%02d%02d/g_%02d%02d%02d",
-	      file_time.getYear(), file_time.getMonth(), file_time.getDay(),
-	      file_time.getHour(), file_time.getMin(), file_time.getSec());
+      safe_snprintf(rel_file_path,
+                    "%04d%02d%02d/g_%02d%02d%02d",
+                    file_time.getYear(), file_time.getMonth(),
+                    file_time.getDay(),
+                    file_time.getHour(), file_time.getMin(),
+                    file_time.getSec());
 
-      sprintf(file_path, "%s/%s",
-	      _params->output_dir, rel_file_path);
+      safe_snprintf(file_path, "%s/%s",
+                    _params->output_dir, rel_file_path);
 
       rel_data_path = string(rel_file_path) + "/" + string(file_name);
     }
@@ -528,11 +533,12 @@ void Mdv2Grib::_getOutputPath(const DsMdvx &input_mdv,
     
       char rel_file_path[MAX_PATH_LEN];
     
-      sprintf(rel_file_path, "%04d%02d%02d",
-	      file_time.getYear(), file_time.getMonth(), file_time.getDay());
+      safe_snprintf(rel_file_path, "%04d%02d%02d",
+                    file_time.getYear(), file_time.getMonth(),
+                    file_time.getDay());
 
-      sprintf(file_path, "%s/%s",
-	      _params->output_dir, rel_file_path);
+      safe_snprintf(file_path, "%s/%s",
+                    _params->output_dir, rel_file_path);
 
       rel_data_path = string(rel_file_path) + "/" + string(file_name);
     }

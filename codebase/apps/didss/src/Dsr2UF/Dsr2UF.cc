@@ -22,6 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/file_io.h>
 #include <toolsa/Path.hh>
@@ -383,13 +384,14 @@ int Dsr2UF::_closeOutputFile()
   }
   
   char outPath[MAX_PATH_LEN];
-  sprintf(outPath,"%s%s%s_%s_%.4d%.2d%.2d.%.2d%.2d%.2d.%s",
-	  outDir, PATH_DELIM,
-	  _params.output_file_prefix,
-	  modeStr.c_str(),
-	  endTime.getYear(), endTime.getMonth(), endTime.getDay(),
-	  endTime.getHour(), endTime.getMin(), endTime.getSec(),
-	  _params.output_file_ext);
+  safe_snprintf(outPath,
+                "%s%s%s_%s_%.4d%.2d%.2d.%.2d%.2d%.2d.%s",
+                outDir, PATH_DELIM,
+                _params.output_file_prefix,
+                modeStr.c_str(),
+                endTime.getYear(), endTime.getMonth(), endTime.getDay(),
+                endTime.getHour(), endTime.getMin(), endTime.getSec(),
+                _params.output_file_ext);
   
   // rename the tmp to final output file path
   

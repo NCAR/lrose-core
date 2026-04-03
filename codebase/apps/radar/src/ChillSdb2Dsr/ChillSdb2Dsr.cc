@@ -56,6 +56,8 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/TaArray.hh>
 #include <toolsa/Path.hh>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <radar/chill_to_iwrf.hh>
 #include "ChillSdb2Dsr.hh"
@@ -1589,7 +1591,8 @@ int ChillSdb2Dsr::_writeCalibXml()
   // compute output path
 
   char calPath[MAX_PATH_LEN];
-  sprintf(calPath, "%s%scal.%.4d%.2d%.2d_%.2d%.2d%.2d.xml",
+  safe_snprintf(calPath,
+          "%s%scal.%.4d%.2d%.2d_%.2d%.2d%.2d.xml",
           dayDir, PATH_DELIM,
           ctime.getYear(), ctime.getMonth(), ctime.getDay(),
           ctime.getHour(), ctime.getMin(), ctime.getSec());
@@ -1711,4 +1714,3 @@ double ChillSdb2Dsr::_computeRadarConstant(double xmitPowerDbm,
   return radarConst;
 
 }
-

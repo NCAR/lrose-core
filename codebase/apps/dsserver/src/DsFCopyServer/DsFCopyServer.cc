@@ -35,6 +35,7 @@
 #include <didss/RapDataDir.hh>
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/file_io.h>
 #include <toolsa/Socket.hh>
 #include <toolsa/DateTime.hh>
@@ -668,7 +669,7 @@ int DsFCopyServer::_handlePut(Socket * clientSocket,
       }
     }
     // compute tmp path to put file in tmp dir
-    sprintf(tmpPathStr, "%s%s%s",
+    safe_snprintf(tmpPathStr, "%s%s%s",
             tmpDir, PATH_DELIM, tmpName);
   }
   
@@ -1017,4 +1018,3 @@ void DsFCopyServer::_removeFile(const string &path)
 {
   unlink(path.c_str());
 }
-

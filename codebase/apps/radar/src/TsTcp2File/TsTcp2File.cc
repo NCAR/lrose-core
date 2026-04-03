@@ -52,6 +52,8 @@
 #include <toolsa/udatetime.h>
 #include <toolsa/uusleep.h>
 #include <toolsa/pmu.h>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 
 using namespace std;
 
@@ -456,11 +458,12 @@ int TsTcp2File::_openNewFile(const rvp8_pulse_hdr_t &pulseHeader)
   // compute output path
 
   char path[1024];
-  sprintf(path, "%s/%.4d%.2d%.2d_%.2d%.2d%.2d_%.3d_%.3d.tsarchive",
-          subdir,
-          ttime.year, ttime.month, ttime.day,
-          ttime.hour, ttime.min, ttime.sec,
-          iel, iaz);
+  safe_snprintf(path,
+                "%s/%.4d%.2d%.2d_%.2d%.2d%.2d_%.3d_%.3d.tsarchive",
+                subdir,
+                ttime.year, ttime.month, ttime.day,
+                ttime.hour, ttime.min, ttime.sec,
+                iel, iaz);
   
   // open file
 
@@ -736,4 +739,3 @@ int TsTcp2File::_makedir_recurse(const char *path)
   }
 
 }
-

@@ -47,6 +47,7 @@
 #include <toolsa/TaArray.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/Path.hh>
 using namespace std;
 
@@ -1647,9 +1648,10 @@ void file_repeat_day::_substituteTime(char *line,
 
       char outDay2Str[4];
       if (outTime.day < 31) {
-	sprintf(outDay2Str, "%.2d", outTime.day + 1);
+	safe_snprintf(outDay2Str, "%.2d",
+                      outTime.day + 1);
       } else {
-	sprintf(outDay2Str, "%.2d", 1);
+	safe_snprintf(outDay2Str, "%.2d", 1);
       }
       if (sscanf(current, "%2d%2d/%2d%2d",
 		 &day1, &hour1, &day2, &hour2) == 4) {
@@ -1729,11 +1731,11 @@ void file_repeat_day::_substituteStartExpire(char *line,
   uconvert_from_utime(&outTime);
   char day1Str[4];
   char day2Str[4];
-  sprintf(day1Str, "%.2d", outTime.day);
+  safe_snprintf(day1Str, "%.2d", outTime.day);
   if (outTime.day < 31) {
-    sprintf(day2Str, "%.2d", outTime.day + 1);
+    safe_snprintf(day2Str, "%.2d", outTime.day + 1);
   } else {
-    sprintf(day2Str, "%.2d", 1);
+    safe_snprintf(day2Str, "%.2d", 1);
   }
   
   // set up current day string

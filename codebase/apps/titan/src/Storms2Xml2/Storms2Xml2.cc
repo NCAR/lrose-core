@@ -47,6 +47,8 @@
 #include <toolsa/pmu.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/pjg_flat.h>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <titan/DsTitan.hh>
 #include <titan/TitanComplexTrack.hh>
@@ -631,14 +633,15 @@ int Storms2Xml2::_openOutput(time_t when){
 
     // compute rel file name and abs file path
     
-    sprintf(outRelFileName,"%.4d%.2d%.2d/%.4d%.2d%.2d_%.2d%.2d%.2d_%s",
-	    fileTime.year, fileTime.month, fileTime.day,
-	    fileTime.year, fileTime.month, fileTime.day,
-	    fileTime.hour, fileTime.min, fileTime.sec,
-	    _params.outName);
+    safe_snprintf(outRelFileName,
+                  "%.4d%.2d%.2d/%.4d%.2d%.2d_%.2d%.2d%.2d_%s",
+                  fileTime.year, fileTime.month, fileTime.day,
+                  fileTime.year, fileTime.month, fileTime.day,
+                  fileTime.hour, fileTime.min, fileTime.sec,
+                  _params.outName);
 
-    sprintf(outAbsFilePath,"%s/%s",
-	    _params.outDir, outRelFileName);
+    safe_snprintf(outAbsFilePath, "%s/%s",
+                  _params.outDir, outRelFileName);
     
   } else {
     //
@@ -646,8 +649,8 @@ int Storms2Xml2::_openOutput(time_t when){
     // existing file before opening it to ensure that it
     // updates across a cross mount.
     //
-    sprintf(outAbsFilePath,"%s/%s",
-	    _params.outDir, _params.outName);
+    safe_snprintf(outAbsFilePath, "%s/%s",
+                  _params.outDir, _params.outName);
   }
 
   unlink(outAbsFilePath);
@@ -742,7 +745,8 @@ void Storms2Xml2::_closeOutput(){
     sleep(1); // Let the file system relax.
 
     char comBuffer[1024];
-    sprintf(comBuffer,"%s %s", _params.scriptToRun,outAbsFilePath);
+    safe_snprintf(comBuffer, "%s %s",
+                  _params.scriptToRun, outAbsFilePath);
 
     if (_params.debug){
       cerr << "Executing command : " << comBuffer << endl;
@@ -757,4 +761,3 @@ void Storms2Xml2::_closeOutput(){
   }
 
 }
-

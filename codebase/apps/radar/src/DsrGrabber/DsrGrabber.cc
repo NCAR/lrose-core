@@ -47,6 +47,8 @@
 #include <toolsa/TaStr.hh>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/file_io.h>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <radar/RadarComplex.hh>
 #include <iomanip>
@@ -1193,30 +1195,31 @@ int DsrGrabber::_writeBeamsFile()
   DateTime btime(_fileTime);
 
   char subdirName[1024];
-  sprintf(subdirName, "%.4d%.2d%.2d",
-	  btime.getYear(),
-	  btime.getMonth(),
-	  btime.getDay());
+  safe_snprintf(subdirName, "%.4d%.2d%.2d",
+                btime.getYear(),
+                btime.getMonth(),
+                btime.getDay());
   
   char subdirPath[1024];
-  sprintf(subdirPath, "%s%s%s",
-	  _params.beams_output_dir, PATH_DELIM, subdirName);
+  safe_snprintf(subdirPath, "%s%s%s",
+                _params.beams_output_dir, PATH_DELIM, subdirName);
 
   char relFilePath[1024];
-  sprintf(relFilePath, "%s%s%.4d%.2d%.2d_%.2d%.2d%.2d_%s.%s",
-	  subdirName, PATH_DELIM,
-	  btime.getYear(),
-	  btime.getMonth(),
-	  btime.getDay(),
-	  btime.getHour(),
-	  btime.getMin(),
-	  btime.getSec(),
-	  _params.radar_name,
-	  _params.beam_file_ext);
+  safe_snprintf(relFilePath,
+                "%s%s%.4d%.2d%.2d_%.2d%.2d%.2d_%s.%s",
+                subdirName, PATH_DELIM,
+                btime.getYear(),
+                btime.getMonth(),
+                btime.getDay(),
+                btime.getHour(),
+                btime.getMin(),
+                btime.getSec(),
+                _params.radar_name,
+                _params.beam_file_ext);
 
   char filePath[1024];
-  sprintf(filePath, "%s%s%s",
-	  _params.beams_output_dir, PATH_DELIM, relFilePath);
+  safe_snprintf(filePath, "%s%s%s",
+                _params.beams_output_dir, PATH_DELIM, relFilePath);
   
   // create the directory for the output file
   
@@ -1287,14 +1290,14 @@ int DsrGrabber::_writeGridFiles()
   DateTime btime(_fileTime);
   
   char subdirName[1024];
-  sprintf(subdirName, "%.4d%.2d%.2d",
-	  btime.getYear(),
-	  btime.getMonth(),
-	  btime.getDay());
+  safe_snprintf(subdirName, "%.4d%.2d%.2d",
+                btime.getYear(),
+                btime.getMonth(),
+                btime.getDay());
   
   char subdirPath[1024];
-  sprintf(subdirPath, "%s%s%s",
-	  _params.grid_output_dir, PATH_DELIM, subdirName);
+  safe_snprintf(subdirPath, "%s%s%s",
+                _params.grid_output_dir, PATH_DELIM, subdirName);
   
   // create the sub-directory
   
@@ -1329,21 +1332,22 @@ int DsrGrabber::_writeGridField(const char *subdirName,
   // compute file path
   
   char relFilePath[1024];
-  sprintf(relFilePath, "%s%s%.4d%.2d%.2d_%.2d%.2d%.2d_%s_%s.%s",
-	  subdirName, PATH_DELIM,
-	  btime.getYear(),
-	  btime.getMonth(),
-	  btime.getDay(),
-	  btime.getHour(),
-	  btime.getMin(),
-	  btime.getSec(),
-	  _params.radar_name,
-	  fieldName.c_str(),
-	  _params.grid_file_ext);
+  safe_snprintf(relFilePath,
+                "%s%s%.4d%.2d%.2d_%.2d%.2d%.2d_%s_%s.%s",
+                subdirName, PATH_DELIM,
+                btime.getYear(),
+                btime.getMonth(),
+                btime.getDay(),
+                btime.getHour(),
+                btime.getMin(),
+                btime.getSec(),
+                _params.radar_name,
+                fieldName.c_str(),
+                _params.grid_file_ext);
   
   char filePath[1024];
-  sprintf(filePath, "%s%s%s",
-	  _params.beams_output_dir, PATH_DELIM, relFilePath);
+  safe_snprintf(filePath, "%s%s%s",
+                _params.beams_output_dir, PATH_DELIM, relFilePath);
   
   if (_params.debug) {
     cerr << "-->> writing grid file: " << filePath << endl;
@@ -1431,30 +1435,31 @@ int DsrGrabber::_writeSunpropsFile()
   DateTime btime(_fileTime);
 
   char subdirName[1024];
-  sprintf(subdirName, "%.4d%.2d%.2d",
-	  btime.getYear(),
-	  btime.getMonth(),
-	  btime.getDay());
+  safe_snprintf(subdirName, "%.4d%.2d%.2d",
+                btime.getYear(),
+                btime.getMonth(),
+                btime.getDay());
   
   char subdirPath[1024];
-  sprintf(subdirPath, "%s%s%s",
-	  _params.sunprops_output_dir, PATH_DELIM, subdirName);
+  safe_snprintf(subdirPath, "%s%s%s",
+                _params.sunprops_output_dir, PATH_DELIM, subdirName);
   
   char relFilePath[1024];
-  sprintf(relFilePath, "%s%s%.4d%.2d%.2d_%.2d%.2d%.2d_%s.%s",
-	  subdirName, PATH_DELIM,
-	  btime.getYear(),
-	  btime.getMonth(),
-	  btime.getDay(),
-	  btime.getHour(),
-	  btime.getMin(),
-	  btime.getSec(),
-	  _params.radar_name,
-	  _params.sunprops_file_ext);
+  safe_snprintf(relFilePath,
+                "%s%s%.4d%.2d%.2d_%.2d%.2d%.2d_%s.%s",
+                subdirName, PATH_DELIM,
+                btime.getYear(),
+                btime.getMonth(),
+                btime.getDay(),
+                btime.getHour(),
+                btime.getMin(),
+                btime.getSec(),
+                _params.radar_name,
+                _params.sunprops_file_ext);
 
   char filePath[1024];
-  sprintf(filePath, "%s%s%s",
-	  _params.sunprops_output_dir, PATH_DELIM, relFilePath);
+  safe_snprintf(filePath, "%s%s%s",
+                _params.sunprops_output_dir, PATH_DELIM, relFilePath);
   
   // create the directory for the file
   
@@ -1518,4 +1523,3 @@ int DsrGrabber::_writeSunpropsFile()
   return 0;
 
 }
-

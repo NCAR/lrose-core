@@ -49,6 +49,7 @@
 #include <sys/types.h>
 #include <ctime>
 #include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/file_io.h>
 #include <toolsa/DateTime.hh>
@@ -1401,11 +1402,11 @@ FILE *TsOverlay::_openOutputFile(IwrfTsPulse *pulse,
           packing.c_str(), format.c_str());
   
   char relPath[1024];
-  sprintf(relPath, "%.4d%.2d%.2d/%s",
+  safe_snprintf(relPath, "%.4d%.2d%.2d/%s",
           ttime.year, ttime.month, ttime.day, name);
 
   char path[1024];
-  sprintf(path, "%s/%s", output_dir.c_str(), relPath);
+  safe_snprintf(path, "%s/%s", output_dir.c_str(), relPath);
   
   // open file
   

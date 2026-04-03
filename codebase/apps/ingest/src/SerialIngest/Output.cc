@@ -36,6 +36,7 @@
 #include <cerrno>
 #include <sys/stat.h>
 #include <toolsa/umisc.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/file_io.h>
 #include <dsserver/DsLdataInfo.hh>
 using namespace std;
@@ -146,7 +147,7 @@ int Output::save (time_t data_time)
 	  _params.output_file_ext);
   
   char outPath[MAX_PATH_LEN];
-  sprintf(outPath, "%s%s%s",
+  safe_snprintf(outPath, "%s%s%s",
 	  _params.output_dir_path, PATH_DELIM, relDataPath);
   
   if (rename(_tmpFilePath.c_str(), outPath)) {
@@ -214,5 +215,3 @@ int Output::putBuf(MemBuf &buf)
   return (0);
 
 }
-
-

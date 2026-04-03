@@ -34,6 +34,7 @@
 
 #include <dataport/bigend.h>
 #include <toolsa/umisc.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/file_io.h>
 #include <toolsa/pmu.h>
 #include <rapformats/nids_file.h>
@@ -224,7 +225,7 @@ int WsiNidsIngest::Run ()
       // compute directory
       
       char num[4];
-      sprintf(num, "%d", mhead.elevnum);
+      safe_snprintf(num, "%d", mhead.elevnum);
       string prodX = (*ii).second.prod_name;
       prodX += num;
 
@@ -340,4 +341,3 @@ int WsiNidsIngest::Run ()
   return (0);
 
 }
-

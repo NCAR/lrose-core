@@ -39,6 +39,8 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/TaArray.hh>
 #include <toolsa/file_io.h>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/toolsa_macros.h>
 #include <Spdb/DsSpdb.hh>
 #include "BeamMgr.hh"
@@ -695,11 +697,11 @@ void BeamMgr::_asciiPrint(const string &label,
   }
 
   char fname[MAX_PATH_LEN];
-  sprintf(fname, "%s%s%s%s%s.spec.txt",
+  safe_snprintf(fname, "%s%s%s%s%s.spec.txt",
 	  label.c_str(), timeStr, elevStr, azStr, rangeStr);
   
   char fpath[MAX_PATH_LEN];
-  sprintf(fpath, "%s%s%s", dayDir, PATH_DELIM, fname);
+  safe_snprintf(fpath, "%s%s%s", dayDir, PATH_DELIM, fname);
 
   // open file
 

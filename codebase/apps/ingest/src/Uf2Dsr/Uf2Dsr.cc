@@ -45,6 +45,8 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/TaFile.hh>
 #include <toolsa/TaArray.hh>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <dataport/bigend.h>
 #include "Uf2Dsr.hh"
 using namespace std;
@@ -247,10 +249,10 @@ int Uf2Dsr::_processFile(const char *input_path)
     if (!(strcmp(".gz", last3))){
       char com[1024];
       if (_params.debug) {
-	sprintf(com, "gunzip -vf %s", inputPath);
+	safe_snprintf(com, "gunzip -vf %s", inputPath);
 	cerr << "Executing " << com << endl;
       } else {
-	sprintf(com, "gunzip -f %s", inputPath);
+	safe_snprintf(com, "gunzip -f %s", inputPath);
       }
       system(com);
       inputPath[strlen(inputPath)-3]=char(0);
@@ -741,4 +743,3 @@ void Uf2Dsr::_loadBeamFloat32(int nfields,
   dsBeam.loadData(beamData, nbytes, 4);
 
 }
-

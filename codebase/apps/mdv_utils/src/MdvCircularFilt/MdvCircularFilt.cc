@@ -22,6 +22,8 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include "MdvCircularFilt.hh"
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 using namespace std;
 
 //
@@ -746,13 +748,15 @@ int MdvCircularFilt::_writeMdv()
       //
       char newFieldNameLong[512];
       
-      sprintf(newFieldNameLong,"%sMaxFilt", fieldNameLong);
+      safe_snprintf(newFieldNameLong,
+                    "%sMaxFilt", fieldNameLong);
 
       STRcopy(_fieldHdr.field_name_long, newFieldNameLong , MDV_LONG_FIELD_LEN);
       
       char newFieldNameShort[512];
 
-      sprintf(newFieldNameShort,"%sMaxFilt", fieldNameShort);
+      safe_snprintf(newFieldNameShort,
+                    "%sMaxFilt", fieldNameShort);
 
       STRcopy(_fieldHdr.field_name,newFieldNameShort , MDV_SHORT_FIELD_LEN);
       
@@ -776,13 +780,15 @@ int MdvCircularFilt::_writeMdv()
       //
       char newFieldNameLong[512];
       
-      sprintf(newFieldNameLong,"%sMinFilt", fieldNameLong);
+      safe_snprintf(newFieldNameLong,
+                    "%sMinFilt", fieldNameLong);
 
       STRcopy(_fieldHdr.field_name_long, newFieldNameLong , MDV_LONG_FIELD_LEN);
       
       char newFieldNameShort[512];
 
-      sprintf(newFieldNameShort,"%sMinFilt", fieldNameShort);
+      safe_snprintf(newFieldNameShort,
+                    "%sMinFilt", fieldNameShort);
 
       STRcopy(_fieldHdr.field_name,newFieldNameShort , MDV_SHORT_FIELD_LEN);
       
@@ -806,13 +812,15 @@ int MdvCircularFilt::_writeMdv()
       //
       char newFieldNameLong[512];
       
-      sprintf(newFieldNameLong,"%sAvgFilt", fieldNameLong);
+      safe_snprintf(newFieldNameLong,
+                    "%sAvgFilt", fieldNameLong);
 
       STRcopy(_fieldHdr.field_name_long, newFieldNameLong , MDV_LONG_FIELD_LEN);
       
       char newFieldNameShort[512];
 
-      sprintf(newFieldNameShort,"%sAvgFilt", fieldNameShort);
+      safe_snprintf(newFieldNameShort,
+                    "%sAvgFilt", fieldNameShort);
 
       STRcopy(_fieldHdr.field_name,newFieldNameShort , MDV_SHORT_FIELD_LEN);
       
@@ -836,13 +844,15 @@ int MdvCircularFilt::_writeMdv()
       //
       char newFieldNameLong[512];
       
-      sprintf(newFieldNameLong,"%sStdFilt", fieldNameLong);
+      safe_snprintf(newFieldNameLong,
+                    "%sStdFilt", fieldNameLong);
 
       STRcopy(_fieldHdr.field_name_long, newFieldNameLong , MDV_LONG_FIELD_LEN);
       
       char newFieldNameShort[512];
 
-      sprintf(newFieldNameShort,"%sStdFilt", fieldNameShort);
+      safe_snprintf(newFieldNameShort,
+                    "%sStdFilt", fieldNameShort);
 
       STRcopy(_fieldHdr.field_name,newFieldNameShort , MDV_SHORT_FIELD_LEN);
       
@@ -866,14 +876,16 @@ int MdvCircularFilt::_writeMdv()
       //
       char newFieldNameLong[512];
       
-      sprintf(newFieldNameLong,"%sPtile%dFilt", fieldNameLong,
+      safe_snprintf(newFieldNameLong,
+              "%sPtile%dFilt", fieldNameLong,
 	      (int)_params.ptile);
 
       STRcopy(_fieldHdr.field_name_long, newFieldNameLong , MDV_LONG_FIELD_LEN);
       
       char newFieldNameShort[512];
 
-      sprintf(newFieldNameShort,"%sPtile%dFilt", fieldNameShort,
+      safe_snprintf(newFieldNameShort,
+              "%sPtile%dFilt", fieldNameShort,
 	      (int)_params.ptile);
 
       STRcopy(_fieldHdr.field_name,newFieldNameShort , MDV_SHORT_FIELD_LEN);
@@ -897,14 +909,16 @@ int MdvCircularFilt::_writeMdv()
       //
       char newFieldNameLong[512];
       
-      sprintf(newFieldNameLong,"%sPctCov%dFilt", fieldNameLong,
+      safe_snprintf(newFieldNameLong,
+              "%sPctCov%dFilt", fieldNameLong,
 	      (int)_params.percent_cov_thresh);
 
       STRcopy(_fieldHdr.field_name_long, newFieldNameLong , MDV_LONG_FIELD_LEN);
       
       char newFieldNameShort[512];
 
-      sprintf(newFieldNameShort,"%sPctCov%dFilt", fieldNameShort,
+      safe_snprintf(newFieldNameShort,
+              "%sPctCov%dFilt", fieldNameShort,
 	      (int)_params.percent_cov_thresh);
 
       STRcopy(_fieldHdr.field_name,newFieldNameShort , MDV_SHORT_FIELD_LEN);

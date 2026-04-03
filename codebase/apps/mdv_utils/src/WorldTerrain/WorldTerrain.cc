@@ -25,6 +25,7 @@
 #include <Mdv/MdvxField.hh>
 #include <Mdv/DsMdvx.hh>
 #include <toolsa/umisc.h>
+#include <toolsa/safe_snprintf.hh>
 #include <cstdio>
 #include <math.h>
 using namespace std;
@@ -241,7 +242,7 @@ int main(int argc, char *argv[])
   // Try to zip the DEM files we have used.
   //
   char com[1024];
-  sprintf(com,"gzip -f %s/*.DEM", TopDir);
+  safe_snprintf(com, "gzip -f %s/*.DEM", TopDir);
   fprintf(stderr,"Issuing command %s\n", com);
   system(com);
   sleep(1);
@@ -322,8 +323,8 @@ void GetFilename(double Lat, double Lon,
   }
 
 
-  sprintf(FileName,"%c%03d%c%02d.DEM",
-	  LonChar, LonDeg, LatChar, LatDeg);
+  snprintf(FileName, MAX_PATH_LEN, "%c%03d%c%02d.DEM",
+           LonChar, LonDeg, LatChar, LatDeg);
   return;
 
 }
@@ -336,7 +337,7 @@ int GetValue(char *TopDir, char *FileName, int offset){
   short Val;
   unsigned char temp, *b;
 
-  sprintf(Wholename,"%s/%s",TopDir, FileName);
+  safe_snprintf(Wholename, "%s/%s", TopDir, FileName);
   ifp = fopen(Wholename,"rb");
 
   if (ifp == NULL){
@@ -347,9 +348,10 @@ int GetValue(char *TopDir, char *FileName, int offset){
     char zippedName[MAX_PATH_LEN];
     char com[MAX_PATH_LEN];
 
-    sprintf(zippedName,"%s/%s.gz",TopDir, FileName);
+    safe_snprintf(zippedName, "%s/%s.gz",
+                  TopDir, FileName);
 
-    sprintf(com,"gunzip -f %s", zippedName);
+    safe_snprintf(com, "gunzip -f %s", zippedName);
 
     fprintf(stderr,"Issuing command %s\n", com);
 
@@ -379,9 +381,6 @@ int GetValue(char *TopDir, char *FileName, int offset){
   return Val;
 
 }
-
-
-
 
 
 

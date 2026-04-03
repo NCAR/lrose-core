@@ -37,6 +37,8 @@
 
 #include <toolsa/ServerSocket.hh>
 #include <toolsa/Socket.hh>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 
 #include "fileFetch.hh"
 
@@ -207,7 +209,8 @@ int main(int argc, char *argv[])
 	      filenameTime.year, filenameTime.month, filenameTime.day,
 	      filenameTime.hour, filenameTime.min, filenameTime.sec);
       
-      sprintf(fullOutName,"%s/%s", P.outDir, outfileName);
+      safe_snprintf(fullOutName, "%s/%s",
+                    P.outDir, outfileName);
 
       if (ta_makedir_recurse(P.outDir)){
 	fprintf(stderr,"Failed to create %s\n", P.outDir);
@@ -617,5 +620,3 @@ static void tidy_and_exit (int sig){
   PMU_auto_unregister();
   exit(sig);
 }
-
-

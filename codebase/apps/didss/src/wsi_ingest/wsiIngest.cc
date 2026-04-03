@@ -55,6 +55,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/procmap.h>
 #include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/umisc.h>
 
 #include "fs.h"
@@ -526,12 +527,13 @@ int main(int argc, char **argv)
     else
       data_time_struct.year += 2000;
     
-    sprintf(output_subdir, "%04d%02d%02d",
-	    data_time_struct.year, data_time_struct.month,
-	    data_time_struct.day);
+    safe_snprintf(output_subdir, "%04d%02d%02d",
+                  data_time_struct.year, data_time_struct.month,
+                  data_time_struct.day);
     
-    sprintf(temp_filename, "%s/%s",
-            _params._output_data[output_type].output_dir, output_subdir);
+    safe_snprintf(temp_filename, "%s/%s",
+                  _params._output_data[output_type].output_dir,
+                  output_subdir);
     
     if (_params.debug_level >= Params::DEBUG_NORM)
       fprintf(stderr, "Making output subdirectory <%s>\n", temp_filename);
@@ -539,17 +541,18 @@ int main(int argc, char **argv)
     if (makedir(temp_filename) != 0)
     {
       memset(gErrBlk.errArray, '\0', sizeof(gErrBlk.errArray));
-      sprintf(gErrBlk.errArray[0], "\n%s Error:\n", Program_name);
-      sprintf(gErrBlk.errArray[1], 
-	      "\nUnable to make directory: %s\n", temp_filename);
+      safe_snprintf(gErrBlk.errArray[0],
+                    "\n%s Error:\n", Program_name);
+      safe_snprintf(gErrBlk.errArray[1],
+                    "\nUnable to make directory: %s\n", temp_filename);
 
       HandleErr(iNone);
       continue;
     }
 
-    sprintf(output_path, "%s/%s/%s",
-	    _params._output_data[output_type].output_dir,
-	    output_subdir, output_filename);
+    safe_snprintf(output_path, "%s/%s/%s",
+                  _params._output_data[output_type].output_dir,
+                  output_subdir, output_filename);
 
     if (_params.debug_level >= Params::DEBUG_NORM)
       fprintf(stderr, "Writing wsi raw image data to %s\n", output_path);
@@ -561,9 +564,10 @@ int main(int argc, char **argv)
     if ((updateFD = fopen(output_path, "w")) == (FILE *)NULL)
     {
       memset(gErrBlk.errArray, '\0', sizeof(gErrBlk.errArray));
-      sprintf(gErrBlk.errArray[0], "\n%s Error:\n", Program_name);
-      sprintf(gErrBlk.errArray[1], 
-	      "\nUnable to Open: %s for Write\n", output_path);
+      safe_snprintf(gErrBlk.errArray[0],
+                    "\n%s Error:\n", Program_name);
+      safe_snprintf(gErrBlk.errArray[1],
+                    "\nUnable to Open: %s for Write\n", output_path);
 
       HandleErr(iNone);
     }
@@ -577,8 +581,8 @@ int main(int argc, char **argv)
      * Update the LDATA information.
      */
 
-    sprintf(temp_filename, "%s/%s",
-	    output_subdir, output_filename);
+    safe_snprintf(temp_filename, "%s/%s",
+                  output_subdir, output_filename);
     
     data_time = uunix_time(&data_time_struct);
     

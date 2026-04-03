@@ -36,6 +36,8 @@
 #include <toolsa/file_io.h>
 #include <toolsa/MsgLog.hh>
 #include <toolsa/TaStr.hh>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <Spdb/DsSpdbMsg.hh>
 #include <didss/RapDataDir.hh>
 #include <dsserver/DsLocator.hh>
@@ -968,8 +970,9 @@ int DsSpdbServer::_writeMsgBufToFile(DsURL url,
   char fpath[MAX_PATH_LEN];
   FILE *fd;
   
-  sprintf(fname,"ds_spdbp_%ld_%d.msg", time(NULL), getpid());
-  sprintf(fpath,"%s%s%s",
+  safe_snprintf(fname, "ds_spdbp_%ld_%d.msg",
+                time(NULL), getpid());
+  safe_snprintf(fpath, "%s%s%s",
 	  _params->localfile_dest_dir, PATH_DELIM, fname);
 
   if(( fd= fopen(fpath,"w")) == NULL) {
@@ -1343,4 +1346,3 @@ void DsSpdbServer::_logRemoteForwarding(const string &label,
 	      url.getFile().c_str());
 
 }
-

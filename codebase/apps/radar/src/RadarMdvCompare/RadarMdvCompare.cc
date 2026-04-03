@@ -41,6 +41,8 @@
 #include <toolsa/Path.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <Mdv/MdvxProj.hh>
 #include <Mdv/MdvxField.hh>
 #include <Spdb/DsSpdb.hh>
@@ -724,7 +726,8 @@ int RadarMdvCompare::_openOutputFiles()
   if (_params.write_output_stats && _statsFile == NULL) {
 
     char path[1024];
-    sprintf(path, "%s.stats.%s", base, _params.output_file_ext);
+    safe_snprintf(path, "%s.stats.%s",
+                  base, _params.output_file_ext);
     _statsPath = path;
 
     if ((_statsFile = fopen(path, "w")) == NULL) {
@@ -746,7 +749,8 @@ int RadarMdvCompare::_openOutputFiles()
   if (_params.write_output_table && _tableFile == NULL) {
 
     char path[1024];
-    sprintf(path, "%s.table.%s", base, _params.output_file_ext);
+    safe_snprintf(path, "%s.table.%s",
+                  base, _params.output_file_ext);
     _tablePath = path;
     
     if ((_tableFile = fopen(path, "w")) == NULL) {
@@ -768,7 +772,8 @@ int RadarMdvCompare::_openOutputFiles()
   if (_params.append_to_summary_file && _summaryFile == NULL) {
 
     char path[1024];
-    sprintf(path, "%s.summary.%s", base, _params.output_file_ext);
+    safe_snprintf(path, "%s.summary.%s",
+                  base, _params.output_file_ext);
     _summaryPath = path;
     
     if ((_summaryFile = fopen(path, "a")) == NULL) {
@@ -870,4 +875,3 @@ int RadarMdvCompare::_writeResultsToSpdb(double count,
   return 0;
 
 }
-

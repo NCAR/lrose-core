@@ -39,6 +39,8 @@
  #include <toolsa/globals.h>
  #include <toolsa/pjg_flat.h>
  #include <toolsa/DateTime.hh>
+ #include <toolsa/str.h>
+ #include <toolsa/safe_snprintf.hh>
  #include <Spdb/DsSpdb.hh>
  #include "SigAirMet2Spdb.hh"
 
@@ -497,8 +499,8 @@ void SigAirMet2Spdb::_USAirmetCheckCancel()
     // Convert to a string
     
     char arr[4];
-    sprintf(arr, "%d", updateNumInt);
-    prevUpdateNum=*arr;
+    safe_snprintf(arr, "%d", updateNumInt);
+    prevUpdateNum = *arr;
   }
 
   // At a minimum we need to find a match with the type,

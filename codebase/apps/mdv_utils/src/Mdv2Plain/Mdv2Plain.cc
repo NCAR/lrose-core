@@ -40,6 +40,7 @@
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
 #include <toolsa/DateTime.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/TaFile.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
@@ -356,15 +357,15 @@ int Mdv2Plain::_write(const DsMdvx &mdvx, int nBytesVol)
   const Mdvx::master_header_t &mhdr = mdvx.getMasterHeader();
   DateTime ftime(mhdr.time_centroid);
 
-  sprintf(dir, "%s%s%.4d%.2d%.2d",
+  safe_snprintf(dir, "%s%s%.4d%.2d%.2d",
 	  _params.output_dir, PATH_DELIM,
 	  ftime.getYear(), ftime.getMonth(), ftime.getDay());
 
-  sprintf(path, "%s%s%.2d%.2d%.2d.plain",
+  safe_snprintf(path, "%s%s%.2d%.2d%.2d.plain",
 	  dir, PATH_DELIM,
 	  ftime.getHour(), ftime.getMin(), ftime.getSec());
 
-  sprintf(logPath, "%s%s%.2d%.2d%.2d.log",
+  safe_snprintf(logPath, "%s%s%.2d%.2d%.2d.log",
 	  dir, PATH_DELIM,
 	  ftime.getHour(), ftime.getMin(), ftime.getSec());
 
@@ -639,5 +640,3 @@ int Mdv2Plain::_writeFl32(TaFile &out, fl32 val)
   return 0;
 
 }
-
-

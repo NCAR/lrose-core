@@ -42,6 +42,8 @@
 #include <toolsa/file_io.h>
 #include <toolsa/Path.hh>
 #include <toolsa/DateTime.hh>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include "Output.hh"
 using namespace std;
 
@@ -105,11 +107,12 @@ int Output::openFile(time_t startTime,
   // compute output path
 
   char path[MAX_PATH_LEN];
-  sprintf(path, "%s%s%.4d%.2d%.2d_%.2d%.2d%.2d_%.3d_%.3d.%s.tsarchive",
-          outDir, PATH_DELIM,
-          stime.getYear(), stime.getMonth(), stime.getDay(),
-          stime.getHour(), stime.getMin(), stime.getSec(),
-          iel, iaz, _label.c_str());
+  safe_snprintf(path,
+                "%s%s%.4d%.2d%.2d_%.2d%.2d%.2d_%.3d_%.3d.%s.tsarchive",
+                outDir, PATH_DELIM,
+                stime.getYear(), stime.getMonth(), stime.getDay(),
+                stime.getHour(), stime.getMin(), stime.getSec(),
+                iel, iaz, _label.c_str());
   _outputPath = path;
   
   // open file
@@ -301,4 +304,3 @@ int Output::writeIQ(const void *iqPacked, int nBytesPacked)
   return 0;
 
 }
-

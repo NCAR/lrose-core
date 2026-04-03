@@ -44,6 +44,7 @@
 #include <fstream>
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/file_io.h>
 #include <toolsa/DateTime.hh>
@@ -220,17 +221,19 @@ int PrintDataMap::_print()
     }
     DateTime hostDateTime(checkTime);
 
-    sprintf(filename, "datasets_%s_%.4d%.2d%.2d_%.2d%.2d%.2d.%s",
-            _args.hostName.c_str(),
-            hostDateTime.getYear(),
-            hostDateTime.getMonth(),
-            hostDateTime.getDay(),
-	    hostDateTime.getHour(),
-            hostDateTime.getMin(),
-            hostDateTime.getSec(),
-            ext.c_str());
+    safe_snprintf(filename,
+                  "datasets_%s_%.4d%.2d%.2d_%.2d%.2d%.2d.%s",
+                  _args.hostName.c_str(),
+                  hostDateTime.getYear(),
+                  hostDateTime.getMonth(),
+                  hostDateTime.getDay(),
+                  hostDateTime.getHour(),
+                  hostDateTime.getMin(),
+                  hostDateTime.getSec(),
+                  ext.c_str());
 
-    sprintf(path, "%s%s%s", outputDir.c_str(), PATH_DELIM, filename);
+    safe_snprintf(path, "%s%s%s",
+                  outputDir.c_str(), PATH_DELIM, filename);
 
     ofstream outFile;
     outFile.open(path);
@@ -737,5 +740,3 @@ void PrintDataMap::_printSize(ostream &out, int width,
   out << setw(width) << str;
 
 }
-
-

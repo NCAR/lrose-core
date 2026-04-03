@@ -41,6 +41,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
 #include <toolsa/Path.hh>
+#include <toolsa/safe_snprintf.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxRemapLut.hh>
@@ -1222,10 +1223,11 @@ string MdvPull::_computeNcfOutputPath(const DsMdvx &mdvx,
   
   if (isForecast) { 
     string g_hhmmss = genTime.getTimeStrPlain();
-    sprintf(outputPath, "%s/g_%s/%s",
+    safe_snprintf(outputPath, "%s/g_%s/%s",
             outputDir.c_str(), g_hhmmss.c_str(), filename);
   } else {
-    sprintf(outputPath, "%s/%s", outputDir.c_str(), filename);
+    safe_snprintf(outputPath, "%s/%s",
+                  outputDir.c_str(), filename);
   }
   
   return outputPath;
@@ -1275,4 +1277,3 @@ void MdvPull::_writeNcfLdataInfo(const DsMdvx &mdvx,
   }
 
 }
-

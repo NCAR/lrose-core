@@ -53,6 +53,8 @@
 #include <toolsa/os_config.h>
 #include <toolsa/file_io.h>
 #include <toolsa/pmu.h>
+#include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 
 #include "MultFileArchiver.hh"
 using namespace std;
@@ -174,7 +176,7 @@ void MultFileArchiver::_openOutputFile(void)
   // Construct the new file name
 
   char filename[MAX_PATH_LEN];
-  sprintf(filename, "%s/%02d0000.hiq",
+  safe_snprintf(filename, "%s/%02d0000.hiq",
 	  pathname,
 	  _currentFileStartTime.getHour());
 

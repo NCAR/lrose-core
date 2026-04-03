@@ -24,6 +24,7 @@
 
 #include <Mdv/MdvxField.hh>
 #include <toolsa/umisc.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/pjg_flat.h>
 #include <Mdv/DsMdvx.hh>
 #include <cstdio>
@@ -246,9 +247,12 @@ int Mdv2Axf::CloseOutput(){
   for(int k= _NumLatestFiles; k > 1  ;k--){
     char FNameA[MAX_PATH_LEN], FNameB[MAX_PATH_LEN];
 
-    sprintf(FNameA,"%s_%d.axf",_LatestFileName,k-1);
-    sprintf(FNameB,"%s_%d.axf",_LatestFileName,k);
-    sprintf(command,"\\mv  %s %s",FNameA, FNameB);
+    safe_snprintf(FNameA, "%s_%d.axf",
+                  _LatestFileName, k - 1);
+    safe_snprintf(FNameB, "%s_%d.axf",
+                  _LatestFileName, k);
+    safe_snprintf(command, "\\mv  %s %s",
+                  FNameA, FNameB);
  
     system(command);
 
@@ -261,7 +265,8 @@ int Mdv2Axf::CloseOutput(){
   //
   char TempFileName[MAX_PATH_LEN];
 
-  sprintf(TempFileName,"%s.tmp",_LatestFileName);
+  safe_snprintf(TempFileName, "%s.tmp",
+                _LatestFileName);
   //
   // Copy the file across to a temporary file and then
   // move that file into place as the latest file (a move
@@ -270,16 +275,18 @@ int Mdv2Axf::CloseOutput(){
   // This is done with system calls, which is not great, but not
   // (I think) awful either.
   //
-  sprintf(command,"\\cp %s %s", _OutFileName, TempFileName);
+  safe_snprintf(command, "\\cp %s %s",
+                _OutFileName, TempFileName);
   if (system(command)){
     cerr << "Command " << command << " failed." << endl;
     exit(-1);
   }                          
 
   char Target[MAX_PATH_LEN];
-  sprintf(Target,"%s_%d.axf",_LatestFileName,1);
+  safe_snprintf(Target, "%s_%d.axf", _LatestFileName, 1);
  
- sprintf(command,"\\mv %s %s", TempFileName, Target);
+  safe_snprintf(command, "\\mv %s %s",
+                TempFileName, Target);
   if (system(command)){
     cerr << "Command " << command << " failed." << endl;
     exit(-1);
@@ -288,6 +295,3 @@ int Mdv2Axf::CloseOutput(){
 
   return 0;
 }
-
-
-

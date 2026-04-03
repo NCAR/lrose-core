@@ -47,6 +47,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/procmap.h>
 #include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/umisc.h>
 
 #include "Params.hh"
@@ -327,7 +328,7 @@ char *UpdateMdvFieldNames::_constructFileName(char *directory, time_t data_time)
   
   // Now construct the file path
 
-  sprintf(file_path, "%s%s%02d%02d%02d.mdv",
+  safe_snprintf(file_path, "%s%s%02d%02d%02d.mdv",
 	  dir_path, PATH_DELIM,
 	  time_struct.hour, time_struct.min, time_struct.sec);
   

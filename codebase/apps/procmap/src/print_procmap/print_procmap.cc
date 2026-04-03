@@ -34,6 +34,7 @@
 
 #include "print_procmap.hh"
 #include <toolsa/str.h>
+#include <toolsa/safe_snprintf.hh>
 #include <toolsa/DateTime.hh>
 #include <toolsa/file_io.h>
 #include <toolsa/PmuInfo.hh>
@@ -234,17 +235,19 @@ int print_procmap::_queryMapper()
     char filename[MAX_PATH_LEN];
     char path[MAX_PATH_LEN];
     
-    sprintf(filename, "processes_%s_%.4d%.2d%.2d_%.2d%.2d%.2d.%s",
-            hostName.c_str(),
-	    hostDateTime.getYear(),
-	    hostDateTime.getMonth(),
-	    hostDateTime.getDay(),
-	    hostDateTime.getHour(),
-	    hostDateTime.getMin(),
-	    hostDateTime.getSec(),
-            ext.c_str());
+    safe_snprintf(filename,
+                  "processes_%s_%.4d%.2d%.2d_%.2d%.2d%.2d.%s",
+                  hostName.c_str(),
+                  hostDateTime.getYear(),
+                  hostDateTime.getMonth(),
+                  hostDateTime.getDay(),
+                  hostDateTime.getHour(),
+                  hostDateTime.getMin(),
+                  hostDateTime.getSec(),
+                  ext.c_str());
 
-    sprintf(path, "%s%s%s", outputDir.c_str(), PATH_DELIM, filename);
+    safe_snprintf(path, "%s%s%s",
+                  outputDir.c_str(), PATH_DELIM, filename);
     
     FILE *out = stdout;
     if ((out = fopen(path, "w")) == NULL) {
