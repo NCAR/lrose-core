@@ -86,7 +86,8 @@ inline float kelvin2Celsius(const float kelvin_temp)
 //            
 //  compute saturation vapor pressure (Pa) over liquid with
 //  polynomial fit of goff-gratch (1946) formulation. (walko, 1991)
-static float e_sub_s(const float temp_K)
+
+inline float e_sub_s(const float temp_K)
 {
   float c[9] = {610.5851, 44.40316, 1.430341, .2641412e-1, .2995057e-3, 
 		.2031998e-5, .6936113e-8, .2564861e-11, -.3704404e-13 };

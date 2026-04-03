@@ -134,7 +134,7 @@ int AirTempFromVptmpMixrPres::derive(vector<float*> *inputs, vector<float*> *out
   outputs->push_back(tmp);
   
   float *tmpPtr = tmp;
-  float hspec, theta;
+  float theta;
 
   for (int i = 0; i < nPts; i++, vptmpPtr++, mixrPtr++, presPtr++, tmpPtr++) {
     if((*vptmpPtr == missing) || (*vptmpPtr == bad) ||
@@ -142,7 +142,7 @@ int AirTempFromVptmpMixrPres::derive(vector<float*> *inputs, vector<float*> *out
        (*presPtr == missing) || (*presPtr == bad)) {
       *tmpPtr = missing;
     } else {
-      //hspec = (*mixrPtr)/(1.0 + (*mixrPtr));
+      //float hspec = (*mixrPtr)/(1.0 + (*mixrPtr));
       //theta = (*vptmpPtr)/(1.0+0.6078*hspec);
       //*tmpPtr = kelvin2Celsius( pow(theta*((*presPtr)/100000.0), 0.286) );
 

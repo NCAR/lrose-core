@@ -95,7 +95,7 @@ MdvxField *Physics::calcBoundingPressure(const MdvxField &pressure_field) //mb
   Mdvx::field_header_t p_fld_hdr = pressure_field.getFieldHeader();
   fl32 *p_data = (fl32 *)pressure_field.getVol();
   
-  Mdvx::field_header_t pf_fld_hdr = bounding_pres_field->getFieldHeader();
+  // Mdvx::field_header_t pf_fld_hdr = bounding_pres_field->getFieldHeader();
   fl32 *pf_data = (fl32 *)bounding_pres_field->getVol();
   
   int plane_size = p_fld_hdr.nx * p_fld_hdr.ny;
@@ -310,8 +310,8 @@ bool Physics::calcCapeCin(AdiabatTempLookupTable &lookup_table,
       
       // Find the levels for doing the processing
 
-      double parcel_mixing_ratio;   // g/g
-      double parcel_temp;           // K
+      double parcel_mixing_ratio = -9999.0;   // g/g
+      double parcel_temp = -9999.0;           // K
 
       if (process_3d)
       {
@@ -323,7 +323,7 @@ bool Physics::calcCapeCin(AdiabatTempLookupTable &lookup_table,
 	// Find the parcel with max theta-e in lowest 3 km AGL
 
 	double ethmax = -1.0;
-	int klev;
+	int klev = -1;
 	bool valid_data_found = false;
 	
 //	for (int k = true_max_calc_level; k >= true_min_calc_level; --k)
@@ -571,7 +571,7 @@ bool Physics::calcCapeCin(AdiabatTempLookupTable &lookup_table,
 //	buoyancy[buoy_level] = 0.0;
 	int lcl_indicator = 0;
 	int lfc_indicator = 0;
-	int klcl;
+	// int klcl;
 	
 	// Initialize the bouyancy bounds to extreme values
 
@@ -583,7 +583,7 @@ bool Physics::calcCapeCin(AdiabatTempLookupTable &lookup_table,
 	if (parcel_height >= lcl_height)
 	{
 	  lcl_indicator = 2;
-	  klcl = 1;
+	  // klcl = 1;
 	}
 	
 	bool missing_data_found = false;
@@ -819,8 +819,8 @@ bool Physics::calcCapeCin(AdiabatTempLookupTable &lookup_table,
 	// not really at buoy_array_size, but this will make the rest of the
 	// routine behave properly.
 
-	if (lcl_indicator == 0)
-	  klcl = buoy_array_size;
+	// if (lcl_indicator == 0)
+	//   klcl = buoy_array_size;
 	
 	// Get the accumulated buoyant energy from the parcel's starting
 	// point, at all levels up to the top level.
