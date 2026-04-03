@@ -42,22 +42,17 @@ int main(int argc, char *argv[]){
     exit(-1);
   }
 
-  char *inUrl = argv[1];
+  const char *url = argv[1];
 
-  char url[1024];
-  sprintf(url, "%s", inUrl);
-
-
-  //
   // If the port number, 5440, is specified in the URL, this causes issues.
-  // We need to strip that out.
-  //
-  char *p = strstr(url, "5440");
-  if (p != NULL){
-    sprintf(p, "%s", p+4);
-  }
 
-  // fprintf(stderr, "Using URL %s\n", url);
+  if (strstr(url, "5440") != nullptr) {
+    cerr << "ERROR - your url specifies the port number as :5440:" << endl;
+    cerr << "You need to use a url that does not include the port number" << endl;
+    return -1;
+  }
+  
+  cerr << "-->> Using URL: " << url << endl;
 
   int lookBack = 86400;
   if (argc > 2){
