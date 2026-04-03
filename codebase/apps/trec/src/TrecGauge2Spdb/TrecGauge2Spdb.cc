@@ -317,7 +317,7 @@ int TrecGauge2Spdb::_computeMeanVel(time_t trec_time,
   wt_gauge = gauge.gauge_weight;
   
   bool use_time_av_wind = true;
-  if (!_params.motion == Params::MEAN_WIND_MOTION) {
+  if (_params.motion == !Params::MEAN_WIND_MOTION) {
     use_time_av_wind = false;
   }
   if (_computeTimeAvGaugeWind(trec_time, gauge,
