@@ -234,7 +234,7 @@ int BeamMgr::readCalFromFile(const string &calPath)
   
   // read in buffer, close file
   
-  if (ta_fread(xmlBuf, 1, fileLen, calFile) != fileLen) {
+  if (ta_fread(xmlBuf, 1, fileLen, calFile) != static_cast<size_t>(fileLen)) {
     int errNum = errno;
     cerr << "ERROR - BeamMgr::_readCalFromFile" << endl;
     cerr << "  Cannot read file: " << calPath << endl;

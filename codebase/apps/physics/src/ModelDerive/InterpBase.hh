@@ -70,7 +70,7 @@ public:
 
   virtual int interp(vector<float*> *inputs, vector<float*> *data, vector<float*> *outputs)
   {
-    if(inputs->size() != this->numberOfInputs) {
+    if (inputs->size() != static_cast<size_t>(this->numberOfInputs)) {
       return -2;
     }
     return 0;

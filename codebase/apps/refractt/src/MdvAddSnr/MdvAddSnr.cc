@@ -434,7 +434,7 @@ bool MdvAddSnr::_processData(const DateTime &trigger_time)
   
   // Compress the fields and write the output file
 
-  for (int i = 0; i < mdvx.getNFields(); ++i)
+  for (int i = 0; i < static_cast<int>(mdvx.getNFields()); ++i)
   {
     MdvxField *field = mdvx.getField(i);
     field->convertType(Mdvx::ENCODING_INT8,

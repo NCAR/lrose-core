@@ -194,7 +194,7 @@ int Fmq2Fmq::_run ()
 
       // add message to write cache
       
-      for (int ii = 0; ii < _outputFmqs_.size(); ii++) {
+      for (size_t ii = 0; ii < _outputFmqs_.size(); ii++) {
         DsFmq &fmq = _outputFmqs[ii];
         if (fmq.isOpen()) {
           PMU_auto_register("write to cache");
@@ -207,7 +207,7 @@ int Fmq2Fmq::_run ()
     
     // write
 
-    for (int ii = 0; ii < _outputFmqs_.size(); ii++) {
+    for (size_t ii = 0; ii < _outputFmqs_.size(); ii++) {
       DsFmq &fmq = _outputFmqs[ii];
       PMU_auto_register("write to output");
       int cacheSize = fmq.getWriteCacheSize();
@@ -252,7 +252,7 @@ void Fmq2Fmq::_openOutputFmqs()
   }
   _prevTimeForOpen = now;
 
-  for (int ii = 0; ii < _outputFmqs_.size(); ii++) {
+  for (size_t ii = 0; ii < _outputFmqs_.size(); ii++) {
     
     if (_params.debug) {
       cerr << "Opening FMQ to URL: " << _params._output_urls[ii] << endl;

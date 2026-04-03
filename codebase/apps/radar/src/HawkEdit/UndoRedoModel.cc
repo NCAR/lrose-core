@@ -152,7 +152,8 @@ string UndoRedoModel::moveToNextVersion(int fileNum) { //  or (path/file)
 }
 
 bool UndoRedoModel::_validFileNum(int fileNum) {
-  return ((fileNum >= 0) && (fileNum < currentVersion.size()));
+  return ((fileNum >= 0) &&
+          (fileNum < static_cast<int>(currentVersion.size())));
 } 
 
 string UndoRedoModel::getCurrentVersion(int fileNum) {
@@ -223,7 +224,7 @@ void UndoRedoModel::batchUndo() {
   if (_currentBatchIndex-1 >= 0) {
     _currentBatchIndex -= 1;    
     vector<int> *previousBatch = batches.at(_currentBatchIndex);
-    for (int i=0; i<currentVersion.size(); i++) {
+    for (size_t i = 0; i < currentVersion.size(); i++) {
       currentVersion.at(i) = previousBatch->at(i);
     }
   } else {
@@ -236,7 +237,7 @@ void UndoRedoModel::batchRedo() {
   if (_currentBatchIndex+1 < batches.size()) {
     _currentBatchIndex += 1;    
     vector<int> *previousBatch = batches.at(_currentBatchIndex);
-    for (int i=0; i<currentVersion.size(); i++) {
+    for (size_t i = 0; i < currentVersion.size(); i++) {
       currentVersion.at(i) = previousBatch->at(i);
     }
   } else {
@@ -253,7 +254,7 @@ void UndoRedoModel::makeNewBatch() {
   newBatch->resize(nFiles);
   // push previous versions onto stack
   // these will always be -1 from the current versions
-  for (int i=0; i<nFiles; i++) {
+  for (size_t i = 0; i < nFiles; i++) {
     newBatch->at(i) = currentVersion.at(i); // -1;
   }
   batches.push_back(newBatch);
@@ -273,10 +274,10 @@ void UndoRedoModel::makeNewBatch() {
 void UndoRedoModel::_printBatchStack() {
 
   cerr << "_currentBatchIndex = " << _currentBatchIndex << endl;
-  for (int i=0; i<batches.size(); i++) {
+  for (size_t i = 0; i < batches.size(); i++) {
     cerr << "batch[" << i << "]:  ";
     vector<int> *batch = batches.at(i);
-    for (int b=0; b<batch->size(); b++) {
+    for (size_t b = 0; b < batch->size(); b++) {
       cerr << batch->at(b) << " ";
     }
     cerr << endl;
@@ -495,4 +496,3 @@ void UndoRedoModel::_removeTempDirs() {
   //
   
 }
-

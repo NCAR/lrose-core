@@ -179,7 +179,7 @@ int ReadMsg(char *program_name, ui08 *pBuf)
 
       if (len == 0)
 	return(msgLen);
-      else if (len == -1)
+      else if (len == 0xffffffffU)
       {
 	fprintf(stderr, "\n%s: error in data\n", program_name);
 
@@ -196,7 +196,7 @@ int ReadMsg(char *program_name, ui08 *pBuf)
 	break;
       }
 
-      if (NetIORead(pTmp, len) != len)
+      if (NetIORead(pTmp, len) != static_cast<int>(len))
       {
 	fprintf(stderr, "\nReadMsg data Read returned an Error");
 	return( -1);

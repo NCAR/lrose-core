@@ -1112,11 +1112,11 @@ int NcfWrapper::readInt32Array(const string &name,
   try {
     fillValAtt = var.getAtt("_FillValue");
   }
-  catch (NcxxException e) {
+  catch (const NcxxException &e) {
     try {
       fillValAtt = var.getAtt("missingValue");
     }
-    catch (NcxxException e) {
+    catch (const NcxxException &e) {
     }
   }
   
@@ -1293,11 +1293,11 @@ int NcfWrapper::readInt64Array(const string &name,
   try {
     fillValAtt = var.getAtt("_FillValue");
   }
-  catch (NcxxException e) {
+  catch (const NcxxException &e) {
     try {
       fillValAtt = var.getAtt("missingValue");
     }
-    catch (NcxxException e) {
+    catch (const NcxxException &e) {
     }
   }
   
@@ -1473,11 +1473,11 @@ int NcfWrapper::readDoubleArray(const string &name,
   try {
     fillValAtt = var.getAtt("_FillValue");
   }
-  catch (NcxxException e) {
+  catch (const NcxxException &e) {
     try {
       fillValAtt = var.getAtt("missingValue");
     }
-    catch (NcxxException e) {
+    catch (const NcxxException &e) {
     }
   }
   

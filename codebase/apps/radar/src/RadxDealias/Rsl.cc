@@ -119,7 +119,7 @@ void Rsl::free_volume(Volume *volume) {
   if (volume == NULL) return;
 
   Sweep **sweeps = volume->sweep;
-  for (Radx::si32 i=0; i<volume->h.nsweeps; i++) {
+  for (Radx::si32 i = 0; i < static_cast<Radx::si32>(volume->h.nsweeps); i++) {
     free_sweep(sweeps[i]);
   }
   free(volume->sweep);
@@ -133,7 +133,7 @@ void Rsl::free_sweep(Sweep *sweep) {
   if (sweep == NULL) return;
 
   Ray **rays = sweep->ray;
-  for (Radx::si32 i=0; i<sweep->h.nrays; i++) {
+  for (Radx::si32 i = 0; i < static_cast<Radx::si32>(sweep->h.nrays); i++) {
     free_ray(rays[i]);
   }
   free(sweep->ray);
@@ -205,7 +205,7 @@ Sweep *Rsl::copy_sweep(Sweep *sweep) {
   sweepCopy->h.maxBinsInSweep = sweep->h.maxBinsInSweep;
 
   // copy the rays
-  for (int i=0; i<sweep->h.nrays; i++) {
+  for (int i = 0; i < static_cast<int>(sweep->h.nrays); i++) {
     //Ray **rays = sweep->ray;
     //Ray **copyOfRays = sweepCopy->ray;
     //Ray *rayCopy = Rsl::copy_ray(rays[i]);
@@ -239,7 +239,7 @@ Volume *Rsl::copy_volume(Volume *v, bool debug) {
   vcopy->h.nsweeps = v->h.nsweeps;
 
   // copy the sweeps
-  for (int i=0; i<v->h.nsweeps; i++) {
+  for (int i = 0; i < static_cast<int>(v->h.nsweeps); i++) {
     // Sweep **sweeps = v->sweep;
     //Sweep **copyOfSweeps = vcopy->sweep;
     //Sweep *sweepCopy = Rsl::copy_sweep(sweeps[i]);
@@ -335,7 +335,7 @@ void Rsl::print_ray(Ray *ray)
     if (ray->range != NULL) {
       Range *bin = ray->range;
       int maxToPrint = min<size_t>(20, ray->h.nbins);
-      for (int i = 0; i < maxToPrint; i++) {
+      for (int i = 0; i < static_cast<int>(maxToPrint); i++) {
 	cout << bin[i] << " ";
       }
       cout << endl;
@@ -368,7 +368,7 @@ void Rsl::print_sweep(Sweep *sweep)
     if (sweep->ray != NULL) {
       Ray **ray = sweep->ray;
       int maxToPrint = min<size_t>(5, sweep->h.nrays);
-      for (int i = 0; i < maxToPrint; i++) {
+      for (int i = 0; i < static_cast<int>(maxToPrint); i++) {
         cout << "  Ray " << i << endl;
 	print_ray(ray[i]);
       }
@@ -398,7 +398,7 @@ void Rsl::findMaxNBins(Volume *volume, int *maxNBins, int *maxNRays, bool debug)
   int maxBins = 0;
   int maxRays = 0;
   if (volume != NULL) {
-    for (int i=0; i<volume->h.nsweeps; i++) {
+    for (int i = 0; i < static_cast<int>(volume->h.nsweeps); i++) {
       if (volume->sweep[i] != NULL) {
 	int nrays = volume->sweep[i]->h.nrays;
 	if (nrays > maxRays)
@@ -452,13 +452,13 @@ void Rsl::verifyEqualDimensions(Volume *currDbzVol, Volume *currVelVol) {
   if (currDbzVol->h.nsweeps != currVelVol->h.nsweeps)
     throw "ERROR - velocity and reflectivity must has same number of sweeps";
 
-  for (int s=0; s<currDbzVol->h.nsweeps; s++) {
+  for (int s = 0; s < static_cast<int>(currDbzVol->h.nsweeps); s++) {
     if (currDbzVol->sweep[s]->h.nrays != currVelVol->sweep[s]->h.nrays) {
       char msg[1024];
       sprintf(msg, "ERROR - velocity and reflectivity need same number of rays for each sweep\n. Check sweep %d\n", s);
       throw msg;
     }
-    for (int r=0; r<currDbzVol->sweep[s]->h.nrays; r++) {
+    for (int r = 0; r < static_cast<int>(currDbzVol->sweep[s]->h.nrays); r++) {
       if (currDbzVol->sweep[s]->ray[r]->h.nbins != currVelVol->sweep[s]->ray[r]->h.nbins) {
         char msg[1024];
         sprintf(msg, "ERROR - velocity and reflectivity need same number of bins for each ray\n. Check ray %d\n", r);
@@ -482,7 +482,7 @@ void Rsl::verifyEqualDimensionsGetMaxDimensions(Volume *currDbzVol, Volume *curr
   int maxBins = 0;
   int maxRays = 0;
 
-  for (int s=0; s<currDbzVol->h.nsweeps; s++) {
+  for (int s = 0; s < static_cast<int>(currDbzVol->h.nsweeps); s++) {
     // check for NULL
     if ((currDbzVol->sweep[s] == NULL) || (currVelVol->sweep[s] == NULL)) {
       char msg[1024];
@@ -499,7 +499,7 @@ void Rsl::verifyEqualDimensionsGetMaxDimensions(Volume *currDbzVol, Volume *curr
     if (nrays > maxRays)
       maxRays = nrays;
     
-    for (int r=0; r<currDbzVol->sweep[s]->h.nrays; r++) {
+    for (int r = 0; r < static_cast<int>(currDbzVol->sweep[s]->h.nrays); r++) {
       // check for NULL
       if ((currDbzVol->sweep[s]->ray[r] == NULL) || (currVelVol->sweep[s]->ray[r] == NULL)) {
         char msg[1024];

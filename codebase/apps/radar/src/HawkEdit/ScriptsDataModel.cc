@@ -598,13 +598,13 @@ void ScriptsDataModel::_selectFieldsNotInVolume(vector<string> *allFieldNames) {
   vector<string> *primaryFieldNames = getUniqueFieldNameList();
   vector<string>::iterator it;
   for (it = primaryFieldNames->begin(); it != primaryFieldNames->end(); ++it) {
-    int i=0; 
+    size_t i = 0;
     bool found = false;
-    while (i<allFieldNames->size() && !found) {
+    while (i < allFieldNames->size() && !found) {
       if (allFieldNames->at(i).compare(*it) != string::npos) {
         found = true;
         // remove from list
-        allFieldNames->erase(allFieldNames->begin()+i);
+        allFieldNames->erase(allFieldNames->begin() + i);
         cerr << "not reading " << *it << endl;
       }
       i++;
@@ -617,13 +617,13 @@ void ScriptsDataModel::_selectFieldsNotInCurrentVersion(
 
   vector<string>::iterator it;
   for (it = currentVersionFieldNames->begin(); it != currentVersionFieldNames->end(); ++it) {
-    int i=0; 
+    size_t i = 0;
     bool found = false;
-    while (i<allFieldNames->size() && !found) {
+    while (i < allFieldNames->size() && !found) {
       if (allFieldNames->at(i).compare(*it) != string::npos) {
         found = true;
         // remove from list
-        allFieldNames->erase(allFieldNames->begin()+i);
+        allFieldNames->erase(allFieldNames->begin() + i);
         cerr << "not reading " << *it << endl;
       }
       i++;
@@ -1133,7 +1133,7 @@ size_t ScriptsDataModel::getFirstRayIndex(int sweepIndex) {
   _vol->loadRaysFromFields();
   
   const vector<RadxSweep *> sweeps = _vol->getSweeps();
-  if (sweepIndex >= sweeps.size()) {
+  if (sweepIndex >= static_cast<int>(sweeps.size())) {
     throw std::invalid_argument("ScriptsDataModel::getFirstRayIndex: sweep index > number of sweeps");
   }
   RadxSweep *sweep = sweeps.at(sweepIndex);  
@@ -1149,7 +1149,7 @@ size_t ScriptsDataModel::getLastRayIndex(int sweepIndex) {
   _vol->loadRaysFromFields();
   
   const vector<RadxSweep *> sweeps = _vol->getSweeps();
-  if ((sweepIndex < 0) || (sweepIndex >= sweeps.size())) {
+  if ((sweepIndex < 0) || (sweepIndex >= static_cast<int>(sweeps.size()))) {
     string msg = "ScriptsDataModel::getLastRayIndex sweepIndex out of bounds ";
     msg.append(std::to_string(sweepIndex));
     throw std::invalid_argument(msg);
@@ -1266,7 +1266,7 @@ void ScriptsDataModel::printAzimuthInRayOrder() {
   //  get the ray for this field 
   const vector<RadxRay *>  &rays = _vol->getRays(); 
   LOG(DEBUG) << "first 20 rays in order ...";
-  for (int i=0; i<20; i++) {
+  for (size_t i = 0; i < 20 && i < rays.size(); i++) {
     RadxRay *ray = rays.at(i);
     LOG(DEBUG) << "ray Az = " << ray->getAzimuthDeg();
   }
@@ -1280,7 +1280,7 @@ int ScriptsDataModel::getSweepNumber(float elevation) {
   int i = 0;
   float delta = 0.01;
   bool found = false;  
-  while ((i < sweepAngles->size()) && !found) {
+  while ((i < static_cast<int>(sweepAngles->size())) && !found) {
     if (fabs(sweepAngles->at(i) - elevation) < delta) {
       found = true;
     } else {
@@ -1301,7 +1301,7 @@ int ScriptsDataModel::getSweepNumber(float elevation) {
       throw std::invalid_argument("ScriptsDataModel::getSweepNumber _vol is NULL; cache not valid");
     } 
     LOG(DEBUG) << "_vol is NULL; cache is valid ";
-    if ((i < 0) || (i >= _cacheSweepNumbers.size())) {
+    if ((i < 0) || (i >= static_cast<int>(_cacheSweepNumbers.size()))) {
       throw std::invalid_argument("ScriptsDataModel::getSweepNumber index out of bounds for cache");
     }
     sweepNumber = _cacheSweepNumbers.at(i);
@@ -1317,9 +1317,9 @@ int ScriptsDataModel::getSweepNumber(float elevation) {
 int ScriptsDataModel::getSweepIndexFromSweepNumber(int sweepNumber) {
   vector<RadxSweep *> sweeps = _vol->getSweeps();
   int idx = -1;
-  for (int i = 0; i<sweeps.size(); i++) {
+  for (size_t i = 0; i < sweeps.size(); i++) {
     if (sweeps.at(i)->getSweepNumber() == sweepNumber) {
-      idx = i;
+      idx = static_cast<int>(i);
     }
   }
   if (idx < 0) {
@@ -1337,7 +1337,7 @@ int ScriptsDataModel::getSweepIndexFromSweepAngle(float elevation) {
   int i = 0;
   float delta = 0.01;
   bool found = false;  
-  while ((i < sweepAngles->size()) && !found) {
+  while ((i < static_cast<int>(sweepAngles->size())) && !found) {
     if (fabs(sweepAngles->at(i) - elevation) < delta) {
       found = true;
     } else {
@@ -1358,7 +1358,7 @@ double ScriptsDataModel::getSweepAngleFromSweepNumber(int sweepNumber) {
   int i = 0;
   bool found = false;  
   vector<int> *sweepNumbers = getSweepNumbers();
-  while ((i < sweepNumbers->size()) && !found) {
+  while ((i < static_cast<int>(sweepNumbers->size())) && !found) {
     if (sweepNumbers->at(i) == sweepNumber) {
       found = true;
     } else {
@@ -2097,4 +2097,3 @@ size_t ScriptsDataModel::calculateRayIndex_f(size_t idx, size_t start, size_t en
   }
   return new_idx;
 }
-

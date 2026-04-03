@@ -552,7 +552,7 @@ string SoloFunctionsModel::ZeroMiddleThird(string fieldName,  // RadxVol *vol,
     newData[i] = data[i];   
   for (int i=10; i<30; i++)
     newData[i] = 0;
-  for (int i=30; i<nGates; i++)
+  for (size_t i = 30; i < nGates; i++)
     newData[i] = data[i];   
 
   // insert new field into RadxVol                                                                             

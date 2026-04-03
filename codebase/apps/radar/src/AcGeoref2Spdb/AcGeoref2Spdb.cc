@@ -900,7 +900,7 @@ int AcGeoref2Spdb::_readGlobalAttr()
   
   try {
     _file.readGlobAttr("time_coordinate", _timeCoordName);
-  } catch (NcxxException e) {
+  } catch (const NcxxException &e) {
     cerr << "ERROR - AcGeoref2Spdb::_readGlobalAttr()" << endl;
     cerr << "  Cannot find global attr: 'time_coordinate'" << endl;
     cerr << "  exception: " << e.what() << endl;
@@ -909,7 +909,7 @@ int AcGeoref2Spdb::_readGlobalAttr()
 
   try {
     _file.readGlobAttr("latitude_coordinate", _latCoordName);
-  } catch (NcxxException e) {
+  } catch (const NcxxException &e) {
     cerr << "ERROR - AcGeoref2Spdb::_readGlobalAttr()" << endl;
     cerr << "  Cannot find global attr: 'latitude_coordinate'" << endl;
     cerr << "  exception: " << e.what() << endl;
@@ -918,7 +918,7 @@ int AcGeoref2Spdb::_readGlobalAttr()
 
   try {
     _file.readGlobAttr("longitude_coordinate", _lonCoordName);
-  } catch (NcxxException e) {
+  } catch (const NcxxException &e) {
     cerr << "ERROR - AcGeoref2Spdb::_readGlobalAttr()" << endl;
     cerr << "  Cannot find global attr: 'longitude_coordinate'" << endl;
     cerr << "  exception: " << e.what() << endl;

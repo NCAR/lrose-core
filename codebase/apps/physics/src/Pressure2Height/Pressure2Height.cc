@@ -604,7 +604,7 @@ bool Pressure2Height::_processData(const TriggerInfo &trigger_info)
   
   // Convert the input fields from pressure to height
 
-  for (int i = 0; i < input_file.getNFields(); ++i)
+  for (int i = 0; i < static_cast<int>(input_file.getNFields()); ++i)
   {
     MdvxField *field = input_file.getField(i);
     
@@ -757,7 +757,7 @@ bool Pressure2Height::_readInputFile(DsMdvx &mdvx,
 
   MdvxProj proj1(mdvx.getField(0)->getFieldHeader());
   
-  for (int i = 1; i < mdvx.getNFields(); ++i)
+  for (int i = 1; i < static_cast<int>(mdvx.getNFields()); ++i)
   {
     MdvxProj proj(mdvx.getField(i)->getFieldHeader());
     

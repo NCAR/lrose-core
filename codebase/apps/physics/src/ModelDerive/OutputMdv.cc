@@ -154,7 +154,7 @@ int OutputMdv::writeVol(Mdvx::master_header_t masterHdr, const char *dataSetInfo
     // Gather all fields in the output file and stored local to be output
     // that match the input fields dimensions.
     //
-    for(int a = 0; a < fields.size(); a++) {
+    for (size_t a = 0; a < fields.size(); a++) {
 
       field_hdr = fields[a]->getFieldHeader();
       vlevel_hdr = fields[a]->getVlevelHeader();
@@ -200,7 +200,7 @@ int OutputMdv::writeVol(Mdvx::master_header_t masterHdr, const char *dataSetInfo
     // Swap out the data in the field for the new interpolated data
     // If using Grib2 convetion vertical level field names, switch those
     //
-    for(int a = 0; a < data_index.size(); a++) {
+    for (size_t a = 0; a < data_index.size(); a++) {
       fields[data_index[a]]->clearVolData();
 
       //
@@ -267,9 +267,9 @@ int OutputMdv::writeVol(Mdvx::master_header_t masterHdr, const char *dataSetInfo
     // Load previous mdv fields and add them to our list
     //
     vector<MdvxField *> f = mdvx.getFields();
-    for(int a = 0; a < f.size(); a++) {
+    for (size_t a = 0; a < f.size(); a++) {
       overwrite = false;
-      for(int b = 0; b < fields.size(); b++)
+      for (size_t b = 0; b < fields.size(); b++)
 	if(strcmp(f[a]->getFieldHeader().field_name, fields[b]->getFieldHeader().field_name) == 0)
 	  overwrite = true;
       if(!overwrite) {
@@ -293,7 +293,7 @@ int OutputMdv::writeVol(Mdvx::master_header_t masterHdr, const char *dataSetInfo
   Mdvx::scaling_type_t scalingType = 
     (Mdvx::scaling_type_t)_params->scaling_type;
   
-  for(int a = 0; a < fields.size(); a++) {
+  for (size_t a = 0; a < fields.size(); a++) {
     //
     // Convert to specified type and encode
     //
@@ -366,7 +366,7 @@ void OutputMdv::createMdvxField(Mdvx::field_header_t fieldHeader, Mdvx::vlevel_h
 MdvxField *OutputMdv::getField(char *fieldName)
 {
   MdvxField *field = NULL;
-  for(int a = 0; a < fields.size(); a++) {
+  for (size_t a = 0; a < fields.size(); a++) {
     field = fields[a];
     if(strcasecmp(field->getFieldName(), fieldName) == 0)
       return field;

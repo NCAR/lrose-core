@@ -75,7 +75,8 @@ VariableFromVar1Var2::~VariableFromVar1Var2() { }
 int VariableFromVar1Var2::derive(vector<float*> *inputs, vector<float*> *outputs) 
 {
   int returnValue;
-  if(returnValue = DeriveBase::derive(inputs, outputs))
+  returnValue = DeriveBase::derive(inputs, outputs);
+  if (returnValue)
     return returnValue;
 
   // Add your variable deriving function here
@@ -126,7 +127,8 @@ WindSpeedDirectionFromUV::~WindSpeedDirectionFromUV() { }
 int WindSpeedDirectionFromUV::derive(vector<float*> *inputs, vector<float*> *outputs) 
 {
   int returnValue;
-  if(returnValue = DeriveBase::derive(inputs, outputs))
+  returnValue = DeriveBase::derive(inputs, outputs);
+  if (returnValue)
     return returnValue;
   
   const float *uPtr = (*inputs)[0];

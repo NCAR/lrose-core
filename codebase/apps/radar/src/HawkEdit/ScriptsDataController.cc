@@ -448,13 +448,13 @@ void ScriptsDataController::_selectFieldsNotInVolume(vector<string> *allFieldNam
   vector<string> *primaryFieldNames = getUniqueFieldNameList();
   vector<string>::iterator it;
   for (it = primaryFieldNames->begin(); it != primaryFieldNames->end(); ++it) {
-    int i=0; 
+    size_t i = 0;
     bool found = false;
-    while (i<allFieldNames->size() && !found) {
+    while (i < allFieldNames->size() && !found) {
       if (allFieldNames->at(i).compare(*it) != string::npos) {
         found = true;
         // remove from list
-        allFieldNames->erase(allFieldNames->begin()+i);
+        allFieldNames->erase(allFieldNames->begin() + i);
         cerr << "not reading " << *it << endl;
       }
       i++;
@@ -467,13 +467,13 @@ void ScriptsDataController::_selectFieldsNotInCurrentVersion(
 
   vector<string>::iterator it;
   for (it = currentVersionFieldNames->begin(); it != currentVersionFieldNames->end(); ++it) {
-    int i=0; 
+    size_t i = 0;
     bool found = false;
-    while (i<allFieldNames->size() && !found) {
+    while (i < allFieldNames->size() && !found) {
       if (allFieldNames->at(i).compare(*it) != string::npos) {
         found = true;
         // remove from list
-        allFieldNames->erase(allFieldNames->begin()+i);
+        allFieldNames->erase(allFieldNames->begin() + i);
         cerr << "not reading " << *it << endl;
       }
       i++;
@@ -2086,4 +2086,3 @@ size_t ScriptsDataController::calculateRayIndex_f(size_t idx, size_t start, size
   }
   return new_idx;
 }
-

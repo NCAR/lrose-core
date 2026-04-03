@@ -131,7 +131,7 @@ int FourDD::getNumBins(Volume *volume, size_t sweepIndex, size_t rayIndex) {
     throw std::invalid_argument("getNumBins: sweepIndex outside range");
   if (volume->sweep[sweepIndex] == NULL) 
     throw std::invalid_argument("getNumBins: volume->sweep[sweepIndex] is NULL");
-  if (rayIndex >= volume->sweep[sweepIndex]->h.nrays) 
+  if (rayIndex >= static_cast<size_t>(volume->sweep[sweepIndex]->h.nrays)) 
     throw std::invalid_argument("getNumBins: rayIndex outside range");
   return volume->sweep[sweepIndex]->ray[rayIndex]->h.nbins;
 }
@@ -342,7 +342,8 @@ int FourDD::findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int
      // validate arguments ...
      if ((rvVolume1 == NULL) || (rvVolume2 == NULL))  
        throw std::invalid_argument("Volume is NULL");
-     if ((sweepIndex1 > rvVolume1->h.nsweeps) || (sweepIndex2 > rvVolume2->h.nsweeps))
+     if ((sweepIndex1 > static_cast<int>(rvVolume1->h.nsweeps)) ||
+         (sweepIndex2 > static_cast<int>(rvVolume2->h.nsweeps)))
        throw std::invalid_argument("sweepIndex exceeds number of sweeps in volume");
      if ((sweepIndex1 < 0) || (sweepIndex2 < 0)) 
        throw std::invalid_argument("sweepIndex < 0");
@@ -603,7 +604,7 @@ void FourDD::prepVolume(Volume* DBZVolume, Volume* rvVolume, int del_num_bins,
 	  last_bin = numBins;
 	}
         //printf("last_bin = %d\n", last_bin);
-	for (i = 0; i < last_bin; i++) {	     
+	for (i = 0; i < static_cast<int>(last_bin); i++) {	     
 	  rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = velocityMissingValue;
 	  DBZVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = dbzMissingValue;
 	}
@@ -653,11 +654,11 @@ bool FourDD::_missing(Volume *original, size_t sweepIndex, size_t rayIndex, size
     return true; // missingValue;
   if (original->sweep[sweepIndex] == NULL)
     return true; // missingValue;
-  if (rayIndex >= original->sweep[sweepIndex]->h.nrays)
+  if (rayIndex >= static_cast<size_t>(original->sweep[sweepIndex]->h.nrays))
     return true; // missingValue;
   if (original->sweep[sweepIndex]->ray == NULL)
     return true; // missingValue;
-  if (rangeIndex >= original->sweep[sweepIndex]->ray[rayIndex]->h.nbins)
+  if (rangeIndex >= static_cast<size_t>(original->sweep[sweepIndex]->ray[rayIndex]->h.nbins))
     return true; // missingValue;
   if (original->sweep[sweepIndex]->ray[rayIndex]->range == NULL)
     return true; // missingValue;
@@ -681,7 +682,7 @@ short FourDD::Filter3x3(Volume *original, int i, int currIndex, int sweepIndex,
   if (original == NULL) 
     throw std::invalid_argument("original is NULL");
 
-  if ((sweepIndex < 0) || (sweepIndex >= original->h.nsweeps)) 
+  if ((sweepIndex < 0) || (sweepIndex >= static_cast<int>(original->h.nsweeps))) 
     throw std::invalid_argument("sweepIndex outside range");
  
   int numRays = original->sweep[sweepIndex]->h.nrays;
@@ -1480,7 +1481,9 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
     throw std::invalid_argument("rvVolume is NULL");
   if (original == NULL)
     throw std::invalid_argument("original volume is NULL");
-  if ((sweepIndex < 0) || (sweepIndex >= rvVolume->h.nsweeps) || (sweepIndex >= original->h.nsweeps))
+  if ((sweepIndex < 0) ||
+      (sweepIndex >= static_cast<int>(rvVolume->h.nsweeps)) ||
+      (sweepIndex >= static_cast<int>(original->h.nsweeps)))
     throw std::invalid_argument("sweepIndex must be >= 0 and less than number of sweeps");
   if (del_num_bins < 0)
     throw std::invalid_argument("del_num_bins must be >= 0");
@@ -1512,7 +1515,9 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 	if (endray>numRays-1) endray=endray-numRays;
 	if (firstbin<0) firstbin=0;
 	size_t numBins = getNumBins(rvVolume, sweepIndex, currIndex);
-	if (lastbin>numBins-1) lastbin=numBins-1;
+	if (lastbin > static_cast<int>(numBins) - 1) {
+	  lastbin = static_cast<int>(numBins) - 1;
+	}
 
 	bool success = false;
 	float averageVelocity = window(rvVolume, sweepIndex, startray, endray, 
@@ -1530,7 +1535,7 @@ void FourDD::UnfoldRemoteBinsOrUnsuccessfulBinsUsingWindow(short **STATE, Volume
 	  if (startray<0) startray=numRays+startray;
 	  if (endray>numRays-1) endray=endray-numRays;
 	  if (firstbin<0) firstbin=0;
-	  if (lastbin>numBins-1) lastbin=numBins-1;
+	  if (lastbin > static_cast<int>(numBins) - 1) lastbin = static_cast<int>(numBins) - 1;
 	  averageVelocity = window(rvVolume, sweepIndex, startray, endray, 
 			       firstbin, lastbin, min_good,
 			       std_thresh, NyqVelocity, 
@@ -1945,7 +1950,7 @@ float FourDD::window(Volume* rvVolume, int sweepIndex, int startray,
 	   size_t nBinsInRay = rvVolume->sweep[sweepIndex]->ray[currIndex]->h.nbins;
            size_t endBin = min(lastbin, nBinsInRay-1);
 
-	     for (rangeIndex=firstbin; rangeIndex<=endBin; rangeIndex++) {
+	     for (rangeIndex = firstbin; rangeIndex <= static_cast<int>(endBin); rangeIndex++) {
 	       
 	       encodedVal = rvVolume->sweep[sweepIndex]->ray[currIndex]->range[rangeIndex];
 	       
@@ -1962,7 +1967,7 @@ float FourDD::window(Volume* rvVolume, int sweepIndex, int startray,
 	   size_t nBinsInRay = rvVolume->sweep[sweepIndex]->ray[currIndex]->h.nbins;
            size_t endBin = min(lastbin, nBinsInRay-1);
 
-	     for (rangeIndex=firstbin; rangeIndex<=endBin; rangeIndex++) {
+	     for (rangeIndex = firstbin; rangeIndex <= static_cast<int>(endBin); rangeIndex++) {
 		 encodedVal = rvVolume->sweep[sweepIndex]->ray[currIndex]->range[rangeIndex];
 		 
 		 if (!_isMissing(encodedVal, missingVal)) {
@@ -1978,7 +1983,7 @@ float FourDD::window(Volume* rvVolume, int sweepIndex, int startray,
 	 for (currIndex=startray; currIndex<=endray; currIndex++) { 
 	   size_t nBinsInRay = rvVolume->sweep[sweepIndex]->ray[currIndex]->h.nbins;
            size_t endBin = min(lastbin, nBinsInRay-1);
-	   for (rangeIndex=firstbin; rangeIndex<=endBin; rangeIndex++) {
+	   for (rangeIndex = firstbin; rangeIndex <= static_cast<int>(endBin); rangeIndex++) {
 		 encodedVal = rvVolume->sweep[sweepIndex]->ray[currIndex]->range[rangeIndex];
 
 		 if (!_isMissing(encodedVal, missingVal))  {
@@ -2062,4 +2067,3 @@ void FourDD::DestroySTATE(short **STATE, int nbins) {
     delete[] STATE[i];
   delete[] STATE;
 }
-

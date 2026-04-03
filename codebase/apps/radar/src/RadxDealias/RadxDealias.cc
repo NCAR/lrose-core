@@ -888,11 +888,11 @@ Volume *RadxDealias::_extractFieldData(const RadxVol &radxVol, string fieldName)
     }
 
     vector<RadxRay *> radxRays = radxVol.getRays();      
-    for (int j=0; j<newSweep->h.nrays; j++) {
+    for (int j = 0; j < static_cast<int>(newSweep->h.nrays); j++) {
 
-      if (startRayIndex+j > endRayIndex)
+      if (startRayIndex + static_cast<size_t>(j) > endRayIndex)
         throw "ERROR: _extractFieldData: Ray index out of bounds";
-      RadxRay *radxRay = radxRays.at(startRayIndex+j);
+      RadxRay *radxRay = radxRays.at(startRayIndex + static_cast<size_t>(j));
 
       size_t nGates = radxRay->getNGates();
       Rsl::setMaxBinsInSweep(newSweep, nGates);
@@ -1028,14 +1028,14 @@ Volume *RadxDealias::_extractVelocityFieldData(const RadxVol &radxVol, string fi
     }
 
     vector<RadxRay *> radxRays = radxVol.getRays();      
-    for (int j=0; j<newSweep->h.nrays; j++) {
+    for (int j = 0; j < static_cast<int>(newSweep->h.nrays); j++) {
  
       if (j == 481)
         bool here = TRUE;
 
-      if (startRayIndex+j > endRayIndex) 
+      if (startRayIndex + static_cast<size_t>(j) > endRayIndex) 
 	throw "ERROR: _extractVelocityFieldData: Ray index out of bounds";
-      RadxRay *radxRay = radxRays.at(startRayIndex+j);
+      RadxRay *radxRay = radxRays.at(startRayIndex + static_cast<size_t>(j));
 
       size_t nGates = radxRay->getNGates();
       Rsl::setMaxBinsInSweep(newSweep, nGates);
@@ -1078,7 +1078,8 @@ Volume *RadxDealias::_extractVelocityFieldData(const RadxVol &radxVol, string fi
       else {
         if (_params.debug) {
 	  // print the first 10 rays and the last ray's data
-	  if ((j < 10) || (j == newSweep->h.nrays-1)) {
+	  if ((j < 10) ||
+              (j == static_cast<int>(newSweep->h.nrays) - 1)) {
 	    cout << "data values for sweep=" << rslVolumeIdx << 
 	      " ray=" << j << " fieldName=" << fieldName << " " ;
 	    for (int i = 0; i< 50; i++) 
@@ -1157,10 +1158,10 @@ void RadxDealias::_insertFieldData(RadxVol *radxVol, string fieldName, Volume *v
     }
 
     vector<RadxRay *> radxRays = radxVol->getRays();      
-    for (int j=0; j<newSweep->h.nrays; j++) {
+    for (int j = 0; j < static_cast<int>(newSweep->h.nrays); j++) {
 
-      int sweepNumber = rslVolumeIdx;
-      int rayNumRadx = startRayIndex+j;
+      int sweepNumber = static_cast<int>(rslVolumeIdx);
+      size_t rayNumRadx = startRayIndex + static_cast<size_t>(j);
       int rayNumVolume = j;
 
       if (rayNumRadx > endRayIndex)

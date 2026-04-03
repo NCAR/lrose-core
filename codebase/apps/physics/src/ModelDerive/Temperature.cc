@@ -76,7 +76,8 @@ VariableFromVar1Var2::~VariableFromVar1Var2() { }
 int VariableFromVar1Var2::derive(vector<float*> *inputs, vector<float*> *outputs) 
 {
   int returnValue;
-  if(returnValue = DeriveBase::derive(inputs, outputs))
+  returnValue = DeriveBase::derive(inputs, outputs);
+  if (returnValue)
     return returnValue;
 
   // Add your variable deriving function here
@@ -121,7 +122,8 @@ AirTempFromVptmpMixrPres::~AirTempFromVptmpMixrPres() { }
 int AirTempFromVptmpMixrPres::derive(vector<float*> *inputs, vector<float*> *outputs) 
 {
   int returnValue;
-  if(returnValue = DeriveBase::derive(inputs, outputs))
+  returnValue = DeriveBase::derive(inputs, outputs);
+  if (returnValue)
     return returnValue;
   
   const float *vptmpPtr = (*inputs)[0];
@@ -180,7 +182,8 @@ RhFromTmpMixrPres::~RhFromTmpMixrPres() { }
 int RhFromTmpMixrPres::derive(vector<float*> *inputs, vector<float*> *outputs) 
 {
   int returnValue;
-  if(returnValue = DeriveBase::derive(inputs, outputs))
+  returnValue = DeriveBase::derive(inputs, outputs);
+  if (returnValue)
     return returnValue;
   
   const float *tmpPtr = (*inputs)[0];
@@ -236,7 +239,8 @@ RhFromVptmpMixrPres::~RhFromVptmpMixrPres() { }
 int RhFromVptmpMixrPres::derive(vector<float*> *inputs, vector<float*> *outputs) 
 {
   int returnValue;
-  if(returnValue = DeriveBase::derive(inputs, outputs))
+  returnValue = DeriveBase::derive(inputs, outputs);
+  if (returnValue)
     return returnValue;
   
   const float *vptmpPtr = (*inputs)[0];
@@ -297,7 +301,8 @@ RhFromTmpSpecPres::~RhFromTmpSpecPres() { }
 int RhFromTmpSpecPres::derive(vector<float*> *inputs, vector<float*> *outputs) 
 {
   int returnValue;
-  if(returnValue = DeriveBase::derive(inputs, outputs))
+  returnValue = DeriveBase::derive(inputs, outputs);
+  if (returnValue)
     return returnValue;
   
   const float *tmpPtr = (*inputs)[0];

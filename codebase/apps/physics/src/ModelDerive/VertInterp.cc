@@ -59,7 +59,8 @@ LevelFromLvl1::~LevelFromLvl1() { }
 int LevelFromLvl1::interp(vector<float*> *inputs, vector<float*> *data, vector<float*> *outputs)
 {
   int returnValue;
-  if(returnValue = InterpBase::interp(inputs, data, data_out))
+  returnValue = InterpBase::interp(inputs, data, data_out);
+  if (returnValue)
     return returnValue;
 
   // Add your interpolation function here
@@ -100,12 +101,13 @@ AglFromSigma::~AglFromSigma() { }
 int AglFromSigma::interp(vector<float*> *inputs, vector<float*> *data, vector<float*> *data_out)
 {
   int returnValue;
-  if(returnValue = InterpBase::interp(inputs, data, data_out))
+  returnValue = InterpBase::interp(inputs, data, data_out);
+  if (returnValue)
     return returnValue;
 
   const float *zPtr = (*inputs)[0];
 
-  for(int a = 0; a < data->size(); a++) {
+  for (size_t a = 0; a < data->size(); a++) {
     float *odata = new float[oPts];
     data_out->push_back(odata);
   }
@@ -124,15 +126,15 @@ int AglFromSigma::interp(vector<float*> *inputs, vector<float*> *data, vector<fl
 	{
 	  float slope = (zPtr[index(i,j,ink)]-target_alt) / (zPtr[index(i,j,ink)]-zPtr[index(i,j,ink-1)]);
 
-	  for(int a = 0; a < data->size(); a++) {
+	  for (size_t a = 0; a < data->size(); a++) {
 	    (*data_out)[a][oindex(i,j,outk)] = (*data)[a][index(i,j,ink)] -
 	      ((*data)[a][index(i,j,ink)] - (*data)[a][index(i,j,ink-1)]) * slope;
 	  }
 	} else if(ink == 0) {
-	  for(int a = 0; a < data->size(); a++)
+	  for (size_t a = 0; a < data->size(); a++)
 	    (*data_out)[a][oindex(i,j,outk)] = (*data)[a][index(i,j,ink)];
 	} else if(ink == nz) {
-	  for(int a = 0; a < data->size(); a++)
+	  for (size_t a = 0; a < data->size(); a++)
 	    (*data_out)[a][oindex(i,j,outk)] = (*data)[a][index(i,j,ink-1)];
 	}
       }
@@ -157,12 +159,13 @@ IsblFromSigma::~IsblFromSigma() { }
 int IsblFromSigma::interp(vector<float*> *inputs, vector<float*> *data, vector<float*> *data_out)
 {
   int returnValue;
-  if(returnValue = InterpBase::interp(inputs, data, data_out))
+  returnValue = InterpBase::interp(inputs, data, data_out);
+  if (returnValue)
     return returnValue;
 
   const float *pPtr = (*inputs)[0];
 
-  for(int a = 0; a < data->size(); a++) {
+  for (size_t a = 0; a < data->size(); a++) {
     float *odata = new float[oPts];
     data_out->push_back(odata);
   }
@@ -181,15 +184,15 @@ int IsblFromSigma::interp(vector<float*> *inputs, vector<float*> *data, vector<f
 	{
 	  float slope = (pPtr[index(i,j,ink)]-target_alt) / (pPtr[index(i,j,ink)]-pPtr[index(i,j,ink-1)]);
 
-	  for(int a = 0; a < data->size(); a++) {
+	  for (size_t a = 0; a < data->size(); a++) {
 	    (*data_out)[a][oindex(i,j,outk)] = (*data)[a][index(i,j,ink)] -
 	      ((*data)[a][index(i,j,ink)] - (*data)[a][index(i,j,ink-1)]) * slope;
 	  }
 	} else if(ink == 0) {
-	  for(int a = 0; a < data->size(); a++)
+	  for (size_t a = 0; a < data->size(); a++)
 	    (*data_out)[a][oindex(i,j,outk)] = (*data)[a][index(i,j,ink)];
 	} else if(ink == nz) {
-	  for(int a = 0; a < data->size(); a++)
+	  for (size_t a = 0; a < data->size(); a++)
 	    (*data_out)[a][oindex(i,j,outk)] = (*data)[a][index(i,j,ink-1)];
 	}
       }
@@ -214,10 +217,11 @@ FlFromKm::~FlFromKm() { }
 int FlFromKm::interp(vector<float*> *inputs, vector<float*> *data, vector<float*> *data_out)
 {
   int returnValue;
-  if(returnValue = InterpBase::interp(inputs, data, data_out))
+  returnValue = InterpBase::interp(inputs, data, data_out);
+  if (returnValue)
     return returnValue;
 
-  for(int a = 0; a < data->size(); a++) {
+  for (size_t a = 0; a < data->size(); a++) {
     float *odata = new float[oPts];
     data_out->push_back(odata);
   }
@@ -236,7 +240,7 @@ int FlFromKm::interp(vector<float*> *inputs, vector<float*> *data, vector<float*
 
 	if(ink > 0 && zd >= 0.0 && zd <= 1.0)
 	{
-	  for(int a = 0; a < data->size(); a++) {
+	  for (size_t a = 0; a < data->size(); a++) {
 	    if( (*data)[a][index(i,j,ink-1)] == missing ||
 		(*data)[a][index(i,j,ink)] == missing)
 	      (*data_out)[a][oindex(i,j,outk)] = missing;
@@ -268,13 +272,14 @@ SfcFromSigma::~SfcFromSigma() { }
 int SfcFromSigma::interp(vector<float*> *inputs, vector<float*> *data, vector<float*> *data_out)
 {
   int returnValue;
-  if(returnValue = InterpBase::interp(inputs, data, data_out))
+  returnValue = InterpBase::interp(inputs, data, data_out);
+  if (returnValue)
     return returnValue;
 
   if(outz != 1)
     return -1;
 
-  for(int a = 0; a < data->size(); a++) {
+  for (size_t a = 0; a < data->size(); a++) {
     float *odata = new float[oPts];
     data_out->push_back(odata);
   }
@@ -285,7 +290,7 @@ int SfcFromSigma::interp(vector<float*> *inputs, vector<float*> *data, vector<fl
   for(int i = 0; i < nx; i++) {
     for(int j = 0; j < ny; j++) {
       
-      for(int a = 0; a < data->size(); a++) {
+      for (size_t a = 0; a < data->size(); a++) {
 	(*data_out)[a][oindex(i,j,outk)] = (*data)[a][index(i,j,ink)];
       }
 

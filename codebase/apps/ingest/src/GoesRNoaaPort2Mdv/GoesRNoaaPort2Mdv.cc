@@ -717,7 +717,7 @@ void GoesRNoaaPort2Mdv::_readGlobalAttributes() {
     _file.readGlobAttr(SATELLITE_LAT, _globalAtts.satelliteLat);
     _file.readGlobAttr(SATELLITE_LON, _globalAtts.satelliteLon);
     _file.readGlobAttr(SATELLITE_ALT, _globalAtts.satelliteAlt);
-  } catch (NcxxException e) {
+  } catch (const NcxxException &e) {
     NcxxErrStr err;
     ostringstream info;
     info << ERROR_STR << methodName << endl;
@@ -776,7 +776,7 @@ void GoesRNoaaPort2Mdv::_readDimensions() {
       }
     }
   }
-  catch (NcxxException e) {
+  catch (const NcxxException &e) {
     NcxxErrStr err;
     stringstream info;
     info << ERROR_STR << methodName << endl;
@@ -811,7 +811,7 @@ void GoesRNoaaPort2Mdv::_readVariables() {
     _readProjectionVars();
     _ReadSectorized_CMI();
   }
-  catch (NcxxException e) {
+  catch (const NcxxException &e) {
     NcxxErrStr err;
     stringstream info;
     info << ERROR_STR << methodName << endl;
@@ -891,7 +891,7 @@ void GoesRNoaaPort2Mdv::_readCoordinateVars() {
     yCoordAtts[SCALE_FACTOR].getValues(&scaleFactor);
     yCoordAtts[ADD_OFFSET].getValues(&offset);
   }
-  catch (NcxxException e) {
+  catch (const NcxxException &e) {
     NcxxErrStr err;
     stringstream info;
     info << ERROR_STR << methodName << endl;
@@ -1369,4 +1369,3 @@ const char *GoesRNoaaPort2Mdv::MESOSCALE_2_SCAN_NAME = "Mesoscale-2";
 const char *GoesRNoaaPort2Mdv::LAMBERT = "Lambert Conformal";
 const char *GoesRNoaaPort2Mdv::MERCATOR = "Mercator";
 const char *GoesRNoaaPort2Mdv::FIXED_GRID = "Fixed Grid";
-

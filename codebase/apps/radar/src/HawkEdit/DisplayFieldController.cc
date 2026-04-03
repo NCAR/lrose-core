@@ -429,7 +429,7 @@ void DisplayFieldController::setupDisplayFields(
 
   // we interleave unfiltered fields and filtered fields
 
-  for (int ifield = 0; ifield < fields.size(); ifield++) {
+  for (size_t ifield = 0; ifield < fields.size(); ifield++) {
 
     const Params::field_t &pfld = fields.at(ifield);
 

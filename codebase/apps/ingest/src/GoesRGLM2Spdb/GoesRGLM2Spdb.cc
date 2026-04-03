@@ -669,7 +669,7 @@ void GoesRGLM2Spdb::_readGlobalAttributes() {
     _file.readGlobAttr(SATELLITE_LAT, _globalAtts.satelliteLat);
     _file.readGlobAttr(SATELLITE_LON, _globalAtts.satelliteLon);
     _file.readGlobAttr(SATELLITE_ALT, _globalAtts.satelliteAlt);
-  } catch (NcxxException e) {
+  } catch (const NcxxException &e) {
     NcxxErrStr err;
     ostringstream info;
     info << ERROR_STR << methodName << endl;
@@ -740,7 +740,7 @@ void GoesRGLM2Spdb::_readDimensions() {
     }
     _Dim_number_of_events = dim.getSize();
   }
-  catch (NcxxException e) {
+  catch (const NcxxException &e) {
     NcxxErrStr err;
     stringstream info;
     info << ERROR_STR << methodName << endl;
@@ -762,7 +762,7 @@ void GoesRGLM2Spdb::_readDimensions() {
     }
     _Dim_number_of_groups = dim.getSize();
   }
-  catch (NcxxException e) {
+  catch (const NcxxException &e) {
     NcxxErrStr err;
     stringstream info;
     info << ERROR_STR << methodName << endl;
@@ -784,7 +784,7 @@ void GoesRGLM2Spdb::_readDimensions() {
     }
     _Dim_number_of_flashes = dim.getSize();
   }
-  catch (NcxxException e) {
+  catch (const NcxxException &e) {
     NcxxErrStr err;
     stringstream info;
     info << ERROR_STR << methodName << endl;
@@ -910,7 +910,7 @@ bool GoesRGLM2Spdb::_readVariables() {
   return true;
  }
 
-  catch (NcxxException e) {
+  catch (const NcxxException &e) {
     NcxxErrStr err;
     stringstream info;
     info << ERROR_STR << methodName << endl;
@@ -1310,5 +1310,4 @@ const char *GoesRGLM2Spdb::FLASH_QUALITY_FLAG = "flash_quality_flag";
 const char *GoesRGLM2Spdb::ADD_OFFSET = "add_offset";
 const char *GoesRGLM2Spdb::SCALE_FACTOR = "scale_factor";
 const char *GoesRGLM2Spdb::VALID_RANGE = "valid_range";
-
 
