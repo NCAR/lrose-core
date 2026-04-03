@@ -79,6 +79,7 @@ codebase/build*
 CMakeCache.txt
 CMakeFiles
 codebase/build
+build.cmake
 
 # distro makefiles
 
