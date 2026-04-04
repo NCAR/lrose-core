@@ -157,11 +157,13 @@ private:
   RadxArray<double> _pidInterest_;
   RadxArray<double> _tempForPid_;
   RadxArray<double> _sdZdr_;
+  RadxArray<double> _sdPhidp_;
 
   int *_pidArray;
   double *_pidInterest;
   double *_tempForPid;
   double *_sdZdr;
+  double *_sdPhidp;
 
   RadxArray<double> _kdpArray_;
   RadxArray<double> _kdpScArray_;

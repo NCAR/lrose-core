@@ -138,7 +138,7 @@ private:
 
   // scalars rays - after computing scalars
 
-  vector <RadxRay *> _scalarsRays;
+  vector <RadxRay *> _scalarRays;
 
   // interpolation fields
   

@@ -302,6 +302,7 @@ typedef enum {
   PID_INTEREST,
   TEMP_FOR_PID,
   SD_ZDR,
+  SD_PHIDP,
 
   KDP_OUT,
   KDP_SC,
@@ -421,6 +422,15 @@ paramdef struct pid_output_field_t {
       standard_name = "sdev_zdr",
       units = "dB",
       do_write = FALSE
+    }
+    ,
+    {   
+      id = SD_PHIDP,
+      name = "SD_PHIDP",
+      long_name = "sdev_of_phidp_for_computing_pid",
+      standard_name = "sdev_phidp",
+      units = "deg",
+      do_write = TRUE
     }
     ,
     {

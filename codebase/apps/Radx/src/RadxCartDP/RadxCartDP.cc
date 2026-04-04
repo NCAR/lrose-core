@@ -789,8 +789,8 @@ void RadxCartDP::_addGeomFieldsToOutput()
     
     RadxRay *outputRay = NULL;
     double inTime = inputRay->getTimeDouble();
-    for (size_t jj = 0; jj < _scalarsRays.size(); jj++) {
-      RadxRay *pidRay = _scalarsRays[jj];
+    for (size_t jj = 0; jj < _scalarRays.size(); jj++) {
+      RadxRay *pidRay = _scalarRays[jj];
       double outTime = pidRay->getTimeDouble();
       if (fabs(inTime - outTime) < 0.001) {
         outputRay = pidRay;
@@ -856,7 +856,7 @@ int RadxCartDP::_computeScalars()
 
   // initialize pid
 
-  _scalarsRays.clear();
+  _scalarRays.clear();
   
   // loop through the input rays,
   // computing the pid fields
@@ -925,7 +925,7 @@ int RadxCartDP::_storeScalarsRay(ScalarsThread *thread)
   }
 
   // good return, add to results
-  _scalarsRays.push_back(scalarsRay);
+  _scalarRays.push_back(scalarsRay);
   
   return 0;
 
@@ -1816,22 +1816,22 @@ int RadxCartDP::_mergeScalarsIntoReadVol()
 
   vector<RadxRay *> &readRays = _readVol.getRays();
   
-  if (readRays.size() != _scalarsRays.size()) {
+  if (readRays.size() != _scalarRays.size()) {
     cerr << "ERROR - RadxCartDP::_mergeScalarsIntoReadVol" << endl;
     cerr << "  readRays size: " << readRays.size() << endl;
-    cerr << "  _scalarsRays size: " << _scalarsRays.size() << endl;
+    cerr << "  _scalarRays size: " << _scalarRays.size() << endl;
     return -1;
   }
 
-  for (size_t ii = 0; ii < _scalarsRays.size(); ii++) {
+  for (size_t ii = 0; ii < _scalarRays.size(); ii++) {
 
-    RadxRay *derivedRay = _scalarsRays[ii];
-    if (derivedRay == NULL) {
+    RadxRay *scRay = _scalarRays[ii];
+    if (scRay == NULL) {
       cerr << "ERROR - null derived ray at index: " << ii << endl;
       return -1;
     }
 
-    int rayNum = derivedRay->getRayNumber();
+    int rayNum = scRay->getRayNumber();
     if (rayNum < 0 || rayNum >= (int) readRays.size()) {
       cerr << "ERROR - bad ray number in derived ray: " << rayNum << endl;
       return -1;
@@ -1843,10 +1843,10 @@ int RadxCartDP::_mergeScalarsIntoReadVol()
       return -1;
     }
 
-    const vector<RadxField *> &derivedFields = derivedRay->getFields();
-    for (size_t jj = 0; jj < derivedFields.size(); jj++) {
+    const vector<RadxField *> &scFields = scRay->getFields();
+    for (size_t jj = 0; jj < scFields.size(); jj++) {
 
-      const RadxField *src = derivedFields[jj];
+      const RadxField *src = scFields[jj];
       if (src == NULL) {
         continue;
       }

@@ -390,6 +390,7 @@ void ScalarsCompute::_allocArrays()
   _tempForPid = _tempForPid_.alloc(_nGates);
 
   _sdZdr = _sdZdr_.alloc(_nGates);
+  _sdPhidp = _sdPhidp_.alloc(_nGates);
 
   _rateZ = _rateZ_.alloc(_nGates);
   _rateZSnow = _rateZSnow_.alloc(_nGates);
@@ -404,7 +405,7 @@ void ScalarsCompute::_allocArrays()
 }
 
 /////////////////////////////////////////////////////
-// load input arrays ready for KDP
+// load input arrays
   
 int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   
@@ -462,10 +463,13 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
     return -1;
   }
   
-  _loadFieldArray(inputRay, "TEMPC", _tempForPid);
-
-  // _addFieldToRay(inputRay, "SD_ZDR", "dB", _sdZdr, _pid.getMissingDouble());
-
+  if (_loadFieldArray(inputRay, RadxCartDP::tempFieldName, _tempForPid)) {
+    cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
+    cerr << "  Cannot load temp field name: "
+         << RadxCartDP::tempFieldName << endl;
+    return -1;
+  }
+  
   return 0;
   
 }
@@ -735,6 +739,10 @@ void ScalarsCompute::_loadOutputFields(RadxRay *inputRay,
           
         case Params::SD_ZDR:
           *datp = _sdZdr[igate];
+          break;
+          
+        case Params::SD_PHIDP:
+          *datp = _sdPhidp[igate];
           break;
           
           // computed KDP
