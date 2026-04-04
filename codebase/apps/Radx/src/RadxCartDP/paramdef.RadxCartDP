@@ -195,10 +195,26 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "/tmp/pid";
+  p_default = "/tmp/cart/pid";
   p_descr = "Output directory for writing files.";
   p_help = "Files will be written to this directory.";
 } output_dir;
+
+commentdef {
+  p_header = "WRITE RADIAL DATA FOR DEBUGGING";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write polar volume for debugging.";
+  p_help = "If TRUE, write out the input volume in polar coords, after the extra scalar fields have been added.";
+} write_scalar_polar_output;
+
+paramdef string {
+  p_default = "/tmp/polar/pid";
+  p_descr = "Output directory for writing files.";
+  p_help = "Files will be written to this directory.";
+} scalar_polar_output_dir;
 
 commentdef {
   p_header = "COMPUTING KDP";

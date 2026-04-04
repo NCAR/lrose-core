@@ -534,6 +534,10 @@ public:
 
   char* output_dir;
 
+  tdrp_bool_t write_scalar_polar_output;
+
+  char* scalar_polar_output_dir;
+
   char* KDP_params_file_path;
 
   tdrp_bool_t KDP_write_debug_fields;
@@ -757,7 +761,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[156];
+  mutable TDRPtable _table[159];
 
   const char *_className;
 

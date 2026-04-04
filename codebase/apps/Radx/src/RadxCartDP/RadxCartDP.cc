@@ -443,13 +443,11 @@ int RadxCartDP::_processFile(const string &filePath)
     return -1;
   }
 
-  const vector<RadxRay *> &rays = _readVol.getRays();
-  for (const auto& ray : rays) {
-    cerr << "RRRRRRRRRRRR ray el, az: " << ray->getElevationDeg() << ", " << ray->getAzimuthDeg() << endl;
-    for (const auto& fld : ray->getFields()) {
-      cerr << "    FFFFFF field: " << fld->getName() << endl;
+  if (_params.write_scalar_polar_output) {
+    if (_writeScalarPolarOutput()) {
+      cerr << "WARNING - cannot write scalar output in polar coords" << endl;
     }
-  } // iray
+  }
 
   // interpolate and write out
   
@@ -934,6 +932,38 @@ int RadxCartDP::_storeScalarsRay(ScalarsThread *thread)
 }
       
 //////////////////////////////////////////////////
+// Write scalar volume for debugging
+
+int RadxCartDP::_writeScalarPolarOutput()
+{
+
+#ifdef JUNK
+  const vector<RadxRay *> &rays = _readVol.getRays();
+  for (const auto& ray : rays) {
+    cerr << "RRRRRRRRRRRR ray el, az: " << ray->getElevationDeg() << ", " << ray->getAzimuthDeg() << endl;
+    for (const auto& fld : ray->getFields()) {
+      cerr << "    FFFFFF field: " << fld->getName() << endl;
+    }
+  } // iray
+#endif
+
+  RadxFile out;
+  if (_params.debug) {
+    out.setDebug(true);
+  }
+  if (out.writeToDir(_readVol, _params.scalar_polar_output_dir, true, false)) {
+    cerr << "ERROR - RadxCartDP::_writeScalarPolarOutput()" << endl;
+    cerr << "  Cannot write scalar polar file, path: " << out.getPathInUse() << endl;
+    cerr << out.getErrStr() << endl;
+    return -1;
+  }
+
+  return 0;
+  
+}
+
+
+//////////////////////////////////////////////////
 // load up the input ray data vector
 
 void RadxCartDP::_loadInterpRays()
@@ -1367,7 +1397,7 @@ void RadxCartDP::_printParamsRate()
   }
 
   // do the print to stdout
-
+  
   _precipRateParams.print(stdout, printMode);
 
 }

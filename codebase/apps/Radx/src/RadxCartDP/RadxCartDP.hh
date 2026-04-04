@@ -189,6 +189,7 @@ private:
 
   int _computeScalars();
   int _storeScalarsRay(ScalarsThread *thread);
+  int _writeScalarPolarOutput();
 
   void _loadInterpRays();
   void _addGeometryFields();
