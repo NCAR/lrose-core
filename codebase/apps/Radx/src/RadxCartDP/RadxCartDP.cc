@@ -428,7 +428,7 @@ int RadxCartDP::_processFile(const string &filePath)
   _addGeomFieldsToInput();
   
   // compute the scalar (kdp, pid, precip rate) fields
-  
+
   if (_computeScalars()) {
     cerr << "ERROR - RadxCartDP::Run" << endl;
     cerr << "  Cannot compute scalar pid feature fields" << endl;
@@ -1852,7 +1852,9 @@ int RadxCartDP::_mergeScalarsIntoReadVol()
       }
 
       // remove any placeholder / previous version of same field
-      readRay->removeField(src->getName());
+      if (readRay->getField(src->getName())) {
+        readRay->removeField(src->getName());
+      }
 
       // deep copy field into read volume ray
       RadxField *copy = new RadxField(*src);

@@ -201,7 +201,7 @@ void ScalarsCompute::_kdpInit()
 
   _kdp.setFromParams(_kdpFiltParams);
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     _kdp.setDebug(true);
   }
 
