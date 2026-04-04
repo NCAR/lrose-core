@@ -408,7 +408,7 @@ bool PhaseDiff::_calcPhaseDiff(DsMdvx &mdvx1, DsMdvx &mdvx2) const
   int data_size = I1.scanSize();
   for (int i = 0; i < data_size; ++i)
   {
-    bool debug = _input->isDebugPt(i);
+    // bool debug = _input->isDebugPt(i);
 
     // Check for missing data
     if (iq1.missingIorQ(i) || iq2.missingIorQ(i))
@@ -640,6 +640,5 @@ bool PhaseDiff::_readInputFile(DsMdvx &mdvx, const DateTime &data_time)
   }
   return true;
 }
-
 
 

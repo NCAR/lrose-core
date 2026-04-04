@@ -92,7 +92,7 @@ enum
   iNullLines,
   iDumpedImages,
   iUpdate
-} gErrIDs;
+};
 
 /**********************
    Function Prototypes

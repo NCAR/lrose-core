@@ -311,6 +311,14 @@ bool SweepFile::_addGlobalAttributes(Nc3File &output_file) const
     
     switch (input_att->type())
     {
+    case nc3Ushort :
+    case nc3Int64 :
+      cerr << "ERROR: " << method_name << endl;
+      cerr << "Unsupported attribute type in input file" << endl;
+      cerr << "Attribute name: " << input_att->name() << endl;
+      cerr << "Attribute type: " << input_att->type() << endl;
+      return false;
+
     case nc3NoType :
       break;
       
@@ -458,6 +466,14 @@ bool SweepFile::_addVariableAttributes(const Nc3Var &input_var,
     
     switch (input_att->type())
     {
+    case nc3Ushort :
+    case nc3Int64 :
+      cerr << "ERROR: " << method_name << endl;
+      cerr << "Unsupported attribute type in input variable" << endl;
+      cerr << "Attribute name: " << input_att->name() << endl;
+      cerr << "Attribute type: " << input_att->type() << endl;
+      return false;
+
     case nc3NoType :
       break;
       
@@ -744,6 +760,16 @@ bool SweepFile::_copyData(Nc3Var &input_var,
   
   switch (input_var.type())
   {
+  case nc3Ushort :
+  case nc3Int64 :
+    cerr << "ERROR: " << method_name << endl;
+    cerr << "Unsupported variable type in input variable" << endl;
+    cerr << "Variable name: " << input_var.name() << endl;
+    cerr << "Variable type: " << input_var.type() << endl;
+    delete [] counts;
+    delete [] cur;
+    return false;
+
   case nc3NoType :
     break;
       
@@ -887,6 +913,14 @@ bool SweepFile::_negateVariable(Nc3Var &output_var,
 
   switch (output_var.type())
   {
+  case nc3Ushort :
+  case nc3Int64 :
+    cerr << "ERROR: " << method_name << endl;
+    cerr << "Unsupported variable type for negation" << endl;
+    cerr << "Variable name: " << output_var.name() << endl;
+    cerr << "Variable type: " << output_var.type() << endl;
+    return false;
+
   case nc3NoType :
     break;
     

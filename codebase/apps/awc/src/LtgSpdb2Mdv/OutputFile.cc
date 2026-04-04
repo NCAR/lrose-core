@@ -85,7 +85,7 @@ int OutputFile::writeVol()
 
   // convert for output
 
-  for (int ii = 0; ii < _mdvx.getNFields(); ii++) {
+  for (size_t ii = 0; ii < _mdvx.getNFields(); ii++) {
     
     MdvxField *fld = _mdvx.getFieldByNum(ii);
     
@@ -328,4 +328,3 @@ void OutputFile::_initMdvx(time_t trigger_time)
 
   
 }
-

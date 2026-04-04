@@ -776,7 +776,7 @@ void MdvRadarShear::_fillOutput(DsMdvx &outMdvx)
   // copy chunks
   
   outMdvx.clearChunks();
-  for (int ii = 0; ii < _inMdvx.getNChunks(); ii++) {
+  for (size_t ii = 0; ii < _inMdvx.getNChunks(); ii++) {
     MdvxChunk *chunk = new MdvxChunk(*_inMdvx.getChunkByNum(ii));
     outMdvx.addChunk(chunk);
   }
@@ -964,4 +964,3 @@ int MdvRadarShear::_fl32Compare(const void *i, const void *j)
     return 0;
   }
 }
-

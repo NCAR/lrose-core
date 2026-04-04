@@ -513,12 +513,14 @@ int Filter::_writeInterest(DsRadarQueue *queue, const string &output_type,
 
     // Load up data array
 
-    ui16 *scaled_data;
+    ui16 *scaled_data = 0;
       
     if (output_type == INTEREST_OUTPUT)
       scaled_data = _beamList[iaz]->getScaledInterest();
     else if (output_type == CONFIDENCE_OUTPUT)
       scaled_data = _beamList[iaz]->getScaledConfidence();
+    else
+      continue;
 
     radar_beam.loadData(scaled_data,
 			_nGates * FilterBeamInfo::N_INTEREST_FIELDS * 2,

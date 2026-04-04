@@ -75,7 +75,6 @@ int Args::parse(int argc, char **argv, string &prog_name)
   startTime = endTime - 86400;
   timeMargin = 86400;
   maxItems = -1;
-  bool urlSet = false;
   urlStr = "";
   stationStr = "";
 
@@ -237,7 +236,6 @@ int Args::parse(int argc, char **argv, string &prog_name)
       
       if (i < argc - 1) {
 	urlStr = argv[++i];
-	urlSet = true;
       } else {
 	iret = -1;
       }
@@ -340,7 +338,6 @@ void Args::_usage(ostream &out)
       << endl;
 
 }
-
 
 
 

@@ -581,7 +581,7 @@ int DataMgr::_setInterestFunction(const Params::interest_func_t int_func_params,
 				  const FilterBeamInfo::InterestType spin_interest_type,
 				  Filter &filter)
 {
-  FilterBeamInfo::InterestType interestType;
+  FilterBeamInfo::InterestType interestType = spin_interest_type;
            
   switch (int_func_params.interest_field)
   {
@@ -628,6 +628,12 @@ int DataMgr::_setInterestFunction(const Params::interest_func_t int_func_params,
   case Params::RSINZ :
     interestType = FilterBeamInfo::RSINZ;
     break;
+
+  default :
+    cerr << "ERROR - DataMgr::_setInterestFunction" << endl;
+    cerr << "  Unknown interest field enum: "
+         << int_func_params.interest_field << endl;
+    return -1;
   }
 
   return filter.setInterestFunc(interestType,
@@ -655,7 +661,7 @@ int DataMgr::_setConfidenceFunction(const Params::interest_func_t conf_func_para
 				    const FilterBeamInfo::InterestType spin_interest_type,
 				    Filter &filter)
 {
-  FilterBeamInfo::InterestType interestType;
+  FilterBeamInfo::InterestType interestType = spin_interest_type;
            
   switch (conf_func_params.interest_field)
   {
@@ -702,6 +708,12 @@ int DataMgr::_setConfidenceFunction(const Params::interest_func_t conf_func_para
   case Params::RSINZ :
     interestType = FilterBeamInfo::RSINZ;
     break;
+
+  default :
+    cerr << "ERROR - DataMgr::_setConfidenceFunction" << endl;
+    cerr << "  Unknown confidence field enum: "
+         << conf_func_params.interest_field << endl;
+    return -1;
   }
 
   return filter.setConfidenceFunc(interestType,
@@ -1084,5 +1096,3 @@ int DataMgr::_processEOV()
 
   return 0;
 }
-
-

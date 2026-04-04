@@ -717,7 +717,8 @@ int TsTcp2File::_makedir_recurse(const char *path)
   // If no delim, try to make the directory non-recursively.
   
   char up_dir[1024];
-  strncpy(up_dir, path, 1024);
+  strncpy(up_dir, path, sizeof(up_dir) - 1);
+  up_dir[sizeof(up_dir) - 1] = '\0';
   char *last_delim = strrchr(up_dir, delim);
   if (last_delim == NULL) {
     return (_makedir(up_dir));

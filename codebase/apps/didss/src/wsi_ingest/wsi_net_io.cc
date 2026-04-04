@@ -67,7 +67,6 @@ GRAPHICS
 
 union
 {
-  struct sockaddr sock_addr;    /* Socket address structure */
   struct sockaddr_in sock_in;   /* Internet socket address structure */
 } u;
 

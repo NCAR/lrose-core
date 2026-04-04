@@ -63,9 +63,6 @@ char *end_time_string;
 int main(int argc, char **argv)
 {
   // basic declarations
-  char *prog_name;
-  path_parts_t progname_parts;
-  
   DsSpdb input1_spdb;
   DsSpdb input2_spdb;
   DsSpdb output_spdb;
@@ -79,10 +76,6 @@ int main(int argc, char **argv)
   int i;
 
   string pr_label;
-
-  // set program name
-  uparse_path(argv[0], &progname_parts);
-  prog_name = STRdup(progname_parts.base);
 
   if (parse_args(argc, argv) != 0) exit(-1);
 
