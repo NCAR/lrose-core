@@ -882,17 +882,17 @@ int NcarParticleId::loadTempProfile(time_t dataTime)
       return 0;
     }
 
+    if (_debug) {
+      cerr << "WARNING - NcarParticleId::loadTempProfile" << endl;
+      cerr << "  Cannot retrieve sounding, url: "
+           << _params.PID_sounding_spdb_url << endl;
+      cerr << "                     dataTime: "
+           << DateTime::strm(dataTime) << endl;
+      cerr << "  Using thresholds file instead: "
+           << _params.PID_thresholds_file_path << endl;
+    }
+    
   } // if (_params.PID_use_soundings_from_spdb)
-  
-  if (_debug) {
-    cerr << "WARNING - NcarParticleId::loadTempProfile" << endl;
-    cerr << "  Cannot retrieve sounding, url: "
-         << _params.PID_sounding_spdb_url << endl;
-    cerr << "                     dataTime: "
-         << DateTime::strm(dataTime) << endl;
-    cerr << "  Using thresholds file instead: "
-         << _params.PID_thresholds_file_path << endl;
-  }
   
   // alternatively get profile from thresholds file
   
