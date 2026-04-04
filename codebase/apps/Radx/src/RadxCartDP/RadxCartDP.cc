@@ -387,31 +387,16 @@ int RadxCartDP::_processFile(const string &filePath)
   PMU_auto_register("Processing file");
 
   // check file name
-  
-  if (strlen(_params.radar_file_search_ext) > 0) {
-    RadxPath rpath(filePath);
-    if (strcmp(rpath.getExt().c_str(), _params.radar_file_search_ext)) {
-      if (_params.debug) {
-        cerr << "WARNING - ignoring file: " << filePath << endl;
-        cerr << "  Does not have correct extension: "
-             << _params.radar_file_search_ext << endl;
-      }
-      return 0;
-    }
+
+  if (!_fileNameValid(filePath)) {
+    // skip this file
+    return 0;
   }
+
+  // initialize
   
-  if (strlen(_params.radar_file_search_substr) > 0) {
-    RadxPath rpath(filePath);
-    if (rpath.getFile().find(_params.radar_file_search_substr)
-        == string::npos) {
-      if (_params.debug) {
-        cerr << "WARNING - ignoring file: " << filePath << endl;
-        cerr << "  Does not contain required substr: "
-             << _params.radar_file_search_substr << endl;
-      }
-      return 0;
-    }
-  }
+  _readVol.clear();
+  _freeInterpRays();
 
   if (_params.debug) {
     cerr << "INFO - RadxCartDP::_processFile" << endl;
@@ -419,11 +404,6 @@ int RadxCartDP::_processFile(const string &filePath)
     cerr << "  Reading in file ..." << endl;
   }
   
-  // ensure memory is freed up
-  
-  _readVol.clear();
-  _freeInterpRays();
-
   // read in file
   
   if (_readFile(filePath)) {
@@ -431,55 +411,35 @@ int RadxCartDP::_processFile(const string &filePath)
     return -1;
   }
   
-  // check we have at least 2 rays
-  
-  if (_readVol.getNRays() < 2) {
-    cerr << "ERROR - RadxCartDP::_processFile" << endl;
-    cerr << "  Too few rays: " << _readVol.getNRays() << endl;
-    return -1;
-  }
-  
-  // make sure gate geom is constant
-
-  _readVol.remapToFinestGeom();
-  
   // initialize the projection and vlevels of the target volume
 
   _initTargetGrid();
 
-  // read the model data
+  // read the temperature profile from the model
   
-  if (_readModel(_readVol.getStartTimeSecs())) {
+  if (_readModelTemperatureProfile()) {
     cerr << "ERROR - RadxCartDP::_processFile" << endl;
-    cerr << "  Cannot read model data, time: "
-         << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
+    cerr << "  Cannot read model temperature profile" << endl;
     return -1;
   }
 
-  // compute the temperature profile from the model data
-
-  if (_computeTempProfile()) {
-    cerr << "ERROR - RadxCartDP::_processFile" << endl;
-    cerr << "  Cannot read model data, time: "
-         << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
-    return -1;
-  }
-
-  // set the temperature profile into the threads
-
-  for (size_t ii = 0; ii < _computeScalarsThreads.size(); ii++) {
-    _computeScalarsThreads[ii]->setTempProfile(_tempProfile);
-  }
-  
   // add geometry fields to the volume
   
   _addGeomFieldsToInput();
-
+  
   // compute the scalar (kdp, pid, precip rate) fields
   
   if (_computeScalars()) {
     cerr << "ERROR - RadxCartDP::Run" << endl;
     cerr << "  Cannot compute scalar pid feature fields" << endl;
+    return -1;
+  }
+
+  // merge the scalars into the read volume
+
+  if (_mergeScalarsIntoReadVol()) {
+    cerr << "ERROR - RadxCartDP::Run" << endl;
+    cerr << "  Cannot merge scalars into read vol" << endl;
     return -1;
   }
 
@@ -518,6 +478,41 @@ int RadxCartDP::_processFile(const string &filePath)
 }
 
 //////////////////////////////////////////////////
+// Check file name is valid
+// Returns true on success, false on failure
+
+bool RadxCartDP::_fileNameValid(const string &filePath)
+{
+  
+  if (strlen(_params.radar_file_search_ext) > 0) {
+    RadxPath rpath(filePath);
+    if (strcmp(rpath.getExt().c_str(), _params.radar_file_search_ext)) {
+      if (_params.debug) {
+        cerr << "WARNING - ignoring file: " << filePath << endl;
+        cerr << "  Does not have correct extension: "
+             << _params.radar_file_search_ext << endl;
+      }
+      return false;
+    }
+  }
+  
+  if (strlen(_params.radar_file_search_substr) > 0) {
+    RadxPath rpath(filePath);
+    if (rpath.getFile().find(_params.radar_file_search_substr) == string::npos) {
+      if (_params.debug) {
+        cerr << "WARNING - ignoring file: " << filePath << endl;
+        cerr << "  Does not contain required substr: "
+             << _params.radar_file_search_substr << endl;
+      }
+      return false;
+    }
+  }
+
+  return true;
+
+}
+
+//////////////////////////////////////////////////
 // Read in a RADX file
 // Returns 0 on success, -1 on failure
 
@@ -535,6 +530,14 @@ int RadxCartDP::_readFile(const string &filePath)
     return -1;
   }
   
+  // check we have at least 2 rays
+  
+  if (_readVol.getNRays() < 2) {
+    cerr << "ERROR - RadxCartDP::_readFile" << endl;
+    cerr << "  Too few rays: " << _readVol.getNRays() << endl;
+    return -1;
+  }
+  
   // convert to fl32
   
   _readVol.convertToFl32();
@@ -542,6 +545,10 @@ int RadxCartDP::_readFile(const string &filePath)
   // pad out the gates to the longest range
   
   _readVol.setNGatesConstant();
+  
+  // remap all rays to finest geom
+
+  _readVol.remapToFinestGeom();
   
   //  check for rhi
   
@@ -804,6 +811,41 @@ void RadxCartDP::_addGeomFieldsToOutput()
 
 }
 
+/////////////////////////////////////////////////////
+// read in the model temperature profile
+// returns 0 on success, -1 on failure
+
+int RadxCartDP::_readModelTemperatureProfile()
+{
+
+  // read the model data
+  
+  if (_readModel(_readVol.getStartTimeSecs())) {
+    cerr << "ERROR - RadxCartDP::_readModelTemperatureProfile" << endl;
+    cerr << "  Cannot read model data, time: "
+         << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
+    return -1;
+  }
+
+  // compute the temperature profile from the model data
+
+  if (_computeTempProfile()) {
+    cerr << "ERROR - RadxCartDP::_readModelTemperatureProfile" << endl;
+    cerr << "  Cannot compute temp profile, time: "
+         << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
+    return -1;
+  }
+
+  // set the temperature profile into the threads
+
+  for (size_t ii = 0; ii < _computeScalarsThreads.size(); ii++) {
+    _computeScalarsThreads[ii]->setTempProfile(_tempProfile);
+  }
+
+  return 0;
+
+}
+  
 /////////////////////////////////////////////////////
 // compute the pid fields for all rays in volume
 
@@ -1735,6 +1777,63 @@ int RadxCartDP::_computeTempProfile()
 
 }
 
+
+////////////////////////////////////////////////////////////////
+// merge the scalars into the read volume
+
+int RadxCartDP::_mergeScalarsIntoReadVol()
+{
+
+  vector<RadxRay *> &readRays = _readVol.getRays();
+  
+  if (readRays.size() != _scalarsRays.size()) {
+    cerr << "ERROR - RadxCartDP::_mergeScalarsIntoReadVol" << endl;
+    cerr << "  readRays size: " << readRays.size() << endl;
+    cerr << "  _scalarsRays size: " << _scalarsRays.size() << endl;
+    return -1;
+  }
+
+  for (size_t ii = 0; ii < _scalarsRays.size(); ii++) {
+
+    RadxRay *derivedRay = _scalarsRays[ii];
+    if (derivedRay == NULL) {
+      cerr << "ERROR - null derived ray at index: " << ii << endl;
+      return -1;
+    }
+
+    int rayNum = derivedRay->getRayNumber();
+    if (rayNum < 0 || rayNum >= (int) readRays.size()) {
+      cerr << "ERROR - bad ray number in derived ray: " << rayNum << endl;
+      return -1;
+    }
+
+    RadxRay *readRay = readRays[rayNum];
+    if (readRay == NULL) {
+      cerr << "ERROR - null read ray at rayNum: " << rayNum << endl;
+      return -1;
+    }
+
+    const vector<RadxField *> &derivedFields = derivedRay->getFields();
+    for (size_t jj = 0; jj < derivedFields.size(); jj++) {
+
+      const RadxField *src = derivedFields[jj];
+      if (src == NULL) {
+        continue;
+      }
+
+      // remove any placeholder / previous version of same field
+      readRay->removeField(src->getName());
+
+      // deep copy field into read volume ray
+      RadxField *copy = new RadxField(*src);
+      readRay->addField(copy);
+
+    } // jj
+
+  } // ii
+
+  return 0;
+}
 
 #ifdef NOTNOW
 

@@ -177,12 +177,15 @@ private:
   int _runRealtime();
   void _setupRead(RadxFile &file);
   int _processFile(const string &filePath);
+  bool _fileNameValid(const string &filePath);
   int _readFile(const string &filePath);
   void _checkFields(const string &filePath);
 
   void _addGeomFieldsToInput();
   void _addGeomFieldsToOutput();
   void _encodeFieldsForOutput();
+
+  int _readModelTemperatureProfile();
 
   int _computeScalars();
   int _storeScalarsRay(ScalarsThread *thread);
@@ -206,7 +209,9 @@ private:
   void _interpModelToOutputGrid();
   void _initTargetGrid();
   int _computeTempProfile();
-  
+
+  int _mergeScalarsIntoReadVol();
+
 };
 
 #endif
