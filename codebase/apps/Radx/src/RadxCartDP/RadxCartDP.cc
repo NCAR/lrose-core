@@ -1859,18 +1859,25 @@ int RadxCartDP::_mergeScalarsIntoReadVol()
     const vector<RadxField *> &scFields = scRay->getFields();
     for (size_t jj = 0; jj < scFields.size(); jj++) {
 
-      const RadxField *src = scFields[jj];
-      if (src == NULL) {
+      const RadxField *sc = scFields[jj];
+      if (sc == NULL) {
         continue;
       }
 
+      // if (sc->getName() == "SD_ZDR" || sc->getName() == "TEMPC") {
+      //   cerr << "XXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+      //   cerr << "rayNum: " << rayNum << endl;
+      //   sc->printWithData(cerr);
+      //   cerr << "XXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+      // }
+      
       // remove any placeholder / previous version of same field
-      if (readRay->getField(src->getName())) {
-        readRay->removeField(src->getName());
+      if (readRay->getField(sc->getName())) {
+        readRay->removeField(sc->getName());
       }
 
       // deep copy field into read volume ray
-      RadxField *copy = new RadxField(*src);
+      RadxField *copy = new RadxField(*sc);
       readRay->addField(copy);
 
     } // jj

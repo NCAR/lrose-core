@@ -311,6 +311,10 @@ void ScalarsCompute::_pidCompute()
   memcpy(_pidArray, _pid.getPid(), _nGates * sizeof(int));
   memcpy(_pidInterest, _pid.getInterest(), _nGates * sizeof(double));
   
+  memcpy(_sdZdr, _pid.getSdzdr(), _nGates * sizeof(double));
+  memcpy(_sdPhidp, _pid.getSdphidp(), _nGates * sizeof(double));
+  memcpy(_tempForPid, _pid.getTempC(), _nGates * sizeof(double));
+
 }
 
 //////////////////////////////////////
