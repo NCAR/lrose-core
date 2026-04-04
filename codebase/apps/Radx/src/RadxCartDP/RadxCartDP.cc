@@ -449,6 +449,10 @@ int RadxCartDP::_processFile(const string &filePath)
     }
   }
 
+  // set up interpolation fields
+  
+  _initInterp();
+  
   // interpolate and write out
   
   if (_rhiMode) {
@@ -599,19 +603,6 @@ int RadxCartDP::_readFile(const string &filePath)
   _addGeometryFields();
   _addTimeField();
   
-  // set up interp fields
-  
-  _initInterpFields();
-  
-  // load up the input ray data vector
-
-  _loadInterpRays();
-
-  // check all fields are present
-  // set standard names etc
-
-  _checkFields(filePath);
-
   // set radar properties
 
   _radarHtKm = _readVol.getAltitudeKm();
@@ -651,37 +642,6 @@ void RadxCartDP::_setupRead(RadxFile &file)
     file.printReadRequest(cerr);
   }
   
-}
-
-//////////////////////////////////////////////////
-// check all fields are present
-// set standard names etc
-
-void RadxCartDP::_checkFields(const string &filePath)
-{
-  
-  vector<RadxRay *> &rays = _readVol.getRays();
-  
-  for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
-    bool found = false;
-    string fieldName = _interpFields[ifield].radxName;
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      const RadxRay *ray = rays[ii];
-      const RadxField *fld = ray->getField(fieldName);
-      if (fld != NULL) {
-        found = true;
-        _interpFields[ifield].longName = fld->getLongName();
-        _interpFields[ifield].standardName = fld->getStandardName();
-        _interpFields[ifield].units = fld->getUnits();
-        break;
-      }
-    }
-    if (!found) {
-      cerr << "WARNING - field not found: " << fieldName << endl;
-      cerr << "  File: " << filePath << endl;
-    }
-  } // ifield
-
 }
 
 //////////////////////////////////////////////////
@@ -964,41 +924,6 @@ int RadxCartDP::_writeScalarPolarOutput()
 
 
 //////////////////////////////////////////////////
-// load up the input ray data vector
-
-void RadxCartDP::_loadInterpRays()
-{
-
-  // loop through the rays in the read volume,
-  // making some checks and then adding the rays
-  // to the interp rays array as appropriate
-  
-  vector<RadxRay *> &rays = _readVol.getRays();
-  for (size_t isweep = 0; isweep < _readVol.getNSweeps(); isweep++) {
-
-    const RadxSweep *sweep = _readVol.getSweeps()[isweep];
-
-    for (size_t iray = sweep->getStartRayIndex();
-         iray <= sweep->getEndRayIndex(); iray++) {
-
-      // accept ray
-      
-      BaseInterp::Ray *interpRay = 
-        new BaseInterp::Ray(rays[iray],
-                        isweep,
-                        _interpFields,
-                        _params.use_fixed_angle_for_interpolation,
-                        _params.use_fixed_angle_for_data_limits);
-      _interpRays.push_back(interpRay);
-
-    } // iray
-
-  } // isweep
-
-
-}
-  
-//////////////////////////////////////////////////
 // add geometry fields
 
 void RadxCartDP::_addGeometryFields()
@@ -1242,6 +1167,28 @@ bool RadxCartDP::_isRhi()
 }
 
 //////////////////////////////////////////////////
+// initialize interpolation fields
+
+void RadxCartDP::_initInterp()
+
+{
+
+  // set up interp fields
+  
+  _initInterpFields();
+  
+  // load up the input ray data vector
+
+  _loadInterpRays();
+
+  // check all fields are present
+  // set standard names etc
+
+  _checkInterpFields();
+
+}
+
+//////////////////////////////////////////////////
 // initialize the fields for interpolation
 
 void RadxCartDP::_initInterpFields()
@@ -1351,6 +1298,72 @@ void RadxCartDP::_freeInterpRays()
     delete _interpRays[ii];
   }
   _interpRays.clear();
+}
+
+//////////////////////////////////////////////////
+// load up the input ray data vector
+
+void RadxCartDP::_loadInterpRays()
+{
+
+  // loop through the rays in the read volume,
+  // making some checks and then adding the rays
+  // to the interp rays array as appropriate
+  
+  vector<RadxRay *> &rays = _readVol.getRays();
+  for (size_t isweep = 0; isweep < _readVol.getNSweeps(); isweep++) {
+
+    const RadxSweep *sweep = _readVol.getSweeps()[isweep];
+
+    for (size_t iray = sweep->getStartRayIndex();
+         iray <= sweep->getEndRayIndex(); iray++) {
+
+      // accept ray
+      
+      BaseInterp::Ray *interpRay = 
+        new BaseInterp::Ray(rays[iray],
+                            isweep,
+                            _interpFields,
+                            _params.use_fixed_angle_for_interpolation,
+                            _params.use_fixed_angle_for_data_limits);
+      _interpRays.push_back(interpRay);
+      
+    } // iray
+
+  } // isweep
+
+
+}
+  
+//////////////////////////////////////////////////
+// check all fields are present
+// set standard names etc
+
+void RadxCartDP::_checkInterpFields()
+{
+  
+  vector<RadxRay *> &rays = _readVol.getRays();
+  
+  for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
+    bool found = false;
+    string fieldName = _interpFields[ifield].radxName;
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      const RadxRay *ray = rays[ii];
+      const RadxField *fld = ray->getField(fieldName);
+      if (fld != NULL) {
+        found = true;
+        _interpFields[ifield].longName = fld->getLongName();
+        _interpFields[ifield].standardName = fld->getStandardName();
+        _interpFields[ifield].units = fld->getUnits();
+        break;
+      }
+    }
+    if (!found) {
+      cerr << "WARNING - field not found: " << fieldName << endl;
+      cerr << "  File: " << _readVol.getPathInUse() << endl;
+    }
+  } // ifield
+
 }
 
 //////////////////////////////////////////////////

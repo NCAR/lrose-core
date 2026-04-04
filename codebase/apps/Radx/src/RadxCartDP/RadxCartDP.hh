@@ -179,7 +179,6 @@ private:
   int _processFile(const string &filePath);
   bool _fileNameValid(const string &filePath);
   int _readFile(const string &filePath);
-  void _checkFields(const string &filePath);
 
   void _addGeomFieldsToInput();
   void _addGeomFieldsToOutput();
@@ -191,16 +190,17 @@ private:
   int _storeScalarsRay(ScalarsThread *thread);
   int _writeScalarPolarOutput();
 
-  void _loadInterpRays();
   void _addGeometryFields();
   void _addTimeField();
 
   bool _isRhi();
 
+  void _initInterp();
   void _initInterpFields();
   void _allocInterpToCart();
   void _freeInterpRays();
-
+  void _loadInterpRays();
+  void _checkInterpFields();
 
   void _printParamsRate();
   void _printParamsPid();
