@@ -216,12 +216,11 @@ void ScalarsCompute::_kdpCompute()
 
   // set up array for range
   
-  TaArray<double> rangeKm_;
-  double *rangeKm = rangeKm_.alloc(_nGates);
-  double range = _startRangeKm;
-  for (size_t ii = 0; ii < _nGates; ii++, range += _gateSpacingKm) {
-    rangeKm[ii] = range;
-  }
+  // vector<double> rangeKm(_nGates);
+  // double range = _startRangeKm;
+  // for (size_t ii = 0; ii < _nGates; ii++, range += _gateSpacingKm) {
+  //   rangeKm[ii] = range;
+  // }
 
   // compute KDP
   
@@ -233,11 +232,11 @@ void ScalarsCompute::_kdpCompute()
                _nGates, 
                _startRangeKm,
                _gateSpacingKm,
-               _snrArray,
-               _dbzArray,
-               _zdrArray,
-               _rhohvArray,
-               _phidpArray,
+               _snrArray.data(),
+               _dbzArray.data(),
+               _zdrArray.data(),
+               _rhohvArray.data(),
+               _phidpArray.data(),
                missingDbl);
 
   const double *kdp = _kdp.getKdp();
@@ -288,13 +287,13 @@ void ScalarsCompute::_pidPrepare()
   
   // select fields
 
-  const double *kdpArray = _kdpArray;
+  vector<double> &kdpArray = _kdpArray;
   if (_params.PID_use_KDP_self_consistency) {
     kdpArray = _kdpScArray;
   }
-
-  const double *dbzArray = _dbzArray;
-  const double *zdrArray = _zdrArray;
+  
+  const double *dbzArray = _dbzArray.data();
+  const double *zdrArray = _zdrArray.data();
   if (_params.PID_use_attenuation_corrected_fields) {
     dbzArray = _kdp.getDbzCorrected();
     zdrArray = _kdp.getZdrCorrected();
@@ -302,20 +301,21 @@ void ScalarsCompute::_pidPrepare()
   
   // compute particle ID
 
-  _pid.prepareForPid(_nGates, _snrArray,
-                     dbzArray, zdrArray, kdpArray,
-                     _ldrArray, _rhohvArray,
-                     _phidpArray, _tempForPid);
+  _pid.prepareForPid(_nGates, _snrArray.data(),
+                     dbzArray, zdrArray, kdpArray.data(),
+                     _ldrArray.data(), _rhohvArray.data(),
+                     _phidpArray.data(), _tempForPid.data());
   
-  // load results
-
-  memcpy(_pidArray, _pid.getPid(), _nGates * sizeof(int));
-  memcpy(_pidInterest, _pid.getInterest(), _nGates * sizeof(double));
+  // load results into arrays
   
-  memcpy(_sdZdr, _pid.getSdzdr(), _nGates * sizeof(double));
-  memcpy(_sdPhidp, _pid.getSdphidp(), _nGates * sizeof(double));
-  memcpy(_tempForPid, _pid.getTempC(), _nGates * sizeof(double));
-
+  // memcpy(_snrArray.data(), _pid.getSnr(), _nGates * sizeof(double));
+  // memcpy(_dbzArray.data(), _pid.getDbz(), _nGates * sizeof(double));
+  // memcpy(_zdrArray.data(), _pid.getZdr(), _nGates * sizeof(double));
+  // memcpy(_ldrArray.data(), _pid.getLdr(), _nGates * sizeof(double));
+  // memcpy(_tempForPid.data(), _pid.getTempC(), _nGates * sizeof(double));
+  // memcpy(_sdZdr.data(), _pid.getSdzdr(), _nGates * sizeof(double));
+  // memcpy(_sdPhidp.data(), _pid.getSdphidp(), _nGates * sizeof(double));
+  
 }
 
 #ifdef NOTNOW
@@ -347,8 +347,8 @@ void ScalarsCompute::_precipCompute()
     kdpArray = _kdpScArray;
   }
 
-  const double *dbzArray = _dbzArray;
-  const double *zdrArray = _zdrArray;
+  const double *dbzArray = _dbzArray.data();
+  const double *zdrArray = _zdrArray.data();
   if (_params.RATE_use_attenuation_corrected_fields) {
     dbzArray = _kdp.getDbzCorrected();
     zdrArray = _kdp.getZdrCorrected();
@@ -356,7 +356,7 @@ void ScalarsCompute::_precipCompute()
 
   // compute rates
   
-  _precip.computePrecipRates(_nGates, _snrArray,
+  _precip.computePrecipRates(_nGates, _snrArray.data(),
                              dbzArray, zdrArray,
                              kdpArray, missingDbl,
                              &_pid);
@@ -384,32 +384,32 @@ void ScalarsCompute::_allocArrays()
   
 {
 
-  _snrArray = _snrArray_.alloc(_nGates);
-  _dbzArray = _dbzArray_.alloc(_nGates);
-  _zdrArray = _zdrArray_.alloc(_nGates);
-  _ldrArray = _ldrArray_.alloc(_nGates);
-  _rhohvArray = _rhohvArray_.alloc(_nGates);
-  _phidpArray = _phidpArray_.alloc(_nGates);
+  _snrArray.resize(_nGates);
+  _dbzArray.resize(_nGates);
+  _zdrArray.resize(_nGates);
+  _ldrArray.resize(_nGates);
+  _rhohvArray.resize(_nGates);
+  _phidpArray.resize(_nGates);
 
-  _kdpArray = _kdpArray_.alloc(_nGates);
-  _kdpScArray = _kdpScArray_.alloc(_nGates);
+  _kdpArray.resize(_nGates);
+  _kdpScArray.resize(_nGates);
 
-  _pidArray = _pidArray_.alloc(_nGates);
-  _pidInterest = _pidInterest_.alloc(_nGates);
-  _tempForPid = _tempForPid_.alloc(_nGates);
+  // _pidArray.resize(_nGates);
+  // _pidInterest.resize(_nGates);
+  _tempForPid.resize(_nGates);
 
-  _sdZdr = _sdZdr_.alloc(_nGates);
-  _sdPhidp = _sdPhidp_.alloc(_nGates);
+  _sdZdr.resize(_nGates);
+  _sdPhidp.resize(_nGates);
 
-  _rateZ = _rateZ_.alloc(_nGates);
-  _rateZSnow = _rateZSnow_.alloc(_nGates);
-  _rateZZdr = _rateZZdr_.alloc(_nGates);
-  _rateKdp = _rateKdp_.alloc(_nGates);
-  _rateKdpZdr = _rateKdpZdr_.alloc(_nGates);
-  _rateHybrid = _rateHybrid_.alloc(_nGates);
-  _ratePid = _ratePid_.alloc(_nGates);
-  _rateHidro = _rateHidro_.alloc(_nGates);
-  _rateBringi = _rateBringi_.alloc(_nGates);
+  // _rateZ.resize(_nGates);
+  // _rateZSnow.resize(_nGates);
+  // _rateZZdr.resize(_nGates);
+  // _rateKdp.resize(_nGates);
+  // _rateKdpZdr.resize(_nGates);
+  // _rateHybrid.resize(_nGates);
+  // _ratePid.resize(_nGates);
+  // _rateHidro.resize(_nGates);
+  // _rateBringi.resize(_nGates);
 
 }
 
@@ -421,7 +421,7 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
 {
   
   if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::DBZ),
-                      _dbzArray)) {
+                      _dbzArray.data())) {
     cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
     cerr << "  Cannot load DBZ field name: "
          << _parent->getRadarInputName(Params::DBZ) << endl;
@@ -430,7 +430,7 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   
   if (_parent->getRadarInputName(Params::SNR).size() > 0) {
     if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::SNR),
-                        _snrArray)) {
+                        _snrArray.data())) {
       cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
       cerr << "  Cannot load SNR field name: "
            << _parent->getRadarInputName(Params::SNR) << endl;
@@ -441,7 +441,7 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   }
   
   if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::ZDR),
-                      _zdrArray)) {
+                      _zdrArray.data())) {
     cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
     cerr << "  Cannot load ZDR field name: "
          << _parent->getRadarInputName(Params::ZDR) << endl;
@@ -449,7 +449,7 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   }
 
   if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::PHIDP),
-                      _phidpArray)) {
+                      _phidpArray.data())) {
     cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
     cerr << "  Cannot load PHIDP field name: "
          << _parent->getRadarInputName(Params::PHIDP) << endl;
@@ -457,7 +457,7 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   }
   
   if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::RHOHV),
-                      _rhohvArray)) {
+                      _rhohvArray.data())) {
     cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
     cerr << "  Cannot load RHOHV field name: "
          << _parent->getRadarInputName(Params::RHOHV) << endl;
@@ -465,14 +465,14 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
   }
   
   if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::LDR),
-                      _ldrArray)) {
+                      _ldrArray.data())) {
     cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
     cerr << "  Cannot load LDR field name: "
          << _parent->getRadarInputName(Params::LDR) << endl;
     return -1;
   }
   
-  if (_loadFieldArray(inputRay, RadxCartDP::tempFieldName, _tempForPid)) {
+  if (_loadFieldArray(inputRay, RadxCartDP::tempFieldName, _tempForPid.data())) {
     cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
     cerr << "  Cannot load temp field name: "
          << RadxCartDP::tempFieldName << endl;
@@ -573,8 +573,8 @@ void ScalarsCompute::_computeSnrFromDbz()
 
   // compute snr from dbz
   
-  double *snr = _snrArray;
-  const double *dbz = _dbzArray;
+  double *snr = _snrArray.data();
+  const double *dbz = _dbzArray.data();
   for (size_t igate = 0; igate < _nGates; igate++, snr++, dbz++) {
     if (*dbz != missingDbl) {
       *snr = *dbz - noiseDbz[igate];
@@ -582,27 +582,6 @@ void ScalarsCompute::_computeSnrFromDbz()
       *snr = -20;
     }
   }
-
-}
-
-//////////////////////////////////////////////////////////////
-// Censor gates with non-weather particle types
-
-void ScalarsCompute::_censorNonWeather(RadxField &field)
-
-{
-
-  const int *pid = _pid.getPid();
-  for (size_t ii = 0; ii < _nGates; ii++) {
-    int ptype = pid[ii];
-    if (ptype == NcarParticleId::FLYING_INSECTS ||
-        ptype == NcarParticleId::SECOND_TRIP ||
-        ptype == NcarParticleId::GROUND_CLUTTER ||
-        ptype < NcarParticleId::CLOUD ||
-        ptype > NcarParticleId::SATURATED_SNR) {
-      field.setGateToMissing(ii);
-    }
-  } // ii
 
 }
 
@@ -614,227 +593,21 @@ void ScalarsCompute::_loadOutputFields(RadxRay *inputRay,
 
 {
 
-  // initialize array pointers
+  // memcpy(_snrArray.data(), _pid.getSnr(), _nGates * sizeof(double));
+  // memcpy(_dbzArray.data(), _pid.getDbz(), _nGates * sizeof(double));
+  // memcpy(_zdrArray.data(), _pid.getZdr(), _nGates * sizeof(double));
+  // memcpy(_ldrArray.data(), _pid.getLdr(), _nGates * sizeof(double));
+  // memcpy(_tempForPid.data(), _pid.getTempC(), _nGates * sizeof(double));
+  // memcpy(_sdZdr.data(), _pid.getSdzdr(), _nGates * sizeof(double));
+  // memcpy(_sdPhidp.data(), _pid.getSdphidp(), _nGates * sizeof(double));
 
-  const double *dbzAtten = _kdp.getDbzAttenCorr();
-  const double *zdrAtten = _kdp.getZdrAttenCorr();
-  const double *dbzCorrected = _kdp.getDbzCorrected();
-  const double *zdrCorrected = _kdp.getZdrCorrected();
+  _addField(outputRay,
+            "SNR_FOR_PID", "dB",
+            "snr_filtered_for_pid_computations",
+            "signal_to_noise_ratio",
+            _snrArray.data());
+  //            _pid.getSnr());
   
-  // load up output data
-  
-  for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
-    
-    const Params::output_field_t &ofld = _params._output_fields[ifield];
-    if (!ofld.do_write) {
-      continue;
-    }
-    
-    // fill data array
-    
-    TaArray<Radx::fl32> data_;
-    Radx::fl32 *data = data_.alloc(_nGates);
-    Radx::fl32 *datp = data;
-    
-    double minValidPrecipRate = _precipRateParams.RATE_min_valid_rate;
-
-    for (size_t igate = 0; igate < _nGates; igate++, datp++) {
-    
-      switch (ofld.id) {
-
-        // PRECIP RATE
-        
-        case Params::RATE_ZH: {
-          double rate = _rateZ[igate];
-          if (rate < minValidPrecipRate) {
-            *datp = missingDbl;
-          } else {
-            *datp = rate;
-          }
-          break;
-        }
-          
-        case Params::RATE_ZH_SNOW: {
-          double rate = _rateZSnow[igate];
-          if (rate < minValidPrecipRate) {
-            *datp = missingDbl;
-          } else {
-            *datp = rate;
-          }
-          break;
-        }
-          
-        case Params::RATE_Z_ZDR: {
-          double rate = _rateZZdr[igate];
-          if (rate < minValidPrecipRate) {
-            *datp = missingDbl;
-          } else {
-            *datp = rate;
-          }
-          break;
-        }
-          
-        case Params::RATE_KDP: {
-          double rate = _rateKdp[igate];
-          if (rate < minValidPrecipRate) {
-            *datp = missingDbl;
-          } else {
-            *datp = rate;
-          }
-          break;
-        }
-
-        case Params::RATE_KDP_ZDR: {
-          double rate = _rateKdpZdr[igate];
-          if (rate < minValidPrecipRate) {
-            *datp = missingDbl;
-          } else {
-            *datp = rate;
-          }
-          break;
-        }
-
-        case Params::RATE_HYBRID: {
-          double rate = _rateHybrid[igate];
-          if (rate < minValidPrecipRate) {
-            *datp = missingDbl;
-          } else {
-            *datp = rate;
-          }
-          break;
-        }
-
-        case Params::RATE_PID: {
-          double rate = _ratePid[igate];
-          if (rate < minValidPrecipRate) {
-            *datp = missingDbl;
-          } else {
-            *datp = rate;
-          }
-          break;
-        }
-
-        case Params::RATE_HIDRO: {
-          double rate = _rateHidro[igate];
-          if (rate < minValidPrecipRate) {
-            *datp = missingDbl;
-          } else {
-            *datp = rate;
-          }
-          break;
-        }
-
-        case Params::RATE_BRINGI: {
-          double rate = _rateBringi[igate];
-          if (rate < minValidPrecipRate) {
-            *datp = missingDbl;
-          } else {
-            *datp = rate;
-          }
-          break;
-        }
-
-          // PID
-        
-        case Params::PID_OUT:
-          *datp = _pidArray[igate];
-          break;
-        case Params::PID_INTEREST:
-          *datp = _pidInterest[igate];
-          break;
-        case Params::TEMP_FOR_PID:
-          *datp = _tempForPid[igate];
-          break;
-          
-        case Params::SD_ZDR:
-          *datp = _sdZdr[igate];
-          break;
-          
-        case Params::SD_PHIDP:
-          *datp = _sdPhidp[igate];
-          break;
-          
-          // computed KDP
-        
-        case Params::KDP_OUT:
-          *datp = _kdpArray[igate];
-          break;
-        case Params::KDP_SC:
-          *datp = _kdpScArray[igate];
-          break;
-          
-          // attenuation
-          
-        case Params::DBZ_ATTEN_CORRECTION:
-          *datp = dbzAtten[igate];
-          break;
-        case Params::ZDR_ATTEN_CORRECTION:
-          *datp = zdrAtten[igate];
-          break;
-        case Params::DBZ_ATTEN_CORRECTED:
-          *datp = dbzCorrected[igate];
-          break;
-        case Params::ZDR_ATTEN_CORRECTED:
-          *datp = zdrCorrected[igate];
-          break;
-
-      } // switch
-
-    } // igate
-
-    // create field
-    
-    RadxField *field = new RadxField(ofld.name, ofld.units);
-    field->setLongName(ofld.long_name);
-    field->setStandardName(ofld.standard_name);
-    field->setTypeFl32(missingDbl);
-    field->addDataFl32(_nGates, data);
-    field->copyRangeGeom(*inputRay);
-
-    // add to ray
-
-    outputRay->addField(field);
-
-  } // ifield
-  
-  // copy fields through as required
-
-  if (_params.copy_selected_input_fields_to_output) {
-
-    for (int ii = 0; ii < _params.copy_fields_n; ii++) {
-      const Params::copy_field_t &cfield = _params._copy_fields[ii];
-      RadxField *inField = inputRay->getField(cfield.field_name);
-      if (inField != NULL) {
-        RadxField *outField = new RadxField(*inField);
-        if (cfield.censor_non_weather) {
-          _censorNonWeather(*outField);
-        }
-        outputRay->addField(outField);
-      }
-    } // ii
-
-  } // if (_params.copy_input_fields_to_output)
-
-  // add debug fields if required
-
-  if (_params.PID_write_debug_fields) {
-    _addPidDebugFields(inputRay, outputRay);
-  }
-
-  if (_params.KDP_write_debug_fields) {
-    _addKdpDebugFields(outputRay);
-  }
-
-}
-
-//////////////////////////////////////
-// add the debug fields
-  
-void ScalarsCompute::_addPidDebugFields(const RadxRay *inputRay, 
-                                        RadxRay *outputRay)
-
-{
-
   _addField(outputRay,
             "DBZ_FOR_PID", "dBZ",
             "dbz_filtered_for_pid_computations",
@@ -847,12 +620,6 @@ void ScalarsCompute::_addPidDebugFields(const RadxRay *inputRay,
             "differential_reflectivity_hv",
             _pid.getZdr());
   
-  _addField(outputRay,
-            "KDP_FOR_PID", "deg/km",
-            "specific_differential_phase_for_pid_computations",
-            "specific_differential_phase_hv",
-            _pid.getKdp());
-  
   if (_parent->getRadarInputName(Params::LDR).size() > 0) {
     _addField(outputRay,
               "LDR_FOR_PID", "dB",
@@ -860,7 +627,39 @@ void ScalarsCompute::_addPidDebugFields(const RadxRay *inputRay,
               "linear_differential_reflectivity",
               _pid.getLdr());
   }
-
+  
+  _addField(outputRay,
+            "ZDR_SDEV_FOR_PID", "dB",
+            "standard_deviation_of_zdr_for_pid_computations",
+            "sdev_of_differential_reflectivity_hv",
+            _pid.getSdzdr());
+  
+  _addField(outputRay,
+            "PHIDP_SDEV_FOR_PID", "deg",
+            "standard_deviation_of_phidp_for_pid_computations",
+            "sdev_of_differential_phase_hv",
+            _pid.getSdphidp());
+  
+  _addField(outputRay,
+            "TEMP_FOR_PID", "C",
+            "temperature_for_pid_computations",
+            "temperature",
+            _pid.getTempC());
+  
+  if (_params.PID_use_KDP_self_consistency) {
+    _addField(outputRay,
+              "KDP_FOR_PID", "deg/km",
+              "specific_differential_phase_for_pid_computations",
+              "specific_differential_phase_hv",
+              _kdp.getKdpSC());
+  } else {
+    _addField(outputRay,
+              "KDP_FOR_PID", "deg/km",
+              "specific_differential_phase_for_pid_computations",
+              "specific_differential_phase_hv",
+              _kdp.getKdp());
+  }
+  
   _addField(outputRay,
             "RHOHV_FOR_PID", "",
             "rhohv_filtered_for_pid_computations",
@@ -873,150 +672,23 @@ void ScalarsCompute::_addPidDebugFields(const RadxRay *inputRay,
             "differential_phase_hv",
             _pid.getPhidp());
   
-  _addField(outputRay,
-            "ZDR_SDEV_FOR_PID", "dB",
-            "standard_deviation_of_zdr_for_pid_computations",
-            "differential_reflectivity_hv",
-            _pid.getSdzdr());
+  // copy fields through as required
   
-  _addField(outputRay,
-            "PHIDP_SDEV_FOR_PID", "deg",
-            "standard_deviation_of_phidp_for_pid_computations",
-            "differential_phase_hv",
-            _pid.getSdphidp());
-  
-  _addField(outputRay,
-            "ML_INTEREST", "",
-            "melting_layer_interest",
-            "melting_layer_interest",
-            _pid.getMlInterest());
-  
-  _addField(outputRay,
-            "BEAM_HT", "km",
-            "beam_height",
-            "height_to_center_of_beam_msl",
-            inputRay->getField("beam_height")->getDataFl32());
-  
-  _addField(outputRay,
-            "RANGE", "km",
-            "range",
-            "range_to_center_of_gate",
-            inputRay->getField("range")->getDataFl32());
-  
-  _addField(outputRay,
-            "ELEVATION", "deg",
-            "elevation",
-            "elevation_angle",
-            inputRay->getField("elevation")->getDataFl32());
-  
-  
-}
-  
-//////////////////////////////////////
-// add the debug fields
-  
-void ScalarsCompute::_addKdpDebugFields(RadxRay *outputRay)
+  if (_params.copy_selected_input_fields_to_output) {
 
-{
+    for (int ii = 0; ii < _params.copy_fields_n; ii++) {
+      const Params::copy_field_t &cfield = _params._copy_fields[ii];
+      RadxField *inField = inputRay->getField(cfield.field_name);
+      if (inField != NULL) {
+        RadxField *outField = new RadxField(*inField);
+        outputRay->addField(outField);
+      }
+    } // ii
 
-  _addField(outputRay,
-            "KDP_ZZDR", "deg/km",
-            "specific_differential_phase_theoretical_from_z_and_zdr",
-            "specific_differential_phase_hv",
-            _kdp.getKdpZZdr());
-  
-  _addField(outputRay,
-            "PSOB", "deg",
-            "phase_shift_on_backscatter",
-            "phase_shift_on_backscatter",
-            _kdp.getPsob());
-  
-  _addField(outputRay,
-            "DBZ_FOR_KDP", "dBZ",
-            "dbz_filtered_for_kdp_computations",
-            "equivalent_reflectivity_factor",
-            _kdp.getDbz());
-  
-  _addField(outputRay,
-            "SNR_FOR_KDP", "dB",
-            "snr_filtered_for_kdp_computations",
-            "signal_to_noise_ratio",
-            _kdp.getSnr());
-  
-  _addField(outputRay,
-            "ZDR_FOR_KDP", "dB",
-            "zdr_filtered_for_kdp_computations",
-            "differential_reflectivity_hv",
-            _kdp.getZdr());
-  
-  _addField(outputRay,
-            "ZDR_SDEV_FOR_KDP", "dB",
-            "standard_deviation_of_zdr_for_kdp_computations",
-            "differential_reflectivity_hv",
-            _kdp.getZdrSdev());
-  
-  _addField(outputRay,
-            "RHOHV_FOR_KDP", "",
-            "rhohv_filtered_for_kdp_computations",
-            "cross_correlation_hv",
-            _kdp.getRhohv());
-  
-  _addField(outputRay,
-            "VALID_FLAG_FOR_KDP", "",
-            "valid_flag_after_kdp_computations",
-            "valid_flag_for_kdp",
-            _kdp.getValidForKdp());
-  
-  _addField(outputRay,
-            "PHIDP_FOR_KDP", "deg",
-            "phidp_for_kdp_computations",
-            "differential_phase_hv",
-            _kdp.getPhidp());
-  
-  _addField(outputRay,
-            "PHIDP_MEAN", "deg",
-            "phidp_mean_for_kdp_computations",
-            "differential_phase_hv",
-            _kdp.getPhidpMean());
-  
-  _addField(outputRay,
-            "PHIDP_MEAN_UNFOLD", "deg",
-            "phidp_mean_unfold_for_kdp_computations",
-            "differential_phase_hv",
-            _kdp.getPhidpMeanUnfold());
-  
-  _addField(outputRay,
-            "PHIDP_SDEV", "deg",
-            "phidp_sdev_for_kdp_computations",
-            "differential_phase_hv",
-            _kdp.getPhidpSdev());
-  
-  _addField(outputRay,
-            "PHIDP_JITTER", "deg",
-            "phidp_jitter_for_kdp_computations",
-            "differential_phase_hv",
-            _kdp.getPhidpJitter());
-  
-  _addField(outputRay,
-            "PHIDP_UNFOLD", "deg",
-            "phidp_unfold_for_kdp_computations",
-            "differential_phase_hv",
-            _kdp.getPhidpUnfold());
-  
-  _addField(outputRay,
-            "PHIDP_FILT", "deg",
-            "phidp_filtered_for_kdp_computations",
-            "differential_phase_hv",
-            _kdp.getPhidpFilt());
-  
-  _addField(outputRay,
-            "PHIDP_COND", "deg",
-            "phidp_cond_for_kdp_computations",
-            "differential_phase_hv",
-            _kdp.getPhidpCond());
-  
+  } // if (_params.copy_input_fields_to_output)
+
 }
-  
+
 //////////////////////////////////////
 // add a field to the output ray
   

@@ -47,13 +47,13 @@
 #include <radar/PrecipRate.hh>
 #include <radar/PrecipRateParams.hh>
 #include <Radx/Radx.hh>
-#include <Radx/RadxArray.hh>
 #include <Radx/RadxTime.hh>
 class RadxCartDP;
 class RadxRay;
 class RadxField;
 class TempProfile;
 #include <pthread.h>
+#include <vector>
 using namespace std;
 
 class ScalarsCompute {
@@ -137,59 +137,32 @@ private:
   
   // input arrays
 
-  RadxArray<double> _snrArray_;
-  RadxArray<double> _dbzArray_;
-  RadxArray<double> _zdrArray_;
-  RadxArray<double> _ldrArray_;
-  RadxArray<double> _rhohvArray_;
-  RadxArray<double> _phidpArray_;
+  vector<double> _snrArray;
+  vector<double> _dbzArray;
+  vector<double> _zdrArray;
+  vector<double> _ldrArray;
+  vector<double> _rhohvArray;
+  vector<double> _phidpArray;
   
-  double *_snrArray;
-  double *_dbzArray;
-  double *_zdrArray;
-  double *_ldrArray;
-  double *_rhohvArray;
-  double *_phidpArray;
-
   // derived arrays
 
-  RadxArray<int> _pidArray_;
-  RadxArray<double> _pidInterest_;
-  RadxArray<double> _tempForPid_;
-  RadxArray<double> _sdZdr_;
-  RadxArray<double> _sdPhidp_;
+  vector<double> _kdpArray;
+  vector<double> _kdpScArray;
+  vector<double> _tempForPid;
+  vector<double> _sdZdr;
+  vector<double> _sdPhidp;
 
-  int *_pidArray;
-  double *_pidInterest;
-  double *_tempForPid;
-  double *_sdZdr;
-  double *_sdPhidp;
-
-  RadxArray<double> _kdpArray_;
-  RadxArray<double> _kdpScArray_;
-
-  double *_kdpArray;
-  double *_kdpScArray;
-
-  RadxArray<double> _rateZ_;
-  RadxArray<double> _rateZSnow_;
-  RadxArray<double> _rateZZdr_;
-  RadxArray<double> _rateKdp_;
-  RadxArray<double> _rateKdpZdr_;
-  RadxArray<double> _rateHybrid_;
-  RadxArray<double> _ratePid_;
-  RadxArray<double> _rateHidro_;
-  RadxArray<double> _rateBringi_;
-
-  double *_rateZ;
-  double *_rateZSnow;
-  double *_rateZZdr;
-  double *_rateKdp;
-  double *_rateKdpZdr;
-  double *_rateHybrid;
-  double *_ratePid;
-  double *_rateHidro;
-  double *_rateBringi;
+  // vector<int> _pidArray;
+  // vector<double> _pidInterest;
+  // vector<double> _rateZ;
+  // vector<double> _rateZSnow;
+  // vector<double> _rateZZdr;
+  // vector<double> _rateKdp;
+  // vector<double> _rateKdpZdr;
+  // vector<double> _rateHybrid;
+  // vector<double> _ratePid;
+  // vector<double> _rateHidro;
+  // vector<double> _rateBringi;
 
   // computing kdp
   
@@ -235,16 +208,9 @@ private:
 
   void _computeSnrFromDbz();
 
-  void _censorNonWeather(RadxField &field);
-
   void _loadOutputFields(RadxRay *inputRay,
                          RadxRay *derivedRay);
   
-  void _addPidDebugFields(const RadxRay *inputRay, 
-                          RadxRay *outputRay);
-
-  void _addKdpDebugFields(RadxRay *derivedRay);
-
   void _addField(RadxRay *derivedRay,
                  const string &name,
                  const string &units,
