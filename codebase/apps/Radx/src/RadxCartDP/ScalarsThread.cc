@@ -49,13 +49,11 @@ ScalarsThread::ScalarsThread(RadxCartDP *parent,
                              const Params &params,
                              const KdpFiltParams &kdpFiltParams,
                              const NcarPidParams &ncarPidParams,
-                             const PrecipRateParams &precipRateParams,
                              int threadNum) :
         _parent(parent),
         _params(params),
         _kdpFiltParams(kdpFiltParams),
         _ncarPidParams(ncarPidParams),
-        _precipRateParams(precipRateParams),
         _threadNum(threadNum)
 {
 
@@ -69,7 +67,6 @@ ScalarsThread::ScalarsThread(RadxCartDP *parent,
                                        _params,
                                        _kdpFiltParams,
                                        _ncarPidParams,
-                                       // _precipRateParams,
                                        _threadNum);
   
   if (_scalarsCompute == NULL) {

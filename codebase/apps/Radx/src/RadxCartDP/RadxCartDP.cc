@@ -40,11 +40,8 @@
 #include "OutputMdv.hh"
 #include "ScalarsCompute.hh"
 #include "ScalarsThread.hh"
-#include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
-#include <toolsa/pjg.h>
-#include <toolsa/mem.h>
-#include <toolsa/toolsa_macros.h>
+#include <toolsa/umisc.h>
 #include <didss/LdataInfo.hh>
 #include <radar/BeamHeight.hh>
 #include <Radx/RadxRay.hh>
@@ -58,17 +55,25 @@ using namespace std;
 
 // initialize geom field names
 
-string RadxCartDP::smoothedDbzFieldName = "DBZ_SMOOTHED";
-string RadxCartDP::smoothedRhohvFieldName = "RHOHV_SMOOTHED";
 string RadxCartDP::elevationFieldName = "ELEV";
 string RadxCartDP::rangeFieldName = "RANGE";
 string RadxCartDP::beamHtFieldName = "BEAM_HT";
-string RadxCartDP::tempFieldName = "TEMPC";
+string RadxCartDP::tempFieldName = "TEMP_C";
 string RadxCartDP::pidFieldName = "PID";
 string RadxCartDP::pidInterestFieldName = "PID_INTEREST";
 string RadxCartDP::mlFieldName = "MELTING_LAYER";
 string RadxCartDP::mlExtendedFieldName = "ML_EXTENDED";
 string RadxCartDP::convFlagFieldName = "CONV_FLAG";
+
+string RadxCartDP::snrForPidFieldName = "SNR_FOR_PID";
+string RadxCartDP::dbzForPidFieldName = "DBZ_FOR_PID";
+string RadxCartDP::zdrForPidFieldName = "ZDR_FOR_PID";
+string RadxCartDP::ldrForPidFieldName = "LDR_FOR_PID";
+string RadxCartDP::rhohvForPidFieldName = "RHOHV_FOR_PID";
+string RadxCartDP::phidpForPidFieldName = "PHIDP_FOR_PID";
+string RadxCartDP::kdpForPidFieldName = "KDP_FOR_PID";
+string RadxCartDP::zdrSdevForPidFieldName = "ZDR_SDEV_FOR_PID";
+string RadxCartDP::phidpSdevForPidFieldName = "PHIDP_SDEV_FOR_PID";
 
 // Constructor
 
@@ -187,14 +192,13 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   
   pthread_mutex_init(&_debugPrintMutex, NULL);
   
-  // set up compute thread pool
+  // set up scalars compute thread pool
   
   for (int ii = 0; ii < _params.n_compute_threads; ii++) {
     ScalarsThread *thread =
       new ScalarsThread(this, _params, 
                         _kdpFiltParams,
                         _ncarPidParams,
-                        _precipRateParams,
                         ii);
     if (!thread->OK) {
       delete thread;
@@ -423,9 +427,9 @@ int RadxCartDP::_processFile(const string &filePath)
     return -1;
   }
 
-  // add geometry fields to the volume
+  // add ray geometry fields to the input volume
   
-  _addGeomFieldsToInput();
+  _addRayGeomFieldsToInput();
   
   // compute the scalar (kdp, pid, precip rate) fields
 
@@ -443,9 +447,9 @@ int RadxCartDP::_processFile(const string &filePath)
     return -1;
   }
 
-  if (_params.write_scalar_polar_output) {
-    if (_writeScalarPolarOutput()) {
-      cerr << "WARNING - cannot write scalar output in polar coords" << endl;
+  if (_params.write_debug_polar_output) {
+    if (_writeDebugPolarOutput()) {
+      cerr << "WARNING - cannot write debug files in polar coords" << endl;
     }
   }
 
@@ -598,10 +602,23 @@ int RadxCartDP::_readFile(const string &filePath)
     cerr << "  _gateSpacingKm: " << _readVol.getGateSpacingKm() << endl;
   }
 
-  // add geom and time fields if requested
+  // add extra debug fields if requested
   
-  _addGeometryFields();
-  _addTimeField();
+  if (_params.output_angle_fields) {
+    _addAngleFields();
+  }
+  if (_params.output_range_field) {
+    _addRangeField();
+  }
+  if (_params.output_height_field) {
+    _addHeightField();
+  }
+  if (_params.output_coverage_field) {
+    _addCoverageField();
+  }
+  if (_params.output_time_field) {
+    _addTimeField();
+  }
   
   // set radar properties
 
@@ -645,9 +662,9 @@ void RadxCartDP::_setupRead(RadxFile &file)
 }
 
 //////////////////////////////////////////////////
-// add geometry and pid fields to the volume
+// add ray geometry and pid fields to the volume
 
-void RadxCartDP::_addGeomFieldsToInput()
+void RadxCartDP::_addRayGeomFieldsToInput()
 
 {
 
@@ -655,28 +672,17 @@ void RadxCartDP::_addGeomFieldsToInput()
   for (size_t iray = 0; iray < rays.size(); iray++) {
 
     RadxRay *ray = rays[iray];
-
-    RadxField *smoothDbzFld = new RadxField(smoothedDbzFieldName, "dBZ");
-    RadxField *smoothRhohvFld = new RadxField(smoothedRhohvFieldName, "");
+    size_t nGates = ray->getNGates();
+    
     RadxField *elevFld = new RadxField(elevationFieldName, "deg");
     RadxField *rangeFld = new RadxField(rangeFieldName, "km");
     RadxField *beamHtFld = new RadxField(beamHtFieldName, "km");
-    RadxField *tempFld = new RadxField(tempFieldName, "C");
-    RadxField *pidFld = new RadxField(pidFieldName, "");
-    RadxField *pidIntrFld = new RadxField(pidInterestFieldName, "");
-    RadxField *mlFld = new RadxField(mlFieldName, "");
-
-    size_t nGates = ray->getNGates();
-
-    TaArray<Radx::fl32> elev_, rng_, ht_, temp_;
-    Radx::fl32 *elev = elev_.alloc(nGates);
-    Radx::fl32 *rng = rng_.alloc(nGates);
-    Radx::fl32 *ht = ht_.alloc(nGates);
-    Radx::fl32 *temp = temp_.alloc(nGates);
+    
+    vector<Radx::fl32> elev(nGates), rng(nGates), ht(nGates);
     
     double startRangeKm = ray->getStartRangeKm();
     double gateSpacingKm = ray->getGateSpacingKm();
-
+    
     BeamHeight beamHt;
     beamHt.setInstrumentHtKm(_readVol.getAltitudeKm());
     if (_params.override_standard_pseudo_earth_radius) {
@@ -687,83 +693,24 @@ void RadxCartDP::_addGeomFieldsToInput()
     
     double rangeKm = startRangeKm;
     double elevationDeg = ray->getElevationDeg();
-    // const TempProfile &profile = _computeScalarsThreads[0]->getTempProfile();
     for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
       double htKm = beamHt.computeHtKm(elevationDeg, rangeKm);
-      // double tempC = profile.getTempForHtKm(htKm);
       elev[igate] = elevationDeg;
       rng[igate] = rangeKm;
       ht[igate] = htKm;
-      // temp[igate] = tempC;
     } // igate
-
-    smoothDbzFld->setTypeFl32(-9999.0);
-    smoothRhohvFld->setTypeFl32(-9999.0);
+    
     elevFld->setTypeFl32(-9999.0);
     rangeFld->setTypeFl32(-9999.0);
     beamHtFld->setTypeFl32(-9999.0);
-    tempFld->setTypeFl32(-9999.0);
-    pidFld->setTypeSi32(-9999, 1.0, 0.0);
-    pidIntrFld->setTypeFl32(-9999.0);
-    mlFld->setTypeSi32(-9999, 1.0, 0.0);
     
-    smoothDbzFld->addDataMissing(nGates);
-    smoothRhohvFld->addDataMissing(nGates);
-    elevFld->addDataFl32(nGates, elev);
-    rangeFld->addDataFl32(nGates, rng);
-    beamHtFld->addDataFl32(nGates, ht);
-    tempFld->addDataFl32(nGates, temp);
-    pidFld->addDataMissing(nGates);
-    pidIntrFld->addDataMissing(nGates);
-    mlFld->addDataMissing(nGates);
-
-    ray->addField(smoothDbzFld);
-    ray->addField(smoothRhohvFld);
+    elevFld->addDataFl32(nGates, elev.data());
+    rangeFld->addDataFl32(nGates, rng.data());
+    beamHtFld->addDataFl32(nGates, ht.data());
+    
     ray->addField(elevFld);
     ray->addField(rangeFld);
     ray->addField(beamHtFld);
-    ray->addField(tempFld);
-    ray->addField(pidFld);
-    ray->addField(pidIntrFld);
-    ray->addField(mlFld);
-
-  } // iray
-
-}
-
-//////////////////////////////////////////////////
-// add geom output fields
-
-void RadxCartDP::_addGeomFieldsToOutput()
-
-{
-
-  // loop through rays
-
-  vector<RadxRay *> &inputRays = _readVol.getRays();
-  for (size_t iray = 0; iray < inputRays.size(); iray++) {
-    
-    RadxRay *inputRay = inputRays[iray];
-
-    // match output ray to input ray based on time
-    
-    RadxRay *outputRay = NULL;
-    double inTime = inputRay->getTimeDouble();
-    for (size_t jj = 0; jj < _scalarRays.size(); jj++) {
-      RadxRay *pidRay = _scalarRays[jj];
-      double outTime = pidRay->getTimeDouble();
-      if (fabs(inTime - outTime) < 0.001) {
-        outputRay = pidRay;
-        break;
-      }
-    } // jj
-
-    if (outputRay != NULL) {
-      // make a copy of the input fields
-      RadxField *mlFld = new RadxField(*inputRay->getField(mlFieldName));
-      // add to output
-      outputRay->addField(mlFld);
-    }
 
   } // iray
 
@@ -892,18 +839,19 @@ int RadxCartDP::_storeScalarsRay(ScalarsThread *thread)
 }
       
 //////////////////////////////////////////////////
-// Write scalar volume for debugging
+// Write polar volume for debugging
+// Input file + derived fields in polar coords.
 
-int RadxCartDP::_writeScalarPolarOutput()
+int RadxCartDP::_writeDebugPolarOutput()
 {
 
   RadxFile out;
   if (_params.debug) {
     out.setDebug(true);
   }
-  if (out.writeToDir(_readVol, _params.scalar_polar_output_dir, true, false)) {
-    cerr << "ERROR - RadxCartDP::_writeScalarPolarOutput()" << endl;
-    cerr << "  Cannot write scalar polar file, path: " << out.getPathInUse() << endl;
+  if (out.writeToDir(_readVol, _params.debug_polar_output_dir, true, false)) {
+    cerr << "ERROR - RadxCartDP::_writeDebugPolarOutput()" << endl;
+    cerr << "  Cannot write debug polar file, path: " << out.getPathInUse() << endl;
     cerr << out.getErrStr() << endl;
     return -1;
   }
@@ -914,104 +862,139 @@ int RadxCartDP::_writeScalarPolarOutput()
 
 
 //////////////////////////////////////////////////
-// add geometry fields
+// add angle fields
 
-void RadxCartDP::_addGeometryFields()
+void RadxCartDP::_addAngleFields()
 {
   
-  if (_params.output_angle_fields) {
-
-    // loop through rays
+  // loop through rays
     
-    vector<RadxRay *> &rays = _readVol.getRays();
-    for (size_t iray = 0; iray < rays.size(); iray++) {
+  vector<RadxRay *> &rays = _readVol.getRays();
+  for (size_t iray = 0; iray < rays.size(); iray++) {
       
-      RadxRay *ray = rays[iray];
-      int nGates = ray->getNGates();
-      TaArray<Radx::fl32> data_;
-      Radx::fl32 *data = data_.alloc(nGates);
+    RadxRay *ray = rays[iray];
+    int nGates = ray->getNGates();
+    TaArray<Radx::fl32> data_;
+    Radx::fl32 *data = data_.alloc(nGates);
       
-      double az = ray->getAzimuthDeg();
-      double el = ray->getElevationDeg();
-      double cosAz = cos(az * Radx::DegToRad);
-      double cosEl = cos(el * Radx::DegToRad);
-      double sinAz = sin(az * Radx::DegToRad);
-      double sinEl = sin(el * Radx::DegToRad);
+    double az = ray->getAzimuthDeg();
+    double el = ray->getElevationDeg();
+    double cosAz = cos(az * Radx::DegToRad);
+    double cosEl = cos(el * Radx::DegToRad);
+    double sinAz = sin(az * Radx::DegToRad);
+    double sinEl = sin(el * Radx::DegToRad);
       
-      // add azimuth field
-      if (strlen(_params.angle_fields.azimuth_field_name) > 0) {
-        RadxField *azimuthField = 
-          new RadxField(_params.angle_fields.azimuth_field_name, "deg");
-        azimuthField->setLongName("azimuth_angle");
-        azimuthField->setStandardName("sensor_to_target_azimuth_angle");
-        azimuthField->setTypeFl32(-9999.0);
-        for (int ii = 0; ii < nGates; ii++) {
-          data[ii] = az;
-        }
-        azimuthField->setFieldFolds(0.0, 360.0);
-        azimuthField->addDataFl32(nGates, data);
-        ray->addField(azimuthField);
+    // add azimuth field
+    if (strlen(_params.angle_fields.azimuth_field_name) > 0) {
+      RadxField *azimuthField = 
+        new RadxField(_params.angle_fields.azimuth_field_name, "deg");
+      azimuthField->setLongName("azimuth_angle");
+      azimuthField->setStandardName("sensor_to_target_azimuth_angle");
+      azimuthField->setTypeFl32(-9999.0);
+      for (int ii = 0; ii < nGates; ii++) {
+        data[ii] = az;
       }
+      azimuthField->setFieldFolds(0.0, 360.0);
+      azimuthField->addDataFl32(nGates, data);
+      ray->addField(azimuthField);
+    }
       
-      // add elevation field
-      if (strlen(_params.angle_fields.elevation_field_name) > 0) {
-        RadxField *elevationField = 
-          new RadxField(_params.angle_fields.elevation_field_name, "deg");
-        elevationField->setLongName("elevation_angle");
-        elevationField->setStandardName("sensor_to_target_elevation_angle");
-        elevationField->setTypeFl32(-9999.0);
-        for (int ii = 0; ii < nGates; ii++) {
-          data[ii] = el;
-        }
-        elevationField->addDataFl32(nGates, data);
-        ray->addField(elevationField);
+    // add elevation field
+    if (strlen(_params.angle_fields.elevation_field_name) > 0) {
+      RadxField *elevationField = 
+        new RadxField(_params.angle_fields.elevation_field_name, "deg");
+      elevationField->setLongName("elevation_angle");
+      elevationField->setStandardName("sensor_to_target_elevation_angle");
+      elevationField->setTypeFl32(-9999.0);
+      for (int ii = 0; ii < nGates; ii++) {
+        data[ii] = el;
       }
+      elevationField->addDataFl32(nGates, data);
+      ray->addField(elevationField);
+    }
       
-      // add alpha field - sin(az) * cos(el)
-      if (strlen(_params.angle_fields.alpha_field_name) > 0) {
-        RadxField *alphaField = 
-          new RadxField(_params.angle_fields.alpha_field_name, "");
-        alphaField->setLongName("alpha_for_doppler_analysis");
-        alphaField->setStandardName("alpha_for_doppler_analysis");
-        alphaField->setTypeFl32(-9999.0);
-        for (int ii = 0; ii < nGates; ii++) {
-          data[ii] = sinAz * cosEl;
-        }
-        alphaField->addDataFl32(nGates, data);
-        ray->addField(alphaField);
+    // add alpha field - sin(az) * cos(el)
+    if (strlen(_params.angle_fields.alpha_field_name) > 0) {
+      RadxField *alphaField = 
+        new RadxField(_params.angle_fields.alpha_field_name, "");
+      alphaField->setLongName("alpha_for_doppler_analysis");
+      alphaField->setStandardName("alpha_for_doppler_analysis");
+      alphaField->setTypeFl32(-9999.0);
+      for (int ii = 0; ii < nGates; ii++) {
+        data[ii] = sinAz * cosEl;
       }
+      alphaField->addDataFl32(nGates, data);
+      ray->addField(alphaField);
+    }
       
-      // add beta field - cos(az) * cos(el)
-      if (strlen(_params.angle_fields.beta_field_name) > 0) {
-        RadxField *betaField = 
-          new RadxField(_params.angle_fields.beta_field_name, "");
-        betaField->setLongName("beta_for_doppler_analysis");
-        betaField->setStandardName("beta_for_doppler_analysis");
-        betaField->setTypeFl32(-9999.0);
-        for (int ii = 0; ii < nGates; ii++) {
-          data[ii] = cosAz * cosEl;
-        }
-        betaField->addDataFl32(nGates, data);
-        ray->addField(betaField);
+    // add beta field - cos(az) * cos(el)
+    if (strlen(_params.angle_fields.beta_field_name) > 0) {
+      RadxField *betaField = 
+        new RadxField(_params.angle_fields.beta_field_name, "");
+      betaField->setLongName("beta_for_doppler_analysis");
+      betaField->setStandardName("beta_for_doppler_analysis");
+      betaField->setTypeFl32(-9999.0);
+      for (int ii = 0; ii < nGates; ii++) {
+        data[ii] = cosAz * cosEl;
       }
+      betaField->addDataFl32(nGates, data);
+      ray->addField(betaField);
+    }
       
-      // add gamma field - sin(el)
-      if (strlen(_params.angle_fields.gamma_field_name) > 0) {
-        RadxField *gammaField = 
-          new RadxField(_params.angle_fields.gamma_field_name, "");
-        gammaField->setLongName("gamma_for_doppler_analysis");
-        gammaField->setStandardName("gamma_for_doppler_analysis");
-        gammaField->setTypeFl32(-9999.0);
-        for (int ii = 0; ii < nGates; ii++) {
-          data[ii] = sinEl;
-        }
-        gammaField->addDataFl32(nGates, data);
-        ray->addField(gammaField);
+    // add gamma field - sin(el)
+    if (strlen(_params.angle_fields.gamma_field_name) > 0) {
+      RadxField *gammaField = 
+        new RadxField(_params.angle_fields.gamma_field_name, "");
+      gammaField->setLongName("gamma_for_doppler_analysis");
+      gammaField->setStandardName("gamma_for_doppler_analysis");
+      gammaField->setTypeFl32(-9999.0);
+      for (int ii = 0; ii < nGates; ii++) {
+        data[ii] = sinEl;
       }
+      gammaField->addDataFl32(nGates, data);
+      ray->addField(gammaField);
+    }
 
-    } // iray
+  } // iray
 
-  } // if(_params.output_angle_fields)
+}
+  
+//////////////////////////////////////////////////
+// add range field
+
+void RadxCartDP::_addRangeField()
+{
+  
+  vector<RadxRay *> &rays = _readVol.getRays();
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    
+    RadxRay *ray = rays[iray];
+    int nGates = ray->getNGates();
+    TaArray<Radx::fl32> data_;
+    Radx::fl32 *data = data_.alloc(nGates);
+    
+    // range field
+    
+    RadxField *rangeField = new RadxField(_params.range_field_name, "km");
+    rangeField->setLongName("range_from_radar");
+    rangeField->setStandardName("slant_range");
+    rangeField->setTypeFl32(-9999.0);
+    double range = ray->getStartRangeKm();
+    for (int ii = 0; ii < nGates; ii++) {
+      data[ii] = range;
+      range += ray->getGateSpacingKm();
+    }
+    rangeField->addDataFl32(nGates, data);
+    ray->addField(rangeField);
+  }
+
+}
+  
+//////////////////////////////////////////////////
+// add height field
+
+void RadxCartDP::_addHeightField()
+{
   
   // beamHeight
 
@@ -1021,8 +1004,6 @@ void RadxCartDP::_addGeometryFields()
     beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
   }
 
-  // other geom fields
-  
   vector<RadxRay *> &rays = _readVol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
     
@@ -1031,54 +1012,48 @@ void RadxCartDP::_addGeometryFields()
     TaArray<Radx::fl32> data_;
     Radx::fl32 *data = data_.alloc(nGates);
       
-    // range field
-    
-    if (_params.output_range_field) {
-      RadxField *rangeField = new RadxField(_params.range_field_name, "km");
-      rangeField->setLongName("range_from_radar");
-      rangeField->setStandardName("slant_range");
-      rangeField->setTypeFl32(-9999.0);
-      double range = ray->getStartRangeKm();
-      for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = range;
-        range += ray->getGateSpacingKm();
-      }
-      rangeField->addDataFl32(nGates, data);
-      ray->addField(rangeField);
+    RadxField *heightField = new RadxField(_params.height_field_name, "km");
+    heightField->setLongName("height_msl");
+    heightField->setStandardName("height_msl");
+    heightField->setTypeFl32(-9999.0);
+    double elevDeg = ray->getElevationDeg();
+    double range = ray->getStartRangeKm();
+    for (int ii = 0; ii < nGates; ii++) {
+      double ht = beamHt.computeHtKm(elevDeg, range);
+      data[ii] = ht;
+      range += ray->getGateSpacingKm();
     }
-    
-    // height field
-    
-    if (_params.output_height_field) {
-      RadxField *heightField = new RadxField(_params.height_field_name, "km");
-      heightField->setLongName("height_msl");
-      heightField->setStandardName("height_msl");
-      heightField->setTypeFl32(-9999.0);
-      double elevDeg = ray->getElevationDeg();
-      double range = ray->getStartRangeKm();
-      for (int ii = 0; ii < nGates; ii++) {
-        double ht = beamHt.computeHtKm(elevDeg, range);
-        data[ii] = ht;
-        range += ray->getGateSpacingKm();
-      }
-      heightField->addDataFl32(nGates, data);
-      ray->addField(heightField);
-    }
+    heightField->addDataFl32(nGates, data);
+    ray->addField(heightField);
+  }
+  
+}
 
-    // coverage field
-    if (_params.output_coverage_field) {
-      RadxField *covFld = new RadxField(_params.coverage_field_name, "");
-      covFld->setLongName("radar_coverage_flag");
-      covFld->setStandardName("radar_coverage_flag");
-      covFld->setTypeFl32(-9999.0);
-      for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = 1.0;
-      }
-      covFld->addDataFl32(nGates, data);
-      covFld->setIsDiscrete(true);
-      ray->addField(covFld);
-    }
+//////////////////////////////////////////////////
+// add coverage field
+
+void RadxCartDP::_addCoverageField()
+{
+  
+  vector<RadxRay *> &rays = _readVol.getRays();
+  for (size_t iray = 0; iray < rays.size(); iray++) {
     
+    RadxRay *ray = rays[iray];
+    int nGates = ray->getNGates();
+    TaArray<Radx::fl32> data_;
+    Radx::fl32 *data = data_.alloc(nGates);
+    
+    RadxField *covFld = new RadxField(_params.coverage_field_name, "");
+    covFld->setLongName("radar_coverage_flag");
+    covFld->setStandardName("radar_coverage_flag");
+    covFld->setTypeFl32(-9999.0);
+    for (int ii = 0; ii < nGates; ii++) {
+      data[ii] = 1.0;
+    }
+    covFld->addDataFl32(nGates, data);
+    covFld->setIsDiscrete(true);
+    ray->addField(covFld);
+
   } // iray
 
 }
@@ -1089,10 +1064,6 @@ void RadxCartDP::_addGeometryFields()
 void RadxCartDP::_addTimeField()
 {
 
-  if (!_params.output_time_field) {
-    return;
-  }
-  
   // start times
 
   time_t startTimeSecs = _readVol.getStartTimeSecs();
@@ -1878,6 +1849,44 @@ int RadxCartDP::_mergeScalarsIntoReadVol()
 }
 
 #ifdef NOTNOW
+
+//////////////////////////////////////////////////
+// add geom output fields
+
+void RadxCartDP::_addGeomFieldsToOutput()
+
+{
+
+  // loop through rays
+
+  vector<RadxRay *> &inputRays = _readVol.getRays();
+  for (size_t iray = 0; iray < inputRays.size(); iray++) {
+    
+    RadxRay *inputRay = inputRays[iray];
+
+    // match output ray to input ray based on time
+    
+    RadxRay *outputRay = NULL;
+    double inTime = inputRay->getTimeDouble();
+    for (size_t jj = 0; jj < _scalarRays.size(); jj++) {
+      RadxRay *pidRay = _scalarRays[jj];
+      double outTime = pidRay->getTimeDouble();
+      if (fabs(inTime - outTime) < 0.001) {
+        outputRay = pidRay;
+        break;
+      }
+    } // jj
+
+    if (outputRay != NULL) {
+      // make a copy of the input fields
+      RadxField *mlFld = new RadxField(*inputRay->getField(mlFieldName));
+      // add to output
+      outputRay->addField(mlFld);
+    }
+
+  } // iray
+
+}
 
 /////////////////////////////////////////////////////////
 // fill temperature level ht array

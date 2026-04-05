@@ -100,10 +100,8 @@ public:
   string getModelOutputName(Params::model_field_type_t ftype);
   string getBeamBlockOutputName(Params::bblock_field_type_t ftype);
 
-  // names for geom fields
+  // names for derived fields
 
-  static string smoothedDbzFieldName;
-  static string smoothedRhohvFieldName;
   static string elevationFieldName;
   static string rangeFieldName;
   static string beamHtFieldName;
@@ -113,7 +111,17 @@ public:
   static string mlFieldName;
   static string mlExtendedFieldName;
   static string convFlagFieldName;
-  
+
+  static string snrForPidFieldName;
+  static string dbzForPidFieldName;
+  static string zdrForPidFieldName;
+  static string ldrForPidFieldName;
+  static string rhohvForPidFieldName;
+  static string phidpForPidFieldName;
+  static string kdpForPidFieldName;
+  static string zdrSdevForPidFieldName;
+  static string phidpSdevForPidFieldName;
+
 protected:
 private:
 
@@ -180,17 +188,18 @@ private:
   bool _fileNameValid(const string &filePath);
   int _readFile(const string &filePath);
 
-  void _addGeomFieldsToInput();
-  void _addGeomFieldsToOutput();
-  void _encodeFieldsForOutput();
+  void _addRayGeomFieldsToInput();
 
   int _readModelTemperatureProfile();
 
   int _computeScalars();
   int _storeScalarsRay(ScalarsThread *thread);
-  int _writeScalarPolarOutput();
+  int _writeDebugPolarOutput();
 
-  void _addGeometryFields();
+  void _addAngleFields();
+  void _addRangeField();
+  void _addHeightField();
+  void _addCoverageField();
   void _addTimeField();
 
   bool _isRhi();

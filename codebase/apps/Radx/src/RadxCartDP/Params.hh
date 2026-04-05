@@ -535,9 +535,9 @@ public:
 
   char* output_dir;
 
-  tdrp_bool_t write_scalar_polar_output;
+  tdrp_bool_t write_debug_polar_output;
 
-  char* scalar_polar_output_dir;
+  char* debug_polar_output_dir;
 
   char* KDP_params_file_path;
 

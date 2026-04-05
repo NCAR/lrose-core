@@ -1022,32 +1022,32 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("WRITE SCALAR DATA FOR DEBUGGING");
+    tt->comment_hdr = tdrpStrDup("WRITE DERIVED POLAR DATA FOR DEBUGGING");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'write_scalar_polar_output'
+    // Parameter 'write_debug_polar_output'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_scalar_polar_output");
-    tt->descr = tdrpStrDup("Write scalar variables for debugging.");
-    tt->help = tdrpStrDup("If TRUE, write out the input volume in polar coords, after the extra scalar fields have been added.");
-    tt->val_offset = (char *) &write_scalar_polar_output - &_start_;
+    tt->param_name = tdrpStrDup("write_debug_polar_output");
+    tt->descr = tdrpStrDup("Write derived polar variables for debugging.");
+    tt->help = tdrpStrDup("If TRUE, write out the augmented input volume in polar coords, including all derived fields.");
+    tt->val_offset = (char *) &write_debug_polar_output - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'scalar_polar_output_dir'
+    // Parameter 'debug_polar_output_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("scalar_polar_output_dir");
-    tt->descr = tdrpStrDup("Output directory for writing files.");
-    tt->help = tdrpStrDup("Files will be written to this directory.");
-    tt->val_offset = (char *) &scalar_polar_output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/polar/pid");
+    tt->param_name = tdrpStrDup("debug_polar_output_dir");
+    tt->descr = tdrpStrDup("Output directory for writing debug polar files.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &debug_polar_output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/polar/debug");
     tt++;
     
     // Parameter 'Comment 9'

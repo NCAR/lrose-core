@@ -571,84 +571,80 @@ void ScalarsCompute::_loadOutputFields(RadxRay *inputRay,
 
 {
 
-  // memcpy(_snrArray.data(), _pid.getSnr(), _nGates * sizeof(double));
-  // memcpy(_dbzArray.data(), _pid.getDbz(), _nGates * sizeof(double));
-  // memcpy(_zdrArray.data(), _pid.getZdr(), _nGates * sizeof(double));
-  // memcpy(_ldrArray.data(), _pid.getLdr(), _nGates * sizeof(double));
-  // memcpy(_tempForPid.data(), _pid.getTempC(), _nGates * sizeof(double));
-  // memcpy(_sdZdr.data(), _pid.getSdzdr(), _nGates * sizeof(double));
-  // memcpy(_sdPhidp.data(), _pid.getSdphidp(), _nGates * sizeof(double));
-
   _addField(outputRay,
-            "SNR_FOR_PID", "dB",
+            RadxCartDP::snrForPidFieldName,
+            "dB",
             "snr_filtered_for_pid_computations",
             "signal_to_noise_ratio",
-            _snrArray.data());
-  //            _pid.getSnr());
+            // _snrArray.data());
+            _pid.getSnr());
   
   _addField(outputRay,
-            "DBZ_FOR_PID", "dBZ",
+            RadxCartDP::dbzForPidFieldName,
+            "dBZ",
             "dbz_filtered_for_pid_computations",
             "equivalent_reflectivity_factor",
             _pid.getDbz());
   
   _addField(outputRay,
-            "ZDR_FOR_PID", "dB",
+            RadxCartDP::zdrForPidFieldName,
+            "dB",
             "zdr_filtered_for_pid_computations",
             "differential_reflectivity_hv",
             _pid.getZdr());
   
   if (_parent->getRadarInputName(Params::LDR).size() > 0) {
     _addField(outputRay,
-              "LDR_FOR_PID", "dB",
+              RadxCartDP::ldrForPidFieldName,
+              "dB",
               "linear_differential_refectivity_for_pid_computations",
               "linear_differential_reflectivity",
               _pid.getLdr());
   }
   
   _addField(outputRay,
-            "ZDR_SDEV_FOR_PID", "dB",
-            "standard_deviation_of_zdr_for_pid_computations",
-            "sdev_of_differential_reflectivity_hv",
-            _pid.getSdzdr());
+            RadxCartDP::rhohvForPidFieldName,
+            "",
+            "rhohv_filtered_for_pid_computations",
+            "cross_correlation_hv",
+            _pid.getRhohv());
   
   _addField(outputRay,
-            "PHIDP_SDEV_FOR_PID", "deg",
-            "standard_deviation_of_phidp_for_pid_computations",
-            "sdev_of_differential_phase_hv",
-            _pid.getSdphidp());
-  
-  // _addField(outputRay,
-  //           "TEMP_FOR_PID", "C",
-  //           "temperature_for_pid_computations",
-  //           "temperature",
-  //           _pid.getTempC());
+            RadxCartDP::phidpForPidFieldName,
+            "deg",
+            "phidp_for_pid_computations",
+            "differential_phase_hv",
+            _pid.getPhidp());
   
   if (_params.PID_use_KDP_self_consistency) {
     _addField(outputRay,
-              "KDP_FOR_PID", "deg/km",
+              RadxCartDP::kdpForPidFieldName,
+              "deg/km",
               "specific_differential_phase_for_pid_computations",
               "specific_differential_phase_hv",
               _kdp.getKdpSC());
   } else {
     _addField(outputRay,
-              "KDP_FOR_PID", "deg/km",
+              RadxCartDP::kdpForPidFieldName,
+              "deg/km",
               "specific_differential_phase_for_pid_computations",
               "specific_differential_phase_hv",
               _kdp.getKdp());
   }
   
   _addField(outputRay,
-            "RHOHV_FOR_PID", "",
-            "rhohv_filtered_for_pid_computations",
-            "cross_correlation_hv",
-            _pid.getRhohv());
+            RadxCartDP::zdrSdevForPidFieldName,
+            "dB",
+            "standard_deviation_of_zdr_for_pid_computations",
+            "sdev_of_differential_reflectivity_hv",
+            _pid.getSdzdr());
   
   _addField(outputRay,
-            "PHIDP_FOR_PID", "deg",
-            "phidp_for_pid_computations",
-            "differential_phase_hv",
-            _pid.getPhidp());
+            RadxCartDP::phidpSdevForPidFieldName,
+            "deg",
+            "standard_deviation_of_phidp_for_pid_computations",
+            "sdev_of_differential_phase_hv",
+            _pid.getSdphidp());
   
   // copy fields through as required
   

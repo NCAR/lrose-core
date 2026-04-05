@@ -201,20 +201,19 @@ paramdef string {
 } output_dir;
 
 commentdef {
-  p_header = "WRITE SCALAR DATA FOR DEBUGGING";
+  p_header = "WRITE DERIVED POLAR DATA FOR DEBUGGING";
 }
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Write scalar variables for debugging.";
-  p_help = "If TRUE, write out the input volume in polar coords, after the extra scalar fields have been added.";
-} write_scalar_polar_output;
+  p_descr = "Write derived polar variables for debugging.";
+  p_help = "If TRUE, write out the augmented input volume in polar coords, including all derived fields.";
+} write_debug_polar_output;
 
 paramdef string {
-  p_default = "/tmp/polar/pid";
-  p_descr = "Output directory for writing files.";
-  p_help = "Files will be written to this directory.";
-} scalar_polar_output_dir;
+  p_default = "/tmp/polar/debug";
+  p_descr = "Output directory for writing debug polar files.";
+} debug_polar_output_dir;
 
 commentdef {
   p_header = "COMPUTING KDP";
