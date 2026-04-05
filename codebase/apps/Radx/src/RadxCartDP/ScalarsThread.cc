@@ -69,7 +69,7 @@ ScalarsThread::ScalarsThread(RadxCartDP *parent,
                                        _params,
                                        _kdpFiltParams,
                                        _ncarPidParams,
-                                       _precipRateParams,
+                                       // _precipRateParams,
                                        _threadNum);
   
   if (_scalarsCompute == NULL) {

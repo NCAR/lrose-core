@@ -687,14 +687,14 @@ void RadxCartDP::_addGeomFieldsToInput()
     
     double rangeKm = startRangeKm;
     double elevationDeg = ray->getElevationDeg();
-    const TempProfile &profile = _computeScalarsThreads[0]->getTempProfile();
+    // const TempProfile &profile = _computeScalarsThreads[0]->getTempProfile();
     for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
       double htKm = beamHt.computeHtKm(elevationDeg, rangeKm);
-      double tempC = profile.getTempForHtKm(htKm);
+      // double tempC = profile.getTempForHtKm(htKm);
       elev[igate] = elevationDeg;
       rng[igate] = rangeKm;
       ht[igate] = htKm;
-      temp[igate] = tempC;
+      // temp[igate] = tempC;
     } // igate
 
     smoothDbzFld->setTypeFl32(-9999.0);
@@ -796,9 +796,9 @@ int RadxCartDP::_readModelTemperatureProfile()
 
   // set the temperature profile into the threads
 
-  for (size_t ii = 0; ii < _computeScalarsThreads.size(); ii++) {
-    _computeScalarsThreads[ii]->setTempProfile(_tempProfile);
-  }
+  // for (size_t ii = 0; ii < _computeScalarsThreads.size(); ii++) {
+  //   _computeScalarsThreads[ii]->setTempProfile(_tempProfile);
+  // }
 
   return 0;
 

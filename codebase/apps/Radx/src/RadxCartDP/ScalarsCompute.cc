@@ -55,13 +55,13 @@ ScalarsCompute::ScalarsCompute(RadxCartDP *parent,
                                const Params &params,
                                const KdpFiltParams &kdpFiltParams,
                                const NcarPidParams &ncarPidParams,
-                               const PrecipRateParams &precipRateParams,
+                               // const PrecipRateParams &precipRateParams,
                                int id)  :
         _parent(parent),
         _params(params),
         _kdpFiltParams(kdpFiltParams),
         _ncarPidParams(ncarPidParams),
-        _precipRateParams(precipRateParams),
+        // _precipRateParams(precipRateParams),
         _id(id)
   
 {
@@ -94,26 +94,26 @@ ScalarsCompute::~ScalarsCompute()
 // This reads in a new sounding if needed.
 // If no sounding is available, the static profile is used
 
-void ScalarsCompute::loadTempProfile(time_t dataTime)
-{
-  _pid.loadTempProfile(dataTime);
-}
+// void ScalarsCompute::loadTempProfile(time_t dataTime)
+// {
+//   _pid.loadTempProfile(dataTime);
+// }
 
 ///////////////////////////////////////////////////////////
 // Set the temperature profile
 
-void ScalarsCompute::setTempProfile(const TempProfile &profile)
-{
-  _pid.setTempProfile(profile);
-}
+// void ScalarsCompute::setTempProfile(const TempProfile &profile)
+// {
+//   _pid.setTempProfile(profile);
+// }
 
 ///////////////////////////////////////////////////////////
 // Get the temperature profile
 
-const TempProfile &ScalarsCompute::getTempProfile() const
-{
-  return _pid.getTempProfile();
-}
+// const TempProfile &ScalarsCompute::getTempProfile() const
+// {
+//   return _pid.getTempProfile();
+// }
 
 //////////////////////////////////////////////////
 // compute the derived fields for given input ray
@@ -172,10 +172,10 @@ RadxRay *ScalarsCompute::doCompute(RadxRay *inputRay,
 
   // compute pid
 
-  if (_pid.loadTempProfile(inputRay->getTimeSecs())) {
-    cerr << "ERROR - RadxRate::ScalarsCompute - cannot load temp profile" << endl;
-    return NULL;
-  }
+  // if (_pid.loadTempProfile(inputRay->getTimeSecs())) {
+  //   cerr << "ERROR - RadxRate::ScalarsCompute - cannot load temp profile" << endl;
+  //   return NULL;
+  // }
   _pidPrepare();
 
   // compute precip
@@ -304,17 +304,7 @@ void ScalarsCompute::_pidPrepare()
   _pid.prepareForPid(_nGates, _snrArray.data(),
                      dbzArray, zdrArray, kdpArray.data(),
                      _ldrArray.data(), _rhohvArray.data(),
-                     _phidpArray.data(), _tempForPid.data());
-  
-  // load results into arrays
-  
-  // memcpy(_snrArray.data(), _pid.getSnr(), _nGates * sizeof(double));
-  // memcpy(_dbzArray.data(), _pid.getDbz(), _nGates * sizeof(double));
-  // memcpy(_zdrArray.data(), _pid.getZdr(), _nGates * sizeof(double));
-  // memcpy(_ldrArray.data(), _pid.getLdr(), _nGates * sizeof(double));
-  // memcpy(_tempForPid.data(), _pid.getTempC(), _nGates * sizeof(double));
-  // memcpy(_sdZdr.data(), _pid.getSdzdr(), _nGates * sizeof(double));
-  // memcpy(_sdPhidp.data(), _pid.getSdphidp(), _nGates * sizeof(double));
+                     _phidpArray.data());
   
 }
 
@@ -394,22 +384,10 @@ void ScalarsCompute::_allocArrays()
   _kdpArray.resize(_nGates);
   _kdpScArray.resize(_nGates);
 
-  // _pidArray.resize(_nGates);
-  // _pidInterest.resize(_nGates);
-  _tempForPid.resize(_nGates);
+  // _tempForPid.resize(_nGates);
 
   _sdZdr.resize(_nGates);
   _sdPhidp.resize(_nGates);
-
-  // _rateZ.resize(_nGates);
-  // _rateZSnow.resize(_nGates);
-  // _rateZZdr.resize(_nGates);
-  // _rateKdp.resize(_nGates);
-  // _rateKdpZdr.resize(_nGates);
-  // _rateHybrid.resize(_nGates);
-  // _ratePid.resize(_nGates);
-  // _rateHidro.resize(_nGates);
-  // _rateBringi.resize(_nGates);
 
 }
 
@@ -472,12 +450,12 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
     return -1;
   }
   
-  if (_loadFieldArray(inputRay, RadxCartDP::tempFieldName, _tempForPid.data())) {
-    cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
-    cerr << "  Cannot load temp field name: "
-         << RadxCartDP::tempFieldName << endl;
-    return -1;
-  }
+  // if (_loadFieldArray(inputRay, RadxCartDP::tempFieldName, _tempForPid.data())) {
+  //   cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
+  //   cerr << "  Cannot load temp field name: "
+  //        << RadxCartDP::tempFieldName << endl;
+  //   return -1;
+  // }
   
   return 0;
   
@@ -640,11 +618,11 @@ void ScalarsCompute::_loadOutputFields(RadxRay *inputRay,
             "sdev_of_differential_phase_hv",
             _pid.getSdphidp());
   
-  _addField(outputRay,
-            "TEMP_FOR_PID", "C",
-            "temperature_for_pid_computations",
-            "temperature",
-            _pid.getTempC());
+  // _addField(outputRay,
+  //           "TEMP_FOR_PID", "C",
+  //           "temperature_for_pid_computations",
+  //           "temperature",
+  //           _pid.getTempC());
   
   if (_params.PID_use_KDP_self_consistency) {
     _addField(outputRay,

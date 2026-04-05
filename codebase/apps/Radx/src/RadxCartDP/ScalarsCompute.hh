@@ -44,14 +44,14 @@
 #include <radar/KdpFiltParams.hh>
 #include <radar/NcarPidParams.hh>
 #include <radar/NcarParticleId.hh>
-#include <radar/PrecipRate.hh>
-#include <radar/PrecipRateParams.hh>
+// #include <radar/PrecipRate.hh>
+// #include <radar/PrecipRateParams.hh>
 #include <Radx/Radx.hh>
 #include <Radx/RadxTime.hh>
 class RadxCartDP;
 class RadxRay;
 class RadxField;
-class TempProfile;
+// class TempProfile;
 #include <pthread.h>
 #include <vector>
 using namespace std;
@@ -66,7 +66,7 @@ public:
                  const Params &params,
                  const KdpFiltParams &kdpFiltParams,
                  const NcarPidParams &ncarPidParams,
-                 const PrecipRateParams &precipRateParams,
+                 // const PrecipRateParams &precipRateParams,
                  int id);
 
   // destructor
@@ -78,15 +78,15 @@ public:
   // This reads in a new sounding if needed.
   // If no sounding is available, the static profile is used
   
-  void loadTempProfile(time_t dataTime);
+  // void loadTempProfile(time_t dataTime);
   
   // Set the temperature profile
   
-  void setTempProfile(const TempProfile &profile);
+  // void setTempProfile(const TempProfile &profile);
 
   // Get the temperature profile
   
-  const TempProfile &getTempProfile() const;
+  // const TempProfile &getTempProfile() const;
 
   // Creates derived fields ray and returns it.
   // It must be freed by caller.
@@ -113,7 +113,7 @@ private:
   const Params &_params;
   const KdpFiltParams &_kdpFiltParams;
   const NcarPidParams &_ncarPidParams;
-  const PrecipRateParams &_precipRateParams;
+  // const PrecipRateParams &_precipRateParams;
 
   int _id; // thread ID
   
@@ -148,21 +148,9 @@ private:
 
   vector<double> _kdpArray;
   vector<double> _kdpScArray;
-  vector<double> _tempForPid;
+  // vector<double> _tempForPid;
   vector<double> _sdZdr;
   vector<double> _sdPhidp;
-
-  // vector<int> _pidArray;
-  // vector<double> _pidInterest;
-  // vector<double> _rateZ;
-  // vector<double> _rateZSnow;
-  // vector<double> _rateZZdr;
-  // vector<double> _rateKdp;
-  // vector<double> _rateKdpZdr;
-  // vector<double> _rateHybrid;
-  // vector<double> _ratePid;
-  // vector<double> _rateHidro;
-  // vector<double> _rateBringi;
 
   // computing kdp
   
@@ -171,11 +159,11 @@ private:
   // pid
 
   NcarParticleId _pid;
-  const TempProfile *_tempProfile;
+  // const TempProfile *_tempProfile;
 
   // precip
 
-  PrecipRate _precip;
+  // PrecipRate _precip;
 
   // debug printing
 
