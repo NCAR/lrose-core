@@ -301,10 +301,10 @@ void ScalarsCompute::_pidCompute()
 
   // compute particle ID
 
-  _pid.computePidBeam(_nGates, _snrArray,
-                      dbzArray, zdrArray, kdpArray,
-                      _ldrArray, _rhohvArray,
-                      _phidpArray, _tempForPid);
+  _pid.prepareForPid(_nGates, _snrArray,
+                     dbzArray, zdrArray, kdpArray,
+                     _ldrArray, _rhohvArray,
+                     _phidpArray, _tempForPid);
   
   // load results
 

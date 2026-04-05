@@ -434,7 +434,7 @@ void NcarParticleId::initializeArrays(int nGates)
 }
 
 /////////////////////////////////////////////////////////
-// compute PID for a beam
+// Prepare for computing PID
 //
 // Passed in:
 // ---------
@@ -455,15 +455,15 @@ void NcarParticleId::initializeArrays(int nGates)
 // --------
 // Stored in local arrays on this class. Use get() methods to retieve them.
 
-void NcarParticleId::computePidBeam(int nGates,
-                                    const double *snr,
-                                    const double *dbz,
-                                    const double *zdr,
-                                    const double *kdp,
-                                    const double *ldr,
-                                    const double *rhohv,
-                                    const double *phidp,
-                                    const double *tempC)
+void NcarParticleId::prepareForPid(int nGates,
+                                   const double *snr,
+                                   const double *dbz,
+                                   const double *zdr,
+                                   const double *kdp,
+                                   const double *ldr,
+                                   const double *rhohv,
+                                   const double *phidp,
+                                   const double *tempC)
   
 {
 
@@ -555,6 +555,48 @@ void NcarParticleId::computePidBeam(int nGates,
     FilterUtils::applyMedianFilter(_rhohv, nGates, _rhohvMedianFilterLen);
   }
 
+}
+
+/////////////////////////////////////////////////////////
+// compute PID for a beam
+//
+// Passed in:
+// ---------
+//   nGates: number of gates
+//   cflag: censoring flag, pid only computed where this is false
+//   dbz: reflectivity
+//   zdr: differential reflectivity
+//   kdp: phidp slope
+//   ldr: linear depolarization ratio
+//   rhohv: correlation coeff
+//   phidp: phase difference
+//   tempC: temperature at each gate, in deg C
+//
+// Input fields at a gate should be set to _missingDouble
+// if they are not valid for that gate.
+//
+// Results:
+// --------
+// Stored in local arrays on this class. Use get() methods to retieve them.
+
+void NcarParticleId::computePidBeam(int nGates,
+                                    const double *snr,
+                                    const double *dbz,
+                                    const double *zdr,
+                                    const double *kdp,
+                                    const double *ldr,
+                                    const double *rhohv,
+                                    const double *phidp,
+                                    const double *tempC)
+  
+{
+
+  // prepare
+  
+  prepareForPid(nGates,
+                snr, dbz, zdr, kdp,
+                ldr, rhohv, phidp, tempC);
+  
   // compute PID on all gates
 
   for (int igate = 0; igate < nGates; igate++) {
