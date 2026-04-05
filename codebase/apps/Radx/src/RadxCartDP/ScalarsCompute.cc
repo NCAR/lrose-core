@@ -618,9 +618,9 @@ void ScalarsCompute::_loadOutputFields(RadxRay *inputRay,
   
   // load up output data
   
-  for (int ifield = 0; ifield < _params.pid_output_fields_n; ifield++) {
+  for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
     
-    const Params::pid_output_field_t &ofld = _params._pid_output_fields[ifield];
+    const Params::output_field_t &ofld = _params._output_fields[ifield];
     if (!ofld.do_write) {
       continue;
     }

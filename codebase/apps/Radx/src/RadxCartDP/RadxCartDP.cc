@@ -547,10 +547,16 @@ int RadxCartDP::_readFile(const string &filePath)
   // pad out the gates to the longest range
   
   _readVol.setNGatesConstant();
-  
-  // remap all rays to finest geom
 
-  _readVol.remapToFinestGeom();
+  // set range geometry
+  
+  if (_params.override_gate_geometry) {
+    // override gate geometry if requested
+    _readVol.setRangeGeom(_params.start_range_km, _params.gate_spacing_km);
+  } else {
+    // remap all rays to finest geom
+    _readVol.remapToFinestGeom();
+  }
   
   //  check for rhi
   
@@ -581,12 +587,6 @@ int RadxCartDP::_readFile(const string &filePath)
     _readVol.setRadarBeamWidthDegV(_params.beam_width_deg_v);
   }
 
-  // override gate geometry if requested
-  
-  if (_params.override_gate_geometry) {
-    _readVol.setRangeGeom(_params.start_range_km, _params.gate_spacing_km);
-  }
-
   // override fixed angle if required
 
   if (_params.override_fixed_angle_with_mean_measured_angle) {
@@ -598,7 +598,7 @@ int RadxCartDP::_readFile(const string &filePath)
     cerr << "  _gateSpacingKm: " << _readVol.getGateSpacingKm() << endl;
   }
 
-  // add geom fields fields
+  // add geom and time fields if requested
   
   _addGeometryFields();
   _addTimeField();
@@ -896,16 +896,6 @@ int RadxCartDP::_storeScalarsRay(ScalarsThread *thread)
 
 int RadxCartDP::_writeScalarPolarOutput()
 {
-
-#ifdef JUNK
-  const vector<RadxRay *> &rays = _readVol.getRays();
-  for (const auto& ray : rays) {
-    cerr << "RRRRRRRRRRRR ray el, az: " << ray->getElevationDeg() << ", " << ray->getAzimuthDeg() << endl;
-    for (const auto& fld : ray->getFields()) {
-      cerr << "    FFFFFF field: " << fld->getName() << endl;
-    }
-  } // iray
-#endif
 
   RadxFile out;
   if (_params.debug) {

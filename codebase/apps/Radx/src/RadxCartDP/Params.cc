@@ -1001,7 +1001,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("DATA OUTPUT DIRECTORY AND FILE NAMES");
+    tt->comment_hdr = tdrpStrDup("OUTPUT DATA DIRECTORY");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1022,7 +1022,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("WRITE RADIAL DATA FOR DEBUGGING");
+    tt->comment_hdr = tdrpStrDup("WRITE SCALAR DATA FOR DEBUGGING");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1032,7 +1032,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("write_scalar_polar_output");
-    tt->descr = tdrpStrDup("Write polar volume for debugging.");
+    tt->descr = tdrpStrDup("Write scalar variables for debugging.");
     tt->help = tdrpStrDup("If TRUE, write out the input volume in polar coords, after the extra scalar fields have been added.");
     tt->val_offset = (char *) &write_scalar_polar_output - &_start_;
     tt->single_val.b = pFALSE;
@@ -1065,7 +1065,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("KDP_params_file_path");
-    tt->descr = tdrpStrDup("Path for parameters for computing KDP.");
+    tt->descr = tdrpStrDup("Path for parameters for computing KDP, if specified.");
     tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
     tt->val_offset = (char *) &KDP_params_file_path - &_start_;
     tt->single_val.s = tdrpStrDup("use-defaults");
@@ -1098,7 +1098,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("PID_params_file_path");
-    tt->descr = tdrpStrDup("Path for parameters for computing PID.");
+    tt->descr = tdrpStrDup("Path for parameters for computing PID, if specified.");
     tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
     tt->val_offset = (char *) &PID_params_file_path - &_start_;
     tt->single_val.s = tdrpStrDup("use-defaults");
@@ -1155,7 +1155,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("RATE_params_file_path");
-    tt->descr = tdrpStrDup("Path for parameters for computing PRECIP.");
+    tt->descr = tdrpStrDup("Path for parameters for computing PRECIP if specified.");
     tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
     tt->val_offset = (char *) &RATE_params_file_path - &_start_;
     tt->single_val.s = tdrpStrDup("use-defaults");
@@ -1194,30 +1194,30 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'pid_output_fields'
-    // ctype is '_pid_output_field_t'
+    // Parameter 'output_fields'
+    // ctype is '_output_field_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("pid_output_fields");
+    tt->param_name = tdrpStrDup("output_fields");
     tt->descr = tdrpStrDup("Indicate which fields should be written to the output file.");
     tt->help = tdrpStrDup("Choose the ID from the list.\n\nThe name and units can be set however the user prefers.\n\nThe output_encoding apply to CfRadial output only. \n\n\tRATE_ZH: Precip rate from ZH\n\tRATE_ZH_SNOW: Precip rate from ZH in dry snow\n\tRATE_Z_ZDR: Precip rate from Z and ZDR\n\tRATE_KDP: Precip rate from KDP\n\tRATE_KDP_ZDR: Precip rate from KDP and ZDR\n\tRATE_HYBRID: Precip rate from NCAR hybrid\n\tRATE_PID: Precip rate using PID to select the appropriate rate\n\tRATE_HIDRO: Precip rate using CSU HIDRO hybrid\n\tRATE_BRINGI: Precip rate using Bringi hybrid\n\tPID: NCAR Particle ID\n\tPID_INTEREST: final interest map for NCAR Particle ID values\n\tTEMP_FOR_PID: temperature field for PID (C)\n\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n\tKDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)\n\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n");
-    tt->array_offset = (char *) &_pid_output_fields - &_start_;
-    tt->array_n_offset = (char *) &pid_output_fields_n - &_start_;
+    tt->array_offset = (char *) &_output_fields - &_start_;
+    tt->array_n_offset = (char *) &output_fields_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(pid_output_field_t);
+    tt->array_elem_size = sizeof(output_field_t);
     tt->array_n = 17;
-    tt->struct_def.name = tdrpStrDup("pid_output_field_t");
+    tt->struct_def.name = tdrpStrDup("output_field_t");
     tt->struct_def.nfields = 6;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("pid_output_field_id_t");
+      tt->struct_def.fields[0].ftype = tdrpStrDup("output_field_id_t");
       tt->struct_def.fields[0].fname = tdrpStrDup("id");
       tt->struct_def.fields[0].ptype = ENUM_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_pid_output_fields->id - (char *) _pid_output_fields;
-        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("pid_output_field_id_t");
+        (char *) &_output_fields->id - (char *) _output_fields;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
         tt->struct_def.fields[0].enum_def.nfields = 20;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
@@ -1265,27 +1265,27 @@
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_pid_output_fields->name - (char *) _pid_output_fields;
+        (char *) &_output_fields->name - (char *) _output_fields;
       tt->struct_def.fields[2].ftype = tdrpStrDup("string");
       tt->struct_def.fields[2].fname = tdrpStrDup("long_name");
       tt->struct_def.fields[2].ptype = STRING_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_pid_output_fields->long_name - (char *) _pid_output_fields;
+        (char *) &_output_fields->long_name - (char *) _output_fields;
       tt->struct_def.fields[3].ftype = tdrpStrDup("string");
       tt->struct_def.fields[3].fname = tdrpStrDup("standard_name");
       tt->struct_def.fields[3].ptype = STRING_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_pid_output_fields->standard_name - (char *) _pid_output_fields;
+        (char *) &_output_fields->standard_name - (char *) _output_fields;
       tt->struct_def.fields[4].ftype = tdrpStrDup("string");
       tt->struct_def.fields[4].fname = tdrpStrDup("units");
       tt->struct_def.fields[4].ptype = STRING_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_pid_output_fields->units - (char *) _pid_output_fields;
+        (char *) &_output_fields->units - (char *) _output_fields;
       tt->struct_def.fields[5].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[5].fname = tdrpStrDup("do_write");
       tt->struct_def.fields[5].ptype = BOOL_TYPE;
       tt->struct_def.fields[5].rel_offset = 
-        (char *) &_pid_output_fields->do_write - (char *) _pid_output_fields;
+        (char *) &_output_fields->do_write - (char *) _output_fields;
     tt->n_struct_vals = 102;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));

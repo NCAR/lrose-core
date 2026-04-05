@@ -125,7 +125,7 @@ public:
     ZDR_ATTEN_CORRECTION = 17,
     DBZ_ATTEN_CORRECTED = 18,
     ZDR_ATTEN_CORRECTED = 19
-  } pid_output_field_id_t;
+  } output_field_id_t;
 
   typedef enum {
     PROJ_LATLON = 0,
@@ -160,13 +160,13 @@ public:
   } bblock_field_name_t;
 
   typedef struct {
-    pid_output_field_id_t id;
+    output_field_id_t id;
     char* name;
     char* long_name;
     char* standard_name;
     char* units;
     tdrp_bool_t do_write;
-  } pid_output_field_t;
+  } output_field_t;
 
   typedef struct {
     int nz;
@@ -557,8 +557,8 @@ public:
 
   tdrp_bool_t RATE_use_attenuation_corrected_fields;
 
-  pid_output_field_t *_pid_output_fields;
-  int pid_output_fields_n;
+  output_field_t *_output_fields;
+  int output_fields_n;
 
   tdrp_bool_t use_nearest_neighbor;
 

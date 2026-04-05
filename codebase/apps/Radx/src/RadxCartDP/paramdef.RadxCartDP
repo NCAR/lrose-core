@@ -191,7 +191,7 @@ paramdef struct bblock_field_name_t {
 } bblock_field_names[1];
 
 commentdef {
-  p_header = "DATA OUTPUT DIRECTORY AND FILE NAMES";
+  p_header = "OUTPUT DATA DIRECTORY";
 }
 
 paramdef string {
@@ -201,12 +201,12 @@ paramdef string {
 } output_dir;
 
 commentdef {
-  p_header = "WRITE RADIAL DATA FOR DEBUGGING";
+  p_header = "WRITE SCALAR DATA FOR DEBUGGING";
 }
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Write polar volume for debugging.";
+  p_descr = "Write scalar variables for debugging.";
   p_help = "If TRUE, write out the input volume in polar coords, after the extra scalar fields have been added.";
 } write_scalar_polar_output;
 
@@ -222,7 +222,7 @@ commentdef {
 
 paramdef string {
   p_default = "use-defaults";
-  p_descr = "Path for parameters for computing KDP.";
+  p_descr = "Path for parameters for computing KDP, if specified.";
   p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
 } KDP_params_file_path;
 
@@ -238,7 +238,7 @@ commentdef {
 
 paramdef string {
   p_default = "use-defaults";
-  p_descr = "Path for parameters for computing PID.";
+  p_descr = "Path for parameters for computing PID, if specified.";
   p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
 } PID_params_file_path;
 
@@ -266,7 +266,7 @@ commentdef {
 
 paramdef string {
   p_default = "use-defaults";
-  p_descr = "Path for parameters for computing PRECIP.";
+  p_descr = "Path for parameters for computing PRECIP if specified.";
   p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
 } RATE_params_file_path;
 
@@ -312,18 +312,18 @@ typedef enum {
   DBZ_ATTEN_CORRECTED,
   ZDR_ATTEN_CORRECTED
 
-} pid_output_field_id_t;
+} output_field_id_t;
 
 typedef struct {
-  pid_output_field_id_t id;
+  output_field_id_t id;
   string name; 
   string long_name; 
   string standard_name; 
   string units;
   boolean do_write;
-} pid_output_field_t;
+} output_field_t;
 
-paramdef struct pid_output_field_t {
+paramdef struct output_field_t {
   p_default = {
     {
       id = RATE_ZH,
@@ -500,7 +500,7 @@ paramdef struct pid_output_field_t {
     "\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n"
     "\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n"
     "\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n";
-} pid_output_fields[];
+} output_fields[];
 
 commentdef {
   p_header = "INTERPOLATION OPTIONS";
