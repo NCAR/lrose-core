@@ -462,8 +462,7 @@ void NcarParticleId::prepareForPid(int nGates,
                                    const double *kdp,
                                    const double *ldr,
                                    const double *rhohv,
-                                   const double *phidp,
-                                   const double *tempC)
+                                   const double *phidp)
   
 {
 
@@ -484,7 +483,6 @@ void NcarParticleId::prepareForPid(int nGates,
   memcpy(_ldr, ldr, nGates * sizeof(double));
   memcpy(_rhohv, rhohv, nGates * sizeof(double));
   memcpy(_phidp, phidp, nGates * sizeof(double));
-  memcpy(_tempC, tempC, nGates * sizeof(double));
 
   // replace missing LDR values with speficied value, if requested
 
@@ -595,8 +593,12 @@ void NcarParticleId::computePidBeam(int nGates,
   
   prepareForPid(nGates,
                 snr, dbz, zdr, kdp,
-                ldr, rhohv, phidp, tempC);
+                ldr, rhohv, phidp);
   
+  // copy temperature data, which is not handled by prepareForPid()
+
+  memcpy(_tempC, tempC, nGates * sizeof(double));
+
   // compute PID on all gates
 
   for (int igate = 0; igate < nGates; igate++) {

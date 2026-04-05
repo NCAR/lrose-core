@@ -435,10 +435,11 @@ public:
   //   ldr: linear depolarization ratio
   //   rhohv: correlation coeff
   //   phidp: phase difference
-  //   tempC: temperature at each gate, in deg C
   //
   // Input fields at a gate should be set to _missingDouble
   // if they are not valid for that gate.
+  //
+  // Temperature is not handled here.
   //
   // Results:
   // --------
@@ -451,8 +452,7 @@ public:
                      const double *kdp,
                      const double *ldr,
                      const double *rhohv,
-                     const double *phidp,
-                     const double *tempC);
+                     const double *phidp);
   
   /**
    * Compute PID for a beam. Input fields at a gate should be set to 
