@@ -1825,13 +1825,6 @@ int RadxCartDP::_mergeScalarsIntoReadVol()
         continue;
       }
 
-      // if (sc->getName() == "SD_ZDR" || sc->getName() == "TEMPC") {
-      //   cerr << "XXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
-      //   cerr << "rayNum: " << rayNum << endl;
-      //   sc->printWithData(cerr);
-      //   cerr << "XXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
-      // }
-      
       // remove any placeholder / previous version of same field
       if (readRay->getField(sc->getName())) {
         readRay->removeField(sc->getName());
