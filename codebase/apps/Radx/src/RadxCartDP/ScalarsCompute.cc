@@ -76,7 +76,7 @@ ScalarsCompute::ScalarsCompute(RadxCartDP *parent,
     OK = false;
   }
 
-  _precipInit();
+  // _precipInit();
 
 }
 
@@ -176,11 +176,11 @@ RadxRay *ScalarsCompute::doCompute(RadxRay *inputRay,
     cerr << "ERROR - RadxRate::ScalarsCompute - cannot load temp profile" << endl;
     return NULL;
   }
-  _pidCompute();
+  _pidPrepare();
 
   // compute precip
 
-  _precipCompute();
+  // _precipCompute();
   
   // load output fields into the moments ray
   
@@ -243,7 +243,7 @@ void ScalarsCompute::_kdpCompute()
   const double *kdp = _kdp.getKdp();
   const double *kdpSC = _kdp.getKdpSC();
   
-  // put KDP into fields objects
+  // save KDP in arrays on this class
   
   for (size_t ii = 0; ii < _nGates; ii++) {
     if (kdp[ii] == NAN) {
@@ -268,6 +268,7 @@ int ScalarsCompute::_pidInit()
   if (_pid.setFromParams(_ncarPidParams)) {
     return -1;
   }
+
   if (_params.debug >= Params::DEBUG_EXTRA) {
     _pid.setVerbose(true);
   } else if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -278,10 +279,10 @@ int ScalarsCompute::_pidInit()
   
 }
 
-//////////////////////////////////////
-// compute PID
+//////////////////////////////////////////
+// compute fields in preparation for PID
 
-void ScalarsCompute::_pidCompute()
+void ScalarsCompute::_pidPrepare()
   
 {
   
@@ -298,7 +299,7 @@ void ScalarsCompute::_pidCompute()
     dbzArray = _kdp.getDbzCorrected();
     zdrArray = _kdp.getZdrCorrected();
   }
-
+  
   // compute particle ID
 
   _pid.prepareForPid(_nGates, _snrArray,
@@ -316,6 +317,8 @@ void ScalarsCompute::_pidCompute()
   memcpy(_tempForPid, _pid.getTempC(), _nGates * sizeof(double));
 
 }
+
+#ifdef NOTNOW
 
 //////////////////////////////////////
 // initialize PRECIP
@@ -371,6 +374,8 @@ void ScalarsCompute::_precipCompute()
   memcpy(_rateBringi, _precip.getRateBringi(), _nGates * sizeof(double));
 
 }
+
+#endif
 
 //////////////////////////////////////
 // alloc computational arrays

@@ -214,10 +214,10 @@ private:
   void _kdpCompute();
 
   int _pidInit();
-  void _pidCompute();
+  void _pidPrepare();
   
-  void _precipInit();
-  void _precipCompute();
+  // void _precipInit();
+  // void _precipCompute();
 
   void _allocArrays();
   
