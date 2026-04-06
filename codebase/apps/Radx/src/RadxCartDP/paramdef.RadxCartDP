@@ -147,7 +147,7 @@ commentdef {
 }
 
 typedef enum {
-  TEMP, RH, UVEL, VVEL, WVEL
+  TEMP, RH, UVEL, VVEL, WVEL, NOT_SET
 } model_field_type_t;
 
 typedef struct {

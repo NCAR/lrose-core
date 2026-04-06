@@ -97,7 +97,8 @@ public:
     RH = 1,
     UVEL = 2,
     VVEL = 3,
-    WVEL = 4
+    WVEL = 4,
+    NOT_SET = 5
   } model_field_type_t;
 
   typedef enum {

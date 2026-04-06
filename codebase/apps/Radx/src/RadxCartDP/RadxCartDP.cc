@@ -84,7 +84,8 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   OK = true;
 
   _cartInterp = NULL;
-
+  _pidField = NULL;
+  
   // set programe name
 
   _progName = "RadxCartDP";
@@ -302,6 +303,36 @@ string RadxCartDP::getModelOutputName(Params::model_field_type_t ftype)
   }
   // not found
   return "";
+}
+
+//////////////////////////////////////////////////
+// get model type from input name
+
+Params::model_field_type_t RadxCartDP::getModelTypeFromInputName(const string name)
+{
+  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
+    string inputName = _params._model_field_names[ii].input_name;
+    if (name == inputName) {
+      return _params._model_field_names[ii].field_type;
+    }
+  }
+  // not found, assume temp
+  return Params::NOT_SET;
+}
+
+//////////////////////////////////////////////////
+// get model type from output name
+
+Params::model_field_type_t RadxCartDP::getModelTypeFromOutputName(const string name)
+{
+  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
+    string outputName = _params._model_field_names[ii].output_name;
+    if (name == outputName) {
+      return _params._model_field_names[ii].field_type;
+    }
+  }
+  // not found, assume temp
+  return Params::NOT_SET;
 }
 
 //////////////////////////////////////////////////
@@ -571,7 +602,7 @@ int RadxCartDP::_processFile(const string &filePath)
   }
 
   // free up
-  
+
   _cartInterp->freeMemory();
   if (_params.free_memory_between_files) {
     _readVol.clear();
@@ -1594,9 +1625,10 @@ int RadxCartDP::_readModel()
                          radarTime);
 
   for (int ii = 0; ii < _params.model_field_names_n; ii++) {
-    if (strlen(_params._model_field_names[ii].input_name) > 0) {
-      _modelRawMdvx.addReadField(_params._model_field_names[ii].input_name);
+    if (strlen(_params._model_field_names[ii].input_name) == 0) {
+      continue;
     }
+    _modelRawMdvx.addReadField(_params._model_field_names[ii].input_name);
   }
   
   if (_modelRawMdvx.readVolume()) {
@@ -1612,6 +1644,16 @@ int RadxCartDP::_readModel()
   // interpolate the model data onto the output Cartesian grid
 
   _interpModelToOutputGrid();
+
+  // rename fields as appropriate
+
+  for (size_t ifld = 0; ifld < _modelInterpMdvx.getNFields(); ifld++) {
+    MdvxField *fld = _modelInterpMdvx.getField(ifld);
+    string inputName = fld->getFieldName();
+    Params::model_field_type_t mtype = getModelTypeFromInputName(inputName);
+    string outputName = getModelOutputName(mtype);
+    fld->setFieldName(outputName);
+  }
 
   // debug write
   
@@ -1651,7 +1693,7 @@ int RadxCartDP::_computeTempProfile()
   _tempProfile.clear();
 
   MdvxField *tempFld =
-    _modelInterpMdvx.getField(getModelInputName(Params::TEMP).c_str());
+    _modelInterpMdvx.getField(getModelOutputName(Params::TEMP).c_str());
   if (tempFld == NULL) {
     cerr << "ERROR - RadxCartDP::_computeTempProfile" << endl;
     cerr << "  Cannot find temp field in model, time: "
@@ -1708,9 +1750,10 @@ void RadxCartDP::_interpModelToOutputGrid()
   _modelInterpMdvx.setMasterHeader(_modelRawMdvx.getMasterHeader());
   
   for (size_t ifield = 0; ifield < _modelRawMdvx.getNFields(); ifield++) {
-
     MdvxField *rawFld = _modelRawMdvx.getField(ifield);
     MdvxField *interpField = _modelRemap.interpField(*rawFld);
+    string rawName = rawFld->getFieldName();
+    //if (strlen(_params.model_field_names[ifield].
     _modelInterpMdvx.addField(interpField);
     
   } // ifield
@@ -1744,6 +1787,13 @@ int RadxCartDP::_writeOutputMdv()
     // add to output object
     out.addField(field);
   } // ii
+
+  // add PID field
+
+  if (_pidField) {
+    out.addField(_pidField);
+    _pidField = nullptr; // memory handling passed to output mdv object
+  }
   
   // write out file
   
@@ -1764,6 +1814,10 @@ int RadxCartDP::_writeOutputMdv()
 int RadxCartDP::_computePid()
 {
 
+  if (_params.debug) {
+    cerr << "Computing Cartesian PID" << endl;
+  }
+  
   // get the fields we need for computing PID
 
   BaseInterp::Field *snrFld = _getInterpField(snrForPidFieldName);
@@ -1778,11 +1832,25 @@ int RadxCartDP::_computePid()
   if (!snrFld || !dbzFld || !zdrFld || !rhohvFld ||
       !kdpFld || !zdrSdevFld || !phidpSdevFld) {
     cerr << "ERROR - _computePID" << endl;
-    cerr << "  One or mode feature fields is missing" << endl;
+    cerr << "  One or more feature fields is missing" << endl;
+    return -1;
   }
 
-  for (size_t ii = 0; ii < _targetNpoints; ii++) {
+  string modelTempName = getModelOutputName(Params::TEMP);
+  MdvxField *tempFld = _modelInterpMdvx.getField(modelTempName.c_str());
+  if (!tempFld) {
+    cerr << "ERROR - _computePID" << endl;
+    cerr << "  Model temp field missing: " << modelTempName << endl;
+    return -1;
+  }
+  fl32 *tempArray = (fl32 *) tempFld->getVol();
 
+  // compute PID for each point in the Cartesian volume
+  
+  vector<fl32> pidArray(_targetNpoints);
+  
+  for (size_t ii = 0; ii < _targetNpoints; ii++) {
+    
     double snr = snrFld->outputField[ii];
     double dbz = dbzFld->outputField[ii];
     double zdr = zdrFld->outputField[ii];
@@ -1794,17 +1862,38 @@ int RadxCartDP::_computePid()
     double kdp = kdpFld->outputField[ii];
     double zdrSdev = zdrSdevFld->outputField[ii];
     double phidpSdev = phidpSdevFld->outputField[ii];
+    double temp = tempArray[ii];
 
-    double temp = 0.0;
     int pid = 0, pid2 = 0;
     double interest = 0.0, interest2 = 0.0, confidence = 0.0;
     
     _pid.computePid(snr, dbz, temp, zdr, kdp, ldr, rhohv, zdrSdev, phidpSdev,
                     pid, interest, pid2, interest2, confidence);
     
+    pidArray[ii] = pid;
+    
+  } // ii
+  
+  // create MdvxField for pid
+  
+  Mdvx::field_header_t tempFhdr(tempFld->getFieldHeader());
+  Mdvx::vlevel_header_t tempVhdr(tempFld->getVlevelHeader());
+  
+  tempFhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  tempFhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  tempFhdr.data_element_nbytes = sizeof(fl32);
+  tempFhdr.volume_size = _targetNpoints * sizeof(fl32);
+  
+  _pidField = new MdvxField(tempFhdr, tempVhdr, pidArray.data());
+  _pidField->setFieldName(pidFieldName);
+  _pidField->setFieldNameLong("hydrometeor_particle_type");
+  _pidField->setUnits("");
+  _pidField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+                         Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+  
+  if (_params.debug) {
+    cerr << "DONE computing Cartesian PID" << endl;
   }
-  
-  
   
   return 0;
   

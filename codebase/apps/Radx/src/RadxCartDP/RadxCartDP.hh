@@ -101,6 +101,9 @@ public:
   string getModelOutputName(Params::model_field_type_t ftype);
   string getBeamBlockOutputName(Params::bblock_field_type_t ftype);
 
+  Params::model_field_type_t getModelTypeFromInputName(const string name);
+  Params::model_field_type_t getModelTypeFromOutputName(const string name);
+
   // names for derived fields
 
   static string elevationFieldName;
@@ -181,6 +184,8 @@ private:
   
   TaThreadPool _scalarsThreadPool;
   vector<ScalarsCompute *> _computeScalarsThreads;
+
+  MdvxField *_pidField;
 
   // private methods
 

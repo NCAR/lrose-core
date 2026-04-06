@@ -897,7 +897,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_model_field_names->field_type - (char *) _model_field_names;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("model_field_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 5;
+        tt->struct_def.fields[0].enum_def.nfields = 6;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("TEMP");
@@ -910,6 +910,8 @@
         tt->struct_def.fields[0].enum_def.fields[3].val = VVEL;
         tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("WVEL");
         tt->struct_def.fields[0].enum_def.fields[4].val = WVEL;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("NOT_SET");
+        tt->struct_def.fields[0].enum_def.fields[5].val = NOT_SET;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("input_name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
