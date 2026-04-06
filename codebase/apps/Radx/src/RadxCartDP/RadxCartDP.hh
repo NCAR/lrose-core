@@ -47,16 +47,17 @@
 #include <string>
 #include <deque>
 #include <toolsa/TaArray.hh>
-#include <radar/NoiseLocator.hh>
+#include <toolsa/TaThreadPool.hh>
 #include <Radx/RadxVol.hh>
-#include <Mdv/DsMdvx.hh>
-#include <Mdv/MdvxProj.hh>
-#include <Mdv/MdvxRemapInterp.hh>
+#include <radar/NoiseLocator.hh>
 #include <radar/TempProfile.hh>
 #include <radar/KdpFiltParams.hh>
 #include <radar/NcarPidParams.hh>
 #include <radar/PrecipRateParams.hh>
-#include <toolsa/TaThreadPool.hh>
+#include <radar/NcarParticleId.hh>
+#include <Mdv/DsMdvx.hh>
+#include <Mdv/MdvxProj.hh>
+#include <Mdv/MdvxRemapInterp.hh>
 class RadxFile;
 class RadxRay;
 class RadxField;
@@ -82,7 +83,7 @@ public:
 
   // data members
 
-  int OK;
+  bool OK;
 
   // get methods for threading
 
@@ -130,9 +131,11 @@ private:
   Args _args;
   Params _params;
 
-  PrecipRateParams _precipRateParams;
-  NcarPidParams _ncarPidParams;
   KdpFiltParams _kdpFiltParams;
+  NcarPidParams _ncarPidParams;
+  PrecipRateParams _precipRateParams;
+
+  NcarParticleId _pid;
 
   // input data
   
@@ -155,6 +158,7 @@ private:
 
   // target projection and vlevels
 
+  size_t _targetNpoints;
   MdvxProj _targetProj;
   vector<double> _targetVlevels;
 
@@ -218,7 +222,10 @@ private:
   void _interpModelToOutputGrid();
 
   int _writeOutputMdv();
-  
+
+  int _computePid();
+  BaseInterp::Field *_getInterpField(const string &name);
+
   void _printParamsRate();
   void _printParamsPid();
   void _printParamsKdp();

@@ -81,7 +81,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   
 {
 
-  OK = TRUE;
+  OK = true;
 
   _cartInterp = NULL;
 
@@ -95,7 +95,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   if (_args.parse(argc, argv, _progName)) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "Problem with command line args." << endl;
-    OK = FALSE;
+    OK = false;
     return;
   }
   
@@ -106,7 +106,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
 			   _args.override.list, &_paramsPath)) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "Problem with TDRP parameters." << endl;
-    OK = FALSE;
+    OK = false;
     return;
   }
 
@@ -121,8 +121,22 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
       cerr << "  You have chosen to override radar location" << endl;
       cerr << "  You must override latitude, longitude and altitude" << endl;
       cerr << "  You must override all 3 values." << endl;
-      OK = FALSE;
+      OK = false;
     }
+  }
+  
+  // if requested, print params for KDP then exit
+  
+  if (_args.printParamsKdp) {
+    _printParamsKdp();
+    exit(0);
+  }
+
+  // if requested, print params for PID then exit
+  
+  if (_args.printParamsPid) {
+    _printParamsPid();
+    exit(0);
   }
   
   // if requested, print params for RATE then exit
@@ -132,18 +146,18 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
     exit(0);
   }
   
-  // if requested, print params for PID then exit
+  // read params for KdpFilt
   
-  if (_args.printParamsPid) {
-    _printParamsPid();
-    exit(0);
-  }
-  
-  // if requested, print params for KDP then exit
-  
-  if (_args.printParamsKdp) {
-    _printParamsKdp();
-    exit(0);
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpFiltParams.load(_params.KDP_params_file_path,
+                            NULL, true, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      OK = false;
+      return;
+    }
   }
 
   // read params for Ncar PID
@@ -155,23 +169,12 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for NcarPid: "
            << _params.PID_params_file_path << endl;
-      OK = FALSE;
+      OK = false;
       return;
     }
   }
-
-  // read params for KdpFilt
-  
-  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
-    // not using defaults
-    if (_kdpFiltParams.load(_params.KDP_params_file_path,
-                            NULL, true, _args.tdrpDebug)) {
-      cerr << "ERROR: " << _progName << endl;
-      cerr << "Cannot read params file for KdpFilt: "
-           << _params.KDP_params_file_path << endl;
-      OK = FALSE;
-      return;
-    }
+  if (_pid.setFromParams(_ncarPidParams)) {
+    OK = false;
   }
 
   // read in RATE params
@@ -183,7 +186,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for PrecipFilt: "
            << _params.RATE_params_file_path << endl;
-      OK = FALSE;
+      OK = false;
       return;
     }
   }
@@ -202,7 +205,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
                         ii);
     if (!thread->OK) {
       delete thread;
-      OK = FALSE;
+      OK = false;
       return;
     }
     _scalarsThreadPool.addThreadToMain(thread);
@@ -550,9 +553,17 @@ int RadxCartDP::_processFile(const string &filePath)
     _cartInterp->interpVol();
   }
 
-  // write out MDV file
-
+  // compute particle ID type
+  
   int iret = 0;
+  if (_computePid()) {
+    cerr << "ERROR - RadxCartDP" << endl;
+    cerr << "  Cannot compute PID" << endl;
+    iret = -1;
+  }
+  
+  // write out MDV file
+  
   if (_writeOutputMdv()) {
     cerr << "ERROR - RadxCartDP" << endl;
     cerr << "  Cannot write output file" << endl;
@@ -1259,6 +1270,8 @@ void RadxCartDP::_initTargetGrid()
   coord.ny = _params.grid_xy_geom.ny;
   coord.nz = _params.grid_z_geom.nz;
   
+  _targetNpoints = coord.nx * coord.ny* coord.nz;
+
   coord.dx = _params.grid_xy_geom.dx;
   coord.dy = _params.grid_xy_geom.dy;
   coord.dz = _params.grid_z_geom.dz;
@@ -1746,6 +1759,77 @@ int RadxCartDP::_writeOutputMdv()
 }
   
 //////////////////////////////////////////////////
+// compute the PID field
+
+int RadxCartDP::_computePid()
+{
+
+  // get the fields we need for computing PID
+
+  BaseInterp::Field *snrFld = _getInterpField(snrForPidFieldName);
+  BaseInterp::Field *dbzFld = _getInterpField(dbzForPidFieldName);
+  BaseInterp::Field *zdrFld = _getInterpField(zdrForPidFieldName);
+  BaseInterp::Field *ldrFld = _getInterpField(ldrForPidFieldName);
+  BaseInterp::Field *rhohvFld = _getInterpField(rhohvForPidFieldName);
+  BaseInterp::Field *kdpFld = _getInterpField(kdpForPidFieldName);
+  BaseInterp::Field *zdrSdevFld = _getInterpField(zdrSdevForPidFieldName);
+  BaseInterp::Field *phidpSdevFld = _getInterpField(phidpSdevForPidFieldName);
+  
+  if (!snrFld || !dbzFld || !zdrFld || !rhohvFld ||
+      !kdpFld || !zdrSdevFld || !phidpSdevFld) {
+    cerr << "ERROR - _computePID" << endl;
+    cerr << "  One or mode feature fields is missing" << endl;
+  }
+
+  for (size_t ii = 0; ii < _targetNpoints; ii++) {
+
+    double snr = snrFld->outputField[ii];
+    double dbz = dbzFld->outputField[ii];
+    double zdr = zdrFld->outputField[ii];
+    double ldr = -9999.0;
+    if (ldrFld) {
+      ldr = ldrFld->outputField[ii];
+    }
+    double rhohv = rhohvFld->outputField[ii];
+    double kdp = kdpFld->outputField[ii];
+    double zdrSdev = zdrSdevFld->outputField[ii];
+    double phidpSdev = phidpSdevFld->outputField[ii];
+
+    double temp = 0.0;
+    int pid = 0, pid2 = 0;
+    double interest = 0.0, interest2 = 0.0, confidence = 0.0;
+    
+    _pid.computePid(snr, dbz, temp, zdr, kdp, ldr, rhohv, zdrSdev, phidpSdev,
+                    pid, interest, pid2, interest2, confidence);
+    
+  }
+  
+  
+  
+  return 0;
+  
+}
+
+
+//////////////////////////////////////////////////
+// get interp field for given name
+// returns null on error
+
+BaseInterp::Field *RadxCartDP::_getInterpField(const string &name)
+{
+  for (size_t ii = 0; ii < _interpFields.size(); ii++) {
+    if (_interpFields[ii].outputName == name) {
+      return &_interpFields[ii];
+    }
+  }
+  // not found - LDR is optional
+  if (name != ldrForPidFieldName) {
+    cerr << "ERROR - cannot find interp field, name: " << name << endl;
+  }
+  return nullptr;
+}
+
+//////////////////////////////////////////////////
 // Print params for RATE
 
 void RadxCartDP::_printParamsRate()
@@ -1772,7 +1856,7 @@ void RadxCartDP::_printParamsRate()
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for PrecipFilt: "
            << _params.RATE_params_file_path << endl;
-      OK = FALSE;
+      OK = false;
       return;
     }
   }
@@ -1820,7 +1904,7 @@ void RadxCartDP::_printParamsPid()
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for PidFilt: "
            << _params.PID_params_file_path << endl;
-      OK = FALSE;
+      OK = false;
       return;
     }
   }
@@ -1868,7 +1952,7 @@ void RadxCartDP::_printParamsKdp()
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for KdpFilt: "
            << _params.KDP_params_file_path << endl;
-      OK = FALSE;
+      OK = false;
       return;
     }
   }
