@@ -102,8 +102,6 @@ BaseInterp::BaseInterp(const string &progName,
   _gridMinx = _gridMiny = 0.0;
   _gridDx = _gridDy = 0.0;
 
-  _outputFields= NULL;
-
 }
 
 //////////////////////////////////////

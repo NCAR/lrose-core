@@ -70,6 +70,7 @@ public:
     Radx::DataType_t inputDataType;
     double inputScale;
     double inputOffset;
+    vector<fl32> outputField;
     Field() {
       fieldFolds = false;
       isDiscrete = false;
@@ -122,7 +123,7 @@ public:
   };
   GridLoc ****_gridLoc;
 
-  // class for debug fields
+  // class for derived fields
 
   class DerivedField {
   public:
@@ -271,7 +272,6 @@ protected:
   double _gridDx, _gridDy;
   vector<double> _gridZLevels;
   double _radarX, _radarY;
-  fl32 **_outputFields;
 
   // protected methods
 

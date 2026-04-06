@@ -79,7 +79,6 @@ InterpToCart::InterpToCart(const string &progName,
 
   _prevRadarLat = _prevRadarLon = _prevRadarAltKm = -9999.0;
   _gridLoc = NULL;
-  _outputFields = NULL;
 
   _nContribDebug = NULL;
   _gridAzDebug = NULL;
@@ -560,11 +559,9 @@ void InterpToCart::_freeGridLoc()
 void InterpToCart::_allocOutputArrays()
   
 {
-
-  _freeOutputArrays();
-  _outputFields = (fl32 **) umalloc2(_interpFields.size(),
-                                     _nPointsVol, sizeof(fl32));
-  
+  for (auto& val: _interpFields) {
+    val.outputField.resize(_nPointsVol);
+  }
 }
 
 ////////////////////////////////////////////////////////////
@@ -573,10 +570,9 @@ void InterpToCart::_allocOutputArrays()
 void InterpToCart::_freeOutputArrays()
   
 {
-  if (_outputFields) {
-    ufree2((void **) _outputFields);
+  for (auto& val: _interpFields) {
+    val.outputField.clear();
   }
-  _outputFields = NULL;
 }
 
 ////////////////////////////////////////////////////////////
@@ -585,15 +581,9 @@ void InterpToCart::_freeOutputArrays()
 void InterpToCart::_initOutputArrays()
   
 {
-
-  _allocOutputArrays();
-
-  for (size_t ii = 0; ii < _interpFields.size(); ii++) {
-    for (int jj = 0; jj < _nPointsVol; jj++) {
-      _outputFields[ii][jj] = missingFl32;
-    }
+  for (auto& val: _interpFields) {
+    val.outputField.assign(_nPointsVol, missingFl32);
   }
-
 }
 
 //////////////////////////////////////////////////
@@ -2214,9 +2204,9 @@ int InterpToCart::_loadNearestGridPt(int ifield,
   // compute weighted mean
   
   if (nContrib >= _params.min_nvalid_for_interp) {
-    _outputFields[ifield][ptIndex] = closestVal;
+    _interpFields[ifield].outputField[ptIndex] = closestVal;
   } else {
-    _outputFields[ifield][ptIndex] = missingFl32;
+    _interpFields[ifield].outputField[ptIndex] = missingFl32;
   }
 
   return nContrib;
@@ -2272,9 +2262,9 @@ int InterpToCart::_loadInterpGridPt(int ifield,
     if (sumWts > 0) {
       interpVal = sumVals / sumWts;
     }
-    _outputFields[ifield][ptIndex] = interpVal;
+    _interpFields[ifield].outputField[ptIndex] = interpVal;
   } else {
-    _outputFields[ifield][ptIndex] = missingFl32;
+    _interpFields[ifield].outputField[ptIndex] = missingFl32;
   }
 
   return nContrib;
@@ -2333,9 +2323,9 @@ int InterpToCart::_loadFoldedGridPt(int ifield,
     double angleInterp = atan2(sumY, sumX);
     double valInterp = _getFoldValue(angleInterp,
                                      intFld.foldLimitLower, intFld.foldRange);
-    _outputFields[ifield][ptIndex] = valInterp;
+    _interpFields[ifield].outputField[ptIndex] = valInterp;
   } else {
-    _outputFields[ifield][ptIndex] = missingFl32;
+    _interpFields[ifield].outputField[ptIndex] = missingFl32;
   }
 
   return nContrib;
@@ -2384,7 +2374,7 @@ int InterpToCart::_writeOutputFile()
                  ifld.inputScale,
                  ifld.inputOffset,
                  missingFl32,
-                 _outputFields[ifield]);
+                 _interpFields[ifield].outputField.data());
   } // ifield
 
   // debug (test) fields
@@ -2453,7 +2443,7 @@ int InterpToCart::_convStratCompute()
   for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
     const Field &ifld = _interpFields[ifield];
     if (ifld.radxName == dbzName) {
-      dbzVals = _outputFields[ifield];
+      dbzVals = _interpFields[ifield].outputField.data();
       break;
     }
   }
