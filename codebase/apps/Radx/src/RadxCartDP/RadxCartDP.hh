@@ -217,7 +217,8 @@ private:
   int _computeTempProfile();
   void _interpModelToOutputGrid();
 
-
+  int _writeOutputMdv();
+  
   void _printParamsRate();
   void _printParamsPid();
   void _printParamsKdp();

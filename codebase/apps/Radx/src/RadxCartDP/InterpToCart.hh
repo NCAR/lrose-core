@@ -37,6 +37,7 @@
 #define InterpToCart_HH
 
 #include "BaseInterp.hh"
+#include "OutputMdv.hh"
 #include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
 #include <radar/ConvStratFinder.hh>
@@ -74,9 +75,9 @@ public:
 
   void setRhiMode(bool state) { _rhiMode = state; }
 
-  // write the output MDV file
+  // fill the output MDV file with interpolated data
   
-  int writeOutputMdv();
+  void fillOutputMdv(OutputMdv &out);
 
   // free up memory between calls
 

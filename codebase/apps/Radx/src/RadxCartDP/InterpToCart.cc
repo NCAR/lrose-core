@@ -33,7 +33,6 @@
 
 #include "InterpToCart.hh"
 #include "Orient.hh"
-#include "OutputMdv.hh"
 #include <toolsa/pjg.h>
 #include <toolsa/mem.h>
 #include <toolsa/sincos.h>
@@ -282,21 +281,13 @@ int InterpToCart::interpVol()
 }
 
 /////////////////////////////////////////////////////
-// write out MDV data
+// fill output MDV data
 
-int InterpToCart::writeOutputMdv()
+void InterpToCart::fillOutputMdv(OutputMdv &out)
 {
 
-  if (_params.debug) {
-    cerr << "  Writing output file ... " << endl;
-  }
-  
-  _printRunTime("Cart interp - before _writeOutputMdv");
-  
   // all other formats go via the MDV class
   
-  OutputMdv out(_progName, _params);
-  out.setMasterHeader(_readVol);
   for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
     const Field &ifld = _interpFields[ifield];
     out.addField(_readVol, _proj, _gridZLevels,
@@ -339,19 +330,6 @@ int InterpToCart::writeOutputMdv()
 
   out.addChunks(_readVol, _interpFields.size());
   
-  // write out file
-  
-  if (out.writeVol()) {
-    cerr << "ERROR - Interp::processFile" << endl;
-    cerr << "  Cannot write file to output_dir: "
-         << _params.output_dir << endl;
-    return -1;
-  }
-
-  _printRunTime("Writing output files");
-
-  return 0;
-
 }
 
 //////////////////////////////////////////////////

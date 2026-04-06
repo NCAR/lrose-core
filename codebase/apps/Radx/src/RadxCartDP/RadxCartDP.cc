@@ -553,7 +553,7 @@ int RadxCartDP::_processFile(const string &filePath)
   // write out MDV file
 
   int iret = 0;
-  if (_cartInterp->writeOutputMdv()) {
+  if (_writeOutputMdv()) {
     cerr << "ERROR - RadxCartDP" << endl;
     cerr << "  Cannot write output file" << endl;
     iret = -1;
@@ -1701,9 +1701,51 @@ void RadxCartDP::_interpModelToOutputGrid()
     _modelInterpMdvx.addField(interpField);
     
   } // ifield
-
+  
 }
 
+/////////////////////////////////////////////////////
+// write out MDV data
+
+int RadxCartDP::_writeOutputMdv()
+{
+
+  if (_params.debug) {
+    cerr << "  Writing output file ... " << endl;
+  }
+
+  // initialize
+  
+  OutputMdv out(_progName, _params);
+  out.setMasterHeader(_readVol);
+
+  // fill with interpolated fields
+  
+  _cartInterp->fillOutputMdv(out);
+
+  // add the model fields
+
+  for (size_t ii = 0; ii < _modelInterpMdvx.getNFields(); ii++) {
+    // make a copy of the field, since the mdvx object takes memory ownership
+    MdvxField *field = new MdvxField(*_modelInterpMdvx.getField(ii));
+    // add to output object
+    out.addField(field);
+  } // ii
+  
+  // write out file
+  
+  if (out.writeVol()) {
+    cerr << "ERROR - RadxCartDP::_writeOutputMdv" << endl;
+    cerr << "  Cannot write file to output_dir: "
+         << _params.output_dir << endl;
+    return -1;
+  }
+  
+  return 0;
+
+}
+  
+  
 //////////////////////////////////////////////////
 // Print params for RATE
 

@@ -65,6 +65,8 @@ public:
 
   // addField()
   
+  void addField(MdvxField *field);
+
   void addField(const RadxVol &vol,
                 MdvxProj &proj,
                 const vector<double> &vlevels,

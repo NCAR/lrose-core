@@ -127,6 +127,11 @@ void OutputMdv::setMasterHeader(const RadxVol &vol)
 // addField()
 //
 
+void OutputMdv::addField(MdvxField *field)
+{
+  _mdvx.addField(field);
+}
+
 void OutputMdv::addField(const RadxVol &vol,
                          MdvxProj &proj,
                          const vector<double> &vlevels,
