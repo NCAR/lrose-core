@@ -331,16 +331,16 @@ int RadxMergeFields::_processFile(const string &primaryPath)
     return -1;
   }
 
-  time_t primaryTime = primaryVol.getEndTimeSecs();
-  bool dateOnly;
-  if (DataFileNames::getDataTime(primaryPath, primaryTime, dateOnly)) {
-    cerr << "ERROR - RadxMergeFields::_processFile" << endl;
-    cerr << "  Cannot get time from file path: " << primaryPath << endl;
-    return -1;
-  }
+  RadxTime primaryTime = primaryVol.getEndRadxTime();
+  // bool dateOnly;
+  // if (DataFileNames::getDataTime(primaryPath, primaryTime, dateOnly)) {
+  //   cerr << "ERROR - RadxMergeFields::_processFile" << endl;
+  //   cerr << "  Cannot get time from file path: " << primaryPath << endl;
+  //   return -1;
+  // }
 
   if (_params.debug) {
-    cerr << "Time for primary file: " << RadxTime::strm(primaryTime) << endl;
+    cerr << "Time for primary file: " << primaryTime.asString(3) << endl;
   }
 
   // Search for secondary files
@@ -348,7 +348,7 @@ int RadxMergeFields::_processFile(const string &primaryPath)
   for (size_t igroup = 0; igroup < _secondaryGroups.size(); igroup++) {
     
     _activeGroup = _secondaryGroups[igroup];
-    time_t searchTime = primaryTime + _activeGroup.fileTimeOffset;
+    RadxTime searchTime = primaryTime + _activeGroup.fileTimeOffset;
 
     RadxTimeList tlist;
     tlist.setDir(_activeGroup.dir);
