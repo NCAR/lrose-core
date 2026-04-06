@@ -183,17 +183,17 @@ private:
   int _runFilelist();
   int _runArchive();
   int _runRealtime();
-  void _setupRead(RadxFile &file);
   int _processFile(const string &filePath);
   bool _fileNameValid(const string &filePath);
+
   int _readFile(const string &filePath);
+  void _setupRead(RadxFile &file);
 
   void _addRayGeomFieldsToInput();
 
-  int _readModelTemperatureProfile();
-
   int _computeScalars();
   int _storeScalarsRay(ScalarsThread *thread);
+  int _mergeScalarsIntoReadVol();
   int _writeDebugPolarOutput();
 
   void _addAngleFields();
@@ -204,23 +204,23 @@ private:
 
   bool _isRhi();
 
+  void _initTargetGrid();
   void _initInterp();
   void _initInterpFields();
+
   void _allocInterpToCart();
   void _freeInterpRays();
   void _loadInterpRays();
   void _checkInterpFields();
 
+  int _readModel();
+  int _computeTempProfile();
+  void _interpModelToOutputGrid();
+
+
   void _printParamsRate();
   void _printParamsPid();
   void _printParamsKdp();
-
-  int _readModel(time_t radarTime);
-  void _interpModelToOutputGrid();
-  void _initTargetGrid();
-  int _computeTempProfile();
-
-  int _mergeScalarsIntoReadVol();
 
 };
 

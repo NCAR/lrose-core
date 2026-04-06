@@ -73,7 +73,15 @@ public:
   // set RHI mode
 
   void setRhiMode(bool state) { _rhiMode = state; }
+
+  // write the output MDV file
   
+  int writeOutputMdv();
+
+  // free up memory between calls
+
+  void freeMemory();
+
 protected:
 private:
 
@@ -296,8 +304,6 @@ private:
                         const Neighbors &wts);
   
   double _conditionAz(double az);
-
-  int _writeOutputFile();
 
   int _convStratCompute();
 

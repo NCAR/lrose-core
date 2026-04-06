@@ -252,6 +252,81 @@ int RadxCartDP::Run()
 }
 
 //////////////////////////////////////////////////
+// get radar field name from type
+
+string RadxCartDP::getRadarInputName(Params::radar_field_type_t ftype)
+{
+  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
+    if (_params._radar_field_names[ii].field_type == ftype) {
+      return _params._radar_field_names[ii].input_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+string RadxCartDP::getRadarOutputName(Params::radar_field_type_t ftype)
+{
+  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
+    if (_params._radar_field_names[ii].field_type == ftype) {
+      return _params._radar_field_names[ii].output_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+//////////////////////////////////////////////////
+// get model field name from type
+
+string RadxCartDP::getModelInputName(Params::model_field_type_t ftype)
+{
+  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
+    if (_params._model_field_names[ii].field_type == ftype) {
+      return _params._model_field_names[ii].input_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+string RadxCartDP::getModelOutputName(Params::model_field_type_t ftype)
+{
+  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
+    if (_params._model_field_names[ii].field_type == ftype) {
+      return _params._model_field_names[ii].output_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+//////////////////////////////////////////////////
+// get beam block field name from type
+
+string RadxCartDP::getBeamBlockInputName(Params::bblock_field_type_t ftype)
+{
+  for (int ii = 0; ii < _params.bblock_field_names_n; ii++) {
+    if (_params._bblock_field_names[ii].field_type == ftype) {
+      return _params._bblock_field_names[ii].input_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+string RadxCartDP::getBeamBlockOutputName(Params::bblock_field_type_t ftype)
+{
+  for (int ii = 0; ii < _params.bblock_field_names_n; ii++) {
+    if (_params._bblock_field_names[ii].field_type == ftype) {
+      return _params._bblock_field_names[ii].output_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+//////////////////////////////////////////////////
 // Run in filelist mode
 
 int RadxCartDP::_runFilelist()
@@ -404,15 +479,18 @@ int RadxCartDP::_processFile(const string &filePath)
 
   if (_params.debug) {
     cerr << "INFO - RadxCartDP::_processFile" << endl;
-    cerr << "  Input file path: " << filePath << endl;
-    cerr << "  Reading in file ..." << endl;
   }
   
   // read in file
   
   if (_readFile(filePath)) {
     cerr << "ERROR - RadxCartDP::_processFile" << endl;
+    cerr << "  Cannot read file: " << _readVol.getPathInUse() << endl;
     return -1;
+  }
+
+  if (_params.debug) {
+    cerr << "SUCCESS - read in file: " << _readVol.getPathInUse() << endl;
   }
   
   // initialize the projection and vlevels of the target volume
@@ -420,10 +498,10 @@ int RadxCartDP::_processFile(const string &filePath)
   _initTargetGrid();
 
   // read the temperature profile from the model
-  
-  if (_readModelTemperatureProfile()) {
+
+  if (_readModel()) {
     cerr << "ERROR - RadxCartDP::_processFile" << endl;
-    cerr << "  Cannot read model temperature profile" << endl;
+    cerr << "  Cannot read model environment data" << endl;
     return -1;
   }
 
@@ -472,14 +550,24 @@ int RadxCartDP::_processFile(const string &filePath)
     _cartInterp->interpVol();
   }
 
-  // free up
+  // write out MDV file
 
+  int iret = 0;
+  if (_cartInterp->writeOutputMdv()) {
+    cerr << "ERROR - RadxCartDP" << endl;
+    cerr << "  Cannot write output file" << endl;
+    iret = -1;
+  }
+
+  // free up
+  
+  _cartInterp->freeMemory();
   if (_params.free_memory_between_files) {
     _readVol.clear();
     _freeInterpRays();
   }
   
-  return 0;
+  return iret;
 
 }
 
@@ -717,41 +805,6 @@ void RadxCartDP::_addRayGeomFieldsToInput()
 }
 
 /////////////////////////////////////////////////////
-// read in the model temperature profile
-// returns 0 on success, -1 on failure
-
-int RadxCartDP::_readModelTemperatureProfile()
-{
-
-  // read the model data
-  
-  if (_readModel(_readVol.getStartTimeSecs())) {
-    cerr << "ERROR - RadxCartDP::_readModelTemperatureProfile" << endl;
-    cerr << "  Cannot read model data, time: "
-         << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
-    return -1;
-  }
-
-  // compute the temperature profile from the model data
-
-  if (_computeTempProfile()) {
-    cerr << "ERROR - RadxCartDP::_readModelTemperatureProfile" << endl;
-    cerr << "  Cannot compute temp profile, time: "
-         << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
-    return -1;
-  }
-
-  // set the temperature profile into the threads
-
-  // for (size_t ii = 0; ii < _computeScalarsThreads.size(); ii++) {
-  //   _computeScalarsThreads[ii]->setTempProfile(_tempProfile);
-  // }
-
-  return 0;
-
-}
-  
-/////////////////////////////////////////////////////
 // compute the pid fields for all rays in volume
 
 int RadxCartDP::_computeScalars()
@@ -838,6 +891,65 @@ int RadxCartDP::_storeScalarsRay(ScalarsThread *thread)
 
 }
       
+////////////////////////////////////////////////////////////////
+// merge the scalars into the read volume
+
+int RadxCartDP::_mergeScalarsIntoReadVol()
+{
+
+  vector<RadxRay *> &readRays = _readVol.getRays();
+  
+  if (readRays.size() != _scalarRays.size()) {
+    cerr << "ERROR - RadxCartDP::_mergeScalarsIntoReadVol" << endl;
+    cerr << "  readRays size: " << readRays.size() << endl;
+    cerr << "  _scalarRays size: " << _scalarRays.size() << endl;
+    return -1;
+  }
+
+  for (size_t ii = 0; ii < _scalarRays.size(); ii++) {
+
+    RadxRay *scRay = _scalarRays[ii];
+    if (scRay == NULL) {
+      cerr << "ERROR - null derived ray at index: " << ii << endl;
+      return -1;
+    }
+
+    int rayNum = scRay->getRayNumber();
+    if (rayNum < 0 || rayNum >= (int) readRays.size()) {
+      cerr << "ERROR - bad ray number in derived ray: " << rayNum << endl;
+      return -1;
+    }
+
+    RadxRay *readRay = readRays[rayNum];
+    if (readRay == NULL) {
+      cerr << "ERROR - null read ray at rayNum: " << rayNum << endl;
+      return -1;
+    }
+
+    const vector<RadxField *> &scFields = scRay->getFields();
+    for (size_t jj = 0; jj < scFields.size(); jj++) {
+
+      const RadxField *sc = scFields[jj];
+      if (sc == NULL) {
+        continue;
+      }
+
+      // remove any placeholder / previous version of same field
+      if (readRay->getField(sc->getName())) {
+        readRay->removeField(sc->getName());
+      }
+
+      // deep copy field into read volume ray
+      RadxField *copy = new RadxField(*sc);
+      readRay->addField(copy);
+
+    } // jj
+
+  } // ii
+
+  return 0;
+}
+
 //////////////////////////////////////////////////
 // Write polar volume for debugging
 // Input file + derived fields in polar coords.
@@ -845,8 +957,12 @@ int RadxCartDP::_storeScalarsRay(ScalarsThread *thread)
 int RadxCartDP::_writeDebugPolarOutput()
 {
 
-  RadxFile out;
   if (_params.debug) {
+    cerr << "INFO - writing debug polar data in Cfradial" << endl;
+  }
+  
+  RadxFile out;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     out.setDebug(true);
   }
   if (out.writeToDir(_readVol, _params.debug_polar_output_dir, true, false)) {
@@ -856,6 +972,10 @@ int RadxCartDP::_writeDebugPolarOutput()
     return -1;
   }
 
+  if (_params.debug) {
+    cerr << "SUCCESS - wrote debug polar file, path: " << out.getPathInUse() << endl;
+  }
+  
   return 0;
   
 }
@@ -1127,6 +1247,122 @@ bool RadxCartDP::_isRhi()
 
 }
 
+/////////////////////////////////////////////////////////
+// initialize the projection and vlevels of the target volume
+
+void RadxCartDP::_initTargetGrid()
+{
+
+  Mdvx::coord_t coord;
+
+  coord.nx = _params.grid_xy_geom.nx;
+  coord.ny = _params.grid_xy_geom.ny;
+  coord.nz = _params.grid_z_geom.nz;
+  
+  coord.dx = _params.grid_xy_geom.dx;
+  coord.dy = _params.grid_xy_geom.dy;
+  coord.dz = _params.grid_z_geom.dz;
+  
+  coord.minx = _params.grid_xy_geom.minx;
+  coord.miny = _params.grid_xy_geom.miny;
+  coord.minz = _params.grid_z_geom.minz;
+
+  // init _targetVlevels
+  
+  if (_params.specify_individual_z_levels) {
+    _targetVlevels.clear();
+    for (int ii = 0; ii < _params.z_level_array_n; ii++) {
+      _targetVlevels.push_back(_params._z_level_array[ii]);
+    }
+    coord.nz = _targetVlevels.size();
+    coord.minz = _targetVlevels[0];
+    if (coord.nz > 1) {
+      coord.dz = _targetVlevels[1] - _targetVlevels[0];
+    } else {
+      coord.dz = 0.0;
+    }
+  } else {
+    _targetVlevels.clear();
+    for (int ii = 0; ii < coord.nz; ii++) {
+      _targetVlevels.push_back(coord.minz + ii * coord.dz);
+    }
+  }
+
+  // init _targetProj
+  
+  coord.proj_type = _params.grid_projection;
+  if (_params.center_grid_on_radar) {
+    coord.proj_origin_lat = _readVol.getLatitudeDeg();
+    coord.proj_origin_lon = _readVol.getLongitudeDeg();
+  } else {
+    coord.proj_origin_lat = _params.grid_origin_lat;
+    coord.proj_origin_lon = _params.grid_origin_lon;
+  }
+  
+  switch (_params.grid_projection) {
+
+    case Params::PROJ_LATLON:
+      coord.proj_type = Mdvx::PROJ_LATLON;
+      break;
+      
+    case Params::PROJ_LAMBERT_CONF:
+      coord.proj_type = Mdvx::PROJ_LAMBERT_CONF;
+      coord.proj_params.lc2.lat1 = _params.grid_lat1;
+      coord.proj_params.lc2.lat2 = _params.grid_lat2;
+      break;
+
+    case Params::PROJ_MERCATOR:
+      coord.proj_type = Mdvx::PROJ_MERCATOR;
+      break;
+
+    case Params::PROJ_POLAR_STEREO:
+      coord.proj_type = Mdvx::PROJ_POLAR_STEREO;
+      coord.proj_params.ps.tan_lon = _params.grid_tangent_lon;
+      coord.proj_params.ps.central_scale = _params.grid_central_scale;
+      if (_params.grid_pole_is_north) {
+        coord.proj_params.ps.pole_type = Mdvx::POLE_NORTH;
+      } else {
+        coord.proj_params.ps.pole_type = Mdvx::POLE_SOUTH;
+      }
+      break;
+
+    case Params::PROJ_FLAT:
+      coord.proj_type = Mdvx::PROJ_FLAT;
+      coord.proj_params.flat.rotation = _params.grid_rotation;
+      break;
+
+    case Params::PROJ_OBLIQUE_STEREO:
+      coord.proj_type = Mdvx::PROJ_OBLIQUE_STEREO;
+      coord.proj_params.os.tan_lat = _params.grid_tangent_lat;
+      coord.proj_params.os.tan_lon = _params.grid_tangent_lon;
+      coord.proj_params.os.central_scale = _params.grid_central_scale;
+      break;
+
+    case Params::PROJ_TRANS_MERCATOR:
+      coord.proj_type = Mdvx::PROJ_TRANS_MERCATOR;
+      coord.proj_params.tmerc.central_scale = _params.grid_central_scale;
+      break;
+
+    case Params::PROJ_ALBERS:
+      coord.proj_type = Mdvx::PROJ_ALBERS;
+      coord.proj_params.albers.lat1 = _params.grid_lat1;
+      coord.proj_params.albers.lat2 = _params.grid_lat2;
+      break;
+
+    case Params::PROJ_LAMBERT_AZIM:
+      coord.proj_type = Mdvx::PROJ_LAMBERT_AZIM;
+      break;
+
+  } // switch
+
+  _targetProj.init(coord);
+
+  // initialize lookup table
+
+  _modelRemap.setTargetCoords(_targetProj, _targetVlevels);
+
+}
+
 //////////////////////////////////////////////////
 // initialize interpolation fields
 
@@ -1327,6 +1563,147 @@ void RadxCartDP::_checkInterpFields()
 
 }
 
+/////////////////////////////////////////////////////////
+// read in model data
+//
+// Returns 0 on success, -1 on failure.
+
+int RadxCartDP::_readModel()
+
+{
+
+  time_t radarTime = _readVol.getStartTimeSecs();
+
+  _modelRawMdvx.clearRead();
+  _modelRawMdvx.setReadTime(Mdvx::READ_CLOSEST,
+                         _params.model_input_url,
+                         _params.model_search_margin_secs,
+                         radarTime);
+
+  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
+    if (strlen(_params._model_field_names[ii].input_name) > 0) {
+      _modelRawMdvx.addReadField(_params._model_field_names[ii].input_name);
+    }
+  }
+  
+  if (_modelRawMdvx.readVolume()) {
+    cerr << "ERROR - RadxCartDP::_readModel" << endl;
+    cerr << "  Cannot read model data" << endl;
+    cerr << "  URL: " << _params.model_input_url << endl;
+    cerr << "  Search time: " << DateTime::strm(radarTime) << endl;
+    cerr << "  Search margin (secs): " << _params.model_search_margin_secs << endl;
+    cerr << _modelRawMdvx.getErrStr() << endl;
+    return -1;
+  }
+
+  // interpolate the model data onto the output Cartesian grid
+
+  _interpModelToOutputGrid();
+
+  // debug write
+  
+  if (_params.write_interpolated_model_data) {
+    if (_params.debug) {
+      cerr << "Writing interpolated model data file" << endl;
+    }
+    if (_modelInterpMdvx.writeToDir(_params.interpolated_model_output_url)) {
+      cerr << "WARNING - error writing model data" << endl;
+      cerr << _modelInterpMdvx.getErrStr() << endl;
+    }
+    if (_params.debug) {
+      cerr << "Wrote interpolated model data, path: "
+           << _modelInterpMdvx.getPathInUse() << endl;
+    }
+  }
+  
+  // compute the temperature profile from the model data
+
+  if (_computeTempProfile()) {
+    cerr << "ERROR - RadxCartDP::_readModel" << endl;
+    cerr << "  Cannot compute temp profile, time: "
+         << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////////////////////
+// compute the temperatude profile from the interpolated model
+
+int RadxCartDP::_computeTempProfile()
+{
+
+  _tempProfile.clear();
+
+  MdvxField *tempFld =
+    _modelInterpMdvx.getField(getModelInputName(Params::TEMP).c_str());
+  if (tempFld == NULL) {
+    cerr << "ERROR - RadxCartDP::_computeTempProfile" << endl;
+    cerr << "  Cannot find temp field in model, time: "
+         << RadxTime::strm(_modelInterpMdvx.getValidTime()) << endl;
+    return -1;
+  }
+
+  const Mdvx::field_header_t &fhdr = tempFld->getFieldHeader();
+  const Mdvx::vlevel_header_t &vhdr = tempFld->getVlevelHeader();
+  fl32 *tempVol = (fl32 *) tempFld->getVol();
+  fl32 miss = fhdr.missing_data_value;
+  size_t nPtsPlane = fhdr.ny * fhdr.nx;
+
+  for (int iz = 0; iz < fhdr.nz; iz++) {
+    double htKm = vhdr.level[iz];
+    fl32 *tmpPtr = tempVol + iz * nPtsPlane;
+    double sum = 0.0, nn = 0.0;
+    for (size_t ii = 0; ii < nPtsPlane; ii++, tmpPtr++) {
+      if (*tmpPtr != miss) {
+        sum += *tmpPtr;
+        nn++;
+      }
+    } // ii
+    if (nn > 0) {
+      double meanTemp = sum / nn;
+      TempProfile::PointVal val(htKm, meanTemp);
+      _tempProfile.addPoint(val);
+    }
+    
+  } // iz
+
+  if (_tempProfile.getProfile().size() < 2) {
+    cerr << "ERROR - RadxCartDP::_computeTempProfile" << endl;
+    cerr << "  Not enough temp data for valid profile" << endl;
+    cerr << "  Cannot find temp field in model, time: "
+         << RadxTime::strm(_modelInterpMdvx.getValidTime()) << endl;
+    return -1;
+  }
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// interpolate the model data onto the output grid
+
+void RadxCartDP::_interpModelToOutputGrid()
+{
+
+  _modelInterpMdvx.clear();
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _modelInterpMdvx.setDebug(true);
+  }
+  _modelInterpMdvx.setMasterHeader(_modelRawMdvx.getMasterHeader());
+  
+  for (size_t ifield = 0; ifield < _modelRawMdvx.getNFields(); ifield++) {
+
+    MdvxField *rawFld = _modelRawMdvx.getField(ifield);
+    MdvxField *interpField = _modelRemap.interpField(*rawFld);
+    _modelInterpMdvx.addField(interpField);
+    
+  } // ifield
+
+}
+
 //////////////////////////////////////////////////
 // Print params for RATE
 
@@ -1472,570 +1849,3 @@ void RadxCartDP::_printParamsKdp()
 
 }
 
-//////////////////////////////////////////////////
-// get radar field name from type
-
-string RadxCartDP::getRadarInputName(Params::radar_field_type_t ftype)
-{
-  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
-    if (_params._radar_field_names[ii].field_type == ftype) {
-      return _params._radar_field_names[ii].input_name;
-    }
-  }
-  // not found
-  return "";
-}
-
-string RadxCartDP::getRadarOutputName(Params::radar_field_type_t ftype)
-{
-  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
-    if (_params._radar_field_names[ii].field_type == ftype) {
-      return _params._radar_field_names[ii].output_name;
-    }
-  }
-  // not found
-  return "";
-}
-
-//////////////////////////////////////////////////
-// get model field name from type
-
-string RadxCartDP::getModelInputName(Params::model_field_type_t ftype)
-{
-  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
-    if (_params._model_field_names[ii].field_type == ftype) {
-      return _params._model_field_names[ii].input_name;
-    }
-  }
-  // not found
-  return "";
-}
-
-string RadxCartDP::getModelOutputName(Params::model_field_type_t ftype)
-{
-  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
-    if (_params._model_field_names[ii].field_type == ftype) {
-      return _params._model_field_names[ii].output_name;
-    }
-  }
-  // not found
-  return "";
-}
-
-//////////////////////////////////////////////////
-// get beam block field name from type
-
-string RadxCartDP::getBeamBlockInputName(Params::bblock_field_type_t ftype)
-{
-  for (int ii = 0; ii < _params.bblock_field_names_n; ii++) {
-    if (_params._bblock_field_names[ii].field_type == ftype) {
-      return _params._bblock_field_names[ii].input_name;
-    }
-  }
-  // not found
-  return "";
-}
-
-string RadxCartDP::getBeamBlockOutputName(Params::bblock_field_type_t ftype)
-{
-  for (int ii = 0; ii < _params.bblock_field_names_n; ii++) {
-    if (_params._bblock_field_names[ii].field_type == ftype) {
-      return _params._bblock_field_names[ii].output_name;
-    }
-  }
-  // not found
-  return "";
-}
-
-/////////////////////////////////////////////////////////
-// read in model data
-//
-// Returns 0 on success, -1 on failure.
-
-int RadxCartDP::_readModel(time_t radarTime)
-
-{
-
-  _modelRawMdvx.clearRead();
-  _modelRawMdvx.setReadTime(Mdvx::READ_CLOSEST,
-                         _params.model_input_url,
-                         _params.model_search_margin_secs,
-                         radarTime);
-
-  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
-    if (strlen(_params._model_field_names[ii].input_name) > 0) {
-      _modelRawMdvx.addReadField(_params._model_field_names[ii].input_name);
-    }
-  }
-  
-  if (_modelRawMdvx.readVolume()) {
-    cerr << "ERROR - RadxCartDP::_readModel" << endl;
-    cerr << "  Cannot read model data" << endl;
-    cerr << "  URL: " << _params.model_input_url << endl;
-    cerr << "  Search time: " << DateTime::strm(radarTime) << endl;
-    cerr << "  Search margin (secs): " << _params.model_search_margin_secs << endl;
-    cerr << _modelRawMdvx.getErrStr() << endl;
-    return -1;
-  }
-
-  // interpolate the model data onto the output Cartesian grid
-
-  _interpModelToOutputGrid();
-
-  return 0;
-
-}
-
-/////////////////////////////////////////////////////////
-// interpolate the model data onto the output grid
-
-void RadxCartDP::_interpModelToOutputGrid()
-{
-
-  _modelInterpMdvx.clear();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _modelInterpMdvx.setDebug(true);
-  }
-  _modelInterpMdvx.setMasterHeader(_modelRawMdvx.getMasterHeader());
-  
-  for (size_t ifield = 0; ifield < _modelRawMdvx.getNFields(); ifield++) {
-
-    MdvxField *rawFld = _modelRawMdvx.getField(ifield);
-    MdvxField *interpField = _modelRemap.interpField(*rawFld);
-    _modelInterpMdvx.addField(interpField);
-    
-  } // ifield
-
-  if (_params.write_interpolated_model_data) {
-    _modelInterpMdvx.writeToDir(_params.interpolated_model_output_url);
-  }
-  
-}
-
-/////////////////////////////////////////////////////////
-// initialize the projection and vlevels of the target volume
-
-void RadxCartDP::_initTargetGrid()
-{
-
-  Mdvx::coord_t coord;
-
-  coord.nx = _params.grid_xy_geom.nx;
-  coord.ny = _params.grid_xy_geom.ny;
-  coord.nz = _params.grid_z_geom.nz;
-  
-  coord.dx = _params.grid_xy_geom.dx;
-  coord.dy = _params.grid_xy_geom.dy;
-  coord.dz = _params.grid_z_geom.dz;
-  
-  coord.minx = _params.grid_xy_geom.minx;
-  coord.miny = _params.grid_xy_geom.miny;
-  coord.minz = _params.grid_z_geom.minz;
-
-  // init _targetVlevels
-  
-  if (_params.specify_individual_z_levels) {
-    _targetVlevels.clear();
-    for (int ii = 0; ii < _params.z_level_array_n; ii++) {
-      _targetVlevels.push_back(_params._z_level_array[ii]);
-    }
-    coord.nz = _targetVlevels.size();
-    coord.minz = _targetVlevels[0];
-    if (coord.nz > 1) {
-      coord.dz = _targetVlevels[1] - _targetVlevels[0];
-    } else {
-      coord.dz = 0.0;
-    }
-  } else {
-    _targetVlevels.clear();
-    for (int ii = 0; ii < coord.nz; ii++) {
-      _targetVlevels.push_back(coord.minz + ii * coord.dz);
-    }
-  }
-
-  // init _targetProj
-  
-  coord.proj_type = _params.grid_projection;
-  if (_params.center_grid_on_radar) {
-    coord.proj_origin_lat = _readVol.getLatitudeDeg();
-    coord.proj_origin_lon = _readVol.getLongitudeDeg();
-  } else {
-    coord.proj_origin_lat = _params.grid_origin_lat;
-    coord.proj_origin_lon = _params.grid_origin_lon;
-  }
-  
-  switch (_params.grid_projection) {
-
-    case Params::PROJ_LATLON:
-      coord.proj_type = Mdvx::PROJ_LATLON;
-      break;
-      
-    case Params::PROJ_LAMBERT_CONF:
-      coord.proj_type = Mdvx::PROJ_LAMBERT_CONF;
-      coord.proj_params.lc2.lat1 = _params.grid_lat1;
-      coord.proj_params.lc2.lat2 = _params.grid_lat2;
-      break;
-
-    case Params::PROJ_MERCATOR:
-      coord.proj_type = Mdvx::PROJ_MERCATOR;
-      break;
-
-    case Params::PROJ_POLAR_STEREO:
-      coord.proj_type = Mdvx::PROJ_POLAR_STEREO;
-      coord.proj_params.ps.tan_lon = _params.grid_tangent_lon;
-      coord.proj_params.ps.central_scale = _params.grid_central_scale;
-      if (_params.grid_pole_is_north) {
-        coord.proj_params.ps.pole_type = Mdvx::POLE_NORTH;
-      } else {
-        coord.proj_params.ps.pole_type = Mdvx::POLE_SOUTH;
-      }
-      break;
-
-    case Params::PROJ_FLAT:
-      coord.proj_type = Mdvx::PROJ_FLAT;
-      coord.proj_params.flat.rotation = _params.grid_rotation;
-      break;
-
-    case Params::PROJ_OBLIQUE_STEREO:
-      coord.proj_type = Mdvx::PROJ_OBLIQUE_STEREO;
-      coord.proj_params.os.tan_lat = _params.grid_tangent_lat;
-      coord.proj_params.os.tan_lon = _params.grid_tangent_lon;
-      coord.proj_params.os.central_scale = _params.grid_central_scale;
-      break;
-
-    case Params::PROJ_TRANS_MERCATOR:
-      coord.proj_type = Mdvx::PROJ_TRANS_MERCATOR;
-      coord.proj_params.tmerc.central_scale = _params.grid_central_scale;
-      break;
-
-    case Params::PROJ_ALBERS:
-      coord.proj_type = Mdvx::PROJ_ALBERS;
-      coord.proj_params.albers.lat1 = _params.grid_lat1;
-      coord.proj_params.albers.lat2 = _params.grid_lat2;
-      break;
-
-    case Params::PROJ_LAMBERT_AZIM:
-      coord.proj_type = Mdvx::PROJ_LAMBERT_AZIM;
-      break;
-
-  } // switch
-
-  _targetProj.init(coord);
-
-  // initialize lookup table
-
-  _modelRemap.setTargetCoords(_targetProj, _targetVlevels);
-
-}
-
-////////////////////////////////////////////////////////////////
-// compute the temperatude profile from the interpolated model
-
-int RadxCartDP::_computeTempProfile()
-{
-
-  _tempProfile.clear();
-
-  MdvxField *tempFld =
-    _modelInterpMdvx.getField(getModelInputName(Params::TEMP).c_str());
-  if (tempFld == NULL) {
-    cerr << "ERROR - RadxCartDP::_computeTempProfile" << endl;
-    cerr << "  Cannot find temp field in model, time: "
-         << RadxTime::strm(_modelInterpMdvx.getValidTime()) << endl;
-    return -1;
-  }
-
-  const Mdvx::field_header_t &fhdr = tempFld->getFieldHeader();
-  const Mdvx::vlevel_header_t &vhdr = tempFld->getVlevelHeader();
-  fl32 *tempVol = (fl32 *) tempFld->getVol();
-  fl32 miss = fhdr.missing_data_value;
-  size_t nPtsPlane = fhdr.ny * fhdr.nx;
-
-  for (int iz = 0; iz < fhdr.nz; iz++) {
-    double htKm = vhdr.level[iz];
-    fl32 *tmpPtr = tempVol + iz * nPtsPlane;
-    double sum = 0.0, nn = 0.0;
-    for (size_t ii = 0; ii < nPtsPlane; ii++, tmpPtr++) {
-      if (*tmpPtr != miss) {
-        sum += *tmpPtr;
-        nn++;
-      }
-    } // ii
-    if (nn > 0) {
-      double meanTemp = sum / nn;
-      TempProfile::PointVal val(htKm, meanTemp);
-      _tempProfile.addPoint(val);
-    }
-    
-  } // iz
-
-  if (_tempProfile.getProfile().size() < 2) {
-    cerr << "ERROR - RadxCartDP::_computeTempProfile" << endl;
-    cerr << "  Not enough temp data for valid profile" << endl;
-    cerr << "  Cannot find temp field in model, time: "
-         << RadxTime::strm(_modelInterpMdvx.getValidTime()) << endl;
-    return -1;
-  }
-  
-  return 0;
-
-}
-
-
-////////////////////////////////////////////////////////////////
-// merge the scalars into the read volume
-
-int RadxCartDP::_mergeScalarsIntoReadVol()
-{
-
-  vector<RadxRay *> &readRays = _readVol.getRays();
-  
-  if (readRays.size() != _scalarRays.size()) {
-    cerr << "ERROR - RadxCartDP::_mergeScalarsIntoReadVol" << endl;
-    cerr << "  readRays size: " << readRays.size() << endl;
-    cerr << "  _scalarRays size: " << _scalarRays.size() << endl;
-    return -1;
-  }
-
-  for (size_t ii = 0; ii < _scalarRays.size(); ii++) {
-
-    RadxRay *scRay = _scalarRays[ii];
-    if (scRay == NULL) {
-      cerr << "ERROR - null derived ray at index: " << ii << endl;
-      return -1;
-    }
-
-    int rayNum = scRay->getRayNumber();
-    if (rayNum < 0 || rayNum >= (int) readRays.size()) {
-      cerr << "ERROR - bad ray number in derived ray: " << rayNum << endl;
-      return -1;
-    }
-
-    RadxRay *readRay = readRays[rayNum];
-    if (readRay == NULL) {
-      cerr << "ERROR - null read ray at rayNum: " << rayNum << endl;
-      return -1;
-    }
-
-    const vector<RadxField *> &scFields = scRay->getFields();
-    for (size_t jj = 0; jj < scFields.size(); jj++) {
-
-      const RadxField *sc = scFields[jj];
-      if (sc == NULL) {
-        continue;
-      }
-
-      // remove any placeholder / previous version of same field
-      if (readRay->getField(sc->getName())) {
-        readRay->removeField(sc->getName());
-      }
-
-      // deep copy field into read volume ray
-      RadxField *copy = new RadxField(*sc);
-      readRay->addField(copy);
-
-    } // jj
-
-  } // ii
-
-  return 0;
-}
-
-#ifdef NOTNOW
-
-//////////////////////////////////////////////////
-// add geom output fields
-
-void RadxCartDP::_addGeomFieldsToOutput()
-
-{
-
-  // loop through rays
-
-  vector<RadxRay *> &inputRays = _readVol.getRays();
-  for (size_t iray = 0; iray < inputRays.size(); iray++) {
-    
-    RadxRay *inputRay = inputRays[iray];
-
-    // match output ray to input ray based on time
-    
-    RadxRay *outputRay = NULL;
-    double inTime = inputRay->getTimeDouble();
-    for (size_t jj = 0; jj < _scalarRays.size(); jj++) {
-      RadxRay *pidRay = _scalarRays[jj];
-      double outTime = pidRay->getTimeDouble();
-      if (fabs(inTime - outTime) < 0.001) {
-        outputRay = pidRay;
-        break;
-      }
-    } // jj
-
-    if (outputRay != NULL) {
-      // make a copy of the input fields
-      RadxField *mlFld = new RadxField(*inputRay->getField(mlFieldName));
-      // add to output
-      outputRay->addField(mlFld);
-    }
-
-  } // iray
-
-}
-
-/////////////////////////////////////////////////////////
-// fill temperature level ht array
-
-void RadxCartDP::_computeHts(double tempC,
-                             MdvxField &htField,
-                             const string &fieldName,
-                             const string &longName,
-                             const string &units)
-  
-{
-
-  // set up the height field
-
-  htField.clearVolData();
-
-  Mdvx::field_header_t fhdr = _tempField->getFieldHeader();
-  fhdr.nz = 1;
-  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-  size_t planeSize32 = fhdr.nx * fhdr.ny * sizeof(fl32);
-  fhdr.volume_size = planeSize32;
-  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
-  fhdr.data_element_nbytes = 4;
-  fhdr.missing_data_value = _missingFl32;
-  fhdr.bad_data_value = _missingFl32;
-  
-  Mdvx::vlevel_header_t vhdr;
-  MEM_zero(vhdr);
-  vhdr.level[0] = 0;
-  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
-  
-  htField.setHdrsAndVolData(fhdr, vhdr, NULL,
-                            true, false, true);
-
-  htField.setFieldName(fieldName);
-  htField.setFieldNameLong(longName);
-  htField.setUnits(units);
-  
-  // get hts array pointer
-  
-  fl32 *hts = (fl32 *) htField.getVol();
-
-  // get temp array
-
-  _tempField->convertType(Mdvx::ENCODING_FLOAT32);
-  const Mdvx::field_header_t tempFhdr = _tempField->getFieldHeader();
-  fl32 *temp = (fl32 *) _tempField->getVol();
-  fl32 tempMiss = tempFhdr.missing_data_value;
-  
-  // get Z profile for temperatures
-  
-  const Mdvx::vlevel_header_t tempVhdr = _tempField->getVlevelHeader();
-  vector<double> zProfile;
-  for (si64 iz = 0; iz < tempFhdr.nz; iz++) {
-    zProfile.push_back(tempVhdr.level[iz]);
-  } // iz
-  
-  // loop through the (x, y) plane
-  
-  si64 xyIndex = 0;
-  size_t nxy = fhdr.nx * fhdr.ny;
-  for (si64 iy = 0; iy < tempFhdr.ny; iy++) {
-    for (si64 ix = 0; ix < tempFhdr.nx; ix++, xyIndex++) {
-
-      // initialize
-
-      fl32 bottomTemp = tempMiss;
-      double bottomHt = tempVhdr.level[0]; // if temp is below grid
-      
-      fl32 topTemp = tempMiss;
-      double topHt = tempVhdr.level[tempFhdr.nz - 1]; // if temp is above grid
-      
-      hts[xyIndex] = bottomHt;
-      
-      // loop through heights, looking for temps that straddle
-      // the required temp
-
-      bool htFound = false;
-      for (si64 iz = 1; iz < tempFhdr.nz; iz++) {
-        si64 zIndexBelow = xyIndex + (iz - 1) * nxy; 
-        si64 zIndexAbove = zIndexBelow + nxy; 
-        double tempBelow = temp[zIndexBelow];
-        double tempAbove = temp[zIndexAbove];
-        // set bottom temp
-        if (tempBelow != tempMiss && bottomTemp == tempMiss) {
-          bottomTemp = tempBelow;
-        }
-        // set top temp
-        if (tempAbove != tempMiss) {
-          topTemp = tempAbove;
-        }
-        if (!htFound && (tempBelow != tempMiss) && (tempAbove != tempMiss)) {
-          // check for normal profile and inversion
-          if ((tempBelow >= tempC && tempAbove <= tempC) ||
-              (tempBelow <= tempC && tempAbove >= tempC)) {
-            double deltaTemp = tempAbove - tempBelow;
-            double deltaHt = zProfile[iz] - zProfile[iz-1];
-            double interpHt =
-              zProfile[iz] + ((tempC - tempBelow) / deltaTemp) * deltaHt;
-            hts[xyIndex] = interpHt;
-            htFound = true;
-          }
-        }
-      } // iz
-      
-      if (!htFound) {
-        if (tempC >= bottomTemp) {
-          // required temp is below grid
-          hts[xyIndex] = bottomHt;
-        } else if (tempC <= topTemp) {
-          // required temp is above grid
-          hts[xyIndex] = topHt;
-        }
-      }
-
-    } // ix
-  } // iy
-  
-}
-
-
-  _tempField = _modelRawMdvx.getField(_params.temp_profile_field_name);
-  if (_tempField == NULL) {
-    cerr << "ERROR - RadxCartDP::_readModel" << endl;
-    cerr << "  Cannot find field in temp file: "
-         << _params.temp_profile_field_name << endl;
-    cerr << "  URL: " << _params.temp_profile_url << endl;
-    cerr << "  Time: " << DateTime::strm(_modelRawMdvx.getValidTime()) << endl;
-    return -1;
-  }
-  
-  // fill the temperature level arrays
-  
-  _computeHts(_params.shallow_threshold_temp, _shallowHtField,
-              "ShallowHt", "shallow_threshold_ht", "km");
-  _computeHts(_params.deep_threshold_temp, _deepHtField,
-              "DeepHt", "deep_threshold_ht", "km");
-
-  // remap from model to radar grid coords
-  // use of the lookup table makes this more efficient
-  
-  MdvxProj proj(dbzField->getFieldHeader());
-  MdvxRemapLut lut;
-  if (_shallowHtField.remap(lut, proj)) {
-    cerr << "ERROR - RadxCartDP::_readModel" << endl;
-    cerr << "  Cannot convert model temp grid to radar grid" << endl;
-    cerr << "  URL: " << _params.temp_profile_url << endl;
-    cerr << "  Time: " << DateTime::strm(_modelRawMdvx.getValidTime()) << endl;
-    return -1;
-  }
-  if (_deepHtField.remap(lut, proj)) {
-    cerr << "ERROR - RadxCartDP::_readModel" << endl;
-    cerr << "  Cannot convert model temp grid to radar grid" << endl;
-    cerr << "  URL: " << _params.temp_profile_url << endl;
-    cerr << "  Time: " << DateTime::strm(_modelRawMdvx.getValidTime()) << endl;
-    return -1;
-  }
-                       
-#endif

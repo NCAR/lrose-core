@@ -203,7 +203,7 @@ int InterpToCart::interpVol()
   _computeAzimuthDelta();
   _computeElevationDelta();
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "  _scanDeltaAz: " << _scanDeltaAz << endl;
     cerr << "  _scanDeltaEl: " << _scanDeltaEl << endl;
   }
@@ -218,7 +218,7 @@ int InterpToCart::interpVol()
     return -1;
   }
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "  _isSector: " << _isSector << endl;
     cerr << "  _spansNorth: " << (char *) (_spansNorth? "Y":"N") << endl;
   }
@@ -232,18 +232,12 @@ int InterpToCart::interpVol()
 
   // fill the search matrix
 
-  if (_params.debug) {
-    cerr << "  Filling search matrix ... " << endl;
-  }
   _printRunTime("Cart interp - before fillSearchMatrix");
   _fillSearchMatrix();
   _printRunTime("Filling search matrix");
   
   // compute grid locations relative to radar
 
-  if (_params.debug) {
-    cerr << "  Computing grid relative to radar ... " << endl;
-  }
   _printRunTime("Cart interp - before _computeGridRelative");
   _computeGridRelative();
   _printRunTime("Computing grid relative to radar");
@@ -267,9 +261,6 @@ int InterpToCart::interpVol()
 
   // interpolate
 
-  if (_params.debug) {
-    cerr << "  Interpolating ... " << endl;
-  }
   _printRunTime("Cart interp - before doInterp");
   _doInterp();
   _printRunTime("Interpolating");
@@ -286,27 +277,92 @@ int InterpToCart::interpVol()
     _printRunTime("Cart interp - after strat/conv");
   }
   
-  // write out data
+  return 0;
 
-  _printRunTime("Cart interp - before _writeOutputFile");
+}
 
-  if (_writeOutputFile()) {
-    cerr << "ERROR - InterpToCart::interpVol" << endl;
-    cerr << "  Cannot write output file" << endl;
+/////////////////////////////////////////////////////
+// write out MDV data
+
+int InterpToCart::writeOutputMdv()
+{
+
+  if (_params.debug) {
+    cerr << "  Writing output file ... " << endl;
+  }
+  
+  _printRunTime("Cart interp - before _writeOutputMdv");
+  
+  // all other formats go via the MDV class
+  
+  OutputMdv out(_progName, _params);
+  out.setMasterHeader(_readVol);
+  for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
+    const Field &ifld = _interpFields[ifield];
+    out.addField(_readVol, _proj, _gridZLevels,
+                 ifld.outputName, ifld.longName, ifld.units,
+                 ifld.inputDataType,
+                 ifld.inputScale,
+                 ifld.inputOffset,
+                 missingFl32,
+                 _interpFields[ifield].outputField.data());
+  } // ifield
+
+  // debug (test) fields
+
+  for (size_t ii = 0; ii < _derived3DFields.size(); ii++) {
+    const DerivedField *dfld = _derived3DFields[ii];
+    if (dfld->writeToFile) {
+      out.addField(_readVol, _proj, dfld->vertLevels,
+                   dfld->name, dfld->longName, dfld->units,
+                   Radx::FL32, 1.0, 0.0, missingFl32, dfld->data);
+    }
+  }
+
+  for (size_t ii = 0; ii < _derived2DFields.size(); ii++) {
+    const DerivedField *dfld = _derived2DFields[ii];
+    if (dfld->writeToFile) {
+      out.addField(_readVol, _proj, dfld->vertLevels,
+                   dfld->name, dfld->longName, dfld->units,
+                   Radx::FL32, 1.0, 0.0, missingFl32, dfld->data);
+    }
+  }
+
+  // convective stratiform split
+
+  if (_params.identify_convective_stratiform_split && _gotConvStrat) {
+    out.addConvStratFields(_convStrat, _readVol,
+                           _proj, _gridZLevels);
+  }
+
+  // chunks
+
+  out.addChunks(_readVol, _interpFields.size());
+  
+  // write out file
+  
+  if (out.writeVol()) {
+    cerr << "ERROR - Interp::processFile" << endl;
+    cerr << "  Cannot write file to output_dir: "
+         << _params.output_dir << endl;
     return -1;
   }
 
   _printRunTime("Writing output files");
 
-  // clean up
+  return 0;
 
+}
+
+//////////////////////////////////////////////////
+// free up memory between calls
+
+void InterpToCart::freeMemory()
+{
   _freeSearchMatrix();
   if (_params.free_memory_between_files) {
     _freeGridLoc();
   }
- 
-  return 0;
-
 }
 
 //////////////////////////////////////////////////
@@ -631,14 +687,14 @@ void InterpToCart::_computeSearchLimits()
   
   _searchRadiusAz = _scanDeltaAz + _beamWidthDegH + 1.0;
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "  _searchRadiusEl: " << _searchRadiusEl << endl;
     cerr << "  _searchRadiusAz: " << _searchRadiusAz << endl;
   }
 
   if (_isSector) {
     
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "  _dataSectorStartAzDeg: " << _dataSectorStartAzDeg << endl;
       cerr << "  _dataSectorEndAzDeg: " << _dataSectorEndAzDeg << endl;
     }
@@ -2350,75 +2406,6 @@ double InterpToCart::_conditionAz(double az)
     }
   }
   return az;
-}
-
-/////////////////////////////////////////////////////
-// write out data
-
-int InterpToCart::_writeOutputFile()
-{
-
-  if (_params.debug) {
-    cerr << "  Writing output file ... " << endl;
-  }
-
-  // all other formats go via the MDV class
-  
-  OutputMdv out(_progName, _params);
-  out.setMasterHeader(_readVol);
-  for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
-    const Field &ifld = _interpFields[ifield];
-    out.addField(_readVol, _proj, _gridZLevels,
-                 ifld.outputName, ifld.longName, ifld.units,
-                 ifld.inputDataType,
-                 ifld.inputScale,
-                 ifld.inputOffset,
-                 missingFl32,
-                 _interpFields[ifield].outputField.data());
-  } // ifield
-
-  // debug (test) fields
-
-  for (size_t ii = 0; ii < _derived3DFields.size(); ii++) {
-    const DerivedField *dfld = _derived3DFields[ii];
-    if (dfld->writeToFile) {
-      out.addField(_readVol, _proj, dfld->vertLevels,
-                   dfld->name, dfld->longName, dfld->units,
-                   Radx::FL32, 1.0, 0.0, missingFl32, dfld->data);
-    }
-  }
-
-  for (size_t ii = 0; ii < _derived2DFields.size(); ii++) {
-    const DerivedField *dfld = _derived2DFields[ii];
-    if (dfld->writeToFile) {
-      out.addField(_readVol, _proj, dfld->vertLevels,
-                   dfld->name, dfld->longName, dfld->units,
-                   Radx::FL32, 1.0, 0.0, missingFl32, dfld->data);
-    }
-  }
-
-  // convective stratiform split
-
-  if (_params.identify_convective_stratiform_split && _gotConvStrat) {
-    out.addConvStratFields(_convStrat, _readVol,
-                           _proj, _gridZLevels);
-  }
-
-  // chunks
-
-  out.addChunks(_readVol, _interpFields.size());
-  
-  // write out file
-  
-  if (out.writeVol()) {
-    cerr << "ERROR - Interp::processFile" << endl;
-    cerr << "  Cannot write file to output_dir: "
-         << _params.output_dir << endl;
-    return -1;
-  }
-
-  return 0;
-
 }
 
 //////////////////////////////////////////////////
