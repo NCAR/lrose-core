@@ -1480,8 +1480,8 @@ void RadxCartDP::_initInterpFields()
 void RadxCartDP::_allocInterpToCart()
 {
   if (_cartInterp == NULL) {
-    _cartInterp = new InterpToCart(_progName, _params, _readVol,
-                                   _interpFields, _interpRays);
+    _cartInterp = new CartInterp(_progName, _params, _readVol,
+                                 _interpFields, _interpRays);
   }
 }
 
@@ -1744,7 +1744,6 @@ int RadxCartDP::_writeOutputMdv()
   return 0;
 
 }
-  
   
 //////////////////////////////////////////////////
 // Print params for RATE

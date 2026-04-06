@@ -43,7 +43,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include "InterpToCart.hh"
+#include "CartInterp.hh"
 #include <string>
 #include <deque>
 #include <toolsa/TaArray.hh>
@@ -167,7 +167,7 @@ private:
 
   // radar interpolation
 
-  InterpToCart *_cartInterp;
+  CartInterp *_cartInterp;
 
   // mutex for debug prints
   

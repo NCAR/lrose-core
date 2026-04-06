@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// InterpToCart.hh
+// CartInterp.hh
 //
-// InterpToCart class - derived from Interp.
+// CartInterp class - derived from Interp.
 // Used for full 3-D Cartesian interpolation.
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -33,8 +33,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef InterpToCart_HH
-#define InterpToCart_HH
+#ifndef CartInterp_HH
+#define CartInterp_HH
 
 #include "BaseInterp.hh"
 #include "OutputMdv.hh"
@@ -44,21 +44,21 @@
 class DsMdvx;
 class Orient;
 
-class InterpToCart : public BaseInterp {
+class CartInterp : public BaseInterp {
   
 public:
 
   // constructor
   
-  InterpToCart(const string &progName,
-               const Params &params,
-               RadxVol &readVol,
-               vector<Field> &interpFields,
-               vector<Ray *> &interpRays);
+  CartInterp(const string &progName,
+             const Params &params,
+             RadxVol &readVol,
+             vector<Field> &interpFields,
+             vector<Ray *> &interpRays);
   
   // destructor
   
-  virtual ~InterpToCart();
+  virtual ~CartInterp();
   
   // interpolate a volume
   // assumes volume has been read
@@ -319,11 +319,11 @@ private:
   {  
   public:
     // constructor
-    FillSearchLowerLeft(InterpToCart *obj);
+    FillSearchLowerLeft(CartInterp *obj);
     // override run method
     virtual void run();
   private:
-    InterpToCart *_this; // context
+    CartInterp *_this; // context
   };
 
   //////////////////////////////////////////////////////////////
@@ -333,11 +333,11 @@ private:
   {  
   public:
     // constructor
-    FillSearchLowerRight(InterpToCart *obj);
+    FillSearchLowerRight(CartInterp *obj);
     // override run method
     virtual void run();
   private:
-    InterpToCart *_this; // context
+    CartInterp *_this; // context
   };
 
   //////////////////////////////////////////////////////////////
@@ -347,11 +347,11 @@ private:
   {  
   public:
     // constructor
-    FillSearchUpperLeft(InterpToCart *obj);
+    FillSearchUpperLeft(CartInterp *obj);
     // override run method
     virtual void run();
   private:
-    InterpToCart *_this; // context
+    CartInterp *_this; // context
   };
 
   //////////////////////////////////////////////////////////////
@@ -361,11 +361,11 @@ private:
   {  
   public:
     // constructor
-    FillSearchUpperRight(InterpToCart *obj);
+    FillSearchUpperRight(CartInterp *obj);
     // override run method
     virtual void run();
   private:
-    InterpToCart *_this; // context
+    CartInterp *_this; // context
   };
 
   // instantiate threads for fill search
@@ -382,14 +382,14 @@ private:
   {  
   public:
     // constructor
-    ComputeGridRelative(InterpToCart *obj);
+    ComputeGridRelative(CartInterp *obj);
     // set the y and z index
     inline void setYIndex(int yIndex) { _yIndex = yIndex; }
     inline void setZIndex(int zIndex) { _zIndex = zIndex; }
     // override run method
     virtual void run();
   private:
-    InterpToCart *_this; // context
+    CartInterp *_this; // context
     int _yIndex; // grid index of y column
     int _zIndex; // grid index of z plane
   };
@@ -403,14 +403,14 @@ private:
   {  
   public:
     // constructor
-    PerformInterp(InterpToCart *obj);
+    PerformInterp(CartInterp *obj);
     // set the y and z index
     inline void setYIndex(int yIndex) { _yIndex = yIndex; }
     inline void setZIndex(int zIndex) { _zIndex = zIndex; }
     // override run method
     virtual void run();
   private:
-    InterpToCart *_this; // context
+    CartInterp *_this; // context
     int _yIndex; // grid index of y column
     int _zIndex; // grid index of z plane
   };
