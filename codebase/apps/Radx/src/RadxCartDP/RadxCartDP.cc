@@ -1876,15 +1876,15 @@ int RadxCartDP::_computePid()
   
   // create MdvxField for pid
   
-  Mdvx::field_header_t tempFhdr(tempFld->getFieldHeader());
-  Mdvx::vlevel_header_t tempVhdr(tempFld->getVlevelHeader());
+  Mdvx::field_header_t pidFhdr(tempFld->getFieldHeader());
+  Mdvx::vlevel_header_t pidVhdr(tempFld->getVlevelHeader());
   
-  tempFhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
-  tempFhdr.compression_type = Mdvx::COMPRESSION_NONE;
-  tempFhdr.data_element_nbytes = sizeof(fl32);
-  tempFhdr.volume_size = _targetNpoints * sizeof(fl32);
+  pidFhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  pidFhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  pidFhdr.data_element_nbytes = sizeof(fl32);
+  pidFhdr.volume_size = _targetNpoints * sizeof(fl32);
   
-  _pidField = new MdvxField(tempFhdr, tempVhdr, pidArray.data());
+  _pidField = new MdvxField(pidFhdr, pidVhdr, pidArray.data());
   _pidField->setFieldName(pidFieldName);
   _pidField->setFieldNameLong("hydrometeor_particle_type");
   _pidField->setUnits("");
