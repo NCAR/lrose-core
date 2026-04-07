@@ -238,7 +238,8 @@ void OutputMdv::addField(const RadxVol &vol,
       inputDataType == Radx::UI16) {
     fld->convertType(Mdvx::ENCODING_INT16);
   } else {
-    fld->convertType(Mdvx::ENCODING_FLOAT32);
+    fld->convertType(Mdvx::ENCODING_INT16);
+    // fld->convertType(Mdvx::ENCODING_FLOAT32);
   }
 
   if (_params.auto_remap_flat_to_latlon &&

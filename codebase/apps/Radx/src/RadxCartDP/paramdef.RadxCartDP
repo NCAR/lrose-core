@@ -253,6 +253,12 @@ paramdef boolean {
   p_help = "If TRUE, the attenuation-corrected Z and ZDR fields will be used for computing PID.";
 } PID_use_attenuation_corrected_fields;
 
+paramdef int {
+  p_default = 3;
+  p_descr = "Kernel size for 2D mode filter";
+  p_help = "The PID field is filtered, using the mode over a 2D kernel for each plane. The kernel is moved across each Cartesian plane, the mode is computed, and the value at the kernel center is replaced with the mode.";
+} PID_mode_filter_kernel_size;
+
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Write extra fields to assist with PID debugging.";

@@ -550,6 +550,8 @@ public:
 
   tdrp_bool_t PID_use_attenuation_corrected_fields;
 
+  int PID_mode_filter_kernel_size;
+
   tdrp_bool_t PID_write_debug_fields;
 
   char* RATE_params_file_path;
@@ -763,7 +765,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[159];
+  mutable TDRPtable _table[160];
 
   const char *_className;
 

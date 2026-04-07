@@ -1130,6 +1130,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'PID_mode_filter_kernel_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("PID_mode_filter_kernel_size");
+    tt->descr = tdrpStrDup("Kernel size for 2D mode filter");
+    tt->help = tdrpStrDup("The PID field is filtered, using the mode over a 2D kernel for each plane. The kernel is moved across each Cartesian plane, the mode is computed, and the value at the kernel center is replaced with the mode.");
+    tt->val_offset = (char *) &PID_mode_filter_kernel_size - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
     // Parameter 'PID_write_debug_fields'
     // ctype is 'tdrp_bool_t'
     

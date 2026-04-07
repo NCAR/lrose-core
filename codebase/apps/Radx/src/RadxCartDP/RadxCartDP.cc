@@ -1791,7 +1791,7 @@ int RadxCartDP::_writeOutputMdv()
 {
 
   if (_params.debug) {
-    cerr << "  Writing output file ... " << endl;
+    cerr << "  Writing output file and compressing ... " << endl;
   }
 
   // initialize
@@ -1922,7 +1922,7 @@ int RadxCartDP::_computePid()
   // create PID field filtered with a mode in 2D planes
 
   vector<fl32> pidFilt(pidArray);
-  int kernelSize = 3;
+  int kernelSize = _params.PID_mode_filter_kernel_size;
   _modeFilterPidPlanes(pidArray.data(),
                        pidFilt.data(),
                        _cartInterp->getGridZLevels().size(),
