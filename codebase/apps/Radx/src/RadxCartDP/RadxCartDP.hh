@@ -186,6 +186,7 @@ private:
   vector<ScalarsCompute *> _computeScalarsThreads;
 
   MdvxField *_pidField;
+  MdvxField *_pidModeField;
 
   // private methods
 
@@ -203,6 +204,7 @@ private:
   int _computeScalars();
   int _storeScalarsRay(ScalarsThread *thread);
   int _mergeScalarsIntoReadVol();
+  void _freeScalarRays();
   int _writeDebugPolarOutput();
 
   void _addAngleFields();
@@ -231,6 +233,20 @@ private:
   int _computePid();
   BaseInterp::Field *_getInterpField(const string &name);
 
+  static inline size_t cartIndex(size_t iz, size_t iy, size_t ix,
+                                 size_t ny, size_t nx)
+  {
+    return (iz * ny + iy) * nx + ix;
+  }
+  
+  void _modeFilterPidPlanes(const fl32 *input,
+                            fl32 *output,
+                            size_t nz, size_t ny, size_t nx,
+                            int kernelSize,
+                            fl32 missingVal = Radx::missingFl32,
+                            bool copyEdges = true,
+                            bool preserveCenterOnTie = true);
+  
   void _printParamsRate();
   void _printParamsPid();
   void _printParamsKdp();

@@ -51,6 +51,12 @@
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <Mdv/GenericRadxFile.hh>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+#include <cmath>
+#include <stdexcept>
+
 using namespace std;
 
 // initialize geom field names
@@ -85,6 +91,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
 
   _cartInterp = NULL;
   _pidField = NULL;
+  _pidModeField = NULL;
   
   // set programe name
 
@@ -509,7 +516,6 @@ int RadxCartDP::_processFile(const string &filePath)
   // initialize
   
   _readVol.clear();
-  _freeInterpRays();
 
   if (_params.debug) {
     cerr << "INFO - RadxCartDP::_processFile" << endl;
@@ -559,6 +565,10 @@ int RadxCartDP::_processFile(const string &filePath)
     return -1;
   }
 
+  // free up scalar rays
+
+  _freeScalarRays();
+
   if (_params.write_debug_polar_output) {
     if (_writeDebugPolarOutput()) {
       cerr << "WARNING - cannot write debug files in polar coords" << endl;
@@ -571,15 +581,14 @@ int RadxCartDP::_processFile(const string &filePath)
   
   // interpolate and write out
   
+  _allocInterpToCart();
   if (_rhiMode) {
     if (_params.debug) {
       cerr << "  NOTE: data is in RHI mode" << endl;
     }
-    _allocInterpToCart();
     _cartInterp->setRhiMode(true);
     _cartInterp->interpVol();
   } else {
-    _allocInterpToCart();
     _cartInterp->setRhiMode(false);
     _cartInterp->interpVol();
   }
@@ -858,7 +867,7 @@ int RadxCartDP::_computeScalars()
 
   // initialize pid
 
-  _scalarRays.clear();
+  _freeScalarRays();
   
   // loop through the input rays,
   // computing the pid fields
@@ -990,6 +999,17 @@ int RadxCartDP::_mergeScalarsIntoReadVol()
   } // ii
 
   return 0;
+}
+
+//////////////////////////////////////////////////
+// Free up scalar rays
+
+void RadxCartDP::_freeScalarRays()
+{
+  for (size_t ii = 0; ii < _scalarRays.size(); ii++) {
+    delete _scalarRays[ii];
+  }
+  _scalarRays.clear();
 }
 
 //////////////////////////////////////////////////
@@ -1414,6 +1434,10 @@ void RadxCartDP::_initInterp()
 
 {
 
+  // ensure interp rays are freed
+  
+  _freeInterpRays();
+  
   // set up interp fields
   
   _initInterpFields();
@@ -1794,6 +1818,10 @@ int RadxCartDP::_writeOutputMdv()
     out.addField(_pidField);
     _pidField = nullptr; // memory handling passed to output mdv object
   }
+  if (_pidModeField) {
+    out.addField(_pidModeField);
+    _pidModeField = nullptr; // memory handling passed to output mdv object
+  }
   
   // write out file
   
@@ -1890,6 +1918,24 @@ int RadxCartDP::_computePid()
   _pidField->setUnits("");
   _pidField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
                          Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+
+  // create PID field filtered with a mode in 2D planes
+
+  vector<fl32> pidFilt(pidArray);
+  int kernelSize = 3;
+  _modeFilterPidPlanes(pidArray.data(),
+                       pidFilt.data(),
+                       _cartInterp->getGridZLevels().size(),
+                       _cartInterp->getGridNy(),
+                       _cartInterp->getGridNx(),
+                       kernelSize);
+  
+  _pidModeField = new MdvxField(pidFhdr, pidVhdr, pidFilt.data());
+  _pidModeField->setFieldName("PID_FILT");
+  _pidModeField->setFieldNameLong("hydrometeor_particle_type");
+  _pidModeField->setUnits("");
+  _pidModeField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+                             Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
   
   if (_params.debug) {
     cerr << "DONE computing Cartesian PID" << endl;
@@ -1899,6 +1945,101 @@ int RadxCartDP::_computePid()
   
 }
 
+//////////////////////////////////////////////////////////////////////////
+// filter the PID planes using the mode in a kernel
+
+void RadxCartDP::_modeFilterPidPlanes(const fl32 *input,
+                                      fl32 *output,
+                                      size_t nz, size_t ny, size_t nx,
+                                      int kernelSize,
+                                      fl32 missingVal /* = Radx::missingFl32 */,
+                                      bool copyEdges /* = true */,
+                                      bool preserveCenterOnTie /* = true */)
+{
+
+  if (kernelSize < 1 || (kernelSize % 2) == 0) {
+    throw std::runtime_error("modeFilterPidPlanes: kernelSize must be odd and >= 1");
+  }
+
+  const int radius = kernelSize / 2;
+  const size_t nPoints = nz * ny * nx;
+
+  // Start with a straight copy so edges can remain unchanged if desired
+  std::copy(input, input + nPoints, output);
+
+  std::unordered_map<int, int> counts;
+  counts.reserve(kernelSize * kernelSize);
+
+  for (size_t iz = 0; iz < nz; ++iz) {
+    for (size_t iy = 0; iy < ny; ++iy) {
+      for (size_t ix = 0; ix < nx; ++ix) {
+
+        if (copyEdges) {
+          if (iy < (size_t) radius || iy + radius >= ny ||
+              ix < (size_t) radius || ix + radius >= nx) {
+            continue;
+          }
+        }
+        
+        counts.clear();
+        
+        const int y0 = std::max<int>(0, (int) iy - radius);
+        const int y1 = std::min<int>((int) ny - 1, (int) iy + radius);
+        const int x0 = std::max<int>(0, (int) ix - radius);
+        const int x1 = std::min<int>((int) nx - 1, (int) ix + radius);
+        
+        for (int jy = y0; jy <= y1; ++jy) {
+          for (int jx = x0; jx <= x1; ++jx) {
+            fl32 val = input[cartIndex(iz, jy, jx, ny, nx)];
+            if (!std::isfinite(val) || val == missingVal) {
+              continue;
+            }
+
+            // PID classes are stored as float but represent integer labels
+            int cls = static_cast<int>(std::lround(val));
+            counts[cls]++;
+          }
+        }
+
+        const size_t outIdx = cartIndex(iz, iy, ix, ny, nx);
+
+        if (counts.empty()) {
+          output[outIdx] = missingVal;
+          continue;
+        }
+
+        int bestClass = 0;
+        int bestCount = -1;
+        bool tie = false;
+
+        for (const auto &entry : counts) {
+          if (entry.second > bestCount) {
+            bestClass = entry.first;
+            bestCount = entry.second;
+            tie = false;
+          } else if (entry.second == bestCount) {
+            tie = true;
+          }
+        }
+
+        if (tie && preserveCenterOnTie) {
+          fl32 centerVal = input[outIdx];
+          if (std::isfinite(centerVal) && centerVal != missingVal) {
+            int centerClass = static_cast<int>(std::lround(centerVal));
+            auto it = counts.find(centerClass);
+            if (it != counts.end() && it->second == bestCount) {
+              output[outIdx] = centerVal;
+              continue;
+            }
+          }
+        }
+
+        output[outIdx] = static_cast<fl32>(bestClass);
+
+      } // ix
+    } // iy
+  } // iz
+}
 
 //////////////////////////////////////////////////
 // get interp field for given name

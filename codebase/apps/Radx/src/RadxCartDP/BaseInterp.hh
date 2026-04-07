@@ -192,6 +192,24 @@ public:
 
   virtual int interpVol() = 0;
 
+  // get grid details
+  
+  const MdvxProj &getProj() const { return _proj; }
+  inline double getGridOriginLat() const { return _gridOriginLat; }
+  inline double getGridOriginLon() const { return _gridOriginLon; }
+  inline int getGridNx() const { return _gridNx; }
+  inline int getGridNy() const { return _gridNy; }
+  inline int getGridNz() const { return _gridNz; }
+  inline double getGridMinx() const { return _gridMinx; }
+  inline double getGridMiny() const { return _gridMiny; }
+  inline double getGridDx() const { return _gridDx; }
+  inline double getGridDy() const { return _gridDy; }
+  inline int getNpointsVol() const { return _nPointsVol; }
+  inline int getNpointsPlane() const { return _nPointsPlane; }
+  inline const vector<double> &getGridZLevels() const { return _gridZLevels; }
+  inline double getRadarX() const { return _radarX; }
+  inline double getRadarY() const { return _radarY; }
+
   // statics
 
   static const double PseudoDiamKm; // for earth curvature correction
