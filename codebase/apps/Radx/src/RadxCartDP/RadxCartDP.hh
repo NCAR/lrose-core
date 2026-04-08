@@ -46,7 +46,6 @@
 #include "CartInterp.hh"
 #include <string>
 #include <deque>
-#include <toolsa/TaArray.hh>
 #include <toolsa/TaThreadPool.hh>
 #include <Radx/RadxVol.hh>
 #include <radar/NoiseLocator.hh>
@@ -187,6 +186,7 @@ private:
 
   MdvxField *_pidField;
   MdvxField *_pidModeField;
+  vector<fl32> _pidArray, _pidFilt;
 
   // private methods
 
@@ -231,6 +231,8 @@ private:
   int _writeOutputMdv();
 
   int _computePid();
+  int _computePrecip();
+
   BaseInterp::Field *_getInterpField(const string &name);
 
   static inline size_t cartIndex(size_t iz, size_t iy, size_t ix,

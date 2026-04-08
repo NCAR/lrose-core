@@ -235,11 +235,6 @@ void PrecipRate::computePrecipRates
     FilterUtils::applyMedianFilter(_zdr, _nGates, _zdrMedianFilterLen);
   }
   
-  const NcarParticleId::category_t *category = NULL;
-  if (pid != NULL) {
-    category = pid->getCategory();
-  }
-  
   for (int ii = 0; ii < _nGates; ii++) {
     
     if (_cflags[ii]) {
@@ -260,24 +255,20 @@ void PrecipRate::computePrecipRates
       continue;
     }
 
-    NcarParticleId::category_t thisCategory = NcarParticleId::CATEGORY_RAIN;
-    if (category) {
-      thisCategory = category[ii];
-    }
-
-    _computeRates(_dbz[ii], 
-                  _zdr[ii],
-                  _kdp[ii],
-                  thisCategory,
-		  _rateZ[ii],
-		  _rateZSnow[ii],
-		  _rateZMixed[ii],
-                  _rateKdp[ii],
-                  _rateKdpZdr[ii],
-                  _rateZZdr[ii],
-		  _rateHybrid[ii],
-                  _rateHidro[ii],
-                  _rateBringi[ii]);
+    // NcarParticleId::category_t thisCategory = NcarParticleId::CATEGORY_RAIN;
+    // if (category) {
+    //   thisCategory = category[ii];
+    // }
+    
+    computeBaseRates(_dbz[ii], 
+                     _zdr[ii],
+                     _kdp[ii],
+                     _rateZ[ii],
+                     _rateZSnow[ii],
+                     _rateZMixed[ii],
+                     _rateKdp[ii],
+                     _rateKdpZdr[ii],
+                     _rateZZdr[ii]);
     
     if (_rateZ[ii] <= 0.0) _rateZ[ii] = _missingVal;
     if (_rateZSnow[ii] <= 0.0) _rateZSnow[ii] = _missingVal;
@@ -285,9 +276,6 @@ void PrecipRate::computePrecipRates
     if (_rateKdp[ii] <= 0.0) _rateKdp[ii] = _missingVal;
     if (_rateKdpZdr[ii] <= 0.0) _rateKdpZdr[ii] = _missingVal;
     if (_rateZZdr[ii] <= 0.0) _rateZZdr[ii] = _missingVal;
-    if (_rateHybrid[ii] <= 0.0) _rateHybrid[ii] = _missingVal;
-    if (_rateHidro[ii] <= 0.0) _rateHidro[ii] = _missingVal;
-    if (_rateBringi[ii] <= 0.0) _rateBringi[ii] = _missingVal;
 
   }
 
@@ -299,21 +287,17 @@ void PrecipRate::computePrecipRates
 }
   
 ////////////////////////////////////////////////////////////////
-// compute rain rate
+// compute base rain rate from moments for a given point
 
-void PrecipRate::_computeRates(double dbz, 
-                               double zdrdb,
-                               double kdp,
-                               NcarParticleId::category_t category,
-			       double &rateZh,
-			       double &rateZhSnow,
-			       double &rateZhMixed,
-                               double &rateKdp,
-			       double &rateKdpZdr,
-                               double &rateZZdr,
-			       double &rateHybrid,
-                               double &rateHidro,
-                               double &rateBringi)
+void PrecipRate::computeBaseRates(double dbz, 
+                                  double zdrdb,
+                                  double kdp,
+                                  double &rateZh,
+                                  double &rateZhSnow,
+                                  double &rateZhMixed,
+                                  double &rateKdp,
+                                  double &rateKdpZdr,
+                                  double &rateZZdr)
   
 {
 
@@ -404,6 +388,156 @@ void PrecipRate::_computeRates(double dbz,
 
 }
 
+////////////////////////////////////////////////////////////
+// compute hybrid rates for a given point
+// given the base rates previously computed
+
+void PrecipRate::computeHybrid(double rateZ,
+                               double rateZSnow,
+                               double rateZMixed,
+                               double rateZZdr,
+                               double rateKdpZdr,
+                               double rateKdp,
+                               double dbz,
+                               double zdr,
+                               double kdp,
+                               int pid,
+                               double &rateHybrid,
+                               double &rateHidro,
+                               double &rateBringi)
+  
+{
+
+  // first check for clutter etc
+  
+  if (pid == NcarParticleId::FLYING_INSECTS ||
+      pid == NcarParticleId::SECOND_TRIP ||
+      pid == NcarParticleId::GROUND_CLUTTER) {
+    rateHybrid = 0.0;
+    rateHidro = 0.0;
+    rateBringi = 0.0;
+    return;
+  }
+  
+  // NCAR hybrid
+  
+  switch (pid) {
+    case NcarParticleId::HAIL:
+    case NcarParticleId::RAIN_HAIL_MIXTURE:
+    case NcarParticleId::GRAUPEL_SMALL_HAIL: {
+      case NcarParticleId::HEAVY_RAIN:
+        // hail or rain/hail - use KDP if avail
+        if (kdp >= _hybrid_kdp_threshold &&
+            rateKdp != _missingVal) {
+          rateHybrid = rateKdp;
+        } else {
+          rateHybrid = rateZZdr;
+        }
+        break;
+    }
+    case NcarParticleId::DRY_SNOW:
+    case NcarParticleId::ICE_CRYSTALS:
+    case NcarParticleId::IRREG_ICE_CRYSTALS: {
+      // ice/snow
+      rateHybrid = rateZSnow;
+      break;
+    }
+    case NcarParticleId::GRAUPEL_RAIN:
+    case NcarParticleId::WET_SNOW: {
+      // melting snow - i.e. brightband
+      rateHybrid = rateZMixed;
+      break;
+    }
+    case NcarParticleId::DRIZZLE:
+    case NcarParticleId::LIGHT_RAIN:
+    case NcarParticleId::MODERATE_RAIN:
+    case NcarParticleId::SUPERCOOLED_DROPS: {
+      // default to rain
+      if (dbz > _hybrid_dbz_threshold &&
+          kdp >= _hybrid_kdp_threshold) {
+        // heavy rain - use KDP if available
+        if (rateKdp != _missingVal) {
+          rateHybrid = rateKdp;
+        } else {
+          rateHybrid = rateZZdr;
+        }
+      } else {
+        if (zdr >= _hybrid_zdr_threshold) {
+          // moderate rain - use ZZDR
+          rateHybrid = rateZZdr;
+        } else {
+          // light rain - use ZH
+          rateHybrid = rateZ;
+        }
+      }
+      break;
+    }
+  } // switch
+  if (rateHybrid == _missingVal && rateZ != _missingVal) {
+    rateHybrid = rateZ;
+  }
+  
+  // hidro
+  
+  switch (pid) {
+    case NcarParticleId::HAIL:
+    case NcarParticleId::RAIN_HAIL_MIXTURE:
+    case NcarParticleId::GRAUPEL_SMALL_HAIL:
+    case NcarParticleId::GRAUPEL_RAIN:
+    case NcarParticleId::WET_SNOW: {
+      if (kdp >= _hidro_kdp_threshold && rateKdp != _missingVal) {
+        rateHidro = rateKdp;
+      } else {
+        rateHidro = rateZ;
+      }
+      break;
+    }
+    case NcarParticleId::DRIZZLE:
+    case NcarParticleId::LIGHT_RAIN:
+    case NcarParticleId::MODERATE_RAIN:
+    case NcarParticleId::HEAVY_RAIN:
+    case NcarParticleId::SUPERCOOLED_DROPS: {
+      if (kdp >= _hidro_kdp_threshold &&
+          dbz >= _hidro_dbz_threshold) {
+        if (zdr >= _hidro_zdr_threshold && rateKdpZdr != _missingVal) {
+          rateHidro = rateKdpZdr;
+        } else if (rateKdp != _missingVal) {
+          rateHidro = rateKdp;
+        } else {
+          rateHidro = rateZZdr;
+        }
+      } else {
+        if (zdr >= _hidro_zdr_threshold) {
+          rateHidro = rateZZdr;
+        } else {
+          rateHidro = rateZ;
+        }
+      }
+      break;
+    }
+    default: {} // do nothing for ice
+  }
+  
+  // bringi
+  
+  if ((pid == NcarParticleId::HAIL ||
+       pid == NcarParticleId::RAIN_HAIL_MIXTURE) &&
+      rateKdp != _missingVal) {
+    rateBringi = rateKdp;
+  } else if (dbz > _bringi_dbz_threshold &&
+             kdp >= _bringi_kdp_threshold &&
+             rateKdp != _missingVal) {
+    rateBringi = rateKdp;
+  } else {
+    if (zdr >= _bringi_zdr_threshold) {
+      rateBringi = rateZZdr;
+    } else {
+      rateBringi = rateZ;
+    }
+  }
+  
+}
+  
 ////////////////////////////////////////////////////////////////
 // allocate local arrays
 
@@ -470,145 +604,20 @@ void PrecipRate::_computeHybridRates(const NcarParticleId *pid)
 
   for (int igate = 0; igate < _nGates; igate++) {
 
-    double rateZ = _rateZ[igate];
-    double rateZSnow = _rateZSnow[igate];
-    double rateZMixed = _rateZMixed[igate];
-    double rateZZdr = _rateZZdr[igate];
-    double rateKdpZdr = _rateKdpZdr[igate];
-    double rateKdp = _rateKdp[igate];
-    double dbz = _dbz[igate];
-    double zdr = _zdr[igate];
-    double kdp = _kdp[igate];
-    int ptype = PID[igate];
+    computeHybrid(_rateZ[igate],
+                  _rateZSnow[igate],
+                  _rateZMixed[igate],
+                  _rateZZdr[igate],
+                  _rateKdpZdr[igate],
+                  _rateKdp[igate],
+                  _dbz[igate],
+                  _zdr[igate],
+                  _kdp[igate],
+                  PID[igate],
+                  _rateHybrid[igate],
+                  _rateHidro[igate],
+                  _rateBringi[igate]);
     
-    // first check for clutter etc
-
-    if (ptype == NcarParticleId::FLYING_INSECTS ||
-        ptype == NcarParticleId::SECOND_TRIP ||
-        ptype == NcarParticleId::GROUND_CLUTTER) {
-      _rateHybrid[igate] = 0.0;
-      _rateHidro[igate] = 0.0;
-      _rateBringi[igate] = 0.0;
-      continue;
-    }
-
-    // NCAR hybrid
-
-    switch (ptype) {
-      case NcarParticleId::HAIL:
-      case NcarParticleId::RAIN_HAIL_MIXTURE:
-      case NcarParticleId::GRAUPEL_SMALL_HAIL: {
-      case NcarParticleId::HEAVY_RAIN:
-        // hail or rain/hail - use KDP if avail
-        if (kdp >= _hybrid_kdp_threshold &&
-            rateKdp != _missingVal) {
-          _rateHybrid[igate] = rateKdp;
-        } else {
-          _rateHybrid[igate] = rateZZdr;
-        }
-        break;
-      }
-      case NcarParticleId::DRY_SNOW:
-      case NcarParticleId::ICE_CRYSTALS:
-      case NcarParticleId::IRREG_ICE_CRYSTALS: {
-        // ice/snow
-        _rateHybrid[igate] = rateZSnow;
-        break;
-      }
-      case NcarParticleId::GRAUPEL_RAIN:
-      case NcarParticleId::WET_SNOW: {
-        // melting snow - i.e. brightband
-        _rateHybrid[igate] = rateZMixed;
-        break;
-      }
-      case NcarParticleId::DRIZZLE:
-      case NcarParticleId::LIGHT_RAIN:
-      case NcarParticleId::MODERATE_RAIN:
-      case NcarParticleId::SUPERCOOLED_DROPS: {
-        // default to rain
-        if (dbz > _hybrid_dbz_threshold &&
-            kdp >= _hybrid_kdp_threshold) {
-          // heavy rain - use KDP if available
-          if (rateKdp != _missingVal) {
-            _rateHybrid[igate] = rateKdp;
-          } else {
-            _rateHybrid[igate] = rateZZdr;
-          }
-        } else {
-          if (zdr >= _hybrid_zdr_threshold) {
-            // moderate rain - use ZZDR
-            _rateHybrid[igate] = rateZZdr;
-          } else {
-            // light rain - use ZH
-            _rateHybrid[igate] = rateZ;
-          }
-        }
-        break;
-      }
-    } // switch
-    if (_rateHybrid[igate] == _missingVal && rateZ != _missingVal) {
-      _rateHybrid[igate] = rateZ;
-    }
-
-    // hidro
-    
-    switch (ptype) {
-      case NcarParticleId::HAIL:
-      case NcarParticleId::RAIN_HAIL_MIXTURE:
-      case NcarParticleId::GRAUPEL_SMALL_HAIL:
-      case NcarParticleId::GRAUPEL_RAIN:
-      case NcarParticleId::WET_SNOW: {
-        if (kdp >= _hidro_kdp_threshold && rateKdp != _missingVal) {
-          _rateHidro[igate] = rateKdp;
-        } else {
-          _rateHidro[igate] = rateZ;
-        }
-        break;
-      }
-      case NcarParticleId::DRIZZLE:
-      case NcarParticleId::LIGHT_RAIN:
-      case NcarParticleId::MODERATE_RAIN:
-      case NcarParticleId::HEAVY_RAIN:
-      case NcarParticleId::SUPERCOOLED_DROPS: {
-        if (kdp >= _hidro_kdp_threshold &&
-            dbz >= _hidro_dbz_threshold) {
-          if (zdr >= _hidro_zdr_threshold && rateKdpZdr != _missingVal) {
-            _rateHidro[igate] = rateKdpZdr;
-          } else if (rateKdp != _missingVal) {
-            _rateHidro[igate] = rateKdp;
-          } else {
-            _rateHidro[igate] = rateZZdr;
-          }
-        } else {
-          if (zdr >= _hidro_zdr_threshold) {
-            _rateHidro[igate] = rateZZdr;
-          } else {
-            _rateHidro[igate] = rateZ;
-          }
-        }
-        break;
-      }
-      default: {} // do nothing for ice
-    }
-    
-    // bringi
-    
-    if ((ptype == NcarParticleId::HAIL ||
-         ptype == NcarParticleId::RAIN_HAIL_MIXTURE) &&
-        rateKdp != _missingVal) {
-      _rateBringi[igate] = rateKdp;
-    } else if (dbz > _bringi_dbz_threshold &&
-               kdp >= _bringi_kdp_threshold &&
-               rateKdp != _missingVal) {
-      _rateBringi[igate] = rateKdp;
-    } else {
-      if (zdr >= _bringi_zdr_threshold) {
-        _rateBringi[igate] = rateZZdr;
-      } else {
-        _rateBringi[igate] = rateZ;
-      }
-    }
-
   } // igate
 
 }

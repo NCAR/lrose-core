@@ -271,6 +271,35 @@ public:
 
   void setMaxValidDbz(double val) { _max_valid_dbz = val; }
 
+  // compute base rain rate from moments for a given point
+  
+  void computeBaseRates(double dbz, 
+                        double zdrdb,
+                        double kdp,
+                        double &rateZh,
+                        double &rateZhSnow,
+                        double &rateZhMixed,
+                        double &rateKdp,
+                        double &rateKdpZdr,
+                        double &rateZZdr);
+  
+  // compute hybrid rates for a given point
+  // given the base rates previously computed
+  
+  void computeHybrid(double rateZ,
+                     double rateZSnow,
+                     double rateZMixed,
+                     double rateZZdr,
+                     double rateKdpZdr,
+                     double rateKdp,
+                     double dbz,
+                     double zdr,
+                     double kdp,
+                     int pid,
+                     double &rateHybrid,
+                     double &rateHidro,
+                     double &rateBringi);
+  
 protected:
 private:
 
@@ -390,19 +419,15 @@ private:
   void _allocArrays();
   void _initArrays();
 
-  void _computeRates(double dbz, 
-                     double zdrdb,
-                     double kdp,
-                     NcarParticleId::category_t category,
-		     double &rateZh, 
-                     double &rateZhSnow,
-                     double &rateZhMixed,
-                     double &rateKdp,
-                     double &rateKdpZdr, 
-                     double &rateZZdr,
-		     double &rateHybrid,
-		     double &rateHidro,
-		     double &rateBringi);
+  void _computeBaseRates(double dbz, 
+                         double zdrdb,
+                         double kdp,
+                         double &rateZh, 
+                         double &rateZhSnow,
+                         double &rateZhMixed,
+                         double &rateKdp,
+                         double &rateKdpZdr, 
+                         double &rateZZdr);
   
   void _computePidFuzzyRate(const NcarParticleId *pid);
   void _computeHybridRates(const NcarParticleId *pid);

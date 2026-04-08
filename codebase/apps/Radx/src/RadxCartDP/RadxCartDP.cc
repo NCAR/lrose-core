@@ -1056,8 +1056,7 @@ void RadxCartDP::_addAngleFields()
       
     RadxRay *ray = rays[iray];
     int nGates = ray->getNGates();
-    TaArray<Radx::fl32> data_;
-    Radx::fl32 *data = data_.alloc(nGates);
+    vector<Radx::fl32> data32(nGates);
       
     double az = ray->getAzimuthDeg();
     double el = ray->getElevationDeg();
@@ -1074,10 +1073,10 @@ void RadxCartDP::_addAngleFields()
       azimuthField->setStandardName("sensor_to_target_azimuth_angle");
       azimuthField->setTypeFl32(-9999.0);
       for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = az;
+        data32[ii] = az;
       }
       azimuthField->setFieldFolds(0.0, 360.0);
-      azimuthField->addDataFl32(nGates, data);
+      azimuthField->addDataFl32(nGates, data32.data());
       ray->addField(azimuthField);
     }
       
@@ -1089,9 +1088,9 @@ void RadxCartDP::_addAngleFields()
       elevationField->setStandardName("sensor_to_target_elevation_angle");
       elevationField->setTypeFl32(-9999.0);
       for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = el;
+        data32[ii] = el;
       }
-      elevationField->addDataFl32(nGates, data);
+      elevationField->addDataFl32(nGates, data32.data());
       ray->addField(elevationField);
     }
       
@@ -1103,9 +1102,9 @@ void RadxCartDP::_addAngleFields()
       alphaField->setStandardName("alpha_for_doppler_analysis");
       alphaField->setTypeFl32(-9999.0);
       for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = sinAz * cosEl;
+        data32[ii] = sinAz * cosEl;
       }
-      alphaField->addDataFl32(nGates, data);
+      alphaField->addDataFl32(nGates, data32.data());
       ray->addField(alphaField);
     }
       
@@ -1117,9 +1116,9 @@ void RadxCartDP::_addAngleFields()
       betaField->setStandardName("beta_for_doppler_analysis");
       betaField->setTypeFl32(-9999.0);
       for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = cosAz * cosEl;
+        data32[ii] = cosAz * cosEl;
       }
-      betaField->addDataFl32(nGates, data);
+      betaField->addDataFl32(nGates, data32.data());
       ray->addField(betaField);
     }
       
@@ -1131,9 +1130,9 @@ void RadxCartDP::_addAngleFields()
       gammaField->setStandardName("gamma_for_doppler_analysis");
       gammaField->setTypeFl32(-9999.0);
       for (int ii = 0; ii < nGates; ii++) {
-        data[ii] = sinEl;
+        data32[ii] = sinEl;
       }
-      gammaField->addDataFl32(nGates, data);
+      gammaField->addDataFl32(nGates, data32.data());
       ray->addField(gammaField);
     }
 
@@ -1152,8 +1151,7 @@ void RadxCartDP::_addRangeField()
     
     RadxRay *ray = rays[iray];
     int nGates = ray->getNGates();
-    TaArray<Radx::fl32> data_;
-    Radx::fl32 *data = data_.alloc(nGates);
+    vector<Radx::fl32> data32(nGates);
     
     // range field
     
@@ -1163,10 +1161,10 @@ void RadxCartDP::_addRangeField()
     rangeField->setTypeFl32(-9999.0);
     double range = ray->getStartRangeKm();
     for (int ii = 0; ii < nGates; ii++) {
-      data[ii] = range;
+      data32[ii] = range;
       range += ray->getGateSpacingKm();
     }
-    rangeField->addDataFl32(nGates, data);
+    rangeField->addDataFl32(nGates, data32.data());
     ray->addField(rangeField);
   }
 
@@ -1191,9 +1189,8 @@ void RadxCartDP::_addHeightField()
     
     RadxRay *ray = rays[iray];
     int nGates = ray->getNGates();
-    TaArray<Radx::fl32> data_;
-    Radx::fl32 *data = data_.alloc(nGates);
-      
+    vector<Radx::fl32> data32(nGates);
+    
     RadxField *heightField = new RadxField(_params.height_field_name, "km");
     heightField->setLongName("height_msl");
     heightField->setStandardName("height_msl");
@@ -1202,10 +1199,10 @@ void RadxCartDP::_addHeightField()
     double range = ray->getStartRangeKm();
     for (int ii = 0; ii < nGates; ii++) {
       double ht = beamHt.computeHtKm(elevDeg, range);
-      data[ii] = ht;
+      data32[ii] = ht;
       range += ray->getGateSpacingKm();
     }
-    heightField->addDataFl32(nGates, data);
+    heightField->addDataFl32(nGates, data32.data());
     ray->addField(heightField);
   }
   
@@ -1222,17 +1219,16 @@ void RadxCartDP::_addCoverageField()
     
     RadxRay *ray = rays[iray];
     int nGates = ray->getNGates();
-    TaArray<Radx::fl32> data_;
-    Radx::fl32 *data = data_.alloc(nGates);
+    vector<Radx::fl32> data32(nGates);
     
     RadxField *covFld = new RadxField(_params.coverage_field_name, "");
     covFld->setLongName("radar_coverage_flag");
     covFld->setStandardName("radar_coverage_flag");
     covFld->setTypeFl32(-9999.0);
     for (int ii = 0; ii < nGates; ii++) {
-      data[ii] = 1.0;
+      data32[ii] = 1.0;
     }
-    covFld->addDataFl32(nGates, data);
+    covFld->addDataFl32(nGates, data32.data());
     covFld->setIsDiscrete(true);
     ray->addField(covFld);
 
@@ -1258,8 +1254,7 @@ void RadxCartDP::_addTimeField()
     
     RadxRay *ray = rays[iray];
     int nGates = ray->getNGates();
-    TaArray<Radx::fl32> data_;
-    Radx::fl32 *data = data_.alloc(nGates);
+    vector<Radx::fl32> data32(nGates);
 
     // time field
 
@@ -1272,9 +1267,9 @@ void RadxCartDP::_addTimeField()
     double secsSinceStart = 
       (double) (timeSecs - startTimeSecs) - ((nanoSecs - startNanoSecs) * 1.0e-9);
     for (int ii = 0; ii < nGates; ii++) {
-      data[ii] = secsSinceStart;
+      data32[ii] = secsSinceStart;
     }
-    timeFld->addDataFl32(nGates, data);
+    timeFld->addDataFl32(nGates, data32.data());
     if (!_params.interp_time_field) {
       timeFld->setIsDiscrete(true);
     }
@@ -1875,7 +1870,7 @@ int RadxCartDP::_computePid()
 
   // compute PID for each point in the Cartesian volume
   
-  vector<fl32> pidArray(_targetNpoints);
+  _pidArray.resize(_targetNpoints);
   
   for (size_t ii = 0; ii < _targetNpoints; ii++) {
     
@@ -1898,7 +1893,7 @@ int RadxCartDP::_computePid()
     _pid.computePid(snr, dbz, temp, zdr, kdp, ldr, rhohv, zdrSdev, phidpSdev,
                     pid, interest, pid2, interest2, confidence);
     
-    pidArray[ii] = pid;
+    _pidArray[ii] = pid;
     
   } // ii
   
@@ -1912,7 +1907,7 @@ int RadxCartDP::_computePid()
   pidFhdr.data_element_nbytes = sizeof(fl32);
   pidFhdr.volume_size = _targetNpoints * sizeof(fl32);
   
-  _pidField = new MdvxField(pidFhdr, pidVhdr, pidArray.data());
+  _pidField = new MdvxField(pidFhdr, pidVhdr, _pidArray.data());
   _pidField->setFieldName(pidFieldName);
   _pidField->setFieldNameLong("hydrometeor_particle_type");
   _pidField->setUnits("");
@@ -1921,16 +1916,16 @@ int RadxCartDP::_computePid()
 
   // create PID field filtered with a mode in 2D planes
 
-  vector<fl32> pidFilt(pidArray);
+  _pidFilt = _pidArray;
   int kernelSize = _params.PID_mode_filter_kernel_size;
-  _modeFilterPidPlanes(pidArray.data(),
-                       pidFilt.data(),
+  _modeFilterPidPlanes(_pidArray.data(),
+                       _pidFilt.data(),
                        _cartInterp->getGridZLevels().size(),
                        _cartInterp->getGridNy(),
                        _cartInterp->getGridNx(),
                        kernelSize);
   
-  _pidModeField = new MdvxField(pidFhdr, pidVhdr, pidFilt.data());
+  _pidModeField = new MdvxField(pidFhdr, pidVhdr, _pidFilt.data());
   _pidModeField->setFieldName("PID_FILT");
   _pidModeField->setFieldNameLong("hydrometeor_particle_type");
   _pidModeField->setUnits("");
@@ -2039,6 +2034,116 @@ void RadxCartDP::_modeFilterPidPlanes(const fl32 *input,
       } // ix
     } // iy
   } // iz
+
+}
+
+//////////////////////////////////////////////////
+// compute the Precip fields
+
+int RadxCartDP::_computePrecip()
+{
+
+  if (_params.debug) {
+    cerr << "Computing Cartesian PID" << endl;
+  }
+  
+  // get the fields we need for computing PID
+
+  BaseInterp::Field *snrFld = _getInterpField(snrForPidFieldName);
+  BaseInterp::Field *dbzFld = _getInterpField(dbzForPidFieldName);
+  BaseInterp::Field *zdrFld = _getInterpField(zdrForPidFieldName);
+  BaseInterp::Field *ldrFld = _getInterpField(ldrForPidFieldName);
+  BaseInterp::Field *rhohvFld = _getInterpField(rhohvForPidFieldName);
+  BaseInterp::Field *kdpFld = _getInterpField(kdpForPidFieldName);
+  BaseInterp::Field *zdrSdevFld = _getInterpField(zdrSdevForPidFieldName);
+  BaseInterp::Field *phidpSdevFld = _getInterpField(phidpSdevForPidFieldName);
+  
+  if (!snrFld || !dbzFld || !zdrFld || !rhohvFld ||
+      !kdpFld || !zdrSdevFld || !phidpSdevFld) {
+    cerr << "ERROR - _computePID" << endl;
+    cerr << "  One or more feature fields is missing" << endl;
+    return -1;
+  }
+
+  string modelTempName = getModelOutputName(Params::TEMP);
+  MdvxField *tempFld = _modelInterpMdvx.getField(modelTempName.c_str());
+  if (!tempFld) {
+    cerr << "ERROR - _computePID" << endl;
+    cerr << "  Model temp field missing: " << modelTempName << endl;
+    return -1;
+  }
+  fl32 *tempArray = (fl32 *) tempFld->getVol();
+
+  // compute PID for each point in the Cartesian volume
+  
+  vector<fl32> pidArray(_targetNpoints);
+  
+  for (size_t ii = 0; ii < _targetNpoints; ii++) {
+    
+    double snr = snrFld->outputField[ii];
+    double dbz = dbzFld->outputField[ii];
+    double zdr = zdrFld->outputField[ii];
+    double ldr = -9999.0;
+    if (ldrFld) {
+      ldr = ldrFld->outputField[ii];
+    }
+    double rhohv = rhohvFld->outputField[ii];
+    double kdp = kdpFld->outputField[ii];
+    double zdrSdev = zdrSdevFld->outputField[ii];
+    double phidpSdev = phidpSdevFld->outputField[ii];
+    double temp = tempArray[ii];
+
+    int pid = 0, pid2 = 0;
+    double interest = 0.0, interest2 = 0.0, confidence = 0.0;
+    
+    _pid.computePid(snr, dbz, temp, zdr, kdp, ldr, rhohv, zdrSdev, phidpSdev,
+                    pid, interest, pid2, interest2, confidence);
+    
+    pidArray[ii] = pid;
+    
+  } // ii
+  
+  // create MdvxField for pid
+  
+  Mdvx::field_header_t pidFhdr(tempFld->getFieldHeader());
+  Mdvx::vlevel_header_t pidVhdr(tempFld->getVlevelHeader());
+  
+  pidFhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  pidFhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  pidFhdr.data_element_nbytes = sizeof(fl32);
+  pidFhdr.volume_size = _targetNpoints * sizeof(fl32);
+  
+  _pidField = new MdvxField(pidFhdr, pidVhdr, pidArray.data());
+  _pidField->setFieldName(pidFieldName);
+  _pidField->setFieldNameLong("hydrometeor_particle_type");
+  _pidField->setUnits("");
+  _pidField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+                         Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+
+  // create PID field filtered with a mode in 2D planes
+
+  vector<fl32> pidFilt(pidArray);
+  int kernelSize = _params.PID_mode_filter_kernel_size;
+  _modeFilterPidPlanes(pidArray.data(),
+                       pidFilt.data(),
+                       _cartInterp->getGridZLevels().size(),
+                       _cartInterp->getGridNy(),
+                       _cartInterp->getGridNx(),
+                       kernelSize);
+  
+  _pidModeField = new MdvxField(pidFhdr, pidVhdr, pidFilt.data());
+  _pidModeField->setFieldName("PID_FILT");
+  _pidModeField->setFieldNameLong("hydrometeor_particle_type");
+  _pidModeField->setUnits("");
+  _pidModeField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+                             Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+  
+  if (_params.debug) {
+    cerr << "DONE computing Cartesian PID" << endl;
+  }
+  
+  return 0;
+  
 }
 
 //////////////////////////////////////////////////

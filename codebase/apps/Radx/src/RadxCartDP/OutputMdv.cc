@@ -38,7 +38,6 @@
 #include <toolsa/mem.h>
 #include <toolsa/str.h>
 #include <toolsa/Path.hh>
-#include <toolsa/TaArray.hh>
 #include <dsserver/DsLdataInfo.hh>
 
 #include <Mdv/DsMdvx.hh>

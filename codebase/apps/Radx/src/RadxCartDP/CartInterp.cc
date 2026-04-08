@@ -700,7 +700,7 @@ void CartInterp::_computeSearchLimits()
     _searchMaxCount = _searchMaxDistAz;
   }
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "  _searchMinAz: " << _searchMinAz << endl;
     cerr << "  _searchNAz: " << _searchNAz << endl;
     cerr << "  _searchMaxDistAz: " << _searchMaxDistAz << endl;

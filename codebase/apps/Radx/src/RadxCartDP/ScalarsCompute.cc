@@ -538,8 +538,7 @@ void ScalarsCompute::_computeSnrFromDbz()
 
   // compute noise at each gate
 
-  TaArray<double> noiseDbz_;
-  double *noiseDbz = noiseDbz_.alloc(_nGates);
+  vector<double> noiseDbz(_nGates);
   double range = _startRangeKm;
   if (range == 0) {
     range = _gateSpacingKm / 10.0;
@@ -677,8 +676,7 @@ void ScalarsCompute::_addField(RadxRay *outputRay,
 
   // load up data as fl32
   
-  TaArray<Radx::fl32> data32_;
-  Radx::fl32 *data32 = data32_.alloc(_nGates);
+  vector<Radx::fl32> data32(_nGates);
   
   for (size_t igate = 0; igate < _nGates; igate++) {
     if (array64[igate] == missingDbl) {
@@ -694,7 +692,7 @@ void ScalarsCompute::_addField(RadxRay *outputRay,
   field->setLongName(longName);
   field->setStandardName(standardName);
   field->setTypeFl32(Radx::missingFl32);
-  field->addDataFl32(_nGates, data32);
+  field->addDataFl32(_nGates, data32.data());
   field->copyRangeGeom(*outputRay);
   
   // add to ray
@@ -717,8 +715,7 @@ void ScalarsCompute::_addField(RadxRay *outputRay,
 
   // load up data as fl32
   
-  TaArray<Radx::fl32> data32_;
-  Radx::fl32 *data32 = data32_.alloc(_nGates);
+  vector<Radx::fl32> data32(_nGates);
   
   for (size_t igate = 0; igate < _nGates; igate++) {
     if (array32[igate] == missingDbl) {
@@ -734,7 +731,7 @@ void ScalarsCompute::_addField(RadxRay *outputRay,
   field->setLongName(longName);
   field->setStandardName(standardName);
   field->setTypeFl32(Radx::missingFl32);
-  field->addDataFl32(_nGates, data32);
+  field->addDataFl32(_nGates, data32.data());
   field->copyRangeGeom(*outputRay);
   
   // add to ray
@@ -754,8 +751,7 @@ void ScalarsCompute::_addField(RadxRay *outputRay,
 
   // load up data as fl32
   
-  TaArray<Radx::fl32> data32_;
-  Radx::fl32 *data32 = data32_.alloc(_nGates);
+  vector<Radx::fl32> data32(_nGates);
   
   for (size_t igate = 0; igate < _nGates; igate++) {
     if (arrayBool[igate]) {
@@ -771,7 +767,7 @@ void ScalarsCompute::_addField(RadxRay *outputRay,
   field->setLongName(longName);
   field->setStandardName(standardName);
   field->setTypeFl32(Radx::missingFl32);
-  field->addDataFl32(_nGates, data32);
+  field->addDataFl32(_nGates, data32.data());
   field->copyRangeGeom(*outputRay);
   
   // add to ray
