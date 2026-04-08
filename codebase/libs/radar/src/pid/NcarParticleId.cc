@@ -682,6 +682,15 @@ void NcarParticleId::computePid(double snr,
 
 {
 
+  if (snr == _missingDouble || snr < _snrThreshold) {
+    pid = 0;
+    pid2 = 0;
+    interest = 0.0;
+    interest2 = 0.0;
+    confidence = 0.0;
+    return;
+  }
+    
   // compute interest for each particle type
   
   for (int ii = 0; ii < (int) _particleList.size(); ii++) {
