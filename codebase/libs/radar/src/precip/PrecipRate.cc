@@ -410,7 +410,8 @@ void PrecipRate::computeHybrid(double dbz,
 
   // first check for clutter etc
   
-  if (pid == NcarParticleId::FLYING_INSECTS ||
+  if (pid == 0 ||
+      pid == NcarParticleId::FLYING_INSECTS ||
       pid == NcarParticleId::SECOND_TRIP ||
       pid == NcarParticleId::GROUND_CLUTTER) {
     rateHybrid = 0.0;

@@ -63,6 +63,10 @@ public:
 
   void setFromParams(const PrecipRateParams &params);
 
+  // set the missing value
+  
+  void setMissingVal(double missingVal) { _missingVal = missingVal; }
+  
   // set the wavelength in cm
 
   void setWavelengthCm(double cm) { _wavelengthCm = cm; }
