@@ -1,0 +1,321 @@
+///////////////////////////////////////////////////////
+//  parameter definitions for RadxBeamBlock
+//
+////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "RadxBeamBlock program";
+  p_text = "Reads elevation data files, and for a specified radar (location and scanning) produce beam blockage output for the radar";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+  
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "DIGITAL ELEVATION DATA";
+}
+
+paramdef string {
+  p_descr = "input data";
+  p_help = "the file with input digital elevation model data";
+  p_default = "./standalone_beam_blocking/data/srtm3";
+} input_dem_path;
+
+typedef enum {
+  SHUTTLE_RADAR_TOPOGRAPHY,
+  ESRI_I65,
+  ESRI_ANS,
+  ESRI_CLARKE1858,
+  ESRI_GRS80,
+  ESRI_WGS84,
+  ESRI_WGS72,
+  INTERNATIONAL1924,
+  AUSTRALIAN_NATIONAL
+} DigitalElevationModel_t;
+
+paramdef enum DigitalElevationModel_t {
+  p_descr = "format of input digital elevation model data";
+  p_help = "supported digital elevation models:\n"
+  "  Shuttle Radar Topography Mission (3 arc-second resolution)\n"
+  "          format: srtm3 (data found here:\n"
+  "   	     http://dds.cr.usgs.gov/srtm/version2_1/SRTM3\n"
+  "  ESRI grid data (spheroid), with the various standard spheroids\n";
+  p_default = SHUTTLE_RADAR_TOPOGRAPHY;
+} input_data_format;
+
+commentdef {
+  p_header = "SAMPLING STRATEGY";
+  p_text = "We compute blockage using a micro-grid, within the radar elevation, azimuth and gate (bin) geometry. This allows us to compute the effective blockage across the beam."; 
+}
+
+paramdef int
+{
+  p_descr = "Number of subsamples in elevation";
+  p_help = "We sample the beam in elevation using this number of sub angles";
+  p_default = 64;
+} num_elev_subsample;
+
+paramdef int
+{
+  p_descr = "Number of subsamples in azimuth";
+  p_help = "We sample the beam in azimuth using this number of sub angles";
+  p_default = 64;
+} num_az_subsample;
+
+paramdef int
+{
+  p_descr = "Number of subsamples in range";
+  p_help = "We sample the beam in range using this number of sub ranges";
+  p_default = 10;
+} num_range_subsample;
+
+commentdef {
+  p_header = "RADAR PARAMETERS";
+}
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} datetime_t;
+
+paramdef struct datetime_t {
+  p_default = {2000, 01, 01, 00, 00, 00};
+  p_descr = "Time stamp for output files";
+  p_help = "We need to set a time so that the output files can be correctly named. SRTM shuttle mission 99 occurred in early 2000.";
+} output_time_stamp;
+
+paramdef string {
+  p_default = "UNKNOWN";
+  p_descr = "Name of radar";
+} radar_name;
+
+typedef struct {
+  double latitudeDeg;
+  double longitudeDeg;
+  double altitudeKm;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_default = { 0.0, 0.0, 0.0 };
+  p_descr = "Radar location";
+  p_help = "The radar_location, note that the altitude is in km MSL.";
+} radar_location;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Flag to lookup the radar altitude";
+  p_help = "If TRUE, don't use altitudKm from radar_location, instead figure it out by looking into the tiles at the latitudeDeg and longitudeDeg";
+} do_lookup_radar_altitude;
+
+paramdef double
+{
+  p_default = 5.4;
+  p_descr = "Radar wavelength, cm";
+} radar_wavelength_cm;
+
+paramdef double
+{
+  p_default = 1.0;
+  p_descr = "Radar beamwidth in the horizontal plane.";
+} horiz_beam_width_deg;
+
+paramdef double
+{
+  p_default = 1.0;
+  p_descr = "Radar beamwidth in the vertical plane.";
+} vert_beam_width_deg;
+
+commentdef {
+  p_header = "GEOMETRY FOR COMPUTATIONS";
+  p_text = "We compute the beam blockage using the geometry for a theoretical scan. The blockage is then stored in a CfRadial file, using these parameters. When the blockage file is later used, we search for the closest compute gate, in (elev, az, range) space, to that of the acutal measured gate.";
+}
+
+typedef struct {
+  double start;
+  double delta;
+  int count;
+} scan_specification_t;
+
+paramdef struct scan_specification_t
+{
+  p_default = {0.5, 0.15, 1000};
+  p_descr = "Gate specification (km)";
+} gates;
+
+paramdef struct scan_specification_t
+{
+  p_default = {0, 1, 360};
+  p_descr = "Azimuth specification (degrees)";
+} azimuths;
+
+paramdef struct scan_specification_t
+{
+  p_default = {0.5, 1.0, 5};
+  p_descr = "Elevation specification (degrees)";
+} elevations;
+
+commentdef {
+  p_header = "OUTPUT FIELDS";
+}
+
+typedef enum {
+  OUTPUT_FLOAT, OUTPUT_SHORT, OUTPUT_BYTE
+} output_encoding_t;
+  
+typedef enum {
+  BLOCKAGE, LINEAR_BLOCKAGE, PEAK, EXTENDED_BLOCKAGE
+} output_data_t;
+  
+typedef struct {
+  string name;
+  string long_name;
+  string standard_name;
+  string units;
+  output_encoding_t encoding;
+  output_data_t type;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    {
+      name = "BEAMB",
+      long_name = "BeamBlockageFractionDb",
+      standard_name = "BeamBlockageFractionDbPerGate",
+      units = "dB",
+      encoding = OUTPUT_FLOAT,
+      type = BLOCKAGE
+    }
+    ,
+    {
+      name = "BEAML",
+      long_name = "BeamBlockageFraction",
+      standard_name = "BeamBlockageFractionPerGate",
+      units = "fraction",
+      encoding = OUTPUT_FLOAT,
+      type = LINEAR_BLOCKAGE
+    }
+    ,
+    {
+      name = "PEAK",
+      long_name = "MaxTerrainHt",
+      standard_name = "MaxTerrainHtPerGate",
+      units = "m",
+      encoding = OUTPUT_FLOAT,
+      type = PEAK
+    }
+    ,
+    {
+      name = "BEAME",
+      long_name = "CumulativeBeamExtinctionFraction",
+      standard_name = "CumulativeBeamExtinctionFractionInRange",
+      units = "fraction",
+      encoding = OUTPUT_FLOAT,
+      type = EXTENDED_BLOCKAGE
+    }
+  };
+  p_descr = "Array of output fields.";
+  p_help = "We will write out these fields. long_name and standard_name are netCDF conventions. Set the output encoding type to select the resolution of the output data.";
+} output_fields[];
+
+commentdef {
+  p_header = "DATA SET INFORMATION";
+  p_text = "Will be stored in CfRadial files, and other formats to the extent supported by the format.";
+}
+
+paramdef string {
+  p_default = "Radar beam blockage computed from digital elevation data.";
+  p_descr = "Title string for netCDF file.";
+} title;
+
+paramdef string {
+  p_default = "EOL/NCAR";
+  p_descr = "Institution string for netCDF file.";
+} institution;
+
+paramdef string {
+  p_default = "Created by LROSE app RadxBeamBlock";
+  p_descr = "References string for netCDF file.";
+} references;
+
+commentdef {
+  p_header = "OUTPUT FORMAT";
+}
+
+typedef enum {
+  OUTPUT_FORMAT_CFRADIAL,
+  OUTPUT_FORMAT_DORADE,
+  OUTPUT_FORMAT_FORAY,
+  OUTPUT_FORMAT_NEXRAD,
+  OUTPUT_FORMAT_UF,
+  OUTPUT_FORMAT_MDV_RADIAL
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = OUTPUT_FORMAT_CFRADIAL;
+  p_descr = "Format for the output files.";
+} output_format;
+
+commentdef {
+  p_header = "OUTPUT DIRECTORY AND FILE NAME";
+}
+
+paramdef string {
+  p_default = "/tmp/RadxBeamBlock";
+  p_descr = "Output directory path.";
+  p_help = "Output file will be written to this directory.";
+} output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to add the radar name to the output path.";
+  p_help = "If true, the output dir will be 'output_dir/radar_name'.";
+} append_radar_name_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out individual sweeps if appropriate.";
+  p_help = "If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.";
+} write_individual_sweeps;
+
+commentdef {
+  p_header = "CREATE CARTESIAN GRID FOR CHECKING TERRAIN DATA";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to create a Cartesian grid with terrain data.";
+  p_help = "This can be used to check that the terrain data tiles are being correctly interpreted.";
+} create_cart_terrain_grid;
+
+paramdef string {
+  p_default = "cart_terrain";
+  p_descr = "Output directory path for Cartesian terrain grid.";
+  p_help = "This will be written as a CF NetCDF file, from an MDV object.";
+} cart_terrain_grid_subdir;
+
+paramdef double {
+  p_default = 0.005;
+  p_descr = "Grid resolution for terrain grid (deg).";
+  p_help = "The grid extent will be determined by the radar coverage.";
+} cart_terrain_grid_res;
+
+paramdef string {
+  p_default = "terrain_ht";
+  p_descr = "Name of terrain height field in NetCDF MDV output file.";
+} cart_terrain_field_name;
+
