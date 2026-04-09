@@ -54,6 +54,7 @@
 #include <radar/NcarPidParams.hh>
 #include <radar/PrecipRateParams.hh>
 #include <radar/NcarParticleId.hh>
+#include <radar/PrecipRate.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
 #include <Mdv/MdvxRemapInterp.hh>
@@ -109,8 +110,13 @@ public:
   static string rangeFieldName;
   static string beamHtFieldName;
   static string tempFieldName;
+
   static string pidFieldName;
   static string pidInterestFieldName;
+
+  static string rateZhFieldName;
+  static string rateHybridFieldName;
+
   static string mlFieldName;
   static string mlExtendedFieldName;
   static string convFlagFieldName;
@@ -187,6 +193,9 @@ private:
   MdvxField *_pidField;
   MdvxField *_pidModeField;
   vector<fl32> _pidArray, _pidFilt;
+
+  MdvxField *_rateZhField;
+  MdvxField *_rateHybridField;
 
   // private methods
 

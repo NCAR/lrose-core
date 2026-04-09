@@ -67,6 +67,8 @@ string RadxCartDP::beamHtFieldName = "BEAM_HT";
 string RadxCartDP::tempFieldName = "TEMP_C";
 string RadxCartDP::pidFieldName = "PID";
 string RadxCartDP::pidInterestFieldName = "PID_INTEREST";
+string RadxCartDP::rateZhFieldName = "RATE_ZH";
+string RadxCartDP::rateHybridFieldName = "RATE_HYBRID";
 string RadxCartDP::mlFieldName = "MELTING_LAYER";
 string RadxCartDP::mlExtendedFieldName = "ML_EXTENDED";
 string RadxCartDP::convFlagFieldName = "CONV_FLAG";
@@ -1807,7 +1809,7 @@ int RadxCartDP::_writeOutputMdv()
     out.addField(field);
   } // ii
 
-  // add PID field
+  // add PID fields
 
   if (_pidField) {
     out.addField(_pidField);
@@ -1816,6 +1818,17 @@ int RadxCartDP::_writeOutputMdv()
   if (_pidModeField) {
     out.addField(_pidModeField);
     _pidModeField = nullptr; // memory handling passed to output mdv object
+  }
+  
+  // add precip rate fields
+
+  if (_rateZhField) {
+    out.addField(_rateZhField);
+    _rateZhField = nullptr; // memory handling passed to output mdv object
+  }
+  if (_rateHybridField) {
+    out.addField(_rateHybridField);
+    _rateHybridField = nullptr; // memory handling passed to output mdv object
   }
   
   // write out file
@@ -1838,7 +1851,7 @@ int RadxCartDP::_computePid()
 {
 
   if (_params.debug) {
-    cerr << "Computing Cartesian PID" << endl;
+    cerr << "Computing PID" << endl;
   }
   
   // get the fields we need for computing PID
@@ -1933,7 +1946,86 @@ int RadxCartDP::_computePid()
                              Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
   
   if (_params.debug) {
-    cerr << "DONE computing Cartesian PID" << endl;
+    cerr << "DONE computing PID" << endl;
+  }
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////
+// compute the Precip fields
+
+int RadxCartDP::_computePrecip()
+{
+  
+  if (_params.debug) {
+    cerr << "Computing Precip Rates" << endl;
+  }
+
+  PrecipRate rate;
+  rate.setFromParams(_precipRateParams);
+  
+  // get the fields we need for computing PID
+
+  BaseInterp::Field *dbzFld = _getInterpField(dbzForPidFieldName);
+  BaseInterp::Field *zdrFld = _getInterpField(zdrForPidFieldName);
+  BaseInterp::Field *kdpFld = _getInterpField(kdpForPidFieldName);
+  
+  if (!dbzFld || !zdrFld || !kdpFld) {
+    cerr << "ERROR - _computePrecip" << endl;
+    cerr << "  One or more feature fields is missing" << endl;
+    return -1;
+  }
+
+  vector<fl32> rateZhArray(_targetNpoints, Radx::missingFl32);
+  vector<fl32> rateHybridArray(_targetNpoints, Radx::missingFl32);
+
+  for (size_t ii = 0; ii < _targetNpoints; ii++) {
+    
+    double dbz = dbzFld->outputField[ii];
+    double zdr = zdrFld->outputField[ii];
+    double kdp = kdpFld->outputField[ii];
+    int pid = _pidFilt[ii];
+    
+    double rateZh, rateZhSnow, rateZhMixed;
+    double rateKdp, rateKdpZdr, rateZZdr;
+  
+    rate.computeBaseRates(dbz, zdr, kdp,
+                          rateZh, rateZhSnow, rateZhMixed,
+                          rateKdp, rateKdpZdr, rateZZdr);
+    
+    double rateHybrid, rateHidro, rateBringi;
+
+    rate.computeHybrid(dbz, zdr, kdp,
+                       rateZh, rateZhSnow, rateZhMixed,
+                       rateKdp, rateKdpZdr, rateZZdr,
+                       pid, rateHybrid, rateHidro, rateBringi);
+
+    rateZhArray[ii] = rateZh;
+    rateHybridArray[ii] = rateHybrid;
+    
+  } // ii
+  
+  // create MdvxFields for precip
+  
+  Mdvx::field_header_t rateFhdr(_pidField->getFieldHeader());
+  Mdvx::vlevel_header_t rateVhdr(_pidField->getVlevelHeader());
+  
+  rateFhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  rateFhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  rateFhdr.data_element_nbytes = sizeof(fl32);
+  rateFhdr.volume_size = _targetNpoints * sizeof(fl32);
+
+  _rateZhField = new MdvxField(rateFhdr, rateVhdr, rateZhArray.data());
+  _rateZhField->setFieldName(rateZhFieldName);
+  _rateZhField->setFieldNameLong("precip_rate_from_reflectivity");
+  _rateZhField->setUnits("mm/hr");
+  _rateZhField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+                            Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+  
+  if (_params.debug) {
+    cerr << "DONE computing precip rate" << endl;
   }
   
   return 0;
@@ -2035,115 +2127,6 @@ void RadxCartDP::_modeFilterPidPlanes(const fl32 *input,
     } // iy
   } // iz
 
-}
-
-//////////////////////////////////////////////////
-// compute the Precip fields
-
-int RadxCartDP::_computePrecip()
-{
-
-  if (_params.debug) {
-    cerr << "Computing Cartesian PID" << endl;
-  }
-  
-  // get the fields we need for computing PID
-
-  BaseInterp::Field *snrFld = _getInterpField(snrForPidFieldName);
-  BaseInterp::Field *dbzFld = _getInterpField(dbzForPidFieldName);
-  BaseInterp::Field *zdrFld = _getInterpField(zdrForPidFieldName);
-  BaseInterp::Field *ldrFld = _getInterpField(ldrForPidFieldName);
-  BaseInterp::Field *rhohvFld = _getInterpField(rhohvForPidFieldName);
-  BaseInterp::Field *kdpFld = _getInterpField(kdpForPidFieldName);
-  BaseInterp::Field *zdrSdevFld = _getInterpField(zdrSdevForPidFieldName);
-  BaseInterp::Field *phidpSdevFld = _getInterpField(phidpSdevForPidFieldName);
-  
-  if (!snrFld || !dbzFld || !zdrFld || !rhohvFld ||
-      !kdpFld || !zdrSdevFld || !phidpSdevFld) {
-    cerr << "ERROR - _computePID" << endl;
-    cerr << "  One or more feature fields is missing" << endl;
-    return -1;
-  }
-
-  string modelTempName = getModelOutputName(Params::TEMP);
-  MdvxField *tempFld = _modelInterpMdvx.getField(modelTempName.c_str());
-  if (!tempFld) {
-    cerr << "ERROR - _computePID" << endl;
-    cerr << "  Model temp field missing: " << modelTempName << endl;
-    return -1;
-  }
-  fl32 *tempArray = (fl32 *) tempFld->getVol();
-
-  // compute PID for each point in the Cartesian volume
-  
-  vector<fl32> pidArray(_targetNpoints);
-  
-  for (size_t ii = 0; ii < _targetNpoints; ii++) {
-    
-    double snr = snrFld->outputField[ii];
-    double dbz = dbzFld->outputField[ii];
-    double zdr = zdrFld->outputField[ii];
-    double ldr = -9999.0;
-    if (ldrFld) {
-      ldr = ldrFld->outputField[ii];
-    }
-    double rhohv = rhohvFld->outputField[ii];
-    double kdp = kdpFld->outputField[ii];
-    double zdrSdev = zdrSdevFld->outputField[ii];
-    double phidpSdev = phidpSdevFld->outputField[ii];
-    double temp = tempArray[ii];
-
-    int pid = 0, pid2 = 0;
-    double interest = 0.0, interest2 = 0.0, confidence = 0.0;
-    
-    _pid.computePid(snr, dbz, temp, zdr, kdp, ldr, rhohv, zdrSdev, phidpSdev,
-                    pid, interest, pid2, interest2, confidence);
-    
-    pidArray[ii] = pid;
-    
-  } // ii
-  
-  // create MdvxField for pid
-  
-  Mdvx::field_header_t pidFhdr(tempFld->getFieldHeader());
-  Mdvx::vlevel_header_t pidVhdr(tempFld->getVlevelHeader());
-  
-  pidFhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
-  pidFhdr.compression_type = Mdvx::COMPRESSION_NONE;
-  pidFhdr.data_element_nbytes = sizeof(fl32);
-  pidFhdr.volume_size = _targetNpoints * sizeof(fl32);
-  
-  _pidField = new MdvxField(pidFhdr, pidVhdr, pidArray.data());
-  _pidField->setFieldName(pidFieldName);
-  _pidField->setFieldNameLong("hydrometeor_particle_type");
-  _pidField->setUnits("");
-  _pidField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
-                         Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
-
-  // create PID field filtered with a mode in 2D planes
-
-  vector<fl32> pidFilt(pidArray);
-  int kernelSize = _params.PID_mode_filter_kernel_size;
-  _modeFilterPidPlanes(pidArray.data(),
-                       pidFilt.data(),
-                       _cartInterp->getGridZLevels().size(),
-                       _cartInterp->getGridNy(),
-                       _cartInterp->getGridNx(),
-                       kernelSize);
-  
-  _pidModeField = new MdvxField(pidFhdr, pidVhdr, pidFilt.data());
-  _pidModeField->setFieldName("PID_FILT");
-  _pidModeField->setFieldNameLong("hydrometeor_particle_type");
-  _pidModeField->setUnits("");
-  _pidModeField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
-                             Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
-  
-  if (_params.debug) {
-    cerr << "DONE computing Cartesian PID" << endl;
-  }
-  
-  return 0;
-  
 }
 
 //////////////////////////////////////////////////
