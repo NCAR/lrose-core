@@ -242,9 +242,9 @@ void PrecipRate::computePrecipRates
       _dbz[ii] = _missingVal;
       _zdr[ii] = _missingVal;
       _kdp[ii] = _missingVal;
-      _rateZ[ii] = _missingVal;
-      _rateZSnow[ii] = _missingVal;
-      _rateZMixed[ii] = _missingVal;
+      _rateZh[ii] = _missingVal;
+      _rateZhSnow[ii] = _missingVal;
+      _rateZhMixed[ii] = _missingVal;
       _rateKdp[ii] = _missingVal;
       _rateKdpZdr[ii] = _missingVal;
       _rateZZdr[ii] = _missingVal;
@@ -263,16 +263,16 @@ void PrecipRate::computePrecipRates
     computeBaseRates(_dbz[ii], 
                      _zdr[ii],
                      _kdp[ii],
-                     _rateZ[ii],
-                     _rateZSnow[ii],
-                     _rateZMixed[ii],
+                     _rateZh[ii],
+                     _rateZhSnow[ii],
+                     _rateZhMixed[ii],
                      _rateKdp[ii],
                      _rateKdpZdr[ii],
                      _rateZZdr[ii]);
     
-    if (_rateZ[ii] <= 0.0) _rateZ[ii] = _missingVal;
-    if (_rateZSnow[ii] <= 0.0) _rateZSnow[ii] = _missingVal;
-    if (_rateZMixed[ii] <= 0.0) _rateZMixed[ii] = _missingVal;
+    if (_rateZh[ii] <= 0.0) _rateZh[ii] = _missingVal;
+    if (_rateZhSnow[ii] <= 0.0) _rateZhSnow[ii] = _missingVal;
+    if (_rateZhMixed[ii] <= 0.0) _rateZhMixed[ii] = _missingVal;
     if (_rateKdp[ii] <= 0.0) _rateKdp[ii] = _missingVal;
     if (_rateKdpZdr[ii] <= 0.0) _rateKdpZdr[ii] = _missingVal;
     if (_rateZZdr[ii] <= 0.0) _rateZZdr[ii] = _missingVal;
@@ -392,15 +392,15 @@ void PrecipRate::computeBaseRates(double dbz,
 // compute hybrid rates for a given point
 // given the base rates previously computed
 
-void PrecipRate::computeHybrid(double rateZ,
-                               double rateZSnow,
-                               double rateZMixed,
-                               double rateZZdr,
-                               double rateKdpZdr,
-                               double rateKdp,
-                               double dbz,
+void PrecipRate::computeHybrid(double dbz, 
                                double zdr,
                                double kdp,
+                               double rateZh,
+                               double rateZhSnow,
+                               double rateZhMixed,
+                               double rateKdp,
+                               double rateKdpZdr,
+                               double rateZZdr,
                                int pid,
                                double &rateHybrid,
                                double &rateHidro,
@@ -439,13 +439,13 @@ void PrecipRate::computeHybrid(double rateZ,
     case NcarParticleId::ICE_CRYSTALS:
     case NcarParticleId::IRREG_ICE_CRYSTALS: {
       // ice/snow
-      rateHybrid = rateZSnow;
+      rateHybrid = rateZhSnow;
       break;
     }
     case NcarParticleId::GRAUPEL_RAIN:
     case NcarParticleId::WET_SNOW: {
       // melting snow - i.e. brightband
-      rateHybrid = rateZMixed;
+      rateHybrid = rateZhMixed;
       break;
     }
     case NcarParticleId::DRIZZLE:
@@ -467,14 +467,14 @@ void PrecipRate::computeHybrid(double rateZ,
           rateHybrid = rateZZdr;
         } else {
           // light rain - use ZH
-          rateHybrid = rateZ;
+          rateHybrid = rateZh;
         }
       }
       break;
     }
   } // switch
-  if (rateHybrid == _missingVal && rateZ != _missingVal) {
-    rateHybrid = rateZ;
+  if (rateHybrid == _missingVal && rateZh != _missingVal) {
+    rateHybrid = rateZh;
   }
   
   // hidro
@@ -488,7 +488,7 @@ void PrecipRate::computeHybrid(double rateZ,
       if (kdp >= _hidro_kdp_threshold && rateKdp != _missingVal) {
         rateHidro = rateKdp;
       } else {
-        rateHidro = rateZ;
+        rateHidro = rateZh;
       }
       break;
     }
@@ -510,7 +510,7 @@ void PrecipRate::computeHybrid(double rateZ,
         if (zdr >= _hidro_zdr_threshold) {
           rateHidro = rateZZdr;
         } else {
-          rateHidro = rateZ;
+          rateHidro = rateZh;
         }
       }
       break;
@@ -532,7 +532,7 @@ void PrecipRate::computeHybrid(double rateZ,
     if (zdr >= _bringi_zdr_threshold) {
       rateBringi = rateZZdr;
     } else {
-      rateBringi = rateZ;
+      rateBringi = rateZh;
     }
   }
   
@@ -549,9 +549,9 @@ void PrecipRate::_allocArrays()
   _dbz = _dbz_.alloc(_nGates);
   _zdr = _zdr_.alloc(_nGates);
   _kdp = _kdp_.alloc(_nGates);
-  _rateZ = _rateZ_.alloc(_nGates);
-  _rateZSnow = _rateZSnow_.alloc(_nGates);
-  _rateZMixed = _rateZMixed_.alloc(_nGates);
+  _rateZh = _rateZh_.alloc(_nGates);
+  _rateZhSnow = _rateZhSnow_.alloc(_nGates);
+  _rateZhMixed = _rateZhMixed_.alloc(_nGates);
   _rateKdp = _rateKdp_.alloc(_nGates);
   _rateKdpZdr = _rateKdpZdr_.alloc(_nGates);
   _rateZZdr = _rateZZdr_.alloc(_nGates);
@@ -578,9 +578,9 @@ void PrecipRate::_initArrays()
     _dbz[ii] = _missingVal;
     _zdr[ii] = _missingVal;
     _kdp[ii] = _missingVal;
-    _rateZ[ii] = _missingVal;
-    _rateZSnow[ii] = _missingVal;
-    _rateZMixed[ii] = _missingVal;
+    _rateZh[ii] = _missingVal;
+    _rateZhSnow[ii] = _missingVal;
+    _rateZhMixed[ii] = _missingVal;
     _rateKdp[ii] = _missingVal;
     _rateKdpZdr[ii] = _missingVal;
     _rateZZdr[ii] = _missingVal;
@@ -604,9 +604,9 @@ void PrecipRate::_computeHybridRates(const NcarParticleId *pid)
 
   for (int igate = 0; igate < _nGates; igate++) {
 
-    computeHybrid(_rateZ[igate],
-                  _rateZSnow[igate],
-                  _rateZMixed[igate],
+    computeHybrid(_rateZh[igate],
+                  _rateZhSnow[igate],
+                  _rateZhMixed[igate],
                   _rateZZdr[igate],
                   _rateKdpZdr[igate],
                   _rateKdp[igate],
@@ -704,10 +704,10 @@ void PrecipRate::_computePidFuzzyRate(const NcarParticleId *pid)
     double wtHail = interestHail / sumInterest;
     double wtMixed = interestMixed / sumInterest;
     
-    double rateLightRain = _rateZ[igate];
+    double rateLightRain = _rateZh[igate];
     double rateModRain = _rateZZdr[igate];
-    double rateSnow = _rateZSnow[igate];
-    double rateMixed = _rateZMixed[igate];
+    double rateSnow = _rateZhSnow[igate];
+    double rateMixed = _rateZhMixed[igate];
 
     double rateHail = _rateZZdr[igate];
     double rateHvyRain = _rateZZdr[igate];

@@ -248,9 +248,9 @@ public:
   
   // get rate fields after calling computePrecipRates()
 
-  const double *getRateZ() const { return _rateZ; }
-  const double *getRateZSnow() const { return _rateZSnow; }
-  const double *getRateZMixed() const { return _rateZMixed; }
+  const double *getRateZ() const { return _rateZh; }
+  const double *getRateZSnow() const { return _rateZhSnow; }
+  const double *getRateZMixed() const { return _rateZhMixed; }
   const double *getRateKdp() const { return _rateKdp; }
   const double *getRateKdpZdr() const { return _rateKdpZdr; }
   const double *getRateZZdr() const { return _rateZZdr; }
@@ -274,7 +274,7 @@ public:
   // compute base rain rate from moments for a given point
   
   void computeBaseRates(double dbz, 
-                        double zdrdb,
+                        double zdr,
                         double kdp,
                         double &rateZh,
                         double &rateZhSnow,
@@ -286,15 +286,15 @@ public:
   // compute hybrid rates for a given point
   // given the base rates previously computed
   
-  void computeHybrid(double rateZ,
-                     double rateZSnow,
-                     double rateZMixed,
-                     double rateZZdr,
-                     double rateKdpZdr,
-                     double rateKdp,
-                     double dbz,
+  void computeHybrid(double dbz, 
                      double zdr,
                      double kdp,
+                     double rateZh,
+                     double rateZhSnow,
+                     double rateZhMixed,
+                     double rateKdp,
+                     double rateKdpZdr,
+                     double rateZZdr,
                      int pid,
                      double &rateHybrid,
                      double &rateHidro,
@@ -384,14 +384,14 @@ private:
   
   // store computed fields in local arrays
 
-  TaArray<double> _rateZ_;
-  double *_rateZ;
+  TaArray<double> _rateZh_;
+  double *_rateZh;
   
-  TaArray<double> _rateZSnow_;
-  double *_rateZSnow;
+  TaArray<double> _rateZhSnow_;
+  double *_rateZhSnow;
   
-  TaArray<double> _rateZMixed_;
-  double *_rateZMixed;
+  TaArray<double> _rateZhMixed_;
+  double *_rateZhMixed;
   
   TaArray<double> _rateKdp_;
   double *_rateKdp;
