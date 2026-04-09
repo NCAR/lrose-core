@@ -1981,6 +1981,7 @@ int RadxCartDP::_computePrecip()
 
   PrecipRate rate;
   rate.setFromParams(_precipRateParams);
+  rate.setMissingVal(Radx::missingFl32);
   
   // get the fields we need for computing PID
 
@@ -2040,7 +2041,7 @@ int RadxCartDP::_computePrecip()
   _rateZhField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
                             Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
   
-  _rateHybridField = new MdvxField(rateFhdr, rateVhdr, rateZhArray.data());
+  _rateHybridField = new MdvxField(rateFhdr, rateVhdr, rateHybridArray.data());
   _rateHybridField->setFieldName(rateHybridFieldName);
   _rateHybridField->setFieldNameLong("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
   _rateHybridField->setUnits("mm/hr");
