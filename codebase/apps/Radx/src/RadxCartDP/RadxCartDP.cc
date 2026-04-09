@@ -604,6 +604,14 @@ int RadxCartDP::_processFile(const string &filePath)
     iret = -1;
   }
   
+  // compute precip rates
+  
+  if (_computePrecip()) {
+    cerr << "ERROR - RadxCartDP" << endl;
+    cerr << "  Cannot compute precip rates" << endl;
+    iret = -1;
+  }
+  
   // write out MDV file
   
   if (_writeOutputMdv()) {
@@ -1929,6 +1937,10 @@ int RadxCartDP::_computePid()
 
   // create PID field filtered with a mode in 2D planes
 
+  if (_params.debug) {
+    cerr << "Applying mode filter to PID" << endl;
+  }
+  
   _pidFilt = _pidArray;
   int kernelSize = _params.PID_mode_filter_kernel_size;
   _modeFilterPidPlanes(_pidArray.data(),
@@ -1937,6 +1949,10 @@ int RadxCartDP::_computePid()
                        _cartInterp->getGridNy(),
                        _cartInterp->getGridNx(),
                        kernelSize);
+  
+  if (_params.debug) {
+    cerr << "DONE applying mode filter to PID" << endl;
+  }
   
   _pidModeField = new MdvxField(pidFhdr, pidVhdr, _pidFilt.data());
   _pidModeField->setFieldName("PID_FILT");
@@ -1960,7 +1976,7 @@ int RadxCartDP::_computePrecip()
 {
   
   if (_params.debug) {
-    cerr << "Computing Precip Rates" << endl;
+    cerr << "Computing precip rates" << endl;
   }
 
   PrecipRate rate;
@@ -2024,8 +2040,15 @@ int RadxCartDP::_computePrecip()
   _rateZhField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
                             Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
   
+  _rateHybridField = new MdvxField(rateFhdr, rateVhdr, rateZhArray.data());
+  _rateHybridField->setFieldName(rateHybridFieldName);
+  _rateHybridField->setFieldNameLong("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
+  _rateHybridField->setUnits("mm/hr");
+  _rateHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+                                Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+  
   if (_params.debug) {
-    cerr << "DONE computing precip rate" << endl;
+    cerr << "DONE computing precip rates" << endl;
   }
   
   return 0;
