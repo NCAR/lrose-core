@@ -197,6 +197,9 @@ private:
   MdvxField *_rateZhField;
   MdvxField *_rateHybridField;
 
+  MdvxField *_rateZhFiltField;
+  MdvxField *_rateHybridFiltField;
+
   // private methods
 
   int _runFilelist();
@@ -250,13 +253,20 @@ private:
     return (iz * ny + iy) * nx + ix;
   }
   
-  void _modeFilterPidPlanes(const fl32 *input,
-                            fl32 *output,
-                            size_t nz, size_t ny, size_t nx,
-                            int kernelSize,
-                            fl32 missingVal = Radx::missingFl32,
-                            bool copyEdges = true,
-                            bool preserveCenterOnTie = true);
+  void _medianFilter2D(const fl32 *input,
+                       fl32 *output,
+                       size_t nz, size_t ny, size_t nx,
+                       int kernelSize,
+                       fl32 missingVal = Radx::missingFl32,
+                       bool copyEdges = true);
+  
+  void _modeFilterPid2D(const fl32 *input,
+                        fl32 *output,
+                        size_t nz, size_t ny, size_t nx,
+                        int kernelSize,
+                        fl32 missingVal = Radx::missingFl32,
+                        bool copyEdges = true,
+                        bool preserveCenterOnTie = true);
   
   void _printParamsRate();
   void _printParamsPid();

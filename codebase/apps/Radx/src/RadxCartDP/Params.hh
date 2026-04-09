@@ -560,6 +560,8 @@ public:
 
   tdrp_bool_t RATE_use_attenuation_corrected_fields;
 
+  int RATE_median_filter_kernel_size;
+
   output_field_t *_output_fields;
   int output_fields_n;
 
@@ -765,7 +767,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[160];
+  mutable TDRPtable _table[161];
 
   const char *_className;
 

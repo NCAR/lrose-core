@@ -94,6 +94,10 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   _cartInterp = NULL;
   _pidField = NULL;
   _pidModeField = NULL;
+  _rateZhField = NULL;
+  _rateHybridField = NULL;
+  _rateZhFiltField = NULL;
+  _rateHybridFiltField = NULL;
   
   // set programe name
 
@@ -1838,6 +1842,15 @@ int RadxCartDP::_writeOutputMdv()
     out.addField(_rateHybridField);
     _rateHybridField = nullptr; // memory handling passed to output mdv object
   }
+
+  if (_rateZhFiltField) {
+    out.addField(_rateZhFiltField);
+    _rateZhFiltField = nullptr; // memory handling passed to output mdv object
+  }
+  if (_rateHybridFiltField) {
+    out.addField(_rateHybridFiltField);
+    _rateHybridFiltField = nullptr; // memory handling passed to output mdv object
+  }
   
   // write out file
   
@@ -1943,12 +1956,12 @@ int RadxCartDP::_computePid()
   
   _pidFilt = _pidArray;
   int kernelSize = _params.PID_mode_filter_kernel_size;
-  _modeFilterPidPlanes(_pidArray.data(),
-                       _pidFilt.data(),
-                       _cartInterp->getGridZLevels().size(),
-                       _cartInterp->getGridNy(),
-                       _cartInterp->getGridNx(),
-                       kernelSize);
+  _modeFilterPid2D(_pidArray.data(),
+                   _pidFilt.data(),
+                   _cartInterp->getGridZLevels().size(),
+                   _cartInterp->getGridNy(),
+                   _cartInterp->getGridNx(),
+                   kernelSize);
   
   if (_params.debug) {
     cerr << "DONE applying mode filter to PID" << endl;
@@ -2047,6 +2060,49 @@ int RadxCartDP::_computePrecip()
   _rateHybridField->setUnits("mm/hr");
   _rateHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
                                 Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+
+  // median filter for precip
+  
+  if (_params.debug) {
+    cerr << "Applying median filter to precip" << endl;
+  }
+  
+  vector<fl32> rateZhFilt = rateZhArray;
+  vector<fl32> rateHybridFilt = rateHybridArray;
+  
+  int kernelSize = _params.RATE_median_filter_kernel_size;
+  
+  _medianFilter2D(rateZhArray.data(),
+                  rateZhFilt.data(),
+                  _cartInterp->getGridZLevels().size(),
+                  _cartInterp->getGridNy(),
+                  _cartInterp->getGridNx(),
+                  kernelSize, Radx::missingFl32, true);
+  
+  _medianFilter2D(rateHybridArray.data(),
+                  rateHybridFilt.data(),
+                  _cartInterp->getGridZLevels().size(),
+                  _cartInterp->getGridNy(),
+                  _cartInterp->getGridNx(),
+                  kernelSize, Radx::missingFl32, true);
+ 
+  _rateZhFiltField = new MdvxField(rateFhdr, rateVhdr, rateZhFilt.data());
+  _rateZhFiltField->setFieldName("RATE_ZH_FILT");
+  _rateZhFiltField->setFieldNameLong("precip_rate_from_reflectivity");
+  _rateZhFiltField->setUnits("mm/hr");
+  _rateZhFiltField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+                                Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+  
+  _rateHybridFiltField = new MdvxField(rateFhdr, rateVhdr, rateHybridFilt.data());
+  _rateHybridFiltField->setFieldName("RATE_HYBRID_FILT");
+  _rateHybridFiltField->setFieldNameLong("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
+  _rateHybridFiltField->setUnits("mm/hr");
+  _rateHybridFiltField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+                                    Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+  
+  if (_params.debug) {
+    cerr << "DONE applying median filter to precip" << endl;
+  }
   
   if (_params.debug) {
     cerr << "DONE computing precip rates" << endl;
@@ -2057,15 +2113,94 @@ int RadxCartDP::_computePrecip()
 }
 
 //////////////////////////////////////////////////////////////////////////
+// filter floating-point planes using the median in a 2D kernel
+
+void RadxCartDP::_medianFilter2D(const fl32 *input,
+                                 fl32 *output,
+                                 size_t nz, size_t ny, size_t nx,
+                                 int kernelSize,
+                                 fl32 missingVal /* = Radx::missingFl32 */,
+                                 bool copyEdges /* = true */)
+{
+
+  if (kernelSize < 1 || (kernelSize % 2) == 0) {
+    throw std::runtime_error("_medianFilterFloatPlanes: kernelSize must be odd and >= 1");
+  }
+
+  const int radius = kernelSize / 2;
+  const size_t nPoints = nz * ny * nx;
+
+  // start with a straight copy so edges can remain unchanged if desired
+  std::copy(input, input + nPoints, output);
+
+  std::vector<fl32> vals;
+  vals.reserve(kernelSize * kernelSize);
+
+  for (size_t iz = 0; iz < nz; ++iz) {
+    for (size_t iy = 0; iy < ny; ++iy) {
+      for (size_t ix = 0; ix < nx; ++ix) {
+
+        if (copyEdges) {
+          if (iy < (size_t) radius || iy + radius >= ny ||
+              ix < (size_t) radius || ix + radius >= nx) {
+            continue;
+          }
+        }
+
+        vals.clear();
+
+        const int y0 = std::max<int>(0, (int) iy - radius);
+        const int y1 = std::min<int>((int) ny - 1, (int) iy + radius);
+        const int x0 = std::max<int>(0, (int) ix - radius);
+        const int x1 = std::min<int>((int) nx - 1, (int) ix + radius);
+
+        for (int jy = y0; jy <= y1; ++jy) {
+          for (int jx = x0; jx <= x1; ++jx) {
+            fl32 val = input[cartIndex(iz, jy, jx, ny, nx)];
+            if (!std::isfinite(val) || val == missingVal) {
+              continue;
+            }
+            vals.push_back(val);
+          }
+        }
+
+        const size_t outIdx = cartIndex(iz, iy, ix, ny, nx);
+
+        if (vals.empty()) {
+          output[outIdx] = missingVal;
+          continue;
+        }
+
+        const size_t midIndex = vals.size() / 2;
+        std::nth_element(vals.begin(), vals.begin() + midIndex, vals.end());
+        fl32 median = vals[midIndex];
+
+        // Optional: for even number of samples, average the middle two.
+        // For 3x3 and 5x5 kernels with full valid data this won't matter,
+        // but it can matter near missing data.
+        if ((vals.size() % 2) == 0) {
+          std::nth_element(vals.begin(), vals.begin() + midIndex - 1, vals.end());
+          median = (median + vals[midIndex - 1]) * 0.5f;
+        }
+
+        output[outIdx] = median;
+
+      } // ix
+    } // iy
+  } // iz
+
+}
+
+//////////////////////////////////////////////////////////////////////////
 // filter the PID planes using the mode in a kernel
 
-void RadxCartDP::_modeFilterPidPlanes(const fl32 *input,
-                                      fl32 *output,
-                                      size_t nz, size_t ny, size_t nx,
-                                      int kernelSize,
-                                      fl32 missingVal /* = Radx::missingFl32 */,
-                                      bool copyEdges /* = true */,
-                                      bool preserveCenterOnTie /* = true */)
+void RadxCartDP::_modeFilterPid2D(const fl32 *input,
+                                  fl32 *output,
+                                  size_t nz, size_t ny, size_t nx,
+                                  int kernelSize,
+                                  fl32 missingVal /* = Radx::missingFl32 */,
+                                  bool copyEdges /* = true */,
+                                  bool preserveCenterOnTie /* = true */)
 {
 
   if (kernelSize < 1 || (kernelSize % 2) == 0) {

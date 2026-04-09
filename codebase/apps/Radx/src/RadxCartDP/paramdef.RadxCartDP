@@ -287,6 +287,12 @@ paramdef boolean {
   p_help = "If TRUE, the attenuation-corrected Z and ZDR fields will be used for computing PRECIP.";
 } RATE_use_attenuation_corrected_fields;
 
+paramdef int {
+  p_default = 3;
+  p_descr = "Kernel size for 2D median filter";
+  p_help = "The precip rate field is filtered, using the median over a 2D kernel for each plane. The kernel is moved across each Cartesian plane, the median is computed, and the value at the kernel center is replaced with the median.";
+} RATE_median_filter_kernel_size;
+
 commentdef {
   p_header = "SPECIFYING PID OUTPUT FIELDS";
 }
