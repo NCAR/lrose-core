@@ -42,6 +42,21 @@
 #include <vector>
 
 #ifdef CODEX
+
+class DemProvider {
+public:
+  bool initialize(...);
+  latlonalt radarOriginInDemSpheroid(const latlonalt&) const;
+  double terrainAltitudeM(const latlon&) const;
+  bool peakAlongSegment(const latlon& origin,
+                        angle bearing,
+                        double r0M,
+                        double r1M,
+                        size_t nSamples,
+                        double &peakRangeM,
+                        double &peakAltM) const;
+};
+
 class DemProvider {
 public:
   

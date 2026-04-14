@@ -59,14 +59,16 @@ HDRS = \
 	Args.hh \
 	DemProvider.hh \
 	CartBeamBlock.hh \
-	Parms.hh
+	Parms.hh \
+	RainFields.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
 	DemProvider.cc \
 	CartBeamBlock.cc \
-	Main.cc
+	Main.cc \
+	RainFields.cc
 
 #
 # tdrp macros

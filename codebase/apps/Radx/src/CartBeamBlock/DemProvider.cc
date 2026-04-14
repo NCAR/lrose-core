@@ -179,6 +179,7 @@ void DemProvider::_set(const std::pair<double,double> &sw,
                        const std::pair<double,double> &ne,
                        spheroid::standard which)
 {
+
   angle a0, a1;
   a0.set_degrees(sw.first);
   a1.set_degrees(sw.second);
