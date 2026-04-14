@@ -30,44 +30,6 @@ using namespace rainfields;
 using namespace rainfields::ancilla;
 
 
-//------------------------------------------------------------------
-static spheroid::standard _toSphereStandard(Params::DigitalElevationModel_t t)
-{
-  std::string s="";
-  switch (t)
-  {
-    case Params::ESRI_I65:
-      s = "i65";
-      break;
-    case Params::ESRI_ANS:
-      s = "ans";
-      break;
-    case Params::ESRI_CLARKE1858:
-      s = "clarke1858";
-      break;
-    case Params::ESRI_GRS80:
-      s = "grs80";
-      break;
-    case Params::ESRI_WGS84:
-      s = "wgs84";
-      break;
-    case Params::ESRI_WGS72:
-      s = "wgs72";
-      break;
-    case Params::INTERNATIONAL1924:
-      s = "international924";
-      break;
-    case Params::AUSTRALIAN_NATIONAL:
-      s = "australian_national";
-      break;
-    default:
-      s = "?";
-      break;
-  }
-
-  return from_string<spheroid::standard>(s);
-}
-
 //----------------------------------------------------------------
 DemProvider::DemProvider(const Params &params) :
         _params(params)
@@ -193,3 +155,43 @@ void DemProvider::_set(const std::pair<double,double> &sw,
                                         _params.input_dem_path, lsw, lne,
 					spheroid(which)));
 }
+
+//------------------------------------------------------------------
+
+spheroid::standard DemProvider::_toSphereStandard(Params::DigitalElevationModel_t t)
+{
+  std::string s="";
+  switch (t)
+  {
+    case Params::ESRI_I65:
+      s = "i65";
+      break;
+    case Params::ESRI_ANS:
+      s = "ans";
+      break;
+    case Params::ESRI_CLARKE1858:
+      s = "clarke1858";
+      break;
+    case Params::ESRI_GRS80:
+      s = "grs80";
+      break;
+    case Params::ESRI_WGS84:
+      s = "wgs84";
+      break;
+    case Params::ESRI_WGS72:
+      s = "wgs72";
+      break;
+    case Params::INTERNATIONAL1924:
+      s = "international924";
+      break;
+    case Params::AUSTRALIAN_NATIONAL:
+      s = "australian_national";
+      break;
+    default:
+      s = "?";
+      break;
+  }
+
+  return from_string<spheroid::standard>(s);
+}
+

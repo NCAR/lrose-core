@@ -1,0 +1,514 @@
+/**********************************************************************
+ * TDRP params for CartBeamBlock
+ **********************************************************************/
+
+//======================================================================
+//
+// CartBeamBlock application.
+//
+// CartBeamBlock computes beam blockage for a specific radar and a 3D 
+//   Cartesian grid associated with that radar. The terrain height data is 
+//   read in from a digital terrain map. The Cartesian grid details are 
+//   determined by reading in a Cartesian file in CF-NetCDF MDV format. 
+//   Generally that Cart file will have been produced by RadxCartDP or 
+//   Radx2Grid. CartBeamBlock computes the cumulative beam blockage 
+//   fraction for each voxel in the 3D grid. It also writes out a 2D grid 
+//   containing the terrain height.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// CARTESIAN GRID TEMPLATE.
+//
+// We read in a 3D Cartesian file which we use as a template to 
+//   determine the 3D grid details.
+//
+//======================================================================
+ 
+///////////// grid_template_path //////////////////////
+//
+// Path or directory for Cartesian input data.
+//
+// This specifies the path to either (a) a single 3D Cartesian file, or 
+//   a directory containing such files. These files will have been created 
+//   by running Radx2Grid or RadxCartDP.
+//
+// Type: string
+
+grid_template_path = "$(HOME)/data/pecan/mdv/radarCart/kftg/20150626/ncf_20150626_000334.nc";
+// grid_template_path = "$(HOME)/data/pecan/mdv/radarCart/kftg";
+
+//======================================================================
+//
+// DIGITAL ELEVATION DATA.
+//
+//======================================================================
+ 
+///////////// input_dem_path //////////////////////////
+//
+// input data.
+//
+// the file with input digital elevation model data.
+//
+// Type: string
+
+input_dem_path = "./standalone_beam_blocking/data/srtm3";
+
+///////////// input_data_format ///////////////////////
+//
+// format of input digital elevation model data.
+//
+// supported digital elevation models:
+//   Shuttle Radar Topography Mission (3 arc-second resolution)
+//           format: srtm3 (data found here:
+//    	     http://dds.cr.usgs.gov/srtm/version2_1/SRTM3
+//   ESRI grid data (spheroid), with the various standard spheroids.
+//
+// Type: enum
+// Options:
+//     SHUTTLE_RADAR_TOPOGRAPHY
+//     ESRI_I65
+//     ESRI_ANS
+//     ESRI_CLARKE1858
+//     ESRI_GRS80
+//     ESRI_WGS84
+//     ESRI_WGS72
+//     INTERNATIONAL1924
+//     AUSTRALIAN_NATIONAL
+
+input_data_format = SHUTTLE_RADAR_TOPOGRAPHY;
+
+//======================================================================
+//
+// SAMPLING STRATEGY.
+//
+// We compute blockage using a micro-grid, within the radar elevation, 
+//   azimuth and gate (bin) geometry. This allows us to compute the 
+//   effective blockage across the beam.
+//
+//======================================================================
+ 
+///////////// num_elev_subsample //////////////////////
+//
+// Number of subsamples in elevation.
+//
+// We sample the beam in elevation using this number of sub angles.
+//
+// Type: int
+
+num_elev_subsample = 64;
+
+///////////// num_az_subsample ////////////////////////
+//
+// Number of subsamples in azimuth.
+//
+// We sample the beam in azimuth using this number of sub angles.
+//
+// Type: int
+
+num_az_subsample = 64;
+
+///////////// num_range_subsample /////////////////////
+//
+// Number of subsamples in range.
+//
+// We sample the beam in range using this number of sub ranges.
+//
+// Type: int
+
+num_range_subsample = 10;
+
+//======================================================================
+//
+// RADAR PARAMETERS.
+//
+//======================================================================
+ 
+///////////// output_time_stamp ///////////////////////
+//
+// Time stamp for output files.
+//
+// We need to set a time so that the output files can be correctly 
+//   named. SRTM shuttle mission 99 occurred in early 2000.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+
+output_time_stamp = {
+    year = 2000,
+    month = 1,
+    day = 1,
+    hour = 0,
+    min = 0,
+    sec = 0
+};
+
+///////////// radar_name //////////////////////////////
+//
+// Name of radar.
+//
+// Type: string
+
+radar_name = "UNKNOWN";
+
+///////////// radar_location //////////////////////////
+//
+// Radar location.
+//
+// The radar_location, note that the altitude is in km MSL.
+//
+// Type: struct
+//   typedef struct {
+//      double latitudeDeg;
+//      double longitudeDeg;
+//      double altitudeKm;
+//   }
+//
+
+radar_location = {
+    latitudeDeg = 0,
+    longitudeDeg = 0,
+    altitudeKm = 0
+};
+
+///////////// do_lookup_radar_altitude ////////////////
+//
+// Flag to lookup the radar altitude.
+//
+// If TRUE, don't use altitudKm from radar_location, instead figure it 
+//   out by looking into the tiles at the latitudeDeg and longitudeDeg.
+//
+// Type: boolean
+
+do_lookup_radar_altitude = FALSE;
+
+///////////// radar_wavelength_cm /////////////////////
+//
+// Radar wavelength, cm.
+//
+// Type: double
+
+radar_wavelength_cm = 5.4;
+
+///////////// horiz_beam_width_deg ////////////////////
+//
+// Radar beamwidth in the horizontal plane.
+//
+// Type: double
+
+horiz_beam_width_deg = 1;
+
+///////////// vert_beam_width_deg /////////////////////
+//
+// Radar beamwidth in the vertical plane.
+//
+// Type: double
+
+vert_beam_width_deg = 1;
+
+//======================================================================
+//
+// GEOMETRY FOR COMPUTATIONS.
+//
+// We compute the beam blockage using the geometry for a theoretical 
+//   scan. The blockage is then stored in a CfRadial file, using these 
+//   parameters. When the blockage file is later used, we search for the 
+//   closest compute gate, in (elev, az, range) space, to that of the 
+//   acutal measured gate.
+//
+//======================================================================
+ 
+///////////// gates ///////////////////////////////////
+//
+// Gate specification (km).
+//
+// Type: struct
+//   typedef struct {
+//      double start;
+//      double delta;
+//      int count;
+//   }
+//
+
+gates = {
+    start = 0.5,
+    delta = 0.15,
+    count = 1000
+};
+
+///////////// azimuths ////////////////////////////////
+//
+// Azimuth specification (degrees).
+//
+// Type: struct
+//   typedef struct {
+//      double start;
+//      double delta;
+//      int count;
+//   }
+//
+
+azimuths = {
+    start = 0,
+    delta = 1,
+    count = 360
+};
+
+///////////// elevations //////////////////////////////
+//
+// Elevation specification (degrees).
+//
+// Type: struct
+//   typedef struct {
+//      double start;
+//      double delta;
+//      int count;
+//   }
+//
+
+elevations = {
+    start = 0.5,
+    delta = 1,
+    count = 5
+};
+
+//======================================================================
+//
+// OUTPUT FIELDS.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Array of output fields.
+//
+// We will write out these fields. long_name and standard_name are 
+//   netCDF conventions. Set the output encoding type to select the 
+//   resolution of the output data.
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      string long_name;
+//      string standard_name;
+//      string units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_FLOAT
+//          OUTPUT_SHORT
+//          OUTPUT_BYTE
+//      output_data_t type;
+//        Options:
+//          BLOCKAGE
+//          LINEAR_BLOCKAGE
+//          PEAK
+//          EXTENDED_BLOCKAGE
+//   }
+//
+// 1D array - variable length.
+
+output_fields = {
+  {
+    name = "BEAMB",
+    long_name = "BeamBlockageFractionDb",
+    standard_name = "BeamBlockageFractionDbPerGate",
+    units = "dB",
+    encoding = OUTPUT_FLOAT,
+    type = BLOCKAGE
+  }
+  ,
+  {
+    name = "BEAML",
+    long_name = "BeamBlockageFraction",
+    standard_name = "BeamBlockageFractionPerGate",
+    units = "fraction",
+    encoding = OUTPUT_FLOAT,
+    type = LINEAR_BLOCKAGE
+  }
+  ,
+  {
+    name = "PEAK",
+    long_name = "MaxTerrainHt",
+    standard_name = "MaxTerrainHtPerGate",
+    units = "m",
+    encoding = OUTPUT_FLOAT,
+    type = PEAK
+  }
+  ,
+  {
+    name = "BEAME",
+    long_name = "CumulativeBeamExtinctionFraction",
+    standard_name = "CumulativeBeamExtinctionFractionInRange",
+    units = "fraction",
+    encoding = OUTPUT_FLOAT,
+    type = EXTENDED_BLOCKAGE
+  }
+};
+
+//======================================================================
+//
+// DATA SET INFORMATION.
+//
+// Will be stored in CfRadial files, and other formats to the extent 
+//   supported by the format.
+//
+//======================================================================
+ 
+///////////// title ///////////////////////////////////
+//
+// Title string for netCDF file.
+//
+// Type: string
+
+title = "Radar beam blockage computed from digital elevation data.";
+
+///////////// institution /////////////////////////////
+//
+// Institution string for netCDF file.
+//
+// Type: string
+
+institution = "EOL/NCAR";
+
+///////////// references //////////////////////////////
+//
+// References string for netCDF file.
+//
+// Type: string
+
+references = "Created by LROSE app CartBeamBlock";
+
+//======================================================================
+//
+// OUTPUT FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_NEXRAD
+//     OUTPUT_FORMAT_UF
+//     OUTPUT_FORMAT_MDV_RADIAL
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Output file will be written to this directory.
+//
+// Type: string
+
+output_dir = "/tmp/CartBeamBlock";
+
+///////////// append_radar_name_to_output_dir /////////
+//
+// Option to add the radar name to the output path.
+//
+// If true, the output dir will be 'output_dir/radar_name'.
+//
+// Type: boolean
+
+append_radar_name_to_output_dir = FALSE;
+
+///////////// write_individual_sweeps /////////////////
+//
+// Option to write out individual sweeps if appropriate.
+//
+// If true, the volume is split into individual sweeps for writing. 
+//   Applies to CfRadial format. This is always true for DORADE format 
+//   files.
+//
+// Type: boolean
+
+write_individual_sweeps = FALSE;
+
+//======================================================================
+//
+// CREATE CARTESIAN GRID FOR CHECKING TERRAIN DATA.
+//
+//======================================================================
+ 
+///////////// create_cart_terrain_grid ////////////////
+//
+// Option to create a Cartesian grid with terrain data.
+//
+// This can be used to check that the terrain data tiles are being 
+//   correctly interpreted.
+//
+// Type: boolean
+
+create_cart_terrain_grid = FALSE;
+
+///////////// cart_terrain_grid_subdir ////////////////
+//
+// Output directory path for Cartesian terrain grid.
+//
+// This will be written as a CF NetCDF file, from an MDV object.
+//
+// Type: string
+
+cart_terrain_grid_subdir = "cart_terrain";
+
+///////////// cart_terrain_grid_res ///////////////////
+//
+// Grid resolution for terrain grid (deg).
+//
+// The grid extent will be determined by the radar coverage.
+//
+// Type: double
+
+cart_terrain_grid_res = 0.005;
+
+///////////// cart_terrain_field_name /////////////////
+//
+// Name of terrain height field in NetCDF MDV output file.
+//
+// Type: string
+
+cart_terrain_field_name = "terrain_ht";
+

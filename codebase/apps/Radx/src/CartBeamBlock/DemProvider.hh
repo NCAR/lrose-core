@@ -155,6 +155,8 @@ private:
 	    rainfields::ancilla::spheroid::standard which);
 
   
+  rainfields::ancilla::spheroid::standard _toSphereStandard(Params::DigitalElevationModel_t t);
+  
 };
 
 #endif

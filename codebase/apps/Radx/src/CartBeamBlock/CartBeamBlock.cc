@@ -37,7 +37,12 @@
 ///////////////////////////////////////////////////////////////
 
 #include "CartBeamBlock.hh"
+#include <filesystem>
+#include <iostream>
 #include <toolsa/umisc.h>
+#include <didss/DsInputPath.hh>
+#include <Mdv/Mdvx.hh>
+#include <Mdv/MdvxField.hh>
 
 // Constructor
 
@@ -89,9 +94,106 @@ CartBeamBlock::~CartBeamBlock()
 int CartBeamBlock::Run()
 {
 
+  // read a Cart file to get the grid details
+
+  if (_readGridTemplate(_params.grid_template_path)) {
+    cerr << "ERROR - CartBeamBlock::Run()" << endl;
+    cerr << "  Cannot find template file, path: " << _params.grid_template_path << endl;
+    return -1;
+  }
+  
   return 0;
   
 }
+
+//////////////////////////////////////////////////
+// Read in the grid details from a template file
+
+int CartBeamBlock::_readGridTemplate(const string &path)
+{
+
+  // check whether we have a file or directory
+  
+  namespace fs = std::filesystem;
+  
+  if (fs::is_directory(path)) {
+
+    DsInputPath input(_progName,
+                      _params.debug >= Params::DEBUG_VERBOSE,
+                      path,
+                      0, time(NULL));
+
+    const char *filePath = input.next();
+    if (filePath == nullptr) {
+      cerr << "ERROR - CartBeamBlock::_readGridTemplate" << endl;
+      cerr << "  Cannot find any files, dir: " << path << endl;
+      return -1;
+    }
+    
+    if (_readTemplateFile(filePath)) {
+      cerr << "ERROR - CartBeamBlock::_readGridTemplate" << endl;
+      cerr << "  Cannot read template from dir, file path: " << filePath << endl;
+      return -1;
+    }
+
+  } else if (fs::is_regular_file(path)) {
+    
+    if (_readTemplateFile(path)) {
+      cerr << "ERROR - CartBeamBlock::_readGridTemplate" << endl;
+      cerr << "  Cannot read specified template file: " << path << endl;
+      return -1;
+    }
+
+  } else {
+
+    cerr << "ERROR - CartBeamBlock::_readGridTemplate" << endl;
+    cerr << "  Path does not exist as dir or file: " << path << endl;
+    return -1;
+
+  }
+
+  return 0;
+  
+}
+
+int CartBeamBlock::_readTemplateFile(const string &path)
+{
+
+
+  Mdvx cart;
+  cart.setReadPath(path);
+  cart.addReadField(0);
+  if (cart.readAllHeaders()) {
+    cerr << "ERROR - CartBeamBlock::_readTemplateFile" << endl;
+    cerr << "  Cannot read template file: " << path << endl;
+    cerr << "  " << cart.getErrStr() << endl;
+    return -1;
+  }
+  if (cart.getNFieldsFile() < 1) {
+    cerr << "ERROR - CartBeamBlock::_readTemplateFile" << endl;
+    cerr << "  No fields in template file: " << path << endl;
+  }
+  MdvxField *field0 = cart.getField(0);
+  if (field0 == nullptr) {
+    cerr << "ERROR - CartBeamBlock::_readTemplateFile" << endl;
+    cerr << "  Cannot read field 0 in template file: " << path << endl;
+  }
+  
+  if (_params.debug) {
+    cerr << "INFO - read template file: " << path << endl;
+  }
+
+  _proj.init(field0->getFieldHeader());
+  if (_params.debug) {
+    cerr << "INFO - PROJECTION" << path << endl;
+    _proj.print(cerr);
+  }
+  
+  
+  return 0;
+  
+}
+
 
 #ifdef JUNK
 

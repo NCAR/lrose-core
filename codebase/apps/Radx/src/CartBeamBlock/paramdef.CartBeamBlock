@@ -1,11 +1,18 @@
-///////////////////////////////////////////////////////
-//  parameter definitions for RadxBeamBlock
+////////////////////////////////////////////////////////////
 //
-////////////////////////////////////////////////////////
+// parameter definitions for CartBeamBlock
+//
+/////////////////////////////////////////////////////////////
+//
+// CartBeamBlock computes beam blockage for a specific
+// radar and a Cartesian grid associated with thar radar.
+//
+// Mike Dixon, EOL, NCAR, April 2026
+/////////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "RadxBeamBlock program";
-  p_text = "Reads elevation data files, and for a specified radar (location and scanning) produce beam blockage output for the radar";
+  p_header = "CartBeamBlock application";
+  p_text = "CartBeamBlock computes beam blockage for a specific radar and a 3D Cartesian grid associated with that radar. The terrain height data is read in from a digital terrain map. The Cartesian grid details are determined by reading in a Cartesian file in CF-NetCDF MDV format. Generally that Cart file will have been produced by RadxCartDP or Radx2Grid. CartBeamBlock computes the cumulative beam blockage fraction for each voxel in the 3D grid. It also writes out a 2D grid containing the terrain height.";
 }
 
 commentdef {
@@ -21,6 +28,17 @@ paramdef enum debug_t {
   p_descr = "Debug option";
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
+
+commentdef {
+  p_header = "CARTESIAN GRID TEMPLATE";
+  p_text = "We read in a 3D Cartesian file which we use as a template to determine the 3D grid details.";
+}
+
+paramdef string {
+  p_default = "/tmp/cart_template/example_cart_file.nc";
+  p_descr = "Path or directory for Cartesian input data.";
+  p_help = "This specifies the path to either (a) a single 3D Cartesian file, or a directory containing such files. These files will have been created by running Radx2Grid or RadxCartDP.";
+} grid_template_path;
 
 commentdef {
   p_header = "DIGITAL ELEVATION DATA";
@@ -248,7 +266,7 @@ paramdef string {
 } institution;
 
 paramdef string {
-  p_default = "Created by LROSE app RadxBeamBlock";
+  p_default = "Created by LROSE app CartBeamBlock";
   p_descr = "References string for netCDF file.";
 } references;
 
@@ -275,7 +293,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "/tmp/RadxBeamBlock";
+  p_default = "/tmp/CartBeamBlock";
   p_descr = "Output directory path.";
   p_help = "Output file will be written to this directory.";
 } output_dir;

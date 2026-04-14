@@ -41,6 +41,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include <Mdv/MdvxProj.hh>
 #include <string>
 #include <set>
 using namespace std;
@@ -72,6 +73,10 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+  MdvxProj _proj;
+
+  int _readGridTemplate(const string &path);
+  int _readTemplateFile(const string &path);
 
 };
 

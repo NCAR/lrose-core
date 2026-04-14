@@ -436,6 +436,8 @@ public:
 
   debug_t debug;
 
+  char* grid_template_path;
+
   char* input_dem_path;
 
   DigitalElevationModel_t input_data_format;
@@ -498,7 +500,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[40];
+  mutable TDRPtable _table[42];
 
   const char *_className;
 

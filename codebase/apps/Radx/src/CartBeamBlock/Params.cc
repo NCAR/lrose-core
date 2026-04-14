@@ -559,8 +559,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("RadxBeamBlock program");
-    tt->comment_text = tdrpStrDup("Reads elevation data files, and for a specified radar (location and scanning) produce beam blockage output for the radar");
+    tt->comment_hdr = tdrpStrDup("CartBeamBlock application");
+    tt->comment_text = tdrpStrDup("CartBeamBlock computes beam blockage for a specific radar and a 3D Cartesian grid associated with that radar. The terrain height data is read in from a digital terrain map. The Cartesian grid details are determined by reading in a Cartesian file in CF-NetCDF MDV format. Generally that Cart file will have been produced by RadxCartDP or Radx2Grid. CartBeamBlock computes the cumulative beam blockage fraction for each voxel in the 3D grid. It also writes out a 2D grid containing the terrain height.");
     tt++;
     
     // Parameter 'Comment 1'
@@ -601,6 +601,27 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
+    tt->comment_hdr = tdrpStrDup("CARTESIAN GRID TEMPLATE");
+    tt->comment_text = tdrpStrDup("We read in a 3D Cartesian file which we use as a template to determine the 3D grid details.");
+    tt++;
+    
+    // Parameter 'grid_template_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("grid_template_path");
+    tt->descr = tdrpStrDup("Path or directory for Cartesian input data.");
+    tt->help = tdrpStrDup("This specifies the path to either (a) a single 3D Cartesian file, or a directory containing such files. These files will have been created by running Radx2Grid or RadxCartDP.");
+    tt->val_offset = (char *) &grid_template_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/cart_template/example_cart_file.nc");
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("DIGITAL ELEVATION DATA");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -651,11 +672,11 @@
     tt->single_val.e = SHUTTLE_RADAR_TOPOGRAPHY;
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("SAMPLING STRATEGY");
     tt->comment_text = tdrpStrDup("We compute blockage using a micro-grid, within the radar elevation, azimuth and gate (bin) geometry. This allows us to compute the effective blockage across the beam.");
     tt++;
@@ -696,11 +717,11 @@
     tt->single_val.i = 10;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("RADAR PARAMETERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -855,11 +876,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("GEOMETRY FOR COMPUTATIONS");
     tt->comment_text = tdrpStrDup("We compute the beam blockage using the geometry for a theoretical scan. The blockage is then stored in a CfRadial file, using these parameters. When the blockage file is later used, we search for the closest compute gate, in (elev, az, range) space, to that of the acutal measured gate.");
     tt++;
@@ -972,11 +993,11 @@
       tt->struct_vals[2].i = 5;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1080,11 +1101,11 @@
       tt->struct_vals[23].e = EXTENDED_BLOCKAGE;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("DATA SET INFORMATION");
     tt->comment_text = tdrpStrDup("Will be stored in CfRadial files, and other formats to the extent supported by the format.");
     tt++;
@@ -1122,14 +1143,14 @@
     tt->descr = tdrpStrDup("References string for netCDF file.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &references - &_start_;
-    tt->single_val.s = tdrpStrDup("Created by LROSE app RadxBeamBlock");
+    tt->single_val.s = tdrpStrDup("Created by LROSE app CartBeamBlock");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1162,11 +1183,11 @@
     tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1180,7 +1201,7 @@
     tt->descr = tdrpStrDup("Output directory path.");
     tt->help = tdrpStrDup("Output file will be written to this directory.");
     tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/RadxBeamBlock");
+    tt->single_val.s = tdrpStrDup("/tmp/CartBeamBlock");
     tt++;
     
     // Parameter 'append_radar_name_to_output_dir'
@@ -1207,11 +1228,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("CREATE CARTESIAN GRID FOR CHECKING TERRAIN DATA");
     tt->comment_text = tdrpStrDup("");
     tt++;
