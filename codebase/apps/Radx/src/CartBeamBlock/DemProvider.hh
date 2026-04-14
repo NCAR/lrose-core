@@ -38,9 +38,31 @@
 #define DEM_PROVIDER_HH
 
 #include "Params.hh"
-#include "digital_elevation.h"
-#include "spheroid.h"
+#include "RainFields.hh"
 #include <vector>
+
+#ifdef CODEX
+class DemProvider {
+public:
+  
+  bool initialize(const Params &params,
+                  const std::pair<double,double> &sw,
+                  const std::pair<double,double> &ne);
+  
+  rainfields::latlonalt radarOriginInDemSpheroid(
+          const rainfields::latlonalt &radar) const;
+  
+  double elevationM(const rainfields::latlon &loc) const;
+  
+  bool peakInSegment(const rainfields::latlon &origin,
+                     rainfields::angle bearing,
+                     double minRangeM,
+                     double maxRangeM,
+                     size_t nSamples,
+                     double &peakRangeM,
+                     double &peakAltM) const;
+};
+#endif
 
 
 class DemProvider
@@ -106,7 +128,7 @@ private:
   /**
    * Alg parameters
    */
-  Parms _params;
+  const Params &_params;
 
   /**
    * the DEM handler

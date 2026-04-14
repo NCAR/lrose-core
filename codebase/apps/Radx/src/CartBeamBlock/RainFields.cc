@@ -21,1267 +21,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
 
-#include "angle.h"
-
-using namespace rainfields;
-
-auto angle::dms(int& deg, int& min, double& sec) const -> void
-{
-  double decimal = std::abs(degrees());
-  deg = decimal;
-  decimal = (decimal - deg) * 60.0;
-  min = decimal;
-  decimal = (decimal - min) * 60.0;
-  sec = decimal;
-
-  // fix rare case of floating point stuff up
-  if (sec >= 60.0)
-  {
-    min++;
-    sec -= 60.0;
-  }
-
-  // ensure correct sign on degrees
-  if (rads_ < 0.0)
-    deg = -deg;
-}
-
-auto angle::set_dms(int d, int m, double s) -> void
-{
-  rads_ = (d + (m / 60.0) + (s / 3600.0)) * constants<double>::to_radians;
-}
-
-template<>
-auto rainfields::from_string<angle>(const char* str) -> angle
-{
-  // for now assume it's just a number specified in degrees
-  return from_string<double>(str) * 1._deg;
-}
-
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#include "beam_power.h"
-
-#include "array_utils.h"
-
-#include <cmath>
-
-using namespace rainfields::ancilla;
-
-beam_power::beam_power(angle beam_width_h, angle beam_width_v)
-  : beam_width_h_(beam_width_h)
-  , beam_width_v_(beam_width_v)
-  , four_ln_two_(-4.0 * std::log(2.0))
-  , inv_h_sqr_(1.0 / (beam_width_h_.radians() * beam_width_h_.radians()))
-  , inv_v_sqr_(1.0 / (beam_width_v_.radians() * beam_width_v_.radians()))
-{
-
-}
-
-/* calculate the 2d power of the radar beam at theta_azi and theta_elev degrees 
- * off the beam centre.
- *
- * Probert & Jones 1962 Meteoroogical Radar Equation, QJR Met Soc 88, 485 - 495
- */
-auto beam_power::calculate(angle theta_azi, angle theta_elev) const -> real
-{
-  const auto azi = theta_azi.radians();
-  const auto ele = theta_elev.radians();
-  return std::exp(four_ln_two_ * ((azi * azi * inv_h_sqr_) + (ele * ele * inv_v_sqr_)));
-}
-
-beam_power_cross_section::beam_power_cross_section(
-      const beam_power& beam
-    , angle gate_width
-    , size_t rows
-    , size_t cols
-    , angle height
-    , angle width)
-  : height_(height)
-  , width_(width)
-  , elevations_(rows)
-  , azimuths_(cols)
-  , data_(rows, cols)
-{
-  real offset;
-
-  // determine elevation centers
-  offset = 0.5_r * (1.0_r - rows);
-  angle delta_v  = height / rows;
-  for (size_t i = 0; i < rows; ++i)
-    elevations_[i] = (offset + i) * delta_v;
-
-  // determine azimuth centers
-  offset = 0.5_r * (1.0_r - cols);
-  angle delta_h  = width / cols;
-  for (size_t i = 0; i < cols; ++i)
-    azimuths_[i] = (offset + i) * delta_h;
-
-  // calculate cross sectional power array for a single pointing location
-  array2<real> csec{rows, cols};
-  for (size_t y = 0; y < rows; ++y)
-  {
-    for (size_t x = 0; x < cols; ++x)
-    {
-      csec[y][x] = beam.calculate(azimuths_[x], elevations_[y]);
-    }
-  }
-
-  // convolve the pattern over the gate sweep arc
-  int start = std::lround(gate_width / (-2.0_r * delta_h));
-  int end = std::lround(gate_width / (2.0_r * delta_h)) + 1;
-  array_utils::fill(data_, 0.0_r);
-  for (auto i = start; i < end; ++i)
-  {
-    const size_t sx = i < 0 ? -i : 0;
-    const size_t ex = i > 0 ? cols - i : cols;
-
-    for (size_t y = 0; y < rows; ++y)
-    {
-      for (size_t x = sx; x < ex; ++x)
-      {
-        data_[y][x + i] += csec[y][x];
-      }
-    }
-  }
-
-  // normalize the array
-  double total = 0.0;
-  for (size_t i = 0; i < data_.size(); ++i)
-    total += data_.data()[i];
-  array_utils::divide(data_, data_, total);
-}
-
-void beam_power_cross_section::make_vertical_integration()
-{
-  for (size_t y = 1; y < data_.rows(); ++y)
-  {
-    auto below = data_[y-1];
-    auto above = data_[y];
-    for (size_t x = 0; x < data_.cols(); ++x)
-      above[x] += below[x];
-  }
-}
-
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#include "beam_propagation.h"
-
-#include "angle.h"
-
-using namespace rainfields;
-using namespace rainfields::ancilla;
-
-beam_propagation::beam_propagation(
-      angle elevation_angle
-    , real site_altitude
-    , real earth_radius
-    , real effective_multiplier)
-  : elevation_angle_(elevation_angle)
-  , site_altitude_(site_altitude)
-  , earth_radius_(earth_radius)
-  , multiplier_(effective_multiplier)
-  , effective_radius_(multiplier_ * earth_radius_)
-  , cos_elev_(std::cos(elevation_angle_.radians()))
-  , sin_elev_(std::sin(elevation_angle_.radians()))
-  , eer_alt_(effective_radius_ + site_altitude_)
-{
-
-}
-
-auto beam_propagation::set_elevation_angle(angle val) -> void
-{
-  elevation_angle_ = val;
-  cos_elev_ = cos(elevation_angle_);
-  sin_elev_ = sin(elevation_angle_);
-}
-
-auto beam_propagation::set_site_altitude(real val) -> void
-{
-  site_altitude_ = val;
-  eer_alt_ = effective_radius_ + site_altitude_;
-}
-
-auto beam_propagation::set_effective_multiplier(real val) -> void
-{
-  multiplier_ = val;
-  effective_radius_ = multiplier_ * earth_radius_;
-  eer_alt_ = effective_radius_ + site_altitude_;
-}
-
-auto beam_propagation::set_earth_radius(real val) -> void
-{
-  earth_radius_ = val;
-  effective_radius_ = multiplier_ * earth_radius_;
-  eer_alt_ = effective_radius_ + site_altitude_;
-}
-
-auto beam_propagation::ground_range_altitude(real slant_range) const -> vec2<real>
-{
-  // distance along plane tangental to earth at site location
-  double h = slant_range * cos_elev_;
-  // distance above plane tangental to earth at site location
-  double v = (slant_range * sin_elev_) + eer_alt_;
-  return vec2<real>(
-      // x = ground range = curved distance along earth surface
-      std::atan(h/v) * effective_radius_
-      // y = altitude = distance above spherical earth surface
-    , std::hypot(h, v) - effective_radius_
-  );
-
-#if 0
-  /* Alternative version based on theory from text book:
-   *    Dopper Radar and Weather Observations, Doviak & Zrnic
-   * The two versions here were derived separately, however result in negligible
-   * difference (< 6.5mm height, < 0.1mm range @ 100km with elev angle of 30 deg) */
-  real hgt = sqrt(in.x * in.x + eff_sqr_ + 2.0 * in.x * eff_rad_ * sin_elev_) - eff_rad_ + ref_point_sph_.hgt;
-  real rng = eff_rad_ * asin((in.x * cos_elev_)/(eff_rad_ + hgt));
-#endif
-}
-
-auto beam_propagation::slant_range(real ground_range) const -> real
-{
-  // TODO - it would be nice to calculate the geometric height here too...
-
-  // inverse of above formula
-  if (ground_range <= 0.0_r)
-    return 0.0_r;
-  else
-    return eer_alt_ / ((cos_elev_ / std::tan(ground_range / effective_radius_)) - sin_elev_);
-}
-
-auto beam_propagation::required_elevation_angle(real ground_range, real altitude) const -> angle
-{
-  /* Warning to modifiers:
-   * It is crucial that the calculations performed by this function use double precision
-   * math.  This is due mostly to the very small angle of theta and very large values
-   * of tgt_alt and eer_alt.  DO NOT CHANGE IT TO SINGLE PRECISION!  */
-
-  // angle between site location and target on great circle
-  angle theta = (ground_range / effective_radius_) * 1.0_rad;
-
-  // slant range (law of cosines)
-  double tgt_alt = effective_radius_ + altitude;
-  double eer_alt = eer_alt_;
-  double slant_range
-    = (tgt_alt * tgt_alt) 
-    + (eer_alt * eer_alt) 
-    - 2.0 * tgt_alt * eer_alt * cos(theta);
-  slant_range = std::sqrt(slant_range);
-
-  // elevation angle (law of sines)
-  // find the angle opposite the shorter side (since asin always returns < 90 degrees)
-  if (tgt_alt < eer_alt)
-    return asin((tgt_alt * sin(theta)) / slant_range) - 90.0_deg;
-  else
-    return 90.0_deg - theta - asin((eer_alt * sin(theta)) / slant_range);
-}
-
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#include "digital_elevation.h"
-#include "array_utils.h"
-#include "trace.h"
-
-#include <arpa/inet.h> // just for ntohs()
-#include <fstream>
-#include <memory>
-#include <iostream>
-#include <sys/stat.h>
-
-using namespace std;
-
-using namespace rainfields::ancilla;
-
-digital_elevation::digital_elevation(const Params &params) :
-        _params(params)
-{
-}
-
-digital_elevation::~digital_elevation()
-{
-  
-}
-
-digital_elevation::model_error::model_error(std::string description)
-        : runtime_error(description)
-        , description_(std::move(description))
-        , location_(nan<angle>(), nan<angle>())
-{
-  
-}
-
-digital_elevation::model_error::model_error(std::string description, latlon location)
-        : runtime_error(msg{} << description << std::endl << "  location: " << location)
-        , description_(std::move(description))
-        , location_(location)
-{
-  
-}
-
-digital_elevation_srtm3::digital_elevation_srtm3(const Params &params,
-                                                 std::string path, size_t cache_size)
-        : digital_elevation(params)
-        , path_(std::move(path))
-        , cache_size_(cache_size)
-        , wgs84_(spheroid::standard::wgs84)
-{
-  if (path_.empty())
-    path_.assign("./");
-  else if (path_.back() != '/')
-    path_.append("/");
-}
-
-auto digital_elevation_srtm3::reference_spheroid() -> const spheroid&
-{
-  return wgs84_;
-}
-
-auto digital_elevation_srtm3::lookup(const latlon& loc) -> real
-{
-
-  real lat = std::abs(loc.lat.degrees());
-  real lon = std::abs(loc.lon.degrees());
-  int ilat = lat, ilon = lon;
-
-  // determine the tile to use
-  int tilelat = loc.lat.radians() < 0.0 ? -ilat - 1 : ilat;
-  int tilelon = loc.lon.radians() < 0.0 ? -ilon - 1 : ilon;
-  
-  const srtm_tile &tile = get_tile(tilelat, tilelon);
-  if (tile.nlat == 0 || tile.nlon == 0) {
-    return 0.0; // sea location
-  }
-
-  // determine the indices within the tile
-  int x, y;
-  if (tilelat >= 0)
-  {
-    y = std::lround((ilat + 1 - lat) / tile.dlat);
-  }
-  else
-  {
-    y = std::lround((lat - ilat) / tile.dlat);
-  }
-  if (tilelon >= 0)
-  {
-    x = std::lround((lon - ilon) / tile.dlon);
-  }
-  else
-  {
-    x = std::lround((ilon + 1 - lon) / tile.dlon);
-  }
-  
-  return tile.data[y][x];
-     
-}
-
-auto digital_elevation_srtm3::lookup(latlonalt* values, size_t count) -> void
-{
-  throw model_error{"unimplemented feature: model multi lookup"};
-}
-
-auto digital_elevation_srtm3::testFTG(void) ->void
-{
-  test(39, -104, 40, -104, 39, -105, 39, -104);
-}
-
-auto digital_elevation_srtm3::testBOM(void) ->void
-{
-  test(-37, 144, -38, 144, -38, 145, -38, 146);
-}
-
-auto digital_elevation_srtm3::test(int lat0, int lon0, int lat1, int lon1, 
-				   int lat2, int lon2, int lat3, int lon3) ->void
-{
-  array2<real> t0 = get_tile(lat0, lon0).data;
-  array2<real> t1 = get_tile(lat1, lon1).data;
-  bool match01_00 = true;
-  bool match01_01 = true;
-  bool match01_10 = true;
-  bool match01_11 = true;
-  for (size_t i=0; i<1201; ++i)
-  {
-    if (t0[0][i] != t1[1200][i])
-    {
-      match01_01 = false;
-    }
-    if (t0[0][i] != t1[0][i])
-    {
-      match01_00 = false;
-    }
-    if (t0[1200][i] != t1[0][i])
-    {
-      match01_10 = false;
-    }
-    if (t0[1200][i] != t1[1200][i])
-    {
-      match01_11 = false;
-    }
-  }
-  if (match01_01)
-  {
-    printf("[%d,%d] row[0] matches [%d,%d] row[1200]\n",
-	   lat0, lon0, lat1, lon1);
-  }
-  if (match01_10)
-  {
-    printf("[%d,%d] row[1200] matches [%d,%d] row[0]\n",
-	   lat0, lon0, lat1, lon1);
-  }
-  if (match01_00)
-  {
-    printf("[%d,%d] row[0] matches [%d,%d] row[0]\n",
-	   lat0, lon0, lat1, lon1);
-  }
-  if (match01_11)
-  {
-    printf("[%d,%d] row[1200] matches [%d,%d] row[1200]\n",
-	   lat0, lon0, lat1, lon1);
-  }
-
-
-  t0 = get_tile(lat2, lon2).data;
-  t1 = get_tile(lat3, lon3).data;
-  match01_00 = true;
-  match01_01 = true;
-  match01_10 = true;
-  match01_11 = true;
-  for (size_t i=0; i<1201; ++i)
-  {
-    if (t0[i][0] != t1[i][1200])
-    {
-      match01_01 = false;
-    }
-    if (t0[i][0] != t1[i][0])
-    {
-      match01_00 = false;
-    }
-    if (t0[i][1200] != t1[i][0])
-    {
-      match01_10 = false;
-    }
-    if (t0[i][1200] != t1[i][1200])
-    {
-      match01_11 = false;
-    }
-  }
-  if (match01_01)
-  {
-    printf("[%d,%d] col[0] matches [%d,%d] col[1200]\n",
-	   lat2, lon2, lat3, lon3);
-  }
-  if (match01_10)
-  {
-    printf("[%d,%d] col[1200] matches [%d,%d] col[0]\n",
-	   lat2, lon2, lat3, lon3);
-  }
-  if (match01_00)
-  {
-    printf("[%d,%d] col[0] matches [%d,%d] col[0]\n",
-	   lat2, lon2, lat3, lon3);
-  }
-  if (match01_11)
-  {
-    printf("[%d,%d] col[1200] matches [%d,%d] col[1200]\n",
-	   lat2, lon2, lat3, lon3);
-  }
-}
-
-auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
-{
-
-  // do we have this tile cached?
-  for (auto i = tiles_.begin(); i != tiles_.end(); ++i)
-  {
-    if (i->lat == lat && i->lon == lon)
-    {
-      // promote tile to front of list
-      if (i != tiles_.begin())
-        tiles_.splice(tiles_.begin(), tiles_, i);
-      return *i;
-    }
-  }
-
-  // allocate or reuse a tile
-  if (tiles_.size() < cache_size_)
-    tiles_.emplace_front();
-  else
-    tiles_.splice(tiles_.begin(), tiles_, --tiles_.end());
-
-  auto& tile = tiles_.front();
-
-  // compute tile file name and path
-  char file_name[128];
-  snprintf(
-          file_name
-          , sizeof(file_name)
-          , "%c%02d%c%03d.hgt"
-          , lat < 0 ? 'S' : 'N'
-          , std::abs(lat)
-          , lon < 0 ? 'W' : 'E'
-          , std::abs(lon));
-  string file_path = path_ + file_name;
-
-  // check tile dimensions
-
-  struct stat fileStat;
-  if (stat(file_path.c_str(), &fileStat)) {
-    // file does not exist, set tile to have size 0x0
-    if (_params.debug) {
-      cerr << "Missing tile path: " << file_path << endl;
-      cerr << "  Probably a sea tile" << endl;
-    }
-    tile.lat = lat;
-    tile.lon = lon;
-    tile.nlat = 0;
-    tile.nlon = 0;
-    tile.dlat = 0;
-    tile.dlon = 0;
-    return tile;
-  }
-
-  int nBytes = fileStat.st_size;
-  long nCells = nBytes / 2; // data is 2 byte ints
-  int tileDim = sqrt(nCells);
-  if (_params.debug) {
-    cerr << "Tile path: " << file_path << endl;
-    cerr << " lat, lon: " << lat << ", " << lon << endl;
-    cerr << "      dim: " << tileDim << endl;
-  }
-
-  // set tile metadata
-  // depends on tile dimension
-  // 3-sec data has tiles 1201 x 1201
-  // 1-sec data has tiles 3601 x 3601
-
-  tile.lat = lat;
-  tile.lon = lon;
-  tile.nlat = tileDim;
-  tile.nlon = tileDim;
-  tile.dlat = 1.0 / (tileDim - 1.0);
-  tile.dlon = 1.0 / (tileDim - 1.0);
-
-  // allocate space for tile data
-
-  tile.data.resize(tile.nlat, tile.nlon);
-
-  // fill tile data
-
-  std::ifstream file((path_ + file_name).c_str(),
-                     std::ifstream::in | std::ifstream::binary);
-  if (file) {
-    
-    std::unique_ptr<std::int16_t[]>
-      buf{new std::int16_t[tile.nlat * tile.nlon]};
-    
-    file.read(reinterpret_cast<char*>(buf.get()),
-              sizeof(int16_t) * tile.nlat * tile.nlon);
-    if (!file)
-      throw model_error{
-          msg{} << "srtm3: tile read failed: " << path_ << file_name
-        , {lat * 1_deg, lon * 1_deg}};
-
-    // convert from big-endian into host order
-    for (int i = 0; i < tile.nlat * tile.nlon; ++i) {
-      buf[i] = ntohs(buf[i]);
-    }
-
-    // convert to real replacing void values with NaN
-    for (int i = 0; i < tile.nlat * tile.nlon; ++i) {
-      tile.data.data()[i] = buf[i] == void_value ? nan() : buf[i];
-    }
-
-  }
-
-  return tile;
-
-}
-
-digital_elevation_esri::digital_elevation_esri(
-        const Params &params
-        , const std::string& path
-        , latlon sw
-        , latlon ne
-        , spheroid::standard reference_spheroid)
-        : digital_elevation_esri(params, path, sw, ne, spheroid{reference_spheroid})
-{
-
-}
-
-digital_elevation_esri::digital_elevation_esri(
-        const Params &params
-        , const std::string& path
-        , latlon sw
-        , latlon ne
-        , spheroid reference_spheroid)
-        : digital_elevation(params)
-        , spheroid_(std::move(reference_spheroid))
-{
-  std::ifstream file(path);
-  if (!file)
-    throw model_error{msg{} << "esri: failed to open dataset: " << path};
-
-  std::string label;
-  int cols, rows;
-  real llx, lly;
-  real nodata;
-  
-  file >> label >> cols;
-  if (!file || label != "ncols")
-    throw model_error{msg{} << "esri: dataset expected ncols: " << path};
-
-  file >> label >> rows;
-  if (!file || label != "nrows")
-    throw model_error{msg{} << "esri: dataset expected nrows: " << path};
-
-  file >> label >> llx;
-  if (!file || label != "xllcorner")
-    throw model_error{msg{} << "esri: dataset expected xllcorner: " << path};
-
-  file >> label >> lly;
-  if (!file || label != "yllcorner")
-    throw model_error{msg{} << "esri: dataset expected yllcorner: " << path};
-
-  file >> label >> delta_deg_;
-  if (!file || label != "cellsize")
-    throw model_error{msg{} << "esri: dataset expected cellsize: " << path};
-
-  file >> label >> nodata;
-  if (!file || label != "NODATA_value")
-    throw model_error{msg{} << "esri: dataset expected NODATA_value: " << path};
-
-  // determine the subset of points to load
-  int miny = rows - (ne.lat.degrees() - lly) / delta_deg_;
-  int maxy = miny + (ne.lat - sw.lat).degrees() / delta_deg_;
-  int minx = (sw.lon.degrees() - llx) / delta_deg_;
-  int maxx = minx + (ne.lon - sw.lon).degrees() / delta_deg_;
-
-  // clamp subset to the actual data
-  bool warn = false;
-  if (miny < 0)
-  {
-    miny = 0;
-    warn = true;
-  }
-  if (maxy >= rows)
-  {
-    maxy = rows;
-    warn = true;
-  }
-  if (minx < 0)
-  {
-    minx = 0;
-    warn = true;
-  }
-  if (maxx >= cols)
-  {
-    maxx = cols;
-    warn = true;
-  }
-  if (warn)
-    trace::log() << "esri: requested subset " << sw << " - " << ne << " exceeds dataset bounds";
-
-  // allocate our data
-  data_ = array2<real>(maxy - miny, maxx - minx);
-
-  // record central position of 0,0 point of our array
-  nw_.lat.set_degrees(lly + (rows - miny - 0.5_r) * delta_deg_);
-  nw_.lon.set_degrees(llx + (minx + 0.5_r) * delta_deg_);
-
-  // skip to the first row we want to load
-  file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-  for (int i = 0; i < miny; ++i)
-    file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-  // read each row in the interesting region
-  for (size_t y = 0; y < data_.rows(); ++y)
-  {
-    // skip to the first column we want to load
-    for (int i = 0; i < minx; ++i)
-      file.ignore(std::numeric_limits<std::streamsize>::max(), ' ');
-
-    // read the data
-    real* raw = data_[y];
-    for (size_t x = 0; x < data_.cols(); ++x)
-    {
-      file >> raw[x];
-      if (std::abs(raw[x] - nodata) < 0.0001_r)
-        raw[x] = nan();
-    }
-
-    // skip until the start of the next row
-    file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-  }
-}
-
-auto digital_elevation_esri::reference_spheroid() -> const spheroid&
-{
-  return spheroid_;
-}
-
-auto digital_elevation_esri::lookup(const latlon& loc) -> real
-{
-  // determine the array coordinates
-  auto y = std::lround((nw_.lat - loc.lat).degrees() / delta_deg_);
-  auto x = std::lround((loc.lon - nw_.lon).degrees() / delta_deg_);
-
-  if (   y < 0 || y >= (int) data_.rows()
-      || x < 0 || x >= (int) data_.cols())
-    return nan();
-
-  return data_[y][x];
-}
-
-auto digital_elevation_esri::lookup(latlonalt* values, size_t count) -> void
-{
-  throw model_error{"unimplemented feature: model multi lookup"};
-}
-
-
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#include "field.h"
-
-using namespace rainfields::ancilla;
-
-field::field(std::string id)
-  : id_(std::move(id))
-{
-
-}
-
-// should be = default - but can't due to non-conforming std::string in gcc
-auto field::operator=(field&& rhs) noexcept -> field&
-{
-  id_ = std::move(rhs.id_);
-  return *this;
-}
-
-auto field::set_id(const std::string& val) -> void
-{
-  id_ = val;
-}
-
-field1::field1(std::string id, size_t size)
-  : field(std::move(id))
-  , array1<real>(size)
-{ }
-
-field1::field1(std::string id, const size_t dims[])
-  : field(std::move(id))
-  , array1<real>(dims)
-{ }
-
-field2::field2(std::string id, size_t y, size_t x)
-  : field(std::move(id))
-  , array2<real>(y, x)
-{ }
-
-field2::field2(std::string id, const size_t dims[])
-  : field(std::move(id))
-  , array2<real>(dims)
-{ }
-
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#include "latlon.h"
-
-using namespace rainfields;
-
-auto rainfields::operator<<(std::ostream& lhs, const latlon& rhs) -> std::ostream&
-{
-  int d, m;
-  double s;
-  char buf[64];
-
-  rhs.lat.dms(d, m, s);
-  snprintf(buf, sizeof(buf), "%03d%02d%02.lf%c", std::abs(d), m, s, d < 0 ? 'S' : 'N');
-  lhs << buf;
-
-  rhs.lon.dms(d, m, s);
-  snprintf(buf, sizeof(buf), " %03d%02d%02.lf%c", std::abs(d), m, s, d < 0 ? 'W' : 'E');
-  lhs << buf;
-
-  return lhs;
-}
-
-auto rainfields::operator<<(std::ostream& lhs, const latlonalt& rhs) -> std::ostream&
-{
-  char buf[32];
-  snprintf(buf, sizeof(buf), " %.0fm", rhs.alt);
-  return lhs << static_cast<const latlon&>(rhs) << buf;
-}
-
-template <>
-auto rainfields::from_string<latlon>(const char* str) -> latlon
-{
-  // TODO - support multiple formats here...
-  double lat, lon;
-  if (sscanf(str, "%lf %lf", &lat, &lon) != 2)
-    throw string_conversion_error("latlon", str);
-  return {lat * 1_deg, lon * 1_deg};
-}
-
-template <>
-auto rainfields::from_string<latlonalt>(const char* str) -> latlonalt
-{
-  // TODO - support multiple formats here...
-  double lat, lon, alt;
-  if (sscanf(str, "%lf %lf %lf", &lat, &lon, &alt) != 3)
-    throw string_conversion_error("latlonalt", str);
-  return {lat * 1_deg, lon * 1_deg, alt};
-}
-
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#include "spheroid.h"
-
-using namespace rainfields;
-using namespace rainfields::ancilla;
-
-constexpr const char* enum_traits<spheroid::standard>::strings[];
-
-// the order of the spheroids specified here _must_ match common_sphereoid
-// first value is major axis, second value is inverse flattening
-static constexpr real std_sphere[][2] =
-{
-    { 6378165.000, 298.3         } // i65
-  , { 6378160.000, 298.25        } // ans
-  , { 6378293.645, 294.26        } // clark1858
-  , { 6378137.000, 298.257222101 } // grs80
-  , { 6378137.000, 298.257223563 } // wgs84
-  , { 6378135.000, 298.26        } // wgs72
-  , { 6378388.000, 297           } // international1924
-  , { 6378160.000, 298.25        } // australian_national
-};
-
-spheroid::spheroid(standard cs)
-  : a_(std_sphere[static_cast<int>(cs)][0])
-  , inv_f_(std_sphere[static_cast<int>(cs)][1])
-{
-  derive_parameters();
-}
-
-spheroid::spheroid(real semi_major_axis, real inverse_flattening)
-  : a_(semi_major_axis)
-  , inv_f_(inverse_flattening)
-{
-  derive_parameters();
-}
-
-spheroid::spheroid(const xml::node& conf)
-{
-  auto i = conf.attributes().find("spheroid");
-  if (i == conf.attributes().end())
-  {
-    a_ = conf("semi_major_axis");
-    inv_f_ = conf("inverse_flattening");
-  }
-  else
-  {
-    standard cs = from_string<standard>(*i);
-    a_ = std_sphere[static_cast<int>(cs)][0];
-    inv_f_ = std_sphere[static_cast<int>(cs)][1];
-  }
-  derive_parameters();
-}
-
-auto spheroid::radius_physical(angle lat) const -> real
-{
-  real a_cos = a_ * cos(lat);
-  real a2_cos = a_ * a_cos;
-  real b_sin = b_ * sin(lat);
-  real b2_sin = b_ * b_sin;
-  return std::sqrt((a2_cos * a2_cos + b2_sin * b2_sin) / (a_cos * a_cos + b_sin * b_sin));
-}
-
-auto spheroid::radius_of_curvature_meridional(angle lat) const -> real
-{
-  real ab = a_ * b_;
-  real a_cos = a_ * cos(lat);
-  real b_sin = b_ * sin(lat);
-  return (ab * ab) / std::pow(a_cos * a_cos + b_sin * b_sin, 1.5_r);
-}
-
-auto spheroid::radius_of_curvature_normal(angle lat) const -> real
-{
-  real a_cos = a_ * cos(lat);
-  real b_sin = b_ * sin(lat);
-  return (a_ * a_) / std::sqrt(a_cos * a_cos + b_sin * b_sin);
-}
-
-auto spheroid::radius_of_curvature(angle lat) const -> real
-{
-  real a_cos = a_ * cos(lat);
-  real b_sin = b_ * sin(lat);
-  return (a_ * a_ * b_) / (a_cos * a_cos + b_sin * b_sin);
-}
-
-auto spheroid::latlon_to_ecefxyz(latlonalt pos) const -> vec3<real>
-{
-  real sin_lat = sin(pos.lat);
-  real cos_lat = cos(pos.lat);
-  real nu = a_ / std::sqrt(1.0_r - e_sqr_ * sin_lat * sin_lat);
-  real nu_plus_h = nu + pos.alt;
-
-  return vec3<real>(
-        nu_plus_h * cos_lat * cos(pos.lon)
-      , nu_plus_h * cos_lat * sin(pos.lon)
-      , ((1.0_r - e_sqr_) * nu + pos.alt) * sin_lat);
-}
-
-auto spheroid::ecefxyz_to_latlon(vec3<real> pos) const -> latlonalt
-{
-  real p = std::sqrt(pos.x * pos.x + pos.y * pos.y);
-  angle theta = atan((pos.z * a_) / (p * b_));
-  real sin3 = sin(theta); sin3 = sin3 * sin3 * sin3;
-  real cos3 = cos(theta); cos3 = cos3 * cos3 * cos3;
-  angle lat = atan((pos.z + ep2_ * b_ * sin3) / (p - e_sqr_ * a_ * cos3));
-  real sinlat = sin(lat);
-
-  return latlonalt(
-        lat
-      , atan2(pos.y, pos.x)
-      , (p / cos(lat)) - (a_ / std::sqrt(1.0_r - e_sqr_ * sinlat * sinlat)));
-}
-
-auto spheroid::bearing_range_to_latlon(latlon pos, angle bearing, real range) const -> latlon
-{
-  // based on original open source script found at:
-  // http://www.movable-type.co.uk/scripts/latlong-vincenty-direct.html
-  // modified for use in ancilla
-
-  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
-  /* Vincenty Direct Solution of Geodesics on the Ellipsoid (c) Chris Veness 2005-2012              */
-  /*                                                                                                */
-  /* from: Vincenty direct formula - T Vincenty, "Direct and Inverse Solutions of Geodesics on the  */
-  /*       Ellipsoid with application of nested equations", Survey Review, vol XXII no 176, 1975    */
-  /*       http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf                                             */
-  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
-
-  auto sin_alpha_1 = sin(bearing);
-  auto cos_alpha_1 = cos(bearing);
-  
-  auto tanU1 = (1.0 - f_) * tan(pos.lat);
-  auto cosU1 = 1.0 / std::sqrt((1.0 + tanU1 * tanU1));
-  auto sinU1 = tanU1 * cosU1;
-
-  auto sigma1 = atan2(tanU1, cos_alpha_1);
-  auto sinAlpha = cosU1 * sin_alpha_1;
-  auto cosSqAlpha = 1.0 - sinAlpha * sinAlpha;
-  auto uSq = cosSqAlpha * ep2_;
-  auto A = 1.0 + uSq / 16384.0 * (4096.0 + uSq * (-768.0 + uSq * (320.0 - 175.0 * uSq)));
-  auto B = uSq / 1024.0 * (256.0 + uSq * (-128.0 + uSq * (74.0 - 47.0 * uSq)));
-  
-  auto sigma = (range / (b_ * A)) * 1_rad;
-  auto sigmaP = constants<double>::two_pi * 1_rad;
-  real cos2SigmaM, sinSigma, cosSigma;
-  while (true)
-  {
-    cos2SigmaM = cos(2.0 * sigma1 + sigma);
-    sinSigma = sin(sigma);
-    cosSigma = cos(sigma);
-
-    if ((sigma - sigmaP).abs() > 1e-12_rad)
-      break;
-
-    auto deltaSigma = 
-      B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1.0 + 2.0 * cos2SigmaM * cos2SigmaM)
-      - B / 6.0 * cos2SigmaM * (-3.0 + 4.0 * sinSigma * sinSigma) 
-      * (-3.0 + 4.0 * cos2SigmaM * cos2SigmaM)));
-    sigmaP = sigma;
-    sigma.set_radians(range / (b_ * A) + deltaSigma);
-  }
-
-  auto tmp = sinU1 * sinSigma - cosU1 * cosSigma * cos_alpha_1;
-  auto lat2 = atan2(sinU1 * cosSigma + cosU1 * sinSigma * cos_alpha_1, (1-f_) * std::hypot(sinAlpha, tmp));
-  auto lambda = atan2(sinSigma*sin_alpha_1, cosU1*cosSigma - sinU1*sinSigma*cos_alpha_1);
-  auto C = f_/16*cosSqAlpha*(4+f_*(4-3*cosSqAlpha));
-  auto L = lambda - (1-C) * f_ * sinAlpha *
-      (sigma + 1_rad * C * sinSigma * (cos2SigmaM + C * cosSigma * (-1.0 + 2.0 * cos2SigmaM * cos2SigmaM)));
-  auto lon2 = 1_rad * (std::fmod(pos.lon.radians() + L.radians() + (3 * constants<double>::pi), constants<double>::two_pi) - constants<double>::pi);  // normalise to -180...+180
-
-  return { lat2, lon2 };
-}
-
-/* Vincenty inverse formula - T Vincenty, "Direct and Inverse Solutions of Geodesics on the
- * Ellipsoid with application of nested equations", Survey Review, vol XXII no 176, 1975
- * http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
- *
- * Implementation based on formulas found from the "Vincenty's Formulae" Wikipedia article.
- */
-auto spheroid::latlon_to_bearing_range(latlon pos1, latlon pos2) const -> std::pair<angle, real>
-{
-  // initialization
-  const double u1 = std::atan((1.0 - f_) * std::tan((double) pos1.lat.radians()));
-  const double u2 = std::atan((1.0 - f_) * std::tan((double) pos2.lat.radians()));
-  const double l = pos2.lon.radians() - pos1.lon.radians();
-
-  // dependent initialization
-  const double cos_u1 = std::cos(u1);
-  const double cos_u2 = std::cos(u2);
-  const double sin_u1 = std::sin(u1);
-  const double sin_u2 = std::sin(u2);
-  const double cu1su2 = cos_u1 * sin_u2;
-  const double cu2su1 = cos_u2 * sin_u1;
-  const double su1su2 = sin_u1 * sin_u2;
-  const double cu1cu2 = cos_u1 * cos_u2;
-
-  // iteration until convergence of lambda
-  double lambda = l;
-  for (size_t iters = 0; iters < 100; ++iters)
-  {
-    double cos_lambda = std::cos(lambda);
-    double sin_lambda = std::sin(lambda);
-    double sin_sigma  = std::hypot(cos_u2 * sin_lambda, cu1su2 - cu2su1 * cos_lambda);
-
-    // check for coincident points
-    if (sin_sigma == 0.0)
-      return { 0.0_rad, 0.0 };
-
-    double cos_sigma  = su1su2 + cu1cu2 * cos_lambda;
-    double sigma      = std::atan2(sin_sigma, cos_sigma);
-    double sin_alpha  = (cu1cu2 * sin_lambda) / sin_sigma;
-    double csq_alpha  = 1.0 - sin_alpha * sin_alpha;
-    double cos_2sigm  = cos_sigma - ((2.0 * su1su2) / csq_alpha);
-
-    // check for equatorial line
-    if (is_nan(cos_2sigm))
-      cos_2sigm = 0.0;
-
-    double c          = (f_ / 16.0) * csq_alpha * (4.0 + f_ * (4.0 - 3.0 * csq_alpha));
-    double lambda_new = l + (1.0 - c) * f_ * sin_alpha * (sigma + c * sin_sigma * 
-                          (cos_2sigm + c * cos_sigma * (-1.0 + 2.0 * cos_2sigm)));
-
-    // check for convergence to correct answer
-    if (std::abs(lambda - lambda_new) < 1e-12)
-    {
-      double u_sqr  = csq_alpha * ep2_;
-      double a      = 1.0 + (u_sqr / 16384.0) * (4096.0 + u_sqr * 
-                        (-768.0 + u_sqr * (320.0 - 175.0 * u_sqr)));
-      double b      = (u_sqr / 1024.0) * (256.0 + u_sqr * (-128.0 + u_sqr * (74 - 47.0 * u_sqr)));
-      double dsigma = b * sin_sigma * (cos_2sigm + 0.25 * b * (cos_sigma * 
-                        (-1.0 + 2.0 * cos_2sigm * cos_2sigm) - (1.0 / 6.0) * b * cos_2sigm * 
-                        (-3.0 + 4.0 * sin_sigma * sin_sigma) * (-3.0 + 4.0 * cos_2sigm * cos_2sigm)));
-      double s      = b_ * a * (sigma - dsigma);
-      double az_fwd = std::atan2(
-                          (cos_u2 * std::sin(lambda_new))
-                        , (cu1su2 - cu2su1 * std::cos(lambda_new)));
-      return { az_fwd * 1_rad, s };
-    }
-    lambda = lambda_new;
-  }
-
-  // failed to converge
-  return { nan<angle>(), nan() };
-}
-
-auto spheroid::bearing_range_to_latlon_haversine(latlon pos, angle bearing, real range) const -> latlon
-{
-  auto ronrad = (range / radius_of_curvature(pos.lat)) * 1_rad;
-  auto srad = sin(ronrad);
-  auto crad = cos(ronrad);
-  auto slat = sin(pos.lat);
-  auto clat = cos(pos.lat);
-
-  auto lat = asin(slat * crad + clat * srad * cos(bearing));
-  auto lon = pos.lon + atan2(sin(bearing) * srad * clat, crad - slat * sin(lat));
-
-  return { lat, lon };
-}
-
-auto spheroid::latlon_to_bearing_range_haversine(latlon pos1, latlon pos2) const -> std::pair<angle, real>
-{
-  auto radius = radius_of_curvature(pos1.lat);
-
-  auto dlat = pos2.lat - pos1.lat;
-  auto dlon = pos2.lon - pos1.lon;
-
-  auto clat1 = cos(pos1.lat);
-  auto clat2 = cos(pos2.lat);
-
-  // distance
-  auto sdlat2 = sin(dlat * 0.5_r);
-  auto sdlon2 = sin(dlon * 0.5_r);
-  auto a = sdlat2 * sdlat2 + sdlon2 * sdlon2 * clat1 * clat2;
-  auto r = radius * (2.0_r * atan2(sqrt(a), sqrt(1.0_r - a)).radians());
-
-  // bearing
-  auto y = sin(dlon) * clat2;
-  auto x = clat1 * sin(pos2.lat) - sin(pos1.lat) * clat2 * cos(dlon);
-  auto b = atan2(y,x);
-  
-  return { b, r };
-}
-
-void spheroid::derive_parameters()
-{
-  f_      = 1.0_r / inv_f_;
-  b_      = a_ * (1.0_r - f_);
-  e_sqr_  = f_ * (2.0_r - f_);
-  ep2_    = (a_ * a_ - b_ * b_) / (b_ * b_);
-  e_      = std::sqrt(e_sqr_);
-  avg_r_  = (2.0_r * a_ + b_) / 3.0_r;
-
-  auth_r_ = e_sqr_ * e_sqr_ * e_sqr_ * 4.0_r / 7.0_r;
-  auth_r_ += e_sqr_ * e_sqr_ * 3.0_r / 5.0_r;
-  auth_r_ += 1.0_r;
-  auth_r_ *= (1.0_r - e_sqr_);
-  auth_r_ = a_ * std::sqrt(auth_r_);
-}
-
-
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#include "string_utils.h"
+#include "RainFields.hh"
 
 #include <limits>
 #include <cstdlib>
@@ -1474,7 +214,7 @@ auto rainfields::tokenize(const std::string& str, const char* delims) -> std::ve
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
 
-#include "trace.h"
+// #include "trace.h"
 
 #include <iostream>
 #include <thread>
@@ -1695,6 +435,71 @@ auto rainfields::format_exception(const std::exception& err, const char* prefix)
 }
 
 // %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+// ** Ancilla Radar Quality Control System (ancilla)
+// ** Copyright BOM (C) 2013
+// ** Bureau of Meteorology, Commonwealth of Australia, 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from the BOM.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of the BOM nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+
+// #include "field.h"
+
+using namespace rainfields::ancilla;
+
+field::field(std::string id)
+  : id_(std::move(id))
+{
+
+}
+
+// should be = default - but can't due to non-conforming std::string in gcc
+auto field::operator=(field&& rhs) noexcept -> field&
+{
+  id_ = std::move(rhs.id_);
+  return *this;
+}
+
+auto field::set_id(const std::string& val) -> void
+{
+  id_ = val;
+}
+
+field1::field1(std::string id, size_t size)
+  : field(std::move(id))
+  , array1<real>(size)
+{ }
+
+field1::field1(std::string id, const size_t dims[])
+  : field(std::move(id))
+  , array1<real>(dims)
+{ }
+
+field2::field2(std::string id, size_t y, size_t x)
+  : field(std::move(id))
+  , array2<real>(y, x)
+{ }
+
+field2::field2(std::string id, const size_t dims[])
+  : field(std::move(id))
+  , array2<real>(dims)
+{ }
+
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
 // ** Rainfields Utilities Library (rainutil)
 // ** Copyright BOM (C) 2013
 // ** Bureau of Meteorology, Commonwealth of Australia, 
@@ -1717,7 +522,138 @@ auto rainfields::format_exception(const std::exception& err, const char* prefix)
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
 
-#include "xml.h"
+// #include "angle.h"
+
+using namespace rainfields;
+
+auto angle::dms(int& deg, int& min, double& sec) const -> void
+{
+  double decimal = std::abs(degrees());
+  deg = decimal;
+  decimal = (decimal - deg) * 60.0;
+  min = decimal;
+  decimal = (decimal - min) * 60.0;
+  sec = decimal;
+
+  // fix rare case of floating point stuff up
+  if (sec >= 60.0)
+  {
+    min++;
+    sec -= 60.0;
+  }
+
+  // ensure correct sign on degrees
+  if (rads_ < 0.0)
+    deg = -deg;
+}
+
+auto angle::set_dms(int d, int m, double s) -> void
+{
+  rads_ = (d + (m / 60.0) + (s / 3600.0)) * constants<double>::to_radians;
+}
+
+template<>
+auto rainfields::from_string<angle>(const char* str) -> angle
+{
+  // for now assume it's just a number specified in degrees
+  return from_string<double>(str) * 1._deg;
+}
+
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+// ** Rainfields Utilities Library (rainutil)
+// ** Copyright BOM (C) 2013
+// ** Bureau of Meteorology, Commonwealth of Australia, 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from the BOM.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of the BOM nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+
+// #include "latlon.h"
+
+using namespace rainfields;
+
+auto rainfields::operator<<(std::ostream& lhs, const latlon& rhs) -> std::ostream&
+{
+  int d, m;
+  double s;
+  char buf[64];
+
+  rhs.lat.dms(d, m, s);
+  snprintf(buf, sizeof(buf), "%03d%02d%02.lf%c", std::abs(d), m, s, d < 0 ? 'S' : 'N');
+  lhs << buf;
+
+  rhs.lon.dms(d, m, s);
+  snprintf(buf, sizeof(buf), " %03d%02d%02.lf%c", std::abs(d), m, s, d < 0 ? 'W' : 'E');
+  lhs << buf;
+
+  return lhs;
+}
+
+auto rainfields::operator<<(std::ostream& lhs, const latlonalt& rhs) -> std::ostream&
+{
+  char buf[32];
+  snprintf(buf, sizeof(buf), " %.0fm", rhs.alt);
+  return lhs << static_cast<const latlon&>(rhs) << buf;
+}
+
+template <>
+auto rainfields::from_string<latlon>(const char* str) -> latlon
+{
+  // TODO - support multiple formats here...
+  double lat, lon;
+  if (sscanf(str, "%lf %lf", &lat, &lon) != 2)
+    throw string_conversion_error("latlon", str);
+  return {lat * 1_deg, lon * 1_deg};
+}
+
+template <>
+auto rainfields::from_string<latlonalt>(const char* str) -> latlonalt
+{
+  // TODO - support multiple formats here...
+  double lat, lon, alt;
+  if (sscanf(str, "%lf %lf %lf", &lat, &lon, &alt) != 3)
+    throw string_conversion_error("latlonalt", str);
+  return {lat * 1_deg, lon * 1_deg, alt};
+}
+
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+// ** Rainfields Utilities Library (rainutil)
+// ** Copyright BOM (C) 2013
+// ** Bureau of Meteorology, Commonwealth of Australia, 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from the BOM.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of the BOM nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+
+// #include "xml.h"
 
 #include <cstdio>
 
@@ -2730,4 +1666,1066 @@ auto document::write(std::ostream&& out) -> void
 {
   write(out);
 }
+
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+// ** Ancilla Radar Quality Control System (ancilla)
+// ** Copyright BOM (C) 2013
+// ** Bureau of Meteorology, Commonwealth of Australia, 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from the BOM.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of the BOM nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+
+// #include "beam_power.h"
+// #include "array_utils.h"
+
+#include <cmath>
+
+using namespace rainfields::ancilla;
+
+beam_power::beam_power(angle beam_width_h, angle beam_width_v)
+  : beam_width_h_(beam_width_h)
+  , beam_width_v_(beam_width_v)
+  , four_ln_two_(-4.0 * std::log(2.0))
+  , inv_h_sqr_(1.0 / (beam_width_h_.radians() * beam_width_h_.radians()))
+  , inv_v_sqr_(1.0 / (beam_width_v_.radians() * beam_width_v_.radians()))
+{
+
+}
+
+/* calculate the 2d power of the radar beam at theta_azi and theta_elev degrees 
+ * off the beam centre.
+ *
+ * Probert & Jones 1962 Meteoroogical Radar Equation, QJR Met Soc 88, 485 - 495
+ */
+auto beam_power::calculate(angle theta_azi, angle theta_elev) const -> real
+{
+  const auto azi = theta_azi.radians();
+  const auto ele = theta_elev.radians();
+  return std::exp(four_ln_two_ * ((azi * azi * inv_h_sqr_) + (ele * ele * inv_v_sqr_)));
+}
+
+beam_power_cross_section::beam_power_cross_section(
+      const beam_power& beam
+    , angle gate_width
+    , size_t rows
+    , size_t cols
+    , angle height
+    , angle width)
+  : height_(height)
+  , width_(width)
+  , elevations_(rows)
+  , azimuths_(cols)
+  , data_(rows, cols)
+{
+  real offset;
+
+  // determine elevation centers
+  offset = 0.5_r * (1.0_r - rows);
+  angle delta_v  = height / rows;
+  for (size_t i = 0; i < rows; ++i)
+    elevations_[i] = (offset + i) * delta_v;
+
+  // determine azimuth centers
+  offset = 0.5_r * (1.0_r - cols);
+  angle delta_h  = width / cols;
+  for (size_t i = 0; i < cols; ++i)
+    azimuths_[i] = (offset + i) * delta_h;
+
+  // calculate cross sectional power array for a single pointing location
+  array2<real> csec{rows, cols};
+  for (size_t y = 0; y < rows; ++y)
+  {
+    for (size_t x = 0; x < cols; ++x)
+    {
+      csec[y][x] = beam.calculate(azimuths_[x], elevations_[y]);
+    }
+  }
+
+  // convolve the pattern over the gate sweep arc
+  int start = std::lround(gate_width / (-2.0_r * delta_h));
+  int end = std::lround(gate_width / (2.0_r * delta_h)) + 1;
+  array_utils::fill(data_, 0.0_r);
+  for (auto i = start; i < end; ++i)
+  {
+    const size_t sx = i < 0 ? -i : 0;
+    const size_t ex = i > 0 ? cols - i : cols;
+
+    for (size_t y = 0; y < rows; ++y)
+    {
+      for (size_t x = sx; x < ex; ++x)
+      {
+        data_[y][x + i] += csec[y][x];
+      }
+    }
+  }
+
+  // normalize the array
+  double total = 0.0;
+  for (size_t i = 0; i < data_.size(); ++i)
+    total += data_.data()[i];
+  array_utils::divide(data_, data_, total);
+}
+
+void beam_power_cross_section::make_vertical_integration()
+{
+  for (size_t y = 1; y < data_.rows(); ++y)
+  {
+    auto below = data_[y-1];
+    auto above = data_[y];
+    for (size_t x = 0; x < data_.cols(); ++x)
+      above[x] += below[x];
+  }
+}
+
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+// ** Ancilla Radar Quality Control System (ancilla)
+// ** Copyright BOM (C) 2013
+// ** Bureau of Meteorology, Commonwealth of Australia, 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from the BOM.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of the BOM nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+
+// #include "beam_propagation.h"
+// #include "angle.h"
+
+using namespace rainfields;
+using namespace rainfields::ancilla;
+
+beam_propagation::beam_propagation(
+      angle elevation_angle
+    , real site_altitude
+    , real earth_radius
+    , real effective_multiplier)
+  : elevation_angle_(elevation_angle)
+  , site_altitude_(site_altitude)
+  , earth_radius_(earth_radius)
+  , multiplier_(effective_multiplier)
+  , effective_radius_(multiplier_ * earth_radius_)
+  , cos_elev_(std::cos(elevation_angle_.radians()))
+  , sin_elev_(std::sin(elevation_angle_.radians()))
+  , eer_alt_(effective_radius_ + site_altitude_)
+{
+
+}
+
+auto beam_propagation::set_elevation_angle(angle val) -> void
+{
+  elevation_angle_ = val;
+  cos_elev_ = cos(elevation_angle_);
+  sin_elev_ = sin(elevation_angle_);
+}
+
+auto beam_propagation::set_site_altitude(real val) -> void
+{
+  site_altitude_ = val;
+  eer_alt_ = effective_radius_ + site_altitude_;
+}
+
+auto beam_propagation::set_effective_multiplier(real val) -> void
+{
+  multiplier_ = val;
+  effective_radius_ = multiplier_ * earth_radius_;
+  eer_alt_ = effective_radius_ + site_altitude_;
+}
+
+auto beam_propagation::set_earth_radius(real val) -> void
+{
+  earth_radius_ = val;
+  effective_radius_ = multiplier_ * earth_radius_;
+  eer_alt_ = effective_radius_ + site_altitude_;
+}
+
+auto beam_propagation::ground_range_altitude(real slant_range) const -> vec2<real>
+{
+  // distance along plane tangental to earth at site location
+  double h = slant_range * cos_elev_;
+  // distance above plane tangental to earth at site location
+  double v = (slant_range * sin_elev_) + eer_alt_;
+  return vec2<real>(
+      // x = ground range = curved distance along earth surface
+      std::atan(h/v) * effective_radius_
+      // y = altitude = distance above spherical earth surface
+    , std::hypot(h, v) - effective_radius_
+  );
+
+#if 0
+  /* Alternative version based on theory from text book:
+   *    Dopper Radar and Weather Observations, Doviak & Zrnic
+   * The two versions here were derived separately, however result in negligible
+   * difference (< 6.5mm height, < 0.1mm range @ 100km with elev angle of 30 deg) */
+  real hgt = sqrt(in.x * in.x + eff_sqr_ + 2.0 * in.x * eff_rad_ * sin_elev_) - eff_rad_ + ref_point_sph_.hgt;
+  real rng = eff_rad_ * asin((in.x * cos_elev_)/(eff_rad_ + hgt));
+#endif
+}
+
+auto beam_propagation::slant_range(real ground_range) const -> real
+{
+  // TODO - it would be nice to calculate the geometric height here too...
+
+  // inverse of above formula
+  if (ground_range <= 0.0_r)
+    return 0.0_r;
+  else
+    return eer_alt_ / ((cos_elev_ / std::tan(ground_range / effective_radius_)) - sin_elev_);
+}
+
+auto beam_propagation::required_elevation_angle(real ground_range, real altitude) const -> angle
+{
+  /* Warning to modifiers:
+   * It is crucial that the calculations performed by this function use double precision
+   * math.  This is due mostly to the very small angle of theta and very large values
+   * of tgt_alt and eer_alt.  DO NOT CHANGE IT TO SINGLE PRECISION!  */
+
+  // angle between site location and target on great circle
+  angle theta = (ground_range / effective_radius_) * 1.0_rad;
+
+  // slant range (law of cosines)
+  double tgt_alt = effective_radius_ + altitude;
+  double eer_alt = eer_alt_;
+  double slant_range
+    = (tgt_alt * tgt_alt) 
+    + (eer_alt * eer_alt) 
+    - 2.0 * tgt_alt * eer_alt * cos(theta);
+  slant_range = std::sqrt(slant_range);
+
+  // elevation angle (law of sines)
+  // find the angle opposite the shorter side (since asin always returns < 90 degrees)
+  if (tgt_alt < eer_alt)
+    return asin((tgt_alt * sin(theta)) / slant_range) - 90.0_deg;
+  else
+    return 90.0_deg - theta - asin((eer_alt * sin(theta)) / slant_range);
+}
+
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+// ** Ancilla Radar Quality Control System (ancilla)
+// ** Copyright BOM (C) 2013
+// ** Bureau of Meteorology, Commonwealth of Australia, 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from the BOM.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of the BOM nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+
+// #include "spheroid.h"
+
+using namespace rainfields;
+using namespace rainfields::ancilla;
+
+constexpr const char* enum_traits<spheroid::standard>::strings[];
+
+// the order of the spheroids specified here _must_ match common_sphereoid
+// first value is major axis, second value is inverse flattening
+static constexpr real std_sphere[][2] =
+{
+    { 6378165.000, 298.3         } // i65
+  , { 6378160.000, 298.25        } // ans
+  , { 6378293.645, 294.26        } // clark1858
+  , { 6378137.000, 298.257222101 } // grs80
+  , { 6378137.000, 298.257223563 } // wgs84
+  , { 6378135.000, 298.26        } // wgs72
+  , { 6378388.000, 297           } // international1924
+  , { 6378160.000, 298.25        } // australian_national
+};
+
+spheroid::spheroid(standard cs)
+  : a_(std_sphere[static_cast<int>(cs)][0])
+  , inv_f_(std_sphere[static_cast<int>(cs)][1])
+{
+  derive_parameters();
+}
+
+spheroid::spheroid(real semi_major_axis, real inverse_flattening)
+  : a_(semi_major_axis)
+  , inv_f_(inverse_flattening)
+{
+  derive_parameters();
+}
+
+spheroid::spheroid(const xml::node& conf)
+{
+  auto i = conf.attributes().find("spheroid");
+  if (i == conf.attributes().end())
+  {
+    a_ = conf("semi_major_axis");
+    inv_f_ = conf("inverse_flattening");
+  }
+  else
+  {
+    standard cs = from_string<standard>(*i);
+    a_ = std_sphere[static_cast<int>(cs)][0];
+    inv_f_ = std_sphere[static_cast<int>(cs)][1];
+  }
+  derive_parameters();
+}
+
+auto spheroid::radius_physical(angle lat) const -> real
+{
+  real a_cos = a_ * cos(lat);
+  real a2_cos = a_ * a_cos;
+  real b_sin = b_ * sin(lat);
+  real b2_sin = b_ * b_sin;
+  return std::sqrt((a2_cos * a2_cos + b2_sin * b2_sin) / (a_cos * a_cos + b_sin * b_sin));
+}
+
+auto spheroid::radius_of_curvature_meridional(angle lat) const -> real
+{
+  real ab = a_ * b_;
+  real a_cos = a_ * cos(lat);
+  real b_sin = b_ * sin(lat);
+  return (ab * ab) / std::pow(a_cos * a_cos + b_sin * b_sin, 1.5_r);
+}
+
+auto spheroid::radius_of_curvature_normal(angle lat) const -> real
+{
+  real a_cos = a_ * cos(lat);
+  real b_sin = b_ * sin(lat);
+  return (a_ * a_) / std::sqrt(a_cos * a_cos + b_sin * b_sin);
+}
+
+auto spheroid::radius_of_curvature(angle lat) const -> real
+{
+  real a_cos = a_ * cos(lat);
+  real b_sin = b_ * sin(lat);
+  return (a_ * a_ * b_) / (a_cos * a_cos + b_sin * b_sin);
+}
+
+auto spheroid::latlon_to_ecefxyz(latlonalt pos) const -> vec3<real>
+{
+  real sin_lat = sin(pos.lat);
+  real cos_lat = cos(pos.lat);
+  real nu = a_ / std::sqrt(1.0_r - e_sqr_ * sin_lat * sin_lat);
+  real nu_plus_h = nu + pos.alt;
+
+  return vec3<real>(
+        nu_plus_h * cos_lat * cos(pos.lon)
+      , nu_plus_h * cos_lat * sin(pos.lon)
+      , ((1.0_r - e_sqr_) * nu + pos.alt) * sin_lat);
+}
+
+auto spheroid::ecefxyz_to_latlon(vec3<real> pos) const -> latlonalt
+{
+  real p = std::sqrt(pos.x * pos.x + pos.y * pos.y);
+  angle theta = atan((pos.z * a_) / (p * b_));
+  real sin3 = sin(theta); sin3 = sin3 * sin3 * sin3;
+  real cos3 = cos(theta); cos3 = cos3 * cos3 * cos3;
+  angle lat = atan((pos.z + ep2_ * b_ * sin3) / (p - e_sqr_ * a_ * cos3));
+  real sinlat = sin(lat);
+
+  return latlonalt(
+        lat
+      , atan2(pos.y, pos.x)
+      , (p / cos(lat)) - (a_ / std::sqrt(1.0_r - e_sqr_ * sinlat * sinlat)));
+}
+
+auto spheroid::bearing_range_to_latlon(latlon pos, angle bearing, real range) const -> latlon
+{
+  // based on original open source script found at:
+  // http://www.movable-type.co.uk/scripts/latlong-vincenty-direct.html
+  // modified for use in ancilla
+
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
+  /* Vincenty Direct Solution of Geodesics on the Ellipsoid (c) Chris Veness 2005-2012              */
+  /*                                                                                                */
+  /* from: Vincenty direct formula - T Vincenty, "Direct and Inverse Solutions of Geodesics on the  */
+  /*       Ellipsoid with application of nested equations", Survey Review, vol XXII no 176, 1975    */
+  /*       http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf                                             */
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
+
+  auto sin_alpha_1 = sin(bearing);
+  auto cos_alpha_1 = cos(bearing);
+  
+  auto tanU1 = (1.0 - f_) * tan(pos.lat);
+  auto cosU1 = 1.0 / std::sqrt((1.0 + tanU1 * tanU1));
+  auto sinU1 = tanU1 * cosU1;
+
+  auto sigma1 = atan2(tanU1, cos_alpha_1);
+  auto sinAlpha = cosU1 * sin_alpha_1;
+  auto cosSqAlpha = 1.0 - sinAlpha * sinAlpha;
+  auto uSq = cosSqAlpha * ep2_;
+  auto A = 1.0 + uSq / 16384.0 * (4096.0 + uSq * (-768.0 + uSq * (320.0 - 175.0 * uSq)));
+  auto B = uSq / 1024.0 * (256.0 + uSq * (-128.0 + uSq * (74.0 - 47.0 * uSq)));
+  
+  auto sigma = (range / (b_ * A)) * 1_rad;
+  auto sigmaP = constants<double>::two_pi * 1_rad;
+  real cos2SigmaM, sinSigma, cosSigma;
+  while (true)
+  {
+    cos2SigmaM = cos(2.0 * sigma1 + sigma);
+    sinSigma = sin(sigma);
+    cosSigma = cos(sigma);
+
+    if ((sigma - sigmaP).abs() > 1e-12_rad)
+      break;
+
+    auto deltaSigma = 
+      B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1.0 + 2.0 * cos2SigmaM * cos2SigmaM)
+      - B / 6.0 * cos2SigmaM * (-3.0 + 4.0 * sinSigma * sinSigma) 
+      * (-3.0 + 4.0 * cos2SigmaM * cos2SigmaM)));
+    sigmaP = sigma;
+    sigma.set_radians(range / (b_ * A) + deltaSigma);
+  }
+
+  auto tmp = sinU1 * sinSigma - cosU1 * cosSigma * cos_alpha_1;
+  auto lat2 = atan2(sinU1 * cosSigma + cosU1 * sinSigma * cos_alpha_1, (1-f_) * std::hypot(sinAlpha, tmp));
+  auto lambda = atan2(sinSigma*sin_alpha_1, cosU1*cosSigma - sinU1*sinSigma*cos_alpha_1);
+  auto C = f_/16*cosSqAlpha*(4+f_*(4-3*cosSqAlpha));
+  auto L = lambda - (1-C) * f_ * sinAlpha *
+      (sigma + 1_rad * C * sinSigma * (cos2SigmaM + C * cosSigma * (-1.0 + 2.0 * cos2SigmaM * cos2SigmaM)));
+  auto lon2 = 1_rad * (std::fmod(pos.lon.radians() + L.radians() + (3 * constants<double>::pi), constants<double>::two_pi) - constants<double>::pi);  // normalise to -180...+180
+
+  return { lat2, lon2 };
+}
+
+/* Vincenty inverse formula - T Vincenty, "Direct and Inverse Solutions of Geodesics on the
+ * Ellipsoid with application of nested equations", Survey Review, vol XXII no 176, 1975
+ * http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
+ *
+ * Implementation based on formulas found from the "Vincenty's Formulae" Wikipedia article.
+ */
+auto spheroid::latlon_to_bearing_range(latlon pos1, latlon pos2) const -> std::pair<angle, real>
+{
+  // initialization
+  const double u1 = std::atan((1.0 - f_) * std::tan((double) pos1.lat.radians()));
+  const double u2 = std::atan((1.0 - f_) * std::tan((double) pos2.lat.radians()));
+  const double l = pos2.lon.radians() - pos1.lon.radians();
+
+  // dependent initialization
+  const double cos_u1 = std::cos(u1);
+  const double cos_u2 = std::cos(u2);
+  const double sin_u1 = std::sin(u1);
+  const double sin_u2 = std::sin(u2);
+  const double cu1su2 = cos_u1 * sin_u2;
+  const double cu2su1 = cos_u2 * sin_u1;
+  const double su1su2 = sin_u1 * sin_u2;
+  const double cu1cu2 = cos_u1 * cos_u2;
+
+  // iteration until convergence of lambda
+  double lambda = l;
+  for (size_t iters = 0; iters < 100; ++iters)
+  {
+    double cos_lambda = std::cos(lambda);
+    double sin_lambda = std::sin(lambda);
+    double sin_sigma  = std::hypot(cos_u2 * sin_lambda, cu1su2 - cu2su1 * cos_lambda);
+
+    // check for coincident points
+    if (sin_sigma == 0.0)
+      return { 0.0_rad, 0.0 };
+
+    double cos_sigma  = su1su2 + cu1cu2 * cos_lambda;
+    double sigma      = std::atan2(sin_sigma, cos_sigma);
+    double sin_alpha  = (cu1cu2 * sin_lambda) / sin_sigma;
+    double csq_alpha  = 1.0 - sin_alpha * sin_alpha;
+    double cos_2sigm  = cos_sigma - ((2.0 * su1su2) / csq_alpha);
+
+    // check for equatorial line
+    if (is_nan(cos_2sigm))
+      cos_2sigm = 0.0;
+
+    double c          = (f_ / 16.0) * csq_alpha * (4.0 + f_ * (4.0 - 3.0 * csq_alpha));
+    double lambda_new = l + (1.0 - c) * f_ * sin_alpha * (sigma + c * sin_sigma * 
+                          (cos_2sigm + c * cos_sigma * (-1.0 + 2.0 * cos_2sigm)));
+
+    // check for convergence to correct answer
+    if (std::abs(lambda - lambda_new) < 1e-12)
+    {
+      double u_sqr  = csq_alpha * ep2_;
+      double a      = 1.0 + (u_sqr / 16384.0) * (4096.0 + u_sqr * 
+                        (-768.0 + u_sqr * (320.0 - 175.0 * u_sqr)));
+      double b      = (u_sqr / 1024.0) * (256.0 + u_sqr * (-128.0 + u_sqr * (74 - 47.0 * u_sqr)));
+      double dsigma = b * sin_sigma * (cos_2sigm + 0.25 * b * (cos_sigma * 
+                        (-1.0 + 2.0 * cos_2sigm * cos_2sigm) - (1.0 / 6.0) * b * cos_2sigm * 
+                        (-3.0 + 4.0 * sin_sigma * sin_sigma) * (-3.0 + 4.0 * cos_2sigm * cos_2sigm)));
+      double s      = b_ * a * (sigma - dsigma);
+      double az_fwd = std::atan2(
+                          (cos_u2 * std::sin(lambda_new))
+                        , (cu1su2 - cu2su1 * std::cos(lambda_new)));
+      return { az_fwd * 1_rad, s };
+    }
+    lambda = lambda_new;
+  }
+
+  // failed to converge
+  return { nan<angle>(), nan() };
+}
+
+auto spheroid::bearing_range_to_latlon_haversine(latlon pos, angle bearing, real range) const -> latlon
+{
+  auto ronrad = (range / radius_of_curvature(pos.lat)) * 1_rad;
+  auto srad = sin(ronrad);
+  auto crad = cos(ronrad);
+  auto slat = sin(pos.lat);
+  auto clat = cos(pos.lat);
+
+  auto lat = asin(slat * crad + clat * srad * cos(bearing));
+  auto lon = pos.lon + atan2(sin(bearing) * srad * clat, crad - slat * sin(lat));
+
+  return { lat, lon };
+}
+
+auto spheroid::latlon_to_bearing_range_haversine(latlon pos1, latlon pos2) const -> std::pair<angle, real>
+{
+  auto radius = radius_of_curvature(pos1.lat);
+
+  auto dlat = pos2.lat - pos1.lat;
+  auto dlon = pos2.lon - pos1.lon;
+
+  auto clat1 = cos(pos1.lat);
+  auto clat2 = cos(pos2.lat);
+
+  // distance
+  auto sdlat2 = sin(dlat * 0.5_r);
+  auto sdlon2 = sin(dlon * 0.5_r);
+  auto a = sdlat2 * sdlat2 + sdlon2 * sdlon2 * clat1 * clat2;
+  auto r = radius * (2.0_r * atan2(sqrt(a), sqrt(1.0_r - a)).radians());
+
+  // bearing
+  auto y = sin(dlon) * clat2;
+  auto x = clat1 * sin(pos2.lat) - sin(pos1.lat) * clat2 * cos(dlon);
+  auto b = atan2(y,x);
+  
+  return { b, r };
+}
+
+void spheroid::derive_parameters()
+{
+  f_      = 1.0_r / inv_f_;
+  b_      = a_ * (1.0_r - f_);
+  e_sqr_  = f_ * (2.0_r - f_);
+  ep2_    = (a_ * a_ - b_ * b_) / (b_ * b_);
+  e_      = std::sqrt(e_sqr_);
+  avg_r_  = (2.0_r * a_ + b_) / 3.0_r;
+
+  auth_r_ = e_sqr_ * e_sqr_ * e_sqr_ * 4.0_r / 7.0_r;
+  auth_r_ += e_sqr_ * e_sqr_ * 3.0_r / 5.0_r;
+  auth_r_ += 1.0_r;
+  auth_r_ *= (1.0_r - e_sqr_);
+  auth_r_ = a_ * std::sqrt(auth_r_);
+}
+
+
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+// ** Ancilla Radar Quality Control System (ancilla)
+// ** Copyright BOM (C) 2013
+// ** Bureau of Meteorology, Commonwealth of Australia, 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from the BOM.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of the BOM nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
+
+// #include "digital_elevation.h"
+// #include "array_utils.h"
+// #include "trace.h"
+
+#include <arpa/inet.h> // just for ntohs()
+#include <fstream>
+#include <memory>
+#include <iostream>
+#include <sys/stat.h>
+
+using namespace std;
+
+using namespace rainfields::ancilla;
+
+digital_elevation::digital_elevation(bool debug) :
+        _debug(debug)
+{
+}
+
+digital_elevation::~digital_elevation()
+{
+  
+}
+
+digital_elevation::model_error::model_error(std::string description)
+        : runtime_error(description)
+        , description_(std::move(description))
+        , location_(nan<angle>(), nan<angle>())
+{
+  
+}
+
+digital_elevation::model_error::model_error(std::string description, latlon location)
+        : runtime_error(msg{} << description << std::endl << "  location: " << location)
+        , description_(std::move(description))
+        , location_(location)
+{
+  
+}
+
+digital_elevation_srtm3::digital_elevation_srtm3(bool debug,
+                                                 std::string path, size_t cache_size)
+        : digital_elevation(debug)
+        , path_(std::move(path))
+        , cache_size_(cache_size)
+        , wgs84_(spheroid::standard::wgs84)
+{
+  if (path_.empty())
+    path_.assign("./");
+  else if (path_.back() != '/')
+    path_.append("/");
+}
+
+auto digital_elevation_srtm3::reference_spheroid() -> const spheroid&
+{
+  return wgs84_;
+}
+
+auto digital_elevation_srtm3::lookup(const latlon& loc) -> real
+{
+
+  real lat = std::abs(loc.lat.degrees());
+  real lon = std::abs(loc.lon.degrees());
+  int ilat = lat, ilon = lon;
+
+  // determine the tile to use
+  int tilelat = loc.lat.radians() < 0.0 ? -ilat - 1 : ilat;
+  int tilelon = loc.lon.radians() < 0.0 ? -ilon - 1 : ilon;
+  
+  const srtm_tile &tile = get_tile(tilelat, tilelon);
+  if (tile.nlat == 0 || tile.nlon == 0) {
+    return 0.0; // sea location
+  }
+
+  // determine the indices within the tile
+  int x, y;
+  if (tilelat >= 0)
+  {
+    y = std::lround((ilat + 1 - lat) / tile.dlat);
+  }
+  else
+  {
+    y = std::lround((lat - ilat) / tile.dlat);
+  }
+  if (tilelon >= 0)
+  {
+    x = std::lround((lon - ilon) / tile.dlon);
+  }
+  else
+  {
+    x = std::lround((ilon + 1 - lon) / tile.dlon);
+  }
+  
+  return tile.data[y][x];
+     
+}
+
+auto digital_elevation_srtm3::lookup(latlonalt* values, size_t count) -> void
+{
+  throw model_error{"unimplemented feature: model multi lookup"};
+}
+
+auto digital_elevation_srtm3::testFTG(void) ->void
+{
+  test(39, -104, 40, -104, 39, -105, 39, -104);
+}
+
+auto digital_elevation_srtm3::testBOM(void) ->void
+{
+  test(-37, 144, -38, 144, -38, 145, -38, 146);
+}
+
+auto digital_elevation_srtm3::test(int lat0, int lon0, int lat1, int lon1, 
+				   int lat2, int lon2, int lat3, int lon3) ->void
+{
+  array2<real> t0 = get_tile(lat0, lon0).data;
+  array2<real> t1 = get_tile(lat1, lon1).data;
+  bool match01_00 = true;
+  bool match01_01 = true;
+  bool match01_10 = true;
+  bool match01_11 = true;
+  for (size_t i=0; i<1201; ++i)
+  {
+    if (t0[0][i] != t1[1200][i])
+    {
+      match01_01 = false;
+    }
+    if (t0[0][i] != t1[0][i])
+    {
+      match01_00 = false;
+    }
+    if (t0[1200][i] != t1[0][i])
+    {
+      match01_10 = false;
+    }
+    if (t0[1200][i] != t1[1200][i])
+    {
+      match01_11 = false;
+    }
+  }
+  if (match01_01)
+  {
+    printf("[%d,%d] row[0] matches [%d,%d] row[1200]\n",
+	   lat0, lon0, lat1, lon1);
+  }
+  if (match01_10)
+  {
+    printf("[%d,%d] row[1200] matches [%d,%d] row[0]\n",
+	   lat0, lon0, lat1, lon1);
+  }
+  if (match01_00)
+  {
+    printf("[%d,%d] row[0] matches [%d,%d] row[0]\n",
+	   lat0, lon0, lat1, lon1);
+  }
+  if (match01_11)
+  {
+    printf("[%d,%d] row[1200] matches [%d,%d] row[1200]\n",
+	   lat0, lon0, lat1, lon1);
+  }
+
+
+  t0 = get_tile(lat2, lon2).data;
+  t1 = get_tile(lat3, lon3).data;
+  match01_00 = true;
+  match01_01 = true;
+  match01_10 = true;
+  match01_11 = true;
+  for (size_t i=0; i<1201; ++i)
+  {
+    if (t0[i][0] != t1[i][1200])
+    {
+      match01_01 = false;
+    }
+    if (t0[i][0] != t1[i][0])
+    {
+      match01_00 = false;
+    }
+    if (t0[i][1200] != t1[i][0])
+    {
+      match01_10 = false;
+    }
+    if (t0[i][1200] != t1[i][1200])
+    {
+      match01_11 = false;
+    }
+  }
+  if (match01_01)
+  {
+    printf("[%d,%d] col[0] matches [%d,%d] col[1200]\n",
+	   lat2, lon2, lat3, lon3);
+  }
+  if (match01_10)
+  {
+    printf("[%d,%d] col[1200] matches [%d,%d] col[0]\n",
+	   lat2, lon2, lat3, lon3);
+  }
+  if (match01_00)
+  {
+    printf("[%d,%d] col[0] matches [%d,%d] col[0]\n",
+	   lat2, lon2, lat3, lon3);
+  }
+  if (match01_11)
+  {
+    printf("[%d,%d] col[1200] matches [%d,%d] col[1200]\n",
+	   lat2, lon2, lat3, lon3);
+  }
+}
+
+auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
+{
+
+  // do we have this tile cached?
+  for (auto i = tiles_.begin(); i != tiles_.end(); ++i)
+  {
+    if (i->lat == lat && i->lon == lon)
+    {
+      // promote tile to front of list
+      if (i != tiles_.begin())
+        tiles_.splice(tiles_.begin(), tiles_, i);
+      return *i;
+    }
+  }
+
+  // allocate or reuse a tile
+  if (tiles_.size() < cache_size_)
+    tiles_.emplace_front();
+  else
+    tiles_.splice(tiles_.begin(), tiles_, --tiles_.end());
+
+  auto& tile = tiles_.front();
+
+  // compute tile file name and path
+  char file_name[128];
+  snprintf(
+          file_name
+          , sizeof(file_name)
+          , "%c%02d%c%03d.hgt"
+          , lat < 0 ? 'S' : 'N'
+          , std::abs(lat)
+          , lon < 0 ? 'W' : 'E'
+          , std::abs(lon));
+  string file_path = path_ + file_name;
+
+  // check tile dimensions
+
+  struct stat fileStat;
+  if (stat(file_path.c_str(), &fileStat)) {
+    // file does not exist, set tile to have size 0x0
+    if (_debug) {
+      cerr << "Missing tile path: " << file_path << endl;
+      cerr << "  Probably a sea tile" << endl;
+    }
+    tile.lat = lat;
+    tile.lon = lon;
+    tile.nlat = 0;
+    tile.nlon = 0;
+    tile.dlat = 0;
+    tile.dlon = 0;
+    return tile;
+  }
+
+  int nBytes = fileStat.st_size;
+  long nCells = nBytes / 2; // data is 2 byte ints
+  int tileDim = sqrt(nCells);
+  if (_debug) {
+    cerr << "Tile path: " << file_path << endl;
+    cerr << " lat, lon: " << lat << ", " << lon << endl;
+    cerr << "      dim: " << tileDim << endl;
+  }
+
+  // set tile metadata
+  // depends on tile dimension
+  // 3-sec data has tiles 1201 x 1201
+  // 1-sec data has tiles 3601 x 3601
+
+  tile.lat = lat;
+  tile.lon = lon;
+  tile.nlat = tileDim;
+  tile.nlon = tileDim;
+  tile.dlat = 1.0 / (tileDim - 1.0);
+  tile.dlon = 1.0 / (tileDim - 1.0);
+
+  // allocate space for tile data
+
+  tile.data.resize(tile.nlat, tile.nlon);
+
+  // fill tile data
+
+  std::ifstream file((path_ + file_name).c_str(),
+                     std::ifstream::in | std::ifstream::binary);
+  if (file) {
+    
+    std::unique_ptr<std::int16_t[]>
+      buf{new std::int16_t[tile.nlat * tile.nlon]};
+    
+    file.read(reinterpret_cast<char*>(buf.get()),
+              sizeof(int16_t) * tile.nlat * tile.nlon);
+    if (!file)
+      throw model_error{
+          msg{} << "srtm3: tile read failed: " << path_ << file_name
+        , {lat * 1_deg, lon * 1_deg}};
+
+    // convert from big-endian into host order
+    for (int i = 0; i < tile.nlat * tile.nlon; ++i) {
+      buf[i] = ntohs(buf[i]);
+    }
+
+    // convert to real replacing void values with NaN
+    for (int i = 0; i < tile.nlat * tile.nlon; ++i) {
+      tile.data.data()[i] = buf[i] == void_value ? nan() : buf[i];
+    }
+
+  }
+
+  return tile;
+
+}
+
+digital_elevation_esri::digital_elevation_esri(
+        bool debug
+        , const std::string& path
+        , latlon sw
+        , latlon ne
+        , spheroid::standard reference_spheroid)
+        : digital_elevation_esri(debug, path, sw, ne, spheroid{reference_spheroid})
+{
+
+}
+
+digital_elevation_esri::digital_elevation_esri(
+        bool debug
+        , const std::string& path
+        , latlon sw
+        , latlon ne
+        , spheroid reference_spheroid)
+        : digital_elevation(debug)
+        , spheroid_(std::move(reference_spheroid))
+{
+  std::ifstream file(path);
+  if (!file)
+    throw model_error{msg{} << "esri: failed to open dataset: " << path};
+
+  std::string label;
+  int cols, rows;
+  real llx, lly;
+  real nodata;
+  
+  file >> label >> cols;
+  if (!file || label != "ncols")
+    throw model_error{msg{} << "esri: dataset expected ncols: " << path};
+
+  file >> label >> rows;
+  if (!file || label != "nrows")
+    throw model_error{msg{} << "esri: dataset expected nrows: " << path};
+
+  file >> label >> llx;
+  if (!file || label != "xllcorner")
+    throw model_error{msg{} << "esri: dataset expected xllcorner: " << path};
+
+  file >> label >> lly;
+  if (!file || label != "yllcorner")
+    throw model_error{msg{} << "esri: dataset expected yllcorner: " << path};
+
+  file >> label >> delta_deg_;
+  if (!file || label != "cellsize")
+    throw model_error{msg{} << "esri: dataset expected cellsize: " << path};
+
+  file >> label >> nodata;
+  if (!file || label != "NODATA_value")
+    throw model_error{msg{} << "esri: dataset expected NODATA_value: " << path};
+
+  // determine the subset of points to load
+  int miny = rows - (ne.lat.degrees() - lly) / delta_deg_;
+  int maxy = miny + (ne.lat - sw.lat).degrees() / delta_deg_;
+  int minx = (sw.lon.degrees() - llx) / delta_deg_;
+  int maxx = minx + (ne.lon - sw.lon).degrees() / delta_deg_;
+
+  // clamp subset to the actual data
+  bool warn = false;
+  if (miny < 0)
+  {
+    miny = 0;
+    warn = true;
+  }
+  if (maxy >= rows)
+  {
+    maxy = rows;
+    warn = true;
+  }
+  if (minx < 0)
+  {
+    minx = 0;
+    warn = true;
+  }
+  if (maxx >= cols)
+  {
+    maxx = cols;
+    warn = true;
+  }
+  if (warn)
+    trace::log() << "esri: requested subset " << sw << " - " << ne << " exceeds dataset bounds";
+
+  // allocate our data
+  data_ = array2<real>(maxy - miny, maxx - minx);
+
+  // record central position of 0,0 point of our array
+  nw_.lat.set_degrees(lly + (rows - miny - 0.5_r) * delta_deg_);
+  nw_.lon.set_degrees(llx + (minx + 0.5_r) * delta_deg_);
+
+  // skip to the first row we want to load
+  file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+  for (int i = 0; i < miny; ++i)
+    file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+  // read each row in the interesting region
+  for (size_t y = 0; y < data_.rows(); ++y)
+  {
+    // skip to the first column we want to load
+    for (int i = 0; i < minx; ++i)
+      file.ignore(std::numeric_limits<std::streamsize>::max(), ' ');
+
+    // read the data
+    real* raw = data_[y];
+    for (size_t x = 0; x < data_.cols(); ++x)
+    {
+      file >> raw[x];
+      if (std::abs(raw[x] - nodata) < 0.0001_r)
+        raw[x] = nan();
+    }
+
+    // skip until the start of the next row
+    file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+  }
+}
+
+auto digital_elevation_esri::reference_spheroid() -> const spheroid&
+{
+  return spheroid_;
+}
+
+auto digital_elevation_esri::lookup(const latlon& loc) -> real
+{
+  // determine the array coordinates
+  auto y = std::lround((nw_.lat - loc.lat).degrees() / delta_deg_);
+  auto x = std::lround((loc.lon - nw_.lon).degrees() / delta_deg_);
+
+  if (   y < 0 || y >= (int) data_.rows()
+      || x < 0 || x >= (int) data_.cols())
+    return nan();
+
+  return data_[y][x];
+}
+
+auto digital_elevation_esri::lookup(latlonalt* values, size_t count) -> void
+{
+  throw model_error{"unimplemented feature: model multi lookup"};
+}
+
 

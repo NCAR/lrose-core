@@ -22,10 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
- * @file DigitalElevationHandler.cc
+ * @file DemProvider.cc
  */
-#include "DigitalElevationHandler.hh"
-#include "spheroid.h"
+#include "DemProvider.hh"
 #include <toolsa/LogMsg.hh>
 using namespace rainfields;
 using namespace rainfields::ancilla;
@@ -37,82 +36,82 @@ static spheroid::standard _toSphereStandard(Params::DigitalElevationModel_t t)
   std::string s="";
   switch (t)
   {
-  case Params::ESRI_I65:
-    s = "i65";
-    break;
-  case Params::ESRI_ANS:
-    s = "ans";
-    break;
-  case Params::ESRI_CLARKE1858:
-    s = "clarke1858";
-    break;
-  case Params::ESRI_GRS80:
-    s = "grs80";
-    break;
-  case Params::ESRI_WGS84:
-    s = "wgs84";
-    break;
-  case Params::ESRI_WGS72:
-    s = "wgs72";
-    break;
-  case Params::INTERNATIONAL1924:
-    s = "international924";
-    break;
-  case Params::AUSTRALIAN_NATIONAL:
-    s = "australian_national";
-    break;
-  default:
-    s = "?";
-    break;
+    case Params::ESRI_I65:
+      s = "i65";
+      break;
+    case Params::ESRI_ANS:
+      s = "ans";
+      break;
+    case Params::ESRI_CLARKE1858:
+      s = "clarke1858";
+      break;
+    case Params::ESRI_GRS80:
+      s = "grs80";
+      break;
+    case Params::ESRI_WGS84:
+      s = "wgs84";
+      break;
+    case Params::ESRI_WGS72:
+      s = "wgs72";
+      break;
+    case Params::INTERNATIONAL1924:
+      s = "international924";
+      break;
+    case Params::AUSTRALIAN_NATIONAL:
+      s = "australian_national";
+      break;
+    default:
+      s = "?";
+      break;
   }
 
   return from_string<spheroid::standard>(s);
 }
 
 //----------------------------------------------------------------
-DigitalElevationHandler::DigitalElevationHandler(const Parms &params) :
-  _params(params)
+DemProvider::DemProvider(const Params &params) :
+        _params(params)
 {
 }
 
 //----------------------------------------------------------------
-DigitalElevationHandler::~DigitalElevationHandler(void)
+DemProvider::~DemProvider(void)
 {
 }
 
 //----------------------------------------------------------------
-bool DigitalElevationHandler::set(const std::pair<double,double> &sw,
-				  const std::pair<double,double> &ne)
+bool DemProvider::set(const std::pair<double,double> &sw,
+                      const std::pair<double,double> &ne)
 {
   spheroid::standard which;
 
   switch (_params.input_data_format)
   {
-  case Params::SHUTTLE_RADAR_TOPOGRAPHY:
-    _dem.reset(new digital_elevation_srtm3(_params,
-                                           _params.input_dem_path));
-    break;
-  case Params::ESRI_I65:
-  case Params::ESRI_ANS:
-  case Params::ESRI_CLARKE1858:
-  case Params::ESRI_GRS80:
-  case Params::ESRI_WGS84:
-  case Params::ESRI_WGS72:
-  case Params::INTERNATIONAL1924:
-  case Params::AUSTRALIAN_NATIONAL:
-    which = _toSphereStandard(_params.input_data_format);
-    _set(sw, ne, which);
-    break;
-  default:
-    LOG(LogMsg::ERROR, "format Unknown");
-    exit(1);
+    case Params::SHUTTLE_RADAR_TOPOGRAPHY:
+      _dem.reset(new digital_elevation_srtm3(_params.debug,
+                                             _params.input_dem_path));
+      break;
+    case Params::ESRI_I65:
+    case Params::ESRI_ANS:
+    case Params::ESRI_CLARKE1858:
+    case Params::ESRI_GRS80:
+    case Params::ESRI_WGS84:
+    case Params::ESRI_WGS72:
+    case Params::INTERNATIONAL1924:
+    case Params::AUSTRALIAN_NATIONAL:
+      which = _toSphereStandard(_params.input_data_format);
+      _set(sw, ne, which);
+      break;
+    default:
+      LOG(LogMsg::ERROR, "format Unknown");
+      exit(1);
   }
 
   return true;
 }
 
 //----------------------------------------------------------------
-latlonalt DigitalElevationHandler::radarOrigin(const latlonalt &radar) const
+latlonalt DemProvider::radarOrigin(const latlonalt &radar) const
 {
   spheroid wgs84{spheroid::standard::wgs84};
   latlonalt ret =
@@ -133,14 +132,14 @@ latlonalt DigitalElevationHandler::radarOrigin(const latlonalt &radar) const
 
 //----------------------------------------------------------------
 void
-DigitalElevationHandler::determine_dem_segment_peak(const latlon& origin,
-						    angle bearing,
-						    real min_range,
-						    real max_range,
-						    real& peak_ground_range,
-						    real& peak_altitude,
-						    size_t bin_samples
-						    ) const
+  DemProvider::determine_dem_segment_peak(const latlon& origin,
+                                          angle bearing,
+                                          real min_range,
+                                          real max_range,
+                                          real& peak_ground_range,
+                                          real& peak_altitude,
+                                          size_t bin_samples
+                                          ) const
 {
   const auto delta_range = (max_range - min_range) / bin_samples;
   const auto& sphere = _dem->reference_spheroid();
@@ -170,15 +169,15 @@ DigitalElevationHandler::determine_dem_segment_peak(const latlon& origin,
 
 //----------------------------------------------------------------
 double
-DigitalElevationHandler::getElevation(const rainfields::latlon& loc) const
+  DemProvider::getElevation(const rainfields::latlon& loc) const
 {
   return _dem->lookup(loc);
 }
 
 //----------------------------------------------------------------
-void DigitalElevationHandler::_set(const std::pair<double,double> &sw,
-				   const std::pair<double,double> &ne,
-				   spheroid::standard which)
+void DemProvider::_set(const std::pair<double,double> &sw,
+                       const std::pair<double,double> &ne,
+                       spheroid::standard which)
 {
   angle a0, a1;
   a0.set_degrees(sw.first);
@@ -189,7 +188,7 @@ void DigitalElevationHandler::_set(const std::pair<double,double> &sw,
   a1.set_degrees(ne.second);
   latlon lne(a0, a1);
 
-  _dem.reset(new digital_elevation_esri(_params,
+  _dem.reset(new digital_elevation_esri(_params.debug,
                                         _params.input_dem_path, lsw, lne,
 					spheroid(which)));
 }
