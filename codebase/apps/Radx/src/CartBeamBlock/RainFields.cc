@@ -21,6 +21,12 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
 
+////////////////////////////////////////////////////////////////////////////
+// RainFields.cc is a concatenation of a number of source files originally
+// made available in open source by the Australian BOM.
+// The intention is to cut down on the number of source files.
+////////////////////////////////////////////////////////////////////////////
+
 #include "RainFields.hh"
 
 #include <limits>

@@ -21,12 +21,38 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
 
-#ifndef RAINUTIL_TRAITS_H
-#define RAINUTIL_TRAITS_H
+////////////////////////////////////////////////////////////////////////////
+// RainFields.hh is a concatenation of a number of header files originally
+// made available in open source by the Australian BOM.
+// The intention is to cut down on the number of source files.
+////////////////////////////////////////////////////////////////////////////
 
+#ifndef RAINFIELDS_HH
+#define RAINFIELDS_HH
+
+#include <algorithm>
+#include <cmath>
 #include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <exception>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <memory>
+#include <mutex>
+#include <ostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <type_traits>
+#include <unordered_set>
 #include <utility>
+#include <vector>
+
+////////////////////////////////////////////////////////////////////////////
+//////////////////////// RAINFIELDS_TRAITS_H ///////////////////////////////
 
 namespace rainfields
 {
@@ -214,37 +240,8 @@ namespace rainfields
   template <> struct generic_enum<10> { enum type { _0, _1, _2, _3, _4, _5, _6, _7, _8, _9 }; };
 }
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef RAINUTIL_REAL_H
-#define RAINUTIL_REAL_H
-
-#include <cstdint>
-#include <cmath>
-#include <limits>
-#include <type_traits>
+////////////////////////////////////////////////////////////////////////////
+//////////////////////// RAINFIELDS_REAL_H ///////////////////////////////
 
 namespace rainfields
 {
@@ -516,37 +513,8 @@ namespace rainfields {
   inline constexpr auto nan(std::uint16_t payload) -> real  { return nan<real>(payload); }
 }
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef ARRAY_TEMPLATE_H
-#define ARRAY_TEMPLATE_H
-
-#include <cstring> // for memcpy
-#include <iterator>
-#include <memory>
-#include <algorithm>
+////////////////////////////////////////////////////////////////////////////
+/////////////////////////// ARRAY_TEMPLATE_H ///////////////////////////////
 
 namespace rainfields {
   template <typename T>
@@ -749,36 +717,8 @@ namespace rainfields {
 
 }
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef RAINUTIL_ARRAY_UTILS_H
-#define RAINUTIL_ARRAY_UTILS_H
-
-// #include "array.h"
-// #include "real.h"
-#include <stdexcept>
+/////////////////////////////////////////////////////////////////////////////////
+//////////////////////// RAINFIELDS_ARRAY_UTILS_H ///////////////////////////////
 
 namespace rainfields {
 namespace array_utils {
@@ -1165,41 +1105,8 @@ namespace array_utils {
   }
 }}
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef RAINUTIL_STRING_UTILS_H
-#define RAINUTIL_STRING_UTILS_H
-
-// #include "traits.h"
-
-#include <cstring>
-#include <stdexcept>
-#include <string>
-#include <sstream>
-#include <type_traits>
-#include <vector>
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////// RAINFIELDS_STRING_UTILS_H ///////////////////////////////
 
 namespace rainfields {
 
@@ -1381,38 +1288,8 @@ namespace rainfields {
   auto tokenize(const std::string& str, const char* delims) -> std::vector<std::string>;
 }
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef RAINUTIL_TRACE_H
-#define RAINUTIL_TRACE_H
-
-// #include "traits.h"
-
-#include <mutex>
-#include <ostream>
-#include <sstream>
+////////////////////////////////////////////////////////////////////////////
+///////////////////////// RAINFIELDS_TRACE_H ///////////////////////////////
 
 namespace rainfields {
 namespace trace {
@@ -1511,36 +1388,8 @@ namespace rainfields {
   };
 }
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef ANCILLA_CORE_FIELD_H
-#define ANCILLA_CORE_FIELD_H
-
-// #include "array.h"
-// #include "real.h"
-#include <string>
+/////////////////////////////////////////////////////////////////////////////
+//////////////////////// ANCILLA_CORE_FIELD_H ///////////////////////////////
 
 namespace rainfields {
 namespace ancilla {
@@ -1650,40 +1499,8 @@ namespace ancilla {
   };
 }}
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef RAINUTIL_ANGLE_H
-#define RAINUTIL_ANGLE_H
-
-// #include "real.h"
-// #include "string_utils.h"
-
-#include <cmath>
-#include <istream>
-#include <limits>
-#include <ostream>
+////////////////////////////////////////////////////////////////////////////
+///////////////////////// RAINFIELDS_ANGLE_H ///////////////////////////////
 
 namespace rainfields
 {
@@ -1844,36 +1661,8 @@ namespace rainfields
   auto from_string<angle>(const char* str) -> angle;
 }
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef RAINUTIL_LATLON_H
-#define RAINUTIL_LATLON_H
-
-// #include "angle.h"
-// #include "string_utils.h"
-#include <ostream>
+////////////////////////////////////////////////////////////////////////////
+//////////////////////// RAINFIELDS_LATLON_H ///////////////////////////////
 
 namespace rainfields {
 
@@ -1919,38 +1708,8 @@ namespace rainfields {
   auto from_string<latlonalt>(const char* str) -> latlonalt;
 }
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef RAINUTIL_VEC2_H
-#define RAINUTIL_VEC2_H
-
-// #include "angle.h"
-
-#include <cmath>
-#include <istream>
-#include <ostream>
+////////////////////////////////////////////////////////////////////////////
+////////////////////////// RAINFIELDS_VEC2_H ///////////////////////////////
 
 namespace rainfields {
   template <typename T>
@@ -2059,38 +1818,8 @@ namespace rainfields {
   }
 }
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef RAINUTIL_VEC3_H
-#define RAINUTIL_VEC3_H
-
-// #include "angle.h"
-
-#include <cmath>
-#include <istream>
-#include <ostream>
+////////////////////////////////////////////////////////////////////////////
+////////////////////////// RAINFIELDS_VEC3_H ///////////////////////////////
 
 namespace rainfields {
   template <typename T>
@@ -2199,43 +1928,8 @@ namespace rainfields {
   }
 }
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef RAINUTIL_XML_H
-#define RAINUTIL_XML_H
-
-// #include "string_utils.h"
-
-#include <istream>
-#include <iterator>
-#include <exception>
-#include <ostream>
-#include <string>
-#include <type_traits>
-#include <unordered_set>
-#include <vector>
+////////////////////////////////////////////////////////////////////////////
+/////////////////////////// RAINFIELDS_XML_H ///////////////////////////////
 
 namespace rainfields {
 namespace xml {
@@ -2695,36 +2389,8 @@ namespace xml {
   };
 }}
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef ANCILLA_MODELS_BEAM_POWER_H
-#define ANCILLA_MODELS_BEAM_POWER_H
-
-// #include "angle.h"
-// #include "array.h"
-// #include "real.h"
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////// ANCILLA_MODELS_BEAM_POWER_H ///////////////////////////////
 
 namespace rainfields {
 namespace ancilla {
@@ -2814,36 +2480,8 @@ namespace ancilla {
   };
 }}
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef ANCILLA_MODELS_BEAM_PROPAGATION_H
-#define ANCILLA_MODELS_BEAM_PROPAGATION_H
-
-// #include "angle.h"
-// #include "real.h"
-// #include "vec2.h"
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////// ANCILLA_MODELS_BEAM_PROPAGATION_H ///////////////////////////////
 
 namespace rainfields {
 namespace ancilla {
@@ -2918,38 +2556,8 @@ namespace ancilla {
   };
 }}
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef ANCILLA_MODELS_SPHEROID_H
-#define ANCILLA_MODELS_SPHEROID_H
-
-// #include "latlon.h"
-// #include "real.h"
-// #include "traits.h"
-// #include "vec3.h"
-// #include "xml.h"
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////// ANCILLA_MODELS_SPHEROID_H ///////////////////////////////
 
 namespace rainfields {
 namespace ancilla {
@@ -3081,40 +2689,8 @@ namespace rainfields {
   };
 }
 
-#endif
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-#ifndef DIGITAL_ELEVATION_H
-#define DIGITAL_ELEVATION_H
-
-// #include "spheroid.h"
-// #include "angle.h"
-// #include "array.h"
-// #include "latlon.h"
-// #include "Params.hh"
-
-#include <list>
+////////////////////////////////////////////////////////////////////////////
+//////////////////////// DIGITAL_ELEVATION_H ///////////////////////////////
 
 namespace rainfields {
   namespace ancilla {
@@ -3240,4 +2816,4 @@ namespace rainfields {
 
 } // namespace rainfields
 
-#endif
+#endif // RAINFIELDS_HH
