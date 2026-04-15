@@ -97,6 +97,10 @@ public:
 
   ~DemProvider();
 
+  // get the model name as a string
+  
+  string ModelName(Params::DigitalElevationModel_t t);
+
   /**
    * Initialize for the input range of lat/lons
    * @param[in] sw  The 'southwest' latlon  (first=lat, second=lon)

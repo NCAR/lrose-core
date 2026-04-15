@@ -638,27 +638,27 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'input_dem_path'
+    // Parameter 'dem_path'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_dem_path");
-    tt->descr = tdrpStrDup("input data");
-    tt->help = tdrpStrDup("the file with input digital elevation model data");
-    tt->val_offset = (char *) &input_dem_path - &_start_;
+    tt->param_name = tdrpStrDup("dem_path");
+    tt->descr = tdrpStrDup("DEM data path");
+    tt->help = tdrpStrDup("The file with input digital elevation model data.");
+    tt->val_offset = (char *) &dem_path - &_start_;
     tt->single_val.s = tdrpStrDup("./standalone_beam_blocking/data/srtm3");
     tt++;
     
-    // Parameter 'input_data_format'
+    // Parameter 'dem_data_format'
     // ctype is '_DigitalElevationModel_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("input_data_format");
+    tt->param_name = tdrpStrDup("dem_data_format");
     tt->descr = tdrpStrDup("format of input digital elevation model data");
     tt->help = tdrpStrDup("supported digital elevation models:\n  Shuttle Radar Topography Mission (3 arc-second resolution)\n          format: srtm3 (data found here:\n   	     http://dds.cr.usgs.gov/srtm/version2_1/SRTM3\n  ESRI grid data (spheroid), with the various standard spheroids\n");
-    tt->val_offset = (char *) &input_data_format - &_start_;
+    tt->val_offset = (char *) &dem_data_format - &_start_;
     tt->enum_def.name = tdrpStrDup("DigitalElevationModel_t");
     tt->enum_def.nfields = 9;
     tt->enum_def.fields = (enum_field_t *)

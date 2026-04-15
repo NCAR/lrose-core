@@ -47,11 +47,11 @@ bool DemProvider::set(const std::pair<double,double> &sw,
 {
   spheroid::standard which;
 
-  switch (_params.input_data_format)
+  switch (_params.dem_data_format)
   {
     case Params::SHUTTLE_RADAR_TOPOGRAPHY:
       _dem.reset(new digital_elevation_srtm3(_params.debug,
-                                             _params.input_dem_path));
+                                             _params.dem_path));
       break;
     case Params::ESRI_I65:
     case Params::ESRI_ANS:
@@ -61,7 +61,7 @@ bool DemProvider::set(const std::pair<double,double> &sw,
     case Params::ESRI_WGS72:
     case Params::INTERNATIONAL1924:
     case Params::AUSTRALIAN_NATIONAL:
-      which = _toSphereStandard(_params.input_data_format);
+      which = _toSphereStandard(_params.dem_data_format);
       _set(sw, ne, which);
       break;
     default:
@@ -152,7 +152,7 @@ void DemProvider::_set(const std::pair<double,double> &sw,
   latlon lne(a0, a1);
 
   _dem.reset(new digital_elevation_esri(_params.debug,
-                                        _params.input_dem_path, lsw, lne,
+                                        _params.dem_path, lsw, lne,
 					spheroid(which)));
 }
 
@@ -193,5 +193,49 @@ spheroid::standard DemProvider::_toSphereStandard(Params::DigitalElevationModel_
   }
 
   return from_string<spheroid::standard>(s);
+}
+
+//------------------------------------------------------------------
+//
+// Get the DEM model name as a string
+
+string DemProvider::ModelName(Params::DigitalElevationModel_t t)
+{
+
+  std::string name;
+
+  switch (t)
+  {
+    case Params::ESRI_I65:
+      name = "ESRI_I65";
+      break;
+    case Params::ESRI_ANS:
+      name = "ESRI_ANS";
+      break;
+    case Params::ESRI_CLARKE1858:
+      name = "ESRI_CLARKE1858";
+      break;
+    case Params::ESRI_GRS80:
+      name = "ESRI_GRS80";
+      break;
+    case Params::ESRI_WGS84:
+      name = "ESRI_WGS84";
+      break;
+    case Params::ESRI_WGS72:
+      name = "ESRI_WGS72";
+      break;
+    case Params::INTERNATIONAL1924:
+      name = "INTERNATIONAL1924";
+      break;
+    case Params::AUSTRALIAN_NATIONAL:
+      name = "AUSTRALIAN_NATIONAL";
+      break;
+    case Params::SHUTTLE_RADAR_TOPOGRAPHY:
+    default:
+      name = "SHUTTLE_RADAR_TOPOGRAPHY";
+  }
+
+  return name;
+
 }
 

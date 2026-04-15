@@ -440,9 +440,9 @@ public:
 
   char* template_field_name;
 
-  char* input_dem_path;
+  char* dem_path;
 
-  DigitalElevationModel_t input_data_format;
+  DigitalElevationModel_t dem_data_format;
 
   int num_elev_subsample;
 

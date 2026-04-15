@@ -41,6 +41,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include "DemProvider.hh"
 #include <Mdv/MdvxProj.hh>
 #include <string>
 #include <set>
@@ -73,10 +74,18 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+
+  // projection from template file
+  
   MdvxProj _proj;
+
+  // digital terrain height data
+
+  DemProvider _dem;
 
   int _readGridTemplate(const string &path);
   int _readTemplateFile(const string &path);
+  int _readDem();
 
 };
 

@@ -46,7 +46,8 @@
 
 // Constructor
 
-CartBeamBlock::CartBeamBlock(int argc, char **argv)
+CartBeamBlock::CartBeamBlock(int argc, char **argv) :
+        _dem(_params)
   
 {
 
@@ -101,6 +102,16 @@ int CartBeamBlock::Run()
     cerr << "  Cannot find template file, path: " << _params.grid_template_path << endl;
     return -1;
   }
+
+  // get digital terrain data
+
+  if (_readDem()) {
+    cerr << "ERROR - CartBeamBlock::Run()" << endl;
+    cerr << "  Cannot read DEM data, path: " << _params.dem_path << endl;
+    return -1;
+  }
+
+  
   
   return 0;
   
@@ -197,6 +208,20 @@ int CartBeamBlock::_readTemplateFile(const string &path)
   
 }
 
+//////////////////////////////////////////////////
+// Read in the DEM
+
+int CartBeamBlock::_readDem()
+{
+
+  cerr << "111111111111111111111111" << endl;
+  cerr << "  dem path: " << _params.dem_path << endl;
+  cerr << "  dem model: " << _dem.ModelName(_params.dem_data_format) << endl;
+  cerr << "111111111111111111111111" << endl;
+
+  return 0;
+
+}
 
 #ifdef JUNK
 

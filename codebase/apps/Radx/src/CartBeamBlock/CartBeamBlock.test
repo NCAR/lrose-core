@@ -79,17 +79,17 @@ template_field_name = "DBZ";
 //
 //======================================================================
  
-///////////// input_dem_path //////////////////////////
+///////////// dem_path ////////////////////////////////
 //
-// input data.
+// DEM data path.
 //
-// the file with input digital elevation model data.
+// The file with input digital elevation model data.
 //
 // Type: string
 
-input_dem_path = "./standalone_beam_blocking/data/srtm3";
+dem_path = "./standalone_beam_blocking/data/srtm3";
 
-///////////// input_data_format ///////////////////////
+///////////// dem_data_format /////////////////////////
 //
 // format of input digital elevation model data.
 //
@@ -111,7 +111,7 @@ input_dem_path = "./standalone_beam_blocking/data/srtm3";
 //     INTERNATIONAL1924
 //     AUSTRALIAN_NATIONAL
 
-input_data_format = SHUTTLE_RADAR_TOPOGRAPHY;
+dem_data_format = SHUTTLE_RADAR_TOPOGRAPHY;
 
 //======================================================================
 //

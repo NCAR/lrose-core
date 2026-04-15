@@ -51,10 +51,10 @@ commentdef {
 }
 
 paramdef string {
-  p_descr = "input data";
-  p_help = "the file with input digital elevation model data";
+  p_descr = "DEM data path";
+  p_help = "The file with input digital elevation model data.";
   p_default = "./standalone_beam_blocking/data/srtm3";
-} input_dem_path;
+} dem_path;
 
 typedef enum {
   SHUTTLE_RADAR_TOPOGRAPHY,
@@ -76,7 +76,7 @@ paramdef enum DigitalElevationModel_t {
   "   	     http://dds.cr.usgs.gov/srtm/version2_1/SRTM3\n"
   "  ESRI grid data (spheroid), with the various standard spheroids\n";
   p_default = SHUTTLE_RADAR_TOPOGRAPHY;
-} input_data_format;
+} dem_data_format;
 
 commentdef {
   p_header = "SAMPLING STRATEGY";
