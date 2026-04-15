@@ -203,7 +203,6 @@ int CartBeamBlock::_readTemplateFile(const string &path)
     _proj.print(cerr);
   }
   
-  
   return 0;
   
 }
@@ -215,8 +214,21 @@ int CartBeamBlock::_readDem()
 {
 
   cerr << "111111111111111111111111" << endl;
+
   cerr << "  dem path: " << _params.dem_path << endl;
   cerr << "  dem model: " << _dem.ModelName(_params.dem_data_format) << endl;
+
+  // compute safe lat/lon limits, with a margin of 5 grid points
+
+  double minLat, minLon, maxLat, maxLon;
+  int margin = 5;
+  _proj.getEdgeExtrema(minLat, minLon, maxLat, maxLon, margin);
+
+  cerr << "minLat: " << minLat << endl;
+  cerr << "maxLat: " << maxLat << endl;
+  cerr << "minLon: " << minLon << endl;
+  cerr << "maxLon: " << maxLon << endl;
+  
   cerr << "111111111111111111111111" << endl;
 
   return 0;
