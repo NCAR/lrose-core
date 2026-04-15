@@ -432,11 +432,14 @@ public:
   void getGridOrigin(double &lat, double &lon) const;
 
   // Get the maximum and minimum lat, lon by going
-  // around the edge of the grid. Computationally expensive
-  // in some cases.
+  // around the edge of the grid.
+  // Optionally set the extra margin around in the grid, in grid indices.
+  // Setting margin > 0 enlarges the resulting region.
+  // Computationally expensive in some cases.
 
   void getEdgeExtrema(double &minLat, double &minLon,
-		      double &maxLat, double &maxLon) const;
+		      double &maxLat, double &maxLon,
+                      int margin = 0) const;
   
   // Synchronize master and field header with info from
   // this object.

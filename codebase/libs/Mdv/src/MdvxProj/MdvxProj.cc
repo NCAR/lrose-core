@@ -1389,52 +1389,56 @@ void MdvxProj::getGridOrigin(double &lat, double &lon) const
 
 ////////////////////////////////////////////////////////
 // 
-// getEdgeExtrema()
-//
 // Get the maximum and minimum lat, lon by going
-// around the edge of the grid. Computationally expensive
-// in some cases. Niles Oien November 2004.
-//
+// around the edge of the grid.
+// Optionally set the extra margin around in the grid, in grid indices.
+// Setting margin > 0 enlarges the resulting region.
+// Computationally expensive in some cases.
+
 void MdvxProj::getEdgeExtrema(double &minLat, double &minLon,
-			      double &maxLat, double &maxLon) const
+			      double &maxLat, double &maxLon,
+                              int margin /* = 0 */) const
 {
 
   // Initialize.
 
   double lat, lon;
   xyIndex2latlon(0, 0, lat, lon);
-  minLat = maxLat = lat;         maxLon = minLon = lon;
+  minLat = maxLat = lat;
+  maxLon = minLon = lon;
 
   // Go around all four sides.
 
-  // First, the sides defined by ix=0 and ix=Nx-1.
+  // go around the sides defined by ix=0 and ix=Nx-1
+  // plus the margin as appropriate
 
-  for (int iy = 0; iy < _coord.ny; iy++){
+  for (int iy = 0 - margin; iy < _coord.ny + margin; iy++){
     //
-    xyIndex2latlon(0, iy, lat, lon);
+    xyIndex2latlon(0 - margin, iy, lat, lon);
     if (lon < minLon) minLon = lon;
     if (lon > maxLon) maxLon = lon;
     if (lat < minLat) minLat = lat;
     if (lat > maxLat) maxLat = lat;
     //
-    xyIndex2latlon(_coord.nx-1, iy, lat, lon);
+    xyIndex2latlon(_coord.nx - 1 + margin, iy, lat, lon);
     if (lon < minLon) minLon = lon;
     if (lon > maxLon) maxLon = lon;
     if (lat < minLat) minLat = lat;
     if (lat > maxLat) maxLat = lat;
   }
 
-  // Then, the sides defined by iy=0 and iy=Ny-1.
+  // go around the sides defined by iy=0 and iy=Ny-1
+  // plus the margin as appropriate
 
-  for (int ix = 0; ix < _coord.nx; ix++){
+  for (int ix = 0 - margin; ix < _coord.nx + margin; ix++){
     //
-    xyIndex2latlon(ix, 0, lat, lon);
+    xyIndex2latlon(ix, 0 - margin, lat, lon);
     if (lon < minLon) minLon = lon;
     if (lon > maxLon) maxLon = lon;
     if (lat < minLat) minLat = lat;
     if (lat > maxLat) maxLat = lat;
     //
-    xyIndex2latlon(ix,  _coord.ny-1, lat, lon);
+    xyIndex2latlon(ix,  _coord.ny - 1 + margin, lat, lon);
     if (lon < minLon) minLon = lon;
     if (lon > maxLon) maxLon = lon;
     if (lat < minLat) minLat = lat;
