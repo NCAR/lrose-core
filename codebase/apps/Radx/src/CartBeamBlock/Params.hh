@@ -438,6 +438,8 @@ public:
 
   char* grid_template_path;
 
+  char* template_field_name;
+
   char* input_dem_path;
 
   DigitalElevationModel_t input_data_format;
@@ -500,7 +502,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[43];
 
   const char *_className;
 

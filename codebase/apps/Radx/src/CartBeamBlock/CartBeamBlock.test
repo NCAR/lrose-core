@@ -49,16 +49,29 @@ debug = DEBUG_OFF;
  
 ///////////// grid_template_path //////////////////////
 //
-// Path or directory for Cartesian input data.
+// Directory or file path for Cartesian input data.
 //
-// This specifies the path to either (a) a single 3D Cartesian file, or 
-//   a directory containing such files. These files will have been created 
-//   by running Radx2Grid or RadxCartDP.
+// This specifies the path to either:
+//
+// 	(a) a single 3D Cartesian file, or 
+// 	(b) a directory containing such files.
+//
+// These files must have been previously created by running Radx2Grid or 
+//   RadxCartDP.
 //
 // Type: string
 
 grid_template_path = "$(HOME)/data/pecan/mdv/radarCart/kftg/20150626/ncf_20150626_000334.nc";
-// grid_template_path = "$(HOME)/data/pecan/mdv/radarCart/kftg";
+
+///////////// template_field_name /////////////////////
+//
+// Field name for 3D Cartesian input data.
+//
+// This should be a 3D field in the template Cartesian file.
+//
+// Type: string
+
+template_field_name = "DBZ";
 
 //======================================================================
 //

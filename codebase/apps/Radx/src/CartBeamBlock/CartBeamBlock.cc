@@ -162,8 +162,8 @@ int CartBeamBlock::_readTemplateFile(const string &path)
 
   Mdvx cart;
   cart.setReadPath(path);
-  cart.addReadField(0);
-  if (cart.readAllHeaders()) {
+  cart.addReadField(_params.template_field_name);
+  if (cart.readVolume()) {
     cerr << "ERROR - CartBeamBlock::_readTemplateFile" << endl;
     cerr << "  Cannot read template file: " << path << endl;
     cerr << "  " << cart.getErrStr() << endl;
@@ -171,12 +171,15 @@ int CartBeamBlock::_readTemplateFile(const string &path)
   }
   if (cart.getNFieldsFile() < 1) {
     cerr << "ERROR - CartBeamBlock::_readTemplateFile" << endl;
-    cerr << "  No fields in template file: " << path << endl;
+    cerr << "  Cannot find specified field in template file: " << path << endl;
+    cerr << "  Field name: " << _params.template_field_name << endl;
+    return -1;
   }
-  MdvxField *field0 = cart.getField(0);
+  MdvxField *field0 = cart.getField(_params.template_field_name);
   if (field0 == nullptr) {
-    cerr << "ERROR - CartBeamBlock::_readTemplateFile" << endl;
-    cerr << "  Cannot read field 0 in template file: " << path << endl;
+    cerr << "  Cannot find specified field in template file: " << path << endl;
+    cerr << "  Field name: " << _params.template_field_name << endl;
+    return -1;
   }
   
   if (_params.debug) {

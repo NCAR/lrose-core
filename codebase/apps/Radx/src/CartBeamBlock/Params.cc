@@ -611,10 +611,22 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("grid_template_path");
-    tt->descr = tdrpStrDup("Path or directory for Cartesian input data.");
-    tt->help = tdrpStrDup("This specifies the path to either (a) a single 3D Cartesian file, or a directory containing such files. These files will have been created by running Radx2Grid or RadxCartDP.");
+    tt->descr = tdrpStrDup("Directory or file path for Cartesian input data.");
+    tt->help = tdrpStrDup("This specifies the path to either:\n\n\t(a) a single 3D Cartesian file, or \n\t(b) a directory containing such files.\n\nThese files must have been previously created by running Radx2Grid or RadxCartDP.");
     tt->val_offset = (char *) &grid_template_path - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/cart_template/example_cart_file.nc");
+    tt++;
+    
+    // Parameter 'template_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("template_field_name");
+    tt->descr = tdrpStrDup("Field name for 3D Cartesian input data.");
+    tt->help = tdrpStrDup("This should be a 3D field in the template Cartesian file.");
+    tt->val_offset = (char *) &template_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DBZ");
     tt++;
     
     // Parameter 'Comment 3'

@@ -36,9 +36,15 @@ commentdef {
 
 paramdef string {
   p_default = "/tmp/cart_template/example_cart_file.nc";
-  p_descr = "Path or directory for Cartesian input data.";
-  p_help = "This specifies the path to either (a) a single 3D Cartesian file, or a directory containing such files. These files will have been created by running Radx2Grid or RadxCartDP.";
+  p_descr = "Directory or file path for Cartesian input data.";
+  p_help = "This specifies the path to either:\n\n\t(a) a single 3D Cartesian file, or \n\t(b) a directory containing such files.\n\nThese files must have been previously created by running Radx2Grid or RadxCartDP.";
 } grid_template_path;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Field name for 3D Cartesian input data.";
+  p_help = "This should be a 3D field in the template Cartesian file.";
+} template_field_name;
 
 commentdef {
   p_header = "DIGITAL ELEVATION DATA";
