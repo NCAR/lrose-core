@@ -37,13 +37,15 @@
 ///////////////////////////////////////////////////////////////
 
 #include "CartBeamBlock.hh"
+#include "RainFields.hh"
 #include <filesystem>
 #include <iostream>
 #include <toolsa/umisc.h>
 #include <didss/DsInputPath.hh>
-#include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxField.hh>
 
+namespace fs = std::filesystem;
+  
 // Constructor
 
 CartBeamBlock::CartBeamBlock(int argc, char **argv) :
@@ -105,7 +107,7 @@ int CartBeamBlock::Run()
 
   // get digital terrain data
 
-  if (_readDem()) {
+  if (_readDem(_params.dem_path)) {
     cerr << "ERROR - CartBeamBlock::Run()" << endl;
     cerr << "  Cannot read DEM data, path: " << _params.dem_path << endl;
     return -1;
@@ -124,8 +126,6 @@ int CartBeamBlock::_readGridTemplate(const string &path)
 {
 
   // check whether we have a file or directory
-  
-  namespace fs = std::filesystem;
   
   if (fs::is_directory(path)) {
 
@@ -170,23 +170,22 @@ int CartBeamBlock::_readGridTemplate(const string &path)
 int CartBeamBlock::_readTemplateFile(const string &path)
 {
 
-
-  Mdvx cart;
-  cart.setReadPath(path);
-  cart.addReadField(_params.template_field_name);
-  if (cart.readVolume()) {
+  _templateMdvx.clear();
+  _templateMdvx.setReadPath(path);
+  _templateMdvx.addReadField(_params.template_field_name);
+  if (_templateMdvx.readVolume()) {
     cerr << "ERROR - CartBeamBlock::_readTemplateFile" << endl;
     cerr << "  Cannot read template file: " << path << endl;
-    cerr << "  " << cart.getErrStr() << endl;
+    cerr << "  " << _templateMdvx.getErrStr() << endl;
     return -1;
   }
-  if (cart.getNFieldsFile() < 1) {
+  if (_templateMdvx.getNFieldsFile() < 1) {
     cerr << "ERROR - CartBeamBlock::_readTemplateFile" << endl;
     cerr << "  Cannot find specified field in template file: " << path << endl;
     cerr << "  Field name: " << _params.template_field_name << endl;
     return -1;
   }
-  MdvxField *field0 = cart.getField(_params.template_field_name);
+  MdvxField *field0 = _templateMdvx.getField(_params.template_field_name);
   if (field0 == nullptr) {
     cerr << "  Cannot find specified field in template file: " << path << endl;
     cerr << "  Field name: " << _params.template_field_name << endl;
@@ -196,12 +195,15 @@ int CartBeamBlock::_readTemplateFile(const string &path)
   if (_params.debug) {
     cerr << "INFO - read template file: " << path << endl;
   }
-
+  
   _proj.init(field0->getFieldHeader());
   if (_params.debug) {
     cerr << "INFO - PROJECTION" << path << endl;
     _proj.print(cerr);
   }
+
+  const Mdvx::master_header_t &mhdr = _templateMdvx.getMasterHeader();
+  _proj.setSensorPosn(mhdr.sensor_lat, mhdr.sensor_lon, mhdr.sensor_alt);
   
   return 0;
   
@@ -210,35 +212,259 @@ int CartBeamBlock::_readTemplateFile(const string &path)
 //////////////////////////////////////////////////
 // Read in the DEM
 
-int CartBeamBlock::_readDem()
+int CartBeamBlock::_readDem(const string &path)
 {
 
-  cerr << "111111111111111111111111" << endl;
+  if (!fs::is_directory(path) && (!fs::is_regular_file(path))) {
+    cerr << "ERROR - CartBeamBlock::_readDem" << endl;
+    cerr << "  DEM path does not exist: " << path << endl;
+    return -1;
+  }
 
-  cerr << "  dem path: " << _params.dem_path << endl;
-  cerr << "  dem model: " << _dem.ModelName(_params.dem_data_format) << endl;
-
-  // compute safe lat/lon limits, with a margin of 5 grid points
-
+  if (_params.debug) {
+    cerr << "INFO: reading DEM from path: " << path << endl;
+    cerr << "      DEM model: " << _dem.ModelName(_params.dem_data_format) << endl;
+  }
+    
+  // compute safe projection lat/lon limits, with a margin of 5 grid points
+  
   double minLat, minLon, maxLat, maxLon;
   int margin = 5;
   _proj.getEdgeExtrema(minLat, minLon, maxLat, maxLon, margin);
 
-  cerr << "minLat: " << minLat << endl;
-  cerr << "maxLat: " << maxLat << endl;
-  cerr << "minLon: " << minLon << endl;
-  cerr << "maxLon: " << maxLon << endl;
+  if (_params.debug) {
+    cerr << "INFO: retrieving DEM data for lat/lon bounding box" << endl;
+    cerr << "      minLat, maxLat: " << minLat << ", " << maxLat << endl;
+    cerr << "      minLon, maxLon: " << minLon << ", " << maxLon << endl;
+  }
+    
+  // initialize dem for reading
+
+  std::pair<double,double> sw(minLat, minLon);
+  std::pair<double,double> ne(maxLat, maxLon);
+  _dem.set(sw, ne);
+
+  // create the terrain grid
   
-  cerr << "111111111111111111111111" << endl;
+  if (_createTerrainGrid(minLat, minLon, maxLat, maxLon)) {
+    cerr << "ERROR - CartBeamBlock::_readDem" << endl;
+    cerr << "  Cannot create terrain output grid file" << endl;
+    return -1;
+  }
+  
+  return 0;
+
+}
+
+//////////////////////////////////////////
+// create a terrain grid in Cart coords
+
+int CartBeamBlock::_createTerrainGrid(double minLat, double minLon,
+                                      double maxLat, double maxLon)
+  
+{
+
+  // compute grid details
+
+  minLat = (floor(minLat / _params.cart_terrain_grid_res) - 1.0) *
+    _params.cart_terrain_grid_res;
+  minLon = (floor(minLon / _params.cart_terrain_grid_res) - 1.0) *
+    _params.cart_terrain_grid_res;
+
+  maxLat = (floor(maxLat / _params.cart_terrain_grid_res) + 1.0) *
+    _params.cart_terrain_grid_res;
+  maxLon = (floor(maxLon / _params.cart_terrain_grid_res) + 1.0) *
+    _params.cart_terrain_grid_res;
+
+  if (_params.debug) {
+    cerr << "createTerrainGrid():" << endl;
+    cerr << "  minLat, minLon: " << minLat << ", " << minLon << endl;
+    cerr << "  maxLat, maxLon: " << maxLat << ", " << maxLon << endl;
+  }
+
+  // create MDV object
+
+  _outMdvx.clear();
+  _setTerrainMdvMasterHeader(_outMdvx);
+  if (_addTerrainMdvField(_outMdvx, minLat, minLon, maxLat, maxLon)) {
+    return -1;
+  }
+
+  // write it out
+
+  _outMdvx.setWriteFormat(Mdvx::FORMAT_NCF);
+
+  string outputDir(_params.output_dir);
+  if (_params.append_radar_name_to_output_dir) {
+    outputDir += PATH_DELIM;
+    outputDir += _params.radar_name;
+  }
+  outputDir += PATH_DELIM;
+  outputDir += _params.cart_terrain_grid_subdir;
+
+  if (_outMdvx.writeToDir(outputDir.c_str())) {
+    cerr << "ERROR - CartBeamBlock::_createTerrainGrid" << endl;
+    cerr << _outMdvx.getErrStr() << endl;
+    return -1;
+  }
+
+  if (_params.debug) {
+    cerr << "Wrote terrain NetCDF file: " << _outMdvx.getPathInUse() << endl;
+  }
 
   return 0;
 
+}
+//////////////////////////////////////////////
+// set the master header for terrain file
+
+void CartBeamBlock::_setTerrainMdvMasterHeader(Mdvx &mdv)
+
+{
+  
+  // set master header
+  
+  Mdvx::master_header_t mhdr(_templateMdvx.getMasterHeader());
+
+  DateTime ttime(_params.output_time_stamp.year,
+                 _params.output_time_stamp.month,
+                 _params.output_time_stamp.day,
+                 _params.output_time_stamp.hour,
+                 _params.output_time_stamp.min,
+                 _params.output_time_stamp.sec);
+
+  mhdr.time_gen = time(NULL);
+  mhdr.time_begin = ttime.utime();
+  mhdr.time_end = ttime.utime();
+  mhdr.time_centroid = ttime.utime();
+  mhdr.time_expire = mhdr.time_begin + 999999999L;
+  
+  mhdr.num_data_times = 1;
+  mhdr.data_dimension = 3;
+  
+  mhdr.data_collection_type = Mdvx::DATA_SYNTHESIS;
+  // mhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  // mhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  
+  mhdr.vlevel_included = TRUE;
+  mhdr.grid_orientation = Mdvx::ORIENT_SN_WE;
+  mhdr.data_ordering = Mdvx::ORDER_XYZ;
+  mhdr.field_grids_differ = FALSE;
+  
+  mdv.setMasterHeader(mhdr);
+  
+  mdv.setDataSetInfo("Terrain data from SRTM30");
+  mdv.setDataSetName("SRTM30");
+  mdv.setDataSetSource("CartBeamBlock");
+  
+}
+
+////////////////////
+// addTerrainField()
+//
+
+int CartBeamBlock::_addTerrainMdvField(Mdvx &mdv,
+                                       double minLat, double minLon,
+                                       double maxLat, double maxLon)
+  
+{
+  
+  if (_params.debug) {
+    cerr << "  Adding terrain field: " << _params.cart_terrain_field_name << endl;
+  }
+
+  int nLat = (int) floor((maxLat - minLat) / _params.cart_terrain_grid_res + 0.5) + 1;
+  int nLon = (int) floor((maxLon - minLon) / _params.cart_terrain_grid_res + 0.5) + 1;
+
+  // field header
+
+  MdvxField *field0 = _templateMdvx.getField(_params.template_field_name);
+  if (field0 == nullptr) {
+    cerr << "  Cannot find specified field in template file" << endl;
+    cerr << "  Field name: " << _params.template_field_name << endl;
+    return -1;
+  }
+  Mdvx::field_header_t fhdr(field0->getFieldHeader());
+  fhdr.nz = 1;
+  
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.dz_constant = true;
+
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = 4;
+  fhdr.volume_size = fhdr.nx * fhdr.ny * 1 * sizeof(fl32);
+  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
+  fhdr.scaling_type = Mdvx::SCALING_NONE;
+  
+  fhdr.grid_dz = 1.0;
+  fhdr.grid_minz = 0;
+
+  fhdr.scale = 1.0;
+  fhdr.bias = 0.0;
+
+  fl32 missingVal = -9999.0;
+  fhdr.bad_data_value = missingVal;
+  fhdr.missing_data_value = missingVal;
+  
+  fhdr.min_value = 0;
+  fhdr.max_value = 0;
+  fhdr.min_value_orig_vol = 0;
+  fhdr.max_value_orig_vol = 0;
+
+  // vlevel header
+  
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  vhdr.level[0] = 0;
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+
+  // create terrain data
+
+  fl32 *height = new fl32[fhdr.nx * fhdr.ny];
+  int ii = 0;
+  for (int iy = 0; iy < nLat; iy++) {
+    for (int ix = 0; ix < nLon; ix++, ii++) {
+      double latDeg, lonDeg;
+      _proj.xyIndex2latlon(ix, iy, latDeg, lonDeg);
+      rainfields::angle alat, alon;
+      alat.set_degrees(latDeg);
+      alon.set_degrees(lonDeg);
+      rainfields::latlon loc(alat, alon);
+      double ht = _dem.getElevation(loc);
+      if (!std::isfinite(ht)) {
+        ht = missingVal;
+      }
+      height[ii] = ht;
+    }
+  }
+
+  // create field
+
+  MdvxField *fld = new MdvxField(fhdr, vhdr, height);
+  fld->convertType(Mdvx::ENCODING_FLOAT32,
+                   Mdvx::COMPRESSION_GZIP);
+  delete[] height;
+
+  // set strings
+  
+  fld->setFieldName(_params.cart_terrain_field_name);
+  fld->setFieldNameLong(_params.cart_terrain_field_name);
+  fld->setUnits("m");
+  
+  // add to object
+  
+  mdv.addField(fld);
+
+  return 0;
+  
 }
 
 #ifdef JUNK
 
 //------------------------------------------------------------------
-RadxBeamBlock::RadxBeamBlock(int argc, char **argv) :
+CartBeamBlock::CartBeamBlock(int argc, char **argv) :
 
 {
 
@@ -253,12 +479,12 @@ RadxBeamBlock::RadxBeamBlock(int argc, char **argv) :
 }
 
 //------------------------------------------------------------------
-RadxBeamBlock::~RadxBeamBlock()
+CartBeamBlock::~CartBeamBlock()
 {
 }
 
 //------------------------------------------------------------------
-int RadxBeamBlock::Run(void)
+int CartBeamBlock::Run(void)
 {
 
   // pull out extremes in latitude/longitude, which are needed for setup
@@ -327,7 +553,7 @@ int RadxBeamBlock::Run(void)
 }
 
 //------------------------------------------------------------------
-bool RadxBeamBlock::_processScan(ScanHandler &scan,
+bool CartBeamBlock::_processScan(ScanHandler &scan,
 				 const beam_power &power_model,
 				 latlonalt origin)
 {
@@ -378,7 +604,7 @@ bool RadxBeamBlock::_processScan(ScanHandler &scan,
 
 
 //------------------------------------------------------------------
-void RadxBeamBlock::_processBeam(RayHandler &ray, latlonalt origin, 
+void CartBeamBlock::_processBeam(RayHandler &ray, latlonalt origin, 
 				 const beam_propagation &bProp,
 				 const beam_power_cross_section &csec,
                                  bool &foundBlockage)
@@ -411,7 +637,7 @@ void RadxBeamBlock::_processBeam(RayHandler &ray, latlonalt origin,
 }
 
 //------------------------------------------------------------------
-void RadxBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
+void CartBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
 				 size_t iray, latlonalt origin, 
 				 const beam_propagation &bProp, angle bearing,
 				 const beam_power_cross_section &csec,
@@ -454,7 +680,7 @@ void RadxBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
 }
 
 //------------------------------------------------------------------
-void RadxBeamBlock::_adjustValues(size_t ray, const beam_propagation &bProp,
+void CartBeamBlock::_adjustValues(size_t ray, const beam_propagation &bProp,
 				  real peak_ground_range, real peak_altitude,
 				  angle elevAngle,
 				  const beam_power_cross_section &csec,
@@ -488,217 +714,11 @@ void RadxBeamBlock::_adjustValues(size_t ray, const beam_propagation &bProp,
 }
 
 //------------------------------------------------------------------
-int RadxBeamBlock::Write(void)
+int CartBeamBlock::Write(void)
 {
   return _vol.write();
 }
 
 
-//////////////////////////////////////////
-// create a terrain grid in Cart corrds
-int RadxBeamBlock::_createCartTerrainGrid(double minLat, double minLon,
-                                          double maxLat, double maxLon)
-
-{
-
-  // compute grid details
-
-  minLat = (floor(minLat / _params.cart_terrain_grid_res) - 1.0) *
-    _params.cart_terrain_grid_res;
-  minLon = (floor(minLon / _params.cart_terrain_grid_res) - 1.0) *
-    _params.cart_terrain_grid_res;
-
-  maxLat = (floor(maxLat / _params.cart_terrain_grid_res) + 1.0) *
-    _params.cart_terrain_grid_res;
-  maxLon = (floor(maxLon / _params.cart_terrain_grid_res) + 1.0) *
-    _params.cart_terrain_grid_res;
-
-  if (_params.debug) {
-    cerr << "createCartTerrainGrid():" << endl;
-    cerr << "  minLat, minLon: " << minLat << ", " << minLon << endl;
-    cerr << "  maxLat, maxLon: " << maxLat << ", " << maxLon << endl;
-  }
-
-  // create MDV object
-
-  DsMdvx mdv;
-  _setTerrainMdvMasterHeader(mdv);
-  _addTerrainMdvField(mdv, minLat, minLon, maxLat, maxLon);
-
-  // write it out
-
-  mdv.setWriteFormat(Mdvx::FORMAT_NCF);
-
-  string outputDir(_params.output_dir);
-  if (_params.append_radar_name_to_output_dir) {
-    outputDir += PATH_DELIM;
-    outputDir += _params.radar_name;
-  }
-  outputDir += PATH_DELIM;
-  outputDir += _params.cart_terrain_grid_subdir;
-
-  if (mdv.writeToDir(outputDir.c_str())) {
-    cerr << "ERROR - RadxBeamBlock::_createCartTerrainGrid" << endl;
-    cerr << mdv.getErrStr() << endl;
-  }
-
-  if (_params.debug) {
-    cerr << "Wrote terrain NetCDF file: " << mdv.getPathInUse() << endl;
-  }
-
-  return 0;
-
-}
-//////////////////////////////////////////////
-// set the master header for terrain file
-
-void RadxBeamBlock::_setTerrainMdvMasterHeader(DsMdvx &mdv)
-
-{
-  
-  // set master header
-  
-  Mdvx::master_header_t mhdr;
-  MEM_zero(mhdr);
-
-  RadxTime ttime(_params.output_time_stamp.year,
-                 _params.output_time_stamp.month,
-                 _params.output_time_stamp.day,
-                 _params.output_time_stamp.hour,
-                 _params.output_time_stamp.min,
-                 _params.output_time_stamp.sec);
-
-  mhdr.time_gen = time(NULL);
-  mhdr.time_begin = ttime.utime();
-  mhdr.time_end = ttime.utime();
-  mhdr.time_centroid = ttime.utime();
-  mhdr.time_expire = mhdr.time_begin + 999999999L;
-  
-  mhdr.num_data_times = 1;
-  mhdr.data_dimension = 2;
-  
-  mhdr.data_collection_type = Mdvx::DATA_MEASURED;
-  mhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-  mhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-
-  mhdr.vlevel_included = TRUE;
-  mhdr.grid_orientation = Mdvx::ORIENT_SN_WE;
-  mhdr.data_ordering = Mdvx::ORDER_XYZ;
-  mhdr.field_grids_differ = FALSE;
-  
-  mdv.setMasterHeader(mhdr);
-  
-  mdv.setDataSetInfo("Terrain height from SRTM30");
-  mdv.setDataSetName("SRTM30");
-  mdv.setDataSetSource("RadxBeamBlock");
- 
-}
-
-////////////////////
-// addTerrainField()
-//
-
-void RadxBeamBlock::_addTerrainMdvField(DsMdvx &mdv,
-                                        double minLat, double minLon,
-                                        double maxLat, double maxLon)
-  
-{
-  
-  if (_params.debug) {
-    cerr << "  Adding terrain field: " << _params.cart_terrain_field_name << endl;
-  }
-
-  int nLat = (int) floor((maxLat - minLat) / _params.cart_terrain_grid_res + 0.5) + 1;
-  int nLon = (int) floor((maxLon - minLon) / _params.cart_terrain_grid_res + 0.5) + 1;
-
-  // field header
-
-  Mdvx::field_header_t fhdr;
-  MEM_zero(fhdr);
-
-  fhdr.nx = nLon;
-  fhdr.ny = nLat;
-  fhdr.nz = 1;
-
-  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-  fhdr.proj_type = Mdvx::PROJ_LATLON;
-  fhdr.dz_constant = true;
-
-  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
-  fhdr.data_element_nbytes = 4;
-  fhdr.volume_size = fhdr.nx * fhdr.ny * 1 * sizeof(fl32);
-  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
-  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
-  fhdr.scaling_type = Mdvx::SCALING_NONE;
-  
-  fhdr.proj_origin_lat = minLat;
-  fhdr.proj_origin_lon = minLon;
-
-  fhdr.grid_dx = _params.cart_terrain_grid_res;
-  fhdr.grid_dy = _params.cart_terrain_grid_res;
-  fhdr.grid_dz = 1.0;
-
-  fhdr.grid_minx = minLon;
-  fhdr.grid_miny = minLat;
-  fhdr.grid_minz = 0;
-
-  fhdr.scale = 1.0;
-  fhdr.bias = 0.0;
-
-  fl32 missingVal = -9999.0;
-  fhdr.bad_data_value = missingVal;
-  fhdr.missing_data_value = missingVal;
-  
-  fhdr.min_value = 0;
-  fhdr.max_value = 0;
-  fhdr.min_value_orig_vol = 0;
-  fhdr.max_value_orig_vol = 0;
-
-  // vlevel header
-  
-  Mdvx::vlevel_header_t vhdr;
-  MEM_zero(vhdr);
-  vhdr.level[0] = 0;
-  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
-
-  // create terrain data
-
-  fl32 *height = new fl32[fhdr.nx * fhdr.ny];
-  int ii = 0;
-  for (int ilat = 0; ilat < nLat; ilat++) {
-    double latDeg = minLat + ilat * _params.cart_terrain_grid_res;
-    for (int ilon = 0; ilon < nLon; ilon++, ii++) {
-      double lonDeg = minLon + ilon * _params.cart_terrain_grid_res;
-      angle alat, alon;
-      alat.set_degrees(latDeg);
-      alon.set_degrees(lonDeg);
-      latlon loc(alat, alon);
-      double ht = _dem.getElevation(loc);
-      if (!std::isfinite(ht)) {
-        ht = missingVal;
-      }
-      height[ii] = ht;
-    }
-  }
-
-  // create field
-
-  MdvxField *fld = new MdvxField(fhdr, vhdr, height);
-  fld->convertType(Mdvx::ENCODING_FLOAT32,
-                   Mdvx::COMPRESSION_GZIP);
-  delete[] height;
-
-  // set strings
-  
-  fld->setFieldName(_params.cart_terrain_field_name);
-  fld->setFieldNameLong(_params.cart_terrain_field_name);
-  fld->setUnits("m");
-  
-  // add to object
-  
-  mdv.addField(fld);
-
-}
-
 #endif
+

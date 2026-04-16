@@ -87,7 +87,7 @@ template_field_name = "DBZ";
 //
 // Type: string
 
-dem_path = "./standalone_beam_blocking/data/srtm3";
+dem_path = "$(HOME)/data/Terrain/DEM/SRTM1";
 
 ///////////// dem_data_format /////////////////////////
 //
@@ -456,7 +456,7 @@ output_format = OUTPUT_FORMAT_CFRADIAL;
 //
 // Type: string
 
-output_dir = "/tmp/CartBeamBlock";
+output_dir = "$(HOME)/data/pecan/mdv/beabBlock/kftg";
 
 ///////////// append_radar_name_to_output_dir /////////
 //

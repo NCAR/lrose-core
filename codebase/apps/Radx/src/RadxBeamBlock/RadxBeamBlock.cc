@@ -295,7 +295,8 @@ int RadxBeamBlock::Write(void)
 
 
 //////////////////////////////////////////
-// create a terrain grid in Cart corrds
+// create a terrain grid in Cart coords
+
 int RadxBeamBlock::_createCartTerrainGrid(double minLat, double minLon,
                                           double maxLat, double maxLon)
 

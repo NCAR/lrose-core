@@ -42,6 +42,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "DemProvider.hh"
+#include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxProj.hh>
 #include <string>
 #include <set>
@@ -76,17 +77,29 @@ private:
   Params _params;
 
   // projection from template file
-  
+
+  Mdvx _templateMdvx;
   MdvxProj _proj;
 
   // digital terrain height data
 
   DemProvider _dem;
 
+  // output file
+
+  Mdvx _outMdvx;
+
   int _readGridTemplate(const string &path);
   int _readTemplateFile(const string &path);
-  int _readDem();
+  int _readDem(const string &path);
 
+  int _createTerrainGrid(double minLat, double minLon,
+                         double maxLat, double maxLon);
+  void _setTerrainMdvMasterHeader(Mdvx &mdv);
+  int _addTerrainMdvField(Mdvx &mdv,
+                          double minLat, double minLon,
+                          double maxLat, double maxLon);
+  
 };
 
 #endif
