@@ -689,8 +689,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("SAMPLING STRATEGY");
-    tt->comment_text = tdrpStrDup("We compute blockage using a micro-grid, within the radar elevation, azimuth and gate (bin) geometry. This allows us to compute the effective blockage across the beam.");
+    tt->comment_hdr = tdrpStrDup("BLOCKAGE SAMPLING GEOMETRY");
+    tt->comment_text = tdrpStrDup("We compute blockage using a micro-grid, within the radar elevation, azimuth and range geometry. This allows us to compute the effective blockage more accurately.");
     tt++;
     
     // Parameter 'num_elev_subsample'
@@ -738,60 +738,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'output_time_stamp'
-    // ctype is '_datetime_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("output_time_stamp");
-    tt->descr = tdrpStrDup("Time stamp for output files");
-    tt->help = tdrpStrDup("We need to set a time so that the output files can be correctly named. SRTM shuttle mission 99 occurred in early 2000.");
-    tt->val_offset = (char *) &output_time_stamp - &_start_;
-    tt->struct_def.name = tdrpStrDup("datetime_t");
-    tt->struct_def.nfields = 6;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[0].fname = tdrpStrDup("year");
-      tt->struct_def.fields[0].ptype = INT_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &output_time_stamp.year - (char *) &output_time_stamp;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[1].fname = tdrpStrDup("month");
-      tt->struct_def.fields[1].ptype = INT_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &output_time_stamp.month - (char *) &output_time_stamp;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[2].fname = tdrpStrDup("day");
-      tt->struct_def.fields[2].ptype = INT_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &output_time_stamp.day - (char *) &output_time_stamp;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[3].fname = tdrpStrDup("hour");
-      tt->struct_def.fields[3].ptype = INT_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &output_time_stamp.hour - (char *) &output_time_stamp;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[4].fname = tdrpStrDup("min");
-      tt->struct_def.fields[4].ptype = INT_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &output_time_stamp.min - (char *) &output_time_stamp;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[5].fname = tdrpStrDup("sec");
-      tt->struct_def.fields[5].ptype = INT_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &output_time_stamp.sec - (char *) &output_time_stamp;
-    tt->n_struct_vals = 6;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].i = 2000;
-      tt->struct_vals[1].i = 1;
-      tt->struct_vals[2].i = 1;
-      tt->struct_vals[3].i = 0;
-      tt->struct_vals[4].i = 0;
-      tt->struct_vals[5].i = 0;
-    tt++;
-    
     // Parameter 'radar_name'
     // ctype is 'char*'
     
@@ -799,9 +745,21 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("radar_name");
     tt->descr = tdrpStrDup("Name of radar");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("If empty, the radar name from the data is used.");
     tt->val_offset = (char *) &radar_name - &_start_;
-    tt->single_val.s = tdrpStrDup("UNKNOWN");
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'override_radar_location'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_radar_location");
+    tt->descr = tdrpStrDup("Option to override the radar spatial location.");
+    tt->help = tdrpStrDup("If FALSE we use the radar location from the template file. If TRUE, we specify the location in the parameter file.");
+    tt->val_offset = (char *) &override_radar_location - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'radar_location'
@@ -811,7 +769,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("radar_location");
     tt->descr = tdrpStrDup("Radar location");
-    tt->help = tdrpStrDup("The radar_location, note that the altitude is in km MSL.");
+    tt->help = tdrpStrDup("The radar location if override_radar_location is true. Altitude is in km MSL.");
     tt->val_offset = (char *) &radar_location - &_start_;
     tt->struct_def.name = tdrpStrDup("radar_location_t");
     tt->struct_def.nfields = 3;
@@ -828,10 +786,10 @@
       tt->struct_def.fields[1].rel_offset = 
         (char *) &radar_location.longitudeDeg - (char *) &radar_location;
       tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("altitudeKm");
+      tt->struct_def.fields[2].fname = tdrpStrDup("heightKm");
       tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &radar_location.altitudeKm - (char *) &radar_location;
+        (char *) &radar_location.heightKm - (char *) &radar_location;
     tt->n_struct_vals = 3;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
@@ -840,15 +798,15 @@
       tt->struct_vals[2].d = 0;
     tt++;
     
-    // Parameter 'do_lookup_radar_altitude'
+    // Parameter 'override_radar_wavelength'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("do_lookup_radar_altitude");
-    tt->descr = tdrpStrDup("Flag to lookup the radar altitude");
-    tt->help = tdrpStrDup("If TRUE, don't use altitudKm from radar_location, instead figure it out by looking into the tiles at the latitudeDeg and longitudeDeg");
-    tt->val_offset = (char *) &do_lookup_radar_altitude - &_start_;
+    tt->param_name = tdrpStrDup("override_radar_wavelength");
+    tt->descr = tdrpStrDup("Option to override the radar wavelength.");
+    tt->help = tdrpStrDup("If FALSE we use the frequency from the radar params in the template file. If TRUE, we use the value in the parameter file.");
+    tt->val_offset = (char *) &override_radar_wavelength - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -858,10 +816,22 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("radar_wavelength_cm");
-    tt->descr = tdrpStrDup("Radar wavelength, cm");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Radar wavelength, cm.");
+    tt->help = tdrpStrDup("The radar wavelength if override_radar_wavelength is true.");
     tt->val_offset = (char *) &radar_wavelength_cm - &_start_;
     tt->single_val.d = 5.4;
+    tt++;
+    
+    // Parameter 'override_radar_beamwidth'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_radar_beamwidth");
+    tt->descr = tdrpStrDup("Option to override the radar beam width.");
+    tt->help = tdrpStrDup("If FALSE we use the beam width from the radar params in the template file. If TRUE, we use the values in the parameter file.");
+    tt->val_offset = (char *) &override_radar_beamwidth - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'horiz_beam_width_deg'
@@ -870,8 +840,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("horiz_beam_width_deg");
-    tt->descr = tdrpStrDup("Radar beamwidth in the horizontal plane.");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Radar horizontal beam (deg).");
+    tt->help = tdrpStrDup("Used if override_radar_beamwidth is true.");
     tt->val_offset = (char *) &horiz_beam_width_deg - &_start_;
     tt->single_val.d = 1;
     tt++;
@@ -882,8 +852,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("vert_beam_width_deg");
-    tt->descr = tdrpStrDup("Radar beamwidth in the vertical plane.");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Radar vertical beam (deg).");
+    tt->help = tdrpStrDup("Used if override_radar_beamwidth is true.");
     tt->val_offset = (char *) &vert_beam_width_deg - &_start_;
     tt->single_val.d = 1;
     tt++;
@@ -893,123 +863,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("GEOMETRY FOR COMPUTATIONS");
-    tt->comment_text = tdrpStrDup("We compute the beam blockage using the geometry for a theoretical scan. The blockage is then stored in a CfRadial file, using these parameters. When the blockage file is later used, we search for the closest compute gate, in (elev, az, range) space, to that of the acutal measured gate.");
-    tt++;
-    
-    // Parameter 'gates'
-    // ctype is '_scan_specification_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("gates");
-    tt->descr = tdrpStrDup("Gate specification (km)");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &gates - &_start_;
-    tt->struct_def.name = tdrpStrDup("scan_specification_t");
-    tt->struct_def.nfields = 3;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("start");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &gates.start - (char *) &gates;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("delta");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &gates.delta - (char *) &gates;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[2].fname = tdrpStrDup("count");
-      tt->struct_def.fields[2].ptype = INT_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &gates.count - (char *) &gates;
-    tt->n_struct_vals = 3;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 0.5;
-      tt->struct_vals[1].d = 0.15;
-      tt->struct_vals[2].i = 1000;
-    tt++;
-    
-    // Parameter 'azimuths'
-    // ctype is '_scan_specification_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("azimuths");
-    tt->descr = tdrpStrDup("Azimuth specification (degrees)");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &azimuths - &_start_;
-    tt->struct_def.name = tdrpStrDup("scan_specification_t");
-    tt->struct_def.nfields = 3;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("start");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &azimuths.start - (char *) &azimuths;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("delta");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &azimuths.delta - (char *) &azimuths;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[2].fname = tdrpStrDup("count");
-      tt->struct_def.fields[2].ptype = INT_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &azimuths.count - (char *) &azimuths;
-    tt->n_struct_vals = 3;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 0;
-      tt->struct_vals[1].d = 1;
-      tt->struct_vals[2].i = 360;
-    tt++;
-    
-    // Parameter 'elevations'
-    // ctype is '_scan_specification_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("elevations");
-    tt->descr = tdrpStrDup("Elevation specification (degrees)");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &elevations - &_start_;
-    tt->struct_def.name = tdrpStrDup("scan_specification_t");
-    tt->struct_def.nfields = 3;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("start");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &elevations.start - (char *) &elevations;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("delta");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &elevations.delta - (char *) &elevations;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[2].fname = tdrpStrDup("count");
-      tt->struct_def.fields[2].ptype = INT_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &elevations.count - (char *) &elevations;
-    tt->n_struct_vals = 3;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 0.5;
-      tt->struct_vals[1].d = 1;
-      tt->struct_vals[2].i = 5;
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1113,11 +966,11 @@
       tt->struct_vals[23].e = EXTENDED_BLOCKAGE;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("DATA SET INFORMATION");
     tt->comment_text = tdrpStrDup("Will be stored in CfRadial files, and other formats to the extent supported by the format.");
     tt++;
@@ -1158,49 +1011,12 @@
     tt->single_val.s = tdrpStrDup("Created by LROSE app CartBeamBlock");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_format'
-    // ctype is '_output_format_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_format");
-    tt->descr = tdrpStrDup("Format for the output files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_format - &_start_;
-    tt->enum_def.name = tdrpStrDup("output_format_t");
-    tt->enum_def.nfields = 6;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_FORMAT_CFRADIAL");
-      tt->enum_def.fields[0].val = OUTPUT_FORMAT_CFRADIAL;
-      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_FORMAT_DORADE");
-      tt->enum_def.fields[1].val = OUTPUT_FORMAT_DORADE;
-      tt->enum_def.fields[2].name = tdrpStrDup("OUTPUT_FORMAT_FORAY");
-      tt->enum_def.fields[2].val = OUTPUT_FORMAT_FORAY;
-      tt->enum_def.fields[3].name = tdrpStrDup("OUTPUT_FORMAT_NEXRAD");
-      tt->enum_def.fields[3].val = OUTPUT_FORMAT_NEXRAD;
-      tt->enum_def.fields[4].name = tdrpStrDup("OUTPUT_FORMAT_UF");
-      tt->enum_def.fields[4].val = OUTPUT_FORMAT_UF;
-      tt->enum_def.fields[5].name = tdrpStrDup("OUTPUT_FORMAT_MDV_RADIAL");
-      tt->enum_def.fields[5].val = OUTPUT_FORMAT_MDV_RADIAL;
-    tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
-    tt++;
-    
-    // Parameter 'Comment 10'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
+    tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("OUTPUT DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1240,11 +1056,65 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'output_time_stamp'
+    // ctype is '_datetime_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("output_time_stamp");
+    tt->descr = tdrpStrDup("Time stamp for output files");
+    tt->help = tdrpStrDup("We need to set a time so that the output files can be correctly named. SRTM shuttle mission 99 occurred in early 2000.");
+    tt->val_offset = (char *) &output_time_stamp - &_start_;
+    tt->struct_def.name = tdrpStrDup("datetime_t");
+    tt->struct_def.nfields = 6;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[0].fname = tdrpStrDup("year");
+      tt->struct_def.fields[0].ptype = INT_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &output_time_stamp.year - (char *) &output_time_stamp;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[1].fname = tdrpStrDup("month");
+      tt->struct_def.fields[1].ptype = INT_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &output_time_stamp.month - (char *) &output_time_stamp;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[2].fname = tdrpStrDup("day");
+      tt->struct_def.fields[2].ptype = INT_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &output_time_stamp.day - (char *) &output_time_stamp;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[3].fname = tdrpStrDup("hour");
+      tt->struct_def.fields[3].ptype = INT_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &output_time_stamp.hour - (char *) &output_time_stamp;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[4].fname = tdrpStrDup("min");
+      tt->struct_def.fields[4].ptype = INT_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &output_time_stamp.min - (char *) &output_time_stamp;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[5].fname = tdrpStrDup("sec");
+      tt->struct_def.fields[5].ptype = INT_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &output_time_stamp.sec - (char *) &output_time_stamp;
+    tt->n_struct_vals = 6;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].i = 2000;
+      tt->struct_vals[1].i = 1;
+      tt->struct_vals[2].i = 1;
+      tt->struct_vals[3].i = 0;
+      tt->struct_vals[4].i = 0;
+      tt->struct_vals[5].i = 0;
+    tt++;
+    
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("CREATE CARTESIAN GRID FOR CHECKING TERRAIN DATA");
     tt->comment_text = tdrpStrDup("");
     tt++;

@@ -29,11 +29,20 @@
 
 #include "RainFields.hh"
 
-#include <limits>
+#include <arpa/inet.h> // just for ntohs()
+#include <cmath>
+#include <cstdio>
 #include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <memory>
 #include <strings.h>
+#include <sys/stat.h>
+#include <thread>
 
 using namespace rainfields;
+using namespace rainfields::ancilla;
 
 string_conversion_error::string_conversion_error(std::string type)
   : std::runtime_error(msg{} << "to_string error (" << type << ")")
@@ -196,34 +205,8 @@ auto rainfields::tokenize(const std::string& str, const char* delims) -> std::ve
   return ret;
 }
 
-
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-// #include "trace.h"
-
-#include <iostream>
-#include <thread>
+////////////////////////////////////////////////////////////////////////////
+///////////////////////// RAINFIELDS_TRACE_H ///////////////////////////////
 
 using namespace rainfields::trace;
 
@@ -440,32 +423,8 @@ auto rainfields::format_exception(const std::exception& err, const char* prefix)
   return ss.str();
 }
 
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-// #include "field.h"
-
-using namespace rainfields::ancilla;
+/////////////////////////////////////////////////////////////////////////////
+//////////////////////// ANCILLA_CORE_FIELD_H ///////////////////////////////
 
 field::field(std::string id)
   : id_(std::move(id))
@@ -505,32 +464,8 @@ field2::field2(std::string id, const size_t dims[])
   , array2<real>(dims)
 { }
 
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-// #include "angle.h"
-
-using namespace rainfields;
+////////////////////////////////////////////////////////////////////////////
+///////////////////////// RAINFIELDS_ANGLE_H ///////////////////////////////
 
 auto angle::dms(int& deg, int& min, double& sec) const -> void
 {
@@ -565,32 +500,8 @@ auto rainfields::from_string<angle>(const char* str) -> angle
   return from_string<double>(str) * 1._deg;
 }
 
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-// #include "latlon.h"
-
-using namespace rainfields;
+////////////////////////////////////////////////////////////////////////////
+//////////////////////// RAINFIELDS_LATLON_H ///////////////////////////////
 
 auto rainfields::operator<<(std::ostream& lhs, const latlon& rhs) -> std::ostream&
 {
@@ -636,49 +547,10 @@ auto rainfields::from_string<latlonalt>(const char* str) -> latlonalt
   return {lat * 1_deg, lon * 1_deg, alt};
 }
 
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Rainfields Utilities Library (rainutil)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-// #include "xml.h"
-
-#include <cstdio>
+////////////////////////////////////////////////////////////////////////////
+/////////////////////////// RAINFIELDS_XML_H ///////////////////////////////
 
 using namespace rainfields::xml;
-
-#if 0
-static_assert(
-      std::is_nothrow_move_constructible<attribute>::value
-    , "attribute not move constructible");
-static_assert(
-      std::is_nothrow_move_assignable<attribute>::value
-    , "attribute not move assignable");
-static_assert(
-      std::is_nothrow_move_constructible<node>::value
-    , "node not move constructible");
-static_assert(
-      std::is_nothrow_move_assignable<node>::value
-    , "node not move assignable");
-#endif
 
 namespace rainfields {
 namespace xml {
@@ -1673,35 +1545,8 @@ auto document::write(std::ostream&& out) -> void
   write(out);
 }
 
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-// #include "beam_power.h"
-// #include "array_utils.h"
-
-#include <cmath>
-
-using namespace rainfields::ancilla;
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////// ANCILLA_MODELS_BEAM_POWER_H ///////////////////////////////
 
 beam_power::beam_power(angle beam_width_h, angle beam_width_v)
   : beam_width_h_(beam_width_h)
@@ -1798,34 +1643,8 @@ void beam_power_cross_section::make_vertical_integration()
   }
 }
 
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-// #include "beam_propagation.h"
-// #include "angle.h"
-
-using namespace rainfields;
-using namespace rainfields::ancilla;
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////// ANCILLA_MODELS_BEAM_PROPAGATION_H ///////////////////////////////
 
 beam_propagation::beam_propagation(
       angle elevation_angle
@@ -1932,33 +1751,8 @@ auto beam_propagation::required_elevation_angle(real ground_range, real altitude
     return 90.0_deg - theta - asin((eer_alt * sin(theta)) / slant_range);
 }
 
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-// #include "spheroid.h"
-
-using namespace rainfields;
-using namespace rainfields::ancilla;
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////// ANCILLA_MODELS_SPHEROID_H ///////////////////////////////
 
 constexpr const char* enum_traits<spheroid::standard>::strings[];
 
@@ -2251,43 +2045,8 @@ void spheroid::derive_parameters()
   auth_r_ = a_ * std::sqrt(auth_r_);
 }
 
-
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-// ** Ancilla Radar Quality Control System (ancilla)
-// ** Copyright BOM (C) 2013
-// ** Bureau of Meteorology, Commonwealth of Australia, 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from the BOM.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of the BOM nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// %=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%=%
-
-// #include "digital_elevation.h"
-// #include "array_utils.h"
-// #include "trace.h"
-
-#include <arpa/inet.h> // just for ntohs()
-#include <fstream>
-#include <memory>
-#include <iostream>
-#include <sys/stat.h>
-
-using namespace std;
-
-using namespace rainfields::ancilla;
+////////////////////////////////////////////////////////////////////////////
+//////////////////////// DIGITAL_ELEVATION_H ///////////////////////////////
 
 digital_elevation::digital_elevation(bool debug) :
         _debug(debug)
@@ -2517,7 +2276,7 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
           , std::abs(lat)
           , lon < 0 ? 'W' : 'E'
           , std::abs(lon));
-  string file_path = path_ + file_name;
+  std::string file_path = path_ + file_name;
 
   // check tile dimensions
 
@@ -2525,8 +2284,8 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
   if (stat(file_path.c_str(), &fileStat)) {
     // file does not exist, set tile to have size 0x0
     if (_debug) {
-      cerr << "Missing tile path: " << file_path << endl;
-      cerr << "  Probably a sea tile" << endl;
+      std::cerr << "Missing tile path: " << file_path << std::endl;
+      std::cerr << "  Probably a sea tile" << std::endl;
     }
     tile.lat = lat;
     tile.lon = lon;
@@ -2541,9 +2300,9 @@ auto digital_elevation_srtm3::get_tile(int lat, int lon) -> const srtm_tile&
   long nCells = nBytes / 2; // data is 2 byte ints
   int tileDim = sqrt(nCells);
   if (_debug) {
-    cerr << "Tile path: " << file_path << endl;
-    cerr << " lat, lon: " << lat << ", " << lon << endl;
-    cerr << "      dim: " << tileDim << endl;
+    std::cerr << "Tile path: " << file_path << std::endl;
+    std::cerr << " lat, lon: " << lat << ", " << lon << std::endl;
+    std::cerr << "      dim: " << tileDim << std::endl;
   }
 
   // set tile metadata

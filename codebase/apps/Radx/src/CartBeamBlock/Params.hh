@@ -99,37 +99,13 @@ public:
     EXTENDED_BLOCKAGE = 3
   } output_data_t;
 
-  typedef enum {
-    OUTPUT_FORMAT_CFRADIAL = 0,
-    OUTPUT_FORMAT_DORADE = 1,
-    OUTPUT_FORMAT_FORAY = 2,
-    OUTPUT_FORMAT_NEXRAD = 3,
-    OUTPUT_FORMAT_UF = 4,
-    OUTPUT_FORMAT_MDV_RADIAL = 5
-  } output_format_t;
-
   // struct typedefs
-
-  typedef struct {
-    int year;
-    int month;
-    int day;
-    int hour;
-    int min;
-    int sec;
-  } datetime_t;
 
   typedef struct {
     double latitudeDeg;
     double longitudeDeg;
-    double altitudeKm;
+    double heightKm;
   } radar_location_t;
-
-  typedef struct {
-    double start;
-    double delta;
-    int count;
-  } scan_specification_t;
 
   typedef struct {
     char* name;
@@ -139,6 +115,15 @@ public:
     output_encoding_t encoding;
     output_data_t type;
   } output_field_t;
+
+  typedef struct {
+    int year;
+    int month;
+    int day;
+    int hour;
+    int min;
+    int sec;
+  } datetime_t;
 
   ///////////////////////////
   // Member functions
@@ -450,25 +435,21 @@ public:
 
   int num_range_subsample;
 
-  datetime_t output_time_stamp;
-
   char* radar_name;
+
+  tdrp_bool_t override_radar_location;
 
   radar_location_t radar_location;
 
-  tdrp_bool_t do_lookup_radar_altitude;
+  tdrp_bool_t override_radar_wavelength;
 
   double radar_wavelength_cm;
+
+  tdrp_bool_t override_radar_beamwidth;
 
   double horiz_beam_width_deg;
 
   double vert_beam_width_deg;
-
-  scan_specification_t gates;
-
-  scan_specification_t azimuths;
-
-  scan_specification_t elevations;
 
   output_field_t *_output_fields;
   int output_fields_n;
@@ -479,13 +460,13 @@ public:
 
   char* references;
 
-  output_format_t output_format;
-
   char* output_dir;
 
   tdrp_bool_t append_radar_name_to_output_dir;
 
   tdrp_bool_t write_individual_sweeps;
+
+  datetime_t output_time_stamp;
 
   tdrp_bool_t create_cart_terrain_grid;
 
@@ -502,7 +483,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[43];
+  mutable TDRPtable _table[39];
 
   const char *_className;
 

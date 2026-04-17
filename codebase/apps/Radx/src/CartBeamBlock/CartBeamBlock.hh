@@ -44,6 +44,7 @@
 #include "DemProvider.hh"
 #include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxProj.hh>
+#include <rapformats/DsRadarParams.hh>
 #include <string>
 #include <set>
 using namespace std;
@@ -68,6 +69,8 @@ public:
 
   int OK;
 
+  static const fl32 missingFl32;
+  
 protected:
 private:
 
@@ -76,10 +79,22 @@ private:
   Args _args;
   Params _params;
 
-  // projection from template file
+  // template file
+  // provides headers, projection, radar location
 
   Mdvx _templateMdvx;
+  MdvxField *_templateField;
+  Mdvx::master_header_t _templateMhdr;
+  Mdvx::field_header_t _templateFhdr;
+  Mdvx::vlevel_header_t _templateVhdr;
+
+  DsRadarParams _radarParams;
+  double _radarLat, _radarLon, _radarHtKm;
+  double _radarWavelengthCm;
+  double _horizBeamWidthDeg, _vertBeamWidthDeg;
+  
   MdvxProj _proj;
+  double _sensorLat, _sensorLon, _sensorHtKm, _sensorHtM;
 
   // digital terrain height data
 
@@ -92,6 +107,11 @@ private:
   int _readGridTemplate(const string &path);
   int _readTemplateFile(const string &path);
   int _readDem(const string &path);
+
+  int _computeBlockage();
+  double _computeBeamExtinction(double elevDeg,
+                                double zKm,
+                                double gndRangeKm);
 
   int _createTerrainGrid(double minLat, double minLon,
                          double maxLat, double maxLon);

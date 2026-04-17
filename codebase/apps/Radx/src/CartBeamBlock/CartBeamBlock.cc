@@ -43,8 +43,11 @@
 #include <toolsa/umisc.h>
 #include <didss/DsInputPath.hh>
 #include <Mdv/MdvxField.hh>
+#include <Mdv/MdvxRadar.hh>
+#include <radar/BeamHeight.hh>
 
 namespace fs = std::filesystem;
+const fl32 CartBeamBlock::missingFl32 = -9999.0;
   
 // Constructor
 
@@ -113,7 +116,13 @@ int CartBeamBlock::Run()
     return -1;
   }
 
-  
+  // compute beam blockage for each point in the Cartesian grid
+
+  if (_computeBlockage()) {
+    cerr << "ERROR - CartBeamBlock::Run()" << endl;
+    cerr << "  Cannot compute beam blockage" << endl;
+    return -1;
+  }
   
   return 0;
   
@@ -185,8 +194,8 @@ int CartBeamBlock::_readTemplateFile(const string &path)
     cerr << "  Field name: " << _params.template_field_name << endl;
     return -1;
   }
-  MdvxField *field0 = _templateMdvx.getField(_params.template_field_name);
-  if (field0 == nullptr) {
+  _templateField = _templateMdvx.getField(_params.template_field_name);
+  if (_templateField == nullptr) {
     cerr << "  Cannot find specified field in template file: " << path << endl;
     cerr << "  Field name: " << _params.template_field_name << endl;
     return -1;
@@ -196,14 +205,54 @@ int CartBeamBlock::_readTemplateFile(const string &path)
     cerr << "INFO - read template file: " << path << endl;
   }
   
-  _proj.init(field0->getFieldHeader());
+  _proj.init(_templateField->getFieldHeader());
   if (_params.debug) {
     cerr << "INFO - PROJECTION" << path << endl;
     _proj.print(cerr);
   }
 
-  const Mdvx::master_header_t &mhdr = _templateMdvx.getMasterHeader();
-  _proj.setSensorPosn(mhdr.sensor_lat, mhdr.sensor_lon, mhdr.sensor_alt);
+  _templateMhdr = _templateMdvx.getMasterHeader();
+  _templateFhdr = _templateField->getFieldHeader();
+  _templateVhdr = _templateField->getVlevelHeader();
+  _sensorLat = _templateMhdr.sensor_lat;
+  _sensorLon = _templateMhdr.sensor_lon;
+  _sensorHtKm = _templateMhdr.sensor_alt;
+  _sensorHtM = _sensorHtKm * 1000.0;
+  _proj.setSensorPosn(_sensorLat, _sensorLon, _sensorHtKm);
+  
+  _radarLat = _sensorLat;
+  _radarLon = _sensorLon;
+  _radarHtKm = _sensorHtKm;
+  _radarWavelengthCm = _params.radar_wavelength_cm;
+  _horizBeamWidthDeg = _params.horiz_beam_width_deg;
+  _vertBeamWidthDeg = _params.vert_beam_width_deg;
+  
+  MdvxRadar mdvxRadar;
+  if (mdvxRadar.loadFromMdvx(_templateMdvx) == 0 &&
+      mdvxRadar.radarParamsAvail()) {
+    
+    DsRadarParams rparams = mdvxRadar.getRadarParams();
+
+    if (_params.override_radar_location) {
+      _radarLat = _params.radar_location.latitudeDeg;
+      _radarLon = _params.radar_location.longitudeDeg;
+      _radarHtKm = _params.radar_location.heightKm;
+    } else {
+      _radarLat = rparams.latitude;
+      _radarLon = rparams.longitude;
+      _radarHtKm = rparams.altitude;
+    }
+
+    if (!_params.override_radar_wavelength) {
+      _radarWavelengthCm = rparams.wavelength;
+    }
+
+    if (!_params.override_radar_beamwidth) {
+      _horizBeamWidthDeg = rparams.horizBeamWidth;
+      _vertBeamWidthDeg = rparams.vertBeamWidth;
+    }
+
+  } // if (mdvxRadar.loadFromMdvx(_templateMdvx) == 0 ....
   
   return 0;
   
@@ -255,6 +304,176 @@ int CartBeamBlock::_readDem(const string &path)
   return 0;
 
 }
+
+///////////////////////////////////////////////////////////////////////////
+// compute beam blockage for each point in the Cartesian grid
+
+int CartBeamBlock::_computeBlockage()
+  
+{
+
+  // initialize BeamHeight computations
+  
+  BeamHeight bht;
+  bht.setInstrumentHtKm(_sensorHtKm);
+  
+  // compute radar x and y coords in km
+  
+  double radarX, radarY;
+  _proj.latlon2xy(_sensorLat, _sensorLon, radarX, radarY);
+  
+  const Mdvx::coord_t &coord = _proj.getCoord();
+
+  // array for extinction
+
+  size_t nPtsPlane = _templateFhdr.nx * _templateFhdr.ny;
+  vector<fl32> extinct;
+  extinct.resize(nPtsPlane * _templateFhdr.nz, missingFl32);
+
+  // loop through the XY grid
+  
+  for (int iy = 0; iy < coord.ny; iy++) {
+    for (int ix = 0; ix < coord.nx; ix++) {
+
+      // get terrain height
+      
+      double lat, lon;
+      _proj.xyIndex2latlon(ix, iy, lat, lon);
+      rainfields::angle alat, alon;
+      alat.set_degrees(lat);
+      alon.set_degrees(lon);
+      rainfields::latlon loc(alat, alon);
+      fl32 terrainHt = _dem.getElevation(loc);
+
+      if (std::isfinite(terrainHt)) {
+        
+        // compute x and y coords in km
+        
+        double xx, yy;
+        _proj.latlon2xy(lat, lon, xx, yy);
+        
+        // compute ground range
+        
+        double deltaX = xx - radarX;
+        double deltaY = yy - radarY;
+        double gndRangeKm = sqrt(deltaX * deltaX + deltaY * deltaY);
+        
+        // loop through the planes
+
+        size_t index = iy * _templateFhdr.nx + ix;
+        for (int iz = 0; iz < coord.nz; iz++, index += nPtsPlane) {
+          
+          double zKm = _templateVhdr.level[iz];
+          double elevDeg = bht.computeElevationDeg(zKm, gndRangeKm);
+
+          double ext = _computeBeamExtinction(elevDeg, zKm, gndRangeKm);
+          extinct[index] = ext;
+
+          if (ext == 0.0) {
+            // no blockage at this elevation, so none above either
+            break;
+          }
+          
+        } // iz
+        
+      } // if (std::isfinite(terrainHt) ...
+      
+    } // ix
+  } // iy
+  
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////
+// compute extinction for a given range and elevation
+
+double CartBeamBlock::_computeBeamExtinction(double elevDeg,
+                                             double zKm,
+                                             double gndRangeKm)
+  
+{
+
+  return 0.0;
+  
+}
+
+//------------------------------------------------------------------
+void CartBeamBlock::_processBeam(RayHandler &ray, latlonalt origin, 
+				 const beam_propagation &bProp,
+				 const beam_power_cross_section &csec,
+                                 bool &foundBlockage)
+  
+{
+  angle azAngle = ray.azimuth();
+  angle elevAngle = ray.elev();
+
+  LOGF(LogMsg::DEBUG, "  processing beam, el, az, nSoFar: %7.2f, %7.2f, %d", 
+       ray.elevDegrees(), ray.azDegrees(), _nGatesBlocked);
+
+  // subsample each azimuth based on the number of horizontal cells in our
+  // cross section
+  for (size_t iray = 0; iray < csec.cols(); ++iray) {
+
+    const angle bearing = azAngle + csec.offset_azimuth(iray);
+    angle max_ray_theta = -90.0_deg;  // updated as we go
+    
+    // walk out along our ray, keeping track of the total power loss at each bin
+    for (auto & gate : ray) {
+      _processGate(gate, elevAngle, iray, origin, bProp, bearing, csec,
+		   max_ray_theta);
+      if (gate.getBeamL() > 0) {
+        foundBlockage = true;
+      }
+    }
+
+  } // iray
+
+}
+
+//------------------------------------------------------------------
+void CartBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
+				 size_t iray, latlonalt origin, 
+				 const beam_propagation &bProp, angle bearing,
+				 const beam_power_cross_section &csec,
+				 angle &max_ray_theta)
+{
+
+  if (gate.getBeamL() > 0) {
+    _nGatesBlocked++;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      LOGF(LogMsg::DEBUG,
+           "elev, bearing, range, blocakge: %g, %g, %g, %g", 
+           elevAngle, bearing, gate.meters(), gate.getBeamL());
+    }
+  }
+  
+  double gateMeters = gate.meters();
+
+  // get maximum height of DEM along ray in segment bounded by this bin
+  real peak_ground_range = 0.0_r;
+  real peak_altitude;
+  real progressive_loss = 0.0_r;
+  _dem.determine_dem_segment_peak(origin, bearing, gateMeters,
+				  gateMeters + _params.gates.delta*1000.0,
+				  peak_ground_range, peak_altitude,
+				  _params.num_range_subsample);
+
+  // if DEM gave us no valid values we can fail this condition
+  // this is usually due to sea regions not being included in the DEM
+  if (peak_ground_range > 0.0_r) {
+    _adjustValues(iray, bProp, peak_ground_range, peak_altitude, elevAngle,
+		  csec, max_ray_theta, progressive_loss);
+
+    // update the highest peak observed for the bin
+    gate.adjustPeak(peak_altitude);
+  }
+
+  // add the loss in this ray,bin to the gate,bin total
+  gate.incrementLoss(progressive_loss);
+
+}
+
 
 //////////////////////////////////////////
 // create a terrain grid in Cart coords
@@ -324,7 +543,7 @@ void CartBeamBlock::_setTerrainMdvMasterHeader(Mdvx &mdv)
   
   // set master header
   
-  Mdvx::master_header_t mhdr(_templateMdvx.getMasterHeader());
+  Mdvx::master_header_t mhdr(_templateMhdr);
 
   DateTime ttime(_params.output_time_stamp.year,
                  _params.output_time_stamp.month,
@@ -373,18 +592,9 @@ int CartBeamBlock::_addTerrainMdvField(Mdvx &mdv,
     cerr << "  Adding terrain field: " << _params.cart_terrain_field_name << endl;
   }
 
-  int nLat = (int) floor((maxLat - minLat) / _params.cart_terrain_grid_res + 0.5) + 1;
-  int nLon = (int) floor((maxLon - minLon) / _params.cart_terrain_grid_res + 0.5) + 1;
-
   // field header
 
-  MdvxField *field0 = _templateMdvx.getField(_params.template_field_name);
-  if (field0 == nullptr) {
-    cerr << "  Cannot find specified field in template file" << endl;
-    cerr << "  Field name: " << _params.template_field_name << endl;
-    return -1;
-  }
-  Mdvx::field_header_t fhdr(field0->getFieldHeader());
+  Mdvx::field_header_t fhdr(_templateFhdr);
   fhdr.nz = 1;
   
   fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
@@ -404,9 +614,8 @@ int CartBeamBlock::_addTerrainMdvField(Mdvx &mdv,
   fhdr.scale = 1.0;
   fhdr.bias = 0.0;
 
-  fl32 missingVal = -9999.0;
-  fhdr.bad_data_value = missingVal;
-  fhdr.missing_data_value = missingVal;
+  fhdr.bad_data_value = missingFl32;
+  fhdr.missing_data_value = missingFl32;
   
   fhdr.min_value = 0;
   fhdr.max_value = 0;
@@ -422,19 +631,20 @@ int CartBeamBlock::_addTerrainMdvField(Mdvx &mdv,
 
   // create terrain data
 
-  fl32 *height = new fl32[fhdr.nx * fhdr.ny];
+  vector<fl32> height;
+  height.resize(fhdr.nx * fhdr.ny, missingFl32);
   int ii = 0;
-  for (int iy = 0; iy < nLat; iy++) {
-    for (int ix = 0; ix < nLon; ix++, ii++) {
+  for (int iy = 0; iy < fhdr.ny; iy++) {
+    for (int ix = 0; ix < fhdr.nx; ix++, ii++) {
       double latDeg, lonDeg;
       _proj.xyIndex2latlon(ix, iy, latDeg, lonDeg);
       rainfields::angle alat, alon;
       alat.set_degrees(latDeg);
       alon.set_degrees(lonDeg);
       rainfields::latlon loc(alat, alon);
-      double ht = _dem.getElevation(loc);
+      fl32 ht = _dem.getElevation(loc);
       if (!std::isfinite(ht)) {
-        ht = missingVal;
+        ht = missingFl32;
       }
       height[ii] = ht;
     }
@@ -442,11 +652,9 @@ int CartBeamBlock::_addTerrainMdvField(Mdvx &mdv,
 
   // create field
 
-  MdvxField *fld = new MdvxField(fhdr, vhdr, height);
+  MdvxField *fld = new MdvxField(fhdr, vhdr, height.data());
   fld->convertType(Mdvx::ENCODING_FLOAT32,
                    Mdvx::COMPRESSION_GZIP);
-  delete[] height;
-
   // set strings
   
   fld->setFieldName(_params.cart_terrain_field_name);
@@ -567,10 +775,13 @@ bool CartBeamBlock::_processScan(ScanHandler &scan,
   beam_width_h.set_degrees(3*_params.horiz_beam_width_deg +
 			   _params.azimuths.delta);
   angle_width.set_degrees(_params.azimuths.delta);
-  beam_power_cross_section csec{power_model, angle_width,
+  beam_power_cross_section csec
+    {
+      power_model, angle_width,
       static_cast<size_t>(_params.num_elev_subsample),
       static_cast<size_t>(_params.num_range_subsample),
-      beam_width_v, beam_width_h};
+      beam_width_v, beam_width_h
+    };
   csec.make_vertical_integration();
   
   bool foundBlockage = false;
@@ -602,82 +813,6 @@ bool CartBeamBlock::_processScan(ScanHandler &scan,
   
 }
 
-
-//------------------------------------------------------------------
-void CartBeamBlock::_processBeam(RayHandler &ray, latlonalt origin, 
-				 const beam_propagation &bProp,
-				 const beam_power_cross_section &csec,
-                                 bool &foundBlockage)
-  
-{
-  angle azAngle = ray.azimuth();
-  angle elevAngle = ray.elev();
-
-  LOGF(LogMsg::DEBUG, "  processing beam, el, az, nSoFar: %7.2f, %7.2f, %d", 
-       ray.elevDegrees(), ray.azDegrees(), _nGatesBlocked);
-
-  // subsample each azimuth based on the number of horizontal cells in our
-  // cross section
-  for (size_t iray = 0; iray < csec.cols(); ++iray) {
-
-    const angle bearing = azAngle + csec.offset_azimuth(iray);
-    angle max_ray_theta = -90.0_deg;  // updated as we go
-    
-    // walk out along our ray, keeping track of the total power loss at each bin
-    for (auto & gate : ray) {
-      _processGate(gate, elevAngle, iray, origin, bProp, bearing, csec,
-		   max_ray_theta);
-      if (gate.getBeamL() > 0) {
-        foundBlockage = true;
-      }
-    }
-
-  } // iray
-
-}
-
-//------------------------------------------------------------------
-void CartBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
-				 size_t iray, latlonalt origin, 
-				 const beam_propagation &bProp, angle bearing,
-				 const beam_power_cross_section &csec,
-				 angle &max_ray_theta)
-{
-
-  if (gate.getBeamL() > 0) {
-    _nGatesBlocked++;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      LOGF(LogMsg::DEBUG,
-           "elev, bearing, range, blocakge: %g, %g, %g, %g", 
-           elevAngle, bearing, gate.meters(), gate.getBeamL());
-    }
-  }
-  
-  double gateMeters = gate.meters();
-
-  // get maximum height of DEM along ray in segment bounded by this bin
-  real peak_ground_range = 0.0_r;
-  real peak_altitude;
-  real progressive_loss = 0.0_r;
-  _dem.determine_dem_segment_peak(origin, bearing, gateMeters,
-				  gateMeters + _params.gates.delta*1000.0,
-				  peak_ground_range, peak_altitude,
-				  _params.num_range_subsample);
-
-  // if DEM gave us no valid values we can fail this condition
-  // this is usually due to sea regions not being included in the DEM
-  if (peak_ground_range > 0.0_r) {
-    _adjustValues(iray, bProp, peak_ground_range, peak_altitude, elevAngle,
-		  csec, max_ray_theta, progressive_loss);
-
-    // update the highest peak observed for the bin
-    gate.adjustPeak(peak_altitude);
-  }
-
-  // add the loss in this ray,bin to the gate,bin total
-  gate.incrementLoss(progressive_loss);
-
-}
 
 //------------------------------------------------------------------
 void CartBeamBlock::_adjustValues(size_t ray, const beam_propagation &bProp,

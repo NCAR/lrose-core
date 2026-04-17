@@ -79,8 +79,8 @@ paramdef enum DigitalElevationModel_t {
 } dem_data_format;
 
 commentdef {
-  p_header = "SAMPLING STRATEGY";
-  p_text = "We compute blockage using a micro-grid, within the radar elevation, azimuth and gate (bin) geometry. This allows us to compute the effective blockage across the beam."; 
+  p_header = "BLOCKAGE SAMPLING GEOMETRY";
+  p_text = "We compute blockage using a micro-grid, within the radar elevation, azimuth and range geometry. This allows us to compute the effective blockage more accurately."; 
 }
 
 paramdef int
@@ -108,90 +108,59 @@ commentdef {
   p_header = "RADAR PARAMETERS";
 }
 
-typedef struct {
-  int year;
-  int month;
-  int day;
-  int hour;
-  int min;
-  int sec;
-} datetime_t;
-
-paramdef struct datetime_t {
-  p_default = {2000, 01, 01, 00, 00, 00};
-  p_descr = "Time stamp for output files";
-  p_help = "We need to set a time so that the output files can be correctly named. SRTM shuttle mission 99 occurred in early 2000.";
-} output_time_stamp;
-
 paramdef string {
-  p_default = "UNKNOWN";
+  p_default = "";
   p_descr = "Name of radar";
+  p_help = "If empty, the radar name from the data is used.";
 } radar_name;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the radar spatial location.";
+  p_help = "If FALSE we use the radar location from the template file. If TRUE, we specify the location in the parameter file.";
+} override_radar_location;
 
 typedef struct {
   double latitudeDeg;
   double longitudeDeg;
-  double altitudeKm;
+  double heightKm;
 } radar_location_t;
 
 paramdef struct radar_location_t {
   p_default = { 0.0, 0.0, 0.0 };
   p_descr = "Radar location";
-  p_help = "The radar_location, note that the altitude is in km MSL.";
+  p_help = "The radar location if override_radar_location is true. Altitude is in km MSL.";
 } radar_location;
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Flag to lookup the radar altitude";
-  p_help = "If TRUE, don't use altitudKm from radar_location, instead figure it out by looking into the tiles at the latitudeDeg and longitudeDeg";
-} do_lookup_radar_altitude;
+  p_descr = "Option to override the radar wavelength.";
+  p_help = "If FALSE we use the frequency from the radar params in the template file. If TRUE, we use the value in the parameter file.";
+} override_radar_wavelength;
 
-paramdef double
-{
+paramdef double {
   p_default = 5.4;
-  p_descr = "Radar wavelength, cm";
+  p_descr = "Radar wavelength, cm.";
+  p_help = "The radar wavelength if override_radar_wavelength is true.";
 } radar_wavelength_cm;
 
-paramdef double
-{
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the radar beam width.";
+  p_help = "If FALSE we use the beam width from the radar params in the template file. If TRUE, we use the values in the parameter file.";
+} override_radar_beamwidth;
+
+paramdef double {
   p_default = 1.0;
-  p_descr = "Radar beamwidth in the horizontal plane.";
+  p_descr = "Radar horizontal beam (deg).";
+  p_help = "Used if override_radar_beamwidth is true.";
 } horiz_beam_width_deg;
 
-paramdef double
-{
+paramdef double {
   p_default = 1.0;
-  p_descr = "Radar beamwidth in the vertical plane.";
+  p_descr = "Radar vertical beam (deg).";
+  p_help = "Used if override_radar_beamwidth is true.";
 } vert_beam_width_deg;
-
-commentdef {
-  p_header = "GEOMETRY FOR COMPUTATIONS";
-  p_text = "We compute the beam blockage using the geometry for a theoretical scan. The blockage is then stored in a CfRadial file, using these parameters. When the blockage file is later used, we search for the closest compute gate, in (elev, az, range) space, to that of the acutal measured gate.";
-}
-
-typedef struct {
-  double start;
-  double delta;
-  int count;
-} scan_specification_t;
-
-paramdef struct scan_specification_t
-{
-  p_default = {0.5, 0.15, 1000};
-  p_descr = "Gate specification (km)";
-} gates;
-
-paramdef struct scan_specification_t
-{
-  p_default = {0, 1, 360};
-  p_descr = "Azimuth specification (degrees)";
-} azimuths;
-
-paramdef struct scan_specification_t
-{
-  p_default = {0.5, 1.0, 5};
-  p_descr = "Elevation specification (degrees)";
-} elevations;
 
 commentdef {
   p_header = "OUTPUT FIELDS";
@@ -277,25 +246,7 @@ paramdef string {
 } references;
 
 commentdef {
-  p_header = "OUTPUT FORMAT";
-}
-
-typedef enum {
-  OUTPUT_FORMAT_CFRADIAL,
-  OUTPUT_FORMAT_DORADE,
-  OUTPUT_FORMAT_FORAY,
-  OUTPUT_FORMAT_NEXRAD,
-  OUTPUT_FORMAT_UF,
-  OUTPUT_FORMAT_MDV_RADIAL
-} output_format_t;
-
-paramdef enum output_format_t {
-  p_default = OUTPUT_FORMAT_CFRADIAL;
-  p_descr = "Format for the output files.";
-} output_format;
-
-commentdef {
-  p_header = "OUTPUT DIRECTORY AND FILE NAME";
+  p_header = "OUTPUT DETAILS";
 }
 
 paramdef string {
@@ -315,6 +266,21 @@ paramdef boolean {
   p_descr = "Option to write out individual sweeps if appropriate.";
   p_help = "If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.";
 } write_individual_sweeps;
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} datetime_t;
+
+paramdef struct datetime_t {
+  p_default = {2000, 01, 01, 00, 00, 00};
+  p_descr = "Time stamp for output files";
+  p_help = "We need to set a time so that the output files can be correctly named. SRTM shuttle mission 99 occurred in early 2000.";
+} output_time_stamp;
 
 commentdef {
   p_header = "CREATE CARTESIAN GRID FOR CHECKING TERRAIN DATA";

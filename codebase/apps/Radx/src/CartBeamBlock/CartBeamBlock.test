@@ -87,7 +87,7 @@ template_field_name = "DBZ";
 //
 // Type: string
 
-dem_path = "$(HOME)/data/Terrain/DEM/SRTM1";
+dem_path = "$(HOME)/data/Terrain/DEM/SRTM3";
 
 ///////////// dem_data_format /////////////////////////
 //
