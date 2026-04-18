@@ -429,11 +429,17 @@ public:
 
   DigitalElevationModel_t dem_data_format;
 
+  tdrp_bool_t override_standard_pseudo_earth_radius;
+
+  double pseudo_earth_radius_ratio;
+
   int num_elev_subsample;
 
   int num_az_subsample;
 
   int num_range_subsample;
+
+  double blockage_range_resolution_m;
 
   char* radar_name;
 
@@ -483,7 +489,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[39];
+  mutable TDRPtable _table[43];
 
   const char *_className;
 

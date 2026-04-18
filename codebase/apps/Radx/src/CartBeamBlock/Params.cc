@@ -689,6 +689,39 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("SETTING THE PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'override_standard_pseudo_earth_radius'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_standard_pseudo_earth_radius");
+    tt->descr = tdrpStrDup("Option to override the standard 4/3 earth radius model for refraction.");
+    tt->help = tdrpStrDup("If true, the standard 4/3 earth radius will be overridden. The US NWS NEXRAD system uses 1.21 instead of 1.333.");
+    tt->val_offset = (char *) &override_standard_pseudo_earth_radius - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'pseudo_earth_radius_ratio'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("pseudo_earth_radius_ratio");
+    tt->descr = tdrpStrDup("Ratio for computing the pseudo earth radius for beam height computations.");
+    tt->help = tdrpStrDup("For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.");
+    tt->val_offset = (char *) &pseudo_earth_radius_ratio - &_start_;
+    tt->single_val.d = 1.33333;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("BLOCKAGE SAMPLING GEOMETRY");
     tt->comment_text = tdrpStrDup("We compute blockage using a micro-grid, within the radar elevation, azimuth and range geometry. This allows us to compute the effective blockage more accurately.");
     tt++;
@@ -729,11 +762,23 @@
     tt->single_val.i = 10;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'blockage_range_resolution_m'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("blockage_range_resolution_m");
+    tt->descr = tdrpStrDup("Range resolution for blockage computations (m)");
+    tt->help = tdrpStrDup("We sample the beam at this range resolution, and accumulate the extinction in range.");
+    tt->val_offset = (char *) &blockage_range_resolution_m - &_start_;
+    tt->single_val.d = 100;
+    tt++;
+    
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("RADAR PARAMETERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -858,11 +903,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -966,11 +1011,11 @@
       tt->struct_vals[23].e = EXTENDED_BLOCKAGE;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("DATA SET INFORMATION");
     tt->comment_text = tdrpStrDup("Will be stored in CfRadial files, and other formats to the extent supported by the format.");
     tt++;
@@ -1011,11 +1056,11 @@
     tt->single_val.s = tdrpStrDup("Created by LROSE app CartBeamBlock");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OUTPUT DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1110,11 +1155,11 @@
       tt->struct_vals[5].i = 0;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("CREATE CARTESIAN GRID FOR CHECKING TERRAIN DATA");
     tt->comment_text = tdrpStrDup("");
     tt++;

@@ -37,15 +37,17 @@
 ///////////////////////////////////////////////////////////////
 
 #include "CartBeamBlock.hh"
-#include "RainFields.hh"
 #include <filesystem>
 #include <iostream>
 #include <toolsa/umisc.h>
+#include <toolsa/toolsa_macros.h>
+#include <toolsa/pjg_flat.h>
 #include <didss/DsInputPath.hh>
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxRadar.hh>
-#include <radar/BeamHeight.hh>
 
+using namespace rainfields;
+using namespace rainfields::ancilla;
 namespace fs = std::filesystem;
 const fl32 CartBeamBlock::missingFl32 = -9999.0;
   
@@ -253,6 +255,8 @@ int CartBeamBlock::_readTemplateFile(const string &path)
     }
 
   } // if (mdvxRadar.loadFromMdvx(_templateMdvx) == 0 ....
+
+  _origin.set(angle(_radarLat, true), angle(_radarLon, true), _radarHtKm);
   
   return 0;
   
@@ -314,9 +318,32 @@ int CartBeamBlock::_computeBlockage()
 
   // initialize BeamHeight computations
   
-  BeamHeight bht;
-  bht.setInstrumentHtKm(_sensorHtKm);
-  
+  BeamHeight beamHt;
+  beamHt.setInstrumentHtKm(_sensorHtKm);
+  if (_params.override_standard_pseudo_earth_radius) {
+    beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
+  }
+
+  // setup beam power model
+
+  angle height, width;
+  height.set_degrees(_vertBeamWidthDeg);
+  width.set_degrees(_horizBeamWidthDeg);
+  beam_power powerModel(width, height);
+
+  // set up beam cross section
+
+  angle azWidth(_horizBeamWidthDeg * 2.0, true);
+  angle beamWidthH(_horizBeamWidthDeg, true);
+  angle beamWidthV(_vertBeamWidthDeg, true);
+
+  beam_power_cross_section csec
+    (powerModel, azWidth,
+     static_cast<size_t>(_params.num_elev_subsample),
+     static_cast<size_t>(_params.num_range_subsample),
+     beamWidthV, beamWidthH);
+  csec.make_vertical_integration();
+
   // compute radar x and y coords in km
   
   double radarX, radarY;
@@ -335,49 +362,54 @@ int CartBeamBlock::_computeBlockage()
   for (int iy = 0; iy < coord.ny; iy++) {
     for (int ix = 0; ix < coord.nx; ix++) {
 
-      // get terrain height
+      // get lat/lon of grid point
       
       double lat, lon;
       _proj.xyIndex2latlon(ix, iy, lat, lon);
-      rainfields::angle alat, alon;
+
+      // get terrain height
+      
+      angle alat, alon;
       alat.set_degrees(lat);
       alon.set_degrees(lon);
-      rainfields::latlon loc(alat, alon);
+      latlon loc(alat, alon);
       fl32 terrainHt = _dem.getElevation(loc);
-
-      if (std::isfinite(terrainHt)) {
+      if (!std::isfinite(terrainHt)) {
+        continue;
+      }
         
-        // compute x and y coords in km
-        
-        double xx, yy;
-        _proj.latlon2xy(lat, lon, xx, yy);
-        
-        // compute ground range
-        
-        double deltaX = xx - radarX;
-        double deltaY = yy - radarY;
-        double gndRangeKm = sqrt(deltaX * deltaX + deltaY * deltaY);
-        
-        // loop through the planes
-
-        size_t index = iy * _templateFhdr.nx + ix;
-        for (int iz = 0; iz < coord.nz; iz++, index += nPtsPlane) {
-          
-          double zKm = _templateVhdr.level[iz];
-          double elevDeg = bht.computeElevationDeg(zKm, gndRangeKm);
-
-          double ext = _computeBeamExtinction(elevDeg, zKm, gndRangeKm);
-          extinct[index] = ext;
-
-          if (ext == 0.0) {
-            // no blockage at this elevation, so none above either
-            break;
-          }
-          
-        } // iz
-        
-      } // if (std::isfinite(terrainHt) ...
+      // compute range and azimuth from radar
       
+      double gndRangeKm, azDeg;
+      PJGLatLon2RTheta(_radarLat, _radarLon, lat, lon, &gndRangeKm, &azDeg);
+      
+      // double xx, yy;
+      // _proj.latlon2xy(lat, lon, xx, yy);
+      // double azDeg = atan2(xx, yy) * RAD_TO_DEG;
+      // double deltaX = xx - radarX;
+      // double deltaY = yy - radarY;
+      // double gndRangeKm = sqrt(deltaX * deltaX + deltaY * deltaY);
+      
+      // loop through the planes
+      
+      size_t index = iy * _templateFhdr.nx + ix;
+      for (int iz = 0; iz < coord.nz; iz++, index += nPtsPlane) {
+        
+        double zKm = _templateVhdr.level[iz];
+        double elDeg = beamHt.computeElevationDeg(zKm, gndRangeKm);
+        
+        double ext = _computeExtinction(elDeg, azDeg,
+                                        zKm, gndRangeKm,
+                                        beamHt, powerModel, csec);
+        extinct[index] = ext;
+        
+        if (ext == 0.0) {
+          // no blockage at this elevation, so none above either
+          break;
+        }
+        
+      } // iz
+        
     } // ix
   } // iy
   
@@ -388,15 +420,77 @@ int CartBeamBlock::_computeBlockage()
 ///////////////////////////////////////////////////////////
 // compute extinction for a given range and elevation
 
-double CartBeamBlock::_computeBeamExtinction(double elevDeg,
-                                             double zKm,
-                                             double gndRangeKm)
+double CartBeamBlock::_computeExtinction(double elDeg,
+                                         double azDeg,
+                                         double zKm,
+                                         double gndRangeKm,
+                                         const BeamHeight &beamHt,
+                                         const beam_power &powerModel,
+                                         const beam_power_cross_section &csec)
   
 {
 
-  return 0.0;
+  // initialize
+  
+  double extinction = 0.0;
+  angle azAngle(azDeg, true);
+  angle elAngle(elDeg, true);
+  double dRangeM = _params.blockage_range_resolution_m;
+  
+  // we compute the beam blockage at intervals along the ray
+  
+  double rangeM = 0.0;
+  while (rangeM <= gndRangeKm * 1000.0) {
+    
+    // compute lat/lon
+    
+    double lat, lon;
+    PJGLatLonPlusRTheta(_radarLat, _radarLon, rangeM / 1000.0, azDeg, &lat, &lon);
+    
+    // get terrain ht
+
+    rainfields::angle alat, alon;
+    alat.set_degrees(lat);
+    alon.set_degrees(lon);
+    rainfields::latlon loc(alat, alon);
+    fl32 terrainHt = _dem.getElevation(loc);
+
+    if (std::isfinite(terrainHt)) {
+
+      // compute beam ht
+      
+      double slantRngKm = (rangeM / 1000.0) / cos(elDeg * DEG_TO_RAD);
+      double htKm = beamHt.computeHtKm(elDeg, slantRngKm);
+
+      // compute blockage
+      
+      // accumulate extinction
+      
+      extinction += htKm;
+      
+      // get maximum height of DEM along ray in segment bounded by this bin
+
+      real peak_ground_range = 0.0_r;
+      real peak_altitude;
+      real progressive_loss = 0.0_r;
+      _dem.determine_dem_segment_peak(_origin, azAngle, rangeM,
+                                      rangeM + dRangeM,
+                                      peak_ground_range, peak_altitude,
+                                      _params.num_range_subsample);
+
+    }
+
+    // increment
+    
+    rangeM += dRangeM;
+    
+  } // while (gndRngKm <= gndRangeKm) 
+  
+  return extinction;
   
 }
+
+#ifdef NOTNOW
 
 //------------------------------------------------------------------
 void CartBeamBlock::_processBeam(RayHandler &ray, latlonalt origin, 
@@ -474,6 +568,7 @@ void CartBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
 
 }
 
+#endif
 
 //////////////////////////////////////////
 // create a terrain grid in Cart coords

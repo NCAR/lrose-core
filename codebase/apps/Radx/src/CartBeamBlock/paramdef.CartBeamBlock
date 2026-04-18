@@ -79,6 +79,22 @@ paramdef enum DigitalElevationModel_t {
 } dem_data_format;
 
 commentdef {
+  p_header = "SETTING THE PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the standard 4/3 earth radius model for refraction.";
+  p_help = "If true, the standard 4/3 earth radius will be overridden. The US NWS NEXRAD system uses 1.21 instead of 1.333.";
+} override_standard_pseudo_earth_radius;
+
+paramdef double {
+  p_default = 1.33333333;
+  p_descr = "Ratio for computing the pseudo earth radius for beam height computations.";
+  p_help = "For standard refraction this is 4/3. For super refraction it will be less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 1.21.";
+} pseudo_earth_radius_ratio;
+
+commentdef {
   p_header = "BLOCKAGE SAMPLING GEOMETRY";
   p_text = "We compute blockage using a micro-grid, within the radar elevation, azimuth and range geometry. This allows us to compute the effective blockage more accurately."; 
 }
@@ -103,6 +119,13 @@ paramdef int
   p_help = "We sample the beam in range using this number of sub ranges";
   p_default = 10;
 } num_range_subsample;
+
+paramdef double
+{
+  p_descr = "Range resolution for blockage computations (m)";
+  p_help = "We sample the beam at this range resolution, and accumulate the extinction in range.";
+  p_default = 100;
+} blockage_range_resolution_m;
 
 commentdef {
   p_header = "RADAR PARAMETERS";

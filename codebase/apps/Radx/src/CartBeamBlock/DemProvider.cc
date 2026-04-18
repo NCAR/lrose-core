@@ -81,7 +81,7 @@ latlonalt DemProvider::radarOrigin(const latlonalt &radar) const
 
   // warn if the stated site location is less than 3 meters above the DEM location of that site
   LOGF(LogMsg::DEBUG, "Altitude (native spheroid): %lf",
-       _params.radar_location.altitudeKm*1000.0);
+       _params.radar_location.heightKm*1000.0);
   LOGF(LogMsg::DEBUG, "Altitude (DEM spheroid): %lf", ret.alt);
   LOGF(LogMsg::DEBUG, "DEM:  %lf", _dem->lookup(ret));
   if (ret.alt < _dem->lookup(ret) + 3.0)

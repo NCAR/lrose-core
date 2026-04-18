@@ -1676,6 +1676,7 @@ namespace rainfields {
     latlon(const latlon& rhs) noexcept = default;
     latlon(latlon&& rhs) noexcept = default;
 
+    void set(angle lat_, angle lon_) { lat = lat_; lon = lon_; }
     auto operator=(const latlon& rhs) noexcept -> latlon& = default;
     auto operator=(latlon&& rhs) noexcept -> latlon& = default;
 
@@ -1689,9 +1690,11 @@ namespace rainfields {
     latlonalt() noexcept  = default;
     latlonalt(angle lat, angle lon, double alt) noexcept : latlon{lat, lon}, alt{alt} { }
     latlonalt(latlon ll, double alt) noexcept : latlon{ll}, alt{alt} { }
-
+    
     latlonalt(const latlonalt& rhs) noexcept = default;
     latlonalt(latlonalt&& rhs) noexcept = default;
+
+    void set(angle lat_, angle lon_, double alt_) { lat = lat_; lon = lon_; alt = alt_; }
 
     auto operator=(const latlonalt& rhs) noexcept -> latlonalt& = default;
     auto operator=(latlonalt&& rhs) noexcept -> latlonalt& = default;
