@@ -15,6 +15,8 @@ SUB_DIRS = \
 	EchoTops \
 	EsdAcIngest \
 	FilterStorms \
+	HailKE \
+	HailKEswath \
 	OpticalFlow \
 	PartialProps \
 	PrintTitanFiles \

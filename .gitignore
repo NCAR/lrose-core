@@ -309,6 +309,7 @@ codebase/apps/ingest/src/hiResNidsVil2Mdv/hiResNidsVil2Mdv
 codebase/apps/ingest/src/lowResNids2Mdv/lowResNids2Mdv
 codebase/apps/interp/src/SurfInterp/SurfInterp
 codebase/apps/interp/src/surf_interp/surf_interp
+
 codebase/apps/mdv_utils/src/Affirm/Affirm
 codebase/apps/mdv_utils/src/Binary2Mdv/Binary2Mdv
 codebase/apps/mdv_utils/src/CreateTestMdv/CreateTestMdv
@@ -625,6 +626,8 @@ codebase/apps/titan/src/ClutterTableGenerate/ClutterTableGenerate
 codebase/apps/titan/src/EchoTops/EchoTops
 codebase/apps/titan/src/EsdAcIngest/EsdAcIngest
 codebase/apps/titan/src/FilterStorms/FilterStorms
+codebase/apps/titan/src/HailKE/HailKE
+codebase/apps/titan/src/HailKEswath/HailKEswath
 codebase/apps/titan/src/OpticalFlow/OpticalFlow
 codebase/apps/titan/src/PrintTitanFiles/PrintTitanFiles
 codebase/apps/titan/src/PrintTitanServer/PrintTitanServer
