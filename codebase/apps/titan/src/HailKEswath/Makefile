@@ -10,7 +10,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = HailKEswath 
+TARGET_FILE = HailKEswath
 
 LOC_INCLUDES =
 LOC_CFLAGS =
