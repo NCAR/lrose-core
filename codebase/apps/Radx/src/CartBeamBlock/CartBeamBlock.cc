@@ -473,8 +473,8 @@ double CartBeamBlock::_computeExtinction(double elDeg,
       real peak_ground_range = 0.0_r;
       real peak_altitude;
       real progressive_loss = 0.0_r;
-      _dem.determine_dem_segment_peak(_origin, azAngle, rangeM,
-                                      rangeM + dRangeM,
+      _dem.determine_dem_segment_peak(_origin, azAngle,
+                                      rangeM, rangeM + dRangeM,
                                       peak_ground_range, peak_altitude,
                                       _params.num_range_subsample);
 
