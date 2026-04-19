@@ -433,13 +433,11 @@ public:
 
   double pseudo_earth_radius_ratio;
 
-  int num_elev_subsample;
+  int num_vert_subsamples;
 
-  int num_az_subsample;
+  int num_horiz_subsamples;
 
-  int num_range_subsample;
-
-  double blockage_range_resolution_m;
+  double range_sampling_m;
 
   char* radar_name;
 
@@ -489,7 +487,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[43];
+  mutable TDRPtable _table[42];
 
   const char *_className;
 

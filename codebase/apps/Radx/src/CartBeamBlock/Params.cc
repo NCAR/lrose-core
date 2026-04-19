@@ -726,52 +726,40 @@
     tt->comment_text = tdrpStrDup("We compute blockage using a micro-grid, within the radar elevation, azimuth and range geometry. This allows us to compute the effective blockage more accurately.");
     tt++;
     
-    // Parameter 'num_elev_subsample'
+    // Parameter 'num_vert_subsamples'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("num_elev_subsample");
-    tt->descr = tdrpStrDup("Number of subsamples in elevation");
-    tt->help = tdrpStrDup("We sample the beam in elevation using this number of sub angles");
-    tt->val_offset = (char *) &num_elev_subsample - &_start_;
-    tt->single_val.i = 64;
+    tt->param_name = tdrpStrDup("num_vert_subsamples");
+    tt->descr = tdrpStrDup("Number of subsamples in the vertical.");
+    tt->help = tdrpStrDup("We compute beam power at this number of points in a vertical slice of the beam. An uneven number gives us symmetrical sampling.");
+    tt->val_offset = (char *) &num_vert_subsamples - &_start_;
+    tt->single_val.i = 31;
     tt++;
     
-    // Parameter 'num_az_subsample'
+    // Parameter 'num_horiz_subsamples'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("num_az_subsample");
-    tt->descr = tdrpStrDup("Number of subsamples in azimuth");
-    tt->help = tdrpStrDup("We sample the beam in azimuth using this number of sub angles");
-    tt->val_offset = (char *) &num_az_subsample - &_start_;
-    tt->single_val.i = 64;
+    tt->param_name = tdrpStrDup("num_horiz_subsamples");
+    tt->descr = tdrpStrDup("Number of subsamples in the horizontal.");
+    tt->help = tdrpStrDup("We compute beam power at this number of points in a horizontal section across the beam. An uneven number gives us symmetrical sampling.");
+    tt->val_offset = (char *) &num_horiz_subsamples - &_start_;
+    tt->single_val.i = 31;
     tt++;
     
-    // Parameter 'num_range_subsample'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("num_range_subsample");
-    tt->descr = tdrpStrDup("Number of subsamples in range");
-    tt->help = tdrpStrDup("We sample the beam in range using this number of sub ranges");
-    tt->val_offset = (char *) &num_range_subsample - &_start_;
-    tt->single_val.i = 10;
-    tt++;
-    
-    // Parameter 'blockage_range_resolution_m'
+    // Parameter 'range_sampling_m'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("blockage_range_resolution_m");
-    tt->descr = tdrpStrDup("Range resolution for blockage computations (m)");
+    tt->param_name = tdrpStrDup("range_sampling_m");
+    tt->descr = tdrpStrDup("Range resolution for blockage sampling computations (m)");
     tt->help = tdrpStrDup("We sample the beam at this range resolution, and accumulate the extinction in range.");
-    tt->val_offset = (char *) &blockage_range_resolution_m - &_start_;
-    tt->single_val.d = 100;
+    tt->val_offset = (char *) &range_sampling_m - &_start_;
+    tt->single_val.d = 20;
     tt++;
     
     // Parameter 'Comment 6'

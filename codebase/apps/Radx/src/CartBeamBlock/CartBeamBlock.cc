@@ -339,9 +339,9 @@ int CartBeamBlock::_computeBlockage()
 
   beam_power_cross_section csec
     (powerModel, azWidth,
-     static_cast<size_t>(_params.num_elev_subsample),
-     static_cast<size_t>(_params.num_range_subsample),
-     beamWidthV, beamWidthH);
+     static_cast<size_t>(_params.num_vert_subsamples),
+     static_cast<size_t>(_params.num_horiz_subsamples),
+     beamWidthV * 1.5, beamWidthH * 1.5);
   csec.make_vertical_integration();
 
   // compute radar x and y coords in km
@@ -435,7 +435,7 @@ double CartBeamBlock::_computeExtinction(double elDeg,
   double extinction = 0.0;
   angle azAngle(azDeg, true);
   angle elAngle(elDeg, true);
-  double dRangeM = _params.blockage_range_resolution_m;
+  double dRangeM = _params.range_sampling_m;
   
   // we compute the beam blockage at intervals along the ray
   
@@ -476,7 +476,7 @@ double CartBeamBlock::_computeExtinction(double elDeg,
       _dem.determine_dem_segment_peak(_origin, azAngle,
                                       rangeM, rangeM + dRangeM,
                                       peak_ground_range, peak_altitude,
-                                      _params.num_range_subsample);
+                                      1);
 
     }
 

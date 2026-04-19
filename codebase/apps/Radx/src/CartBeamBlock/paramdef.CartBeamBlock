@@ -101,31 +101,24 @@ commentdef {
 
 paramdef int
 {
-  p_descr = "Number of subsamples in elevation";
-  p_help = "We sample the beam in elevation using this number of sub angles";
-  p_default = 64;
-} num_elev_subsample;
+  p_descr = "Number of subsamples in the vertical.";
+  p_help = "We compute beam power at this number of points in a vertical slice of the beam. An uneven number gives us symmetrical sampling.";
+  p_default = 31;
+} num_vert_subsamples;
 
 paramdef int
 {
-  p_descr = "Number of subsamples in azimuth";
-  p_help = "We sample the beam in azimuth using this number of sub angles";
-  p_default = 64;
-} num_az_subsample;
-
-paramdef int
-{
-  p_descr = "Number of subsamples in range";
-  p_help = "We sample the beam in range using this number of sub ranges";
-  p_default = 10;
-} num_range_subsample;
+  p_descr = "Number of subsamples in the horizontal.";
+  p_help = "We compute beam power at this number of points in a horizontal section across the beam. An uneven number gives us symmetrical sampling.";
+  p_default = 31;
+} num_horiz_subsamples;
 
 paramdef double
 {
-  p_descr = "Range resolution for blockage computations (m)";
+  p_descr = "Range resolution for blockage sampling computations (m)";
   p_help = "We sample the beam at this range resolution, and accumulate the extinction in range.";
-  p_default = 100;
-} blockage_range_resolution_m;
+  p_default = 20;
+} range_sampling_m;
 
 commentdef {
   p_header = "RADAR PARAMETERS";
