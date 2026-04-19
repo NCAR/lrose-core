@@ -211,72 +211,116 @@ public:
 
   // spectral noise in range
   
-  double *getSpecNoise1D() const { return _specNoiseHc1D.dat(); }
+  const double *getSpecNoise1D() const { return _specNoiseHc1D.dat(); }
 
   // mean cmd for the range gate, averaged across the spectrum
   
-  double *getMeanCmd1D() const { return _meanCmd1D.dat(); }
+  const double *getMeanCmd1D() const { return _meanCmd1D.dat(); }
+  double *getMeanCmd1D() { return _meanCmd1D.dat(); }
 
   // fraction of the spectrum that exceeds the cmd threshold
   
-  double *getFractionCmd1D() const { return _fractionCmd1D.dat(); }
+  const double *getFractionCmd1D() const { return _fractionCmd1D.dat(); }
+  double *getFractionCmd1D() { return _fractionCmd1D.dat(); }
 
   // IQ time series - original
   
-  RadarComplex_t **getIqHc2D() const { return _iqHc2D.dat2D(); }
-  RadarComplex_t **getIqVc2D() const { return _iqVc2D.dat2D(); }
-  RadarComplex_t **getIqHx2D() const { return _iqHx2D.dat2D(); }
-  RadarComplex_t **getIqVx2D() const { return _iqVx2D.dat2D(); }
+  const RadarComplex_t * const *getIqHc2D() const { return _iqHc2D.dat2D(); }
+  const RadarComplex_t * const *getIqVc2D() const { return _iqVc2D.dat2D(); }
+  const RadarComplex_t * const *getIqHx2D() const { return _iqHx2D.dat2D(); }
+  const RadarComplex_t * const *getIqVx2D() const { return _iqVx2D.dat2D(); }
+
+  RadarComplex_t **getIqHc2D() { return _iqHc2D.dat2D(); }
+  RadarComplex_t **getIqVc2D() { return _iqVc2D.dat2D(); }
+  RadarComplex_t **getIqHx2D() { return _iqHx2D.dat2D(); }
+  RadarComplex_t **getIqVx2D() { return _iqVx2D.dat2D(); }
 
   // filtered IQ time series
   
-  RadarComplex_t **getIqHcFilt2D() const { return _iqHcFilt2D.dat2D(); }
-  RadarComplex_t **getIqVcFilt2D() const { return _iqVcFilt2D.dat2D(); }
+  const RadarComplex_t * const *getIqHcFilt2D() const { return _iqHcFilt2D.dat2D(); }
+  const RadarComplex_t * const *getIqVcFilt2D() const { return _iqVcFilt2D.dat2D(); }
 
+  RadarComplex_t **getIqHcFilt2D() { return _iqHcFilt2D.dat2D(); }
+  RadarComplex_t **getIqVcFilt2D() { return _iqVcFilt2D.dat2D(); }
+  
   // complex spectra of the time series
   
-  RadarComplex_t **getSpecCompHc2D() const { return _specCompHc2D.dat2D(); }
-  RadarComplex_t **getSpecCompVc2D() const { return _specCompVc2D.dat2D(); }
-  RadarComplex_t **getSpecCompHx2D() const { return _specCompHx2D.dat2D(); }
-  RadarComplex_t **getSpecCompVx2D() const { return _specCompVx2D.dat2D(); }
+  const RadarComplex_t * const *getSpecCompHc2D() const { return _specCompHc2D.dat2D(); }
+  const RadarComplex_t * const *getSpecCompVc2D() const { return _specCompVc2D.dat2D(); }
+  const RadarComplex_t * const *getSpecCompHx2D() const { return _specCompHx2D.dat2D(); }
+  const RadarComplex_t * const *getSpecCompVx2D() const { return _specCompVx2D.dat2D(); }
+  
+  RadarComplex_t **getSpecCompHc2D() { return _specCompHc2D.dat2D(); }
+  RadarComplex_t **getSpecCompVc2D() { return _specCompVc2D.dat2D(); }
+  RadarComplex_t **getSpecCompHx2D() { return _specCompHx2D.dat2D(); }
+  RadarComplex_t **getSpecCompVx2D() { return _specCompVx2D.dat2D(); }
   
   // complex spectra of the fitered time series
   
-  RadarComplex_t **getSpecCompHcFilt2D() const { return _specCompHcFilt2D.dat2D(); }
-  RadarComplex_t **getSpecCompVcFilt2D() const { return _specCompVcFilt2D.dat2D(); }
+  const RadarComplex_t * const *getSpecCompHcFilt2D() const { return _specCompHcFilt2D.dat2D(); }
+  const RadarComplex_t * const *getSpecCompVcFilt2D() const { return _specCompVcFilt2D.dat2D(); }
+
+  RadarComplex_t **getSpecCompHcFilt2D() { return _specCompHcFilt2D.dat2D(); }
+  RadarComplex_t **getSpecCompVcFilt2D() { return _specCompVcFilt2D.dat2D(); }
 
   // real spectra of the moments
 
-  double **getSpecPowerHc2D() const { return _specPowerHc2D.dat2D(); }
-  double **getSpecPowerVc2D() const { return _specPowerVc2D.dat2D(); }
-  double **getSpecPowerHx2D() const { return _specPowerHx2D.dat2D(); }
-  double **getSpecPowerVx2D() const { return _specPowerVx2D.dat2D(); }
+  const double * const *getSpecPowerHc2D() const { return _specPowerHc2D.dat2D(); }
+  const double * const *getSpecPowerVc2D() const { return _specPowerVc2D.dat2D(); }
+  const double * const *getSpecPowerHx2D() const { return _specPowerHx2D.dat2D(); }
+  const double * const *getSpecPowerVx2D() const { return _specPowerVx2D.dat2D(); }
   
-  double **getSpecDbmHc2D() const { return _specDbmHc2D.dat2D(); }
-  double **getSpecDbmVc2D() const { return _specDbmVc2D.dat2D(); }
-  double **getSpecDbmHx2D() const { return _specDbmHx2D.dat2D(); }
-  double **getSpecDbmVx2D() const { return _specDbmVx2D.dat2D(); }
+  const double * const *getSpecDbmHc2D() const { return _specDbmHc2D.dat2D(); }
+  const double * const *getSpecDbmVc2D() const { return _specDbmVc2D.dat2D(); }
+  const double * const *getSpecDbmHx2D() const { return _specDbmHx2D.dat2D(); }
+  const double * const *getSpecDbmVx2D() const { return _specDbmVx2D.dat2D(); }
   
-  double **getSpecDbz2D() const { return _specDbz2D.dat2D(); }
-  double **getSpecSnr2D() const { return _specSnr2D.dat2D(); }
-  double **getSpecZdr2D() const { return _specZdr2D.dat2D(); }
-  double **getSpecPhidp2D() const { return _specPhidp2D.dat2D(); }
-  double **getSpecRhohv2D() const { return _specRhohv2D.dat2D(); }
+  const double * const *getSpecDbz2D() const { return _specDbz2D.dat2D(); }
+  const double * const *getSpecSnr2D() const { return _specSnr2D.dat2D(); }
+  const double * const *getSpecZdr2D() const { return _specZdr2D.dat2D(); }
+  const double * const *getSpecPhidp2D() const { return _specPhidp2D.dat2D(); }
+  const double * const *getSpecRhohv2D() const { return _specRhohv2D.dat2D(); }
 
-  double **getSpecTdbz2D() const { return _specTdbz2D.dat2D(); }
-  double **getSpecSdevZdr2D() const { return _specSdevZdr2D.dat2D(); }
-  double **getSpecSdevPhidp2D() const { return _specSdevPhidp2D.dat2D(); }
+  const double * const *getSpecTdbz2D() const { return _specTdbz2D.dat2D(); }
+  const double * const *getSpecSdevZdr2D() const { return _specSdevZdr2D.dat2D(); }
+  const double * const *getSpecSdevPhidp2D() const { return _specSdevPhidp2D.dat2D(); }
+
+  double **getSpecPowerHc2D() { return _specPowerHc2D.dat2D(); }
+  double **getSpecPowerVc2D() { return _specPowerVc2D.dat2D(); }
+  double **getSpecPowerHx2D() { return _specPowerHx2D.dat2D(); }
+  double **getSpecPowerVx2D() { return _specPowerVx2D.dat2D(); }
+  
+  double **getSpecDbmHc2D() { return _specDbmHc2D.dat2D(); }
+  double **getSpecDbmVc2D() { return _specDbmVc2D.dat2D(); }
+  double **getSpecDbmHx2D() { return _specDbmHx2D.dat2D(); }
+  double **getSpecDbmVx2D() { return _specDbmVx2D.dat2D(); }
+  
+  double **getSpecDbz2D() { return _specDbz2D.dat2D(); }
+  double **getSpecSnr2D() { return _specSnr2D.dat2D(); }
+  double **getSpecZdr2D() { return _specZdr2D.dat2D(); }
+  double **getSpecPhidp2D() { return _specPhidp2D.dat2D(); }
+  double **getSpecRhohv2D() { return _specRhohv2D.dat2D(); }
+
+  double **getSpecTdbz2D() { return _specTdbz2D.dat2D(); }
+  double **getSpecSdevZdr2D() { return _specSdevZdr2D.dat2D(); }
+  double **getSpecSdevPhidp2D() { return _specSdevPhidp2D.dat2D(); }
 
   // interest fields
   
-  double **getSpecSnrInterest2D() const { return _specSnrInterest2D.dat2D(); }
-  double **getSpecTdbzInterest2D() const { return _specTdbzInterest2D.dat2D(); }
-  double **getSpecSdevZdrInterest2D() const { return _specSdevZdrInterest2D.dat2D(); }
-  double **getSpecSdevPhidpInterest2D() const { return _specSdevPhidpInterest2D.dat2D(); }
+  const double * const *getSpecSnrInterest2D() const { return _specSnrInterest2D.dat2D(); }
+  const double * const *getSpecTdbzInterest2D() const { return _specTdbzInterest2D.dat2D(); }
+  const double * const *getSpecSdevZdrInterest2D() const { return _specSdevZdrInterest2D.dat2D(); }
+  const double * const *getSpecSdevPhidpInterest2D() const { return _specSdevPhidpInterest2D.dat2D(); }
+
+  double **getSpecSnrInterest2D() { return _specSnrInterest2D.dat2D(); }
+  double **getSpecTdbzInterest2D() { return _specTdbzInterest2D.dat2D(); }
+  double **getSpecSdevZdrInterest2D() { return _specSdevZdrInterest2D.dat2D(); }
+  double **getSpecSdevPhidpInterest2D() { return _specSdevPhidpInterest2D.dat2D(); }
 
   // spectra of CMD
   
-  double **getSpecCmd2D() const { return _specCmd2D.dat2D(); }
+  const double * const *getSpecCmd2D() const { return _specCmd2D.dat2D(); }
+  double **getSpecCmd2D() { return _specCmd2D.dat2D(); }
   
 protected:
   

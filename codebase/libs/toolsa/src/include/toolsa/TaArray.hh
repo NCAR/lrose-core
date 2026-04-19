@@ -41,8 +41,174 @@
 //
 ////////////////////////////////////////////////////////////////////
 
+
+// NOTE - this latest implementation is from ChatGpt.
+// 2026/04/18
+
 #ifndef TA_ARRAY_HH
 #define TA_ARRAY_HH
+
+#include <cstddef>
+#include <memory>
+#include <algorithm>
+#include <stdexcept>
+
+template <class T>
+class TaArray
+{
+public:
+
+  // default constructor - empty array
+
+  TaArray() = default;
+
+  // constructor specifying number of elements in array
+
+  explicit TaArray(size_t nelem)
+  {
+    alloc(nelem);
+  }
+
+  // destructor
+
+  ~TaArray() = default;
+
+  // copy constructor
+
+  TaArray(const TaArray &rhs)
+  {
+    _copy(rhs);
+  }
+
+  // move constructor
+
+  TaArray(TaArray &&rhs) noexcept = default;
+
+  // copy assignment
+
+  TaArray &operator=(const TaArray &rhs)
+  {
+    return _copy(rhs);
+  }
+
+  // move assignment
+
+  TaArray &operator=(TaArray &&rhs) noexcept = default;
+
+  // allocate array
+
+  T *alloc(size_t nelem)
+  {
+    if (nelem == _nelem) {
+      return _buf.get();
+    }
+
+    if (nelem == 0) {
+      free();
+      return nullptr;
+    }
+
+    _buf = std::make_unique<T[]>(nelem);
+    _nelem = nelem;
+    return _buf.get();
+  }
+
+  // free array
+
+  void free()
+  {
+    _buf.reset();
+    _nelem = 0;
+  }
+
+  // alias for free()
+
+  void clear()
+  {
+    free();
+  }
+
+  // get size
+
+  size_t size() const { return _nelem; }
+  size_t nElem() const { return _nelem; }
+  bool empty() const { return (_nelem == 0); }
+
+  // get pointer to buffer
+
+  T *buf() { return _buf.get(); }
+  const T *buf() const { return _buf.get(); }
+
+  T *dat() { return _buf.get(); }
+  const T *dat() const { return _buf.get(); }
+
+  T *data() { return _buf.get(); }
+  const T *data() const { return _buf.get(); }
+
+  // element access
+
+  T &operator[](size_t idx) { return _buf[idx]; }
+  const T &operator[](size_t idx) const { return _buf[idx]; }
+
+  T &at(size_t idx)
+  {
+    if (idx >= _nelem) {
+      throw std::out_of_range("TaArray::at index out of range");
+    }
+    return _buf[idx];
+  }
+
+  const T &at(size_t idx) const
+  {
+    if (idx >= _nelem) {
+      throw std::out_of_range("TaArray::at index out of range");
+    }
+    return _buf[idx];
+  }
+
+  // iteration
+
+  T *begin() { return _buf.get(); }
+  const T *begin() const { return _buf.get(); }
+  const T *cbegin() const { return _buf.get(); }
+
+  T *end() { return _buf.get() + _nelem; }
+  const T *end() const { return _buf.get() + _nelem; }
+  const T *cend() const { return _buf.get() + _nelem; }
+
+private:
+
+  std::unique_ptr<T[]> _buf;
+  size_t _nelem = 0;
+
+  TaArray &_copy(const TaArray &rhs)
+  {
+    if (&rhs == this) {
+      return *this;
+    }
+
+    if (rhs._nelem == 0 || rhs._buf.get() == nullptr) {
+      free();
+      return *this;
+    }
+
+    alloc(rhs._nelem);
+    std::copy(rhs._buf.get(), rhs._buf.get() + _nelem, _buf.get());
+
+    return *this;
+  }
+
+};
+
+#endif
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+#ifdef ORIGINAL_IMPLEMENTATION
+
+#ifndef TA_ARRAY_ORIG_HH
+#define TA_ARRAY_ORIG_HH
 
 #include <cstdio>
 #include <cstring>
@@ -195,3 +361,9 @@ TaArray<T> &TaArray<T>::_copy(const TaArray<T> &rhs)
 }
 
 #endif
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+#endif // ORIGINAL_IMPLEMENTATION
+

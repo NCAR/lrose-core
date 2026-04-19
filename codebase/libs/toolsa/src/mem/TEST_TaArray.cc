@@ -32,6 +32,8 @@
 #include <toolsa/TaArray2D.hh>
 #include <iostream>
 
+using namespace std;
+
 //////////////////////
 // test the compile
 //

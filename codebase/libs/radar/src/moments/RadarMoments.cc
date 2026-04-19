@@ -348,7 +348,7 @@ void RadarMoments::setDbForDb(double db_for_db_ratio,
 // Single polarization
 // Horizontal channel
 
-void RadarMoments::computeCovarSinglePolH(RadarComplex_t *iqhc,
+void RadarMoments::computeCovarSinglePolH(const RadarComplex_t *iqhc,
                                           MomentsFields &fields)
   
 {
@@ -385,7 +385,7 @@ void RadarMoments::computeCovarSinglePolH(RadarComplex_t *iqhc,
 // Single polarization
 // Vertical channel
 
-void RadarMoments::computeCovarSinglePolV(RadarComplex_t *iqvc,
+void RadarMoments::computeCovarSinglePolV(const RadarComplex_t *iqvc,
                                           MomentsFields &fields)
   
 {
@@ -423,8 +423,8 @@ void RadarMoments::computeCovarSinglePolV(RadarComplex_t *iqvc,
 // Transmit alternating, receive copolar only
 // IQ data passed in
 
-void RadarMoments::computeCovarDpAltHvCoOnly(RadarComplex_t *iqhc,
-                                             RadarComplex_t *iqvc,
+void RadarMoments::computeCovarDpAltHvCoOnly(const RadarComplex_t *iqhc,
+                                             const RadarComplex_t *iqvc,
                                              MomentsFields &fields)
   
 {
@@ -470,10 +470,10 @@ void RadarMoments::computeCovarDpAltHvCoOnly(RadarComplex_t *iqhc,
 // DP_ALT_HV_CO_CROSS
 // Transmit alternating, receive co/cross
 
-void RadarMoments::computeCovarDpAltHvCoCross(RadarComplex_t *iqhc,
-                                              RadarComplex_t *iqvc,
-                                              RadarComplex_t *iqhx,
-                                              RadarComplex_t *iqvx,
+void RadarMoments::computeCovarDpAltHvCoCross(const RadarComplex_t *iqhc,
+                                              const RadarComplex_t *iqvc,
+                                              const RadarComplex_t *iqhx,
+                                              const RadarComplex_t *iqvx,
                                               MomentsFields &fields)
   
 {
@@ -552,8 +552,8 @@ void RadarMoments::computeCovarDpAltHvCoCross(RadarComplex_t *iqhc,
 // DP_SIM_HV
 // Dual pol, transmit simultaneous, receive fixed channels 
 
-void RadarMoments::computeCovarDpSimHv(RadarComplex_t *iqhc,
-                                       RadarComplex_t *iqvc,
+void RadarMoments::computeCovarDpSimHv(const RadarComplex_t *iqhc,
+                                       const RadarComplex_t *iqvc,
                                        MomentsFields &fields)
   
 {
@@ -607,8 +607,8 @@ void RadarMoments::computeCovarDpSimHv(RadarComplex_t *iqhc,
 // Compute covariances
 // Dual pol, transmit H, receive co/cross
 
-void RadarMoments::computeCovarDpHOnly(RadarComplex_t *iqhc,
-                                       RadarComplex_t *iqvx,
+void RadarMoments::computeCovarDpHOnly(const RadarComplex_t *iqhc,
+                                       const RadarComplex_t *iqvx,
                                        MomentsFields &fields)
   
 {
@@ -645,8 +645,8 @@ void RadarMoments::computeCovarDpHOnly(RadarComplex_t *iqhc,
 // Compute covariances
 // Dual pol, transmit V, receive co/cross
 
-void RadarMoments::computeCovarDpVOnly(RadarComplex_t *iqvc,
-                                       RadarComplex_t *iqhx,
+void RadarMoments::computeCovarDpVOnly(const RadarComplex_t *iqvc,
+                                       const RadarComplex_t *iqhx,
                                        MomentsFields &fields)
   
 {
@@ -684,7 +684,7 @@ void RadarMoments::computeCovarDpVOnly(RadarComplex_t *iqvc,
 // Horizontal channel
 // IQ passed in
 
-void RadarMoments::singlePolH(RadarComplex_t *iqhc,
+void RadarMoments::singlePolH(const RadarComplex_t *iqhc,
                               int gateNum,
                               bool isFiltered,
                               MomentsFields &fields)
@@ -736,7 +736,7 @@ void RadarMoments::singlePolH(RadarComplex_t *iqhc,
 // Vertical channel
 // IQ passed in
 
-void RadarMoments::singlePolV(RadarComplex_t *iqvc,
+void RadarMoments::singlePolV(const RadarComplex_t *iqvc,
                               int gateNum,
                               bool isFiltered,
                               MomentsFields &fields)
@@ -1080,8 +1080,8 @@ double RadarMoments::computeDbz(const RadarComplex_t *iq,
 // Transmit alternating, receive copolar only
 // IQ data passed in
 
-void RadarMoments::dpAltHvCoOnly(RadarComplex_t *iqhc,
-                                 RadarComplex_t *iqvc,
+void RadarMoments::dpAltHvCoOnly(const RadarComplex_t *iqhc,
+                                 const RadarComplex_t *iqvc,
                                  int gateNum,
                                  bool isFiltered,
                                  MomentsFields &fields)
@@ -1430,10 +1430,10 @@ void RadarMoments::computeMomDpAltHvCoOnly(double lag0_hc,
 // Transmit alternating, receive co/cross
 // IQ passed in
 
-void RadarMoments::dpAltHvCoCross(RadarComplex_t *iqhc,
-                                  RadarComplex_t *iqvc,
-                                  RadarComplex_t *iqhx,
-                                  RadarComplex_t *iqvx,
+void RadarMoments::dpAltHvCoCross(const RadarComplex_t *iqhc,
+                                  const RadarComplex_t *iqvc,
+                                  const RadarComplex_t *iqhx,
+                                  const RadarComplex_t *iqvx,
                                   int gateNum,
                                   bool isFiltered,
                                   MomentsFields &fields)
@@ -1953,8 +1953,8 @@ void RadarMoments::computeMomDpAltHvCoCross(double lag0_hc,
 // DP_ALT_HV_CO_CROSS - compute rhohv
 
 double RadarMoments::rhohvAltHvCoCross(int nSamplesHalf,
-                                       RadarComplex_t *iqhc,
-                                       RadarComplex_t *iqvc) const
+                                       const RadarComplex_t *iqhc,
+                                       const RadarComplex_t *iqvc) const
   
 {
 
@@ -2012,8 +2012,8 @@ double RadarMoments::rhohvAltHvCoCross(int nSamplesHalf,
 // Dual pol, transmit simultaneous, receive fixed channels 
 // IQ passed in
 
-void RadarMoments::dpSimHv(RadarComplex_t *iqhc,
-                           RadarComplex_t *iqvc,
+void RadarMoments::dpSimHv(const RadarComplex_t *iqhc,
+                           const RadarComplex_t *iqvc,
                            int gateNum,
                            bool isFiltered,
                            MomentsFields &fields)
@@ -2329,8 +2329,8 @@ void RadarMoments::computeMomDpSimHv(double lag0_hc,
 // DP_ALT_HV_CO_CROSS - compute rhohv
 
 double RadarMoments::rhohvDpSimHv(int nSamples,
-                                  RadarComplex_t *iqhc,
-                                  RadarComplex_t *iqvc) const
+                                  const RadarComplex_t *iqhc,
+                                  const RadarComplex_t *iqvc) const
   
 {
 
@@ -2356,8 +2356,8 @@ double RadarMoments::rhohvDpSimHv(int nSamples,
 // Dual pol, transmit H, receive co/cross
 // IQ passed in
 
-void RadarMoments::dpHOnly(RadarComplex_t *iqhc,
-                           RadarComplex_t *iqvx,
+void RadarMoments::dpHOnly(const RadarComplex_t *iqhc,
+                           const RadarComplex_t *iqvx,
                            int gateNum,
                            bool isFiltered,
                            MomentsFields &fields)
@@ -2574,8 +2574,8 @@ void RadarMoments::computeMomDpHOnly(double lag0_hc,
 // Dual pol, transmit V, receive co/cross
 // IQ passed in
 
-void RadarMoments::dpVOnly(RadarComplex_t *iqvc,
-                           RadarComplex_t *iqhx,
+void RadarMoments::dpVOnly(const RadarComplex_t *iqvc,
+                           const RadarComplex_t *iqhx,
                            int gateNum,
                            bool isFiltered,
                            MomentsFields &fields)
@@ -2789,9 +2789,9 @@ void RadarMoments::computeMomDpVOnly(double lag0_vc,
 // Single polarization Staggered-PRT
 // Horizontal channel
 
-void RadarMoments::singlePolHStagPrt(RadarComplex_t *iqhc,
-                                     RadarComplex_t *iqhcShort,
-                                     RadarComplex_t *iqhcLong,
+void RadarMoments::singlePolHStagPrt(const RadarComplex_t *iqhc,
+                                     const RadarComplex_t *iqhcShort,
+                                     const RadarComplex_t *iqhcLong,
                                      int gateNum,
                                      bool isFiltered,
                                      MomentsFields &fields)
@@ -3095,12 +3095,12 @@ void RadarMoments::singlePolHStagPrtPower(double lag0_hc,
 // Dual pol, transmit simultaneous, receive fixed channels
 // Staggered-PRT
 
-void RadarMoments::dpSimHvStagPrt(RadarComplex_t *iqhc,
-                                  RadarComplex_t *iqvc,
-                                  RadarComplex_t *iqhcShort,
-                                  RadarComplex_t *iqvcShort,
-                                  RadarComplex_t *iqhcLong,
-                                  RadarComplex_t *iqvcLong,
+void RadarMoments::dpSimHvStagPrt(const RadarComplex_t *iqhc,
+                                  const RadarComplex_t *iqvc,
+                                  const RadarComplex_t *iqhcShort,
+                                  const RadarComplex_t *iqvcShort,
+                                  const RadarComplex_t *iqhcLong,
+                                  const RadarComplex_t *iqvcLong,
                                   int gateNum,
                                   bool isFiltered,
                                   MomentsFields &fields)
@@ -3629,12 +3629,12 @@ void RadarMoments::dpSimHvStagPrtPower(double lag0_hc,
 // Dual pol, H-only transmit, receive fixed channels
 // Staggered-PRT
 
-void RadarMoments::dpHOnlyStagPrt(RadarComplex_t *iqhc,
-                                  RadarComplex_t *iqvx,
-                                  RadarComplex_t *iqhcShort,
-                                  RadarComplex_t *iqvxShort,
-                                  RadarComplex_t *iqhcLong,
-                                  RadarComplex_t *iqvxLong,
+void RadarMoments::dpHOnlyStagPrt(const RadarComplex_t *iqhc,
+                                  const RadarComplex_t *iqvx,
+                                  const RadarComplex_t *iqhcShort,
+                                  const RadarComplex_t *iqvxShort,
+                                  const RadarComplex_t *iqhcLong,
+                                  const RadarComplex_t *iqvxLong,
                                   int gateNum,
                                   bool isFiltered,
                                   MomentsFields &fields)
@@ -3930,12 +3930,12 @@ void RadarMoments::dpHOnlyStagPrtPower(double lag0_hc,
 // Dual pol, V-only transmit, receive fixed channels
 // Staggered-PRT
 
-void RadarMoments::dpVOnlyStagPrt(RadarComplex_t *iqvc,
-                                  RadarComplex_t *iqhx,
-                                  RadarComplex_t *iqvcShort,
-                                  RadarComplex_t *iqhxShort,
-                                  RadarComplex_t *iqvcLong,
-                                  RadarComplex_t *iqhxLong,
+void RadarMoments::dpVOnlyStagPrt(const RadarComplex_t *iqvc,
+                                  const RadarComplex_t *iqhx,
+                                  const RadarComplex_t *iqvcShort,
+                                  const RadarComplex_t *iqhxShort,
+                                  const RadarComplex_t *iqvcLong,
+                                  const RadarComplex_t *iqhxLong,
                                   int gateNum,
                                   bool isFiltered,
                                   MomentsFields &fields)
@@ -4225,7 +4225,7 @@ void RadarMoments::dpVOnlyStagPrtPower(double lag0_vc,
 // Single polarization, range unfolding using SZ864
 
 void RadarMoments::singlePolHSz864(GateData &gateData,
-                                   RadarComplex_t *delta12,
+                                   const RadarComplex_t *delta12,
                                    int gateNum,
                                    int ngatesPulse,
                                    const RadarFft &fft,

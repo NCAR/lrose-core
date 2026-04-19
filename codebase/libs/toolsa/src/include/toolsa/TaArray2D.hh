@@ -41,8 +41,242 @@
 //
 ////////////////////////////////////////////////////////////////////
 
+// NOTE - this latest implementation is from ChatGpt.
+// 2026/04/18
+
 #ifndef TA_ARRAY_2D_HH
 #define TA_ARRAY_2D_HH
+
+#include <cstddef>
+#include <memory>
+#include <algorithm>
+#include <stdexcept>
+
+template <class T>
+class TaArray2D
+{
+public:
+
+  // default constructor - empty array
+
+  TaArray2D() = default;
+
+  // constructor specifying dimensions of array
+
+  TaArray2D(size_t sizeMajor, size_t sizeMinor)
+  {
+    _alloc(sizeMajor, sizeMinor);
+  }
+
+  // destructor
+
+  ~TaArray2D() = default;
+
+  // copy constructor
+
+  TaArray2D(const TaArray2D &rhs)
+  {
+    _copy(rhs);
+  }
+
+  // move constructor
+
+  TaArray2D(TaArray2D &&rhs) noexcept = default;
+
+  // copy assignment
+
+  TaArray2D &operator=(const TaArray2D &rhs)
+  {
+    return _copy(rhs);
+  }
+
+  // move assignment
+
+  TaArray2D &operator=(TaArray2D &&rhs) noexcept = default;
+
+  // allocate array
+
+  T **alloc(size_t sizeMajor, size_t sizeMinor)
+  {
+    _alloc(sizeMajor, sizeMinor);
+    return _dat2D.get();
+  }
+
+  // free array
+
+  void free()
+  {
+    _dat2D.reset();
+    _dat1D.reset();
+    _sizeMajor = 0;
+    _sizeMinor = 0;
+    _size1D = 0;
+  }
+
+  // alias for free()
+
+  void clear()
+  {
+    free();
+  }
+
+  // get size
+
+  size_t sizeMajor() const { return _sizeMajor; }
+  size_t sizeMinor() const { return _sizeMinor; }
+  size_t size1D() const { return _size1D; }
+
+  size_t nRows() const { return _sizeMajor; }
+  size_t nCols() const { return _sizeMinor; }
+
+  bool empty() const { return (_size1D == 0); }
+
+  // direct access to row-pointer view
+
+  T **dat2D() { return _dat2D.get(); }
+  T * const *dat2D() const { return _dat2D.get(); }
+
+  T **rows() { return _dat2D.get(); }
+  T * const *rows() const { return _dat2D.get(); }
+
+  // direct access to contiguous 1D storage
+
+  T *dat1D() { return _dat1D.get(); }
+  const T *dat1D() const { return _dat1D.get(); }
+
+  T *data() { return _dat1D.get(); }
+  const T *data() const { return _dat1D.get(); }
+
+  // row access
+
+  T *operator[](size_t irow) { return _dat2D[irow]; }
+  const T *operator[](size_t irow) const { return _dat2D[irow]; }
+
+  T *row(size_t irow) { return _dat2D[irow]; }
+  const T *row(size_t irow) const { return _dat2D[irow]; }
+
+  T *rowAt(size_t irow)
+  {
+    if (irow >= _sizeMajor) {
+      throw std::out_of_range("TaArray2D::rowAt row out of range");
+    }
+    return _dat2D[irow];
+  }
+
+  const T *rowAt(size_t irow) const
+  {
+    if (irow >= _sizeMajor) {
+      throw std::out_of_range("TaArray2D::rowAt row out of range");
+    }
+    return _dat2D[irow];
+  }
+
+  // element access
+
+  T &at(size_t irow, size_t icol)
+  {
+    if (irow >= _sizeMajor || icol >= _sizeMinor) {
+      throw std::out_of_range("TaArray2D::at index out of range");
+    }
+    return _dat2D[irow][icol];
+  }
+
+  const T &at(size_t irow, size_t icol) const
+  {
+    if (irow >= _sizeMajor || icol >= _sizeMinor) {
+      throw std::out_of_range("TaArray2D::at index out of range");
+    }
+    return _dat2D[irow][icol];
+  }
+
+  // flat indexing into contiguous data
+
+  T &flat(size_t idx)
+  {
+    if (idx >= _size1D) {
+      throw std::out_of_range("TaArray2D::flat index out of range");
+    }
+    return _dat1D[idx];
+  }
+
+  const T &flat(size_t idx) const
+  {
+    if (idx >= _size1D) {
+      throw std::out_of_range("TaArray2D::flat index out of range");
+    }
+    return _dat1D[idx];
+  }
+
+  // iteration over contiguous 1D storage
+
+  T *begin() { return _dat1D.get(); }
+  const T *begin() const { return _dat1D.get(); }
+  const T *cbegin() const { return _dat1D.get(); }
+
+  T *end() { return _dat1D.get() + _size1D; }
+  const T *end() const { return _dat1D.get() + _size1D; }
+  const T *cend() const { return _dat1D.get() + _size1D; }
+
+private:
+
+  std::unique_ptr<T*[]> _dat2D;
+  std::unique_ptr<T[]> _dat1D;
+  size_t _sizeMajor = 0;
+  size_t _sizeMinor = 0;
+  size_t _size1D = 0;
+
+  TaArray2D &_copy(const TaArray2D &rhs)
+  {
+    if (&rhs == this) {
+      return *this;
+    }
+
+    if (rhs._size1D == 0 || rhs._dat1D.get() == nullptr) {
+      free();
+      return *this;
+    }
+
+    _alloc(rhs._sizeMajor, rhs._sizeMinor);
+    std::copy(rhs._dat1D.get(), rhs._dat1D.get() + _size1D, _dat1D.get());
+
+    return *this;
+  }
+
+  void _alloc(size_t sizeMajor, size_t sizeMinor)
+  {
+    if (sizeMajor == _sizeMajor &&
+        sizeMinor == _sizeMinor) {
+      return;
+    }
+
+    if (sizeMajor == 0 || sizeMinor == 0) {
+      free();
+      return;
+    }
+
+    _sizeMajor = sizeMajor;
+    _sizeMinor = sizeMinor;
+    _size1D = _sizeMajor * _sizeMinor;
+
+    _dat1D = std::make_unique<T[]>(_size1D);
+    _dat2D = std::make_unique<T*[]>(_sizeMajor);
+
+    for (size_t ii = 0; ii < _sizeMajor; ii++) {
+      _dat2D[ii] = _dat1D.get() + ii * _sizeMinor;
+    }
+  }
+
+};
+
+#endif
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+#ifdef ORIGINAL_IMPLEMENTATION
+
+#ifndef TA_ARRAY_2D_ORIG_HH
+#define TA_ARRAY_2D_ORIG_HH
 
 #include <cstdio>
 #include <cstring>
@@ -233,3 +467,9 @@ template <class T>
 }
 
 #endif
+
+#endif // ORIGINAL IMPLEMENTATION
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
