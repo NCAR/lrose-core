@@ -3396,16 +3396,16 @@ void Beam::_filtSpecCmdSimHv()
   _specCmd.computeSpectralCmd();
   _specCmd.filterIqUsingCmd();
 
-  RadarComplex_t **iqHcFilt2D = _specCmd.getIqHcFilt2D();
-  RadarComplex_t **iqVcFilt2D = _specCmd.getIqVcFilt2D();
+  const RadarComplex_t * const *iqHcFilt2D = _specCmd.getIqHcFilt2D();
+  const RadarComplex_t * const *iqVcFilt2D = _specCmd.getIqVcFilt2D();
   double *meanCmd = _specCmd.getMeanCmd1D();
   double *fractionCmd = _specCmd.getFractionCmd1D();
 
   for (int igate = 0; igate < _nGates; igate++) {
     
     GateData *gate = _gateData[igate];
-    RadarComplex_t *iqHcFilt1D = iqHcFilt2D[igate];
-    RadarComplex_t *iqVcFilt1D = iqVcFilt2D[igate];
+    const RadarComplex_t *iqHcFilt1D = iqHcFilt2D[igate];
+    const RadarComplex_t *iqVcFilt1D = iqVcFilt2D[igate];
 
     // compute filtered moments for this gate
     
