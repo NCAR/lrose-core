@@ -157,6 +157,17 @@ void
 }
 
 //----------------------------------------------------------------
+
+double
+  DemProvider::getElevation(double lat, double lon) const
+{
+  rainfields::angle alat, alon;
+  alat.set_degrees(lat);
+  alon.set_degrees(lon);
+  rainfields::latlon loc(alat, alon);
+  return getElevation(loc);
+}
+
 double
   DemProvider::getElevation(const rainfields::latlon& loc) const
 {

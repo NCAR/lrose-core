@@ -100,6 +100,7 @@ public:
 				  size_t bin_samples
 				  ) const;
 
+  double getElevation(double lat, double lon) const;
   double getElevation(const rainfields::latlon& loc) const;
 
   // get terrain ht for a point

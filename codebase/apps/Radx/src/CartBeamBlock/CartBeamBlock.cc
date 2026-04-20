@@ -463,11 +463,7 @@ double CartBeamBlock::_computeCartPtExtinction(double elDeg,
     
     // get terrain ht
 
-    rainfields::angle alat, alon;
-    alat.set_degrees(lat);
-    alon.set_degrees(lon);
-    rainfields::latlon loc(alat, alon);
-    fl32 terrainHt = _dem->getElevation(loc);
+    fl32 terrainHt = _dem->getElevation(lat, lon);
 
     if (std::isfinite(terrainHt)) {
 
@@ -782,11 +778,7 @@ int CartBeamBlock::_addTerrainMdvField(Mdvx &mdv,
     for (int ix = 0; ix < fhdr.nx; ix++, ii++) {
       double latDeg, lonDeg;
       _proj.xyIndex2latlon(ix, iy, latDeg, lonDeg);
-      rainfields::angle alat, alon;
-      alat.set_degrees(latDeg);
-      alon.set_degrees(lonDeg);
-      rainfields::latlon loc(alat, alon);
-      fl32 ht = _dem->getElevation(loc);
+      fl32 ht = _dem->getElevation(latDeg, lonDeg);
       if (!std::isfinite(ht)) {
         ht = missingFl32;
       }
@@ -887,14 +879,29 @@ int CartBeamBlock::_addTerrainMdvField2(Mdvx &mdv,
       double xx = fhdr.grid_minx + ix * fhdr.grid_dx;
       double latDeg, lonDeg;
       _proj.xy2latlon(xx, yy, latDeg, lonDeg);
-      int16_t htM;
-      if (_dem->getHt(latDeg, lonDeg, htM)) {
-        height[ii] = 0;
-      } else {
-        height[ii] = htM;
+      fl32 ht = _dem->getElevation(latDeg, lonDeg);
+      if (!std::isfinite(ht)) {
+        ht = missingFl32;
       }
+      height[ii] = ht;
+
+      // int16_t htM;
+      // _dem->getHt(latDeg, lonDeg, htM);
+      // double diff = ht - htM;
+      // if (diff != 0) {
+      //   cerr << "11111111111111 ht, htM, diff: " << ht << ", " << htM << ", " << ht - htM << endl;
+      // }
+      
+      // if (_dem->getHt(latDeg, lonDeg, htM)) {
+      //   height[ii] = 0;
+      // } else {
+      //   height[ii] = htM;
+      // }
+
     }
   }
+
+
   
   // create field
   
