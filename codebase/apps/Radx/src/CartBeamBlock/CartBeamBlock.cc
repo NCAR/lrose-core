@@ -126,7 +126,7 @@ int CartBeamBlock::Run()
   }
 
   // compute beam blockage for each point in the Cartesian grid
-
+  
 #ifdef NOTNOW
   if (_computeBlockage()) {
     cerr << "ERROR - CartBeamBlock::Run()" << endl;

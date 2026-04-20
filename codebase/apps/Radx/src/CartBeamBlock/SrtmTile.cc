@@ -75,8 +75,8 @@ SrtmTile::SrtmTile(const string &demDir,
     _centerLon += 360.0;
   }
 
-  _llLatDeg = (int) (_centerLat);
-  _llLonDeg = (int) (_centerLon);
+  _llLat = (int) (_centerLat);
+  _llLon = (int) (_centerLon);
 
   _latestAccessTime = 0;
 
@@ -120,8 +120,6 @@ int SrtmTile::getHt(double lat, double lon, int16_t &terrainHtM)
 
 {
 
-  // cerr << "XXXXXXXXXXXXXXXXXXX lat, lon: " << lat << ", " << lon << endl;
-  
   // lock mutex - will unlock going out of scope
   
   TaThread::LockForScope lock(&_localMutex);
@@ -137,8 +135,8 @@ int SrtmTile::getHt(double lat, double lon, int16_t &terrainHtM)
 
   // compute offsets
 
-  int dlat = (int) ((lat + 0.5 - _llLatDeg) / _dy);
-  int dlon = (int) ((lon + 0.5 - _llLonDeg) / _dx);
+  int dlat = (int) _ny - ((lat - _llLat) / _dy + 0.5);
+  int dlon = (int) ((lon - _llLon) / _dx + 0.5);
 
   if (dlat < 0) {
     dlat = 0;
@@ -198,18 +196,14 @@ int SrtmTile::_readFromFile()
   
 {
 
-  cerr << "bbbbbbbbbbbbb _centerLat, _centerLon: " << _centerLat << ", " << _centerLon << endl;
-  
   // get the DEM file path, and other info
 
   if (_findFile()) {
     return -1;
   }
 
-  cerr << "ccccccccccccc _demFilePath: " << _demFilePath << endl;
-  
   // get file status, and set properties
-
+  
   struct stat fstat;
   if (ta_stat(_demFilePath, &fstat)) {
     int errNum = errno;
@@ -253,12 +247,6 @@ int SrtmTile::_readFromFile()
     cerr << "  Reading in DEM file; " << _demFilePath << endl;
   }
 
-  // compute offset from Lower Left corner of file
-  
-  // int dLat = (int) (_fileUlLatDeg - _ulLatDeg + 0.5);
-  // int dLon = (int) (_ulLonDeg - _fileUlLonDeg + 0.5);
-  // size_t ulOffset = (dLat * _fileNx + dLon) * _ptsPerDeg;
-
   // alloc array
 
   _htArray.alloc(_ny, _nx);
@@ -301,18 +289,18 @@ int SrtmTile::_findFile()
     return -1;
   }
   
-  _llLatDeg = (int) (_centerLat);
-  _llLonDeg = (int) (_centerLon);
+  _llLat = (int) floor(_centerLat);
+  _llLon = (int) floor(_centerLon);
   
   char latChar, lonChar;
   
-  if (_llLatDeg >= 0) {
+  if (_llLat >= 0) {
     latChar = 'N';
   } else {
     latChar = 'S';
   }
   
-  if (_llLonDeg >= 0) {
+  if (_llLon >= 0) {
     lonChar = 'E';
   } else {
     lonChar = 'W';
@@ -321,8 +309,8 @@ int SrtmTile::_findFile()
   snprintf(_demFilePath, MAX_PATH_LEN,
            "%s%s%c%02d%c%03d.hgt",
            _demDir.c_str(), PATH_DELIM,
-           latChar, abs(_llLatDeg),
-           lonChar, abs(_llLonDeg));
+           latChar, abs(_llLat),
+           lonChar, abs(_llLon));
   
   return 0;
   

@@ -98,16 +98,15 @@ private:
 
   double _centerLat;
   double _centerLon;
-  int _llLatDeg, _llLonDeg;
+
+  int _ptsPerDeg;
+  double _gridRes;
+
+  int _llLat, _llLon;
   int _nx, _ny;
   double _dx, _dy;
   
   time_t _latestAccessTime;
-  
-  int _ptsPerDeg;
-  double _gridRes;
-
-  int _fileUlLatDeg, _fileUlLonDeg;
   
   TaArray2D<int16_t> _htArray;
   

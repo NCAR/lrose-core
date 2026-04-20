@@ -36,8 +36,6 @@ DemProvider::DemProvider(const Params &params) :
         _params(params)
 {
 
-  cerr << "aaaaaaaaaaaaaaaaaa dem_path: " << _params.dem_path << endl;
-  
   // allocate pointers to tiles
   
   _tiles = (SrtmTile ***) umalloc2(nLat, nLon, sizeof(SrtmTile *));
