@@ -64,8 +64,8 @@ BlockageCalc::~BlockageCalc(void)
 void BlockageCalc::initGeom(double maxRangeKm,
                             double rangeResKm,
                             const vector<double> &zCartKm,
-                            int nBeamPatternAz,
-                            int nBeamPatternEl)
+                            int nBeamPatternEl,
+                            int nBeamPatternAz)
 
 {
 
@@ -77,9 +77,9 @@ void BlockageCalc::initGeom(double maxRangeKm,
   _nRange = (int) ((_maxRangeKm / _rangeResKm) + 1);
 
   _zCartKm = zCartKm;
-  _nBeamPatternAz = nBeamPatternAz;
   _nBeamPatternEl = nBeamPatternEl;
-
+  _nBeamPatternAz = nBeamPatternAz;
+  
   // create 2D points array
   
   _points.clear();

@@ -92,6 +92,7 @@ private:
   Mdvx::master_header_t _templateMhdr;
   Mdvx::field_header_t _templateFhdr;
   Mdvx::vlevel_header_t _templateVhdr;
+  vector<double> _zKm;
 
   DsRadarParams _radarParams;
   double _radarLat, _radarLon, _radarHtKm;
@@ -101,6 +102,7 @@ private:
   
   MdvxProj _proj;
   double _sensorLat, _sensorLon, _sensorHtKm, _sensorHtM;
+  double _minLat, _minLon, _maxLat, _maxLon;
 
   // digital terrain height data
 

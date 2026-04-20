@@ -61,8 +61,8 @@ public:
   void initGeom(double maxRangeKm,
                 double rangeResKm,
                 const vector<double> &zCartKm,
-                int nBeamPatternAz,
-                int nBeamPatternEl);
+                int nBeamPatternEl,
+                int nBeamPatternAz);
 
 protected:
   

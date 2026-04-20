@@ -750,15 +750,15 @@
     tt->single_val.i = 31;
     tt++;
     
-    // Parameter 'ht_res_m'
+    // Parameter 'range_res_m'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("ht_res_m");
+    tt->param_name = tdrpStrDup("range_res_m");
     tt->descr = tdrpStrDup("Range resolution for height and blockage sampling computations (m)");
     tt->help = tdrpStrDup("We sample the beam at this range resolution, and accumulate the extinction in range.");
-    tt->val_offset = (char *) &ht_res_m - &_start_;
+    tt->val_offset = (char *) &range_res_m - &_start_;
     tt->single_val.d = 100;
     tt++;
     

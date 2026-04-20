@@ -437,7 +437,7 @@ public:
 
   int n_pattern_horiz;
 
-  double ht_res_m;
+  double range_res_m;
 
   char* radar_name;
 

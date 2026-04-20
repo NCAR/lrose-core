@@ -118,7 +118,7 @@ paramdef double
   p_descr = "Range resolution for height and blockage sampling computations (m)";
   p_help = "We sample the beam at this range resolution, and accumulate the extinction in range.";
   p_default = 100.0;
-} ht_res_m;
+} range_res_m;
 
 // paramdef double {
 //   p_default = 100.0;

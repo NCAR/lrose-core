@@ -240,6 +240,11 @@ int CartBeamBlock::_readTemplateFile(const string &path)
   _sensorHtKm = _templateMhdr.sensor_alt;
   _sensorHtM = _sensorHtKm * 1000.0;
   _proj.setSensorPosn(_sensorLat, _sensorLon, _sensorHtKm);
+
+  _zKm.clear();
+  for (int iz = 0; iz < _templateFhdr.nz; iz++) {
+    _zKm.push_back(_templateVhdr.level[iz]);
+  }
   
   _radarLat = _sensorLat;
   _radarLon = _sensorLon;
@@ -277,6 +282,28 @@ int CartBeamBlock::_readTemplateFile(const string &path)
 
   // _origin.set(angle(_radarLat, true), angle(_radarLon, true), _radarHtKm);
 
+  // compute lat/lon limits
+  
+  int margin = 5;
+  _proj.getEdgeExtrema(_minLat, _minLon, _maxLat, _maxLon, margin);
+
+  // compute max range limit from radar
+  
+  double maxRangeKm = 0.0;
+  double range = 0.0, bearing = 0.0;
+  // SW corner
+  PJGLatLon2RTheta(_radarLat, _radarLon, _minLat, _minLon, &range, &bearing);
+  maxRangeKm = std::max(maxRangeKm, range);
+  // SE corner
+  PJGLatLon2RTheta(_radarLat, _radarLon, _minLat, _maxLon, &range, &bearing);
+  maxRangeKm = std::max(maxRangeKm, range);
+  // NE corner
+  PJGLatLon2RTheta(_radarLat, _radarLon, _maxLat, _maxLon, &range, &bearing);
+  maxRangeKm = std::max(maxRangeKm, range);
+  // NW corner
+  PJGLatLon2RTheta(_radarLat, _radarLon, _maxLat, _minLon, &range, &bearing);
+  maxRangeKm = std::max(maxRangeKm, range);
+  
   // set the beam pattern object
 
   _pattern->set(euclid::EuclidAngle::fromDegrees(_vertBeamWidthDeg),
@@ -288,6 +315,13 @@ int CartBeamBlock::_readTemplateFile(const string &path)
 
   _pattern->makeVerticalIntegration();
   
+  // initialize blockage calculations
+
+  _calc->initGeom(maxRangeKm, _params.range_res_m / 1000.0,
+                  _zKm,
+                  _params.n_pattern_vert,
+                  _params.n_pattern_horiz);
+
   return 0;
   
 }
@@ -311,25 +345,21 @@ int CartBeamBlock::_readDem(const string &path)
   
   // compute safe projection lat/lon limits, with a margin of 5 grid points
   
-  double minLat, minLon, maxLat, maxLon;
-  int margin = 5;
-  _proj.getEdgeExtrema(minLat, minLon, maxLat, maxLon, margin);
-
   if (_params.debug) {
     cerr << "INFO: retrieving DEM data for lat/lon bounding box" << endl;
-    cerr << "      minLat, maxLat: " << minLat << ", " << maxLat << endl;
-    cerr << "      minLon, maxLon: " << minLon << ", " << maxLon << endl;
+    cerr << "      minLat, maxLat: " << _minLat << ", " << _maxLat << endl;
+    cerr << "      minLon, maxLon: " << _minLon << ", " << _maxLon << endl;
   }
     
   // initialize dem for reading
-
-  std::pair<double,double> sw(minLat, minLon);
-  std::pair<double,double> ne(maxLat, maxLon);
+  
+  std::pair<double,double> sw(_minLat, _minLon);
+  std::pair<double,double> ne(_maxLat, _maxLon);
   _dem->set(sw, ne);
 
   // create the terrain grid
   
-  if (_createTerrainGrid(minLat, minLon, maxLat, maxLon)) {
+  if (_createTerrainGrid(_minLat, _minLon, _maxLat, _maxLon)) {
     cerr << "ERROR - CartBeamBlock::_readDem" << endl;
     cerr << "  Cannot create terrain output grid file" << endl;
     return -1;
@@ -471,7 +501,7 @@ double CartBeamBlock::_computeCartPtExtinction(double elDeg,
   double extinction = 0.0;
   angle azAngle(azDeg, true);
   angle elAngle(elDeg, true);
-  double dRangeM = _params.ht_res_m;
+  double dRangeM = _params.range_res_m;
   
   // we compute the beam blockage at intervals along the ray
   
@@ -667,8 +697,8 @@ int CartBeamBlock::_createTerrainGrid(double minLat, double minLon,
   _proj.latlon2xy(minLat, minLon, minX, minY);
   _proj.latlon2xy(maxLat, maxLon, maxX, maxY);
 
-  _htDx = _params.ht_res_m / 1000.0;
-  _htDy = _params.ht_res_m / 1000.0;
+  _htDx = _params.range_res_m / 1000.0;
+  _htDy = _params.range_res_m / 1000.0;
   _htMinx = minX;
   _htMiny = minY;
   _htNx = floor((maxX - minX) / _htDx) + 1;
