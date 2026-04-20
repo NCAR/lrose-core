@@ -37,6 +37,8 @@
 ///////////////////////////////////////////////////////////////
 
 #include "CartBeamBlock.hh"
+#include "DemProvider.hh"
+#include "BlockageCalc.hh"
 #include <filesystem>
 #include <iostream>
 #include <thread>
@@ -58,7 +60,8 @@ const fl32 CartBeamBlock::missingFl32 = -9999.0;
 // Constructor
 
 CartBeamBlock::CartBeamBlock(int argc, char **argv) :
-        _dem(nullptr)
+        _dem(nullptr),
+        _calc(nullptr)
   
 {
 
@@ -89,7 +92,10 @@ CartBeamBlock::CartBeamBlock(int argc, char **argv) :
     return;
   }
 
+  // create computational objects
+  
   _dem = new DemProvider(_params);
+  _calc = new BlockageCalc(_params, *_dem);
 
 }
 
@@ -100,6 +106,7 @@ CartBeamBlock::~CartBeamBlock()
 {
 
   delete _dem;
+  delete _calc;
   
 }
 

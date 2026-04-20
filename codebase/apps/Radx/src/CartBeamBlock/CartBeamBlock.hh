@@ -41,7 +41,6 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include "DemProvider.hh"
 #include "RainFields.hh"
 #include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxProj.hh>
@@ -50,6 +49,9 @@
 #include <string>
 #include <set>
 using namespace std;
+
+class DemProvider;
+class BlockageCalc;
 
 class CartBeamBlock {
   
@@ -107,6 +109,10 @@ private:
   size_t _htNx, _htNy;
   double _htDx, _htDy;
   double _htMinx, _htMiny;
+
+  // computing blockage
+
+  BlockageCalc *_calc;
 
   // output file
 
