@@ -55,6 +55,9 @@ SRCS = \
 	unit_vector.c \
 	vect_add.c
 
+CPPC_SRCS = \
+	EuclidAngle.cc
+
 #
 # general targets
 #
