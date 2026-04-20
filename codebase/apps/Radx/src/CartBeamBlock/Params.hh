@@ -437,7 +437,7 @@ public:
 
   int num_horiz_subsamples;
 
-  double range_sampling_m;
+  double ht_res_m;
 
   char* radar_name;
 
@@ -476,7 +476,7 @@ public:
 
   char* cart_terrain_grid_subdir;
 
-  double cart_terrain_grid_res;
+  double cart_terrain_grid_res_deg;
 
   char* cart_terrain_field_name;
 

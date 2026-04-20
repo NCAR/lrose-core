@@ -115,10 +115,16 @@ paramdef int
 
 paramdef double
 {
-  p_descr = "Range resolution for blockage sampling computations (m)";
+  p_descr = "Range resolution for height and blockage sampling computations (m)";
   p_help = "We sample the beam at this range resolution, and accumulate the extinction in range.";
-  p_default = 20;
-} range_sampling_m;
+  p_default = 100.0;
+} ht_res_m;
+
+// paramdef double {
+//   p_default = 100.0;
+//   p_descr = "Grid resolution for terrain grid (m).";
+//   p_help = "This is used for internal computations. It should be of the same order as the terrain data itself. Finer resolution will use more memory.";
+// } cart_terrain_grid_res_m;
 
 commentdef {
   p_header = "RADAR PARAMETERS";
@@ -318,7 +324,7 @@ paramdef double {
   p_default = 0.005;
   p_descr = "Grid resolution for terrain grid (deg).";
   p_help = "The grid extent will be determined by the radar coverage.";
-} cart_terrain_grid_res;
+} cart_terrain_grid_res_deg;
 
 paramdef string {
   p_default = "terrain_ht";

@@ -1570,67 +1570,107 @@ auto beam_power::calculate(angle theta_azi, angle theta_elev) const -> real
   return std::exp(four_ln_two_ * ((azi * azi * inv_h_sqr_) + (ele * ele * inv_v_sqr_)));
 }
 
-beam_power_cross_section::beam_power_cross_section(
-      const beam_power& beam
-    , angle gate_width
-    , size_t rows
-    , size_t cols
-    , angle height
-    , angle width)
-  : height_(height)
-  , width_(width)
-  , elevations_(rows)
-  , azimuths_(cols)
-  , data_(rows, cols)
-{
-  real offset;
+/**
+ * This class creates a rectangular array that represents a 2d cross-sectional view
+ * of beam power.  The array is centered on the center (highest power) of the beam.
+ *
+ * The array is always normalized so that the total power in the array sums to 1.
+ */
 
-  // determine elevation centers
+beam_power_cross_section::beam_power_cross_section(const beam_power& beam,
+                                                   size_t rows,
+                                                   size_t cols,
+                                                   angle height /* = 6.0_deg */,
+                                                   angle width /* = 6.0_deg */,
+                                                   bool convolve_dwell_in_az /* = false */,
+                                                   angle dwell_width /* = 1.0_deg */)
+        : height_(height)
+        , width_(width)
+        , elevations_(rows)
+        , azimuths_(cols)
+        , data_(rows, cols)
+{
+
+  real offset;
+  
+  // determine relative elevation centers
+
   offset = 0.5_r * (1.0_r - rows);
   angle delta_v  = height / rows;
-  for (size_t i = 0; i < rows; ++i)
+  for (size_t i = 0; i < rows; ++i) {
     elevations_[i] = (offset + i) * delta_v;
+  }
+  
+  // determine relative azimuth centers
 
-  // determine azimuth centers
   offset = 0.5_r * (1.0_r - cols);
   angle delta_h  = width / cols;
-  for (size_t i = 0; i < cols; ++i)
+  for (size_t i = 0; i < cols; ++i) {
     azimuths_[i] = (offset + i) * delta_h;
+  }
+  
+  // calculate cross sectional power array around the pointing angle
 
-  // calculate cross sectional power array for a single pointing location
   array2<real> csec{rows, cols};
-  for (size_t y = 0; y < rows; ++y)
-  {
-    for (size_t x = 0; x < cols; ++x)
-    {
+  for (size_t y = 0; y < rows; ++y) {
+    for (size_t x = 0; x < cols; ++x) {
       csec[y][x] = beam.calculate(azimuths_[x], elevations_[y]);
     }
   }
 
-  // convolve the pattern over the gate sweep arc
-  int start = std::lround(gate_width / (-2.0_r * delta_h));
-  int end = std::lround(gate_width / (2.0_r * delta_h)) + 1;
-  array_utils::fill(data_, 0.0_r);
-  for (auto i = start; i < end; ++i)
-  {
-    const size_t sx = i < 0 ? -i : 0;
-    const size_t ex = i > 0 ? cols - i : cols;
-
-    for (size_t y = 0; y < rows; ++y)
-    {
-      for (size_t x = sx; x < ex; ++x)
-      {
-        data_[y][x + i] += csec[y][x];
+  if (convolve_dwell_in_az) {
+    
+    // convolve the pattern over the gate sweep arc
+    // Start with the intrinsic 2D antenna power pattern in angular space,
+    // with rows spanning elevation offset and columns spanning azimuth offset.
+    //
+    // Then convolve that pattern in the horizontal (azimuth) direction with
+    // a rectangular window representing the finite azimuthal sweep arc over
+    // which the radar sample is accumulated.
+    //
+    // NOTE:
+    //   - dwell_width here is an angular width in azimuth, not a range-gate depth.
+    //   - this broadens the effective horizontal response of the beam.
+    //   - this refinement is mainly applicable when the antenna is moving in
+    //     azimuth during sampling (e.g. PPI). It is less appropriate for RHI,
+    //     staring modes, or electronically steered antennas.
+    
+    int start = std::lround(dwell_width / (-2.0_r * delta_h));
+    int end = std::lround(dwell_width / (2.0_r * delta_h)) + 1;
+    array_utils::fill(data_, 0.0_r);
+    for (auto i = start; i < end; ++i) {
+      const size_t sx = i < 0 ? -i : 0;
+      const size_t ex = i > 0 ? cols - i : cols;
+      for (size_t y = 0; y < rows; ++y) {
+        for (size_t x = sx; x < ex; ++x) {
+          data_[y][x + i] += csec[y][x];
+        }
       }
     }
+    
+  } else {
+
+    // use the power distribution as is, no convolution
+
+    data_ = csec;
+
   }
 
   // normalize the array
   double total = 0.0;
-  for (size_t i = 0; i < data_.size(); ++i)
+  for (size_t i = 0; i < data_.size(); ++i) {
     total += data_.data()[i];
+  }
   array_utils::divide(data_, data_, total);
+  
 }
+
+/**
+ * After calling this function values within the array shall no longer represent beam
+ * power at a particular offset from beam center.  Instead, the value returned at any
+ * point represents the fraction of total beam power at that point and below.  This
+ * can be used to determine fraction of signal loss due to terrain obstructions.
+ */
 
 void beam_power_cross_section::make_vertical_integration()
 {

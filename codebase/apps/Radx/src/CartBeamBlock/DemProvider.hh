@@ -39,46 +39,8 @@
 
 #include "Params.hh"
 #include "RainFields.hh"
+#include "SrtmTile.hh"
 #include <vector>
-
-#ifdef CODEX
-
-class DemProvider {
-public:
-  bool initialize(...);
-  latlonalt radarOriginInDemSpheroid(const latlonalt&) const;
-  double terrainAltitudeM(const latlon&) const;
-  bool peakAlongSegment(const latlon& origin,
-                        angle bearing,
-                        double r0M,
-                        double r1M,
-                        size_t nSamples,
-                        double &peakRangeM,
-                        double &peakAltM) const;
-};
-
-class DemProvider {
-public:
-  
-  bool initialize(const Params &params,
-                  const std::pair<double,double> &sw,
-                  const std::pair<double,double> &ne);
-  
-  rainfields::latlonalt radarOriginInDemSpheroid(
-          const rainfields::latlonalt &radar) const;
-  
-  double elevationM(const rainfields::latlon &loc) const;
-  
-  bool peakInSegment(const rainfields::latlon &origin,
-                     rainfields::angle bearing,
-                     double minRangeM,
-                     double maxRangeM,
-                     size_t nSamples,
-                     double &peakRangeM,
-                     double &peakAltM) const;
-};
-#endif
-
 
 class DemProvider
 {
@@ -140,6 +102,12 @@ public:
 
   double getElevation(const rainfields::latlon& loc) const;
 
+  // get terrain ht for a point
+  // returns 0 on success, -1 on failure
+  // sets terrainHtM
+  
+  int getHt(double lat, double lon, int16_t &terrainHtM);
+
 protected:
   
 private:
@@ -160,6 +128,18 @@ private:
 
   
   rainfields::ancilla::spheroid::standard _toSphereStandard(Params::DigitalElevationModel_t t);
+  
+  const static int nLat = 180;
+  const static int nLon = 360;
+
+  SrtmTile ***_tiles;
+
+  double _latestLat;
+  double _latestLon;
+  
+  void _updateCache();
+  int _readForCache(double lat, double lon);
+  void _freeTileMemory();
   
 };
 

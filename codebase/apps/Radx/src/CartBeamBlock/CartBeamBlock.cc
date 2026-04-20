@@ -39,6 +39,10 @@
 #include "CartBeamBlock.hh"
 #include <filesystem>
 #include <iostream>
+#include <thread>
+#include <vector>
+#include <algorithm>
+#include <cmath>
 #include <toolsa/umisc.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pjg_flat.h>
@@ -54,7 +58,7 @@ const fl32 CartBeamBlock::missingFl32 = -9999.0;
 // Constructor
 
 CartBeamBlock::CartBeamBlock(int argc, char **argv) :
-        _dem(_params)
+        _dem(nullptr)
   
 {
 
@@ -85,6 +89,8 @@ CartBeamBlock::CartBeamBlock(int argc, char **argv) :
     return;
   }
 
+  _dem = new DemProvider(_params);
+
 }
 
 // destructor
@@ -93,7 +99,8 @@ CartBeamBlock::~CartBeamBlock()
 
 {
 
-
+  delete _dem;
+  
 }
 
 //////////////////////////////////////////////////
@@ -120,11 +127,13 @@ int CartBeamBlock::Run()
 
   // compute beam blockage for each point in the Cartesian grid
 
+#ifdef NOTNOW
   if (_computeBlockage()) {
     cerr << "ERROR - CartBeamBlock::Run()" << endl;
     cerr << "  Cannot compute beam blockage" << endl;
     return -1;
   }
+#endif
   
   return 0;
   
@@ -276,7 +285,7 @@ int CartBeamBlock::_readDem(const string &path)
 
   if (_params.debug) {
     cerr << "INFO: reading DEM from path: " << path << endl;
-    cerr << "      DEM model: " << _dem.ModelName(_params.dem_data_format) << endl;
+    cerr << "      DEM model: " << _dem->ModelName(_params.dem_data_format) << endl;
   }
     
   // compute safe projection lat/lon limits, with a margin of 5 grid points
@@ -295,7 +304,7 @@ int CartBeamBlock::_readDem(const string &path)
 
   std::pair<double,double> sw(minLat, minLon);
   std::pair<double,double> ne(maxLat, maxLon);
-  _dem.set(sw, ne);
+  _dem->set(sw, ne);
 
   // create the terrain grid
   
@@ -324,24 +333,26 @@ int CartBeamBlock::_computeBlockage()
     beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
   }
 
-  // setup beam power model
+  // initialize beam power model
 
   angle height, width;
   height.set_degrees(_vertBeamWidthDeg);
   width.set_degrees(_horizBeamWidthDeg);
   beam_power powerModel(width, height);
 
-  // set up beam cross section
+  // compute beam cross section data
+  // do not convolve in azimuth
+  // integrate power in the vertical
 
-  angle azWidth(_horizBeamWidthDeg * 2.0, true);
-  angle beamWidthH(_horizBeamWidthDeg, true);
-  angle beamWidthV(_vertBeamWidthDeg, true);
-
+  angle csectionHeight(_vertBeamWidthDeg * 3.0, true);
+  angle csectionWidth(_horizBeamWidthDeg * 3.0, true);
+  
   beam_power_cross_section csec
-    (powerModel, azWidth,
+    (powerModel,
      static_cast<size_t>(_params.num_vert_subsamples),
      static_cast<size_t>(_params.num_horiz_subsamples),
-     beamWidthV * 1.5, beamWidthH * 1.5);
+     csectionHeight, csectionWidth, false);
+
   csec.make_vertical_integration();
 
   // compute radar x and y coords in km
@@ -354,8 +365,8 @@ int CartBeamBlock::_computeBlockage()
   // array for extinction
 
   size_t nPtsPlane = _templateFhdr.nx * _templateFhdr.ny;
-  vector<fl32> extinct;
-  extinct.resize(nPtsPlane * _templateFhdr.nz, missingFl32);
+  vector<fl32> extinction;
+  extinction.resize(nPtsPlane * _templateFhdr.nz, missingFl32);
 
   // loop through the XY grid
   
@@ -373,7 +384,7 @@ int CartBeamBlock::_computeBlockage()
       alat.set_degrees(lat);
       alon.set_degrees(lon);
       latlon loc(alat, alon);
-      fl32 terrainHt = _dem.getElevation(loc);
+      fl32 terrainHt = _dem->getElevation(loc);
       if (!std::isfinite(terrainHt)) {
         continue;
       }
@@ -398,12 +409,12 @@ int CartBeamBlock::_computeBlockage()
         double zKm = _templateVhdr.level[iz];
         double elDeg = beamHt.computeElevationDeg(zKm, gndRangeKm);
         
-        double ext = _computeExtinction(elDeg, azDeg,
-                                        zKm, gndRangeKm,
-                                        beamHt, powerModel, csec);
-        extinct[index] = ext;
+        double extinct = _computeCartPtExtinction(elDeg, azDeg,
+                                                  zKm, gndRangeKm,
+                                                  beamHt, powerModel, csec);
+        extinction[index] = extinct;
         
-        if (ext == 0.0) {
+        if (extinct == 0.0) {
           // no blockage at this elevation, so none above either
           break;
         }
@@ -418,24 +429,27 @@ int CartBeamBlock::_computeBlockage()
 }
 
 ///////////////////////////////////////////////////////////
-// compute extinction for a given range and elevation
+// compute extinction for a given Cartesian point
+// represented by elev, az, height and range
 
-double CartBeamBlock::_computeExtinction(double elDeg,
-                                         double azDeg,
-                                         double zKm,
-                                         double gndRangeKm,
-                                         const BeamHeight &beamHt,
-                                         const beam_power &powerModel,
-                                         const beam_power_cross_section &csec)
+double CartBeamBlock::_computeCartPtExtinction(double elDeg,
+                                               double azDeg,
+                                               double zKm,
+                                               double gndRangeKm,
+                                               const BeamHeight &beamHt,
+                                               const beam_power &powerModel,
+                                               const beam_power_cross_section &csec)
   
 {
 
+  return 0.0;
+  
   // initialize
   
   double extinction = 0.0;
   angle azAngle(azDeg, true);
   angle elAngle(elDeg, true);
-  double dRangeM = _params.range_sampling_m;
+  double dRangeM = _params.ht_res_m;
   
   // we compute the beam blockage at intervals along the ray
   
@@ -453,7 +467,7 @@ double CartBeamBlock::_computeExtinction(double elDeg,
     alat.set_degrees(lat);
     alon.set_degrees(lon);
     rainfields::latlon loc(alat, alon);
-    fl32 terrainHt = _dem.getElevation(loc);
+    fl32 terrainHt = _dem->getElevation(loc);
 
     if (std::isfinite(terrainHt)) {
 
@@ -472,8 +486,8 @@ double CartBeamBlock::_computeExtinction(double elDeg,
 
       real peak_ground_range = 0.0_r;
       real peak_altitude;
-      real progressive_loss = 0.0_r;
-      _dem.determine_dem_segment_peak(_origin, azAngle,
+      // real progressive_loss = 0.0_r;
+      _dem->determine_dem_segment_peak(_origin, azAngle,
                                       rangeM, rangeM + dRangeM,
                                       peak_ground_range, peak_altitude,
                                       1);
@@ -548,7 +562,7 @@ void CartBeamBlock::_processGate(GateHandler &gate, angle elevAngle,
   real peak_ground_range = 0.0_r;
   real peak_altitude;
   real progressive_loss = 0.0_r;
-  _dem.determine_dem_segment_peak(origin, bearing, gateMeters,
+  _dem->determine_dem_segment_peak(origin, bearing, gateMeters,
 				  gateMeters + _params.gates.delta*1000.0,
 				  peak_ground_range, peak_altitude,
 				  _params.num_range_subsample);
@@ -580,15 +594,15 @@ int CartBeamBlock::_createTerrainGrid(double minLat, double minLon,
 
   // compute grid details
 
-  minLat = (floor(minLat / _params.cart_terrain_grid_res) - 1.0) *
-    _params.cart_terrain_grid_res;
-  minLon = (floor(minLon / _params.cart_terrain_grid_res) - 1.0) *
-    _params.cart_terrain_grid_res;
+  minLat = (floor(minLat / _params.cart_terrain_grid_res_deg) - 1.0) *
+    _params.cart_terrain_grid_res_deg;
+  minLon = (floor(minLon / _params.cart_terrain_grid_res_deg) - 1.0) *
+    _params.cart_terrain_grid_res_deg;
 
-  maxLat = (floor(maxLat / _params.cart_terrain_grid_res) + 1.0) *
-    _params.cart_terrain_grid_res;
-  maxLon = (floor(maxLon / _params.cart_terrain_grid_res) + 1.0) *
-    _params.cart_terrain_grid_res;
+  maxLat = (floor(maxLat / _params.cart_terrain_grid_res_deg) + 1.0) *
+    _params.cart_terrain_grid_res_deg;
+  maxLon = (floor(maxLon / _params.cart_terrain_grid_res_deg) + 1.0) *
+    _params.cart_terrain_grid_res_deg;
 
   if (_params.debug) {
     cerr << "createTerrainGrid():" << endl;
@@ -603,9 +617,12 @@ int CartBeamBlock::_createTerrainGrid(double minLat, double minLon,
   if (_addTerrainMdvField(_outMdvx, minLat, minLon, maxLat, maxLon)) {
     return -1;
   }
+  if (_addTerrainMdvField2(_outMdvx, minLat, minLon, maxLat, maxLon)) {
+    return -1;
+  }
 
   // write it out
-
+  
   _outMdvx.setWriteFormat(Mdvx::FORMAT_NCF);
 
   string outputDir(_params.output_dir);
@@ -628,7 +645,158 @@ int CartBeamBlock::_createTerrainGrid(double minLat, double minLon,
 
   return 0;
 
+  // set up internal cart grid for terrain
+
+  // if (_computeHtArray(minLat, minLon, maxLat, maxLon)) {
+  //   cerr << "ERROR - _createTerrainGrid" << endl;
+  //   cerr << "Cannot compute ht array using threads" << endl;
+  //   return -1;
+  // }
+  
+  double minX, minY, maxX, maxY;
+  _proj.latlon2xy(minLat, minLon, minX, minY);
+  _proj.latlon2xy(maxLat, maxLon, maxX, maxY);
+
+  _htDx = _params.ht_res_m / 1000.0;
+  _htDy = _params.ht_res_m / 1000.0;
+  _htMinx = minX;
+  _htMiny = minY;
+  _htNx = floor((maxX - minX) / _htDx) + 1;
+  _htNy = floor((maxY - minY) / _htDy) + 1;
+  _htArray.alloc(_htNy, _htNx);
+
+  cerr << "111111111111111111111111111111111111" << endl;
+  cerr << "2222222222222 _htNy, _htNx: " << _htNy << ", " << _htNx << endl;
+  size_t count = 0;
+  for (int iy = 0; iy < (int) _htNy; iy++) {
+    for (int ix = 0; ix < (int) _htNx; ix++, count++) {
+      double latDeg, lonDeg;
+      _proj.xyIndex2latlon(ix, iy, latDeg, lonDeg);
+      rainfields::angle alat, alon;
+      alat.set_degrees(latDeg);
+      alon.set_degrees(lonDeg);
+      rainfields::latlon loc(alat, alon);
+      fl32 ht = _dem->getElevation(loc);
+      int16_t htM;
+      if (_dem->getHt(latDeg, lonDeg, htM)) {
+        _htArray[iy][ix] = 0;
+      } else {
+        _htArray[iy][ix] = htM;
+      }
+      if (count % 10000 == 0) {
+        cerr << "33333333333 count, iy, ix, ht, array: " << count << ", " << iy << ", " << ix << ", " << ht << ", " << _htArray[iy][ix] << endl;
+      }
+    }
+  }
+
+  cerr << "2222222222222222222222222222222222222" << endl;
+
+  return 0;
+
 }
+
+int CartBeamBlock::_computeHtArray(double minLat, double minLon,
+                                   double maxLat, double maxLon)
+{
+
+  double minX, minY, maxX, maxY;
+  _proj.latlon2xy(minLat, minLon, minX, minY);
+  _proj.latlon2xy(maxLat, maxLon, maxX, maxY);
+
+  _htDx = _params.ht_res_m / 1000.0;
+  _htDy = _params.ht_res_m / 1000.0;
+  _htMinx = minX;
+  _htMiny = minY;
+  _htNx = floor((maxX - minX) / _htDx) + 1;
+  _htNy = floor((maxY - minY) / _htDy) + 1;
+  _htArray.alloc(_htNy, _htNx);
+
+  // Choose a sensible thread count
+
+  unsigned int nThreads = std::thread::hardware_concurrency();
+  cerr << "5555555555555555555 nThreads: " << nThreads << endl;
+  if (nThreads == 0) {
+    nThreads = 4;
+  }
+  if (nThreads > _htNy) {
+    nThreads = static_cast<unsigned int>(_htNy);
+  }
+  if (nThreads == 0) {
+    nThreads = 1;
+  }
+
+  auto worker = [this](size_t iyStart, size_t iyEnd) {
+
+    DemProvider dem(_params);
+    
+    cerr << "111111111111111111 iyStart, iyEnd: " << iyStart << ", " << iyEnd << endl;
+
+    int count = 0;
+    for (size_t iy = iyStart; iy < iyEnd; ++iy) {
+
+      cerr << "333333333333333333 count, iy: " << count << ", " << iy << endl;
+      
+      int16_t *row = _htArray[iy];
+
+      for (size_t ix = 0; ix < _htNx; ++ix, count++) {
+
+        double latDeg, lonDeg;
+        _proj.xyIndex2latlon(static_cast<int>(ix), static_cast<int>(iy),
+                             latDeg, lonDeg);
+
+        rainfields::angle alat, alon;
+        alat.set_degrees(latDeg);
+        alon.set_degrees(lonDeg);
+        rainfields::latlon loc(alat, alon);
+
+        fl32 ht = dem.getElevation(loc);
+        // fl32 ht = 0.0;
+
+        if (std::isfinite(ht)) {
+          row[ix] = static_cast<int16_t>(std::floor(ht + 0.5));
+        } else {
+          row[ix] = 0;
+        }
+
+        if (count % 10000 == 0) {
+          cerr << "2222222222222 count, iy: " << count << ", " << iy << endl;
+        }
+
+      } // ix
+
+    } // iy
+
+  };
+
+  cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
+  
+  std::vector<std::thread> threads;
+  threads.reserve(nThreads);
+
+  size_t rowsPerThread = _htNy / nThreads;
+  size_t extra = _htNy % nThreads;
+  size_t iyStart = 0;
+
+  cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" << endl;
+  
+  for (unsigned int ii = 0; ii < nThreads; ++ii) {
+    size_t thisCount = rowsPerThread + (ii < extra ? 1 : 0);
+    size_t iyEnd = iyStart + thisCount;
+    threads.emplace_back(worker, iyStart, iyEnd);
+    iyStart = iyEnd;
+  }
+
+  cerr << "cccccccccccccccccccccccccccccc" << endl;
+  
+  for (auto &tt : threads) {
+    tt.join();
+  }
+
+  cerr << "dddddddddddddddddddddddddddddddd" << endl;
+  
+  return 0;
+}
+
 //////////////////////////////////////////////
 // set the master header for terrain file
 
@@ -737,7 +905,7 @@ int CartBeamBlock::_addTerrainMdvField(Mdvx &mdv,
       alat.set_degrees(latDeg);
       alon.set_degrees(lonDeg);
       rainfields::latlon loc(alat, alon);
-      fl32 ht = _dem.getElevation(loc);
+      fl32 ht = _dem->getElevation(loc);
       if (!std::isfinite(ht)) {
         ht = missingFl32;
       }
@@ -754,6 +922,93 @@ int CartBeamBlock::_addTerrainMdvField(Mdvx &mdv,
   
   fld->setFieldName(_params.cart_terrain_field_name);
   fld->setFieldNameLong(_params.cart_terrain_field_name);
+  fld->setUnits("m");
+  
+  // add to object
+  
+  mdv.addField(fld);
+
+  return 0;
+  
+}
+
+int CartBeamBlock::_addTerrainMdvField2(Mdvx &mdv,
+                                        double minLat, double minLon,
+                                        double maxLat, double maxLon)
+  
+{
+
+  string fieldName = _params.cart_terrain_field_name;
+  fieldName.append(".2");
+
+  if (_params.debug) {
+    cerr << "  Adding terrain field 2: " << fieldName << endl;
+  }
+
+  // field header
+  
+  Mdvx::field_header_t fhdr(_templateFhdr);
+  fhdr.nz = 1;
+  
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.dz_constant = true;
+
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = 4;
+  fhdr.volume_size = fhdr.nx * fhdr.ny * 1 * sizeof(fl32);
+  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
+  fhdr.scaling_type = Mdvx::SCALING_NONE;
+  
+  fhdr.grid_dz = 1.0;
+  fhdr.grid_minz = 0;
+
+  fhdr.scale = 1.0;
+  fhdr.bias = 0.0;
+
+  fhdr.bad_data_value = missingFl32;
+  fhdr.missing_data_value = missingFl32;
+  
+  fhdr.min_value = 0;
+  fhdr.max_value = 0;
+  fhdr.min_value_orig_vol = 0;
+  fhdr.max_value_orig_vol = 0;
+
+  // vlevel header
+  
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  vhdr.level[0] = 0;
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+
+  // create terrain data
+  
+  vector<fl32> height;
+  height.resize(fhdr.nx * fhdr.ny, missingFl32);
+  int ii = 0;
+  for (int iy = 0; iy < fhdr.ny; iy++) {
+    for (int ix = 0; ix < fhdr.nx; ix++, ii++) {
+      double latDeg, lonDeg;
+      _proj.xyIndex2latlon(ix, iy, latDeg, lonDeg);
+      int16_t htM;
+      if (_dem->getHt(latDeg, lonDeg, htM)) {
+        height[ii] = 0;
+      } else {
+        height[ii] = htM;
+      }
+    }
+  }
+  
+  // create field
+  
+  MdvxField *fld = new MdvxField(fhdr, vhdr, height.data());
+  fld->convertType(Mdvx::ENCODING_FLOAT32,
+                   Mdvx::COMPRESSION_GZIP);
+  // set strings
+  
+  fld->setFieldName(fieldName);
+  fld->setFieldNameLong(fieldName);
   fld->setUnits("m");
   
   // add to object
@@ -801,7 +1056,7 @@ int CartBeamBlock::Run(void)
   }
   
   // set up the digital elevation object
-  if (!_dem.set(sw, ne))
+  if (!_dem->set(sw, ne))
   {
     return 1;
   }
@@ -818,14 +1073,14 @@ int CartBeamBlock::Run(void)
   double elevation;
   if (_params.do_lookup_radar_altitude) {
     latlon ll(lat, lon);
-    elevation = _dem.getElevation(ll);
+    elevation = _dem->getElevation(ll);
   } else {
     elevation = _params.radar_location.altitudeKm*1000.0;
   }
   latlonalt origin(lat, lon, elevation);
 
   // convert the site location of the volume into the native spheroid of the DEM
-  origin = _dem.radarOrigin(origin); 
+  origin = _dem->radarOrigin(origin); 
 
   // setup our beam power models
   angle height, width;

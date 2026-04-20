@@ -115,43 +115,78 @@ dem_data_format = SHUTTLE_RADAR_TOPOGRAPHY;
 
 //======================================================================
 //
-// SAMPLING STRATEGY.
-//
-// We compute blockage using a micro-grid, within the radar elevation, 
-//   azimuth and gate (bin) geometry. This allows us to compute the 
-//   effective blockage across the beam.
+// SETTING THE PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS.
 //
 //======================================================================
  
-///////////// num_elev_subsample //////////////////////
+///////////// override_standard_pseudo_earth_radius ///
 //
-// Number of subsamples in elevation.
+// Option to override the standard 4/3 earth radius model for 
+//   refraction.
 //
-// We sample the beam in elevation using this number of sub angles.
+// If true, the standard 4/3 earth radius will be overridden. The US NWS 
+//   NEXRAD system uses 1.21 instead of 1.333.
+//
+// Type: boolean
+
+override_standard_pseudo_earth_radius = FALSE;
+
+///////////// pseudo_earth_radius_ratio ///////////////
+//
+// Ratio for computing the pseudo earth radius for beam height 
+//   computations.
+//
+// For standard refraction this is 4/3. For super refraction it will be 
+//   less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 
+//   1.21.
+//
+// Type: double
+
+pseudo_earth_radius_ratio = 1.33333;
+
+//======================================================================
+//
+// BLOCKAGE SAMPLING GEOMETRY.
+//
+// We compute blockage using a micro-grid, within the radar elevation, 
+//   azimuth and range geometry. This allows us to compute the effective 
+//   blockage more accurately.
+//
+//======================================================================
+ 
+///////////// num_vert_subsamples /////////////////////
+//
+// Number of subsamples in the vertical.
+//
+// We compute beam power at this number of points in a vertical slice of 
+//   the beam. An uneven number gives us symmetrical sampling.
 //
 // Type: int
 
-num_elev_subsample = 64;
+num_vert_subsamples = 31;
 
-///////////// num_az_subsample ////////////////////////
+///////////// num_horiz_subsamples ////////////////////
 //
-// Number of subsamples in azimuth.
+// Number of subsamples in the horizontal.
 //
-// We sample the beam in azimuth using this number of sub angles.
+// We compute beam power at this number of points in a horizontal 
+//   section across the beam. An uneven number gives us symmetrical 
+//   sampling.
 //
 // Type: int
 
-num_az_subsample = 64;
+num_horiz_subsamples = 31;
 
-///////////// num_range_subsample /////////////////////
+///////////// ht_res_m ////////////////////////////////
 //
-// Number of subsamples in range.
+// Range resolution for height and blockage sampling computations (m).
 //
-// We sample the beam in range using this number of sub ranges.
+// We sample the beam at this range resolution, and accumulate the 
+//   extinction in range.
 //
-// Type: int
+// Type: double
 
-num_range_subsample = 10;
+ht_res_m = 200;
 
 //======================================================================
 //
@@ -159,83 +194,85 @@ num_range_subsample = 10;
 //
 //======================================================================
  
-///////////// output_time_stamp ///////////////////////
-//
-// Time stamp for output files.
-//
-// We need to set a time so that the output files can be correctly 
-//   named. SRTM shuttle mission 99 occurred in early 2000.
-//
-// Type: struct
-//   typedef struct {
-//      int year;
-//      int month;
-//      int day;
-//      int hour;
-//      int min;
-//      int sec;
-//   }
-//
-
-output_time_stamp = {
-    year = 2000,
-    month = 1,
-    day = 1,
-    hour = 0,
-    min = 0,
-    sec = 0
-};
-
 ///////////// radar_name //////////////////////////////
 //
 // Name of radar.
+//
+// If empty, the radar name from the data is used.
 //
 // Type: string
 
 radar_name = "UNKNOWN";
 
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar spatial location.
+//
+// If FALSE we use the radar location from the template file. If TRUE, 
+//   we specify the location in the parameter file.
+//
+// Type: boolean
+
+override_radar_location = FALSE;
+
 ///////////// radar_location //////////////////////////
 //
 // Radar location.
 //
-// The radar_location, note that the altitude is in km MSL.
+// The radar location if override_radar_location is true. Altitude is in 
+//   km MSL.
 //
 // Type: struct
 //   typedef struct {
 //      double latitudeDeg;
 //      double longitudeDeg;
-//      double altitudeKm;
+//      double heightKm;
 //   }
 //
 
 radar_location = {
     latitudeDeg = 0,
     longitudeDeg = 0,
-    altitudeKm = 0
+    heightKm = 0
 };
 
-///////////// do_lookup_radar_altitude ////////////////
+///////////// override_radar_wavelength ///////////////
 //
-// Flag to lookup the radar altitude.
+// Option to override the radar wavelength.
 //
-// If TRUE, don't use altitudKm from radar_location, instead figure it 
-//   out by looking into the tiles at the latitudeDeg and longitudeDeg.
+// If FALSE we use the frequency from the radar params in the template 
+//   file. If TRUE, we use the value in the parameter file.
 //
 // Type: boolean
 
-do_lookup_radar_altitude = FALSE;
+override_radar_wavelength = FALSE;
 
 ///////////// radar_wavelength_cm /////////////////////
 //
 // Radar wavelength, cm.
 //
+// The radar wavelength if override_radar_wavelength is true.
+//
 // Type: double
 
 radar_wavelength_cm = 5.4;
 
+///////////// override_radar_beamwidth ////////////////
+//
+// Option to override the radar beam width.
+//
+// If FALSE we use the beam width from the radar params in the template 
+//   file. If TRUE, we use the values in the parameter file.
+//
+// Type: boolean
+
+override_radar_beamwidth = FALSE;
+
 ///////////// horiz_beam_width_deg ////////////////////
 //
-// Radar beamwidth in the horizontal plane.
+// Radar horizontal beam (deg).
+//
+// Used if override_radar_beamwidth is true.
 //
 // Type: double
 
@@ -243,77 +280,13 @@ horiz_beam_width_deg = 1;
 
 ///////////// vert_beam_width_deg /////////////////////
 //
-// Radar beamwidth in the vertical plane.
+// Radar vertical beam (deg).
+//
+// Used if override_radar_beamwidth is true.
 //
 // Type: double
 
 vert_beam_width_deg = 1;
-
-//======================================================================
-//
-// GEOMETRY FOR COMPUTATIONS.
-//
-// We compute the beam blockage using the geometry for a theoretical 
-//   scan. The blockage is then stored in a CfRadial file, using these 
-//   parameters. When the blockage file is later used, we search for the 
-//   closest compute gate, in (elev, az, range) space, to that of the 
-//   acutal measured gate.
-//
-//======================================================================
- 
-///////////// gates ///////////////////////////////////
-//
-// Gate specification (km).
-//
-// Type: struct
-//   typedef struct {
-//      double start;
-//      double delta;
-//      int count;
-//   }
-//
-
-gates = {
-    start = 0.5,
-    delta = 0.15,
-    count = 1000
-};
-
-///////////// azimuths ////////////////////////////////
-//
-// Azimuth specification (degrees).
-//
-// Type: struct
-//   typedef struct {
-//      double start;
-//      double delta;
-//      int count;
-//   }
-//
-
-azimuths = {
-    start = 0,
-    delta = 1,
-    count = 360
-};
-
-///////////// elevations //////////////////////////////
-//
-// Elevation specification (degrees).
-//
-// Type: struct
-//   typedef struct {
-//      double start;
-//      double delta;
-//      int count;
-//   }
-//
-
-elevations = {
-    start = 0.5,
-    delta = 1,
-    count = 5
-};
 
 //======================================================================
 //
@@ -423,28 +396,7 @@ references = "Created by LROSE app CartBeamBlock";
 
 //======================================================================
 //
-// OUTPUT FORMAT.
-//
-//======================================================================
- 
-///////////// output_format ///////////////////////////
-//
-// Format for the output files.
-//
-// Type: enum
-// Options:
-//     OUTPUT_FORMAT_CFRADIAL
-//     OUTPUT_FORMAT_DORADE
-//     OUTPUT_FORMAT_FORAY
-//     OUTPUT_FORMAT_NEXRAD
-//     OUTPUT_FORMAT_UF
-//     OUTPUT_FORMAT_MDV_RADIAL
-
-output_format = OUTPUT_FORMAT_CFRADIAL;
-
-//======================================================================
-//
-// OUTPUT DIRECTORY AND FILE NAME.
+// OUTPUT DETAILS.
 //
 //======================================================================
  
@@ -456,7 +408,7 @@ output_format = OUTPUT_FORMAT_CFRADIAL;
 //
 // Type: string
 
-output_dir = "$(HOME)/data/pecan/mdv/beabBlock/kftg";
+output_dir = "$(HOME)/data/pecan/mdv/beamBlock/kftg";
 
 ///////////// append_radar_name_to_output_dir /////////
 //
@@ -479,6 +431,33 @@ append_radar_name_to_output_dir = FALSE;
 // Type: boolean
 
 write_individual_sweeps = FALSE;
+
+///////////// output_time_stamp ///////////////////////
+//
+// Time stamp for output files.
+//
+// We need to set a time so that the output files can be correctly 
+//   named. SRTM shuttle mission 99 occurred in early 2000.
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+
+output_time_stamp = {
+    year = 2000,
+    month = 1,
+    day = 1,
+    hour = 0,
+    min = 0,
+    sec = 0
+};
 
 //======================================================================
 //
@@ -507,7 +486,7 @@ create_cart_terrain_grid = FALSE;
 
 cart_terrain_grid_subdir = "cart_terrain";
 
-///////////// cart_terrain_grid_res ///////////////////
+///////////// cart_terrain_grid_res_deg ///////////////
 //
 // Grid resolution for terrain grid (deg).
 //
@@ -515,7 +494,7 @@ cart_terrain_grid_subdir = "cart_terrain";
 //
 // Type: double
 
-cart_terrain_grid_res = 0.005;
+cart_terrain_grid_res_deg = 0.005;
 
 ///////////// cart_terrain_field_name /////////////////
 //

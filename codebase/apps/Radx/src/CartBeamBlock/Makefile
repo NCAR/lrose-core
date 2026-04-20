@@ -60,7 +60,8 @@ HDRS = \
 	DemProvider.hh \
 	CartBeamBlock.hh \
 	Parms.hh \
-	RainFields.hh
+	RainFields.hh \
+	SrtmTile.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
@@ -68,7 +69,8 @@ CPPC_SRCS = \
 	DemProvider.cc \
 	CartBeamBlock.cc \
 	Main.cc \
-	RainFields.cc
+	RainFields.cc \
+	SrtmTile.cc
 
 #
 # tdrp macros

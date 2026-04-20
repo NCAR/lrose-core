@@ -2422,9 +2422,25 @@ namespace ancilla {
    *
    * The array is always normalized so that the total power in the array sums to 1.
    */
+  // Start with the intrinsic 2D antenna power pattern in angular space,
+  // with rows spanning elevation offset and columns spanning azimuth offset.
+  //
+  // Then, if convolve_dwell_in_az is true, convolve that pattern in the horizontal
+  // (azimuth) direction with a rectangular window representing the finite
+  // azimuthal sweep arc over which the radar sample is accumulated.
+  //
+  // NOTE:
+  //   - dwell_width here is an angular width in azimuth, not a range-gate depth.
+  //   - this broadens the effective horizontal response of the beam.
+  //   - this refinement is mainly applicable when the antenna is moving in
+  //     azimuth during sampling (e.g. PPI). It is less appropriate for RHI,
+  //     staring modes, or electronically steered antennas.
+  
   class beam_power_cross_section
   {
+
   public:
+    
     /**
      * \param beam    Model for the beam power
      * \param rows    Number of samples along beam vertically (rows in array)
@@ -2432,14 +2448,14 @@ namespace ancilla {
      * \param height  Angular height of the array (6 = +/-3 from beam center)
      * \param width   Angular width of the array (6 = +/-3 from beam center)
      */
-    beam_power_cross_section(
-          const beam_power& beam
-        , angle gate_width
-        , size_t rows
-        , size_t cols
-        , angle height = 6.0_deg
-        , angle width = 6.0_deg
-        );
+    
+    beam_power_cross_section(const beam_power& beam,
+                             size_t rows,
+                             size_t cols,
+                             angle height = 6.0_deg,
+                             angle width = 6.0_deg,
+                             bool convolve_dwell_in_az = false,
+                             angle dwell_width = 1.0_deg);
 
     /// Get the number of rows (elevation offsets) in array
     auto rows() const -> size_t                       { return data_.rows(); }

@@ -101,7 +101,12 @@ private:
 
   // digital terrain height data
 
-  DemProvider _dem;
+  DemProvider *_dem;
+  
+  TaArray2D<int16_t> _htArray;
+  size_t _htNx, _htNy;
+  double _htDx, _htDy;
+  double _htMinx, _htMiny;
 
   // output file
 
@@ -112,20 +117,26 @@ private:
   int _readDem(const string &path);
 
   int _computeBlockage();
-  double _computeExtinction(double elDeg,
-                            double azDeg,
-                            double zKm,
-                            double gndRangeKm,
-                            const BeamHeight &beamHt,
-                            const rainfields::ancilla::beam_power &powerModel,
-                            const rainfields::ancilla::beam_power_cross_section &csec);
+
+  double _computeCartPtExtinction(double elDeg,
+                                  double azDeg,
+                                  double zKm,
+                                  double gndRangeKm,
+                                  const BeamHeight &beamHt,
+                                  const rainfields::ancilla::beam_power &powerModel,
+                                  const rainfields::ancilla::beam_power_cross_section &csec);
 
   int _createTerrainGrid(double minLat, double minLon,
                          double maxLat, double maxLon);
+  int _computeHtArray(double minLat, double minLon,
+                      double maxLat, double maxLon);
   void _setTerrainMdvMasterHeader(Mdvx &mdv);
   int _addTerrainMdvField(Mdvx &mdv,
                           double minLat, double minLon,
                           double maxLat, double maxLon);
+  int _addTerrainMdvField2(Mdvx &mdv,
+                           double minLat, double minLon,
+                           double maxLat, double maxLon);
   
 };
 
@@ -194,10 +205,10 @@ public:
 protected:
 private:
 
-  Parms _params;                /**< Alg parameters */
-  VolHandler _vol;              /**< Handles creation and writing of Radx*/
-  DigitalElevationHandler _dem; /**< handles reading and use of digital
-				 * elevation data */
+  Parms _params;                  /**< Alg parameters */
+  VolHandler _vol;                /**< Handles creation and writing of Radx*/
+  DigitalElevationHandler *_dem;  /**< handles reading and use of digital
+				  * elevation data */
 
   int64_t _nGatesBlocked;
 

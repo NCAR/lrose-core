@@ -750,16 +750,16 @@
     tt->single_val.i = 31;
     tt++;
     
-    // Parameter 'range_sampling_m'
+    // Parameter 'ht_res_m'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("range_sampling_m");
-    tt->descr = tdrpStrDup("Range resolution for blockage sampling computations (m)");
+    tt->param_name = tdrpStrDup("ht_res_m");
+    tt->descr = tdrpStrDup("Range resolution for height and blockage sampling computations (m)");
     tt->help = tdrpStrDup("We sample the beam at this range resolution, and accumulate the extinction in range.");
-    tt->val_offset = (char *) &range_sampling_m - &_start_;
-    tt->single_val.d = 20;
+    tt->val_offset = (char *) &ht_res_m - &_start_;
+    tt->single_val.d = 100;
     tt++;
     
     // Parameter 'Comment 6'
@@ -1176,15 +1176,15 @@
     tt->single_val.s = tdrpStrDup("cart_terrain");
     tt++;
     
-    // Parameter 'cart_terrain_grid_res'
+    // Parameter 'cart_terrain_grid_res_deg'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("cart_terrain_grid_res");
+    tt->param_name = tdrpStrDup("cart_terrain_grid_res_deg");
     tt->descr = tdrpStrDup("Grid resolution for terrain grid (deg).");
     tt->help = tdrpStrDup("The grid extent will be determined by the radar coverage.");
-    tt->val_offset = (char *) &cart_terrain_grid_res - &_start_;
+    tt->val_offset = (char *) &cart_terrain_grid_res_deg - &_start_;
     tt->single_val.d = 0.005;
     tt++;
     

@@ -26,6 +26,7 @@
  */
 #include "DemProvider.hh"
 #include <toolsa/LogMsg.hh>
+#include <toolsa/mem.h>
 using namespace rainfields;
 using namespace rainfields::ancilla;
 
@@ -34,11 +35,39 @@ using namespace rainfields::ancilla;
 DemProvider::DemProvider(const Params &params) :
         _params(params)
 {
+
+  cerr << "aaaaaaaaaaaaaaaaaa dem_path: " << _params.dem_path << endl;
+  
+  // allocate pointers to tiles
+  
+  _tiles = (SrtmTile ***) umalloc2(nLat, nLon, sizeof(SrtmTile *));
+  for (int ilat = 0; ilat < nLat; ilat++) {
+    for (int ilon = 0; ilon < nLon; ilon++) {
+      double centerLat = ilat + 0.5 - 90.0;
+      double centerLon = ilon + 0.5 - 180.0;
+      _tiles[ilat][ilon] = new SrtmTile(_params.dem_path,
+                                        centerLat, centerLon,
+                                        _params.debug);
+    }
+  }
+  
 }
 
 //----------------------------------------------------------------
 DemProvider::~DemProvider(void)
 {
+
+  // free up tiles
+  
+  if (_tiles != NULL) {
+    for (int ilat = 0; ilat < nLat; ilat++) {
+      for (int ilon = 0; ilon < nLon; ilon++) {
+        delete _tiles[ilat][ilon];
+      }
+    }
+    ufree2((void **) _tiles);
+  }
+  
 }
 
 //----------------------------------------------------------------
@@ -50,7 +79,7 @@ bool DemProvider::set(const std::pair<double,double> &sw,
   switch (_params.dem_data_format)
   {
     case Params::SHUTTLE_RADAR_TOPOGRAPHY:
-      _dem.reset(new digital_elevation_srtm3(_params.debug,
+      _dem.reset(new digital_elevation_srtm3(_params.debug >= Params::DEBUG_VERBOSE,
                                              _params.dem_path));
       break;
     case Params::ESRI_I65:
@@ -238,4 +267,133 @@ string DemProvider::ModelName(Params::DigitalElevationModel_t t)
   return name;
 
 }
+
+//////////////////////////////////////////////////////////
+// get terrain ht and water flag for a point
+// returns 0 on success, -1 on failure
+// sets terrainHtM and isWater args
+
+int DemProvider::getHt(double lat, double lon, int16_t &terrainHtM)
+  
+{
+
+  // condition the longitude and latitude
+  
+  if (lon > 180.0) {
+    lon -= 360.0;
+  }
+  
+  // compute tile indices
+  
+  int ilat = (int) (lat - -90.0);
+  int ilon = (int) (lon - -180.0);
+
+  if (ilat < 0) ilat = 0;
+  if (ilat > nLat - 1) ilat = nLat - 1;
+  if (ilon < 0) ilon = 0;
+  if (ilon > nLon - 1) ilon = nLon - 1;
+  
+  if (_tiles[ilat][ilon]->getHt(lat, lon, terrainHtM)) {
+    cerr << "ERROR - DemProvider::getHt()" << endl;
+    cerr << "  Cannot get height for lat, lon: " << lat << ", " << lon << endl;
+    cerr << "  Tile indices: ilat, ilon: " << ilat << ", " << ilon << endl;
+    return -1;
+  }
+  
+  // save location of latest request
+
+  _latestLat = lat;
+  _latestLon = lon;
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Got ht request: lat, lon: " << lat << ", " << lon << endl;
+    cerr << "Got ht request: htM: " << terrainHtM << endl;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////////
+// update cache of 1 tile around the latest access point
+// to prepare for upcoming reads
+
+void DemProvider::_updateCache()
+
+{
+
+  if (_latestLat == -9999.0 || _latestLon == -9999.0) {
+    // no activity yet
+    return;
+  }
+
+  _readForCache(_latestLat + 1.0, _latestLon - 1.0);
+  _readForCache(_latestLat + 1.0, _latestLon);
+  _readForCache(_latestLat + 1.0, _latestLon + 1.0);
+
+  _readForCache(_latestLat, _latestLon - 1.0);
+  _readForCache(_latestLat, _latestLon + 1.0);
+
+  _readForCache(_latestLat - 1.0, _latestLon - 1.0);
+  _readForCache(_latestLat - 1.0, _latestLon);
+  _readForCache(_latestLat - 1.0, _latestLon + 1.0);
+  
+}
+
+//////////////////////////////////////////////////////////
+// read in a tile for the cache
+// returns 0 on success, -1 on failure
+
+int DemProvider::_readForCache(double lat, double lon)
+
+{
+
+  // compute tile indices
+
+  int ilat = (int) (lat - -90.0);
+  int ilon = (int) (lon - -180.0);
+
+  // check for out of bounds
+
+  if (ilat < 0) return 0;
+  if (ilat > nLat - 1) return 0;
+  if (ilon < 0) return 0;;
+  if (ilon > nLon - 1) return 0;
+
+  // read tile for cache
+
+  if (_tiles[ilat][ilon]->readForCache()) {
+    cerr << "ERROR - DemProvider::getHt()" << endl;
+    cerr << "  Cannot read for cache, lat, lon: " << lat << ", " << lon << endl;
+    cerr << "  Tile indices: ilat, ilon: " << ilat << ", " << ilon << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////////
+// free up tile memory that has not been used recently
+
+void DemProvider::_freeTileMemory()
+
+{
+
+  time_t now = time(NULL);
+
+  for (int ilat = 0; ilat < nLat; ilat++) {
+    for (int ilon = 0; ilon < nLon; ilon++) {
+      time_t ltime = _tiles[ilat][ilon]->getLatestAccessTime();
+      if (ltime > 0) {
+        double secsSinceLastAccess = (double) now - (double) ltime;
+        if (secsSinceLastAccess > 1800) {
+          _tiles[ilat][ilon]->freeHtArray();
+        }
+      } // if (ltime > 0)
+    } // ilon
+  } // ilat
+
+}
+
 
