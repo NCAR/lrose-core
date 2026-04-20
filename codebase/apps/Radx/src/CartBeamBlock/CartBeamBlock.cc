@@ -643,16 +643,8 @@ int CartBeamBlock::_createTerrainGrid(double minLat, double minLon,
     cerr << "Wrote terrain NetCDF file: " << _outMdvx.getPathInUse() << endl;
   }
 
-  return 0;
-
   // set up internal cart grid for terrain
 
-  // if (_computeHtArray(minLat, minLon, maxLat, maxLon)) {
-  //   cerr << "ERROR - _createTerrainGrid" << endl;
-  //   cerr << "Cannot compute ht array using threads" << endl;
-  //   return -1;
-  // }
-  
   double minX, minY, maxX, maxY;
   _proj.latlon2xy(minLat, minLon, minX, minY);
   _proj.latlon2xy(maxLat, maxLon, maxX, maxY);
@@ -665,136 +657,25 @@ int CartBeamBlock::_createTerrainGrid(double minLat, double minLon,
   _htNy = floor((maxY - minY) / _htDy) + 1;
   _htArray.alloc(_htNy, _htNx);
 
-  cerr << "111111111111111111111111111111111111" << endl;
-  cerr << "2222222222222 _htNy, _htNx: " << _htNy << ", " << _htNx << endl;
-  size_t count = 0;
+  int count = 0;
   for (int iy = 0; iy < (int) _htNy; iy++) {
-    for (int ix = 0; ix < (int) _htNx; ix++, count++) {
+    double yy = _htMiny + iy * _htDy;
+    for (int ix = 0; ix < (int) _htNx; ix++) {
+      double xx = _htMinx + ix * _htDx;
       double latDeg, lonDeg;
-      _proj.xyIndex2latlon(ix, iy, latDeg, lonDeg);
-      rainfields::angle alat, alon;
-      alat.set_degrees(latDeg);
-      alon.set_degrees(lonDeg);
-      rainfields::latlon loc(alat, alon);
-      fl32 ht = _dem->getElevation(loc);
+      _proj.xy2latlon(xx, yy, latDeg, lonDeg);
       int16_t htM;
       if (_dem->getHt(latDeg, lonDeg, htM)) {
         _htArray[iy][ix] = 0;
       } else {
         _htArray[iy][ix] = htM;
       }
-      if (count % 10000 == 0) {
-        cerr << "33333333333 count, iy, ix, ht, array: " << count << ", " << iy << ", " << ix << ", " << ht << ", " << _htArray[iy][ix] << endl;
-      }
+      count++;
     }
   }
 
-  cerr << "2222222222222222222222222222222222222" << endl;
-
   return 0;
 
-}
-
-int CartBeamBlock::_computeHtArray(double minLat, double minLon,
-                                   double maxLat, double maxLon)
-{
-
-  double minX, minY, maxX, maxY;
-  _proj.latlon2xy(minLat, minLon, minX, minY);
-  _proj.latlon2xy(maxLat, maxLon, maxX, maxY);
-
-  _htDx = _params.ht_res_m / 1000.0;
-  _htDy = _params.ht_res_m / 1000.0;
-  _htMinx = minX;
-  _htMiny = minY;
-  _htNx = floor((maxX - minX) / _htDx) + 1;
-  _htNy = floor((maxY - minY) / _htDy) + 1;
-  _htArray.alloc(_htNy, _htNx);
-
-  // Choose a sensible thread count
-
-  unsigned int nThreads = std::thread::hardware_concurrency();
-  cerr << "5555555555555555555 nThreads: " << nThreads << endl;
-  if (nThreads == 0) {
-    nThreads = 4;
-  }
-  if (nThreads > _htNy) {
-    nThreads = static_cast<unsigned int>(_htNy);
-  }
-  if (nThreads == 0) {
-    nThreads = 1;
-  }
-
-  auto worker = [this](size_t iyStart, size_t iyEnd) {
-
-    DemProvider dem(_params);
-    
-    cerr << "111111111111111111 iyStart, iyEnd: " << iyStart << ", " << iyEnd << endl;
-
-    int count = 0;
-    for (size_t iy = iyStart; iy < iyEnd; ++iy) {
-
-      cerr << "333333333333333333 count, iy: " << count << ", " << iy << endl;
-      
-      int16_t *row = _htArray[iy];
-
-      for (size_t ix = 0; ix < _htNx; ++ix, count++) {
-
-        double latDeg, lonDeg;
-        _proj.xyIndex2latlon(static_cast<int>(ix), static_cast<int>(iy),
-                             latDeg, lonDeg);
-
-        rainfields::angle alat, alon;
-        alat.set_degrees(latDeg);
-        alon.set_degrees(lonDeg);
-        rainfields::latlon loc(alat, alon);
-
-        fl32 ht = dem.getElevation(loc);
-        // fl32 ht = 0.0;
-
-        if (std::isfinite(ht)) {
-          row[ix] = static_cast<int16_t>(std::floor(ht + 0.5));
-        } else {
-          row[ix] = 0;
-        }
-
-        if (count % 10000 == 0) {
-          cerr << "2222222222222 count, iy: " << count << ", " << iy << endl;
-        }
-
-      } // ix
-
-    } // iy
-
-  };
-
-  cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
-  
-  std::vector<std::thread> threads;
-  threads.reserve(nThreads);
-
-  size_t rowsPerThread = _htNy / nThreads;
-  size_t extra = _htNy % nThreads;
-  size_t iyStart = 0;
-
-  cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" << endl;
-  
-  for (unsigned int ii = 0; ii < nThreads; ++ii) {
-    size_t thisCount = rowsPerThread + (ii < extra ? 1 : 0);
-    size_t iyEnd = iyStart + thisCount;
-    threads.emplace_back(worker, iyStart, iyEnd);
-    iyStart = iyEnd;
-  }
-
-  cerr << "cccccccccccccccccccccccccccccc" << endl;
-  
-  for (auto &tt : threads) {
-    tt.join();
-  }
-
-  cerr << "dddddddddddddddddddddddddddddddd" << endl;
-  
-  return 0;
 }
 
 //////////////////////////////////////////////
@@ -956,7 +837,6 @@ int CartBeamBlock::_addTerrainMdvField2(Mdvx &mdv,
 
   fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
   fhdr.data_element_nbytes = 4;
-  fhdr.volume_size = fhdr.nx * fhdr.ny * 1 * sizeof(fl32);
   fhdr.compression_type = Mdvx::COMPRESSION_NONE;
   fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
   fhdr.scaling_type = Mdvx::SCALING_NONE;
@@ -975,6 +855,20 @@ int CartBeamBlock::_addTerrainMdvField2(Mdvx &mdv,
   fhdr.min_value_orig_vol = 0;
   fhdr.max_value_orig_vol = 0;
 
+  double llx = fhdr.grid_minx - fhdr.grid_dx / 2.0;
+  double lly = fhdr.grid_miny - fhdr.grid_dy / 2.0;
+
+  fhdr.grid_dx /= 10.0;
+  fhdr.grid_dy /= 10.0;
+
+  fhdr.nx *= 10;
+  fhdr.ny *= 10;
+
+  fhdr.grid_minx = llx + fhdr.grid_dx / 2.0;
+  fhdr.grid_miny = lly + fhdr.grid_dy / 2.0;
+  
+  fhdr.volume_size = fhdr.nx * fhdr.ny * 1 * sizeof(fl32);
+
   // vlevel header
   
   Mdvx::vlevel_header_t vhdr;
@@ -988,9 +882,11 @@ int CartBeamBlock::_addTerrainMdvField2(Mdvx &mdv,
   height.resize(fhdr.nx * fhdr.ny, missingFl32);
   int ii = 0;
   for (int iy = 0; iy < fhdr.ny; iy++) {
+    double yy = fhdr.grid_miny + iy * fhdr.grid_dy;
     for (int ix = 0; ix < fhdr.nx; ix++, ii++) {
+      double xx = fhdr.grid_minx + ix * fhdr.grid_dx;
       double latDeg, lonDeg;
-      _proj.xyIndex2latlon(ix, iy, latDeg, lonDeg);
+      _proj.xy2latlon(xx, yy, latDeg, lonDeg);
       int16_t htM;
       if (_dem->getHt(latDeg, lonDeg, htM)) {
         height[ii] = 0;
