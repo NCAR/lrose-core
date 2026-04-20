@@ -50,20 +50,20 @@
 //=======================================================================
 
 BeamPowerPattern::BeamPowerPattern()
-  : _nPatternEl(31),
-    _nPatternAz(31),
-    _beamWidthAz(euclid::EuclidAngle::fromDegrees(1.0)),
-    _beamWidthEl(euclid::EuclidAngle::fromDegrees(1.0)),
-    _patternHeight(euclid::EuclidAngle::fromDegrees(3.0)),
-    _patternWidth(euclid::EuclidAngle::fromDegrees(3.0)),
-    _fourLnTwo(4.0 * std::log(2.0)),
-    _invBeamWidthAzSq(1.0),
-    _invBeamWidthElSq(1.0)
+        : _beamWidthEl(euclid::EuclidAngle::fromDegrees(1.0)),
+          _beamWidthAz(euclid::EuclidAngle::fromDegrees(1.0)),
+          _nEl(31),
+          _nAz(31),
+          _patternHeight(euclid::EuclidAngle::fromDegrees(3.0)),
+          _patternWidth(euclid::EuclidAngle::fromDegrees(3.0)),
+          _fourLnTwo(4.0 * std::log(2.0)),
+          _invBeamWidthAzSq(1.0),
+          _invBeamWidthElSq(1.0)
 {
 }
 
-BeamPowerPattern::BeamPowerPattern(const euclid::EuclidAngle &beamWidthAz,
-                                   const euclid::EuclidAngle &beamWidthEl,
+BeamPowerPattern::BeamPowerPattern(const euclid::EuclidAngle &beamWidthEl,
+                                   const euclid::EuclidAngle &beamWidthAz,
                                    size_t nPatternEl,
                                    size_t nPatternAz,
                                    const euclid::EuclidAngle &patternHeight,
@@ -72,7 +72,7 @@ BeamPowerPattern::BeamPowerPattern(const euclid::EuclidAngle &beamWidthAz,
                                    const euclid::EuclidAngle &dwellWidth)
   : BeamPowerPattern()
 {
-  set(beamWidthAz, beamWidthEl,
+  set(beamWidthEl, beamWidthAz,
       nPatternEl, nPatternAz,
       patternHeight, patternWidth,
       convolveDwellInAz, dwellWidth);
@@ -86,8 +86,8 @@ BeamPowerPattern::~BeamPowerPattern()
 // Public methods
 //=======================================================================
 
-void BeamPowerPattern::set(const euclid::EuclidAngle &beamWidthAz,
-                           const euclid::EuclidAngle &beamWidthEl,
+void BeamPowerPattern::set(const euclid::EuclidAngle &beamWidthEl,
+                           const euclid::EuclidAngle &beamWidthAz,
                            size_t nPatternEl,
                            size_t nPatternAz,
                            const euclid::EuclidAngle &patternHeight,
@@ -95,10 +95,11 @@ void BeamPowerPattern::set(const euclid::EuclidAngle &beamWidthAz,
                            bool convolveDwellInAz,
                            const euclid::EuclidAngle &dwellWidth)
 {
+
   if (nPatternEl < 1 || nPatternAz < 1) {
     throw std::runtime_error("BeamPowerPattern::set: invalid array dimensions");
   }
-
+  
   if (!beamWidthAz.isFinite() || !beamWidthEl.isFinite() ||
       !patternHeight.isFinite() || !patternWidth.isFinite() ||
       !dwellWidth.isFinite()) {
@@ -113,22 +114,22 @@ void BeamPowerPattern::set(const euclid::EuclidAngle &beamWidthAz,
     throw std::runtime_error("BeamPowerPattern::set: pattern extents must be positive");
   }
 
-  _nPatternEl = nPatternEl;
-  _nPatternAz = nPatternAz;
+  _nEl = nPatternEl;
+  _nAz = nPatternAz;
 
   _beamWidthAz = beamWidthAz;
   _beamWidthEl = beamWidthEl;
 
   _patternHeight = patternHeight;
   _patternWidth = patternWidth;
-
-  _elevationOffsets.resize(_nPatternEl);
-  _azimuthOffsets.resize(_nPatternAz);
-  _power.resize(_nPatternEl * _nPatternAz);
+  
+  _elevationOffsets.resize(_nEl);
+  _azimuthOffsets.resize(_nAz);
+  _power.resize(_nEl * _nAz);
 
   _fourLnTwo = 4.0 * std::log(2.0);
-  _invBeamWidthAzSq = 1.0 / (_beamWidthAz.radians() * _beamWidthAz.radians());
   _invBeamWidthElSq = 1.0 / (_beamWidthEl.radians() * _beamWidthEl.radians());
+  _invBeamWidthAzSq = 1.0 / (_beamWidthAz.radians() * _beamWidthAz.radians());
 
   _computeOffsets();
   _computeIntrinsicPattern();
@@ -146,8 +147,8 @@ void BeamPowerPattern::makeVerticalIntegration()
     return;
   }
 
-  for (size_t iel = 1; iel < _nPatternEl; ++iel) {
-    for (size_t iaz = 0; iaz < _nPatternAz; ++iaz) {
+  for (size_t iel = 1; iel < _nEl; ++iel) {
+    for (size_t iaz = 0; iaz < _nAz; ++iaz) {
       _power[_index(iel, iaz)] += _power[_index(iel - 1, iaz)];
     }
   }
@@ -155,8 +156,8 @@ void BeamPowerPattern::makeVerticalIntegration()
 
 void BeamPowerPattern::clear()
 {
-  _nPatternEl = 0;
-  _nPatternAz = 0;
+  _nEl = 0;
+  _nAz = 0;
   _elevationOffsets.clear();
   _azimuthOffsets.clear();
   _power.clear();
@@ -166,8 +167,8 @@ std::string BeamPowerPattern::getSummary() const
 {
   std::ostringstream out;
   out << "BeamPowerPattern:"
-      << " nPatternEl=" << _nPatternEl
-      << " nPatternAz=" << _nPatternAz
+      << " nEl=" << _nEl
+      << " nAz=" << _nAz
       << " beamWidthAzDeg=" << _beamWidthAz.degrees()
       << " beamWidthElDeg=" << _beamWidthEl.degrees()
       << " patternHeightDeg=" << _patternHeight.degrees()
@@ -184,11 +185,11 @@ void BeamPowerPattern::_computeOffsets()
   // Compute elevation offsets for row centers.
   // Rows span the requested total angular height, centered on zero.
 
-  const double rowOffset0 = 0.5 * (1.0 - static_cast<double>(_nPatternEl));
+  const double rowOffset0 = 0.5 * (1.0 - static_cast<double>(_nEl));
   const euclid::EuclidAngle deltaEl =
-    _patternHeight / static_cast<double>(_nPatternEl);
+    _patternHeight / static_cast<double>(_nEl);
 
-  for (size_t iel = 0; iel < _nPatternEl; ++iel) {
+  for (size_t iel = 0; iel < _nEl; ++iel) {
     _elevationOffsets[iel] =
       (rowOffset0 + static_cast<double>(iel)) * deltaEl;
   }
@@ -196,40 +197,41 @@ void BeamPowerPattern::_computeOffsets()
   // Compute azimuth offsets for column centers.
   // Columns span the requested total angular width, centered on zero.
 
-  const double colOffset0 = 0.5 * (1.0 - static_cast<double>(_nPatternAz));
+  const double colOffset0 = 0.5 * (1.0 - static_cast<double>(_nAz));
   const euclid::EuclidAngle deltaAz =
-    _patternWidth / static_cast<double>(_nPatternAz);
+    _patternWidth / static_cast<double>(_nAz);
 
-  for (size_t iaz = 0; iaz < _nPatternAz; ++iaz) {
+  for (size_t iaz = 0; iaz < _nAz; ++iaz) {
     _azimuthOffsets[iaz] =
       (colOffset0 + static_cast<double>(iaz)) * deltaAz;
   }
 }
 
 double BeamPowerPattern::_computeIntrinsicPower(
-    const euclid::EuclidAngle &azOffset,
-    const euclid::EuclidAngle &elOffset) const
+        const euclid::EuclidAngle &elOffset,
+        const euclid::EuclidAngle &azOffset) const
 {
   // Gaussian beam model for a parabolic dish.
   //
   // beamWidthAz and beamWidthEl are the 3 dB beam widths. Therefore
   // at half a beamwidth from center the power drops to 0.5.
 
-  const double azRad = azOffset.radians();
   const double elRad = elOffset.radians();
+  const double azRad = azOffset.radians();
 
   const double exponent =
     -_fourLnTwo *
     (azRad * azRad * _invBeamWidthAzSq +
      elRad * elRad * _invBeamWidthElSq);
-
+  
   return std::exp(exponent);
+
 }
 
 void BeamPowerPattern::_computeIntrinsicPattern()
 {
-  for (size_t iel = 0; iel < _nPatternEl; ++iel) {
-    for (size_t iaz = 0; iaz < _nPatternAz; ++iaz) {
+  for (size_t iel = 0; iel < _nEl; ++iel) {
+    for (size_t iaz = 0; iaz < _nAz; ++iaz) {
       _power[_index(iel, iaz)] =
         _computeIntrinsicPower(_azimuthOffsets[iaz],
                                _elevationOffsets[iel]);
@@ -251,12 +253,12 @@ void BeamPowerPattern::_convolveDwellInAz(
     return;
   }
 
-  if (_nPatternAz < 2) {
+  if (_nAz < 2) {
     return;
   }
 
   const euclid::EuclidAngle deltaAz =
-    _patternWidth / static_cast<double>(_nPatternAz);
+    _patternWidth / static_cast<double>(_nAz);
 
   const int start =
     static_cast<int>(std::lround(
@@ -272,10 +274,10 @@ void BeamPowerPattern::_convolveDwellInAz(
   for (int ishift = start; ishift < end; ++ishift) {
 
     const size_t srcX0 = (ishift < 0) ? static_cast<size_t>(-ishift) : 0;
-    const size_t srcX1 = (ishift > 0) ? (_nPatternAz - static_cast<size_t>(ishift))
-                                      : _nPatternAz;
+    const size_t srcX1 = (ishift > 0) ? (_nAz - static_cast<size_t>(ishift))
+                                      : _nAz;
 
-    for (size_t iel = 0; iel < _nPatternEl; ++iel) {
+    for (size_t iel = 0; iel < _nEl; ++iel) {
       for (size_t iaz = srcX0; iaz < srcX1; ++iaz) {
         const size_t dstCol =
           static_cast<size_t>(static_cast<int>(iaz) + ishift);

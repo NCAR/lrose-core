@@ -61,6 +61,7 @@ const fl32 CartBeamBlock::missingFl32 = -9999.0;
 
 CartBeamBlock::CartBeamBlock(int argc, char **argv) :
         _dem(nullptr),
+        _pattern(nullptr),
         _calc(nullptr)
   
 {
@@ -95,6 +96,7 @@ CartBeamBlock::CartBeamBlock(int argc, char **argv) :
   // create computational objects
   
   _dem = new DemProvider(_params);
+  _pattern = new BeamPowerPattern;
   _calc = new BlockageCalc(_params, *_dem);
 
 }
@@ -106,6 +108,7 @@ CartBeamBlock::~CartBeamBlock()
 {
 
   delete _dem;
+  delete _pattern;
   delete _calc;
   
 }
@@ -273,6 +276,17 @@ int CartBeamBlock::_readTemplateFile(const string &path)
   } // if (mdvxRadar.loadFromMdvx(_templateMdvx) == 0 ....
 
   // _origin.set(angle(_radarLat, true), angle(_radarLon, true), _radarHtKm);
+
+  // set the beam pattern object
+
+  _pattern->set(euclid::EuclidAngle::fromDegrees(_vertBeamWidthDeg),
+                euclid::EuclidAngle::fromDegrees(_horizBeamWidthDeg),
+                _params.n_pattern_vert,
+                _params.n_pattern_horiz,
+                euclid::EuclidAngle::fromDegrees(_vertBeamWidthDeg * 3.0),
+                euclid::EuclidAngle::fromDegrees(_horizBeamWidthDeg * 3.0));
+
+  _pattern->makeVerticalIntegration();
   
   return 0;
   
@@ -294,7 +308,7 @@ int CartBeamBlock::_readDem(const string &path)
     cerr << "INFO: reading DEM from path: " << path << endl;
     cerr << "      DEM model: " << _dem->ModelName(_params.dem_data_format) << endl;
   }
-    
+  
   // compute safe projection lat/lon limits, with a margin of 5 grid points
   
   double minLat, minLon, maxLat, maxLon;
@@ -334,33 +348,32 @@ int CartBeamBlock::_computeBlockage()
 
   // initialize BeamHeight computations
   
-  BeamHeight beamHt;
-  beamHt.setInstrumentHtKm(_sensorHtKm);
+  _beamHt.setInstrumentHtKm(_sensorHtKm);
   if (_params.override_standard_pseudo_earth_radius) {
-    beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
+    _beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
   }
 
   // initialize beam power model
 
-  angle height, width;
-  height.set_degrees(_vertBeamWidthDeg);
-  width.set_degrees(_horizBeamWidthDeg);
-  beam_power powerModel(width, height);
+  // angle height, width;
+  // height.set_degrees(_vertBeamWidthDeg);
+  // width.set_degrees(_horizBeamWidthDeg);
+  // beam_power powerModel(width, height);
 
   // compute beam cross section data
   // do not convolve in azimuth
   // integrate power in the vertical
 
-  angle csectionHeight(_vertBeamWidthDeg * 3.0, true);
-  angle csectionWidth(_horizBeamWidthDeg * 3.0, true);
+  // angle csectionHeight(_vertBeamWidthDeg * 3.0, true);
+  // angle csectionWidth(_horizBeamWidthDeg * 3.0, true);
   
-  beam_power_cross_section csec
-    (powerModel,
-     static_cast<size_t>(_params.num_vert_subsamples),
-     static_cast<size_t>(_params.num_horiz_subsamples),
-     csectionHeight, csectionWidth, false);
+  // beam_power_cross_section csec
+  //   (powerModel,
+  //    static_cast<size_t>(_params.num_vert_subsamples),
+  //    static_cast<size_t>(_params.num_horiz_subsamples),
+  //    csectionHeight, csectionWidth, false);
 
-  csec.make_vertical_integration();
+  // csec.make_vertical_integration();
 
   // compute radar x and y coords in km
   
@@ -387,11 +400,11 @@ int CartBeamBlock::_computeBlockage()
 
       // get terrain height
       
-      angle alat, alon;
-      alat.set_degrees(lat);
-      alon.set_degrees(lon);
-      latlon loc(alat, alon);
-      fl32 terrainHt = _dem->getElevation(loc);
+      // angle alat, alon;
+      // alat.set_degrees(lat);
+      // alon.set_degrees(lon);
+      // latlon loc(alat, alon);
+      fl32 terrainHt = _dem->getElevation(lat, lon);
       if (!std::isfinite(terrainHt)) {
         continue;
       }
@@ -443,9 +456,9 @@ int CartBeamBlock::_computeBlockage()
 double CartBeamBlock::_computeCartPtExtinction(double elDeg,
                                                double azDeg,
                                                double zKm,
-                                               double gndRangeKm,
-                                               const BeamHeight &beamHt,
-                                               const BeamPowerPattern &pattern)
+                                               double gndRangeKm)
+                                               // const BeamHeight &beamHt,
+                                               // const BeamPowerPattern &pattern)
                                                // const beam_power &powerModel,
                                                // const beam_power_cross_section &csec)
   
@@ -479,7 +492,7 @@ double CartBeamBlock::_computeCartPtExtinction(double elDeg,
       // compute beam ht
       
       double slantRngKm = (rangeM / 1000.0) / cos(elDeg * DEG_TO_RAD);
-      double htKm = beamHt.computeHtKm(elDeg, slantRngKm);
+      double htKm = _beamHt.computeHtKm(elDeg, slantRngKm);
 
       // compute blockage
       

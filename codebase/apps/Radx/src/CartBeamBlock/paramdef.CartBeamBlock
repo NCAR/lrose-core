@@ -101,17 +101,17 @@ commentdef {
 
 paramdef int
 {
-  p_descr = "Number of subsamples in the vertical.";
+  p_descr = "Number of pattern subsamples in the vertical.";
   p_help = "We compute beam power at this number of points in a vertical slice of the beam. An uneven number gives us symmetrical sampling.";
   p_default = 31;
-} num_vert_subsamples;
+} n_pattern_vert;
 
 paramdef int
 {
-  p_descr = "Number of subsamples in the horizontal.";
+  p_descr = "Number of pattern subsamples in the horizontal.";
   p_help = "We compute beam power at this number of points in a horizontal section across the beam. An uneven number gives us symmetrical sampling.";
   p_default = 31;
-} num_horiz_subsamples;
+} n_pattern_horiz;
 
 paramdef double
 {

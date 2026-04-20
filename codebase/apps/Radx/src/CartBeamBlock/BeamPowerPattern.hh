@@ -80,10 +80,10 @@ public:
 
   BeamPowerPattern();
 
-  BeamPowerPattern(const euclid::EuclidAngle &beamWidthAz,
-                   const euclid::EuclidAngle &beamWidthEl,
-                   size_t nPatternEl,
-                   size_t nPatternAz,
+  BeamPowerPattern(const euclid::EuclidAngle &beamWidthEl,
+                   const euclid::EuclidAngle &beamWidthAz,
+                   size_t nEl,
+                   size_t nAz,
                    const euclid::EuclidAngle &patternHeight,
                    const euclid::EuclidAngle &patternWidth,
                    bool convolveDwellInAz = false,
@@ -110,10 +110,10 @@ public:
    * antenna motion during a PPI-style dwell. In many applications for
    * blockage estimation this refinement may not be necessary.
    */
-  void set(const euclid::EuclidAngle &beamWidthAz,
-           const euclid::EuclidAngle &beamWidthEl,
-           size_t nPatternEl,
-           size_t nPatternAz,
+  void set(const euclid::EuclidAngle &beamWidthEl,
+           const euclid::EuclidAngle &beamWidthAz,
+           size_t nEl,
+           size_t nAz,
            const euclid::EuclidAngle &patternHeight,
            const euclid::EuclidAngle &patternWidth,
            bool convolveDwellInAz = false,
@@ -136,16 +136,16 @@ public:
   //=======================================================================
   // Accessors
   //=======================================================================
+  
+  size_t getNEl() const { return _nEl; }
+  size_t getNAz() const { return _nAz; }
 
-  size_t getNRows() const { return _nPatternEl; }
-  size_t getNCols() const { return _nPatternAz; }
-
-  euclid::EuclidAngle getBeamWidthAz() const { return _beamWidthAz; }
   euclid::EuclidAngle getBeamWidthEl() const { return _beamWidthEl; }
-
+  euclid::EuclidAngle getBeamWidthAz() const { return _beamWidthAz; }
+  
   euclid::EuclidAngle getPatternHeight() const { return _patternHeight; }
   euclid::EuclidAngle getPatternWidth() const { return _patternWidth; }
-
+  
   const euclid::EuclidAngle &getElevationOffset(size_t iel) const
   {
     return _elevationOffsets[iel];
@@ -168,11 +168,11 @@ public:
 
   const double *getPowerData() const { return _power.data(); }
   double *getPowerData() { return _power.data(); }
-
+  
   bool isValid() const
   {
-    return (_nPatternEl > 0 && _nPatternAz > 0 &&
-            _power.size() == _nPatternEl * _nPatternAz);
+    return (_nEl > 0 && _nAz > 0 &&
+            _power.size() == _nEl * _nAz);
   }
 
   std::string getSummary() const;
@@ -185,25 +185,25 @@ private:
 
   size_t _index(size_t iel, size_t iaz) const
   {
-    return iel * _nPatternAz + iaz;
+    return iel * _nAz + iaz;
   }
 
   void _computeOffsets();
   void _computeIntrinsicPattern();
   void _convolveDwellInAz(const euclid::EuclidAngle &dwellWidth);
   void _normalize();
-  double _computeIntrinsicPower(const euclid::EuclidAngle &azOffset,
-                                const euclid::EuclidAngle &elOffset) const;
+  double _computeIntrinsicPower(const euclid::EuclidAngle &elOffset,
+                                const euclid::EuclidAngle &azOffset) const;
 
   //=======================================================================
   // Private data members
   //=======================================================================
 
-  size_t _nPatternEl;
-  size_t _nPatternAz;
-
-  euclid::EuclidAngle _beamWidthAz;
   euclid::EuclidAngle _beamWidthEl;
+  euclid::EuclidAngle _beamWidthAz;
+
+  size_t _nEl;
+  size_t _nAz;
 
   euclid::EuclidAngle _patternHeight;
   euclid::EuclidAngle _patternWidth;

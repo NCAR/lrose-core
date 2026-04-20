@@ -113,6 +113,8 @@ private:
 
   // computing blockage
 
+  BeamHeight _beamHt;
+  BeamPowerPattern *_pattern;
   BlockageCalc *_calc;
 
   // output file
@@ -128,9 +130,10 @@ private:
   double _computeCartPtExtinction(double elDeg,
                                   double azDeg,
                                   double zKm,
-                                  double gndRangeKm,
-                                  const BeamHeight &beamHt,
-                                  const BeamPowerPattern &pattern);
+                                  double gndRangeKm);
+    // ,
+    //                               const BeamHeight &beamHt,
+    //                               const BeamPowerPattern &pattern);
                                   // const rainfields::ancilla::beam_power &powerModel,
                                   // const rainfields::ancilla::beam_power_cross_section &csec);
 

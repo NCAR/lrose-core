@@ -726,27 +726,27 @@
     tt->comment_text = tdrpStrDup("We compute blockage using a micro-grid, within the radar elevation, azimuth and range geometry. This allows us to compute the effective blockage more accurately.");
     tt++;
     
-    // Parameter 'num_vert_subsamples'
+    // Parameter 'n_pattern_vert'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("num_vert_subsamples");
-    tt->descr = tdrpStrDup("Number of subsamples in the vertical.");
+    tt->param_name = tdrpStrDup("n_pattern_vert");
+    tt->descr = tdrpStrDup("Number of pattern subsamples in the vertical.");
     tt->help = tdrpStrDup("We compute beam power at this number of points in a vertical slice of the beam. An uneven number gives us symmetrical sampling.");
-    tt->val_offset = (char *) &num_vert_subsamples - &_start_;
+    tt->val_offset = (char *) &n_pattern_vert - &_start_;
     tt->single_val.i = 31;
     tt++;
     
-    // Parameter 'num_horiz_subsamples'
+    // Parameter 'n_pattern_horiz'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("num_horiz_subsamples");
-    tt->descr = tdrpStrDup("Number of subsamples in the horizontal.");
+    tt->param_name = tdrpStrDup("n_pattern_horiz");
+    tt->descr = tdrpStrDup("Number of pattern subsamples in the horizontal.");
     tt->help = tdrpStrDup("We compute beam power at this number of points in a horizontal section across the beam. An uneven number gives us symmetrical sampling.");
-    tt->val_offset = (char *) &num_horiz_subsamples - &_start_;
+    tt->val_offset = (char *) &n_pattern_horiz - &_start_;
     tt->single_val.i = 31;
     tt++;
     

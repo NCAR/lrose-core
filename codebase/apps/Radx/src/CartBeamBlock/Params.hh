@@ -433,9 +433,9 @@ public:
 
   double pseudo_earth_radius_ratio;
 
-  int num_vert_subsamples;
+  int n_pattern_vert;
 
-  int num_horiz_subsamples;
+  int n_pattern_horiz;
 
   double ht_res_m;
 
