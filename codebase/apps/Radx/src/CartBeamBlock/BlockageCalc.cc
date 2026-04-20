@@ -69,6 +69,8 @@ void BlockageCalc::initGeom(double maxRangeKm,
 
 {
 
+  // initialize values
+  
   _maxRangeKm = maxRangeKm;
   _rangeResKm = rangeResKm;
 
@@ -77,6 +79,20 @@ void BlockageCalc::initGeom(double maxRangeKm,
   _zCartKm = zCartKm;
   _nBeamPatternAz = nBeamPatternAz;
   _nBeamPatternEl = nBeamPatternEl;
+
+  // create 2D points array
+  
+  _points.clear();
+  _points.resize(_nRange);
+  for (size_t irange = 0; irange < _points.size(); irange++) {
+    vector<AzRangePoint> &azPts = _points[irange];
+    azPts.resize(_nBeamPatternAz);
+    for (size_t iaz = 0; iaz < azPts.size(); iaz++) {
+      AzRangePoint &pt = azPts[iaz];
+      pt.cartEl.resize(_zCartKm.size());
+      pt.fracBlocked.resize(_zCartKm.size());
+    } // iaz
+  } // irange
   
 }
 

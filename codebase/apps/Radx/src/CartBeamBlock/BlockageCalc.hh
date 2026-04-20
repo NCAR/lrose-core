@@ -78,7 +78,9 @@ private:
   vector<double> _zCartKm;
   int _nBeamPatternAz, _nBeamPatternEl;
 
-  class azRangePoint {
+  class AzRangePoint {
+
+  public:
     
     double lat;
     double lon;
@@ -89,6 +91,10 @@ private:
     vector<double> fracBlocked;
 
   };
+
+  // the dimensions will be [_Range][_nBeamPatternAz]
+  
+  vector< vector< AzRangePoint > > _points;
   
 };
 
