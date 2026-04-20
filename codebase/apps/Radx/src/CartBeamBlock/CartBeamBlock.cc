@@ -272,7 +272,7 @@ int CartBeamBlock::_readTemplateFile(const string &path)
 
   } // if (mdvxRadar.loadFromMdvx(_templateMdvx) == 0 ....
 
-  _origin.set(angle(_radarLat, true), angle(_radarLon, true), _radarHtKm);
+  // _origin.set(angle(_radarLat, true), angle(_radarLon, true), _radarHtKm);
   
   return 0;
   
@@ -413,12 +413,13 @@ int CartBeamBlock::_computeBlockage()
       size_t index = iy * _templateFhdr.nx + ix;
       for (int iz = 0; iz < coord.nz; iz++, index += nPtsPlane) {
         
-        double zKm = _templateVhdr.level[iz];
-        double elDeg = beamHt.computeElevationDeg(zKm, gndRangeKm);
-        
-        double extinct = _computeCartPtExtinction(elDeg, azDeg,
-                                                  zKm, gndRangeKm,
-                                                  beamHt, powerModel, csec);
+        // double zKm = _templateVhdr.level[iz];
+        // double elDeg = beamHt.computeElevationDeg(zKm, gndRangeKm);
+
+        double extinct = 0;
+        // double extinct = _computeCartPtExtinction(elDeg, azDeg,
+        //                                           zKm, gndRangeKm,
+        //                                           beamHt, powerModel, csec);
         extinction[index] = extinct;
         
         if (extinct == 0.0) {
@@ -444,8 +445,9 @@ double CartBeamBlock::_computeCartPtExtinction(double elDeg,
                                                double zKm,
                                                double gndRangeKm,
                                                const BeamHeight &beamHt,
-                                               const beam_power &powerModel,
-                                               const beam_power_cross_section &csec)
+                                               const BeamPowerPattern &pattern)
+                                               // const beam_power &powerModel,
+                                               // const beam_power_cross_section &csec)
   
 {
 
@@ -487,13 +489,13 @@ double CartBeamBlock::_computeCartPtExtinction(double elDeg,
       
       // get maximum height of DEM along ray in segment bounded by this bin
 
-      real peak_ground_range = 0.0_r;
-      real peak_altitude;
+      // real peak_ground_range = 0.0_r;
+      // real peak_altitude;
       // real progressive_loss = 0.0_r;
-      _dem->determine_dem_segment_peak(_origin, azAngle,
-                                      rangeM, rangeM + dRangeM,
-                                      peak_ground_range, peak_altitude,
-                                      1);
+      // _dem->determine_dem_segment_peak(_origin, azAngle,
+      //                                 rangeM, rangeM + dRangeM,
+      //                                 peak_ground_range, peak_altitude,
+      //                                 1);
 
     }
 

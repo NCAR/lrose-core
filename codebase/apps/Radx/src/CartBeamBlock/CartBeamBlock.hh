@@ -41,7 +41,8 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include "RainFields.hh"
+#include "BeamPowerPattern.hh"
+// #include "RainFields.hh"
 #include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxProj.hh>
 #include <rapformats/DsRadarParams.hh>
@@ -96,7 +97,7 @@ private:
   double _radarLat, _radarLon, _radarHtKm;
   double _radarWavelengthCm;
   double _horizBeamWidthDeg, _vertBeamWidthDeg;
-  rainfields::latlonalt _origin;
+  // rainfields::latlonalt _origin;
   
   MdvxProj _proj;
   double _sensorLat, _sensorLon, _sensorHtKm, _sensorHtM;
@@ -129,8 +130,9 @@ private:
                                   double zKm,
                                   double gndRangeKm,
                                   const BeamHeight &beamHt,
-                                  const rainfields::ancilla::beam_power &powerModel,
-                                  const rainfields::ancilla::beam_power_cross_section &csec);
+                                  const BeamPowerPattern &pattern);
+                                  // const rainfields::ancilla::beam_power &powerModel,
+                                  // const rainfields::ancilla::beam_power_cross_section &csec);
 
   int _createTerrainGrid(double minLat, double minLon,
                          double maxLat, double maxLon);

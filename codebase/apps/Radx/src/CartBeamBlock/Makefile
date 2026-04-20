@@ -57,6 +57,7 @@ LOC_CPPC_CFLAGS = -std=c++14
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
+	BeamPowerPattern.hh \
 	BlockageCalc.hh \
 	DemProvider.hh \
 	CartBeamBlock.hh \
@@ -67,6 +68,7 @@ HDRS = \
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
+	BeamPowerPattern.cc \
 	BlockageCalc.cc \
 	DemProvider.cc \
 	CartBeamBlock.cc \
