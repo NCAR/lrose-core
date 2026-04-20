@@ -129,24 +129,21 @@ private:
 
   int _computeBlockage();
 
-  double _computeCartPtExtinction(double elDeg,
-                                  double azDeg,
-                                  double zKm,
+  double _computeCartPtExtinction(double azDeg,
                                   double gndRangeKm);
-    // ,
-    //                               const BeamHeight &beamHt,
-    //                               const BeamPowerPattern &pattern);
-                                  // const rainfields::ancilla::beam_power &powerModel,
-                                  // const rainfields::ancilla::beam_power_cross_section &csec);
-
+  
   int _createTerrainGrid(double minLat, double minLon,
                          double maxLat, double maxLon);
+
   int _computeHtArray(double minLat, double minLon,
                       double maxLat, double maxLon);
+
   void _setTerrainMdvMasterHeader(Mdvx &mdv);
+
   int _addTerrainMdvField(Mdvx &mdv,
                           double minLat, double minLon,
                           double maxLat, double maxLon);
+
   int _addTerrainMdvField2(Mdvx &mdv,
                            double minLat, double minLon,
                            double maxLat, double maxLon);

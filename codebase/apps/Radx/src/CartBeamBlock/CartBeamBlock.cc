@@ -430,17 +430,13 @@ int CartBeamBlock::_computeBlockage()
 
       // get terrain height
       
-      // angle alat, alon;
-      // alat.set_degrees(lat);
-      // alon.set_degrees(lon);
-      // latlon loc(alat, alon);
       fl32 terrainHt = _dem->getElevation(lat, lon);
       if (!std::isfinite(terrainHt)) {
         continue;
       }
         
-      // compute range and azimuth from radar
-      
+      // compute ground range and azimuth from radar
+
       double gndRangeKm, azDeg;
       PJGLatLon2RTheta(_radarLat, _radarLon, lat, lon, &gndRangeKm, &azDeg);
       
@@ -479,22 +475,18 @@ int CartBeamBlock::_computeBlockage()
 
 }
 
-///////////////////////////////////////////////////////////
-// compute extinction for a given Cartesian point
-// represented by elev, az, height and range
+/////////////////////////////////////////////////////////////////
+// compute extinction for each level at a given Cartesian point
+// described by az and range
 
-double CartBeamBlock::_computeCartPtExtinction(double elDeg,
-                                               double azDeg,
-                                               double zKm,
+double CartBeamBlock::_computeCartPtExtinction(double azDeg,
                                                double gndRangeKm)
-                                               // const BeamHeight &beamHt,
-                                               // const BeamPowerPattern &pattern)
-                                               // const beam_power &powerModel,
-                                               // const beam_power_cross_section &csec)
   
 {
-
+  
   return 0.0;
+
+#ifdef JUNK
   
   // initialize
   
@@ -549,6 +541,8 @@ double CartBeamBlock::_computeCartPtExtinction(double elDeg,
   } // while (gndRngKm <= gndRangeKm) 
   
   return extinction;
+
+#endif
   
 }
 
