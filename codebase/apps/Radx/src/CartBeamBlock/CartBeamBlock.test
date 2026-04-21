@@ -72,7 +72,7 @@ n_compute_threads = 16;
 //
 // Type: string
 
-grid_template_path = "$(HOME)/data/pecan/mdv/radarCart/kftg/20150626/ncf_20150626_000334.nc";
+grid_template_path = "$(HOME)/data/pecan/mdv/radarCart/kftg2/20150626/ncf_20150626_000334.nc";
 
 ///////////// template_field_name /////////////////////
 //
@@ -346,7 +346,7 @@ references = "Created by LROSE app CartBeamBlock";
 //
 // Type: string
 
-output_dir = "$(HOME)/data/pecan/mdv/beamBlock/kftg";
+output_dir = "$(HOME)/data/pecan/mdv/beamBlock/kftg2";
 
 ///////////// data_set_source /////////////////////////
 //
@@ -420,7 +420,7 @@ terrain_ht_field_name = "terrain_ht";
 //
 // Type: boolean
 
-create_hi_res_terrain_grid = FALSE;
+create_hi_res_terrain_grid = TRUE;
 
 ///////////// hi_res_terrain_ht_field_name ////////////
 //

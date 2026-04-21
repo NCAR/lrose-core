@@ -45,7 +45,7 @@ DemProvider::DemProvider(const Params &params) :
       double centerLon = ilon + 0.5 - 180.0;
       _tiles[ilat][ilon] = new SrtmTile(_params.dem_path,
                                         centerLat, centerLon,
-                                        _params.debug);
+                                        _params.debug >= Params::DEBUG_VERBOSE);
     }
   }
   

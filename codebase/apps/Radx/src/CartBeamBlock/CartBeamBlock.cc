@@ -41,6 +41,8 @@
 #include "BlockageCalc.hh"
 #include <filesystem>
 #include <iostream>
+#include <atomic>
+#include <chrono>
 #include <thread>
 #include <vector>
 #include <algorithm>
@@ -427,6 +429,9 @@ int CartBeamBlock::_computeBlockage()
     nThreads = 1;
   }
 
+  size_t nPointsTotal = coord.nx * coord.ny;
+  std::atomic<size_t> nPointsDone(0);
+  
   if (_params.debug) {
     cerr << "INFO - CartBeamBlock::_computeBlockage()" << endl;
     cerr << "  nx, ny, nz: "
@@ -435,6 +440,8 @@ int CartBeamBlock::_computeBlockage()
          << coord.nz << endl;
     cerr << "  nThreads: " << nThreads << endl;
     cerr << "  maxRangeKm: " << maxRangeKm << endl;
+    cerr << "  nPointsTotal: " << nPointsTotal << endl;
+    cerr << endl;
   }
 
   // divide rows among threads in contiguous chunks
@@ -457,10 +464,13 @@ int CartBeamBlock::_computeBlockage()
     iyStart[ii] = iyBegin;
     iyEnd[ii] = iyBegin + nRows;
     iyBegin += nRows;
-    if (_params.debug) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "thread num, iyStart, iyEnd: "
            << ii << ", " << iyStart[ii] << ", " << iyEnd[ii] << ", " << endl;
     }
+  }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << endl;
   }
 
   // lamda function
@@ -485,11 +495,6 @@ int CartBeamBlock::_computeBlockage()
 
     for (int iy = iy0; iy < iy1; iy++) {
 
-      if (_params.debug) {
-        cerr << "--->> thread starting to process row, threadNum, rowNum: "
-             << threadNum << ", " << iy << endl;
-      }
-      
       for (int ix = 0; ix < coord.nx; ix++) {
         
         // get lat/lon of grid point
@@ -522,6 +527,8 @@ int CartBeamBlock::_computeBlockage()
           _blockage[index] = fractionBlocked[iz];
         }
 
+        ++nPointsDone;
+        
       } // ix
     } // iy
 
@@ -532,18 +539,60 @@ int CartBeamBlock::_computeBlockage()
   if (nThreads == 1) {
 
     computeRows(0, 0, coord.ny);
-
+    
   } else {
+
+    // launch all threads
 
     for (int ii = 0; ii < nThreads; ii++) {
       workers.emplace_back(computeRows, ii, iyStart[ii], iyEnd[ii]);
     }
+
+    // monitor progress from main thread
+
+    size_t prevPercent = 999;
+    while (nPointsDone.load() < nPointsTotal) {
+
+      size_t done = nPointsDone.load();
+      size_t percent = (done * 100) / nPointsTotal;
+
+      if (percent != prevPercent) {
+        cerr << "\rINFO - blockage computation, % complete, nPointsDone: "
+             << percent << ", " << nPointsDone << std::flush;
+        prevPercent = percent;
+      }
+      
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    }
+
+    // ensure 100% gets printed
+
+    cerr << "\rINFO - blockage computation: 100% complete" << endl;
+
+    // now join all threads
 
     for (size_t ii = 0; ii < workers.size(); ii++) {
       workers[ii].join();
     }
 
   }
+
+  // if (nThreads == 1) {
+
+  //   computeRows(0, 0, coord.ny);
+
+  // } else {
+
+  //   for (int ii = 0; ii < nThreads; ii++) {
+  //     workers.emplace_back(computeRows, ii, iyStart[ii], iyEnd[ii]);
+  //   }
+
+  //   for (size_t ii = 0; ii < workers.size(); ii++) {
+  //     workers[ii].join();
+  //   }
+
+  // }
 
   // check thread status
 
