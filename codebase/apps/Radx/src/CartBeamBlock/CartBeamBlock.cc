@@ -463,7 +463,9 @@ int CartBeamBlock::_computeBlockage()
     }
   }
 
+  // lamda function
   // worker to process a contiguous block of rows
+  // designed to allow multithreading
 
   auto computeRows = [&](int threadNum, int iy0, int iy1) {
 
@@ -561,72 +563,6 @@ int CartBeamBlock::_computeBlockage()
   return 0;
 
 }
-
-// int CartBeamBlock::_computeBlockage()
-  
-// {
-
-//   // initialize BeamHeight computations
-  
-//   _beamHt.setInstrumentHtKm(_radarHtKm);
-//   if (_params.override_standard_pseudo_earth_radius) {
-//     _beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
-//   }
-
-//   // compute radar x and y coords in km
-  
-//   double radarX, radarY;
-//   _proj.latlon2xy(_sensorLat, _sensorLon, radarX, radarY);
-  
-//   const Mdvx::coord_t &coord = _proj.getCoord();
-
-//   // array for extinction
-
-//   size_t nPtsPlane = _templateFhdr.nx * _templateFhdr.ny;
-//   _blockage.resize(nPtsPlane * _templateFhdr.nz);
-//   std::fill(_blockage.begin(), _blockage.end(), missingFl32);
-
-//   // loop through the XY grid
-  
-//   for (int iy = 0; iy < coord.ny; iy++) {
-//     for (int ix = 0; ix < coord.nx; ix++) {
-
-//       if (_params.debug >= Params::DEBUG_VERBOSE) {
-//         cerr << "INFO - computing blockage, iy, ix: " << iy << ", " << ix << endl;
-//       }
-
-//       // get lat/lon of grid point
-      
-//       double lat, lon;
-//       _proj.xyIndex2latlon(ix, iy, lat, lon);
-
-//       // compute ground range and azimuth from radar
-      
-//       double gndRangeKm, azDeg;
-//       PJGLatLon2RTheta(_radarLat, _radarLon, lat, lon, &gndRangeKm, &azDeg);
-
-//       // compute the extinction for all planes at that grid point
-
-//       vector<double> fractionBlocked;
-//       fractionBlocked.resize(_templateFhdr.nz, 0.0);
-
-//       // calculate the blockage
-
-//       _calc->getBlockage(lat, lon, gndRangeKm, azDeg, fractionBlocked);
-
-//       // copy to 3D array
-      
-//       size_t index = iy * _templateFhdr.nx + ix;
-//       for (int iz = 0; iz < coord.nz; iz++, index += nPtsPlane) {
-//         _blockage[index] = fractionBlocked[iz];
-//       } // iz
-        
-//     } // ix
-//   } // iy
-  
-//   return 0;
-
-// }
 
 //////////////////////////////////////////
 // write blockage data to MDV

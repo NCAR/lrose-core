@@ -91,6 +91,8 @@ public:
    * @param[out] peak_altitude  Altitude (meters) of peak
    * @param[in] bin_samples  Number of subsamples per bin
    */
+  // NOTE - not thread safe
+  
   void determine_dem_segment_peak(const rainfields::latlon& origin,
 				  rainfields::angle bearing,
 				  rainfields::real min_range,
@@ -106,6 +108,7 @@ public:
   // get terrain ht for a point in meters
   // returns 0 on failure
   // uses SrtmTiles method
+  // NOTE - this is thread safe
   
   int16_t getTerrainHtM(double lat, double lon) const;
 
@@ -126,7 +129,7 @@ private:
   void _set(const std::pair<double,double> &sw,
 	    const std::pair<double,double> &ne, 
 	    rainfields::ancilla::spheroid::standard which);
-
+  
   
   rainfields::ancilla::spheroid::standard
     _toSphereStandard(Params::DigitalElevationModel_t t);
@@ -136,14 +139,6 @@ private:
 
   SrtmTile ***_tiles;
 
-  // mutable double _latestLat;
-  // mutable double _latestLon;
-  
-  // void _updateCache();
-  // int _readForCache(double lat, double lon);
-
-  // void _freeTileMemory();
-  
 };
 
 #endif

@@ -97,7 +97,6 @@ private:
   double _radarLat, _radarLon, _radarHtKm;
   double _radarWavelengthCm;
   double _horizBeamWidthDeg, _vertBeamWidthDeg;
-  // rainfields::latlonalt _origin;
   
   MdvxProj _proj;
   double _sensorLat, _sensorLon, _sensorHtKm, _sensorHtM;

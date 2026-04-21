@@ -80,16 +80,11 @@ public:
   
   void freeHtArray();
 
-  // get latest access time
-
-  // time_t getLatestAccessTime() const { return _latestAccessTime; }
-  
 protected:
   
 private:
 
   TaThread::SafeMutex _localMutex;
-  // static TaThread::SafeMutex *_globalMutex;
   
   bool _debug;
 
@@ -105,8 +100,6 @@ private:
   int _llLat, _llLon;
   int _nx, _ny;
   double _dx, _dy;
-  
-  // time_t _latestAccessTime;
   
   TaArray2D<int16_t> _htArray;
   

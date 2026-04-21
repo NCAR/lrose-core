@@ -92,7 +92,7 @@ SrtmTile::SrtmTile(const string &demDir,
 SrtmTile::~SrtmTile()
 
 {
-
+  freeHtArray();
 }
 
 ////////////////////////////////////////////////
@@ -106,8 +106,6 @@ void SrtmTile::freeHtArray()
     
   TaThread::LockForScope lock(&_localMutex);
   _htArray.clear();
-  // _latestAccessTime = 0;
-
 
 }
 
@@ -152,41 +150,9 @@ int SrtmTile::getHt(double lat, double lon, int16_t &terrainHtM)
 
   terrainHtM = _htArray[dlat][dlon];
 
-  // save latest access time
-  
-  //   _latestAccessTime = time(NULL);
-
   return 0;
 
 }
-
-////////////////////////////////////////////////
-// read file to update cache
-// returns 0 on success, -1 on failure
-
-// int SrtmTile::readForCache()
-
-// {
-
-//   // read in ht array if needed
-  
-//   if (_htArray.empty()) {
-    
-//     // lock mutex - will unlock going out of scope
-    
-//     TaThread::LockForScope lock(&_localMutex);
-    
-//     if (_readFromFile()) {
-//       cerr << "ERROR - SrtmTile::readForCache" << endl;
-//       cerr << "  Cannot read ht data from file" << endl;
-//       return -1;
-//     }
-
-//   }
-
-//   return 0;
-
-// }
 
 /////////////////////////////////////////
 // read height data from the file

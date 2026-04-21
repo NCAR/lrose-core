@@ -34,6 +34,8 @@
 // Compute the blockage up to a Cartesian (x,y) grid point
 // for each of the Cartesian levels.
 //
+// We use one of these objects per compute thread.
+//
 ///////////////////////////////////////////////////////////////
 
 #include <toolsa/pjg_flat.h>
@@ -296,14 +298,11 @@ void BlockageCalc::_getMaxElIndexBlockedPlane(size_t iaz,
       int maxIndexBlocked = -1;
       if (terrainElIndex < 0) {
         maxIndexBlocked = -1;
-        // _azRangePts[iaz][irange].maxElIndexBlocked = -1;
         _blockedBelow[irange] = false;
       } else if (terrainElIndex > (int) _pattern.getNEl() - 1) {
         maxIndexBlocked = _pattern.getNEl() - 1;
-        // _azRangePts[iaz][irange].maxElIndexBlocked = _pattern.getNEl() - 1;
       } else {
         maxIndexBlocked = terrainElIndex;
-        // _azRangePts[iaz][irange].maxElIndexBlocked = terrainElIndex;
       }
 
       if (maxIndexBlocked >= 0) {

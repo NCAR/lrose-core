@@ -144,6 +144,14 @@ void BeamPowerPattern::set(const euclid::EuclidAngle &beamWidthEl,
   _normalize();
 }
 
+//////////////////////////////////////////////////////////////
+// integrate the power downwards from each row in the pattern
+//
+// After this call, power(y,x) no longer represents power at a single
+// angular cell. Instead it represents the fraction of total beam power
+// at that cell and below. This is useful for computing partial beam
+// blockage from terrain height relative to the beam.
+
 void BeamPowerPattern::makeVerticalIntegration()
 {
   if (!isValid()) {
@@ -157,6 +165,9 @@ void BeamPowerPattern::makeVerticalIntegration()
   }
 }
 
+///////////////////////////////
+// clear the object memory
+
 void BeamPowerPattern::clear()
 {
   _nEl = 0;
@@ -165,6 +176,9 @@ void BeamPowerPattern::clear()
   _azimuthOffsets.clear();
   _power.clear();
 }
+
+/////////////////////
+// get summary for printing
 
 std::string BeamPowerPattern::getSummary() const
 {
@@ -185,6 +199,7 @@ std::string BeamPowerPattern::getSummary() const
 
 void BeamPowerPattern::_computeOffsets()
 {
+
   // Compute elevation offsets for row centers.
   // Rows span the requested total angular height, centered on zero.
 
@@ -210,6 +225,9 @@ void BeamPowerPattern::_computeOffsets()
   }
 }
 
+/////////////////////////////////////////////////
+// compute the power at a specified el/az offset
+
 double BeamPowerPattern::_computeIntrinsicPower(
         const euclid::EuclidAngle &elOffset,
         const euclid::EuclidAngle &azOffset) const
@@ -231,6 +249,10 @@ double BeamPowerPattern::_computeIntrinsicPower(
 
 }
 
+/////////////////////////////////////////////////
+// compute the power pattern across the
+// 2D beam footprint
+
 void BeamPowerPattern::_computeIntrinsicPattern()
 {
   for (size_t iel = 0; iel < _nEl; ++iel) {
@@ -242,15 +264,32 @@ void BeamPowerPattern::_computeIntrinsicPattern()
   }
 }
 
+
+////////////////////////////////////////////////////////////////////
+// Convolve the intrinsic beam pattern in azimuth with a rectangular
+// kernel representing antenna motion during the dwell.
+//
+// This is a scan-acquisition refinement, not part of the intrinsic
+// beam physics. In CartBeamBlock it may often be reasonable to leave
+// this turned off.
+//
+// Convolution in azimuth only makes sense if:
+//  (a) scanning is in PPI mode
+//  (b) a rectaangular window is used
+//
+// If a spectral clutter filter is applied, as is likely for most
+// modern radars when clutter is present, then a non-rectangular window
+// is probably applied - e.g. Von Hann or Blackman. If such a window
+// is in use then convolution assuming a rectangular window is not
+// applicable. Also, the window is centered on the dwell, so it is
+// necessary in addition to know how the beams are indexed.
+//
+// For these reasons, convolution will probably cause errors
+// rather than improve accuracy.
+
 void BeamPowerPattern::_convolveDwellInAz(
     const euclid::EuclidAngle &dwellWidth)
 {
-  // Convolve the intrinsic beam pattern in azimuth with a rectangular
-  // kernel representing antenna motion during the dwell.
-  //
-  // This is a scan-acquisition refinement, not part of the intrinsic
-  // beam physics. In CartBeamBlock it may often be reasonable to leave
-  // this turned off.
 
   if (dwellWidth.radians() <= 0.0) {
     return;
@@ -290,6 +329,11 @@ void BeamPowerPattern::_convolveDwellInAz(
 
   }
 }
+
+///////////////////////////////////////////////////////////////////
+// Normalize the power across the pattern.
+// This allow us to simply add up the fractional power each location
+// to infer how much blockage we have
 
 void BeamPowerPattern::_normalize()
 {

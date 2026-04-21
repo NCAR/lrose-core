@@ -316,9 +316,6 @@ int16_t DemProvider::getTerrainHtM(double lat, double lon) const
   
   // save location of latest request
 
-  // _latestLat = lat;
-  // _latestLon = lon;
-
   if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Got ht request: lat, lon: " << lat << ", " << lon << endl;
     cerr << "Got ht request: htM: " << htM << endl;
@@ -327,87 +324,4 @@ int16_t DemProvider::getTerrainHtM(double lat, double lon) const
   return htM;
 
 }
-
-//////////////////////////////////////////////////////////
-// update cache of 1 tile around the latest access point
-// to prepare for upcoming reads
-
-// void DemProvider::_updateCache()
-
-// {
-
-//   if (_latestLat == -9999.0 || _latestLon == -9999.0) {
-//     // no activity yet
-//     return;
-//   }
-
-//   _readForCache(_latestLat + 1.0, _latestLon - 1.0);
-//   _readForCache(_latestLat + 1.0, _latestLon);
-//   _readForCache(_latestLat + 1.0, _latestLon + 1.0);
-
-//   _readForCache(_latestLat, _latestLon - 1.0);
-//   _readForCache(_latestLat, _latestLon + 1.0);
-
-//   _readForCache(_latestLat - 1.0, _latestLon - 1.0);
-//   _readForCache(_latestLat - 1.0, _latestLon);
-//   _readForCache(_latestLat - 1.0, _latestLon + 1.0);
-  
-// }
-
-//////////////////////////////////////////////////////////
-// read in a tile for the cache
-// returns 0 on success, -1 on failure
-
-// int DemProvider::_readForCache(double lat, double lon)
-
-// {
-
-//   // compute tile indices
-
-//   int ilat = (int) (lat - -90.0);
-//   int ilon = (int) (lon - -180.0);
-
-//   // check for out of bounds
-
-//   if (ilat < 0) return 0;
-//   if (ilat > nLat - 1) return 0;
-//   if (ilon < 0) return 0;;
-//   if (ilon > nLon - 1) return 0;
-
-//   // read tile for cache
-
-//   if (_tiles[ilat][ilon]->readForCache()) {
-//     cerr << "ERROR - DemProvider::getHt()" << endl;
-//     cerr << "  Cannot read for cache, lat, lon: " << lat << ", " << lon << endl;
-//     cerr << "  Tile indices: ilat, ilon: " << ilat << ", " << ilon << endl;
-//     return -1;
-//   }
-
-//   return 0;
-
-// }
-
-//////////////////////////////////////////////////////////
-// free up tile memory that has not been used recently
-
-// void DemProvider::_freeTileMemory()
-
-// {
-
-//   time_t now = time(NULL);
-
-//   for (int ilat = 0; ilat < nLat; ilat++) {
-//     for (int ilon = 0; ilon < nLon; ilon++) {
-//       time_t ltime = _tiles[ilat][ilon]->getLatestAccessTime();
-//       if (ltime > 0) {
-//         double secsSinceLastAccess = (double) now - (double) ltime;
-//         if (secsSinceLastAccess > 1800) {
-//           _tiles[ilat][ilon]->freeHtArray();
-//         }
-//       } // if (ltime > 0)
-//     } // ilon
-//   } // ilat
-
-// }
-
 
