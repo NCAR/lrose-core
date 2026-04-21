@@ -103,11 +103,11 @@ public:
   double getElevation(double lat, double lon) const;
   double getElevation(const rainfields::latlon& loc) const;
 
-  // get terrain ht for a point
-  // returns 0 on success, -1 on failure
-  // sets terrainHtM
+  // get terrain ht for a point in meters
+  // returns 0 on failure
+  // uses SrtmTiles method
   
-  int getHt(double lat, double lon, int16_t &terrainHtM);
+  int16_t getTerrainHtM(double lat, double lon) const;
 
 protected:
   
@@ -128,15 +128,16 @@ private:
 	    rainfields::ancilla::spheroid::standard which);
 
   
-  rainfields::ancilla::spheroid::standard _toSphereStandard(Params::DigitalElevationModel_t t);
+  rainfields::ancilla::spheroid::standard
+    _toSphereStandard(Params::DigitalElevationModel_t t);
   
   const static int nLat = 180;
   const static int nLon = 360;
 
   SrtmTile ***_tiles;
 
-  double _latestLat;
-  double _latestLon;
+  mutable double _latestLat;
+  mutable double _latestLon;
   
   void _updateCache();
   int _readForCache(double lat, double lon);

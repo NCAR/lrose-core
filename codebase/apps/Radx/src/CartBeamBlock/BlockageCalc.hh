@@ -41,7 +41,12 @@
 
 #include "Params.hh"
 #include <vector>
+#include <euclid/EuclidAngle.hh>
+#include <toolsa/TaArray2D.hh>
+
+class BeamHeight;
 class DemProvider;
+class BeamPowerPattern;
 
 class BlockageCalc
 {
@@ -50,7 +55,9 @@ public:
   // constructor
   
   BlockageCalc(const Params &params,
-               const DemProvider &dem);
+               BeamHeight &beamHt,
+               const DemProvider &dem,
+               const BeamPowerPattern &pattern);
   
   // destructor
   
@@ -64,19 +71,36 @@ public:
                 int nBeamPatternEl,
                 int nBeamPatternAz);
 
+  // set radar location
+
+  void setRadarLoc(double radarLatDeg, double radarLonDeg, double radarHtKm);
+  
+  // fill out the array geometry for a specified grid point
+  
+  int calcPtGeom(double lat, double lon,
+                 double gndRangeKm, double azDeg);
+  
 protected:
   
 private:
   
   const Params &_params;
+  BeamHeight &_beamHt;
   const DemProvider &_dem;
+  const BeamPowerPattern &_pattern;
 
   double _maxRangeKm;
   double _rangeResKm;
-  int _nRange;
+  size_t _nRangeAlloc;
   
+  size_t _nAz;
+  size_t _nRange;
+  
+  vector<double> _rangeKm;
   vector<double> _zCartKm;
-  int _nBeamPatternAz, _nBeamPatternEl;
+  euclid::EuclidAngle _azCenter;
+  vector<euclid::EuclidAngle> _patternAz;
+  vector<euclid::EuclidAngle> _cartEl;
 
   class AzRangePoint {
 
@@ -84,17 +108,18 @@ private:
     
     double lat;
     double lon;
-    double rangeKm;
     double terrainHtKm;
-
-    vector<double> cartEl;
-    vector<double> fracBlocked;
+    vector<double> fracBlockedAz;
 
   };
 
-  // the dimensions will be [_Range][_nBeamPatternAz]
+  // the dimensions will be [nAz][nRange]
   
-  vector< vector< AzRangePoint > > _points;
+  TaArray2D<AzRangePoint> _azRangePts;
+
+  // radar location
+
+  double _radarLatDeg, _radarLonDeg, _radarHtKm;
   
 };
 

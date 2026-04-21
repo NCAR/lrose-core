@@ -97,7 +97,7 @@ CartBeamBlock::CartBeamBlock(int argc, char **argv) :
   
   _dem = new DemProvider(_params);
   _pattern = new BeamPowerPattern;
-  _calc = new BlockageCalc(_params, *_dem);
+  _calc = new BlockageCalc(_params, _beamHt, *_dem, *_pattern);
 
 }
 
@@ -312,7 +312,7 @@ int CartBeamBlock::_readTemplateFile(const string &path)
                 _params.n_pattern_horiz,
                 euclid::EuclidAngle::fromDegrees(_vertBeamWidthDeg * 3.0),
                 euclid::EuclidAngle::fromDegrees(_horizBeamWidthDeg * 3.0));
-
+  
   _pattern->makeVerticalIntegration();
   
   // initialize blockage calculations
@@ -428,17 +428,17 @@ int CartBeamBlock::_computeBlockage()
       double lat, lon;
       _proj.xyIndex2latlon(ix, iy, lat, lon);
 
+      // compute ground range and azimuth from radar
+      
+      double gndRangeKm, azDeg;
+      PJGLatLon2RTheta(_radarLat, _radarLon, lat, lon, &gndRangeKm, &azDeg);
+      
       // get terrain height
       
       fl32 terrainHt = _dem->getElevation(lat, lon);
       if (!std::isfinite(terrainHt)) {
         continue;
       }
-        
-      // compute ground range and azimuth from radar
-
-      double gndRangeKm, azDeg;
-      PJGLatLon2RTheta(_radarLat, _radarLon, lat, lon, &gndRangeKm, &azDeg);
       
       // double xx, yy;
       // _proj.latlon2xy(lat, lon, xx, yy);
@@ -699,20 +699,13 @@ int CartBeamBlock::_createTerrainGrid(double minLat, double minLon,
   _htNy = floor((maxY - minY) / _htDy) + 1;
   _htArray.alloc(_htNy, _htNx);
 
-  int count = 0;
   for (int iy = 0; iy < (int) _htNy; iy++) {
     double yy = _htMiny + iy * _htDy;
     for (int ix = 0; ix < (int) _htNx; ix++) {
       double xx = _htMinx + ix * _htDx;
       double latDeg, lonDeg;
       _proj.xy2latlon(xx, yy, latDeg, lonDeg);
-      int16_t htM;
-      if (_dem->getHt(latDeg, lonDeg, htM)) {
-        _htArray[iy][ix] = 0;
-      } else {
-        _htArray[iy][ix] = htM;
-      }
-      count++;
+      _htArray[iy][ix] = _dem->getTerrainHtM(latDeg, lonDeg);
     }
   }
 

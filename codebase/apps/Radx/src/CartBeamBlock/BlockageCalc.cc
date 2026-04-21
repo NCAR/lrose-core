@@ -36,16 +36,24 @@
 //
 ///////////////////////////////////////////////////////////////
 
+#include <toolsa/pjg_flat.h>
+#include <radar/BeamHeight.hh>
 #include "BlockageCalc.hh"
 #include "DemProvider.hh"
+#include "BeamPowerPattern.hh"
+using namespace euclid;
 
 ///////////////////////////////////////////////////////////////////////////
 // constructor
 
 BlockageCalc::BlockageCalc(const Params &params,
-                           const DemProvider &dem) :
+                           BeamHeight &beamHt,
+                           const DemProvider &dem,
+                           const BeamPowerPattern &pattern) :
         _params(params),
-        _dem(dem)
+        _beamHt(beamHt),
+        _dem(dem),
+        _pattern(pattern)
 {
   
 }
@@ -73,27 +81,109 @@ void BlockageCalc::initGeom(double maxRangeKm,
   
   _maxRangeKm = maxRangeKm;
   _rangeResKm = rangeResKm;
-
-  _nRange = (int) ((_maxRangeKm / _rangeResKm) + 1);
-
+  _nRangeAlloc = (int) ((_maxRangeKm / _rangeResKm) + 1);
   _zCartKm = zCartKm;
-  _nBeamPatternEl = nBeamPatternEl;
-  _nBeamPatternAz = nBeamPatternAz;
+  _nAz = _pattern.getNAz();
+  
+  _rangeKm.resize(_nRangeAlloc);
+  for (size_t ii = 0; ii < _nRangeAlloc; ii++) {
+    _rangeKm[ii] = _rangeResKm * (ii + 0.5);
+  }
+  _nRange = _nRangeAlloc;
   
   // create 2D points array
   
-  _points.clear();
-  _points.resize(_nRange);
-  for (size_t irange = 0; irange < _points.size(); irange++) {
-    vector<AzRangePoint> &azPts = _points[irange];
-    azPts.resize(_nBeamPatternAz);
-    for (size_t iaz = 0; iaz < azPts.size(); iaz++) {
-      AzRangePoint &pt = azPts[iaz];
-      pt.cartEl.resize(_zCartKm.size());
-      pt.fracBlocked.resize(_zCartKm.size());
+  _azRangePts.clear();
+  _azRangePts.alloc(_nAz, _nRangeAlloc);
+  for (size_t iaz = 0; iaz < _nAz; iaz++) {
+    for (size_t irange = 0; irange < _nRangeAlloc; irange++) {
+      AzRangePoint &pt = _azRangePts[iaz][irange];
+      pt.fracBlockedAz.resize(_zCartKm.size());
     } // iaz
   } // irange
   
+  _patternAz.resize(_pattern.getNAz());
+  _cartEl.resize(_zCartKm.size());
+  
+}
+
+//////////////////////////////////////////////////////////////////////////
+// set radar location
+
+void BlockageCalc::setRadarLoc(double radarLatDeg,
+                               double radarLonDeg,
+                               double radarHtKm)
+
+{
+
+  _radarLatDeg = radarLatDeg;
+  _radarLonDeg = radarLonDeg;
+  _radarHtKm = radarHtKm;
+  
+}
+
+//////////////////////////////////////////////////////////////////////////
+// fill out the array geometry for a specified grid point
+
+int BlockageCalc::calcPtGeom(double lat, double lon,
+                             double gndRangeKm, double azDeg)
+  
+{
+
+  // determine how many range intervals to use
+  
+  if (gndRangeKm > _maxRangeKm) {
+    cerr << "ERROR - BlockageCalc::calcGeom" << endl;
+    cerr << "  Target point range: " << gndRangeKm << endl;
+    cerr << "    exceeds max range: " << _maxRangeKm << endl;
+    return -1;
+  }
+  _nRange = (int) ((gndRangeKm / _rangeResKm) + 0.5);
+
+  ////////////////////
+  // compute geometry
+
+  // center azimuth
+  
+  _azCenter = EuclidAngle::fromDegrees(azDeg);
+  
+  // pattern azimuths
+  
+  for (size_t iaz = 0; iaz < _nAz; iaz++) {
+    _patternAz[iaz] = _azCenter + _pattern.getAzimuthOffset(iaz);
+  } // iaz
+
+  // elevation for each Cartesian plane
+  
+  for (size_t iz = 0; iz < _zCartKm.size(); iz++) {
+    double elDeg = _beamHt.computeElevationDeg(_zCartKm[iz], gndRangeKm);
+    _cartEl[iz] = EuclidAngle::fromDegrees(elDeg);
+  }
+
+  // lat/lon and terrain ht
+  
+  for (size_t iaz = 0; iaz < _nAz; iaz++) {
+    for (size_t irange = 0; irange < _nRange; irange++) {
+      AzRangePoint &pt = _azRangePts[iaz][irange];
+
+      // location
+      
+      double lat, lon;
+      PJGLatLonPlusRTheta(_radarLatDeg, _radarLonDeg,
+                          _rangeKm[irange], _patternAz[iaz].degrees(),
+                          &lat, &lon);
+      pt.lat = lat;
+      pt.lon = lon;
+
+      // terrain height
+
+      pt.terrainHtKm = _dem.getTerrainHtM(lat, lon) / 1000.0;
+      
+    } // iaz
+  } // irange
+
+  return 0;
+
 }
 
   

@@ -278,11 +278,10 @@ string DemProvider::ModelName(Params::DigitalElevationModel_t t)
 }
 
 //////////////////////////////////////////////////////////
-// get terrain ht and water flag for a point
-// returns 0 on success, -1 on failure
-// sets terrainHtM and isWater args
+// get terrain ht for a point in meters
+// returns 0 on failure
 
-int DemProvider::getHt(double lat, double lon, int16_t &terrainHtM)
+int16_t DemProvider::getTerrainHtM(double lat, double lon) const
   
 {
 
@@ -301,12 +300,15 @@ int DemProvider::getHt(double lat, double lon, int16_t &terrainHtM)
   if (ilat > nLat - 1) ilat = nLat - 1;
   if (ilon < 0) ilon = 0;
   if (ilon > nLon - 1) ilon = nLon - 1;
-  
-  if (_tiles[ilat][ilon]->getHt(lat, lon, terrainHtM)) {
-    cerr << "ERROR - DemProvider::getHt()" << endl;
-    cerr << "  Cannot get height for lat, lon: " << lat << ", " << lon << endl;
-    cerr << "  Tile indices: ilat, ilon: " << ilat << ", " << ilon << endl;
-    return -1;
+
+  int16_t htM;
+  if (_tiles[ilat][ilon]->getHt(lat, lon, htM)) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - DemProvider::getHt()" << endl;
+      cerr << "  Cannot get height for lat, lon: " << lat << ", " << lon << endl;
+      cerr << "  Tile indices: ilat, ilon: " << ilat << ", " << ilon << endl;
+    }
+    htM = 0;
   }
   
   // save location of latest request
@@ -314,12 +316,12 @@ int DemProvider::getHt(double lat, double lon, int16_t &terrainHtM)
   _latestLat = lat;
   _latestLon = lon;
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     cerr << "Got ht request: lat, lon: " << lat << ", " << lon << endl;
-    cerr << "Got ht request: htM: " << terrainHtM << endl;
+    cerr << "Got ht request: htM: " << htM << endl;
   }
 
-  return 0;
+  return htM;
 
 }
 
