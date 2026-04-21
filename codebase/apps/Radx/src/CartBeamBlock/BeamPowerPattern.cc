@@ -116,9 +116,12 @@ void BeamPowerPattern::set(const euclid::EuclidAngle &beamWidthEl,
 
   _nEl = nPatternEl;
   _nAz = nPatternAz;
-
-  _beamWidthAz = beamWidthAz;
+  
   _beamWidthEl = beamWidthEl;
+  _beamWidthAz = beamWidthAz;
+  
+  _deltaEl = _beamWidthEl / _nEl;
+  _deltaAz = _beamWidthAz / _nEl;
 
   _patternHeight = patternHeight;
   _patternWidth = patternWidth;

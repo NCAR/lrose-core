@@ -102,6 +102,7 @@ private:
   size_t _nRange;
   
   vector<double> _rangeKm;
+  vector<double> _kmToDeg;
   vector<double> _zCartKm;
   euclid::EuclidAngle _azCenter;
   vector<euclid::EuclidAngle> _patternAz;

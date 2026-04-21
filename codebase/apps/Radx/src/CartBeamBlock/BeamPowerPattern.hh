@@ -143,8 +143,11 @@ public:
   euclid::EuclidAngle getBeamWidthEl() const { return _beamWidthEl; }
   euclid::EuclidAngle getBeamWidthAz() const { return _beamWidthAz; }
   
-  euclid::EuclidAngle getPatternHeight() const { return _patternHeight; }
-  euclid::EuclidAngle getPatternWidth() const { return _patternWidth; }
+  euclid::EuclidAngle getDeltaEl() const { return _deltaEl; }
+  euclid::EuclidAngle getDeltaAz() const { return _deltaAz; }
+  
+  euclid::EuclidAngle getHeight() const { return _patternHeight; }
+  euclid::EuclidAngle getWidth() const { return _patternWidth; }
   
   const euclid::EuclidAngle &getElevationOffset(size_t iel) const
   {
@@ -205,6 +208,9 @@ private:
   size_t _nEl;
   size_t _nAz;
 
+  euclid::EuclidAngle _deltaEl;
+  euclid::EuclidAngle _deltaAz;
+  
   euclid::EuclidAngle _patternHeight;
   euclid::EuclidAngle _patternWidth;
 

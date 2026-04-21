@@ -435,9 +435,11 @@ int CartBeamBlock::_computeBlockage()
       double gndRangeKm, azDeg;
       PJGLatLon2RTheta(_radarLat, _radarLon, lat, lon, &gndRangeKm, &azDeg);
 
-      // calculate the geometry for this point
+      // calculate the geometry for this cart point
       
       _calc->initForGridPoint(lat, lon, gndRangeKm, azDeg);
+
+      // 
       
       // get terrain height
       

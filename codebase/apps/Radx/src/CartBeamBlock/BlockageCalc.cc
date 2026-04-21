@@ -86,8 +86,10 @@ void BlockageCalc::initGeom(double maxRangeKm,
   _nAz = _pattern.getNAz();
   
   _rangeKm.resize(_nRangeAlloc);
+  _kmToDeg.resize(_nRangeAlloc);
   for (size_t ii = 0; ii < _nRangeAlloc; ii++) {
     _rangeKm[ii] = _rangeResKm * (ii + 0.5);
+    _kmToDeg[ii] = (1.0 / _rangeKm[ii]) * (180.0 / M_PI);
   }
   _nRange = _nRangeAlloc;
   
@@ -193,25 +195,56 @@ void BlockageCalc::computeMaxElIndexBlocked(size_t iaz)
   
 {
 
+  // initialize flag to indicate whether the Z plane below is blocked
+  
+  vector<bool> blockedBelow;
+  blockedBelow.resize(_nRange, true);
+  
   // loop through increasing elevations, for each cart height
 
   for (size_t iz = 0; iz < _zCartKm.size(); iz++) {
 
+    double cartHtRelKm = _zCartKm[iz] - _radarHtKm;
+    double elDeg = _cartEl[iz].degrees();
+    
     // loop through increasing range
     
     for (size_t irange = 0; irange < _nRange; irange++) {
+
+      // check if height below was not blocked
+      // if not, then this one cannot be blocked either
+      // so we can short-circuit this logic
+
+      if (!blockedBelow[irange]) {
+        _azRangePts[iaz][irange].maxElIndexBlocked = -1;
+        continue;
+      }
+      
+      // compute elevation angle for this Cart height at this range
       
       double gndRangeKm = _rangeKm[irange];
-      double cartHtKm = _zCartKm[iz];
-      double slantRangeKm = sqrt(gndRangeKm * gndRangeKm + cartHtKm * cartHtKm);
-      double elDeg = _cartEl[iz].degrees();
+      double slantRangeKm = sqrt(gndRangeKm * gndRangeKm + cartHtRelKm * cartHtRelKm);
+
+      // get beam height 
 
       double beamHtKm = _beamHt.computeHtKm(elDeg, slantRangeKm);
       double terrainHtKm = _azRangePts[iaz][irange].terrainHtKm;
 
-      double excessHtKm = beamHtKm / terrainHtKm;
-      // double excessDeg = (excessHtKm / slantRangeKm) * RAD_TO_DEG;
+      double terrainRelHtKm = terrainHtKm - beamHtKm;
+      double terrainRelDeg = terrainRelHtKm * _kmToDeg[irange];
 
+      int terrainElIndex = (_pattern.getNEl() / 2) +
+        (int) std::round(terrainRelDeg / _pattern.getDeltaEl().degrees());
+
+      if (terrainElIndex < 0) {
+        _azRangePts[iaz][irange].maxElIndexBlocked = -1;
+        blockedBelow[irange] = false;
+      } else if (terrainElIndex > (int) _pattern.getNEl() - 1) {
+        _azRangePts[iaz][irange].maxElIndexBlocked = _pattern.getNEl() - 1;
+      } else {
+        _azRangePts[iaz][irange].maxElIndexBlocked = terrainElIndex;
+      }
+      
     } // irange
   
   } // iz
