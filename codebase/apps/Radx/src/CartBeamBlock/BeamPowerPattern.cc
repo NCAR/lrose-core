@@ -121,7 +121,7 @@ void BeamPowerPattern::set(const euclid::EuclidAngle &beamWidthEl,
   _beamWidthAz = beamWidthAz;
   
   _deltaEl = _beamWidthEl / _nEl;
-  _deltaAz = _beamWidthAz / _nEl;
+  _deltaAz = _beamWidthAz / _nAz;
 
   _patternHeight = patternHeight;
   _patternWidth = patternWidth;
@@ -236,8 +236,8 @@ void BeamPowerPattern::_computeIntrinsicPattern()
   for (size_t iel = 0; iel < _nEl; ++iel) {
     for (size_t iaz = 0; iaz < _nAz; ++iaz) {
       _power[_index(iel, iaz)] =
-        _computeIntrinsicPower(_azimuthOffsets[iaz],
-                               _elevationOffsets[iel]);
+        _computeIntrinsicPower(_elevationOffsets[iel],
+                               _azimuthOffsets[iaz]);
     }
   }
 }

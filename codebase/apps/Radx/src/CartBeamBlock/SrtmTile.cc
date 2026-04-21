@@ -44,7 +44,7 @@
 #include <cerrno>
 
 using namespace std;
-TaThread::SafeMutex *SrtmTile::_globalMutex = NULL;
+// TaThread::SafeMutex *SrtmTile::_globalMutex = NULL;
 
 // Constructor
 
@@ -78,11 +78,11 @@ SrtmTile::SrtmTile(const string &demDir,
   _llLat = (int) (_centerLat);
   _llLon = (int) (_centerLon);
 
-  _latestAccessTime = 0;
+  // _latestAccessTime = 0;
 
-  if (_globalMutex == NULL) {
-    _globalMutex = new TaThread::SafeMutex;
-  }
+  // if (_globalMutex == NULL) {
+  //   _globalMutex = new TaThread::SafeMutex;
+  // }
 
 }
 
@@ -106,7 +106,7 @@ void SrtmTile::freeHtArray()
     
   TaThread::LockForScope lock(&_localMutex);
   _htArray.clear();
-  _latestAccessTime = 0;
+  // _latestAccessTime = 0;
 
 
 }
@@ -154,7 +154,7 @@ int SrtmTile::getHt(double lat, double lon, int16_t &terrainHtM)
 
   // save latest access time
   
-  _latestAccessTime = time(NULL);
+  //   _latestAccessTime = time(NULL);
 
   return 0;
 
@@ -164,29 +164,29 @@ int SrtmTile::getHt(double lat, double lon, int16_t &terrainHtM)
 // read file to update cache
 // returns 0 on success, -1 on failure
 
-int SrtmTile::readForCache()
+// int SrtmTile::readForCache()
 
-{
+// {
 
-  // read in ht array if needed
+//   // read in ht array if needed
   
-  if (_htArray.empty()) {
+//   if (_htArray.empty()) {
     
-    // lock mutex - will unlock going out of scope
+//     // lock mutex - will unlock going out of scope
     
-    TaThread::LockForScope lock(&_localMutex);
+//     TaThread::LockForScope lock(&_localMutex);
     
-    if (_readFromFile()) {
-      cerr << "ERROR - SrtmTile::readForCache" << endl;
-      cerr << "  Cannot read ht data from file" << endl;
-      return -1;
-    }
+//     if (_readFromFile()) {
+//       cerr << "ERROR - SrtmTile::readForCache" << endl;
+//       cerr << "  Cannot read ht data from file" << endl;
+//       return -1;
+//     }
 
-  }
+//   }
 
-  return 0;
+//   return 0;
 
-}
+// }
 
 /////////////////////////////////////////
 // read height data from the file

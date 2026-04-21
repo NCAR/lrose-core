@@ -399,6 +399,8 @@ public:
 
   debug_t debug;
 
+  int n_compute_threads;
+
   char* grid_template_path;
 
   char* template_field_name;
@@ -464,7 +466,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[40];
+  mutable TDRPtable _table[41];
 
   const char *_className;
 

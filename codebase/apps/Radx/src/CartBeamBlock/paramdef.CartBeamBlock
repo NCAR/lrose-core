@@ -29,6 +29,12 @@ paramdef enum debug_t {
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
+paramdef int {
+  p_descr = "Number of threads to be used for the main computations..";
+  p_help = "This splits the load between CPU cores and speeds up the processing. I recommend using 2 * number of cores.";
+  p_default = 16;
+} n_compute_threads;
+
 commentdef {
   p_header = "CARTESIAN GRID TEMPLATE";
   p_text = "We read in a 3D Cartesian file which we use as a template to determine the 3D grid details.";

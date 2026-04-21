@@ -47,11 +47,9 @@ using namespace euclid;
 // constructor
 
 BlockageCalc::BlockageCalc(const Params &params,
-                           BeamHeight &beamHt,
                            const DemProvider &dem,
                            const BeamPowerPattern &pattern) :
         _params(params),
-        _beamHt(beamHt),
         _dem(dem),
         _pattern(pattern)
 {
@@ -103,7 +101,9 @@ void BlockageCalc::initGeom(double maxRangeKm,
   _cartEl.resize(_nZ);
 
   _maxElIndexBlocked.alloc(_nZ, _nAz);
-  
+  _maxElIndexBlockedPlane.resize(_nZ);
+  _blockedBelow.resize(_nRange);
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -119,6 +119,11 @@ void BlockageCalc::setRadarLoc(double radarLatDeg,
   _radarLonDeg = radarLonDeg;
   _radarHtKm = radarHtKm;
   
+  _beamHt.setInstrumentHtKm(_radarHtKm);
+  if (_params.override_standard_pseudo_earth_radius) {
+    _beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
+  }
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -134,7 +139,10 @@ int BlockageCalc::getBlockage(double lat, double lon,
   
   // initialize geometry for this cart point
       
-  _initForGridPoint(lat, lon, gndRangeKm, azDeg);
+  if (_initForGridPoint(lat, lon, gndRangeKm, azDeg)) {
+    cerr << "ERROR - BlockageCalc::getBlockage" << endl;
+    return -1;
+  }
 
   // loop through the azimuths in the pattern
   
@@ -142,14 +150,14 @@ int BlockageCalc::getBlockage(double lat, double lon,
 
     // compute the max index blocked at each plane
     
-    vector<int> maxElIndexBlockedPlane;
-    maxElIndexBlockedPlane.resize(_nZ, -1);
-    _getMaxElIndexBlockedPlane(iaz, maxElIndexBlockedPlane);
+    std::fill(_maxElIndexBlockedPlane.begin(),
+              _maxElIndexBlockedPlane.end(), -1);
+    _getMaxElIndexBlockedPlane(iaz, _maxElIndexBlockedPlane);
 
     // load up 2D array of blocked indexes
     
     for (size_t iz = 0; iz < _nZ; iz++) {
-      _maxElIndexBlocked[iz][iaz] = maxElIndexBlockedPlane[iz];
+      _maxElIndexBlocked[iz][iaz] = _maxElIndexBlockedPlane[iz];
     } // iz
 
   } // iaz
@@ -241,14 +249,13 @@ int BlockageCalc::_initForGridPoint(double lat, double lon,
 // compute the maximum elevation index blocked for a pattern azimuth
 
 void BlockageCalc::_getMaxElIndexBlockedPlane(size_t iaz,
-                                            vector<int> &maxElIndexBlockedPlane)
+                                              vector<int> &maxElIndexBlockedPlane)
   
 {
 
   // initialize flag to indicate whether the Z plane below is blocked
   
-  vector<bool> blockedBelow;
-  blockedBelow.resize(_nRange, true);
+  std::fill(_blockedBelow.begin(), _blockedBelow.end(), true);
   
   // loop through increasing elevations, for each cart height
 
@@ -266,7 +273,7 @@ void BlockageCalc::_getMaxElIndexBlockedPlane(size_t iaz,
       // if not, then this one cannot be blocked either
       // so we can short-circuit this logic
 
-      if (!blockedBelow[irange]) {
+      if (!_blockedBelow[irange]) {
         continue;
       }
       
@@ -290,7 +297,7 @@ void BlockageCalc::_getMaxElIndexBlockedPlane(size_t iaz,
       if (terrainElIndex < 0) {
         maxIndexBlocked = -1;
         // _azRangePts[iaz][irange].maxElIndexBlocked = -1;
-        blockedBelow[irange] = false;
+        _blockedBelow[irange] = false;
       } else if (terrainElIndex > (int) _pattern.getNEl() - 1) {
         maxIndexBlocked = _pattern.getNEl() - 1;
         // _azRangePts[iaz][irange].maxElIndexBlocked = _pattern.getNEl() - 1;
@@ -310,6 +317,3 @@ void BlockageCalc::_getMaxElIndexBlockedPlane(size_t iaz,
   } // iz
     
 }
-
-  
-  

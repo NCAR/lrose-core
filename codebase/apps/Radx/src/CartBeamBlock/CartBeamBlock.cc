@@ -97,7 +97,7 @@ CartBeamBlock::CartBeamBlock(int argc, char **argv) :
   
   _dem = new DemProvider(_params);
   _pattern = new BeamPowerPattern;
-  _calc = new BlockageCalc(_params, _beamHt, *_dem, *_pattern);
+  _calc = new BlockageCalc(_params, *_dem, *_pattern);
 
 }
 
@@ -361,7 +361,10 @@ int CartBeamBlock::_readDem(const string &path)
   
   std::pair<double,double> sw(_minLat, _minLon);
   std::pair<double,double> ne(_maxLat, _maxLon);
-  _dem->set(sw, ne);
+  if (_dem->set(sw, ne)) {
+    cerr << "ERROR - CartBeamBlock::_readDem" << endl;
+    return -1;
+  }
 
   return 0;
 
@@ -374,67 +377,256 @@ int CartBeamBlock::_computeBlockage()
   
 {
 
-  // initialize BeamHeight computations
-  
-  _beamHt.setInstrumentHtKm(_sensorHtKm);
-  if (_params.override_standard_pseudo_earth_radius) {
-    _beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
-  }
-
-  // compute radar x and y coords in km
-  
-  double radarX, radarY;
-  _proj.latlon2xy(_sensorLat, _sensorLon, radarX, radarY);
-  
   const Mdvx::coord_t &coord = _proj.getCoord();
 
-  // array for extinction
+  // allocate output array
 
   size_t nPtsPlane = _templateFhdr.nx * _templateFhdr.ny;
   _blockage.resize(nPtsPlane * _templateFhdr.nz);
   std::fill(_blockage.begin(), _blockage.end(), missingFl32);
 
-  // loop through the XY grid
-  
-  for (int iy = 0; iy < coord.ny; iy++) {
-    for (int ix = 0; ix < coord.nx; ix++) {
+  // compute max range from radar to grid corners
+  // needed for initializing each thread-local BlockageCalc
 
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "INFO - computing blockage, iy, ix: " << iy << ", " << ix << endl;
+  double maxRangeKm = 0.0;
+  double rangeKm, bearingDeg;
+
+  PJGLatLon2RTheta(_radarLat, _radarLon,
+                   _minLat, _minLon,
+                   &rangeKm, &bearingDeg);
+  maxRangeKm = std::max(maxRangeKm, rangeKm);
+
+  PJGLatLon2RTheta(_radarLat, _radarLon,
+                   _minLat, _maxLon,
+                   &rangeKm, &bearingDeg);
+  maxRangeKm = std::max(maxRangeKm, rangeKm);
+
+  PJGLatLon2RTheta(_radarLat, _radarLon,
+                   _maxLat, _maxLon,
+                   &rangeKm, &bearingDeg);
+  maxRangeKm = std::max(maxRangeKm, rangeKm);
+
+  PJGLatLon2RTheta(_radarLat, _radarLon,
+                   _maxLat, _minLon,
+                   &rangeKm, &bearingDeg);
+  maxRangeKm = std::max(maxRangeKm, rangeKm);
+  
+  // determine number of compute threads
+
+  int nThreads = _params.n_compute_threads;
+  if (nThreads <= 0) {
+    nThreads = (int) std::thread::hardware_concurrency();
+    if (nThreads < 1) {
+      nThreads = 1;
+    }
+  }
+  if (nThreads > coord.ny) {
+    nThreads = coord.ny;
+  }
+  if (nThreads < 1) {
+    nThreads = 1;
+  }
+
+  if (_params.debug) {
+    cerr << "INFO - CartBeamBlock::_computeBlockage()" << endl;
+    cerr << "  nx, ny, nz: "
+         << coord.nx << ", "
+         << coord.ny << ", "
+         << coord.nz << endl;
+    cerr << "  nThreads: " << nThreads << endl;
+    cerr << "  maxRangeKm: " << maxRangeKm << endl;
+  }
+
+  // divide rows among threads in contiguous chunks
+
+  vector<int> iyStart(nThreads, 0);
+  vector<int> iyEnd(nThreads, 0);
+  vector<int> threadStatus(nThreads, 0);
+  vector<string> threadErrStr(nThreads);
+  vector<std::thread> workers;
+
+  int rowsPerThread = coord.ny / nThreads;
+  int rowsExtra = coord.ny % nThreads;
+  int iyBegin = 0;
+
+  for (int ii = 0; ii < nThreads; ii++) {
+    int nRows = rowsPerThread;
+    if (ii < rowsExtra) {
+      nRows++;
+    }
+    iyStart[ii] = iyBegin;
+    iyEnd[ii] = iyBegin + nRows;
+    iyBegin += nRows;
+    if (_params.debug) {
+      cerr << "thread num, iyStart, iyEnd: "
+           << ii << ", " << iyStart[ii] << ", " << iyEnd[ii] << ", " << endl;
+    }
+  }
+
+  // worker to process a contiguous block of rows
+
+  auto computeRows = [&](int threadNum, int iy0, int iy1) {
+
+    // thread-local blockage calculator
+
+    BlockageCalc calc(_params, *_dem, *_pattern);
+    calc.initGeom(maxRangeKm,
+                  _params.range_res_m / 1000.0,
+                  _zKm,
+                  _params.n_pattern_vert,
+                  _params.n_pattern_horiz);
+    calc.setRadarLoc(_radarLat, _radarLon, _radarHtKm);
+
+    // scratch array reused for each grid point
+
+    vector<double> fractionBlocked(_templateFhdr.nz, 0.0);
+
+    for (int iy = iy0; iy < iy1; iy++) {
+
+      if (_params.debug) {
+        cerr << "--->> thread starting to process row, threadNum, rowNum: "
+             << threadNum << ", " << iy << endl;
       }
-
-      // get lat/lon of grid point
       
-      double lat, lon;
-      _proj.xyIndex2latlon(ix, iy, lat, lon);
-
-      // compute ground range and azimuth from radar
-      
-      double gndRangeKm, azDeg;
-      PJGLatLon2RTheta(_radarLat, _radarLon, lat, lon, &gndRangeKm, &azDeg);
-
-      // compute the extinction for all planes at that grid point
-
-      vector<double> fractionBlocked;
-      fractionBlocked.resize(_templateFhdr.nz, 0.0);
-
-      // calculate the blockage
-
-      _calc->getBlockage(lat, lon, gndRangeKm, azDeg, fractionBlocked);
-
-      // copy to 3D array
-      
-      size_t index = iy * _templateFhdr.nx + ix;
-      for (int iz = 0; iz < coord.nz; iz++, index += nPtsPlane) {
-        _blockage[index] = fractionBlocked[iz];
-      } // iz
+      for (int ix = 0; ix < coord.nx; ix++) {
         
-    } // ix
-  } // iy
-  
+        // get lat/lon of grid point
+
+        double lat, lon;
+        _proj.xyIndex2latlon(ix, iy, lat, lon);
+
+        // compute ground range and azimuth from radar
+
+        double gndRangeKm, azDeg;
+        PJGLatLon2RTheta(_radarLat, _radarLon,
+                         lat, lon,
+                         &gndRangeKm, &azDeg);
+
+        // compute blockage for all planes at this grid point
+
+        if (calc.getBlockage(lat, lon, gndRangeKm, azDeg,
+                             fractionBlocked)) {
+          threadStatus[threadNum] = -1;
+          threadErrStr[threadNum] =
+            "ERROR - BlockageCalc::getBlockage() failed";
+          return;
+        }
+
+        // copy to output 3D array
+        // layout is plane-major in Z, so planes are separated by nPtsPlane
+
+        size_t index = iy * _templateFhdr.nx + ix;
+        for (int iz = 0; iz < coord.nz; iz++, index += nPtsPlane) {
+          _blockage[index] = fractionBlocked[iz];
+        }
+
+      } // ix
+    } // iy
+
+  }; // auto computeRows .....
+
+  // run single-threaded or multi-threaded
+
+  if (nThreads == 1) {
+
+    computeRows(0, 0, coord.ny);
+
+  } else {
+
+    for (int ii = 0; ii < nThreads; ii++) {
+      workers.emplace_back(computeRows, ii, iyStart[ii], iyEnd[ii]);
+    }
+
+    for (size_t ii = 0; ii < workers.size(); ii++) {
+      workers[ii].join();
+    }
+
+  }
+
+  // check thread status
+
+  for (int ii = 0; ii < nThreads; ii++) {
+    if (threadStatus[ii]) {
+      cerr << "ERROR - CartBeamBlock::_computeBlockage()" << endl;
+      if (!threadErrStr[ii].empty()) {
+        cerr << "  " << threadErrStr[ii] << endl;
+      }
+      cerr << "  thread num: " << ii << endl;
+      cerr << "  iy start, iy end: "
+           << iyStart[ii] << ", " << iyEnd[ii] << endl;
+      return -1;
+    }
+  }
+
   return 0;
 
 }
+
+// int CartBeamBlock::_computeBlockage()
+  
+// {
+
+//   // initialize BeamHeight computations
+  
+//   _beamHt.setInstrumentHtKm(_radarHtKm);
+//   if (_params.override_standard_pseudo_earth_radius) {
+//     _beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
+//   }
+
+//   // compute radar x and y coords in km
+  
+//   double radarX, radarY;
+//   _proj.latlon2xy(_sensorLat, _sensorLon, radarX, radarY);
+  
+//   const Mdvx::coord_t &coord = _proj.getCoord();
+
+//   // array for extinction
+
+//   size_t nPtsPlane = _templateFhdr.nx * _templateFhdr.ny;
+//   _blockage.resize(nPtsPlane * _templateFhdr.nz);
+//   std::fill(_blockage.begin(), _blockage.end(), missingFl32);
+
+//   // loop through the XY grid
+  
+//   for (int iy = 0; iy < coord.ny; iy++) {
+//     for (int ix = 0; ix < coord.nx; ix++) {
+
+//       if (_params.debug >= Params::DEBUG_VERBOSE) {
+//         cerr << "INFO - computing blockage, iy, ix: " << iy << ", " << ix << endl;
+//       }
+
+//       // get lat/lon of grid point
+      
+//       double lat, lon;
+//       _proj.xyIndex2latlon(ix, iy, lat, lon);
+
+//       // compute ground range and azimuth from radar
+      
+//       double gndRangeKm, azDeg;
+//       PJGLatLon2RTheta(_radarLat, _radarLon, lat, lon, &gndRangeKm, &azDeg);
+
+//       // compute the extinction for all planes at that grid point
+
+//       vector<double> fractionBlocked;
+//       fractionBlocked.resize(_templateFhdr.nz, 0.0);
+
+//       // calculate the blockage
+
+//       _calc->getBlockage(lat, lon, gndRangeKm, azDeg, fractionBlocked);
+
+//       // copy to 3D array
+      
+//       size_t index = iy * _templateFhdr.nx + ix;
+//       for (int iz = 0; iz < coord.nz; iz++, index += nPtsPlane) {
+//         _blockage[index] = fractionBlocked[iz];
+//       } // iz
+        
+//     } // ix
+//   } // iy
+  
+//   return 0;
+
+// }
 
 //////////////////////////////////////////
 // write blockage data to MDV

@@ -38,6 +38,17 @@
 
 debug = DEBUG_OFF;
 
+///////////// n_compute_threads ///////////////////////
+//
+// Number of threads to be used for the main computations..
+//
+// This splits the load between CPU cores and speeds up the processing. 
+//   I recommend using 2 * number of cores.
+//
+// Type: int
+
+n_compute_threads = 16;
+
 //======================================================================
 //
 // CARTESIAN GRID TEMPLATE.

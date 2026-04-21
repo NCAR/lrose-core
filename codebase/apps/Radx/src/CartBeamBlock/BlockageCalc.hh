@@ -55,7 +55,6 @@ public:
   // constructor
   
   BlockageCalc(const Params &params,
-               BeamHeight &beamHt,
                const DemProvider &dem,
                const BeamPowerPattern &pattern);
   
@@ -86,9 +85,10 @@ protected:
 private:
   
   const Params &_params;
-  BeamHeight &_beamHt;
   const DemProvider &_dem;
   const BeamPowerPattern &_pattern;
+
+  BeamHeight _beamHt;
 
   double _maxRangeKm;
   double _rangeResKm;
@@ -105,7 +105,10 @@ private:
   vector<euclid::EuclidAngle> _patternAz;
   vector<euclid::EuclidAngle> _cartEl;
   TaArray2D<int> _maxElIndexBlocked;
-
+  vector<int> _maxElIndexBlockedPlane;
+  
+  vector<bool> _blockedBelow;
+  
   // radar location
 
   double _radarLatDeg, _radarLonDeg, _radarHtKm;

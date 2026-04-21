@@ -68,10 +68,10 @@ public:
    * @param[in] sw  The 'southwest' latlon  (first=lat, second=lon)
    * @param[in] ne  The 'northeast' latlon   (first=lat, second=lon)
    *
-   * @return true for success
+   * @return 0 for success, -1 for failure
    */
-  bool set(const std::pair<double,double> &sw,
-	   const std::pair<double,double> &ne);
+  int set(const std::pair<double,double> &sw,
+          const std::pair<double,double> &ne);
 
   /**
    * convert the site location of the volume into the native spheroid of the DEM
@@ -136,12 +136,13 @@ private:
 
   SrtmTile ***_tiles;
 
-  mutable double _latestLat;
-  mutable double _latestLon;
+  // mutable double _latestLat;
+  // mutable double _latestLon;
   
-  void _updateCache();
-  int _readForCache(double lat, double lon);
-  void _freeTileMemory();
+  // void _updateCache();
+  // int _readForCache(double lat, double lon);
+
+  // void _freeTileMemory();
   
 };
 

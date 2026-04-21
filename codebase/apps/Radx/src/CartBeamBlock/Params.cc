@@ -596,6 +596,18 @@
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
+    // Parameter 'n_compute_threads'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("n_compute_threads");
+    tt->descr = tdrpStrDup("Number of threads to be used for the main computations..");
+    tt->help = tdrpStrDup("This splits the load between CPU cores and speeds up the processing. I recommend using 2 * number of cores.");
+    tt->val_offset = (char *) &n_compute_threads - &_start_;
+    tt->single_val.i = 16;
+    tt++;
+    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));

@@ -74,7 +74,7 @@ public:
   // read file to update cache
   // returns 0 on success, -1 on failure
   
-  int readForCache();
+  // int readForCache();
 
   // free arrays
   
@@ -82,14 +82,14 @@ public:
 
   // get latest access time
 
-  time_t getLatestAccessTime() const { return _latestAccessTime; }
-
+  // time_t getLatestAccessTime() const { return _latestAccessTime; }
+  
 protected:
   
 private:
 
   TaThread::SafeMutex _localMutex;
-  static TaThread::SafeMutex *_globalMutex;
+  // static TaThread::SafeMutex *_globalMutex;
   
   bool _debug;
 
@@ -106,7 +106,7 @@ private:
   int _nx, _ny;
   double _dx, _dy;
   
-  time_t _latestAccessTime;
+  // time_t _latestAccessTime;
   
   TaArray2D<int16_t> _htArray;
   
