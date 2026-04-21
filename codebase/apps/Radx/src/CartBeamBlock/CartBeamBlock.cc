@@ -316,11 +316,13 @@ int CartBeamBlock::_readTemplateFile(const string &path)
   _pattern->makeVerticalIntegration();
   
   // initialize blockage calculations
-
+  
   _calc->initGeom(maxRangeKm, _params.range_res_m / 1000.0,
                   _zKm,
                   _params.n_pattern_vert,
                   _params.n_pattern_horiz);
+
+  _calc->setRadarLoc(_radarLat, _radarLon, _radarHtKm);
 
   return 0;
   
@@ -432,6 +434,10 @@ int CartBeamBlock::_computeBlockage()
       
       double gndRangeKm, azDeg;
       PJGLatLon2RTheta(_radarLat, _radarLon, lat, lon, &gndRangeKm, &azDeg);
+
+      // calculate the geometry for this point
+      
+      _calc->initForGridPoint(lat, lon, gndRangeKm, azDeg);
       
       // get terrain height
       

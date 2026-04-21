@@ -98,7 +98,7 @@ void BlockageCalc::initGeom(double maxRangeKm,
   for (size_t iaz = 0; iaz < _nAz; iaz++) {
     for (size_t irange = 0; irange < _nRangeAlloc; irange++) {
       AzRangePoint &pt = _azRangePts[iaz][irange];
-      pt.fracBlockedAz.resize(_zCartKm.size());
+      pt.fracBlocked.resize(_zCartKm.size());
     } // iaz
   } // irange
   
@@ -125,8 +125,8 @@ void BlockageCalc::setRadarLoc(double radarLatDeg,
 //////////////////////////////////////////////////////////////////////////
 // fill out the array geometry for a specified grid point
 
-int BlockageCalc::calcPtGeom(double lat, double lon,
-                             double gndRangeKm, double azDeg)
+int BlockageCalc::initForGridPoint(double lat, double lon,
+                                   double gndRangeKm, double azDeg)
   
 {
 
@@ -186,4 +186,37 @@ int BlockageCalc::calcPtGeom(double lat, double lon,
 
 }
 
+//////////////////////////////////////////////////////////////////////////
+// compute the maximum elevation index blocked for a pattern azimuth
+
+void BlockageCalc::computeMaxElIndexBlocked(size_t iaz)
+  
+{
+
+  // loop through increasing elevations, for each cart height
+
+  for (size_t iz = 0; iz < _zCartKm.size(); iz++) {
+
+    // loop through increasing range
+    
+    for (size_t irange = 0; irange < _nRange; irange++) {
+      
+      double gndRangeKm = _rangeKm[irange];
+      double cartHtKm = _zCartKm[iz];
+      double slantRangeKm = sqrt(gndRangeKm * gndRangeKm + cartHtKm * cartHtKm);
+      double elDeg = _cartEl[iz].degrees();
+
+      double beamHtKm = _beamHt.computeHtKm(elDeg, slantRangeKm);
+      double terrainHtKm = _azRangePts[iaz][irange].terrainHtKm;
+
+      double excessHtKm = beamHtKm / terrainHtKm;
+      // double excessDeg = (excessHtKm / slantRangeKm) * RAD_TO_DEG;
+
+    } // irange
+  
+  } // iz
+    
+}
+
+  
   

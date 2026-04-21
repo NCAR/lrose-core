@@ -70,15 +70,20 @@ public:
                 const vector<double> &zCartKm,
                 int nBeamPatternEl,
                 int nBeamPatternAz);
-
+  
   // set radar location
 
   void setRadarLoc(double radarLatDeg, double radarLonDeg, double radarHtKm);
   
   // fill out the array geometry for a specified grid point
   
-  int calcPtGeom(double lat, double lon,
-                 double gndRangeKm, double azDeg);
+  int initForGridPoint(double lat, double lon,
+                       double gndRangeKm, double azDeg);
+
+  // compute the maximum elevation index blocked for each
+  // Cartesian height and specified relative az
+  
+  void computeMaxElIndexBlocked(size_t iaz);
   
 protected:
   
@@ -109,7 +114,8 @@ private:
     double lat;
     double lon;
     double terrainHtKm;
-    vector<double> fracBlockedAz;
+    int maxElIndexBlocked;
+    vector<double> fracBlocked;
 
   };
 
