@@ -896,114 +896,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OUTPUT FIELDS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_fields'
-    // ctype is '_output_field_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("output_fields");
-    tt->descr = tdrpStrDup("Array of output fields.");
-    tt->help = tdrpStrDup("We will write out these fields. long_name and standard_name are netCDF conventions. Set the output encoding type to select the resolution of the output data.");
-    tt->array_offset = (char *) &_output_fields - &_start_;
-    tt->array_n_offset = (char *) &output_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 4;
-    tt->struct_def.name = tdrpStrDup("output_field_t");
-    tt->struct_def.nfields = 6;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("name");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_output_fields->name - (char *) _output_fields;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("long_name");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_output_fields->long_name - (char *) _output_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("standard_name");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_output_fields->standard_name - (char *) _output_fields;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[3].fname = tdrpStrDup("units");
-      tt->struct_def.fields[3].ptype = STRING_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_output_fields->units - (char *) _output_fields;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("output_encoding_t");
-      tt->struct_def.fields[4].fname = tdrpStrDup("encoding");
-      tt->struct_def.fields[4].ptype = ENUM_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &_output_fields->encoding - (char *) _output_fields;
-        tt->struct_def.fields[4].enum_def.name = tdrpStrDup("output_encoding_t");
-        tt->struct_def.fields[4].enum_def.nfields = 3;
-        tt->struct_def.fields[4].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[4].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[4].enum_def.fields[0].name = tdrpStrDup("OUTPUT_FLOAT");
-        tt->struct_def.fields[4].enum_def.fields[0].val = OUTPUT_FLOAT;
-        tt->struct_def.fields[4].enum_def.fields[1].name = tdrpStrDup("OUTPUT_SHORT");
-        tt->struct_def.fields[4].enum_def.fields[1].val = OUTPUT_SHORT;
-        tt->struct_def.fields[4].enum_def.fields[2].name = tdrpStrDup("OUTPUT_BYTE");
-        tt->struct_def.fields[4].enum_def.fields[2].val = OUTPUT_BYTE;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("output_data_t");
-      tt->struct_def.fields[5].fname = tdrpStrDup("type");
-      tt->struct_def.fields[5].ptype = ENUM_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &_output_fields->type - (char *) _output_fields;
-        tt->struct_def.fields[5].enum_def.name = tdrpStrDup("output_data_t");
-        tt->struct_def.fields[5].enum_def.nfields = 4;
-        tt->struct_def.fields[5].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[5].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[5].enum_def.fields[0].name = tdrpStrDup("BLOCKAGE");
-        tt->struct_def.fields[5].enum_def.fields[0].val = BLOCKAGE;
-        tt->struct_def.fields[5].enum_def.fields[1].name = tdrpStrDup("LINEAR_BLOCKAGE");
-        tt->struct_def.fields[5].enum_def.fields[1].val = LINEAR_BLOCKAGE;
-        tt->struct_def.fields[5].enum_def.fields[2].name = tdrpStrDup("PEAK");
-        tt->struct_def.fields[5].enum_def.fields[2].val = PEAK;
-        tt->struct_def.fields[5].enum_def.fields[3].name = tdrpStrDup("EXTENDED_BLOCKAGE");
-        tt->struct_def.fields[5].enum_def.fields[3].val = EXTENDED_BLOCKAGE;
-    tt->n_struct_vals = 24;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("BEAMB");
-      tt->struct_vals[1].s = tdrpStrDup("BeamBlockageFractionDb");
-      tt->struct_vals[2].s = tdrpStrDup("BeamBlockageFractionDbPerGate");
-      tt->struct_vals[3].s = tdrpStrDup("dB");
-      tt->struct_vals[4].e = OUTPUT_FLOAT;
-      tt->struct_vals[5].e = BLOCKAGE;
-      tt->struct_vals[6].s = tdrpStrDup("BEAML");
-      tt->struct_vals[7].s = tdrpStrDup("BeamBlockageFraction");
-      tt->struct_vals[8].s = tdrpStrDup("BeamBlockageFractionPerGate");
-      tt->struct_vals[9].s = tdrpStrDup("fraction");
-      tt->struct_vals[10].e = OUTPUT_FLOAT;
-      tt->struct_vals[11].e = LINEAR_BLOCKAGE;
-      tt->struct_vals[12].s = tdrpStrDup("PEAK");
-      tt->struct_vals[13].s = tdrpStrDup("MaxTerrainHt");
-      tt->struct_vals[14].s = tdrpStrDup("MaxTerrainHtPerGate");
-      tt->struct_vals[15].s = tdrpStrDup("m");
-      tt->struct_vals[16].e = OUTPUT_FLOAT;
-      tt->struct_vals[17].e = PEAK;
-      tt->struct_vals[18].s = tdrpStrDup("BEAME");
-      tt->struct_vals[19].s = tdrpStrDup("CumulativeBeamExtinctionFraction");
-      tt->struct_vals[20].s = tdrpStrDup("CumulativeBeamExtinctionFractionInRange");
-      tt->struct_vals[21].s = tdrpStrDup("fraction");
-      tt->struct_vals[22].e = OUTPUT_FLOAT;
-      tt->struct_vals[23].e = EXTENDED_BLOCKAGE;
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("DATA SET INFORMATION");
     tt->comment_text = tdrpStrDup("Will be stored in CfRadial files, and other formats to the extent supported by the format.");
     tt++;
@@ -1044,11 +936,11 @@
     tt->single_val.s = tdrpStrDup("Created by LROSE app CartBeamBlock");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OUTPUT DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;

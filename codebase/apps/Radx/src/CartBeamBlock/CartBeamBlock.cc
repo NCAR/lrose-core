@@ -399,6 +399,10 @@ int CartBeamBlock::_computeBlockage()
   for (int iy = 0; iy < coord.ny; iy++) {
     for (int ix = 0; ix < coord.nx; ix++) {
 
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "INFO - computing blockage, iy, ix: " << iy << ", " << ix << endl;
+      }
+
       // get lat/lon of grid point
       
       double lat, lon;

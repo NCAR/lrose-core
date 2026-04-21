@@ -86,19 +86,6 @@ public:
     AUSTRALIAN_NATIONAL = 8
   } DigitalElevationModel_t;
 
-  typedef enum {
-    OUTPUT_FLOAT = 0,
-    OUTPUT_SHORT = 1,
-    OUTPUT_BYTE = 2
-  } output_encoding_t;
-
-  typedef enum {
-    BLOCKAGE = 0,
-    LINEAR_BLOCKAGE = 1,
-    PEAK = 2,
-    EXTENDED_BLOCKAGE = 3
-  } output_data_t;
-
   // struct typedefs
 
   typedef struct {
@@ -106,15 +93,6 @@ public:
     double longitudeDeg;
     double heightKm;
   } radar_location_t;
-
-  typedef struct {
-    char* name;
-    char* long_name;
-    char* standard_name;
-    char* units;
-    output_encoding_t encoding;
-    output_data_t type;
-  } output_field_t;
 
   typedef struct {
     int year;
@@ -455,9 +433,6 @@ public:
 
   double vert_beam_width_deg;
 
-  output_field_t *_output_fields;
-  int output_fields_n;
-
   char* title;
 
   char* institution;
@@ -489,7 +464,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[40];
 
   const char *_className;
 

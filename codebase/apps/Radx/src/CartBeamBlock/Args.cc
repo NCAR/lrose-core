@@ -76,19 +76,22 @@ int Args::parse(int argc, char **argv, std::string &prog_name)
       _usage(prog_name, cout);
       exit (0);
       
-    } else if (!strcmp(argv[i], "-debug")) {
+    } else if (!strcmp(argv[i], "-debug") ||
+               !strcmp(argv[i], "-d")) {
       
       sprintf(tmp_str, "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-extra")) {
-      
-      sprintf(tmp_str, "debug = DEBUG_EXTRA;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-verbose")) {
+    } else if (!strcmp(argv[i], "-verbose") ||
+               !strcmp(argv[i], "-v")) {
       
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
+      TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-extra") ||
+               !strcmp(argv[i], "-vv")) {
+      
+      sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
     } // if
@@ -109,9 +112,9 @@ void Args::_usage(std::string &prog_name, ostream &out)
   out << "Usage: " << prog_name << " [options as below]\n"
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
-      << "       [ -debug ] print debug messages\n"
-      << "       [ -extra ] print extra verbose debug messages\n"
-      << "       [ -verbose ] print verbose debug messages\n"
+      << "       [ -debug, -d ] print debug messages\n"
+      << "       [ -verbose, -v ] print verbose debug messages\n"
+      << "       [ -extra, -vv ] print extra verbose debug messages\n"
       << endl;
   
   Params::usage(out);

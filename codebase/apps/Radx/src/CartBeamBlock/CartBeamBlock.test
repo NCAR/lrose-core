@@ -154,20 +154,20 @@ pseudo_earth_radius_ratio = 1.33333;
 //
 //======================================================================
  
-///////////// num_vert_subsamples /////////////////////
+///////////// n_pattern_vert //////////////////////////
 //
-// Number of subsamples in the vertical.
+// Number of pattern subsamples in the vertical.
 //
 // We compute beam power at this number of points in a vertical slice of 
 //   the beam. An uneven number gives us symmetrical sampling.
 //
 // Type: int
 
-num_vert_subsamples = 31;
+n_pattern_vert = 31;
 
-///////////// num_horiz_subsamples ////////////////////
+///////////// n_pattern_horiz /////////////////////////
 //
-// Number of subsamples in the horizontal.
+// Number of pattern subsamples in the horizontal.
 //
 // We compute beam power at this number of points in a horizontal 
 //   section across the beam. An uneven number gives us symmetrical 
@@ -175,9 +175,9 @@ num_vert_subsamples = 31;
 //
 // Type: int
 
-num_horiz_subsamples = 31;
+n_pattern_horiz = 31;
 
-///////////// ht_res_m ////////////////////////////////
+///////////// range_res_m /////////////////////////////
 //
 // Range resolution for height and blockage sampling computations (m).
 //
@@ -186,7 +186,7 @@ num_horiz_subsamples = 31;
 //
 // Type: double
 
-ht_res_m = 100;
+range_res_m = 90;
 
 //======================================================================
 //
@@ -202,7 +202,7 @@ ht_res_m = 100;
 //
 // Type: string
 
-radar_name = "UNKNOWN";
+radar_name = "KFTG";
 
 ///////////// override_radar_location /////////////////
 //
@@ -290,79 +290,6 @@ vert_beam_width_deg = 1;
 
 //======================================================================
 //
-// OUTPUT FIELDS.
-//
-//======================================================================
- 
-///////////// output_fields ///////////////////////////
-//
-// Array of output fields.
-//
-// We will write out these fields. long_name and standard_name are 
-//   netCDF conventions. Set the output encoding type to select the 
-//   resolution of the output data.
-//
-// Type: struct
-//   typedef struct {
-//      string name;
-//      string long_name;
-//      string standard_name;
-//      string units;
-//      output_encoding_t encoding;
-//        Options:
-//          OUTPUT_FLOAT
-//          OUTPUT_SHORT
-//          OUTPUT_BYTE
-//      output_data_t type;
-//        Options:
-//          BLOCKAGE
-//          LINEAR_BLOCKAGE
-//          PEAK
-//          EXTENDED_BLOCKAGE
-//   }
-//
-// 1D array - variable length.
-
-output_fields = {
-  {
-    name = "BEAMB",
-    long_name = "BeamBlockageFractionDb",
-    standard_name = "BeamBlockageFractionDbPerGate",
-    units = "dB",
-    encoding = OUTPUT_FLOAT,
-    type = BLOCKAGE
-  }
-  ,
-  {
-    name = "BEAML",
-    long_name = "BeamBlockageFraction",
-    standard_name = "BeamBlockageFractionPerGate",
-    units = "fraction",
-    encoding = OUTPUT_FLOAT,
-    type = LINEAR_BLOCKAGE
-  }
-  ,
-  {
-    name = "PEAK",
-    long_name = "MaxTerrainHt",
-    standard_name = "MaxTerrainHtPerGate",
-    units = "m",
-    encoding = OUTPUT_FLOAT,
-    type = PEAK
-  }
-  ,
-  {
-    name = "BEAME",
-    long_name = "CumulativeBeamExtinctionFraction",
-    standard_name = "CumulativeBeamExtinctionFractionInRange",
-    units = "fraction",
-    encoding = OUTPUT_FLOAT,
-    type = EXTENDED_BLOCKAGE
-  }
-};
-
-//======================================================================
-//
 // DATA SET INFORMATION.
 //
 // Will be stored in CfRadial files, and other formats to the extent 
@@ -410,6 +337,16 @@ references = "Created by LROSE app CartBeamBlock";
 
 output_dir = "$(HOME)/data/pecan/mdv/beamBlock/kftg";
 
+///////////// data_set_source /////////////////////////
+//
+// Description of data set source.
+//
+// This will be written to the MDV master header.
+//
+// Type: string
+
+data_set_source = "SRTM3";
+
 ///////////// append_radar_name_to_output_dir /////////
 //
 // Option to add the radar name to the output path.
@@ -419,18 +356,6 @@ output_dir = "$(HOME)/data/pecan/mdv/beamBlock/kftg";
 // Type: boolean
 
 append_radar_name_to_output_dir = FALSE;
-
-///////////// write_individual_sweeps /////////////////
-//
-// Option to write out individual sweeps if appropriate.
-//
-// If true, the volume is split into individual sweeps for writing. 
-//   Applies to CfRadial format. This is always true for DORADE format 
-//   files.
-//
-// Type: boolean
-
-write_individual_sweeps = FALSE;
 
 ///////////// output_time_stamp ///////////////////////
 //
@@ -459,48 +384,48 @@ output_time_stamp = {
     sec = 0
 };
 
-//======================================================================
+///////////// blockage_field_name /////////////////////
 //
-// CREATE CARTESIAN GRID FOR CHECKING TERRAIN DATA.
+// Name of blockge field in MDV output file.
 //
-//======================================================================
- 
-///////////// create_cart_terrain_grid ////////////////
+// Type: string
+
+blockage_field_name = "extinction";
+
+///////////// terrain_ht_field_name ///////////////////
 //
-// Option to create a Cartesian grid with terrain data.
+// Name of terrain height field in MDV output file.
+//
+// Type: string
+
+terrain_ht_field_name = "terrain_ht";
+
+///////////// create_hi_res_terrain_grid //////////////
+//
+// Option to create a high resolution Cartesian grid with terrain data.
 //
 // This can be used to check that the terrain data tiles are being 
 //   correctly interpreted.
 //
 // Type: boolean
 
-create_cart_terrain_grid = FALSE;
+create_hi_res_terrain_grid = FALSE;
 
-///////////// cart_terrain_grid_subdir ////////////////
+///////////// hi_res_terrain_ht_field_name ////////////
 //
-// Output directory path for Cartesian terrain grid.
-//
-// This will be written as a CF NetCDF file, from an MDV object.
+// Name of high resolution terrain height field in MDV output file.
 //
 // Type: string
 
-cart_terrain_grid_subdir = "cart_terrain";
+hi_res_terrain_ht_field_name = "terrain_hi_res";
 
-///////////// cart_terrain_grid_res_deg ///////////////
+///////////// terrain_grid_hi_res_deg /////////////////
 //
-// Grid resolution for terrain grid (deg).
+// Grid resolution for high-res terrain grid (deg).
 //
 // The grid extent will be determined by the radar coverage.
 //
 // Type: double
 
-cart_terrain_grid_res_deg = 0.005;
-
-///////////// cart_terrain_field_name /////////////////
-//
-// Name of terrain height field in NetCDF MDV output file.
-//
-// Type: string
-
-cart_terrain_field_name = "terrain_ht";
+terrain_grid_hi_res_deg = 0.0005;
 
