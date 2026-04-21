@@ -435,45 +435,20 @@ int CartBeamBlock::_computeBlockage()
       double gndRangeKm, azDeg;
       PJGLatLon2RTheta(_radarLat, _radarLon, lat, lon, &gndRangeKm, &azDeg);
 
-      // calculate the geometry for this cart point
-      
-      _calc->initForGridPoint(lat, lon, gndRangeKm, azDeg);
+      // compute the extinction for all planes at that grid point
 
-      // 
-      
-      // get terrain height
-      
-      fl32 terrainHt = _dem->getElevation(lat, lon);
-      if (!std::isfinite(terrainHt)) {
-        continue;
-      }
-      
-      // double xx, yy;
-      // _proj.latlon2xy(lat, lon, xx, yy);
-      // double azDeg = atan2(xx, yy) * RAD_TO_DEG;
-      // double deltaX = xx - radarX;
-      // double deltaY = yy - radarY;
-      // double gndRangeKm = sqrt(deltaX * deltaX + deltaY * deltaY);
-      
-      // loop through the planes
+      vector<double> fractionBlocked;
+      fractionBlocked.resize(_templateFhdr.nz, 0.0);
+
+      // calculate the blockage
+
+      _calc->getBlockage(lat, lon, gndRangeKm, azDeg, fractionBlocked);
+
+      // copy to 3D array
       
       size_t index = iy * _templateFhdr.nx + ix;
       for (int iz = 0; iz < coord.nz; iz++, index += nPtsPlane) {
-        
-        // double zKm = _templateVhdr.level[iz];
-        // double elDeg = beamHt.computeElevationDeg(zKm, gndRangeKm);
-
-        double extinct = 0;
-        // double extinct = _computeCartPtExtinction(elDeg, azDeg,
-        //                                           zKm, gndRangeKm,
-        //                                           beamHt, powerModel, csec);
-        extinction[index] = extinct;
-        
-        if (extinct == 0.0) {
-          // no blockage at this elevation, so none above either
-          break;
-        }
-        
+        extinction[index] = fractionBlocked[iz];
       } // iz
         
     } // ix

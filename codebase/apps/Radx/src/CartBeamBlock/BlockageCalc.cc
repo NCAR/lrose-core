@@ -83,6 +83,7 @@ void BlockageCalc::initGeom(double maxRangeKm,
   _rangeResKm = rangeResKm;
   _nRangeAlloc = (int) ((_maxRangeKm / _rangeResKm) + 1);
   _zCartKm = zCartKm;
+  _nZ = _zCartKm.size();
   _nAz = _pattern.getNAz();
   
   _rangeKm.resize(_nRangeAlloc);
@@ -97,15 +98,11 @@ void BlockageCalc::initGeom(double maxRangeKm,
   
   _azRangePts.clear();
   _azRangePts.alloc(_nAz, _nRangeAlloc);
-  for (size_t iaz = 0; iaz < _nAz; iaz++) {
-    for (size_t irange = 0; irange < _nRangeAlloc; irange++) {
-      AzRangePoint &pt = _azRangePts[iaz][irange];
-      pt.fracBlocked.resize(_zCartKm.size());
-    } // iaz
-  } // irange
   
   _patternAz.resize(_pattern.getNAz());
-  _cartEl.resize(_zCartKm.size());
+  _cartEl.resize(_nZ);
+
+  _maxElIndexBlocked.alloc(_nZ, _nAz);
   
 }
 
@@ -125,10 +122,62 @@ void BlockageCalc::setRadarLoc(double radarLatDeg,
 }
 
 //////////////////////////////////////////////////////////////////////////
+// compute fraction blocked for each plane at a specified grid point
+
+int BlockageCalc::getBlockage(double lat, double lon,
+                              double gndRangeKm, double azDeg,
+                              vector<double> &fractionBlocked)
+  
+{
+
+  fractionBlocked.resize(_nZ);
+  
+  // initialize geometry for this cart point
+      
+  _initForGridPoint(lat, lon, gndRangeKm, azDeg);
+
+  // loop through the azimuths in the pattern
+  
+  for (size_t iaz = 0; iaz < _nAz; iaz++) {
+
+    // compute the max index blocked at each plane
+    
+    vector<int> maxElIndexBlockedPlane;
+    maxElIndexBlockedPlane.resize(_nZ, -1);
+    _getMaxElIndexBlockedPlane(iaz, maxElIndexBlockedPlane);
+
+    // load up 2D array of blocked indexes
+    
+    for (size_t iz = 0; iz < _nZ; iz++) {
+      _maxElIndexBlocked[iz][iaz] = maxElIndexBlockedPlane[iz];
+    } // iz
+
+  } // iaz
+
+  // sum up the pattern blockages for each plane
+
+  for (size_t iz = 0; iz < _nZ; iz++) {
+
+    double sumFraction = 0.0;
+    for (size_t iaz = 0; iaz < _nAz; iaz++) {
+      int elIndexBlocked = _maxElIndexBlocked[iz][iaz];
+      double frac = _pattern.getPower(elIndexBlocked, iaz);
+      sumFraction += frac;
+    }
+    
+    fractionBlocked[iz] = sumFraction;
+    
+  } // iz
+
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////////////////////////////
 // fill out the array geometry for a specified grid point
 
-int BlockageCalc::initForGridPoint(double lat, double lon,
-                                   double gndRangeKm, double azDeg)
+int BlockageCalc::_initForGridPoint(double lat, double lon,
+                                    double gndRangeKm, double azDeg)
   
 {
 
@@ -141,7 +190,7 @@ int BlockageCalc::initForGridPoint(double lat, double lon,
     return -1;
   }
   _nRange = (int) ((gndRangeKm / _rangeResKm) + 0.5);
-
+  
   ////////////////////
   // compute geometry
 
@@ -157,7 +206,7 @@ int BlockageCalc::initForGridPoint(double lat, double lon,
 
   // elevation for each Cartesian plane
   
-  for (size_t iz = 0; iz < _zCartKm.size(); iz++) {
+  for (size_t iz = 0; iz < _nZ; iz++) {
     double elDeg = _beamHt.computeElevationDeg(_zCartKm[iz], gndRangeKm);
     _cartEl[iz] = EuclidAngle::fromDegrees(elDeg);
   }
@@ -191,7 +240,8 @@ int BlockageCalc::initForGridPoint(double lat, double lon,
 //////////////////////////////////////////////////////////////////////////
 // compute the maximum elevation index blocked for a pattern azimuth
 
-void BlockageCalc::computeMaxElIndexBlocked(size_t iaz)
+void BlockageCalc::_getMaxElIndexBlockedPlane(size_t iaz,
+                                            vector<int> &maxElIndexBlockedPlane)
   
 {
 
@@ -202,10 +252,11 @@ void BlockageCalc::computeMaxElIndexBlocked(size_t iaz)
   
   // loop through increasing elevations, for each cart height
 
-  for (size_t iz = 0; iz < _zCartKm.size(); iz++) {
+  for (size_t iz = 0; iz < _nZ; iz++) {
 
     double cartHtRelKm = _zCartKm[iz] - _radarHtKm;
     double elDeg = _cartEl[iz].degrees();
+    int maxElIndexInRange = -1;
     
     // loop through increasing range
     
@@ -216,7 +267,6 @@ void BlockageCalc::computeMaxElIndexBlocked(size_t iaz)
       // so we can short-circuit this logic
 
       if (!blockedBelow[irange]) {
-        _azRangePts[iaz][irange].maxElIndexBlocked = -1;
         continue;
       }
       
@@ -236,16 +286,26 @@ void BlockageCalc::computeMaxElIndexBlocked(size_t iaz)
       int terrainElIndex = (_pattern.getNEl() / 2) +
         (int) std::round(terrainRelDeg / _pattern.getDeltaEl().degrees());
 
+      int maxIndexBlocked = -1;
       if (terrainElIndex < 0) {
-        _azRangePts[iaz][irange].maxElIndexBlocked = -1;
+        maxIndexBlocked = -1;
+        // _azRangePts[iaz][irange].maxElIndexBlocked = -1;
         blockedBelow[irange] = false;
       } else if (terrainElIndex > (int) _pattern.getNEl() - 1) {
-        _azRangePts[iaz][irange].maxElIndexBlocked = _pattern.getNEl() - 1;
+        maxIndexBlocked = _pattern.getNEl() - 1;
+        // _azRangePts[iaz][irange].maxElIndexBlocked = _pattern.getNEl() - 1;
       } else {
-        _azRangePts[iaz][irange].maxElIndexBlocked = terrainElIndex;
+        maxIndexBlocked = terrainElIndex;
+        // _azRangePts[iaz][irange].maxElIndexBlocked = terrainElIndex;
+      }
+
+      if (maxIndexBlocked >= 0) {
+        maxElIndexInRange = std::max(maxElIndexInRange, maxIndexBlocked);
       }
       
     } // irange
+
+    maxElIndexBlockedPlane[iz] = std::max(maxElIndexBlockedPlane[iz], maxElIndexInRange);
   
   } // iz
     

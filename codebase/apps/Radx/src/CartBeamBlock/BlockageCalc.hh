@@ -75,15 +75,11 @@ public:
 
   void setRadarLoc(double radarLatDeg, double radarLonDeg, double radarHtKm);
   
-  // fill out the array geometry for a specified grid point
+  // compute fraction blocked for each plane at a specified grid point
   
-  int initForGridPoint(double lat, double lon,
-                       double gndRangeKm, double azDeg);
-
-  // compute the maximum elevation index blocked for each
-  // Cartesian height and specified relative az
-  
-  void computeMaxElIndexBlocked(size_t iaz);
+  int getBlockage(double lat, double lon,
+                  double gndRangeKm, double azDeg,
+                  vector<double> &fractionBlocked);
   
 protected:
   
@@ -98,6 +94,7 @@ private:
   double _rangeResKm;
   size_t _nRangeAlloc;
   
+  size_t _nZ;
   size_t _nAz;
   size_t _nRange;
   
@@ -107,26 +104,33 @@ private:
   euclid::EuclidAngle _azCenter;
   vector<euclid::EuclidAngle> _patternAz;
   vector<euclid::EuclidAngle> _cartEl;
-
-  class AzRangePoint {
-
-  public:
-    
-    double lat;
-    double lon;
-    double terrainHtKm;
-    int maxElIndexBlocked;
-    vector<double> fracBlocked;
-
-  };
-
-  // the dimensions will be [nAz][nRange]
-  
-  TaArray2D<AzRangePoint> _azRangePts;
+  TaArray2D<int> _maxElIndexBlocked;
 
   // radar location
 
   double _radarLatDeg, _radarLonDeg, _radarHtKm;
+  
+  // array of attributes in az and range
+  // the dimensions will be [nAz][nRange]
+  
+  class AzRangePoint {
+  public:
+    double lat;
+    double lon;
+    double terrainHtKm;
+  };
+  TaArray2D<AzRangePoint> _azRangePts;
+
+  // fill out the array geometry for a specified grid point
+  
+  int _initForGridPoint(double lat, double lon,
+                        double gndRangeKm, double azDeg);
+
+  // compute the maximum elevation index blocked for each
+  // Cartesian height and specified relative az
+  
+  void _getMaxElIndexBlockedPlane(size_t iaz,
+                                  vector<int> &maxElIndexBlockedPlane);
   
 };
 
