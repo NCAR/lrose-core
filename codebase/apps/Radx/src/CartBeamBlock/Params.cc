@@ -1065,6 +1065,18 @@
     tt->single_val.s = tdrpStrDup("/tmp/CartBeamBlock");
     tt++;
     
+    // Parameter 'data_set_source'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("data_set_source");
+    tt->descr = tdrpStrDup("Description of data set source.");
+    tt->help = tdrpStrDup("This will be written to the MDV master header.");
+    tt->val_offset = (char *) &data_set_source - &_start_;
+    tt->single_val.s = tdrpStrDup("SRTM3");
+    tt++;
+    
     // Parameter 'append_radar_name_to_output_dir'
     // ctype is 'tdrp_bool_t'
     
@@ -1074,18 +1086,6 @@
     tt->descr = tdrpStrDup("Option to add the radar name to the output path.");
     tt->help = tdrpStrDup("If true, the output dir will be 'output_dir/radar_name'.");
     tt->val_offset = (char *) &append_radar_name_to_output_dir - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'write_individual_sweeps'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_individual_sweeps");
-    tt->descr = tdrpStrDup("Option to write out individual sweeps if appropriate.");
-    tt->help = tdrpStrDup("If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.");
-    tt->val_offset = (char *) &write_individual_sweeps - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -1143,61 +1143,64 @@
       tt->struct_vals[5].i = 0;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'blockage_field_name'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("CREATE CARTESIAN GRID FOR CHECKING TERRAIN DATA");
-    tt->comment_text = tdrpStrDup("");
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("blockage_field_name");
+    tt->descr = tdrpStrDup("Name of blockge field in MDV output file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &blockage_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("extinction");
     tt++;
     
-    // Parameter 'create_cart_terrain_grid'
+    // Parameter 'terrain_ht_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("terrain_ht_field_name");
+    tt->descr = tdrpStrDup("Name of terrain height field in MDV output file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &terrain_ht_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("terrain_ht");
+    tt++;
+    
+    // Parameter 'create_hi_res_terrain_grid'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("create_cart_terrain_grid");
-    tt->descr = tdrpStrDup("Option to create a Cartesian grid with terrain data.");
+    tt->param_name = tdrpStrDup("create_hi_res_terrain_grid");
+    tt->descr = tdrpStrDup("Option to create a high resolution Cartesian grid with terrain data.");
     tt->help = tdrpStrDup("This can be used to check that the terrain data tiles are being correctly interpreted.");
-    tt->val_offset = (char *) &create_cart_terrain_grid - &_start_;
+    tt->val_offset = (char *) &create_hi_res_terrain_grid - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'cart_terrain_grid_subdir'
+    // Parameter 'hi_res_terrain_ht_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("cart_terrain_grid_subdir");
-    tt->descr = tdrpStrDup("Output directory path for Cartesian terrain grid.");
-    tt->help = tdrpStrDup("This will be written as a CF NetCDF file, from an MDV object.");
-    tt->val_offset = (char *) &cart_terrain_grid_subdir - &_start_;
-    tt->single_val.s = tdrpStrDup("cart_terrain");
+    tt->param_name = tdrpStrDup("hi_res_terrain_ht_field_name");
+    tt->descr = tdrpStrDup("Name of high resolution terrain height field in MDV output file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &hi_res_terrain_ht_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("terrain_hi_res");
     tt++;
     
-    // Parameter 'cart_terrain_grid_res_deg'
+    // Parameter 'terrain_grid_hi_res_deg'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("cart_terrain_grid_res_deg");
-    tt->descr = tdrpStrDup("Grid resolution for terrain grid (deg).");
+    tt->param_name = tdrpStrDup("terrain_grid_hi_res_deg");
+    tt->descr = tdrpStrDup("Grid resolution for high-res terrain grid (deg).");
     tt->help = tdrpStrDup("The grid extent will be determined by the radar coverage.");
-    tt->val_offset = (char *) &cart_terrain_grid_res_deg - &_start_;
+    tt->val_offset = (char *) &terrain_grid_hi_res_deg - &_start_;
     tt->single_val.d = 0.005;
-    tt++;
-    
-    // Parameter 'cart_terrain_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("cart_terrain_field_name");
-    tt->descr = tdrpStrDup("Name of terrain height field in NetCDF MDV output file.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &cart_terrain_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("terrain_ht");
     tt++;
     
     // trailing entry has param_name set to NULL

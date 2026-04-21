@@ -120,12 +120,6 @@ paramdef double
   p_default = 100.0;
 } range_res_m;
 
-// paramdef double {
-//   p_default = 100.0;
-//   p_descr = "Grid resolution for terrain grid (m).";
-//   p_help = "This is used for internal computations. It should be of the same order as the terrain data itself. Finer resolution will use more memory.";
-// } cart_terrain_grid_res_m;
-
 commentdef {
   p_header = "RADAR PARAMETERS";
 }
@@ -277,17 +271,17 @@ paramdef string {
   p_help = "Output file will be written to this directory.";
 } output_dir;
 
+paramdef string {
+  p_default = "SRTM3";
+  p_descr = "Description of data set source.";
+  p_help = "This will be written to the MDV master header.";
+} data_set_source;
+
 paramdef boolean {
   p_default = false;
   p_descr = "Option to add the radar name to the output path.";
   p_help = "If true, the output dir will be 'output_dir/radar_name'.";
 } append_radar_name_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out individual sweeps if appropriate.";
-  p_help = "If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.";
-} write_individual_sweeps;
 
 typedef struct {
   int year;
@@ -304,30 +298,30 @@ paramdef struct datetime_t {
   p_help = "We need to set a time so that the output files can be correctly named. SRTM shuttle mission 99 occurred in early 2000.";
 } output_time_stamp;
 
-commentdef {
-  p_header = "CREATE CARTESIAN GRID FOR CHECKING TERRAIN DATA";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to create a Cartesian grid with terrain data.";
-  p_help = "This can be used to check that the terrain data tiles are being correctly interpreted.";
-} create_cart_terrain_grid;
-
 paramdef string {
-  p_default = "cart_terrain";
-  p_descr = "Output directory path for Cartesian terrain grid.";
-  p_help = "This will be written as a CF NetCDF file, from an MDV object.";
-} cart_terrain_grid_subdir;
-
-paramdef double {
-  p_default = 0.005;
-  p_descr = "Grid resolution for terrain grid (deg).";
-  p_help = "The grid extent will be determined by the radar coverage.";
-} cart_terrain_grid_res_deg;
+  p_default = "extinction";
+  p_descr = "Name of blockge field in MDV output file.";
+} blockage_field_name;
 
 paramdef string {
   p_default = "terrain_ht";
-  p_descr = "Name of terrain height field in NetCDF MDV output file.";
-} cart_terrain_field_name;
+  p_descr = "Name of terrain height field in MDV output file.";
+} terrain_ht_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to create a high resolution Cartesian grid with terrain data.";
+  p_help = "This can be used to check that the terrain data tiles are being correctly interpreted.";
+} create_hi_res_terrain_grid;
+
+paramdef string {
+  p_default = "terrain_hi_res";
+  p_descr = "Name of high resolution terrain height field in MDV output file.";
+} hi_res_terrain_ht_field_name;
+
+paramdef double {
+  p_default = 0.005;
+  p_descr = "Grid resolution for high-res terrain grid (deg).";
+  p_help = "The grid extent will be determined by the radar coverage.";
+} terrain_grid_hi_res_deg;
 

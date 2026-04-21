@@ -466,19 +466,21 @@ public:
 
   char* output_dir;
 
-  tdrp_bool_t append_radar_name_to_output_dir;
+  char* data_set_source;
 
-  tdrp_bool_t write_individual_sweeps;
+  tdrp_bool_t append_radar_name_to_output_dir;
 
   datetime_t output_time_stamp;
 
-  tdrp_bool_t create_cart_terrain_grid;
+  char* blockage_field_name;
 
-  char* cart_terrain_grid_subdir;
+  char* terrain_ht_field_name;
 
-  double cart_terrain_grid_res_deg;
+  tdrp_bool_t create_hi_res_terrain_grid;
 
-  char* cart_terrain_field_name;
+  char* hi_res_terrain_ht_field_name;
+
+  double terrain_grid_hi_res_deg;
 
   char _end_; // end of data region
               // needed for zeroing out data

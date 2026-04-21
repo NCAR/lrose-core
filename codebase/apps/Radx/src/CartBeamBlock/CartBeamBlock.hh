@@ -42,7 +42,6 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "BeamPowerPattern.hh"
-// #include "RainFields.hh"
 #include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxProj.hh>
 #include <rapformats/DsRadarParams.hh>
@@ -108,16 +107,12 @@ private:
 
   DemProvider *_dem;
   
-  TaArray2D<int16_t> _htArray;
-  size_t _htNx, _htNy;
-  double _htDx, _htDy;
-  double _htMinx, _htMiny;
-
   // computing blockage
-
+  
   BeamHeight _beamHt;
   BeamPowerPattern *_pattern;
   BlockageCalc *_calc;
+  vector<fl32> _blockage;
 
   // output file
 
@@ -129,134 +124,11 @@ private:
 
   int _computeBlockage();
 
-  double _computeCartPtExtinction(double azDeg,
-                                  double gndRangeKm);
-  
-  int _createTerrainGrid(double minLat, double minLon,
-                         double maxLat, double maxLon);
-
-  int _computeHtArray(double minLat, double minLon,
-                      double maxLat, double maxLon);
-
-  void _setTerrainMdvMasterHeader(Mdvx &mdv);
-
-  int _addTerrainMdvField(Mdvx &mdv,
-                          double minLat, double minLon,
-                          double maxLat, double maxLon);
-
-  int _addTerrainMdvField2(Mdvx &mdv,
-                           double minLat, double minLon,
-                           double maxLat, double maxLon);
-  
-};
-
-#endif
-
-#ifdef JUNK
-
-/**
- * @file RadxBeamBlock.hh
- * @brief  The algorithm
- * @class RadxBeamBlock
- * @brief  The algorithm
- *
- * Dave Albo, RAP, NCAR
- *
- * P.O.Box 3000, Boulder, CO, 80307-3000, USA
- *
- * March 2014
- *
- * RadxBeamBlock reads an input Digital Elevation file, and
- * produces beam blockage information for a radar volume as configured 
- * and writes out results in formats supported by Radx.
- */
-
-#include "Args.hh"
-#include "Parms.hh"
-#include "VolHandler.hh"
-#include "DigitalElevationHandler.hh"
-#include "beam_power.h"
-#include "beam_propagation.h"
-#include <Mdv/DsMdvx.hh>
-
-class GridAlgs;
-class Grid2d;
-class ScanHandler;
-class RayHandler;
-
-
-//---------------------------------------------------------------------------
-class RadxBeamBlock
-{
-  
-public:
-  /**
-   * @param[in] parms   Alg parameters
-   */
-  RadxBeamBlock (const Parms &parms);
-
-  /**
-   * Destructor
-   */
-  ~RadxBeamBlock(void);
-
-  /**
-   * Run the algorithm, 
-   * @return 1 for failure, 0 for succes
-   */
-  int Run(void);
-
-  /**
-   * Wite out results
-   * @return 1 for failure, 0 for succes
-   */
-  int Write(void);
-
-protected:
-private:
-
-  Parms _params;                  /**< Alg parameters */
-  VolHandler _vol;                /**< Handles creation and writing of Radx*/
-  DigitalElevationHandler *_dem;  /**< handles reading and use of digital
-				  * elevation data */
-
-  int64_t _nGatesBlocked;
-
-  vector<bool> _azBlocked;
-
-  bool _processScan(ScanHandler &scan,
-		    const rainfields::ancilla::beam_power &power_model,
-		    rainfields::latlonalt origin);
-
-  void _processBeam(RayHandler &ray, rainfields::latlonalt origin, 
-		    const rainfields::ancilla::beam_propagation &bProp,
-		    const rainfields::ancilla::beam_power_cross_section &csec,
-                    bool &foundBlockage);
-
-  void _processGate(GateHandler &ray, rainfields::angle elevAngle, size_t iray,
-		    rainfields::latlonalt origin,
-		    const rainfields::ancilla::beam_propagation &bProp,
-		    rainfields::angle bearing,
-		    const rainfields::ancilla::beam_power_cross_section &csec,
-		    rainfields::angle &max_ray_theta);
-
-  void _adjustValues(size_t ray,
-		     const rainfields::ancilla::beam_propagation &bProp,
-		     rainfields::real peak_ground_range, 
-		     rainfields::real peak_altitude,
-		     rainfields::angle elevAngle,
-		     const rainfields::ancilla::beam_power_cross_section &csec,
-		     rainfields::angle &max_ray_theta, 
-		     rainfields::real &progressive_loss);
-
-  int _createCartTerrainGrid(double minLat, double minLon,
-                             double maxLat, double maxLon);
-
-  void _setTerrainMdvMasterHeader(DsMdvx &mdv);
-
-  void _addTerrainMdvField(DsMdvx &mdv,
-                           double minLat, double minLon,
-                           double maxLat, double maxLon);
+  int _writeBlockage();
+  void _setMasterHeader(Mdvx &mdvx);
+  void _addBlockageField(Mdvx &mdvx);
+  void _addTerrainField(Mdvx &mdvx);
+  void _addHiResTerrainField(Mdvx &mdvx);
   
 };
 
