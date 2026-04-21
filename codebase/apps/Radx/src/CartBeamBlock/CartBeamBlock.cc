@@ -237,7 +237,9 @@ int CartBeamBlock::_readTemplateFile(const string &path)
   _proj.init(_templateField->getFieldHeader());
   if (_params.debug) {
     cerr << "INFO - PROJECTION" << path << endl;
+    cerr << endl;
     _proj.print(cerr);
+    cerr << endl;
   }
 
   _templateMhdr = _templateMdvx.getMasterHeader();
@@ -349,6 +351,7 @@ int CartBeamBlock::_readDem(const string &path)
   if (_params.debug) {
     cerr << "INFO: reading DEM from path: " << path << endl;
     cerr << "      DEM model: " << _dem->ModelName(_params.dem_data_format) << endl;
+    cerr << endl;
   }
   
   // compute safe projection lat/lon limits, with a margin of 5 grid points
@@ -357,6 +360,7 @@ int CartBeamBlock::_readDem(const string &path)
     cerr << "INFO: retrieving DEM data for lat/lon bounding box" << endl;
     cerr << "      minLat, maxLat: " << _minLat << ", " << _maxLat << endl;
     cerr << "      minLon, maxLon: " << _minLon << ", " << _maxLon << endl;
+    cerr << endl;
   }
     
   // initialize dem for reading
