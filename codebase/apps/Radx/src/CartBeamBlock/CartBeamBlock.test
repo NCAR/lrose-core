@@ -72,7 +72,7 @@ n_compute_threads = 8;
 //
 // Type: string
 
-grid_template_path = "$(HOME)/data/pecan/mdv/radarCart/kftg2/20150626/ncf_20150626_000334.nc";
+grid_template_path = "$(HOME)/data/pecan/mdv/radarCart/kftg/20150626/ncf_20150626_000334.nc";
 
 ///////////// template_field_name /////////////////////
 //
@@ -346,7 +346,7 @@ references = "Created by LROSE app CartBeamBlock";
 //
 // Type: string
 
-output_dir = "$(HOME)/data/pecan/mdv/beamBlock/kftg2";
+output_dir = "$(HOME)/data/pecan/mdv/beamBlock/kftg";
 
 ///////////// data_set_source /////////////////////////
 //
