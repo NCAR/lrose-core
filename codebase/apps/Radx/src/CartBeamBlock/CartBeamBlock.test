@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for CartBeamBlock
+ * TDRP params for ./CartBeamBlock
  **********************************************************************/
 
 //======================================================================
@@ -72,7 +72,7 @@ n_compute_threads = 16;
 //
 // Type: string
 
-grid_template_path = "$(HOME)/data/pecan/mdv/radarCart/kftg2/20150626/ncf_20150626_000334.nc";
+grid_template_path = "$(HOME)/data/pecan/mdv/radarCart/kftg/20150626/ncf_20150626_000334.nc";
 
 ///////////// template_field_name /////////////////////
 //
@@ -346,7 +346,7 @@ references = "Created by LROSE app CartBeamBlock";
 //
 // Type: string
 
-output_dir = "$(HOME)/data/pecan/mdv/beamBlock/kftg2";
+output_dir = "$(HOME)/data/pecan/mdv/beamBlock/kftg";
 
 ///////////// data_set_source /////////////////////////
 //
@@ -430,13 +430,15 @@ create_hi_res_terrain_grid = TRUE;
 
 hi_res_terrain_ht_field_name = "terrain_hi_res";
 
-///////////// terrain_grid_hi_res_deg /////////////////
+///////////// hi_res_factor ///////////////////////////
 //
-// Grid resolution for high-res terrain grid (deg).
+// Grid resolution increase for high-res terrain grid.
 //
-// The grid extent will be determined by the radar coverage.
+// The high-resolution grid spacing will be reduced by this factor as 
+//   compared to the main Cartesian grid. Correspondingly, the number of 
+//   grid points will be increased by this factor.
 //
 // Type: double
 
-terrain_grid_hi_res_deg = 0.0005;
+hi_res_factor = 10;
 

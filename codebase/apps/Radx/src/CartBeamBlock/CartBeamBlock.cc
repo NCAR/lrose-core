@@ -882,18 +882,15 @@ void CartBeamBlock::_addHiResTerrainField(Mdvx &mdvx)
   double llx = fhdr.grid_minx - fhdr.grid_dx / 2.0;
   double lly = fhdr.grid_miny - fhdr.grid_dy / 2.0;
 
-  double resRatioX = _params.terrain_grid_hi_res_deg / fhdr.grid_dx;
-  double resRatioY = _params.terrain_grid_hi_res_deg / fhdr.grid_dy;
+  fhdr.grid_dx /= _params.hi_res_factor;
+  fhdr.grid_dy /= _params.hi_res_factor;
 
-  fhdr.grid_dx = _params.terrain_grid_hi_res_deg;
-  fhdr.grid_dy = _params.terrain_grid_hi_res_deg;
+  fhdr.nx = (int) std::round(fhdr.nx * _params.hi_res_factor);
+  fhdr.ny = (int) std::round(fhdr.ny * _params.hi_res_factor);
 
   fhdr.grid_minx = llx + fhdr.grid_dx / 2.0;
   fhdr.grid_miny = lly + fhdr.grid_dy / 2.0;
-  
-  fhdr.nx = std::round(fhdr.nx / resRatioX);
-  fhdr.ny = std::round(fhdr.ny / resRatioY);
-  
+
   fhdr.volume_size = fhdr.nx * fhdr.ny * 1 * sizeof(fl32);
 
   // vlevel header

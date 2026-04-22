@@ -457,7 +457,7 @@ public:
 
   char* hi_res_terrain_ht_field_name;
 
-  double terrain_grid_hi_res_deg;
+  double hi_res_factor;
 
   char _end_; // end of data region
               // needed for zeroing out data

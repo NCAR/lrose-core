@@ -255,6 +255,8 @@ void BlockageCalc::_getMaxElIndexBlockedPlane(size_t iaz,
   
 {
 
+  double MAX_TERRAIN_HT = 9000;
+  
   // initialize flag to indicate whether the Z plane below is blocked
   
   std::fill(_blockedBelow.begin(), _blockedBelow.end(), true);
@@ -263,6 +265,10 @@ void BlockageCalc::_getMaxElIndexBlockedPlane(size_t iaz,
 
   for (size_t iz = 0; iz < _nZ; iz++) {
 
+    if (_zCartKm[iz] > MAX_TERRAIN_HT) {
+     continue;
+    }
+    
     double cartHtRelKm = _zCartKm[iz] - _radarHtKm;
     double elDeg = _cartEl[iz].degrees();
     int maxElIndexInRange = -1;

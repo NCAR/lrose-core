@@ -263,8 +263,8 @@ paramdef string {
 } hi_res_terrain_ht_field_name;
 
 paramdef double {
-  p_default = 0.005;
-  p_descr = "Grid resolution for high-res terrain grid (deg).";
-  p_help = "The grid extent will be determined by the radar coverage.";
-} terrain_grid_hi_res_deg;
+  p_default = 10.0;
+  p_descr = "Grid resolution increase for high-res terrain grid.";
+  p_help = "The high-resolution grid spacing will be reduced by this factor as compared to the main Cartesian grid. Correspondingly, the number of grid points will be increased by this factor.";
+} hi_res_factor;
 

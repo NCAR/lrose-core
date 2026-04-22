@@ -1095,16 +1095,16 @@
     tt->single_val.s = tdrpStrDup("terrain_hi_res");
     tt++;
     
-    // Parameter 'terrain_grid_hi_res_deg'
+    // Parameter 'hi_res_factor'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("terrain_grid_hi_res_deg");
-    tt->descr = tdrpStrDup("Grid resolution for high-res terrain grid (deg).");
-    tt->help = tdrpStrDup("The grid extent will be determined by the radar coverage.");
-    tt->val_offset = (char *) &terrain_grid_hi_res_deg - &_start_;
-    tt->single_val.d = 0.005;
+    tt->param_name = tdrpStrDup("hi_res_factor");
+    tt->descr = tdrpStrDup("Grid resolution increase for high-res terrain grid.");
+    tt->help = tdrpStrDup("The high-resolution grid spacing will be reduced by this factor as compared to the main Cartesian grid. Correspondingly, the number of grid points will be increased by this factor.");
+    tt->val_offset = (char *) &hi_res_factor - &_start_;
+    tt->single_val.d = 10;
     tt++;
     
     // trailing entry has param_name set to NULL
