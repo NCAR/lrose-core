@@ -67,6 +67,7 @@ public:
   void initGeom(double maxRangeKm,
                 double rangeResKm,
                 const vector<double> &zCartKm,
+                double maxTerrainHtKm,
                 int nBeamPatternEl,
                 int nBeamPatternAz);
   
@@ -78,7 +79,8 @@ public:
   
   int getBlockage(double lat, double lon,
                   double gndRangeKm, double azDeg,
-                  vector<double> &fractionBlocked);
+                  vector<double> &fractionBlocked,
+                  vector<double> &cartEl);
   
 protected:
   
@@ -89,7 +91,8 @@ private:
   const BeamPowerPattern &_pattern;
 
   BeamHeight _beamHt;
-
+  double _maxTerrainHtKm;
+  
   double _maxRangeKm;
   double _rangeResKm;
   size_t _nRangeAlloc;

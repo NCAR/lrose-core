@@ -63,8 +63,7 @@ const fl32 CartBeamBlock::missingFl32 = -9999.0;
 
 CartBeamBlock::CartBeamBlock(int argc, char **argv) :
         _dem(nullptr),
-        _pattern(nullptr),
-        _calc(nullptr)
+        _pattern(nullptr)
   
 {
 
@@ -99,7 +98,6 @@ CartBeamBlock::CartBeamBlock(int argc, char **argv) :
   
   _dem = new DemProvider(_params);
   _pattern = new BeamPowerPattern;
-  _calc = new BlockageCalc(_params, *_dem, *_pattern);
 
 }
 
@@ -111,7 +109,6 @@ CartBeamBlock::~CartBeamBlock()
 
   delete _dem;
   delete _pattern;
-  delete _calc;
   
 }
 
@@ -131,7 +128,7 @@ int CartBeamBlock::Run()
 
   // get digital terrain data
 
-  if (_readDem(_params.dem_path)) {
+  if (_initDem(_params.dem_path)) {
     cerr << "ERROR - CartBeamBlock::Run()" << endl;
     cerr << "  Cannot read DEM data, path: " << _params.dem_path << endl;
     return -1;
@@ -323,27 +320,18 @@ int CartBeamBlock::_readTemplateFile(const string &path)
   
   _pattern->makeVerticalIntegration();
   
-  // initialize blockage calculations
-  
-  _calc->initGeom(maxRangeKm, _params.range_res_m / 1000.0,
-                  _zKm,
-                  _params.n_pattern_vert,
-                  _params.n_pattern_horiz);
-
-  _calc->setRadarLoc(_radarLat, _radarLon, _radarHtKm);
-
   return 0;
   
 }
 
 //////////////////////////////////////////////////
-// Read in the DEM
+// Initialize the DEM
 
-int CartBeamBlock::_readDem(const string &path)
+int CartBeamBlock::_initDem(const string &path)
 {
 
   if (!fs::is_directory(path) && (!fs::is_regular_file(path))) {
-    cerr << "ERROR - CartBeamBlock::_readDem" << endl;
+    cerr << "ERROR - CartBeamBlock::_initDem" << endl;
     cerr << "  DEM path does not exist: " << path << endl;
     return -1;
   }
@@ -368,8 +356,25 @@ int CartBeamBlock::_readDem(const string &path)
   std::pair<double,double> sw(_minLat, _minLon);
   std::pair<double,double> ne(_maxLat, _maxLon);
   if (_dem->set(sw, ne)) {
-    cerr << "ERROR - CartBeamBlock::_readDem" << endl;
+    cerr << "ERROR - CartBeamBlock::_initDem" << endl;
     return -1;
+  }
+
+  // fill terrain array
+
+  Mdvx::field_header_t fhdr(_templateFhdr);
+  _height.clear();
+  _height.resize(fhdr.nx * fhdr.ny, missingFl32);
+  _maxTerrainHtKm = -9999;
+  int ii = 0;
+  for (int iy = 0; iy < fhdr.ny; iy++) {
+    for (int ix = 0; ix < fhdr.nx; ix++, ii++) {
+      double latDeg, lonDeg;
+      _proj.xyIndex2latlon(ix, iy, latDeg, lonDeg);
+      double ht = _dem->getTerrainHtM(latDeg, lonDeg);
+      _height[ii] = ht;
+      _maxTerrainHtKm = std::max(_maxTerrainHtKm, ht);
+    }
   }
 
   return 0;
@@ -390,6 +395,8 @@ int CartBeamBlock::_computeBlockage()
   size_t nPtsPlane = _templateFhdr.nx * _templateFhdr.ny;
   _blockage.resize(nPtsPlane * _templateFhdr.nz);
   std::fill(_blockage.begin(), _blockage.end(), missingFl32);
+  _elevation.resize(nPtsPlane * _templateFhdr.nz);
+  std::fill(_elevation.begin(), _elevation.end(), missingFl32);
 
   // compute max range from radar to grid corners
   // needed for initializing each thread-local BlockageCalc
@@ -489,6 +496,7 @@ int CartBeamBlock::_computeBlockage()
     calc.initGeom(maxRangeKm,
                   _params.range_res_m / 1000.0,
                   _zKm,
+                  _maxTerrainHtKm,
                   _params.n_pattern_vert,
                   _params.n_pattern_horiz);
     calc.setRadarLoc(_radarLat, _radarLon, _radarHtKm);
@@ -496,6 +504,7 @@ int CartBeamBlock::_computeBlockage()
     // scratch array reused for each grid point
 
     vector<double> fractionBlocked(_templateFhdr.nz, 0.0);
+    vector<double> elev(_templateFhdr.nz, 0.0);
 
     for (int iy = iy0; iy < iy1; iy++) {
 
@@ -516,7 +525,8 @@ int CartBeamBlock::_computeBlockage()
         // compute blockage for all planes at this grid point
 
         if (calc.getBlockage(lat, lon, gndRangeKm, azDeg,
-                             fractionBlocked)) {
+                             fractionBlocked,
+                             elev)) {
           threadStatus[threadNum] = -1;
           threadErrStr[threadNum] =
             "ERROR - BlockageCalc::getBlockage() failed";
@@ -529,6 +539,7 @@ int CartBeamBlock::_computeBlockage()
         size_t index = iy * _templateFhdr.nx + ix;
         for (int iz = 0; iz < coord.nz; iz++, index += nPtsPlane) {
           _blockage[index] = fractionBlocked[iz];
+          _elevation[index] = elev[iz];
         }
 
         ++nPointsDone;
@@ -629,8 +640,13 @@ int CartBeamBlock::_writeBlockage()
   _outMdvx.clear();
   _setMasterHeader(_outMdvx);
   _addBlockageField(_outMdvx);
-  _addTerrainField(_outMdvx);
-  if (_params.create_hi_res_terrain_grid) {
+  if (strlen(_params.elev_field_name) > 0) {
+    _addElevationField(_outMdvx);
+  }
+  if (strlen(_params.terrain_ht_field_name) > 0) {
+    _addTerrainField(_outMdvx);
+  }
+  if (strlen(_params.hi_res_terrain_ht_field_name) > 0) {
     _addHiResTerrainField(_outMdvx);
   }
   
@@ -642,6 +658,9 @@ int CartBeamBlock::_writeBlockage()
     outputDir += PATH_DELIM;
     outputDir += _params.radar_name;
   }
+
+  cerr << endl;
+  cerr << "Writing output MDV file, dir: " << outputDir << endl;
   
   if (_outMdvx.writeToDir(outputDir.c_str())) {
     cerr << "ERROR - CartBeamBlock::_createTerrainGrid" << endl;
@@ -743,13 +762,67 @@ void CartBeamBlock::_addBlockageField(Mdvx &mdvx)
   
   // create field
   
-  MdvxField *fld = new MdvxField(fhdr, vhdr, _blockage.data());
-  fld->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
-  // set strings
-  
-  fld->setFieldName("BEAM_E");
+  MdvxField *fld = new MdvxField(fhdr, vhdr);
+  fld->setFieldName(_params.blockage_field_name);
   fld->setFieldNameLong("beam_extinction_from_terrain");
   fld->setUnits("");
+  fld->setVolData(_blockage.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
+  fld->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
+  
+  // add to object
+  
+  mdvx.addField(fld);
+
+}
+
+//////////////////////////////////////////////////////////////////////
+// add the elevation field
+
+void CartBeamBlock::_addElevationField(Mdvx &mdvx)
+  
+{
+  
+  if (_params.debug) {
+    cerr << "-->> Adding blockage field: " << _params.elev_field_name << endl;
+  }
+
+  // field header
+  
+  Mdvx::field_header_t fhdr(_templateFhdr);
+  
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
+  
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = 4;
+  fhdr.volume_size = fhdr.nx * fhdr.ny * fhdr.nz * sizeof(fl32);
+  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
+  fhdr.scaling_type = Mdvx::SCALING_NONE;
+  
+  fhdr.scale = 1.0;
+  fhdr.bias = 0.0;
+  
+  fhdr.bad_data_value = missingFl32;
+  fhdr.missing_data_value = missingFl32;
+  
+  fhdr.min_value = 0;
+  fhdr.max_value = 0;
+  fhdr.min_value_orig_vol = 0;
+  fhdr.max_value_orig_vol = 0;
+
+  // vlevel header
+  
+  Mdvx::vlevel_header_t vhdr(_templateVhdr);
+  
+  // create field
+  
+  MdvxField *fld = new MdvxField(fhdr, vhdr);
+  fld->setFieldName(_params.elev_field_name);
+  fld->setFieldNameLong("radar_elevation_for_cart_point");
+  fld->setUnits("deg");
+  fld->setVolData(_elevation.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
+  fld->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
   
   // add to object
   
@@ -808,28 +881,26 @@ void CartBeamBlock::_addTerrainField(Mdvx &mdvx)
 
   // create terrain data
 
-  vector<fl32> height;
-  height.resize(fhdr.nx * fhdr.ny, missingFl32);
-  int ii = 0;
-  for (int iy = 0; iy < fhdr.ny; iy++) {
-    for (int ix = 0; ix < fhdr.nx; ix++, ii++) {
-      double latDeg, lonDeg;
-      _proj.xyIndex2latlon(ix, iy, latDeg, lonDeg);
-      fl32 ht = _dem->getTerrainHtM(latDeg, lonDeg);
-      height[ii] = ht;
-    }
-  }
+  // vector<fl32> height;
+  // height.resize(fhdr.nx * fhdr.ny, missingFl32);
+  // int ii = 0;
+  // for (int iy = 0; iy < fhdr.ny; iy++) {
+  //   for (int ix = 0; ix < fhdr.nx; ix++, ii++) {
+  //     double latDeg, lonDeg;
+  //     _proj.xyIndex2latlon(ix, iy, latDeg, lonDeg);
+  //     fl32 ht = _dem->getTerrainHtM(latDeg, lonDeg);
+  //     height[ii] = ht;
+  //   }
+  // }
 
   // create field
 
-  MdvxField *fld = new MdvxField(fhdr, vhdr, height.data());
-  fld->convertType(Mdvx::ENCODING_FLOAT32,
-                   Mdvx::COMPRESSION_GZIP);
-  // set strings
-  
+  MdvxField *fld = new MdvxField(fhdr, vhdr);
   fld->setFieldName(_params.terrain_ht_field_name);
   fld->setFieldNameLong("Terrain height from DEM data");
   fld->setUnits("m");
+  fld->setVolData(_height.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
+  fld->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
   
   // add to object
   
@@ -918,13 +989,12 @@ void CartBeamBlock::_addHiResTerrainField(Mdvx &mdvx)
   
   // create field
   
-  MdvxField *fld = new MdvxField(fhdr, vhdr, height.data());
-  fld->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_GZIP);
-  // set strings
-  
+  MdvxField *fld = new MdvxField(fhdr, vhdr);
   fld->setFieldName(_params.hi_res_terrain_ht_field_name);
   fld->setFieldNameLong("High resolution terrain ht data from DEM");
   fld->setUnits("m");
+  fld->setVolData(height.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
+  fld->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
   
   // add to object
   

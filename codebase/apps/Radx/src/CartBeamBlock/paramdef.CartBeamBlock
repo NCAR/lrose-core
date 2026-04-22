@@ -247,19 +247,21 @@ paramdef string {
 } blockage_field_name;
 
 paramdef string {
+  p_default = "elevation";
+  p_descr = "Name of elevation field in MDV output file.";
+  p_help = "If name string is empty, this field is not written.";
+} elev_field_name;
+
+paramdef string {
   p_default = "terrain_ht";
   p_descr = "Name of terrain height field in MDV output file.";
+  p_help = "If name string is empty, this field is not written.";
 } terrain_ht_field_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to create a high resolution Cartesian grid with terrain data.";
-  p_help = "This can be used to check that the terrain data tiles are being correctly interpreted.";
-} create_hi_res_terrain_grid;
 
 paramdef string {
   p_default = "terrain_hi_res";
   p_descr = "Name of high resolution terrain height field in MDV output file.";
+  p_help = "If name string is empty, this field is not written.";
 } hi_res_terrain_ht_field_name;
 
 paramdef double {

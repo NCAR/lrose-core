@@ -72,6 +72,7 @@ BlockageCalc::~BlockageCalc(void)
 void BlockageCalc::initGeom(double maxRangeKm,
                             double rangeResKm,
                             const vector<double> &zCartKm,
+                            double maxTerrainHtKm,
                             int nBeamPatternEl,
                             int nBeamPatternAz)
 
@@ -83,6 +84,7 @@ void BlockageCalc::initGeom(double maxRangeKm,
   _rangeResKm = rangeResKm;
   _nRangeAlloc = (int) ((_maxRangeKm / _rangeResKm) + 1);
   _zCartKm = zCartKm;
+  _maxTerrainHtKm = maxTerrainHtKm;
   _nZ = _zCartKm.size();
   _nAz = _pattern.getNAz();
   
@@ -133,11 +135,13 @@ void BlockageCalc::setRadarLoc(double radarLatDeg,
 
 int BlockageCalc::getBlockage(double lat, double lon,
                               double gndRangeKm, double azDeg,
-                              vector<double> &fractionBlocked)
+                              vector<double> &fractionBlocked,
+                              vector<double> &cartEl)
   
 {
 
   fractionBlocked.resize(_nZ);
+  cartEl.resize(_nZ);
   
   // initialize geometry for this cart point
       
@@ -176,6 +180,7 @@ int BlockageCalc::getBlockage(double lat, double lon,
     }
     
     fractionBlocked[iz] = sumFraction;
+    cartEl[iz] = _cartEl[iz].degrees();
     
   } // iz
 
@@ -255,8 +260,6 @@ void BlockageCalc::_getMaxElIndexBlockedPlane(size_t iaz,
   
 {
 
-  double MAX_TERRAIN_HT = 9000;
-  
   // initialize flag to indicate whether the Z plane below is blocked
   
   std::fill(_blockedBelow.begin(), _blockedBelow.end(), true);
@@ -265,8 +268,8 @@ void BlockageCalc::_getMaxElIndexBlockedPlane(size_t iaz,
 
   for (size_t iz = 0; iz < _nZ; iz++) {
 
-    if (_zCartKm[iz] > MAX_TERRAIN_HT) {
-     continue;
+    if (_zCartKm[iz] > _maxTerrainHtKm + 0.5) {
+      continue;
     }
     
     double cartHtRelKm = _zCartKm[iz] - _radarHtKm;

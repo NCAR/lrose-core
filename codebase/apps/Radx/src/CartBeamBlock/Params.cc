@@ -1059,6 +1059,18 @@
     tt->single_val.s = tdrpStrDup("extinction");
     tt++;
     
+    // Parameter 'elev_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("elev_field_name");
+    tt->descr = tdrpStrDup("Name of elevation field in MDV output file.");
+    tt->help = tdrpStrDup("If name string is empty, this field is not written.");
+    tt->val_offset = (char *) &elev_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("elevation");
+    tt++;
+    
     // Parameter 'terrain_ht_field_name'
     // ctype is 'char*'
     
@@ -1066,21 +1078,9 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("terrain_ht_field_name");
     tt->descr = tdrpStrDup("Name of terrain height field in MDV output file.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("If name string is empty, this field is not written.");
     tt->val_offset = (char *) &terrain_ht_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("terrain_ht");
-    tt++;
-    
-    // Parameter 'create_hi_res_terrain_grid'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("create_hi_res_terrain_grid");
-    tt->descr = tdrpStrDup("Option to create a high resolution Cartesian grid with terrain data.");
-    tt->help = tdrpStrDup("This can be used to check that the terrain data tiles are being correctly interpreted.");
-    tt->val_offset = (char *) &create_hi_res_terrain_grid - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'hi_res_terrain_ht_field_name'
@@ -1090,7 +1090,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("hi_res_terrain_ht_field_name");
     tt->descr = tdrpStrDup("Name of high resolution terrain height field in MDV output file.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("If name string is empty, this field is not written.");
     tt->val_offset = (char *) &hi_res_terrain_ht_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("terrain_hi_res");
     tt++;

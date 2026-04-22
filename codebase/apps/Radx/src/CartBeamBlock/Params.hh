@@ -451,9 +451,9 @@ public:
 
   char* blockage_field_name;
 
-  char* terrain_ht_field_name;
+  char* elev_field_name;
 
-  tdrp_bool_t create_hi_res_terrain_grid;
+  char* terrain_ht_field_name;
 
   char* hi_res_terrain_ht_field_name;
 

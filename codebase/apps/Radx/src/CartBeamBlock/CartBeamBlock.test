@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./CartBeamBlock
+ * TDRP params for CartBeamBlock
  **********************************************************************/
 
 //======================================================================
@@ -47,7 +47,7 @@ debug = DEBUG_OFF;
 //
 // Type: int
 
-n_compute_threads = 16;
+n_compute_threads = 8;
 
 //======================================================================
 //
@@ -72,7 +72,7 @@ n_compute_threads = 16;
 //
 // Type: string
 
-grid_template_path = "$(HOME)/data/pecan/mdv/radarCart/kftg/20150626/ncf_20150626_000334.nc";
+grid_template_path = "$(HOME)/data/pecan/mdv/radarCart/kftg2/20150626/ncf_20150626_000334.nc";
 
 ///////////// template_field_name /////////////////////
 //
@@ -346,7 +346,7 @@ references = "Created by LROSE app CartBeamBlock";
 //
 // Type: string
 
-output_dir = "$(HOME)/data/pecan/mdv/beamBlock/kftg";
+output_dir = "$(HOME)/data/pecan/mdv/beamBlock/kftg2";
 
 ///////////// data_set_source /////////////////////////
 //
@@ -403,28 +403,31 @@ output_time_stamp = {
 
 blockage_field_name = "extinction";
 
+///////////// elev_field_name /////////////////////////
+//
+// Name of elevation field in MDV output file.
+//
+// If name string is empty, this field is not written.
+//
+// Type: string
+
+elev_field_name = "elevation";
+
 ///////////// terrain_ht_field_name ///////////////////
 //
 // Name of terrain height field in MDV output file.
+//
+// If name string is empty, this field is not written.
 //
 // Type: string
 
 terrain_ht_field_name = "terrain_ht";
 
-///////////// create_hi_res_terrain_grid //////////////
-//
-// Option to create a high resolution Cartesian grid with terrain data.
-//
-// This can be used to check that the terrain data tiles are being 
-//   correctly interpreted.
-//
-// Type: boolean
-
-create_hi_res_terrain_grid = TRUE;
-
 ///////////// hi_res_terrain_ht_field_name ////////////
 //
 // Name of high resolution terrain height field in MDV output file.
+//
+// If name string is empty, this field is not written.
 //
 // Type: string
 

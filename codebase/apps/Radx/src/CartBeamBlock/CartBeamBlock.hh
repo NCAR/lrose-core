@@ -105,13 +105,15 @@ private:
   // digital terrain height data
 
   DemProvider *_dem;
+  vector<fl32> _height;
+  double _maxTerrainHtKm;
   
   // computing blockage
   
   BeamHeight _beamHt;
   BeamPowerPattern *_pattern;
-  BlockageCalc *_calc;
   vector<fl32> _blockage;
+  vector<fl32> _elevation;
 
   // output file
 
@@ -119,13 +121,14 @@ private:
 
   int _readGridTemplate(const string &path);
   int _readTemplateFile(const string &path);
-  int _readDem(const string &path);
+  int _initDem(const string &path);
 
   int _computeBlockage();
 
   int _writeBlockage();
   void _setMasterHeader(Mdvx &mdvx);
   void _addBlockageField(Mdvx &mdvx);
+  void _addElevationField(Mdvx &mdvx);
   void _addTerrainField(Mdvx &mdvx);
   void _addHiResTerrainField(Mdvx &mdvx);
   
