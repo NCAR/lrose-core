@@ -26,10 +26,10 @@ using namespace std;
 //
 const float DataMgr::undefinedValue   = FLT_MIN;
 
-const char* DataMgr::hailMassFieldName  = "Hail Mass Flux";
+const char* DataMgr::hailMassFieldName  = "Hail_Mass_Flux";
 const char* DataMgr::hailMassUnits      = "g/m2s";
 
-const char* DataMgr::hailKeFieldName  = "Hail KE Flux";
+const char* DataMgr::hailKeFieldName  = "Hail_KE_Flux";
 const char* DataMgr::hailKeUnits      = "J/m2s";
 
 DataMgr::DataMgr()
