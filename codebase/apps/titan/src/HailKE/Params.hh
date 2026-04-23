@@ -74,19 +74,7 @@ public:
     ONE_TIME = 3
   } trigger_mode_t;
 
-  typedef enum {
-    RUNNING_ACCUM = 0,
-    TOTAL_ACCUM = 1,
-    ACCUM_FROM_TIME_OF_DAY = 2
-  } accum_method_t;
-
   // struct typedefs
-
-  typedef struct {
-    int hour;
-    int min;
-    int sec;
-  } restart_time_of_day_t;
 
   typedef struct {
     float a;
@@ -414,15 +402,6 @@ public:
 
   float base_height_threshold;
 
-  accum_method_t accum_method;
-
-  int running_duration;
-
-  tdrp_bool_t use_elapsed_time;
-
-  restart_time_of_day_t *_restart_time_of_day;
-  int restart_time_of_day_n;
-
   char* output_url;
 
   char _end_; // end of data region
@@ -432,7 +411,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[22];
+  mutable TDRPtable _table[17];
 
   const char *_className;
 
