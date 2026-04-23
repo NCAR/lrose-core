@@ -89,37 +89,15 @@ int MaxData::processFile(const string &file_path)
   // read in the file
 
   DsMdvx mdvx;
-
   mdvx.setReadPath(file_path);
-
   mdvx.setReadEncodingType(Mdvx::ENCODING_FLOAT32);
-
   mdvx.setReadCompressionType(Mdvx::COMPRESSION_NONE);
+  mdvx.addReadField(_params.hailKeFlux_field_name);
+  mdvx.addReadField(_params.hailMassFlux_field_name);
 
-  if (strlen(_params.hailKeFlux_field_name) > 0) {
-
-    mdvx.addReadField(_params.hailKeFlux_field_name);
-
-  } else {
-   
-    mdvx.addReadField(_params.hailKeFlux_field);
-    
-  }
-  if (strlen(_params.hailMassFlux_field_name) > 0) {
-    
-    mdvx.addReadField(_params.hailMassFlux_field_name);
-
-  } else {
-    
-    mdvx.addReadField(_params.hailMassFlux_field);
-  }
-  
   if (mdvx.readVolume()) {
-    
     cerr << "ERROR - MaxData::processInput" << endl;
-    
     cerr << mdvx.getErrStr() << endl;
-    
     return -1;
   }
   
@@ -127,26 +105,9 @@ int MaxData::processFile(const string &file_path)
   // Get the data
   //
   const Mdvx::master_header_t &mhdr = mdvx.getMasterHeader();
-  MdvxField hailMassFluxFld;
-  MdvxField hailKeFluxFld; 
-  if (strlen(_params.hailKeFlux_field_name) > 0) {
-
-    hailMassFluxFld = *mdvx.getField(_params.hailKeFlux_field_name);
-
-  } else {
-
-    hailMassFluxFld = *mdvx.getField(_params.hailKeFlux_field);
-
-  }
-  if (strlen(_params.hailMassFlux_field_name) > 0) {
-
-    hailKeFluxFld = *mdvx.getField(_params.hailMassFlux_field_name);
-
-  } else {
-
-    hailKeFluxFld = *mdvx.getField(_params.hailMassFlux_field);
-  }
-
+  MdvxField hailMassFluxFld = *mdvx.getField(_params.hailKeFlux_field_name);
+  MdvxField hailKeFluxFld = *mdvx.getField(_params.hailMassFlux_field_name);
+  
   const Mdvx::field_header_t &hailKeFluxFhdr = hailKeFluxFld.getFieldHeader();
 
   //

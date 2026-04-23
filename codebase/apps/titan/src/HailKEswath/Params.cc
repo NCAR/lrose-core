@@ -715,19 +715,7 @@
     tt->descr = tdrpStrDup("Name of hail mass flux field in input MDV files.");
     tt->help = tdrpStrDup("If empty, the hailMassFlux_field parameter is used instead.");
     tt->val_offset = (char *) &hailMassFlux_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'hailMassFlux_field'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("hailMassFlux_field");
-    tt->descr = tdrpStrDup("Field position of hail mass flux in input MDV files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &hailMassFlux_field - &_start_;
-    tt->single_val.i = 0;
+    tt->single_val.s = tdrpStrDup("Hail_Mass_Flux");
     tt++;
     
     // Parameter 'hailKeFlux_field_name'
@@ -739,19 +727,7 @@
     tt->descr = tdrpStrDup("Name of hail ke flux field");
     tt->help = tdrpStrDup("If empty, the hailKeFlux_field parameter is used instead.");
     tt->val_offset = (char *) &hailKeFlux_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'hailKeFlux_field'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("hailKeFlux_field");
-    tt->descr = tdrpStrDup("Field position of hail ke flux in input MDV files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &hailKeFlux_field - &_start_;
-    tt->single_val.i = 1;
+    tt->single_val.s = tdrpStrDup("Hail_KE_Flux");
     tt++;
     
     // Parameter 'check_input_geom'
@@ -876,30 +852,6 @@
     tt->help = tdrpStrDup("This is placed in the MDV master header for documentation purposes.");
     tt->val_offset = (char *) &data_set_name - &_start_;
     tt->single_val.s = tdrpStrDup("HailKE swaths.");
-    tt++;
-    
-    // Parameter 'output_encoding_type'
-    // ctype is '_encoding_type_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_encoding_type");
-    tt->descr = tdrpStrDup("Set encoding type.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_encoding_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("encoding_type_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("ENCODING_ASIS");
-      tt->enum_def.fields[0].val = ENCODING_ASIS;
-      tt->enum_def.fields[1].name = tdrpStrDup("ENCODING_INT8");
-      tt->enum_def.fields[1].val = ENCODING_INT8;
-      tt->enum_def.fields[2].name = tdrpStrDup("ENCODING_INT16");
-      tt->enum_def.fields[2].val = ENCODING_INT16;
-      tt->enum_def.fields[3].name = tdrpStrDup("ENCODING_FLOAT32");
-      tt->enum_def.fields[3].val = ENCODING_FLOAT32;
-    tt->single_val.e = ENCODING_INT8;
     tt++;
     
     // trailing entry has param_name set to NULL

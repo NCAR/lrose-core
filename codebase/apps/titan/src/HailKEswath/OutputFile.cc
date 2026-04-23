@@ -162,14 +162,14 @@ int OutputFile::write(time_t start_time,
     
     MdvxField *field = nullptr;
     
-     if (out_field == _maxHailKeFluxFieldNum) {
+    if (out_field == _maxHailKeFluxFieldNum) {
       field = new MdvxField(fhdr, vhdr, max_hailke_flux);
-      field->convertRounded((Mdvx::encoding_type_t) _params.output_encoding_type,
-			    Mdvx::COMPRESSION_ZLIB);
+      field->convertRounded(Mdvx::ENCODING_FLOAT32,
+			    Mdvx::COMPRESSION_GZIP);
     } else if (out_field == _maxHailMassFluxFieldNum) {
       field = new MdvxField(fhdr, vhdr, max_hailmass_flux);
-      field->convertRounded((Mdvx::encoding_type_t) _params.output_encoding_type,
-			    Mdvx::COMPRESSION_ZLIB);
+      field->convertRounded(Mdvx::ENCODING_FLOAT32,
+                            Mdvx::COMPRESSION_GZIP);
     }
     // add field to mdvx object
     

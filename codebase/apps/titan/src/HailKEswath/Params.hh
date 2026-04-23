@@ -91,13 +91,6 @@ public:
     SINGLE_FILE = 3
   } max_method_t;
 
-  typedef enum {
-    ENCODING_ASIS = 0,
-    ENCODING_INT8 = 1,
-    ENCODING_INT16 = 2,
-    ENCODING_FLOAT32 = 5
-  } encoding_type_t;
-
   // struct typedefs
 
   typedef struct {
@@ -416,11 +409,7 @@ public:
 
   char* hailMassFlux_field_name;
 
-  int hailMassFlux_field;
-
   char* hailKeFlux_field_name;
-
-  int hailKeFlux_field;
 
   tdrp_bool_t check_input_geom;
 
@@ -435,8 +424,6 @@ public:
 
   char* data_set_name;
 
-  encoding_type_t output_encoding_type;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -444,7 +431,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[24];
+  mutable TDRPtable _table[21];
 
   const char *_className;
 

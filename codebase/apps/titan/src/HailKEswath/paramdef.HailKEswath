@@ -83,27 +83,16 @@ paramdef string {
 } input_hail_data_dir;
 
 paramdef string {
-  p_default = "";
+  p_default = "Hail_Mass_Flux";
   p_descr = "Name of hail mass flux field in input MDV files.";
   p_help = "If empty, the hailMassFlux_field parameter is used instead.";
 } hailMassFlux_field_name;
 
-paramdef int {
-  p_default = 0;
-  p_descr = "Field position of hail mass flux in input MDV files.";
-} hailMassFlux_field;
-
 paramdef string {
-  p_default = "";
+  p_default = "Hail_KE_Flux";
   p_descr = "Name of hail ke flux field";
   p_help = "If empty, the hailKeFlux_field parameter is used instead.";
 } hailKeFlux_field_name;
-
-paramdef int {
-  p_default = 1;
-  p_descr = "Field position of hail ke flux in input MDV files.";
-} hailKeFlux_field;
-
 
 paramdef boolean {
   p_default = TRUE;
@@ -164,22 +153,8 @@ paramdef string {
   p_help = "The swath data is output to this directory in MDV format.";
 } output_dir;
 
-
 paramdef string {
   p_default = "HailKE swaths.";
   p_descr = "Data set name.";
   p_help = "This is placed in the MDV master header for documentation purposes.";
 } data_set_name;
-
-
-typedef enum {
-  ENCODING_ASIS =      0,
-  ENCODING_INT8 =      1,
-  ENCODING_INT16 =     2,
-  ENCODING_FLOAT32 =   5
-} encoding_type_t;
-
-paramdef enum encoding_type_t {
-  p_default = ENCODING_INT8;
-  p_descr = "Set encoding type.";
-} output_encoding_type;
