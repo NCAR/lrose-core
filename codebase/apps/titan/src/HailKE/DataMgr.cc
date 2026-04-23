@@ -192,7 +192,7 @@ DataMgr::convert2kineticEnergy()
    float   Z, M, E;
    float   inverseMassB = 1.0/massB;
    float   inverseKeB = 1.0/keB;
-   float  *lowerData, lowerDbz;
+   float  lowerDbz;
    float  *upperData, upperDbz;
    float   missingValue, badValue;
 
@@ -202,7 +202,6 @@ DataMgr::convert2kineticEnergy()
    dbzField->setPlanePtrs();
    upperPlane = dbzField->computePlaneNum( (double)referenceLevel );
    upperData  = (float*)dbzField->getPlane( upperPlane );
-   lowerData  = (float*)dbzField->getPlane( 0 );
 
    const Mdvx::field_header_t &dbzFieldHdr = dbzField->getFieldHeader();
    missingValue = dbzFieldHdr.missing_data_value;
@@ -215,6 +214,20 @@ DataMgr::convert2kineticEnergy()
    massData          = new float[numValuesPerPlane];
    keData            = new float[numValuesPerPlane];
 
+   // find the lowest dbz in the column
+   
+   vector<float> lowestDbz;
+   lowestDbz.resize(numValuesPerPlane, -9999);
+   for (int ilevel = 0; ilevel < upperPlane; ilevel++) {
+     float *levelData  = (float*)dbzField->getPlane(ilevel);
+     for(int ii = 0; ii < numValuesPerPlane; ++ii) {
+       float dbzVal = levelData[ii];
+       if (lowestDbz[ii] < 0 && dbzVal != missingValue && dbzVal != badValue) {
+         lowestDbz[ii] = dbzVal;
+       }
+     }
+   }
+   
    //
    // Process each dbz value in the upper and lower levels
    // to determine the final kinetic energy result
@@ -235,7 +248,7 @@ DataMgr::convert2kineticEnergy()
       //
       // Lower level: set missing/bad/thresholded values to undefined
       //
-      lowerDbz = lowerData[i];
+      lowerDbz = lowestDbz[i];
       if ( lowerDbz == missingValue || lowerDbz == badValue  ||
          ( lowerDbz < lowerThreshold )) {
          massData[i] = undefinedValue;
@@ -255,8 +268,8 @@ DataMgr::convert2kineticEnergy()
       keData[i]   = E;
 
       if ( !posted ) {
-         posted = true;
-         POSTMSG( DEBUG, "...Areas of hail mass located" );
+        posted = true;
+        POSTMSG( DEBUG, "...Areas of hail mass located" );
       }
    }
    return( 0 );
