@@ -139,20 +139,20 @@ Assume the new RPM is in:
   $HOME/downloads
 ```
 
-Then for Centos 7 or Fedora:
+Then for Fedora:
 
 ```
   cd ~/Downloads
   yum remove -y lrose-core
-  yum install -y ./lrose-core-20210215-centos_8.x86_64.rpm
+  yum install -y ./lrose-core-20250811-fedora_42.x86_64.rpm
 ```
 
-or Centos 8:
+RedHat 9 or 10:
 
 ```
   cd ~/Downloads
   dnf remove -y lrose-core
-  dnf install -y ./lrose-core-20210215-centos_8.x86_64.rpm
+  dnf install -y ./rose-core-20250811-almalinux_9.x86_64.rpm
 ```
 
 This will upgrade to the new version.
