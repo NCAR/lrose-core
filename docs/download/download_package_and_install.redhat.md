@@ -1,4 +1,4 @@
-# Download RPM and install - Redhat, RHEL, CENTOS, Fedora, Alma
+# Download RPM and install - Redhat RHEL, Fedora, Alma, Rocky, Oracle
 
 1. [prepare](#prepare)
 2. [download](#download)
