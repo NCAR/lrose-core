@@ -1,24 +1,12 @@
-# 1. Prepare for build depending on the OS
+# Prepare for build on LINUX OS
 
 This document explains how to prepare a bare-bones OS for an LROSE download and build.
 
+## 1. Install git and python
+
 These steps need to be performed as ```root```, or using ```sudo```.
 
-## Centos 7
-
-```
-  yum update -y
-  yum install -y epel-release
-  yum install -y git
-  yum install -y python
-```
-
-WARNING - this will update to the latest sub-version of the release.
-For example, from Centos 7.5 to 7.6.
-
-If you do not want to do this, you can omit this step.
-
-## Centos 8 and latest, Alma linux 8 and latest
+### RHEL8 - Alma, Rocky
 
 ```
   dnf -y update
@@ -30,7 +18,16 @@ If you do not want to do this, you can omit this step.
   dnf install -y git
 ```
 
-## Fedora
+### RHEL 9, 10 - Alma, Rocky
+
+```
+  yum update -y
+  yum install -y epel-release
+  yum install -y git
+  yum install -y python
+```
+
+### Fedora
 
 ```
   yum update -y
@@ -38,7 +35,7 @@ If you do not want to do this, you can omit this step.
   yum install -y python
 ```
 
-## Debian
+### Debian, ubuntu
 
 ```
   apt-get update
@@ -46,7 +43,7 @@ If you do not want to do this, you can omit this step.
   apt-get install -y python
 ```
 
-## Suse
+### Suse
 
 ```
   zypper update -y
@@ -54,7 +51,7 @@ If you do not want to do this, you can omit this step.
   zypper install -y python
 ```
 
-## Oracle 8
+### Oracle
 
 ```
   dnf update -y
@@ -62,7 +59,7 @@ If you do not want to do this, you can omit this step.
   dnf install -y python
 ```
 
-# 2. Checkout lrose bootstrap
+## 2. Checkout lrose bootstrap
 
 ```
   mkdir git
@@ -70,13 +67,13 @@ If you do not want to do this, you can omit this step.
   git clone https://github.com/ncar/lrose-bootstrap
 ```
 
-# 3. Install package dependencies
+## 3. Install package dependencies
 
 This must be run as ```root``` or using ```sudo```.
 
 ```
   cd lrose-bootstrap/scripts
-  ./install_linux_packages
+  ./install_linux_packages.py
 ```
 
 
