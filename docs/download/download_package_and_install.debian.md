@@ -17,6 +17,20 @@ It should update your OS first:
   apt-get update
 ```
 
+It is smoother if you prepare your OS first by installing the dependencies.
+
+You can do this by running a python script in the GitHub lrose-bootstrap repository:
+
+```
+  mkdir git
+  cd git
+  git clone https://github.com/ncar/lrose-bootstrap
+  cd lrose-bootstrap/scripts
+  sudo ./install_linux_packages.py
+```
+
+This does mean that you need python installed and available before running this step.
+
 <a name="download"/>
 
 ## 2. Download
@@ -30,7 +44,13 @@ Download the .deb file from:
 A typical .deb release would be:
 
 ```
-  lrose-core-20190129.debian_9.amd64.deb
+  lrose-core-20250811.debian_12.amd64.deb
+```
+
+A typical ubuntu release would be:
+
+```
+  lrose-core-20250811.ubuntu_24.04.amd64.deb
 ```
 
 Choose the .deb file that matches your operating system.
@@ -49,7 +69,7 @@ Then:
 
 ```
   cd ~/Downloads
-  apt-get install -y ./lrose-core-20190129.debian_9.amd64.deb
+  apt-get install -y ./lrose-core-20250811.debian_12.amd64.deb
 ```
 
 Make sure you include the leading ```.```.
