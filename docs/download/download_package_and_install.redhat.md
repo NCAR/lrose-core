@@ -11,36 +11,19 @@
 
 ## 1. Prepare
 
-It is a good idea to update your OS first:
+It is smoother if you prepare your OS first by installing the dependencies.
 
-For Centos 7:
-
-```
-  yum update -y
-  yum install -y epel-release
-```
-
-WARNING - this will update to the latest sub-version of the release.
-For example, from Centos 7.5 to 7.6.
-
-If you do not want to do this, you can omit this step.
-
-For Centos 8:
+You can do this by running a python script in the GitHub lrose-bootstrap repository:
 
 ```
-  dnf -y update
-  dnf install -y epel-release
-  dnf install -y 'dnf-command(config-manager)'
-  dnf config-manager --set-enabled powertools
-  dnf install -y python2 python3
-  alternatives --set python /usr/bin/python3
+  mkdir git
+  cd git
+  git clone https://github.com/ncar/lrose-bootstrap
+  cd lrose-bootstrap/scripts
+  sudo ./install_linux_packages.py
 ```
 
-For Fedora:
-
-```
-  yum update -y
-```
+This does mean that you need python installed and available before running this step.
 
 <a name="download"/>
 
@@ -52,10 +35,10 @@ Download the RPM file from:
   https://github.com/NCAR/lrose-core/releases
 ```
 
-A typical RPM release would be:
+A typical RPM release (say for Alma Linux 9) would be:
 
 ```
-  lrose-core-20210214-centos_8.x86_64.rpm
+  lrose-core-20250811-almalinux_9.x86_64.rpm
 ```
 
 Choose the RPM that matches your operating system.
@@ -70,18 +53,11 @@ Assume the download is in:
   $HOME/Downloads
 ```
 
-Then for Centos 7 or Fedora:
+Then run:
 
 ```
   cd ~/Downloads
-  yum install -y ./lrose-core-20210214-centos_8.x86_64.rpm
-```
-
-Then for Centos 8:
-
-```
-  cd ~/Downloads
-  dnf install -y ./lrose-core-20210214-centos_8.x86_64.rpm
+  dnf install -y ./lrose-core-20250811-almalinux_9.x86_64.rpm
 ```
 
 Make sure you include the leading ```.```.
