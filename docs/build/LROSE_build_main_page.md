@@ -8,7 +8,7 @@ These are the recommended builds, if you just want working apps and cannot get t
 
 | Target | Notes  |
 | ---------- |:------:|
-| [lrose-core](./LROSE_cmake_build.auto.md) | Build lrose-core autonomously using cmake |
+| [lrose-core](./LROSE_cmake_build.auto.md) | Build lrose-core automatically using cmake |
 | [lrose-core](./LROSE_cmake_build.manual.md) | Build lrose-core manually using cmake |
 | [fractl](./build_fractl.md) | Build fractl using cmake |
 | [vortrac](./build_vortrac.md) | Build vortrac using cmake |
