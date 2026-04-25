@@ -252,7 +252,11 @@ hid_t DataType::p_decode() const
     }
 
     // Call C function to decode the binary object description
+#if H5_VERSION_GE(1,14,0)
+    hid_t encoded_dtype_id = H5Tdecode(encoded_buf, buf_size);
+#else
     hid_t encoded_dtype_id = H5Tdecode(encoded_buf);
+#endif
 
     // If H5Tdecode fails, raise exception
     if (encoded_dtype_id < 0)

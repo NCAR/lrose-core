@@ -24,6 +24,16 @@
 #include <hdf5.h>
 #include <string>
 
+// check for defines - needed for HDF5 v2
+
+#ifndef H5_DLLCPP
+#define H5_DLLCPP
+#endif
+
+#ifndef H5_DLLCPPVAR
+#define H5_DLLCPPVAR extern
+#endif
+
 // These are defined in H5Opkg.h, which should not be included in the C++ API,
 // so re-define them here for now.
 
