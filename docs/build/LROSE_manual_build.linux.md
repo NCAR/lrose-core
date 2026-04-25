@@ -23,7 +23,7 @@ Recommended distributions are:
   * Debian
   * Ubuntu (based on Debian)
   * RedHat
-  * Centos (based on RedHat)
+  * AlmaLinux (based on RedHat)
   * Fedora (based on RedHat)
 
 Install the required packages. See:
