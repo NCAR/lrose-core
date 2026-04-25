@@ -37,7 +37,8 @@ The latest release can be found at:
 | [Topaz](https://github.com/nsf-lrose/lrose-topaz) | LROSE year 4 |
 | [Jade](https://github.com/NCAR/lrose-core/releases/tag/lrose-core-20230814) | LROSE final Jade release |
 | [Colette final](https://github.com/NCAR/lrose-core/releases/tag/lrose-core-20250105) | LROSE Colette final spring 2025 release |
-| [Laguna interim](https://github.com/NCAR/lrose-core/releases/tag/lrose-core-20250811) | LROSE Laguna Fall 2026 release |
+| [Laguna initial](https://github.com/NCAR/lrose-core/releases/tag/lrose-core-20250811) | LROSE Laguna Fall 2026 release |
+| [Laguna interim](https://github.com/NCAR/lrose-core/releases/tag/lrose-core-20260425) | LROSE Laguna interim 2026 release |
 
 
 ### INSTALLING FROM DOWNLOADS
