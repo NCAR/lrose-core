@@ -23,11 +23,9 @@ set (SRCS
       ColorMap.cc
       ColorTableManager.cc
       DataModel.cc
-      ScriptsDataModel.cc
-      ScriptsDataController.cc
       DisplayField.cc
-      DisplayFieldModel.cc
       DisplayFieldController.cc
+      DisplayFieldModel.cc
       FlowLayout.cc
       HawkEye.cc
       HawkEyeLogger.cc
@@ -40,6 +38,8 @@ set (SRCS
       Reader.cc
       ScaledLabel.cc
       ScriptEditorModel.cc
+      ScriptsDataController.cc
+      ScriptsDataModel.cc
       SiiPalette.cc
       SoloDefaultColorWrapper.cc
       SoloFunctionsModel.cc
@@ -47,43 +47,43 @@ set (SRCS
       SpreadSheetItem.cc
       SpreadSheetModel.cc
       SpreadSheetUtils.cc
-      SweepModel.cc
       SweepController.cc
-      TimeNavModel.cc
+      SweepModel.cc
       TimeNavController.cc
+      TimeNavModel.cc
       UndoRedoController.cc
       UndoRedoModel.cc
       WorldPlot.cc
-      FieldRendererView.cc
-      FieldListView.cc
-      FieldRendererController.cc
-      PolarManager.cc
-      PolarWidget.cc
-      TimeScaleWidget.cc
-      ParameterColorView.cc
-      FieldColorController.cc
       BoundaryPointEditor.cc
       BoundaryPointEditorView.cc
+      ClickableLabel.cc
+      ClickableLabelNamed.cc
       CloseEventFilter.cc
       ColorBar.cc
       ColorMapTemplates.cc
-      ClickableLabel.cc
-      ClickableLabelNamed.cc
       DisplayFieldView.cc
-      ScriptEditorView.cc
+      FieldColorController.cc
+      FieldListView.cc
+      FieldRendererController.cc
+      FieldRendererView.cc
+      FunctionEditor.cc
+      ParameterColorView.cc
+      PolarManager.cc
+      PolarWidget.cc
       ScriptEditorController.cc
       ScriptEditorHelpItem.cc
       ScriptEditorHelpModel.cc
-      TextEdit.cc
+      ScriptEditorView.cc
       SoloFunctionsController.cc
-      SpreadSheetView.cc
       SpreadSheetController.cc
       SpreadSheetDelegate.cc
+      SpreadSheetView.cc
       StatusPanelController.cc
       StatusPanelView.cc
       SweepView.cc
+      TextEdit.cc
       TimeNavView.cc
-      FunctionEditor.cc
+      TimeScaleWidget.cc
     )
 
 if(APPLE)

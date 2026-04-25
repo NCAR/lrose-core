@@ -277,6 +277,7 @@ set (SRCS
       ./geometry/sincos.c
       ./geometry/unit_vector.c
       ./geometry/vect_add.c
+      ./geometry/EuclidAngle.cc
       ./link/link.c
       ./search/search_line_through_ellipse.c
       ./search/search_point_in_ellipse.c
