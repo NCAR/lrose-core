@@ -101,8 +101,8 @@ LROSE_PROFILE_LIB_DIR = $(LROSE_INSTALL_DIR)/lib
 
 # Don't include -lXm, -lXpm as it fails with the libc6 version of libX11
 SYS_X_LIBS = -lXext -lXt -lX11 -lSM -lICE
-SYS_LDFLAGS =
-SYS_CPPC_LDFLAGS =
+SYS_LDFLAGS = -L/opt/homebrew/lib
+SYS_CPPC_LDFLAGS = -L/opt/homebrew/lib
 SYS_X_LDFLAGS = -L/usr/X11R6/lib -L/sw/lib -L/opt/X11/lib
 SYS_F_LDFLAGS =
 SYS_XVIEW_LDFLAGS =
@@ -142,8 +142,8 @@ LEX = lex
 #	NCAR_CC		defines name of script to do NCAR Graphics links
 #	NCAR_CPPC	defines name of script to do NCAR Graphics links
 
-NCG_INC_DIR=-I/usr/local/ncarg/include
-NCG_LIB_DIR=-L/usr/local/ncarg/lib
+NCG_INC_DIR=-I/opt/homebrew/ncarg/include
+NCG_LIB_DIR=-L/opt/homebrew/ncarg/lib
 NCAR_CC=ncargcc
 NCAR_CPPC=ncarg++
 
@@ -156,8 +156,8 @@ NCAR_CPPC=ncarg++
 #       NETCDF4_INCS defines location of netCDF 4 include files
 #       NETCDF4_LDFLAGS defines location of netCDF 4 libraries
 
-NETCDF_INCS=$(MY_NETCDF_INCS) -I/usr/local/netcdf/include
-NETCDF_LDFLAGS=$(MY_NETCDF_LDFLAGS) -L/usr/local/netcdf/lib
+NETCDF_INCS=$(MY_NETCDF_INCS) -I/opt/homebrew/netcdf/include
+NETCDF_LDFLAGS=$(MY_NETCDF_LDFLAGS) -L/opt/homebrew/netcdf/lib
 NETCDF4_INCS=$(MY_NETCDF4_INCS)
 NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS)
 
@@ -172,16 +172,16 @@ NETCDF4_LIBS=-lnetcdf -lhdf5_hl -lhdf5
 # Qt
 #
 
-#QJSENGINE = -F/usr/local/Cellar/qt/5.14.2/lib -framework QtQml
-#PKG_CONFIG_PATH = /usr/local/opt/qt5/lib/pkgconfig
+#QJSENGINE = -F/opt/homebrew/Cellar/qt/5.14.2/lib -framework QtQml
+#PKG_CONFIG_PATH = /opt/homebrew/opt/qt5/lib/pkgconfig
 #QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui)
 #QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt5Gui)
 #QT_LIBS = $(shell pkg-config --libs Qt5Core Qt5Widgets Qt5Gui)
 #QT_CPPC_CFLAGS = -std=c++17
 #QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
 
-QJSENGINE = -F/usr/local/Cellar/qt/6.8.2/lib -framework QtQml
-PKG_CONFIG_PATH = /usr/local/Cellar/qt/6.8.2/libexec/lib/pkgconfig
+QJSENGINE = -F/opt/homebrew/Cellar/qt/6.8.2/lib -framework QtQml
+PKG_CONFIG_PATH = /opt/homebrew/Cellar/qt/6.8.2/libexec/lib/pkgconfig
 QT_INCLUDES = $(shell pkg-config --cflags Qt6Core Qt6Widgets Qt6Gui)
 QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt6Gui)
 QT_LIBS = $(shell pkg-config --libs Qt6Core Qt6Widgets Qt6Gui)
@@ -198,7 +198,7 @@ JASPER_LIBS =
 # have jasper lib
 
 # JASPER_CPPC_CFLAGS =
-# JASPER_INCLUDES = -I/usr/local/jasper/include
-# JASPER_LDFLAGS = -L/usr/local/jasper/lib
+# JASPER_INCLUDES = -I/opt/homebrew/jasper/include
+# JASPER_LDFLAGS = -L/opt/homebrew/jasper/lib
 # JASPER_LIBS = -ljasper
 
