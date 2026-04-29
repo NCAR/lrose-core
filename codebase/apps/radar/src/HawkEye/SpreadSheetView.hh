@@ -17,7 +17,7 @@
 #include <QTableWidgetItem>
 #include <QTableWidget>
 #include <QString>
-#include <QJSEngine>
+// #include <QJSEngine>
 
 class SpreadSheetView : public QMainWindow
 {
@@ -92,7 +92,7 @@ protected:
     void setupContents();
     void setupMenuBar();
     void createActions();
-    void addVariableToSpreadSheet(QString name, QJSValue value);
+  //     void addVariableToSpreadSheet(QString name, QJSValue value);
 
 
 
@@ -141,7 +141,7 @@ private:
     //QTextEdit *formulaInput;
   // SpreadSheetDelegate *formulaInput;
 
-  QJSEngine engine;
+  // QJSEngine engine;
 
   
   //  const char *LogFileName = "/tmp/HawkEye_log.txt";
