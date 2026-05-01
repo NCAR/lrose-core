@@ -1,0 +1,1 @@
+./ws_to_tcp.py --tcp-host 0.0.0.0 ws://50.116.37.114:1880/aircraft 10000

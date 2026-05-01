@@ -36,14 +36,43 @@ class WsToTcpBridge:
         self.tcp_clients: Set[asyncio.StreamWriter] = set()
         self.n_messages_forwarded = 0
 
+        print(f"===>> tcp_host: ", self.tcp_host)
+        print(f"===>> tcp_port: ", self.tcp_port)
+
         self.stop_event = asyncio.Event()
 
     async def start(self) -> None:
+
+        print(f"1111111 tcp_host: ", self.tcp_host)
+        print(f"1111111 tcp_port: ", self.tcp_port)
+
+        print(f"About to start TCP server on host={self.tcp_host}, port={self.tcp_port}", flush=True)
+
         server = await asyncio.start_server(
             self._handle_tcp_client,
             self.tcp_host,
             self.tcp_port,
         )
+
+        print("TCP server successfully created", flush=True)
+
+        sockets = server.sockets or []
+        print(f"Number of listening sockets: {len(sockets)}", flush=True)
+
+        for sock in sockets:
+            print(f"Listening for TCP clients on {sock.getsockname()}", flush=True)
+
+        print(f"3333333 tcp_host: ", self.tcp_host)
+        print(f"3333333 tcp_port: ", self.tcp_port)
+
+        # server = await asyncio.start_server(
+        #     self._handle_tcp_client,
+        #     self.tcp_host,
+        #     self.tcp_port,
+        # )
+
+        print(f"2222222 tcp_host: ", self.tcp_host)
+        print(f"2222222 tcp_port: ", self.tcp_port)
 
         sockets = server.sockets or []
         for sock in sockets:
@@ -66,6 +95,8 @@ class WsToTcpBridge:
         reader: asyncio.StreamReader,
         writer: asyncio.StreamWriter,
     ) -> None:
+        print(f"55555555 tcp_host: ", self.tcp_host)
+        print(f"55555555 tcp_port: ", self.tcp_port)
         peer = writer.get_extra_info("peername")
         print(f"TCP client connected: {peer}")
 
