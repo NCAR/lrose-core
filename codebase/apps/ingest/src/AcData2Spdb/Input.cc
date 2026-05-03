@@ -267,7 +267,7 @@ int TcpInput::readLine(char *line, int len)
     if (_openSocket()) {
       PMU_auto_register("Waiting for TCP connection");
     }
-    umsleep(5000);
+    umsleep(1000);
   }
 
   int pos = 0;
@@ -311,8 +311,39 @@ int TcpInput::readLine(char *line, int len)
         return 0;
       }
       
-    } // if (_readChar ...
+    } else {
+      
+      // A failed read after select() usually means EOF or socket error.
+      // In particular, when the server closes the connection cleanly,
+      // select() reports the socket as readable, and the subsequent read()
+      // returns 0 bytes. That is not a select() error; it is detected here.
 
+      if (_params.debug) {
+        cerr << "WARNING - " << _progName
+             << " - TcpInput::readLine" << endl;
+        cerr << "  TCP socket read failed - closing and reconnecting" << endl;
+        cerr << "  Host: " << _host << endl;
+        cerr << "  Port: " << _port << endl;
+        cerr << "  Socket error: " << _sock.getErrStr() << endl;
+      }
+      
+      _closeSocket();
+      
+      // Discard any partial line from the old connection.
+      pos = 0;
+      line[0] = '\0';
+      
+      // reopen socket
+      
+      while (!_sockIsOpen) {
+        if (_openSocket()) {
+          PMU_auto_register("Waiting for TCP connection");
+        }
+        umsleep(1000);
+      }
+      
+    } // if (_readChar ...
+    
   } // while
     
     
@@ -338,11 +369,13 @@ int TcpInput::_openSocket()
 
   if (_sock.open(_host.c_str(), _port, 10000)) {
     
-    cerr << "ERROR - TcpInput::open()" << endl;
-    cerr << "  Cannot connect" << endl;
-    cerr << "  Host: " << _host << endl;
-    cerr << "  Port: " << _port << endl;
-    cerr << "  " << _sock.getErrStr() << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "ERROR - TcpInput::open()" << endl;
+      cerr << "  Cannot connect" << endl;
+      cerr << "  Host: " << _host << endl;
+      cerr << "  Port: " << _port << endl;
+      cerr << "  " << _sock.getErrStr() << endl;
+    }
     
     return -1;
     
@@ -390,6 +423,7 @@ void TcpInput::_closeSocket()
 
 {
   _sock.close();
+  _sockIsOpen = false;
 }
 
 ////////////////////////////////////////////////////////
