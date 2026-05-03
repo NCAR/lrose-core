@@ -351,22 +351,22 @@ Params::model_field_type_t RadxCartDP::getModelTypeFromOutputName(const string n
 //////////////////////////////////////////////////
 // get beam block field name from type
 
-string RadxCartDP::getBeamBlockInputName(Params::bblock_field_type_t ftype)
+string RadxCartDP::getBeamBlockInputName(Params::beam_block_field_type_t ftype)
 {
-  for (int ii = 0; ii < _params.bblock_field_names_n; ii++) {
-    if (_params._bblock_field_names[ii].field_type == ftype) {
-      return _params._bblock_field_names[ii].input_name;
+  for (int ii = 0; ii < _params.beam_block_field_names_n; ii++) {
+    if (_params._beam_block_field_names[ii].field_type == ftype) {
+      return _params._beam_block_field_names[ii].input_name;
     }
   }
   // not found
   return "";
 }
 
-string RadxCartDP::getBeamBlockOutputName(Params::bblock_field_type_t ftype)
+string RadxCartDP::getBeamBlockOutputName(Params::beam_block_field_type_t ftype)
 {
-  for (int ii = 0; ii < _params.bblock_field_names_n; ii++) {
-    if (_params._bblock_field_names[ii].field_type == ftype) {
-      return _params._bblock_field_names[ii].output_name;
+  for (int ii = 0; ii < _params.beam_block_field_names_n; ii++) {
+    if (_params._beam_block_field_names[ii].field_type == ftype) {
+      return _params._beam_block_field_names[ii].output_name;
     }
   }
   // not found
@@ -521,7 +521,7 @@ int RadxCartDP::_processFile(const string &filePath)
 
   // initialize
   
-  _readVol.clear();
+  _radarVol.clear();
 
   if (_params.debug) {
     cerr << "INFO - RadxCartDP::_processFile" << endl;
@@ -531,12 +531,12 @@ int RadxCartDP::_processFile(const string &filePath)
   
   if (_readFile(filePath)) {
     cerr << "ERROR - RadxCartDP::_processFile" << endl;
-    cerr << "  Cannot read file: " << _readVol.getPathInUse() << endl;
+    cerr << "  Cannot read file: " << _radarVol.getPathInUse() << endl;
     return -1;
   }
 
   if (_params.debug) {
-    cerr << "SUCCESS - read in file: " << _readVol.getPathInUse() << endl;
+    cerr << "SUCCESS - read in file: " << _radarVol.getPathInUse() << endl;
   }
   
   // initialize the projection and vlevels of the target volume
@@ -615,6 +615,14 @@ int RadxCartDP::_processFile(const string &filePath)
     cerr << "  Cannot compute precip rates" << endl;
     iret = -1;
   }
+
+  // read in beam blockage if requested
+
+  if (_readBeamBlock()) {
+    cerr << "ERROR - RadxCartDP" << endl;
+    cerr << "  Cannot read in beam blockage" << endl;
+    iret = -1;
+  }
   
   // write out MDV file
   
@@ -628,7 +636,7 @@ int RadxCartDP::_processFile(const string &filePath)
 
   _cartInterp->freeMemory();
   if (_params.free_memory_between_files) {
-    _readVol.clear();
+    _radarVol.clear();
     _freeInterpRays();
   }
   
@@ -683,7 +691,7 @@ int RadxCartDP::_readFile(const string &filePath)
   
   // read in file
   
-  if (inFile.readFromPath(filePath, _readVol)) {
+  if (inFile.readFromPath(filePath, _radarVol)) {
     cerr << "ERROR - RadxCartDP::_readFile" << endl;
     cerr << inFile.getErrStr() << endl;
     return -1;
@@ -691,28 +699,28 @@ int RadxCartDP::_readFile(const string &filePath)
   
   // check we have at least 2 rays
   
-  if (_readVol.getNRays() < 2) {
+  if (_radarVol.getNRays() < 2) {
     cerr << "ERROR - RadxCartDP::_readFile" << endl;
-    cerr << "  Too few rays: " << _readVol.getNRays() << endl;
+    cerr << "  Too few rays: " << _radarVol.getNRays() << endl;
     return -1;
   }
   
   // convert to fl32
   
-  _readVol.convertToFl32();
+  _radarVol.convertToFl32();
 
   // pad out the gates to the longest range
   
-  _readVol.setNGatesConstant();
+  _radarVol.setNGatesConstant();
 
   // set range geometry
   
   if (_params.override_gate_geometry) {
     // override gate geometry if requested
-    _readVol.setRangeGeom(_params.start_range_km, _params.gate_spacing_km);
+    _radarVol.setRangeGeom(_params.start_range_km, _params.gate_spacing_km);
   } else {
     // remap all rays to finest geom
-    _readVol.remapToFinestGeom();
+    _radarVol.remapToFinestGeom();
   }
   
   //  check for rhi
@@ -725,14 +733,14 @@ int RadxCartDP::_readFile(const string &filePath)
     string inName = _params._radar_field_names[ii].input_name;
     string outName = _params._radar_field_names[ii].output_name;
     if (inName.size() > 0 && inName != outName) {
-      _readVol.renameField(inName, outName);
+      _radarVol.renameField(inName, outName);
     }
   }
 
   // override radar location if requested
 
   if (_params.override_radar_location) {
-    _readVol.overrideLocation(_params.radar_latitude_deg,
+    _radarVol.overrideLocation(_params.radar_latitude_deg,
                               _params.radar_longitude_deg,
                               _params.radar_altitude_meters / 1000.0);
   }
@@ -740,19 +748,19 @@ int RadxCartDP::_readFile(const string &filePath)
   // override beam width if requested
   
   if (_params.override_beam_width) {
-    _readVol.setRadarBeamWidthDegH(_params.beam_width_deg_h);
-    _readVol.setRadarBeamWidthDegV(_params.beam_width_deg_v);
+    _radarVol.setRadarBeamWidthDegH(_params.beam_width_deg_h);
+    _radarVol.setRadarBeamWidthDegV(_params.beam_width_deg_v);
   }
 
   // override fixed angle if required
 
   if (_params.override_fixed_angle_with_mean_measured_angle) {
-    _readVol.computeFixedAnglesFromRays();
+    _radarVol.computeFixedAnglesFromRays();
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "  _startRangeKm: " << _readVol.getStartRangeKm() << endl;
-    cerr << "  _gateSpacingKm: " << _readVol.getGateSpacingKm() << endl;
+    cerr << "  _startRangeKm: " << _radarVol.getStartRangeKm() << endl;
+    cerr << "  _gateSpacingKm: " << _radarVol.getGateSpacingKm() << endl;
   }
 
   // add extra debug fields if requested
@@ -775,8 +783,8 @@ int RadxCartDP::_readFile(const string &filePath)
   
   // set radar properties
 
-  _radarHtKm = _readVol.getAltitudeKm();
-  _wavelengthM = _readVol.getWavelengthM();
+  _radarHtKm = _radarVol.getAltitudeKm();
+  _wavelengthM = _radarVol.getWavelengthM();
 
   return 0;
 
@@ -821,7 +829,7 @@ void RadxCartDP::_addRayGeomFieldsToInput()
 
 {
 
-  vector<RadxRay *> &rays = _readVol.getRays();
+  vector<RadxRay *> &rays = _radarVol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
 
     RadxRay *ray = rays[iray];
@@ -837,7 +845,7 @@ void RadxCartDP::_addRayGeomFieldsToInput()
     double gateSpacingKm = ray->getGateSpacingKm();
     
     BeamHeight beamHt;
-    beamHt.setInstrumentHtKm(_readVol.getAltitudeKm());
+    beamHt.setInstrumentHtKm(_radarVol.getAltitudeKm());
     if (_params.override_standard_pseudo_earth_radius) {
       beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
     }
@@ -877,7 +885,7 @@ int RadxCartDP::_computeScalars()
 
   // initialize the volume with ray numbers
   
-  _readVol.setRayNumbersInOrder();
+  _radarVol.setRayNumbersInOrder();
 
   // initialize pid
 
@@ -886,7 +894,7 @@ int RadxCartDP::_computeScalars()
   // loop through the input rays,
   // computing the pid fields
 
-  const vector<RadxRay *> &inputRays = _readVol.getRays();
+  const vector<RadxRay *> &inputRays = _radarVol.getRays();
   for (size_t iray = 0; iray < inputRays.size(); iray++) {
 
     // get a thread from the pool
@@ -962,7 +970,7 @@ int RadxCartDP::_storeScalarsRay(ScalarsThread *thread)
 int RadxCartDP::_mergeScalarsIntoReadVol()
 {
 
-  vector<RadxRay *> &readRays = _readVol.getRays();
+  vector<RadxRay *> &readRays = _radarVol.getRays();
   
   if (readRays.size() != _scalarRays.size()) {
     cerr << "ERROR - RadxCartDP::_mergeScalarsIntoReadVol" << endl;
@@ -1041,7 +1049,7 @@ int RadxCartDP::_writeDebugPolarOutput()
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     out.setDebug(true);
   }
-  if (out.writeToDir(_readVol, _params.debug_polar_output_dir, true, false)) {
+  if (out.writeToDir(_radarVol, _params.debug_polar_output_dir, true, false)) {
     cerr << "ERROR - RadxCartDP::_writeDebugPolarOutput()" << endl;
     cerr << "  Cannot write debug polar file, path: " << out.getPathInUse() << endl;
     cerr << out.getErrStr() << endl;
@@ -1065,7 +1073,7 @@ void RadxCartDP::_addAngleFields()
   
   // loop through rays
     
-  vector<RadxRay *> &rays = _readVol.getRays();
+  vector<RadxRay *> &rays = _radarVol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
       
     RadxRay *ray = rays[iray];
@@ -1160,7 +1168,7 @@ void RadxCartDP::_addAngleFields()
 void RadxCartDP::_addRangeField()
 {
   
-  vector<RadxRay *> &rays = _readVol.getRays();
+  vector<RadxRay *> &rays = _radarVol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
     
     RadxRay *ray = rays[iray];
@@ -1193,12 +1201,12 @@ void RadxCartDP::_addHeightField()
   // beamHeight
 
   BeamHeight beamHt;
-  beamHt.setInstrumentHtKm(_readVol.getAltitudeKm());
+  beamHt.setInstrumentHtKm(_radarVol.getAltitudeKm());
   if (_params.override_standard_pseudo_earth_radius) {
     beamHt.setPseudoRadiusRatio(_params.pseudo_earth_radius_ratio);
   }
 
-  vector<RadxRay *> &rays = _readVol.getRays();
+  vector<RadxRay *> &rays = _radarVol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
     
     RadxRay *ray = rays[iray];
@@ -1228,7 +1236,7 @@ void RadxCartDP::_addHeightField()
 void RadxCartDP::_addCoverageField()
 {
   
-  vector<RadxRay *> &rays = _readVol.getRays();
+  vector<RadxRay *> &rays = _radarVol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
     
     RadxRay *ray = rays[iray];
@@ -1258,12 +1266,12 @@ void RadxCartDP::_addTimeField()
 
   // start times
 
-  time_t startTimeSecs = _readVol.getStartTimeSecs();
-  double startNanoSecs = _readVol.getStartNanoSecs();
+  time_t startTimeSecs = _radarVol.getStartTimeSecs();
+  double startNanoSecs = _radarVol.getStartNanoSecs();
 
   // loop through rays
 
-  vector<RadxRay *> &rays = _readVol.getRays();
+  vector<RadxRay *> &rays = _radarVol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
     
     RadxRay *ray = rays[iray];
@@ -1302,7 +1310,7 @@ bool RadxCartDP::_isRhi()
   // check to see if we are in RHI mode, set flag accordingly
   
   int nRaysRhi = 0;
-  const vector<RadxRay *> &rays = _readVol.getRays();
+  const vector<RadxRay *> &rays = _radarVol.getRays();
   for (size_t ii = 0; ii < rays.size(); ii++) {
     if (rays[ii]->getSweepMode() == Radx::SWEEP_MODE_RHI ||
         rays[ii]->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
@@ -1365,8 +1373,8 @@ void RadxCartDP::_initTargetGrid()
   
   coord.proj_type = _params.grid_projection;
   if (_params.center_grid_on_radar) {
-    coord.proj_origin_lat = _readVol.getLatitudeDeg();
-    coord.proj_origin_lon = _readVol.getLongitudeDeg();
+    coord.proj_origin_lat = _radarVol.getLatitudeDeg();
+    coord.proj_origin_lon = _radarVol.getLongitudeDeg();
   } else {
     coord.proj_origin_lat = _params.grid_origin_lat;
     coord.proj_origin_lon = _params.grid_origin_lon;
@@ -1472,7 +1480,7 @@ void RadxCartDP::_initInterpFields()
   
   // get field name list
   
-  vector<string> fieldNames = _readVol.getUniqueFieldNameList();
+  vector<string> fieldNames = _radarVol.getUniqueFieldNameList();
 
   // find an example of each field, by search through the rays
   // use that field as the template
@@ -1481,7 +1489,7 @@ void RadxCartDP::_initInterpFields()
 
     string radxName = fieldNames[ifield];
 
-    vector<RadxRay *> &rays = _readVol.getRays();
+    vector<RadxRay *> &rays = _radarVol.getRays();
     for (size_t iray = 0; iray < rays.size(); iray++) {
       const RadxRay *ray = rays[iray];
       const RadxField *field = ray->getField(radxName);
@@ -1515,7 +1523,7 @@ void RadxCartDP::_initInterpFields()
   // override fold limits from the parameters
 
   double nyquist = 0.0;
-  vector<RadxRay *> &rays = _readVol.getRays();
+  vector<RadxRay *> &rays = _radarVol.getRays();
   for (size_t iray = 0; iray < rays.size(); iray++) {
     const RadxRay *ray = rays[iray];
     if (fabs(ray->getNyquistMps() - Radx::missingFl64) > 1.0e-6) {
@@ -1557,7 +1565,7 @@ void RadxCartDP::_initInterpFields()
 void RadxCartDP::_allocInterpToCart()
 {
   if (_cartInterp == NULL) {
-    _cartInterp = new CartInterp(_progName, _params, _readVol,
+    _cartInterp = new CartInterp(_progName, _params, _radarVol,
                                  _interpFields, _interpRays);
   }
 }
@@ -1584,10 +1592,10 @@ void RadxCartDP::_loadInterpRays()
   // making some checks and then adding the rays
   // to the interp rays array as appropriate
   
-  vector<RadxRay *> &rays = _readVol.getRays();
-  for (size_t isweep = 0; isweep < _readVol.getNSweeps(); isweep++) {
+  vector<RadxRay *> &rays = _radarVol.getRays();
+  for (size_t isweep = 0; isweep < _radarVol.getNSweeps(); isweep++) {
 
-    const RadxSweep *sweep = _readVol.getSweeps()[isweep];
+    const RadxSweep *sweep = _radarVol.getSweeps()[isweep];
 
     for (size_t iray = sweep->getStartRayIndex();
          iray <= sweep->getEndRayIndex(); iray++) {
@@ -1616,7 +1624,7 @@ void RadxCartDP::_loadInterpRays()
 void RadxCartDP::_checkInterpFields()
 {
   
-  vector<RadxRay *> &rays = _readVol.getRays();
+  vector<RadxRay *> &rays = _radarVol.getRays();
   
   for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
     bool found = false;
@@ -1634,7 +1642,7 @@ void RadxCartDP::_checkInterpFields()
     }
     if (!found) {
       cerr << "WARNING - field not found: " << fieldName << endl;
-      cerr << "  File: " << _readVol.getPathInUse() << endl;
+      cerr << "  File: " << _radarVol.getPathInUse() << endl;
     }
   } // ifield
 
@@ -1649,7 +1657,7 @@ int RadxCartDP::_readModel()
 
 {
 
-  time_t radarTime = _readVol.getStartTimeSecs();
+  time_t radarTime = _radarVol.getStartTimeSecs();
 
   _modelRawMdvx.clearRead();
   _modelRawMdvx.setReadTime(Mdvx::READ_CLOSEST,
@@ -1709,7 +1717,7 @@ int RadxCartDP::_readModel()
   if (_computeTempProfile()) {
     cerr << "ERROR - RadxCartDP::_readModel" << endl;
     cerr << "  Cannot compute temp profile, time: "
-         << RadxTime::strm(_readVol.getStartTimeSecs()) << endl;
+         << RadxTime::strm(_radarVol.getStartTimeSecs()) << endl;
     return -1;
   }
 
@@ -1793,6 +1801,43 @@ void RadxCartDP::_interpModelToOutputGrid()
   
 }
 
+/////////////////////////////////////////////////////////
+// read in beam blockage data
+//
+// Returns 0 on success, -1 on failure.
+
+int RadxCartDP::_readBeamBlock()
+
+{
+
+  // set up read
+  
+  _beamBlockMdvx.clearRead();
+  _beamBlockMdvx.setReadPath(_params.beam_block_input_file_path);
+  
+  for (int ii = 0; ii < _params.beam_block_field_names_n; ii++) {
+    if (strlen(_params._beam_block_field_names[ii].input_name) == 0) {
+      continue;
+    }
+    _beamBlockMdvx.addReadField(_params._beam_block_field_names[ii].input_name);
+  }
+
+  // perform read
+  
+  if (_beamBlockMdvx.readVolume()) {
+    cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
+    cerr << "  Cannot read beam blockage data" << endl;
+    cerr << "  File path: " << _params.beam_block_input_file_path << endl;
+    cerr << _beamBlockMdvx.getErrStr() << endl;
+    return -1;
+  }
+
+  // check the grid matches
+
+  return 0;
+
+}
+
 /////////////////////////////////////////////////////
 // write out MDV data
 
@@ -1806,7 +1851,7 @@ int RadxCartDP::_writeOutputMdv()
   // initialize
   
   OutputMdv out(_progName, _params);
-  out.setMasterHeader(_readVol);
+  out.setMasterHeader(_radarVol);
 
   // fill with interpolated fields
   

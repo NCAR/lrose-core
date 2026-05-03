@@ -169,26 +169,40 @@ paramdef struct model_field_name_t {
 } model_field_names[5];
 
 commentdef {
-  p_header = "BEAM BLOCKAGE FIELD NAMES";
+  p_header = "BEAM BLOCKAGE";
+  p_text = "Beam blockage and terrain ht are computed by CartBeamBlock, using the same grid as RadxCartDP. We first run RadxCartDP without beam blockage. CartBeamBlock reads in one of the resulting files and uses it as a termplate for computing beam blockage. This ensures that the grids are identical.";
 }
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Read in beam blockage data computed using CartBeamBlock.";
+  p_help = "Set this to FALSE when creating a template file for CartBeamBlock.";
+} read_beam_blockage_data;
+
+paramdef string {
+  p_default = "mdv/beamBlock/radar_name/20000101/20000101_000000.mdv.cf.nc";
+  p_descr = "File path for reading beam blockage data, in MDV/Netcdf-CF format.";
+  p_help = "Beam blockage and terrain ht are computed by CartBeamBlock.";
+} beam_block_input_file_path;
+
 typedef enum {
-  BEAME
-} bblock_field_type_t;
+  TERRAIN_HT, BEAME
+} beam_block_field_type_t;
 
 typedef struct {
-  bblock_field_type_t field_type;
+  beam_block_field_type_t field_type;
   string input_name;
   string output_name;
-} bblock_field_name_t;
+} beam_block_field_name_t;
 
-paramdef struct bblock_field_name_t {
+paramdef struct beam_block_field_name_t {
   p_default = { 
-    { BEAME, "BEAME", "BEAME" }
+    { BEAME, "BEAME", "BEAME" },
+    { TERRAIN_HT, "Terrain", "Terrain" }
   };
   p_descr = "Converts field type to string.";
   p_help = "If input_field is empty the field is assumed to not exist in the input data set.";
-} bblock_field_names[1];
+} beam_block_field_names[2];
 
 commentdef {
   p_header = "OUTPUT DATA DIRECTORY";

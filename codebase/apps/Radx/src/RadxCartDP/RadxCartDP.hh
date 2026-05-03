@@ -95,11 +95,11 @@ public:
   
   string getRadarInputName(Params::radar_field_type_t ftype);
   string getModelInputName(Params::model_field_type_t ftype);
-  string getBeamBlockInputName(Params::bblock_field_type_t ftype);
+  string getBeamBlockInputName(Params::beam_block_field_type_t ftype);
 
   string getRadarOutputName(Params::radar_field_type_t ftype);
   string getModelOutputName(Params::model_field_type_t ftype);
-  string getBeamBlockOutputName(Params::bblock_field_type_t ftype);
+  string getBeamBlockOutputName(Params::beam_block_field_type_t ftype);
 
   Params::model_field_type_t getModelTypeFromInputName(const string name);
   Params::model_field_type_t getModelTypeFromOutputName(const string name);
@@ -145,9 +145,9 @@ private:
 
   NcarParticleId _pid;
 
-  // input data
+  // input radar data
   
-  RadxVol _readVol;
+  RadxVol _radarVol;
   bool _rhiMode;
 
   // radar properties
@@ -176,6 +176,10 @@ private:
   DsMdvx _modelRawMdvx;
   DsMdvx _modelInterpMdvx;
   TempProfile _tempProfile;
+
+  // Beam Blockage
+  
+  DsMdvx _beamBlockMdvx;
 
   // radar interpolation
 
@@ -239,6 +243,8 @@ private:
   int _readModel();
   int _computeTempProfile();
   void _interpModelToOutputGrid();
+
+  int _readBeamBlock();
 
   int _writeOutputMdv();
 

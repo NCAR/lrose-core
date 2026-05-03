@@ -102,8 +102,9 @@ public:
   } model_field_type_t;
 
   typedef enum {
-    BEAME = 0
-  } bblock_field_type_t;
+    TERRAIN_HT = 0,
+    BEAME = 1
+  } beam_block_field_type_t;
 
   typedef enum {
     RATE_ZH = 0,
@@ -155,10 +156,10 @@ public:
   } model_field_name_t;
 
   typedef struct {
-    bblock_field_type_t field_type;
+    beam_block_field_type_t field_type;
     char* input_name;
     char* output_name;
-  } bblock_field_name_t;
+  } beam_block_field_name_t;
 
   typedef struct {
     output_field_id_t id;
@@ -531,8 +532,12 @@ public:
   model_field_name_t *_model_field_names;
   int model_field_names_n;
 
-  bblock_field_name_t *_bblock_field_names;
-  int bblock_field_names_n;
+  tdrp_bool_t read_beam_blockage_data;
+
+  char* beam_block_input_file_path;
+
+  beam_block_field_name_t *_beam_block_field_names;
+  int beam_block_field_names_n;
 
   char* output_dir;
 
@@ -767,7 +772,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[161];
+  mutable TDRPtable _table[163];
 
   const char *_className;
 

@@ -947,55 +947,84 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("BEAM BLOCKAGE FIELD NAMES");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_hdr = tdrpStrDup("BEAM BLOCKAGE");
+    tt->comment_text = tdrpStrDup("Beam blockage and terrain ht are computed by CartBeamBlock, using the same grid as RadxCartDP. We first run RadxCartDP without beam blockage. CartBeamBlock reads in one of the resulting files and uses it as a termplate for computing beam blockage. This ensures that the grids are identical.");
     tt++;
     
-    // Parameter 'bblock_field_names'
-    // ctype is '_bblock_field_name_t'
+    // Parameter 'read_beam_blockage_data'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("read_beam_blockage_data");
+    tt->descr = tdrpStrDup("Read in beam blockage data computed using CartBeamBlock.");
+    tt->help = tdrpStrDup("Set this to FALSE when creating a template file for CartBeamBlock.");
+    tt->val_offset = (char *) &read_beam_blockage_data - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'beam_block_input_file_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("beam_block_input_file_path");
+    tt->descr = tdrpStrDup("File path for reading beam blockage data, in MDV/Netcdf-CF format.");
+    tt->help = tdrpStrDup("Beam blockage and terrain ht are computed by CartBeamBlock.");
+    tt->val_offset = (char *) &beam_block_input_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("mdv/beamBlock/radar_name/20000101/20000101_000000.mdv.cf.nc");
+    tt++;
+    
+    // Parameter 'beam_block_field_names'
+    // ctype is '_beam_block_field_name_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("bblock_field_names");
+    tt->param_name = tdrpStrDup("beam_block_field_names");
     tt->descr = tdrpStrDup("Converts field type to string.");
     tt->help = tdrpStrDup("If input_field is empty the field is assumed to not exist in the input data set.");
-    tt->array_offset = (char *) &_bblock_field_names - &_start_;
-    tt->array_n_offset = (char *) &bblock_field_names_n - &_start_;
+    tt->array_offset = (char *) &_beam_block_field_names - &_start_;
+    tt->array_n_offset = (char *) &beam_block_field_names_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = TRUE;
-    tt->array_elem_size = sizeof(bblock_field_name_t);
-    tt->array_n = 1;
-    tt->struct_def.name = tdrpStrDup("bblock_field_name_t");
+    tt->array_elem_size = sizeof(beam_block_field_name_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("beam_block_field_name_t");
     tt->struct_def.nfields = 3;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("bblock_field_type_t");
+      tt->struct_def.fields[0].ftype = tdrpStrDup("beam_block_field_type_t");
       tt->struct_def.fields[0].fname = tdrpStrDup("field_type");
       tt->struct_def.fields[0].ptype = ENUM_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_bblock_field_names->field_type - (char *) _bblock_field_names;
-        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("bblock_field_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 1;
+        (char *) &_beam_block_field_names->field_type - (char *) _beam_block_field_names;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("beam_block_field_type_t");
+        tt->struct_def.fields[0].enum_def.nfields = 2;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("BEAME");
-        tt->struct_def.fields[0].enum_def.fields[0].val = BEAME;
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("TERRAIN_HT");
+        tt->struct_def.fields[0].enum_def.fields[0].val = TERRAIN_HT;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("BEAME");
+        tt->struct_def.fields[0].enum_def.fields[1].val = BEAME;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("input_name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_bblock_field_names->input_name - (char *) _bblock_field_names;
+        (char *) &_beam_block_field_names->input_name - (char *) _beam_block_field_names;
       tt->struct_def.fields[2].ftype = tdrpStrDup("string");
       tt->struct_def.fields[2].fname = tdrpStrDup("output_name");
       tt->struct_def.fields[2].ptype = STRING_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_bblock_field_names->output_name - (char *) _bblock_field_names;
-    tt->n_struct_vals = 3;
+        (char *) &_beam_block_field_names->output_name - (char *) _beam_block_field_names;
+    tt->n_struct_vals = 6;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = BEAME;
       tt->struct_vals[1].s = tdrpStrDup("BEAME");
       tt->struct_vals[2].s = tdrpStrDup("BEAME");
+      tt->struct_vals[3].e = TERRAIN_HT;
+      tt->struct_vals[4].s = tdrpStrDup("Terrain");
+      tt->struct_vals[5].s = tdrpStrDup("Terrain");
     tt++;
     
     // Parameter 'Comment 7'
