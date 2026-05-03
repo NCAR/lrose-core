@@ -21,13 +21,12 @@ class WsToTcpBridge:
       - Any connected TCP client receives each aircraft message.
     """
 
-    def __init__(
-        self,
-        websocket_url: str,
-        tcp_host: str,
-        tcp_port: int,
-        reconnect_delay_secs: float = 5.0,
-    ):
+    def __init__(self,
+                 websocket_url: str,
+                 tcp_host: str,
+                 tcp_port: int,
+                 reconnect_delay_secs: float = 5.0):
+
         self.websocket_url = websocket_url
         self.tcp_host = tcp_host
         self.tcp_port = tcp_port
@@ -36,15 +35,9 @@ class WsToTcpBridge:
         self.tcp_clients: Set[asyncio.StreamWriter] = set()
         self.n_messages_forwarded = 0
 
-        print(f"===>> tcp_host: ", self.tcp_host)
-        print(f"===>> tcp_port: ", self.tcp_port)
-
         self.stop_event = asyncio.Event()
 
     async def start(self) -> None:
-
-        print(f"1111111 tcp_host: ", self.tcp_host)
-        print(f"1111111 tcp_port: ", self.tcp_port)
 
         print(f"About to start TCP server on host={self.tcp_host}, port={self.tcp_port}", flush=True)
 
@@ -62,18 +55,6 @@ class WsToTcpBridge:
         for sock in sockets:
             print(f"Listening for TCP clients on {sock.getsockname()}", flush=True)
 
-        print(f"3333333 tcp_host: ", self.tcp_host)
-        print(f"3333333 tcp_port: ", self.tcp_port)
-
-        # server = await asyncio.start_server(
-        #     self._handle_tcp_client,
-        #     self.tcp_host,
-        #     self.tcp_port,
-        # )
-
-        print(f"2222222 tcp_host: ", self.tcp_host)
-        print(f"2222222 tcp_port: ", self.tcp_port)
-
         sockets = server.sockets or []
         for sock in sockets:
             print(f"Listening for TCP clients on {sock.getsockname()}")
@@ -88,15 +69,15 @@ class WsToTcpBridge:
         await self._close_all_tcp_clients()
 
     async def stop(self) -> None:
+        print(f"Stopping", flush=True)
         self.stop_event.set()
+        await self._close_all_tcp_clients()
 
     async def _handle_tcp_client(
         self,
         reader: asyncio.StreamReader,
         writer: asyncio.StreamWriter,
     ) -> None:
-        print(f"55555555 tcp_host: ", self.tcp_host)
-        print(f"55555555 tcp_port: ", self.tcp_port)
         peer = writer.get_extra_info("peername")
         print(f"TCP client connected: {peer}")
 
@@ -207,17 +188,18 @@ class WsToTcpBridge:
 
 
 async def main() -> None:
+
     parser = argparse.ArgumentParser(
         description="Bridge newline-delimited ASCII WebSocket messages to TCP."
     )
 
     parser.add_argument(
-        "websocket_url",
+        "--websocket_url",
         help="Input WebSocket URL, e.g. ws://example.com:8080/telemetry",
     )
 
     parser.add_argument(
-        "tcp_port",
+        "--tcp_port",
         type=int,
         help="Local TCP listen port, e.g. 5000",
     )
@@ -246,7 +228,7 @@ async def main() -> None:
 
     loop = asyncio.get_running_loop()
 
-    for signame in ("SIGINT", "SIGTERM"):
+    for signame in ("SIGINT", "SIGTERM", "SIGHUP"):
         try:
             loop.add_signal_handler(
                 getattr(signal, signame),

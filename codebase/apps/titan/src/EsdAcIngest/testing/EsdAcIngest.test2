@@ -55,7 +55,7 @@ instance = "Test";
 //     TCP
 //     TEST
 
-mode = REALTIME;
+mode = TCP;
 
 //======================================================================
 //
@@ -215,7 +215,7 @@ mode = REALTIME;
 //     CSV_GPS_FORMAT
 //     POLCAST2_FORMAT
 
-input_format = AUTOMATIC_FORMAT;
+input_format = COMMA_DELIMITED_FORMAT;
 
 ///////////// optional_field_names ////////////////////
 //
@@ -384,7 +384,7 @@ oddParity = FALSE;
 //
 // Type: string
 
-tcp_server_host_name = "192.168.1.1";
+tcp_server_host_name = "localhost";
 
 ///////////// tcp_server_port /////////////////////////
 //
@@ -394,7 +394,7 @@ tcp_server_host_name = "192.168.1.1";
 //
 // Type: int
 
-tcp_server_port = 2003;
+tcp_server_port = 10000;
 
 ///////////// send_tcp_handshake //////////////////////
 //
@@ -513,7 +513,7 @@ min_valid_air_speed = 20;
 //
 // Type: boolean
 
-echo = FALSE;
+echo = TRUE;
 
 ///////////// new_line_on_echo ////////////////////////
 //
@@ -534,7 +534,7 @@ new_line_on_echo = TRUE;
 //
 // Type: string
 
-output_url = "$(RAP_DATA_DIR)/spdb/ac_posn";
+output_url = "/tmp/spdb/ac_posn";
 
 ///////////// valid_period ////////////////////////////
 //
@@ -567,7 +567,7 @@ output_ascii = TRUE;
 //
 // Type: string
 
-ascii_url = "$(RAP_DATA_DIR)/spdb/ascii_ac_posn";
+ascii_url = "/tmp/spdb/ascii_ac_posn";
 
 ///////////// output_interval /////////////////////////
 //
