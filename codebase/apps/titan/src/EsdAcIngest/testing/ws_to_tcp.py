@@ -201,11 +201,11 @@ async def main() -> None:
     parser.add_argument(
         "--tcp_port",
         type=int,
-        help="Local TCP listen port, e.g. 5000",
+        help="Local TCP listen port, e.g. 10000",
     )
 
     parser.add_argument(
-        "--tcp-host",
+        "--tcp_host",
         default="0.0.0.0",
         help="Local TCP listen address. Default: 0.0.0.0",
     )
