@@ -160,6 +160,10 @@ private:
 
   vector <RadxRay *> _scalarRays;
 
+  // radar interpolation
+
+  CartInterp *_cartInterp;
+
   // interpolation fields
   
   vector<BaseInterp::Field> _interpFields;
@@ -178,15 +182,6 @@ private:
   DsMdvx _modelInterpMdvx;
   TempProfile _tempProfile;
 
-  // Beam Blockage
-  
-  DsMdvx _beamBlockMdvx;
-  bool _haveBeamBlock;
-
-  // radar interpolation
-
-  CartInterp *_cartInterp;
-
   // mutex for debug prints
   
   pthread_mutex_t _debugPrintMutex;
@@ -196,15 +191,32 @@ private:
   TaThreadPool _scalarsThreadPool;
   vector<ScalarsCompute *> _computeScalarsThreads;
 
+  // PID data and fields
+  
   MdvxField *_pidField;
   MdvxField *_pidModeField;
   vector<fl32> _pidArray, _pidFilt;
 
+  // PRECIP data and fields
+  
   MdvxField *_rateZhField;
   MdvxField *_rateHybridField;
-
   MdvxField *_rateZhFiltField;
   MdvxField *_rateHybridFiltField;
+  vector<fl32> _rateZhFilt, _rateHybridFilt;
+
+  // QPE fields
+
+  MdvxField *_qpeZhField;
+  MdvxField *_qpeHybridField;
+  vector<fl32> _qpeZh, _qpeHybrid;
+
+  // Beam Blockage
+  
+  DsMdvx _beamBlockMdvx;
+  MdvxField *_beamBlockField;
+  MdvxField *_terrainHtField;
+  bool _haveBeamBlock;
 
   // private methods
 
@@ -248,7 +260,7 @@ private:
 
   int _readBeamBlock();
 
-  int _addQpeField();
+  int _computeQpeFields();
 
   int _writeOutputMdv();
 

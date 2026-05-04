@@ -91,14 +91,21 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
 
   OK = true;
 
-  _cartInterp = NULL;
-  _pidField = NULL;
-  _pidModeField = NULL;
-  _rateZhField = NULL;
-  _rateHybridField = NULL;
-  _rateZhFiltField = NULL;
-  _rateHybridFiltField = NULL;
+  _cartInterp = nullptr;
 
+  _pidField = nullptr;
+  _pidModeField = nullptr;
+
+  _rateZhField = nullptr;
+  _rateHybridField = nullptr;
+  _rateZhFiltField = nullptr;
+  _rateHybridFiltField = nullptr;
+
+  _qpeZhField = nullptr;
+  _qpeHybridField = nullptr;
+
+  _beamBlockField = nullptr;
+  _terrainHtField = nullptr;
   _haveBeamBlock = false;
   
   // set programe name
@@ -164,10 +171,10 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   
   // read params for KdpFilt
   
-  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == nullptr) {
     // not using defaults
     if (_kdpFiltParams.load(_params.KDP_params_file_path,
-                            NULL, true, _args.tdrpDebug)) {
+                            nullptr, true, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for KdpFilt: "
            << _params.KDP_params_file_path << endl;
@@ -178,10 +185,10 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
 
   // read params for Ncar PID
 
-  if (strstr(_params.PID_params_file_path, "use-defaults") == NULL) {
+  if (strstr(_params.PID_params_file_path, "use-defaults") == nullptr) {
     // not using defaults
     if (_ncarPidParams.load(_params.PID_params_file_path,
-                            NULL, true, _args.tdrpDebug)) {
+                            nullptr, true, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for NcarPid: "
            << _params.PID_params_file_path << endl;
@@ -195,10 +202,10 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
 
   // read in RATE params
   
-  if (strstr(_params.RATE_params_file_path, "use-defaults") == NULL) {
+  if (strstr(_params.RATE_params_file_path, "use-defaults") == nullptr) {
     // not using defaults
     if (_precipRateParams.load(_params.RATE_params_file_path,
-                               NULL, true, _args.tdrpDebug)) {
+                               nullptr, true, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for PrecipFilt: "
            << _params.RATE_params_file_path << endl;
@@ -209,7 +216,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
 
   // initialize compute object
   
-  pthread_mutex_init(&_debugPrintMutex, NULL);
+  pthread_mutex_init(&_debugPrintMutex, nullptr);
   
   // set up scalars compute thread pool
   
@@ -632,11 +639,11 @@ int RadxCartDP::_processFile(const string &filePath)
     }
   }
 
-  // add QPE field if we have beam blockage and terrain data
+  // add QPE fields if we have beam blockage and terrain data
 
   if (_params.add_qpe_field) {
     if (_haveBeamBlock) {
-      if (_addQpeField()) {
+      if (_computeQpeFields()) {
         cerr << "ERROR - RadxCartDP" << endl;
         cerr << "  Cannot add QPE field" << endl;
         iret = -1;
@@ -927,7 +934,7 @@ int RadxCartDP::_computeScalars()
     bool isDone = true;
     ScalarsThread *thread = 
       (ScalarsThread *) _scalarsThreadPool.getNextThread(true, isDone);
-    if (thread == NULL) {
+    if (thread == nullptr) {
       break;
     }
     if (isDone) {
@@ -956,7 +963,7 @@ int RadxCartDP::_computeScalars()
   _scalarsThreadPool.setReadyForDoneCheck();
   while (!_scalarsThreadPool.checkAllDone()) {
     ScalarsThread *thread = (ScalarsThread *) _scalarsThreadPool.getNextDoneThread();
-    if (thread == NULL) {
+    if (thread == nullptr) {
       break;
     } else {
       // store the results computed by the thread
@@ -978,7 +985,7 @@ int RadxCartDP::_storeScalarsRay(ScalarsThread *thread)
 {
   
   RadxRay *scalarsRay = thread->getOutputRay();
-  if (scalarsRay == NULL) {
+  if (scalarsRay == nullptr) {
     // error
     return -1;
   }
@@ -1008,7 +1015,7 @@ int RadxCartDP::_mergeScalarsIntoReadVol()
   for (size_t ii = 0; ii < _scalarRays.size(); ii++) {
 
     RadxRay *scRay = _scalarRays[ii];
-    if (scRay == NULL) {
+    if (scRay == nullptr) {
       cerr << "ERROR - null derived ray at index: " << ii << endl;
       return -1;
     }
@@ -1020,7 +1027,7 @@ int RadxCartDP::_mergeScalarsIntoReadVol()
     }
 
     RadxRay *readRay = readRays[rayNum];
-    if (readRay == NULL) {
+    if (readRay == nullptr) {
       cerr << "ERROR - null read ray at rayNum: " << rayNum << endl;
       return -1;
     }
@@ -1029,7 +1036,7 @@ int RadxCartDP::_mergeScalarsIntoReadVol()
     for (size_t jj = 0; jj < scFields.size(); jj++) {
 
       const RadxField *sc = scFields[jj];
-      if (sc == NULL) {
+      if (sc == nullptr) {
         continue;
       }
 
@@ -1352,7 +1359,7 @@ bool RadxCartDP::_isRhi()
 
 }
 
-/////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 // initialize the projection and vlevels of the target volume
 
 void RadxCartDP::_initTargetGrid()
@@ -1364,7 +1371,7 @@ void RadxCartDP::_initTargetGrid()
   coord.ny = _params.grid_xy_geom.ny;
   coord.nz = _params.grid_z_geom.nz;
   
-  _targetNpoints = coord.nx * coord.ny* coord.nz;
+  _targetNpoints = coord.nx * coord.ny * coord.nz;
 
   coord.dx = _params.grid_xy_geom.dx;
   coord.dy = _params.grid_xy_geom.dy;
@@ -1519,7 +1526,7 @@ void RadxCartDP::_initInterpFields()
     for (size_t iray = 0; iray < rays.size(); iray++) {
       const RadxRay *ray = rays[iray];
       const RadxField *field = ray->getField(radxName);
-      if (field != NULL) {
+      if (field != nullptr) {
         BaseInterp::Field interpField;
         interpField.radxName = field->getName();
         interpField.outputName = field->getName();
@@ -1590,7 +1597,7 @@ void RadxCartDP::_initInterpFields()
 
 void RadxCartDP::_allocInterpToCart()
 {
-  if (_cartInterp == NULL) {
+  if (_cartInterp == nullptr) {
     _cartInterp = new CartInterp(_progName, _params, _radarVol,
                                  _interpFields, _interpRays);
   }
@@ -1658,7 +1665,7 @@ void RadxCartDP::_checkInterpFields()
     for (size_t ii = 0; ii < rays.size(); ii++) {
       const RadxRay *ray = rays[ii];
       const RadxField *fld = ray->getField(fieldName);
-      if (fld != NULL) {
+      if (fld != nullptr) {
         found = true;
         _interpFields[ifield].longName = fld->getLongName();
         _interpFields[ifield].standardName = fld->getStandardName();
@@ -1761,7 +1768,7 @@ int RadxCartDP::_computeTempProfile()
 
   MdvxField *tempFld =
     _modelInterpMdvx.getField(getModelOutputName(Params::TEMP).c_str());
-  if (tempFld == NULL) {
+  if (tempFld == nullptr) {
     cerr << "ERROR - RadxCartDP::_computeTempProfile" << endl;
     cerr << "  Cannot find temp field in model, time: "
          << RadxTime::strm(_modelInterpMdvx.getValidTime()) << endl;
@@ -1862,18 +1869,30 @@ int RadxCartDP::_readBeamBlock()
     return -1;
   }
 
-  // check the grid matches
+  // set field pointers
 
-  const MdvxField *bbField =
-    _beamBlockMdvx.getField(getBeamBlockInputName(Params::BEAME).c_str());
-  if (!bbField) {
+  _beamBlockField = _beamBlockMdvx.getField(getBeamBlockInputName(Params::BEAME).c_str());
+  _terrainHtField = _beamBlockMdvx.getField(getBeamBlockInputName(Params::TERRAIN_HT).c_str());
+
+  if (!_beamBlockField) {
     cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
     cerr << "  Cannot read beam extinction field: "
          << getBeamBlockInputName(Params::BEAME) << endl;
     cerr << "  File path: " << _params.beam_block_input_file_path << endl;
     return -1;
   }
-  MdvxProj bbProj(_beamBlockMdvx.getMasterHeader(), bbField->getFieldHeader());
+
+  if (!_terrainHtField) {
+    cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
+    cerr << "  Cannot read terrain height field: "
+         << getBeamBlockInputName(Params::TERRAIN_HT) << endl;
+    cerr << "  File path: " << _params.beam_block_input_file_path << endl;
+    return -1;
+  }
+
+  // check the beam blocl grid matches the interpolation grid
+  
+  MdvxProj bbProj(_beamBlockMdvx.getMasterHeader(), _beamBlockField->getFieldHeader());
   if (bbProj != _targetProj) {
     cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
     cerr << "  BeamBlock grid does not match target Cart grid" << endl;
@@ -1886,10 +1905,11 @@ int RadxCartDP::_readBeamBlock()
     cerr << "==================================================" << endl;
     return -1;
   }
-  if (bbField->getFieldHeader().nz != (si64) _targetVlevels.size()) {
+
+  if (_beamBlockField->getFieldHeader().nz != (si64) _targetVlevels.size()) {
     cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
     cerr << "  BeamBlock grid nz does not match Cart grid nz" << endl;
-    cerr << "  BeamBlock grid nz: " << bbField->getFieldHeader().nz << endl;
+    cerr << "  BeamBlock grid nz: " << _beamBlockField->getFieldHeader().nz << endl;
     cerr << "  Cart grid nz: " << _targetVlevels.size() << endl;
     return -1;
   }
@@ -1903,10 +1923,10 @@ int RadxCartDP::_readBeamBlock()
 }
 
 /////////////////////////////////////////////////////////
-// add in the QPE field
+// compute QPE fields
 // Returns 0 on success, -1 on failure.
 
-int RadxCartDP::_addQpeField()
+int RadxCartDP::_computeQpeFields()
 
 {
 
@@ -1973,14 +1993,25 @@ int RadxCartDP::_writeOutputMdv()
     _rateHybridFiltField = nullptr; // memory handling passed to output mdv object
   }
   
+  // add QPE fields
+
+  if (_qpeZhField) {
+    out.addField(_qpeZhField);
+    _qpeZhField = nullptr; // memory handling passed to output mdv object
+  }
+  if (_qpeHybridField) {
+    out.addField(_qpeHybridField);
+    _qpeHybridField = nullptr; // memory handling passed to output mdv object
+  }
+
   // add beam blockage fields
   
   if (_haveBeamBlock) {
-    MdvxField *bbField =
+    MdvxField *_beamBlockField =
       _beamBlockMdvx.getField(getBeamBlockInputName(Params::BEAME).c_str());
-    if (bbField) {
+    if (_beamBlockField) {
       // make copy since the Mdvx object takes ownership of the field
-      out.addField(new MdvxField(*bbField));
+      out.addField(new MdvxField(*_beamBlockField));
     }
     MdvxField *terrainHtField =
       _beamBlockMdvx.getField(getBeamBlockInputName(Params::TERRAIN_HT).c_str());
@@ -2205,33 +2236,33 @@ int RadxCartDP::_computePrecip()
     cerr << "Applying median filter to precip" << endl;
   }
   
-  vector<fl32> rateZhFilt = rateZhArray;
-  vector<fl32> rateHybridFilt = rateHybridArray;
+  _rateZhFilt = rateZhArray;
+  _rateHybridFilt = rateHybridArray;
   
   int kernelSize = _params.RATE_median_filter_kernel_size;
   
   _medianFilter2D(rateZhArray.data(),
-                  rateZhFilt.data(),
+                  _rateZhFilt.data(),
                   _cartInterp->getGridZLevels().size(),
                   _cartInterp->getGridNy(),
                   _cartInterp->getGridNx(),
                   kernelSize, Radx::missingFl32, true);
   
   _medianFilter2D(rateHybridArray.data(),
-                  rateHybridFilt.data(),
+                  _rateHybridFilt.data(),
                   _cartInterp->getGridZLevels().size(),
                   _cartInterp->getGridNy(),
                   _cartInterp->getGridNx(),
                   kernelSize, Radx::missingFl32, true);
  
-  _rateZhFiltField = new MdvxField(rateFhdr, rateVhdr, rateZhFilt.data());
+  _rateZhFiltField = new MdvxField(rateFhdr, rateVhdr, _rateZhFilt.data());
   _rateZhFiltField->setFieldName("RATE_ZH_FILT");
   _rateZhFiltField->setFieldNameLong("precip_rate_from_reflectivity");
   _rateZhFiltField->setUnits("mm/hr");
   _rateZhFiltField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
                                 Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
   
-  _rateHybridFiltField = new MdvxField(rateFhdr, rateVhdr, rateHybridFilt.data());
+  _rateHybridFiltField = new MdvxField(rateFhdr, rateVhdr, _rateHybridFilt.data());
   _rateHybridFiltField->setFieldName("RATE_HYBRID_FILT");
   _rateHybridFiltField->setFieldNameLong("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
   _rateHybridFiltField->setUnits("mm/hr");
@@ -2240,9 +2271,6 @@ int RadxCartDP::_computePrecip()
   
   if (_params.debug) {
     cerr << "DONE applying median filter to precip" << endl;
-  }
-  
-  if (_params.debug) {
     cerr << "DONE computing precip rates" << endl;
   }
   
@@ -2464,10 +2492,10 @@ void RadxCartDP::_printParamsRate()
 
   // read in RATE params if applicable
   
-  if (strstr(_params.RATE_params_file_path, "use-defaults") == NULL) {
+  if (strstr(_params.RATE_params_file_path, "use-defaults") == nullptr) {
     // not using defaults
     if (_precipRateParams.load(_params.RATE_params_file_path,
-                               NULL, expandEnvVars, _args.tdrpDebug)) {
+                               nullptr, expandEnvVars, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for PrecipFilt: "
            << _params.RATE_params_file_path << endl;
@@ -2512,10 +2540,10 @@ void RadxCartDP::_printParamsPid()
 
   // read in PID params if applicable
 
-  if (strstr(_params.PID_params_file_path, "use-defaults") == NULL) {
+  if (strstr(_params.PID_params_file_path, "use-defaults") == nullptr) {
     // not using defaults
     if (_ncarPidParams.load(_params.PID_params_file_path,
-                            NULL, expandEnvVars, _args.tdrpDebug)) {
+                            nullptr, expandEnvVars, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for PidFilt: "
            << _params.PID_params_file_path << endl;
@@ -2560,10 +2588,10 @@ void RadxCartDP::_printParamsKdp()
 
   // read in KDP params if applicable
 
-  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == nullptr) {
     // not using defaults
     if (_kdpFiltParams.load(_params.KDP_params_file_path,
-                            NULL, expandEnvVars, _args.tdrpDebug)) {
+                            nullptr, expandEnvVars, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for KdpFilt: "
            << _params.KDP_params_file_path << endl;

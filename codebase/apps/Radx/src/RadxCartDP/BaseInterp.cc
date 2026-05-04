@@ -394,13 +394,13 @@ void BaseInterp::_accumFolded(const Ray *ray,
 
     if (field != NULL) {
       
-      const Field &intFld = _interpFields[ifield];
+      const Field &iField = _interpFields[ifield];
 
       if (igateInner >= 0 && igateInner < nGates) {
         fl32 val = field[igateInner];
         if (val != missing) {
           double angle =
-            _getFoldAngle(val, intFld.foldLimitLower, intFld.foldRange);
+            _getFoldAngle(val, iField.foldLimitLower, iField.foldRange);
           double sinVal, cosVal;
           ta_sincos(angle, &sinVal, &cosVal);
           sumX += cosVal * wtInner;
@@ -414,7 +414,7 @@ void BaseInterp::_accumFolded(const Ray *ray,
         fl32 val = field[igateOuter];
         if (val != missing) {
           double angle = 
-            _getFoldAngle(val, intFld.foldLimitLower, intFld.foldRange);
+            _getFoldAngle(val, iField.foldLimitLower, iField.foldRange);
           double sinVal, cosVal;
           ta_sincos(angle, &sinVal, &cosVal);
           sumX += cosVal * wtOuter;
@@ -454,13 +454,13 @@ void BaseInterp::_accumFolded(const Ray *ray,
 
     if (field != NULL) {
       
-      const Field &intFld = _interpFields[ifield];
+      const Field &iField = _interpFields[ifield];
 
       if (igate >= 0 && igate < nGates) {
         fl32 val = field[igate];
         if (val != missing) {
           double angle =
-            _getFoldAngle(val, intFld.foldLimitLower, intFld.foldRange);
+            _getFoldAngle(val, iField.foldLimitLower, iField.foldRange);
           double sinVal, cosVal;
           ta_sincos(angle, &sinVal, &cosVal);
           sumX += cosVal * wt;
