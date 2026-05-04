@@ -33,31 +33,31 @@
 
 #ifdef _in_Mdvx_hh
 
-void initStruct(master_header_t &val);
-void initStruct(field_header_t &val);
-void initStruct(vlevel_header_t &val);
-void initStruct(chunk_header_t &val);
+static void initStruct(master_header_t &val);
+static void initStruct(field_header_t &val);
+static void initStruct(vlevel_header_t &val);
+static void initStruct(chunk_header_t &val);
 
-void initStruct(vsect_waypt_t &val);
-void initStruct(vsect_samplept_t &val);
-void initStruct(vsect_segment_t &val);
+static void initStruct(vsect_waypt_t &val);
+static void initStruct(vsect_samplept_t &val);
+static void initStruct(vsect_segment_t &val);
 
-void initStruct(chunkVsectWayPtHdr_t &val);
-void initStruct(chunkVsectWayPt_t &val);
-void initStruct(chunkVsectSamplePtHdr_t &val);
-void initStruct(chunkVsectSamplePt_t &val);
-void initStruct(chunkVsectSegmentHdr_t &val);
-void initStruct(chunkVsectSegment_t &val);
+static void initStruct(chunkVsectWayPtHdr_t &val);
+static void initStruct(chunkVsectWayPt_t &val);
+static void initStruct(chunkVsectSamplePtHdr_t &val);
+static void initStruct(chunkVsectSamplePt_t &val);
+static void initStruct(chunkVsectSegmentHdr_t &val);
+static void initStruct(chunkVsectSegment_t &val);
 
-void initStruct(flat_params_t &val);
-void initStruct(albers_params_t &val);
-void initStruct(lc2_params_t &val);
-void initStruct(os_params_t &val);
-void initStruct(ps_params_t &val);
-void initStruct(trans_merc_params_t &val);
-void initStruct(vert_persp_params_t &val);
+static void initStruct(flat_params_t &val);
+static void initStruct(albers_params_t &val);
+static void initStruct(lc2_params_t &val);
+static void initStruct(os_params_t &val);
+static void initStruct(ps_params_t &val);
+static void initStruct(trans_merc_params_t &val);
+static void initStruct(vert_persp_params_t &val);
 
-void initStruct(coord_t &val);
+static void initStruct(coord_t &val);
 
 #endif
 
