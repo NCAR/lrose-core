@@ -205,6 +205,29 @@ paramdef struct beam_block_field_name_t {
 } beam_block_field_names[2];
 
 commentdef {
+  p_header = "QPE - QUANTATIVE PRECIPITAITON ESTIMATION";
+  p_text = "QPE needs the beam blockage and terrain_ht data from the BEAM BLOCKAGE section above.";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Add in the QPE field.";
+  p_help = "This is a 2D field with the best estimate of precipitation rate at the surface. It depends on beam blockage and terrain height.";
+} add_qpe_field;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Max extinction value from the beam blockage calculations - see above.";
+  p_help = "To get QPE, at each (x, y) location we look for the lowest grid point with a blockage extinction value less than this threshold. If the extinction exceeds this threshold at a Cartesian point, we look above to get the precip rate estimate from a grid point with less blockage.";
+} qpe_max_extinction_fraction;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Minimum height margin above terrain for a valid precip estimate (km).";
+  p_help = "We require the QPE rate estimate to be drawn from a grid cell clear of the terrain. So for each (x, y) location we only accept precip rates from grid points with a height that exceeds the terrain by at least this margin.";
+} qpe_ht_margin_above_terrain_km;
+
+commentdef {
   p_header = "OUTPUT DATA DIRECTORY";
 }
 

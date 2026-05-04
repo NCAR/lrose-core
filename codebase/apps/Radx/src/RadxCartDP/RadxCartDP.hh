@@ -248,6 +248,8 @@ private:
 
   int _readBeamBlock();
 
+  int _addQpeField();
+
   int _writeOutputMdv();
 
   int _computePid();

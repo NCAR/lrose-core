@@ -539,6 +539,12 @@ public:
   beam_block_field_name_t *_beam_block_field_names;
   int beam_block_field_names_n;
 
+  tdrp_bool_t add_qpe_field;
+
+  double qpe_max_extinction_fraction;
+
+  double qpe_ht_margin_above_terrain_km;
+
   char* output_dir;
 
   tdrp_bool_t write_debug_polar_output;
@@ -772,7 +778,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[163];
+  mutable TDRPtable _table[167];
 
   const char *_className;
 

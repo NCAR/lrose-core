@@ -632,6 +632,24 @@ int RadxCartDP::_processFile(const string &filePath)
     }
   }
 
+  // add QPE field if we have beam blockage and terrain data
+
+  if (_params.add_qpe_field) {
+    if (_haveBeamBlock) {
+      if (_addQpeField()) {
+        cerr << "ERROR - RadxCartDP" << endl;
+        cerr << "  Cannot add QPE field" << endl;
+        iret = -1;
+      }
+    } else {
+      // no beam blockage data, so this cannot be done
+      cerr << "ERROR - RadxCartDP" << endl;
+      cerr << "  Cannot add QPE field" << endl;
+      cerr << "  For this we need beam blockage data, and it is not available." << endl;
+      iret = -1;
+    }
+  }
+
   // write out MDV file
   
   if (_writeOutputMdv()) {
@@ -1880,6 +1898,18 @@ int RadxCartDP::_readBeamBlock()
     cerr << "SUCCESS - got beam block file: " << _params.beam_block_input_file_path << endl;
   }
   
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// add in the QPE field
+// Returns 0 on success, -1 on failure.
+
+int RadxCartDP::_addQpeField()
+
+{
+
   return 0;
 
 }
