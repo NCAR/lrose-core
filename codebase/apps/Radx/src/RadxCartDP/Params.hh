@@ -107,8 +107,8 @@ public:
   } beam_block_field_type_t;
 
   typedef enum {
-    RATE_ZH = 0,
-    RATE_ZH_SNOW = 1,
+    RATE_ZR = 0,
+    RATE_ZR_SNOW = 1,
     RATE_Z_ZDR = 2,
     RATE_KDP = 3,
     RATE_KDP_ZDR = 4,
@@ -545,6 +545,10 @@ public:
 
   double qpe_ht_margin_above_terrain_km;
 
+  char* qpe_hybrid_field_name;
+
+  char* qpe_zr_field_name;
+
   char* output_dir;
 
   tdrp_bool_t write_debug_polar_output;
@@ -778,7 +782,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[167];
+  mutable TDRPtable _table[169];
 
   const char *_className;
 

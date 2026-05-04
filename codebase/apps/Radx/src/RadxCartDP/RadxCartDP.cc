@@ -67,7 +67,7 @@ string RadxCartDP::beamHtFieldName = "BEAM_HT";
 string RadxCartDP::tempFieldName = "TEMP_C";
 string RadxCartDP::pidFieldName = "PID";
 string RadxCartDP::pidInterestFieldName = "PID_INTEREST";
-string RadxCartDP::rateZhFieldName = "RATE_ZH";
+string RadxCartDP::rateZrFieldName = "RATE_ZR";
 string RadxCartDP::rateHybridFieldName = "RATE_HYBRID";
 string RadxCartDP::mlFieldName = "MELTING_LAYER";
 string RadxCartDP::mlExtendedFieldName = "ML_EXTENDED";
@@ -97,15 +97,15 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   _pidField = nullptr;
   _pidModeField = nullptr;
 
-  _rateZhField = nullptr;
+  _rateZrField = nullptr;
   _rateHybridField = nullptr;
-  _rateZhFiltField = nullptr;
+  _rateZrFiltField = nullptr;
   _rateHybridFiltField = nullptr;
 
-  _qpeZhField = nullptr;
+  _qpeZrField = nullptr;
   _qpeHybridField = nullptr;
 
-  _beamBlockField = nullptr;
+  _extinctionField = nullptr;
   _terrainHtField = nullptr;
   _haveBeamBlock = false;
   
@@ -1873,10 +1873,10 @@ int RadxCartDP::_readBeamBlock()
 
   // set field pointers
 
-  _beamBlockField = _beamBlockMdvx.getField(getBeamBlockInputName(Params::BEAME).c_str());
+  _extinctionField = _beamBlockMdvx.getField(getBeamBlockInputName(Params::BEAME).c_str());
   _terrainHtField = _beamBlockMdvx.getField(getBeamBlockInputName(Params::TERRAIN_HT).c_str());
 
-  if (!_beamBlockField) {
+  if (!_extinctionField) {
     cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
     cerr << "  Cannot read beam extinction field: "
          << getBeamBlockInputName(Params::BEAME) << endl;
@@ -1892,9 +1892,15 @@ int RadxCartDP::_readBeamBlock()
     return -1;
   }
 
+  // cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
+  // _terrainHtField->print(cerr);
+  // cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
+  // _terrainHtField->printVoldata(cerr);
+  // cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
+
   // check the beam blocl grid matches the interpolation grid
   
-  MdvxProj bbProj(_beamBlockMdvx.getMasterHeader(), _beamBlockField->getFieldHeader());
+  MdvxProj bbProj(_beamBlockMdvx.getMasterHeader(), _extinctionField->getFieldHeader());
   if (bbProj != _interpProj) {
     cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
     cerr << "  BeamBlock grid does not match interp Cart grid" << endl;
@@ -1908,10 +1914,10 @@ int RadxCartDP::_readBeamBlock()
     return -1;
   }
 
-  if (_beamBlockField->getFieldHeader().nz != (si64) _interpVlevels.size()) {
+  if (_extinctionField->getFieldHeader().nz != (si64) _interpVlevels.size()) {
     cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
     cerr << "  BeamBlock grid nz does not match Cart grid nz" << endl;
-    cerr << "  BeamBlock grid nz: " << _beamBlockField->getFieldHeader().nz << endl;
+    cerr << "  BeamBlock grid nz: " << _extinctionField->getFieldHeader().nz << endl;
     cerr << "  Cart grid nz: " << _interpVlevels.size() << endl;
     return -1;
   }
@@ -1932,16 +1938,25 @@ int RadxCartDP::_computeQpeFields()
 
 {
 
+  if (_params.debug) {
+    cerr << "Computing QPE fields" << endl;
+  }
+  
   // allocate 2D arrays
   
-  _qpeZh.resize(_interpNpointsPlane, Radx::missingFl32);
+  _qpeZr.resize(_interpNpointsPlane, Radx::missingFl32);
   _qpeHybrid.resize(_interpNpointsPlane, Radx::missingFl32);
   
   // beam blockage and terrain ht arrays
 
-  const fl32 *bblock = (const fl32*) _beamBlockField->getVol();
-  const fl32 *terrainHt = (const fl32*) _terrainHtField->getVol();
+  MdvxField extinctionField(*_extinctionField);
+  extinctionField.convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+  const fl32 *extinct = (const fl32*) extinctionField.getVol();
 
+  MdvxField terrainHtField(*_terrainHtField);
+  terrainHtField.convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+  const fl32 *terrainHt = (const fl32*) terrainHtField.getVol();
+  
   // beam ht field
   
   BaseInterp::Field *beamHtFld = _getInterpField(beamHtFieldName);
@@ -1953,8 +1968,8 @@ int RadxCartDP::_computeQpeFields()
   for (int iy = 0; iy < _interpCoord.ny; iy++) {
     for (int ix = 0; ix < _interpCoord.nx; ix++, index2D++) {
 
-      double tHt = terrainHt[index2D];
-      double minValidHt = tHt + _params.qpe_ht_margin_above_terrain_km;
+      double tHtKm = terrainHt[index2D] / 1000.0;
+      double minValidHtKm = tHtKm + _params.qpe_ht_margin_above_terrain_km;
       
       // start at the bottom of the column and move upwards
       
@@ -1964,7 +1979,8 @@ int RadxCartDP::_computeQpeFields()
         // move up if too close to terrain
         
         double zKm = _interpVlevels[iz];
-        if (zKm < minValidHt) {
+
+        if (zKm < minValidHtKm) {
           continue;
         }
         
@@ -1976,13 +1992,13 @@ int RadxCartDP::_computeQpeFields()
 
         // move up if beam is blocked in excess of threshold
 
-        if (bblock[index3D] > _params.qpe_max_extinction_fraction) {
+        if (extinct[index3D] > _params.qpe_max_extinction_fraction) {
           continue;
         }
 
         // passes all tests, set QPE values
 
-        _qpeZh[index2D] = _rateZhFilt[index3D];
+        _qpeZr[index2D] = _rateZrFilt[index3D];
         _qpeHybrid[index2D] = _rateHybridFilt[index3D];
         
         // done with this (x,y) location
@@ -1998,7 +2014,7 @@ int RadxCartDP::_computeQpeFields()
 
   // field header
   
-  Mdvx::field_header_t fhdr(_rateZhFiltField->getFieldHeader());
+  Mdvx::field_header_t fhdr(_rateZrFiltField->getFieldHeader());
   fhdr.nz = 1;
   fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
   fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
@@ -2030,20 +2046,20 @@ int RadxCartDP::_computeQpeFields()
   // hybrid field
   
   _qpeHybridField = new MdvxField(fhdr, vhdr);
-  _qpeHybridField->setFieldName(_rateZhFiltField->getFieldName());
-  _qpeHybridField->setFieldNameLong(_rateZhFiltField->getFieldNameLong());
-  _qpeHybridField->setUnits(_rateZhFiltField->getUnits());
+  _qpeHybridField->setFieldName(_params.qpe_hybrid_field_name);
+  _qpeHybridField->setFieldNameLong(_rateZrFiltField->getFieldNameLong());
+  _qpeHybridField->setUnits(_rateZrFiltField->getUnits());
   _qpeHybridField->setVolData(_qpeHybrid.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
   _qpeHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
 
-  // Zh field
+  // Zr field
 
-  _qpeZhField = new MdvxField(fhdr, vhdr);
-  _qpeZhField->setFieldName(_rateZhFiltField->getFieldName());
-  _qpeZhField->setFieldNameLong(_rateZhFiltField->getFieldNameLong());
-  _qpeZhField->setUnits(_rateZhFiltField->getUnits());
-  _qpeZhField->setVolData(_qpeZh.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
-  _qpeZhField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
+  _qpeZrField = new MdvxField(fhdr, vhdr);
+  _qpeZrField->setFieldName(_params.qpe_zr_field_name);
+  _qpeZrField->setFieldNameLong(_rateZrFiltField->getFieldNameLong());
+  _qpeZrField->setUnits(_rateZrFiltField->getUnits());
+  _qpeZrField->setVolData(_qpeZr.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
+  _qpeZrField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
 
   return 0;
 
@@ -2090,18 +2106,18 @@ int RadxCartDP::_writeOutputMdv()
   
   // add precip rate fields
 
-  if (_rateZhField) {
-    out.addField(_rateZhField);
-    _rateZhField = nullptr; // memory handling passed to output mdv object
+  if (_rateZrField) {
+    out.addField(_rateZrField);
+    _rateZrField = nullptr; // memory handling passed to output mdv object
   }
   if (_rateHybridField) {
     out.addField(_rateHybridField);
     _rateHybridField = nullptr; // memory handling passed to output mdv object
   }
 
-  if (_rateZhFiltField) {
-    out.addField(_rateZhFiltField);
-    _rateZhFiltField = nullptr; // memory handling passed to output mdv object
+  if (_rateZrFiltField) {
+    out.addField(_rateZrFiltField);
+    _rateZrFiltField = nullptr; // memory handling passed to output mdv object
   }
   if (_rateHybridFiltField) {
     out.addField(_rateHybridFiltField);
@@ -2114,25 +2130,25 @@ int RadxCartDP::_writeOutputMdv()
     out.addField(_qpeHybridField);
     _qpeHybridField = nullptr; // memory handling passed to output mdv object
   }
-  if (_qpeZhField) {
-    out.addField(_qpeZhField);
-    _qpeZhField = nullptr; // memory handling passed to output mdv object
+  if (_qpeZrField) {
+    out.addField(_qpeZrField);
+    _qpeZrField = nullptr; // memory handling passed to output mdv object
   }
 
   // add beam blockage fields
   
   if (_haveBeamBlock) {
-    MdvxField *_beamBlockField =
-      _beamBlockMdvx.getField(getBeamBlockInputName(Params::BEAME).c_str());
-    if (_beamBlockField) {
+    if (_extinctionField) {
       // make copy since the Mdvx object takes ownership of the field
-      out.addField(new MdvxField(*_beamBlockField));
+      MdvxField *eField = new MdvxField(*_extinctionField);
+      eField->setFieldName(getBeamBlockOutputName(Params::BEAME).c_str());
+      out.addField(eField);
     }
-    MdvxField *terrainHtField =
-      _beamBlockMdvx.getField(getBeamBlockInputName(Params::TERRAIN_HT).c_str());
-    if (terrainHtField) {
+    if (_terrainHtField) {
       // make copy since the Mdvx object takes ownership of the field
-      out.addField(new MdvxField(*terrainHtField));
+      MdvxField *htField = new MdvxField(*_terrainHtField);
+      htField->setFieldName(getBeamBlockOutputName(Params::TERRAIN_HT).c_str());
+      out.addField(htField);
     }
   }
   
@@ -2292,7 +2308,7 @@ int RadxCartDP::_computePrecip()
     return -1;
   }
 
-  vector<fl32> rateZhArray(_interpNpointsVol, Radx::missingFl32);
+  vector<fl32> rateZrArray(_interpNpointsVol, Radx::missingFl32);
   vector<fl32> rateHybridArray(_interpNpointsVol, Radx::missingFl32);
 
   for (size_t ii = 0; ii < _interpNpointsVol; ii++) {
@@ -2302,21 +2318,21 @@ int RadxCartDP::_computePrecip()
     double kdp = kdpFld->outputField[ii];
     int pid = _pidFilt[ii];
     
-    double rateZh, rateZhSnow, rateZhMixed;
+    double rateZr, rateZrSnow, rateZrMixed;
     double rateKdp, rateKdpZdr, rateZZdr;
   
     rate.computeBaseRates(dbz, zdr, kdp,
-                          rateZh, rateZhSnow, rateZhMixed,
+                          rateZr, rateZrSnow, rateZrMixed,
                           rateKdp, rateKdpZdr, rateZZdr);
     
     double rateHybrid, rateHidro, rateBringi;
 
     rate.computeHybrid(dbz, zdr, kdp,
-                       rateZh, rateZhSnow, rateZhMixed,
+                       rateZr, rateZrSnow, rateZrMixed,
                        rateKdp, rateKdpZdr, rateZZdr,
                        pid, rateHybrid, rateHidro, rateBringi);
 
-    rateZhArray[ii] = rateZh;
+    rateZrArray[ii] = rateZr;
     rateHybridArray[ii] = rateHybrid;
     
   } // ii
@@ -2331,11 +2347,11 @@ int RadxCartDP::_computePrecip()
   rateFhdr.data_element_nbytes = sizeof(fl32);
   rateFhdr.volume_size = _interpNpointsVol * sizeof(fl32);
 
-  _rateZhField = new MdvxField(rateFhdr, rateVhdr, rateZhArray.data());
-  _rateZhField->setFieldName(rateZhFieldName);
-  _rateZhField->setFieldNameLong("precip_rate_from_reflectivity");
-  _rateZhField->setUnits("mm/hr");
-  _rateZhField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+  _rateZrField = new MdvxField(rateFhdr, rateVhdr, rateZrArray.data());
+  _rateZrField->setFieldName(rateZrFieldName);
+  _rateZrField->setFieldNameLong("precip_rate_from_reflectivity");
+  _rateZrField->setUnits("mm/hr");
+  _rateZrField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
                             Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
   
   _rateHybridField = new MdvxField(rateFhdr, rateVhdr, rateHybridArray.data());
@@ -2351,13 +2367,13 @@ int RadxCartDP::_computePrecip()
     cerr << "Applying median filter to precip" << endl;
   }
   
-  _rateZhFilt = rateZhArray;
+  _rateZrFilt = rateZrArray;
   _rateHybridFilt = rateHybridArray;
   
   int kernelSize = _params.RATE_median_filter_kernel_size;
   
-  _medianFilter2D(rateZhArray.data(),
-                  _rateZhFilt.data(),
+  _medianFilter2D(rateZrArray.data(),
+                  _rateZrFilt.data(),
                   _radarInterp->getGridZLevels().size(),
                   _radarInterp->getGridNy(),
                   _radarInterp->getGridNx(),
@@ -2370,11 +2386,11 @@ int RadxCartDP::_computePrecip()
                   _radarInterp->getGridNx(),
                   kernelSize, Radx::missingFl32, true);
  
-  _rateZhFiltField = new MdvxField(rateFhdr, rateVhdr, _rateZhFilt.data());
-  _rateZhFiltField->setFieldName("RATE_ZH_FILT");
-  _rateZhFiltField->setFieldNameLong("precip_rate_from_reflectivity");
-  _rateZhFiltField->setUnits("mm/hr");
-  _rateZhFiltField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+  _rateZrFiltField = new MdvxField(rateFhdr, rateVhdr, _rateZrFilt.data());
+  _rateZrFiltField->setFieldName("RATE_ZR_FILT");
+  _rateZrFiltField->setFieldNameLong("precip_rate_from_reflectivity");
+  _rateZrFiltField->setUnits("mm/hr");
+  _rateZrFiltField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
                                 Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
   
   _rateHybridFiltField = new MdvxField(rateFhdr, rateVhdr, _rateHybridFilt.data());

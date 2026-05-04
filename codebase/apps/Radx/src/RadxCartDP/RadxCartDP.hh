@@ -115,7 +115,7 @@ public:
   static string pidFieldName;
   static string pidInterestFieldName;
 
-  static string rateZhFieldName;
+  static string rateZrFieldName;
   static string rateHybridFieldName;
 
   static string mlFieldName;
@@ -200,24 +200,24 @@ private:
 
   // PRECIP data and fields
   
-  MdvxField *_rateZhField;
+  MdvxField *_rateZrField;
   MdvxField *_rateHybridField;
-  MdvxField *_rateZhFiltField;
+  MdvxField *_rateZrFiltField;
   MdvxField *_rateHybridFiltField;
-  vector<fl32> _rateZhFilt, _rateHybridFilt;
+  vector<fl32> _rateZrFilt, _rateHybridFilt;
 
   // Beam Blockage and terrain height
   
   DsMdvx _beamBlockMdvx;
-  MdvxField *_beamBlockField;
+  MdvxField *_extinctionField;
   MdvxField *_terrainHtField;
   bool _haveBeamBlock;
 
   // QPE fields
 
-  MdvxField *_qpeZhField;
+  MdvxField *_qpeZrField;
   MdvxField *_qpeHybridField;
-  vector<fl32> _qpeZh, _qpeHybrid;
+  vector<fl32> _qpeZr, _qpeHybrid;
 
   // private methods
 

@@ -831,6 +831,14 @@ int OutputMdv::writeVol()
 
 {
 
+  if (_params.debug) {
+    cerr << "Writing output fields:" << endl;
+    for (size_t ii = 0; ii < _mdvx.getNFields(); ii++) {
+      MdvxField *fld = _mdvx.getField(ii);
+      cerr << "  " << fld->getFieldName() << endl;
+    }
+  }
+  
   _outputDir = _params.output_dir;
 
   _mdvx.setMdv2NcfAttr(_params.ncf_institution,

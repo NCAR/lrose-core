@@ -1032,7 +1032,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("QPE - QUANTATIVE PRECIPITAITON ESTIMATION");
+    tt->comment_hdr = tdrpStrDup("QPE - QUANTATIVE PRECIPITATION ESTIMATION");
     tt->comment_text = tdrpStrDup("QPE needs the beam blockage and terrain_ht data from the BEAM BLOCKAGE section above.");
     tt++;
     
@@ -1070,6 +1070,30 @@
     tt->help = tdrpStrDup("We require the QPE rate estimate to be drawn from a grid cell clear of the terrain. So for each (x, y) location we only accept precip rates from grid points with a height that exceeds the terrain by at least this margin.");
     tt->val_offset = (char *) &qpe_ht_margin_above_terrain_km - &_start_;
     tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'qpe_hybrid_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("qpe_hybrid_field_name");
+    tt->descr = tdrpStrDup("Field name for QPE hybrid rate.");
+    tt->help = tdrpStrDup("This 2D field will be written to the output MDV file.");
+    tt->val_offset = (char *) &qpe_hybrid_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("QPE_HYBRID");
+    tt++;
+    
+    // Parameter 'qpe_zr_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("qpe_zr_field_name");
+    tt->descr = tdrpStrDup("Field name for QPE ZR rate.");
+    tt->help = tdrpStrDup("This 2D field will be written to the output MDV file.");
+    tt->val_offset = (char *) &qpe_zr_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("QPE_ZR");
     tt++;
     
     // Parameter 'Comment 8'
@@ -1301,7 +1325,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("output_fields");
     tt->descr = tdrpStrDup("Indicate which fields should be written to the output file.");
-    tt->help = tdrpStrDup("Choose the ID from the list.\n\nThe name and units can be set however the user prefers.\n\nThe output_encoding apply to CfRadial output only. \n\n\tRATE_ZH: Precip rate from ZH\n\tRATE_ZH_SNOW: Precip rate from ZH in dry snow\n\tRATE_Z_ZDR: Precip rate from Z and ZDR\n\tRATE_KDP: Precip rate from KDP\n\tRATE_KDP_ZDR: Precip rate from KDP and ZDR\n\tRATE_HYBRID: Precip rate from NCAR hybrid\n\tRATE_PID: Precip rate using PID to select the appropriate rate\n\tRATE_HIDRO: Precip rate using CSU HIDRO hybrid\n\tRATE_BRINGI: Precip rate using Bringi hybrid\n\tPID: NCAR Particle ID\n\tPID_INTEREST: final interest map for NCAR Particle ID values\n\tTEMP_FOR_PID: temperature field for PID (C)\n\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n\tKDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)\n\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n");
+    tt->help = tdrpStrDup("Choose the ID from the list.\n\nThe name and units can be set however the user prefers.\n\nThe output_encoding apply to CfRadial output only. \n\n\tRATE_ZR: Precip rate from ZR\n\tRATE_ZR_SNOW: Precip rate from ZR in dry snow\n\tRATE_Z_ZDR: Precip rate from Z and ZDR\n\tRATE_KDP: Precip rate from KDP\n\tRATE_KDP_ZDR: Precip rate from KDP and ZDR\n\tRATE_HYBRID: Precip rate from NCAR hybrid\n\tRATE_PID: Precip rate using PID to select the appropriate rate\n\tRATE_HIDRO: Precip rate using CSU HIDRO hybrid\n\tRATE_BRINGI: Precip rate using Bringi hybrid\n\tPID: NCAR Particle ID\n\tPID_INTEREST: final interest map for NCAR Particle ID values\n\tTEMP_FOR_PID: temperature field for PID (C)\n\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n\tKDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)\n\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n");
     tt->array_offset = (char *) &_output_fields - &_start_;
     tt->array_n_offset = (char *) &output_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -1321,10 +1345,10 @@
         tt->struct_def.fields[0].enum_def.nfields = 20;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("RATE_ZH");
-        tt->struct_def.fields[0].enum_def.fields[0].val = RATE_ZH;
-        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("RATE_ZH_SNOW");
-        tt->struct_def.fields[0].enum_def.fields[1].val = RATE_ZH_SNOW;
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("RATE_ZR");
+        tt->struct_def.fields[0].enum_def.fields[0].val = RATE_ZR;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("RATE_ZR_SNOW");
+        tt->struct_def.fields[0].enum_def.fields[1].val = RATE_ZR_SNOW;
         tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("RATE_Z_ZDR");
         tt->struct_def.fields[0].enum_def.fields[2].val = RATE_Z_ZDR;
         tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("RATE_KDP");
@@ -1389,14 +1413,14 @@
     tt->n_struct_vals = 102;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].e = RATE_ZH;
-      tt->struct_vals[1].s = tdrpStrDup("RATE_ZH");
+      tt->struct_vals[0].e = RATE_ZR;
+      tt->struct_vals[1].s = tdrpStrDup("RATE_ZR");
       tt->struct_vals[2].s = tdrpStrDup("precip_rate_from_z");
       tt->struct_vals[3].s = tdrpStrDup("precip_rate_from_z");
       tt->struct_vals[4].s = tdrpStrDup("mm/hr");
       tt->struct_vals[5].b = pTRUE;
-      tt->struct_vals[6].e = RATE_ZH_SNOW;
-      tt->struct_vals[7].s = tdrpStrDup("RATE_ZH_SNOW");
+      tt->struct_vals[6].e = RATE_ZR_SNOW;
+      tt->struct_vals[7].s = tdrpStrDup("RATE_ZR_SNOW");
       tt->struct_vals[8].s = tdrpStrDup("precip_rate_from_z_for_snow");
       tt->struct_vals[9].s = tdrpStrDup("precip_rate_from_z_for_snow");
       tt->struct_vals[10].s = tdrpStrDup("mm/hr");

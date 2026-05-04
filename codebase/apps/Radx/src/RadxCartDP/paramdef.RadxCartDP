@@ -205,7 +205,7 @@ paramdef struct beam_block_field_name_t {
 } beam_block_field_names[2];
 
 commentdef {
-  p_header = "QPE - QUANTATIVE PRECIPITAITON ESTIMATION";
+  p_header = "QPE - QUANTATIVE PRECIPITATION ESTIMATION";
   p_text = "QPE needs the beam blockage and terrain_ht data from the BEAM BLOCKAGE section above.";
 }
 
@@ -226,6 +226,18 @@ paramdef double {
   p_descr = "Minimum height margin above terrain for a valid precip estimate (km).";
   p_help = "We require the QPE rate estimate to be drawn from a grid cell clear of the terrain. So for each (x, y) location we only accept precip rates from grid points with a height that exceeds the terrain by at least this margin.";
 } qpe_ht_margin_above_terrain_km;
+
+paramdef string {
+  p_default = "QPE_HYBRID";
+  p_descr = "Field name for QPE hybrid rate.";
+  p_help = "This 2D field will be written to the output MDV file.";
+} qpe_hybrid_field_name;
+
+paramdef string {
+  p_default = "QPE_ZR";
+  p_descr = "Field name for QPE ZR rate.";
+  p_help = "This 2D field will be written to the output MDV file.";
+} qpe_zr_field_name;
 
 commentdef {
   p_header = "OUTPUT DATA DIRECTORY";
@@ -336,8 +348,8 @@ commentdef {
 
 typedef enum {
 
-  RATE_ZH,
-  RATE_ZH_SNOW,
+  RATE_ZR,
+  RATE_ZR_SNOW,
   RATE_Z_ZDR,
   RATE_KDP,
   RATE_KDP_ZDR,
@@ -374,8 +386,8 @@ typedef struct {
 paramdef struct output_field_t {
   p_default = {
     {
-      id = RATE_ZH,
-      name = "RATE_ZH",
+      id = RATE_ZR,
+      name = "RATE_ZR",
       long_name = "precip_rate_from_z",
       standard_name = "precip_rate_from_z",
       units = "mm/hr",
@@ -383,8 +395,8 @@ paramdef struct output_field_t {
     }
     ,
     {
-      id = RATE_ZH_SNOW,
-      name = "RATE_ZH_SNOW",
+      id = RATE_ZR_SNOW,
+      name = "RATE_ZR_SNOW",
       long_name = "precip_rate_from_z_for_snow",
       standard_name = "precip_rate_from_z_for_snow",
       units = "mm/hr",
@@ -530,8 +542,8 @@ paramdef struct output_field_t {
   p_help = "Choose the ID from the list.\n"
     "\nThe name and units can be set however the user prefers.\n"
     "\nThe output_encoding apply to CfRadial output only. \n\n"
-    "\tRATE_ZH: Precip rate from ZH\n"
-    "\tRATE_ZH_SNOW: Precip rate from ZH in dry snow\n"
+    "\tRATE_ZR: Precip rate from ZR\n"
+    "\tRATE_ZR_SNOW: Precip rate from ZR in dry snow\n"
     "\tRATE_Z_ZDR: Precip rate from Z and ZDR\n"
     "\tRATE_KDP: Precip rate from KDP\n"
     "\tRATE_KDP_ZDR: Precip rate from KDP and ZDR\n"
