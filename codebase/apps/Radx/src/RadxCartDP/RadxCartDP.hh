@@ -164,16 +164,17 @@ private:
 
   RadarInterp *_radarInterp;
 
+  // target interpolation projection and vlevels
+
+  Mdvx::coord_t _interpCoord;
+  MdvxProj _interpProj;
+  size_t _interpNpointsVol, _interpNpointsPlane;
+  vector<double> _interpVlevels;
+
   // interpolation fields
   
   vector<BaseInterp::Field> _interpFields;
   vector<BaseInterp::Ray *> _interpRays;
-
-  // target projection and vlevels
-
-  size_t _targetNpoints;
-  MdvxProj _targetProj;
-  vector<double> _targetVlevels;
 
   // model interpolation
   
@@ -205,18 +206,18 @@ private:
   MdvxField *_rateHybridFiltField;
   vector<fl32> _rateZhFilt, _rateHybridFilt;
 
-  // QPE fields
-
-  MdvxField *_qpeZhField;
-  MdvxField *_qpeHybridField;
-  vector<fl32> _qpeZh, _qpeHybrid;
-
-  // Beam Blockage
+  // Beam Blockage and terrain height
   
   DsMdvx _beamBlockMdvx;
   MdvxField *_beamBlockField;
   MdvxField *_terrainHtField;
   bool _haveBeamBlock;
+
+  // QPE fields
+
+  MdvxField *_qpeZhField;
+  MdvxField *_qpeHybridField;
+  vector<fl32> _qpeZh, _qpeHybrid;
 
   // private methods
 
@@ -245,7 +246,7 @@ private:
 
   bool _isRhi();
 
-  void _initTargetGrid();
+  void _initInterpGrid();
   void _initInterp();
   void _initInterpFields();
 

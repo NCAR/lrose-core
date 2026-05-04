@@ -92,6 +92,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   OK = true;
 
   _radarInterp = nullptr;
+  Mdvx::initStruct(_interpCoord);
 
   _pidField = nullptr;
   _pidModeField = nullptr;
@@ -548,9 +549,9 @@ int RadxCartDP::_processFile(const string &filePath)
     cerr << "SUCCESS - read in file: " << _radarVol.getPathInUse() << endl;
   }
   
-  // initialize the projection and vlevels of the target volume
+  // initialize the projection and vlevels of the interp volume
 
-  _initTargetGrid();
+  _initInterpGrid();
 
   // read the temperature profile from the model
 
@@ -1360,120 +1361,121 @@ bool RadxCartDP::_isRhi()
 }
 
 ////////////////////////////////////////////////////////////////
-// initialize the projection and vlevels of the target volume
+// initialize the projection and vlevels of the interp volume
 
-void RadxCartDP::_initTargetGrid()
+void RadxCartDP::_initInterpGrid()
 {
 
-  Mdvx::coord_t coord;
+  Mdvx::initStruct(_interpCoord);
 
-  coord.nx = _params.grid_xy_geom.nx;
-  coord.ny = _params.grid_xy_geom.ny;
-  coord.nz = _params.grid_z_geom.nz;
+  _interpCoord.nx = _params.grid_xy_geom.nx;
+  _interpCoord.ny = _params.grid_xy_geom.ny;
+  _interpCoord.nz = _params.grid_z_geom.nz;
   
-  _targetNpoints = coord.nx * coord.ny * coord.nz;
-
-  coord.dx = _params.grid_xy_geom.dx;
-  coord.dy = _params.grid_xy_geom.dy;
-  coord.dz = _params.grid_z_geom.dz;
+  _interpNpointsPlane = _interpCoord.nx * _interpCoord.ny;
+  _interpNpointsVol = _interpNpointsPlane * _interpCoord.nz;
   
-  coord.minx = _params.grid_xy_geom.minx;
-  coord.miny = _params.grid_xy_geom.miny;
-  coord.minz = _params.grid_z_geom.minz;
+  _interpCoord.dx = _params.grid_xy_geom.dx;
+  _interpCoord.dy = _params.grid_xy_geom.dy;
+  _interpCoord.dz = _params.grid_z_geom.dz;
+  
+  _interpCoord.minx = _params.grid_xy_geom.minx;
+  _interpCoord.miny = _params.grid_xy_geom.miny;
+  _interpCoord.minz = _params.grid_z_geom.minz;
 
-  // init _targetVlevels
+  // init _interpVlevels
   
   if (_params.specify_individual_z_levels) {
-    _targetVlevels.clear();
+    _interpVlevels.clear();
     for (int ii = 0; ii < _params.z_level_array_n; ii++) {
-      _targetVlevels.push_back(_params._z_level_array[ii]);
+      _interpVlevels.push_back(_params._z_level_array[ii]);
     }
-    coord.nz = _targetVlevels.size();
-    coord.minz = _targetVlevels[0];
-    if (coord.nz > 1) {
-      coord.dz = _targetVlevels[1] - _targetVlevels[0];
+    _interpCoord.nz = _interpVlevels.size();
+    _interpCoord.minz = _interpVlevels[0];
+    if (_interpCoord.nz > 1) {
+      _interpCoord.dz = _interpVlevels[1] - _interpVlevels[0];
     } else {
-      coord.dz = 0.0;
+      _interpCoord.dz = 0.0;
     }
   } else {
-    _targetVlevels.clear();
-    for (int ii = 0; ii < coord.nz; ii++) {
-      _targetVlevels.push_back(coord.minz + ii * coord.dz);
+    _interpVlevels.clear();
+    for (int ii = 0; ii < _interpCoord.nz; ii++) {
+      _interpVlevels.push_back(_interpCoord.minz + ii * _interpCoord.dz);
     }
   }
 
-  // init _targetProj
+  // init _interpProj
   
-  coord.proj_type = _params.grid_projection;
+  _interpCoord.proj_type = _params.grid_projection;
   if (_params.center_grid_on_radar) {
-    coord.proj_origin_lat = _radarVol.getLatitudeDeg();
-    coord.proj_origin_lon = _radarVol.getLongitudeDeg();
+    _interpCoord.proj_origin_lat = _radarVol.getLatitudeDeg();
+    _interpCoord.proj_origin_lon = _radarVol.getLongitudeDeg();
   } else {
-    coord.proj_origin_lat = _params.grid_origin_lat;
-    coord.proj_origin_lon = _params.grid_origin_lon;
+    _interpCoord.proj_origin_lat = _params.grid_origin_lat;
+    _interpCoord.proj_origin_lon = _params.grid_origin_lon;
   }
   
   switch (_params.grid_projection) {
 
     case Params::PROJ_LATLON:
-      coord.proj_type = Mdvx::PROJ_LATLON;
+      _interpCoord.proj_type = Mdvx::PROJ_LATLON;
       break;
       
     case Params::PROJ_LAMBERT_CONF:
-      coord.proj_type = Mdvx::PROJ_LAMBERT_CONF;
-      coord.proj_params.lc2.lat1 = _params.grid_lat1;
-      coord.proj_params.lc2.lat2 = _params.grid_lat2;
+      _interpCoord.proj_type = Mdvx::PROJ_LAMBERT_CONF;
+      _interpCoord.proj_params.lc2.lat1 = _params.grid_lat1;
+      _interpCoord.proj_params.lc2.lat2 = _params.grid_lat2;
       break;
 
     case Params::PROJ_MERCATOR:
-      coord.proj_type = Mdvx::PROJ_MERCATOR;
+      _interpCoord.proj_type = Mdvx::PROJ_MERCATOR;
       break;
 
     case Params::PROJ_POLAR_STEREO:
-      coord.proj_type = Mdvx::PROJ_POLAR_STEREO;
-      coord.proj_params.ps.tan_lon = _params.grid_tangent_lon;
-      coord.proj_params.ps.central_scale = _params.grid_central_scale;
+      _interpCoord.proj_type = Mdvx::PROJ_POLAR_STEREO;
+      _interpCoord.proj_params.ps.tan_lon = _params.grid_tangent_lon;
+      _interpCoord.proj_params.ps.central_scale = _params.grid_central_scale;
       if (_params.grid_pole_is_north) {
-        coord.proj_params.ps.pole_type = Mdvx::POLE_NORTH;
+        _interpCoord.proj_params.ps.pole_type = Mdvx::POLE_NORTH;
       } else {
-        coord.proj_params.ps.pole_type = Mdvx::POLE_SOUTH;
+        _interpCoord.proj_params.ps.pole_type = Mdvx::POLE_SOUTH;
       }
       break;
 
     case Params::PROJ_FLAT:
-      coord.proj_type = Mdvx::PROJ_FLAT;
-      coord.proj_params.flat.rotation = _params.grid_rotation;
+      _interpCoord.proj_type = Mdvx::PROJ_FLAT;
+      _interpCoord.proj_params.flat.rotation = _params.grid_rotation;
       break;
 
     case Params::PROJ_OBLIQUE_STEREO:
-      coord.proj_type = Mdvx::PROJ_OBLIQUE_STEREO;
-      coord.proj_params.os.tan_lat = _params.grid_tangent_lat;
-      coord.proj_params.os.tan_lon = _params.grid_tangent_lon;
-      coord.proj_params.os.central_scale = _params.grid_central_scale;
+      _interpCoord.proj_type = Mdvx::PROJ_OBLIQUE_STEREO;
+      _interpCoord.proj_params.os.tan_lat = _params.grid_tangent_lat;
+      _interpCoord.proj_params.os.tan_lon = _params.grid_tangent_lon;
+      _interpCoord.proj_params.os.central_scale = _params.grid_central_scale;
       break;
 
     case Params::PROJ_TRANS_MERCATOR:
-      coord.proj_type = Mdvx::PROJ_TRANS_MERCATOR;
-      coord.proj_params.tmerc.central_scale = _params.grid_central_scale;
+      _interpCoord.proj_type = Mdvx::PROJ_TRANS_MERCATOR;
+      _interpCoord.proj_params.tmerc.central_scale = _params.grid_central_scale;
       break;
 
     case Params::PROJ_ALBERS:
-      coord.proj_type = Mdvx::PROJ_ALBERS;
-      coord.proj_params.albers.lat1 = _params.grid_lat1;
-      coord.proj_params.albers.lat2 = _params.grid_lat2;
+      _interpCoord.proj_type = Mdvx::PROJ_ALBERS;
+      _interpCoord.proj_params.albers.lat1 = _params.grid_lat1;
+      _interpCoord.proj_params.albers.lat2 = _params.grid_lat2;
       break;
 
     case Params::PROJ_LAMBERT_AZIM:
-      coord.proj_type = Mdvx::PROJ_LAMBERT_AZIM;
+      _interpCoord.proj_type = Mdvx::PROJ_LAMBERT_AZIM;
       break;
 
   } // switch
 
-  _targetProj.init(coord);
+  _interpProj.init(_interpCoord);
 
   // initialize lookup table
 
-  _modelRemap.setTargetCoords(_targetProj, _targetVlevels);
+  _modelRemap.setTargetCoords(_interpProj, _interpVlevels);
 
 }
 
@@ -1893,12 +1895,12 @@ int RadxCartDP::_readBeamBlock()
   // check the beam blocl grid matches the interpolation grid
   
   MdvxProj bbProj(_beamBlockMdvx.getMasterHeader(), _beamBlockField->getFieldHeader());
-  if (bbProj != _targetProj) {
+  if (bbProj != _interpProj) {
     cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
-    cerr << "  BeamBlock grid does not match target Cart grid" << endl;
+    cerr << "  BeamBlock grid does not match interp Cart grid" << endl;
     cerr << "==================================================" << endl;
-    cerr << "================== Target proj ===================" << endl;
-    _targetProj.print(cerr);
+    cerr << "================== Interp proj ===================" << endl;
+    _interpProj.print(cerr);
     cerr << "==================================================" << endl;
     cerr << "================== BeamBlock proj ================" << endl;
     bbProj.print(cerr);
@@ -1906,11 +1908,11 @@ int RadxCartDP::_readBeamBlock()
     return -1;
   }
 
-  if (_beamBlockField->getFieldHeader().nz != (si64) _targetVlevels.size()) {
+  if (_beamBlockField->getFieldHeader().nz != (si64) _interpVlevels.size()) {
     cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
     cerr << "  BeamBlock grid nz does not match Cart grid nz" << endl;
     cerr << "  BeamBlock grid nz: " << _beamBlockField->getFieldHeader().nz << endl;
-    cerr << "  Cart grid nz: " << _targetVlevels.size() << endl;
+    cerr << "  Cart grid nz: " << _interpVlevels.size() << endl;
     return -1;
   }
 
@@ -1929,6 +1931,119 @@ int RadxCartDP::_readBeamBlock()
 int RadxCartDP::_computeQpeFields()
 
 {
+
+  // allocate 2D arrays
+  
+  _qpeZh.resize(_interpNpointsPlane, Radx::missingFl32);
+  _qpeHybrid.resize(_interpNpointsPlane, Radx::missingFl32);
+  
+  // beam blockage and terrain ht arrays
+
+  const fl32 *bblock = (const fl32*) _beamBlockField->getVol();
+  const fl32 *terrainHt = (const fl32*) _terrainHtField->getVol();
+
+  // beam ht field
+  
+  BaseInterp::Field *beamHtFld = _getInterpField(beamHtFieldName);
+  const fl32 *beamHt = beamHtFld->outputField.data();
+
+  // loop through the (y,x) domain
+
+  size_t index2D = 0;
+  for (int iy = 0; iy < _interpCoord.ny; iy++) {
+    for (int ix = 0; ix < _interpCoord.nx; ix++, index2D++) {
+
+      double tHt = terrainHt[index2D];
+      double minValidHt = tHt + _params.qpe_ht_margin_above_terrain_km;
+      
+      // start at the bottom of the column and move upwards
+      
+      size_t index3D = index2D;
+      for (int iz = 0; iz < _interpCoord.nz; iz++, index3D += _interpNpointsPlane) {
+
+        // move up if too close to terrain
+        
+        double zKm = _interpVlevels[iz];
+        if (zKm < minValidHt) {
+          continue;
+        }
+        
+        // move up if we are below the lowest beam
+
+        if (beamHt[index3D] == Radx::missingFl32) {
+          continue;
+        }
+
+        // move up if beam is blocked in excess of threshold
+
+        if (bblock[index3D] > _params.qpe_max_extinction_fraction) {
+          continue;
+        }
+
+        // passes all tests, set QPE values
+
+        _qpeZh[index2D] = _rateZhFilt[index3D];
+        _qpeHybrid[index2D] = _rateHybridFilt[index3D];
+        
+        // done with this (x,y) location
+
+        break;
+        
+      } // iz
+      
+    } // ix
+  } // iy
+  
+  // create QPE Mdvx fields
+
+  // field header
+  
+  Mdvx::field_header_t fhdr(_rateZhFiltField->getFieldHeader());
+  fhdr.nz = 1;
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.dz_constant = true;
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = 4;
+  fhdr.volume_size = fhdr.nx * fhdr.ny * 1 * sizeof(fl32);
+  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
+  fhdr.scaling_type = Mdvx::SCALING_NONE;
+  fhdr.grid_dz = 1.0;
+  fhdr.grid_minz = 0;
+  fhdr.scale = 1.0;
+  fhdr.bias = 0.0;
+  fhdr.bad_data_value = Radx::missingFl32;
+  fhdr.missing_data_value = Radx::missingFl32;
+  fhdr.min_value = 0;
+  fhdr.max_value = 0;
+  fhdr.min_value_orig_vol = 0;
+  fhdr.max_value_orig_vol = 0;
+  
+  // vlevel header
+  
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  vhdr.level[0] = 0;
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+
+  // hybrid field
+  
+  _qpeHybridField = new MdvxField(fhdr, vhdr);
+  _qpeHybridField->setFieldName(_rateZhFiltField->getFieldName());
+  _qpeHybridField->setFieldNameLong(_rateZhFiltField->getFieldNameLong());
+  _qpeHybridField->setUnits(_rateZhFiltField->getUnits());
+  _qpeHybridField->setVolData(_qpeHybrid.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
+  _qpeHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
+
+  // Zh field
+
+  _qpeZhField = new MdvxField(fhdr, vhdr);
+  _qpeZhField->setFieldName(_rateZhFiltField->getFieldName());
+  _qpeZhField->setFieldNameLong(_rateZhFiltField->getFieldNameLong());
+  _qpeZhField->setUnits(_rateZhFiltField->getUnits());
+  _qpeZhField->setVolData(_qpeZh.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
+  _qpeZhField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
 
   return 0;
 
@@ -1995,13 +2110,13 @@ int RadxCartDP::_writeOutputMdv()
   
   // add QPE fields
 
-  if (_qpeZhField) {
-    out.addField(_qpeZhField);
-    _qpeZhField = nullptr; // memory handling passed to output mdv object
-  }
   if (_qpeHybridField) {
     out.addField(_qpeHybridField);
     _qpeHybridField = nullptr; // memory handling passed to output mdv object
+  }
+  if (_qpeZhField) {
+    out.addField(_qpeZhField);
+    _qpeZhField = nullptr; // memory handling passed to output mdv object
   }
 
   // add beam blockage fields
@@ -2073,9 +2188,9 @@ int RadxCartDP::_computePid()
 
   // compute PID for each point in the Cartesian volume
   
-  _pidArray.resize(_targetNpoints);
+  _pidArray.resize(_interpNpointsVol);
   
-  for (size_t ii = 0; ii < _targetNpoints; ii++) {
+  for (size_t ii = 0; ii < _interpNpointsVol; ii++) {
     
     double snr = snrFld->outputField[ii];
     double dbz = dbzFld->outputField[ii];
@@ -2108,7 +2223,7 @@ int RadxCartDP::_computePid()
   pidFhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
   pidFhdr.compression_type = Mdvx::COMPRESSION_NONE;
   pidFhdr.data_element_nbytes = sizeof(fl32);
-  pidFhdr.volume_size = _targetNpoints * sizeof(fl32);
+  pidFhdr.volume_size = _interpNpointsVol * sizeof(fl32);
   
   _pidField = new MdvxField(pidFhdr, pidVhdr, _pidArray.data());
   _pidField->setFieldName(pidFieldName);
@@ -2177,10 +2292,10 @@ int RadxCartDP::_computePrecip()
     return -1;
   }
 
-  vector<fl32> rateZhArray(_targetNpoints, Radx::missingFl32);
-  vector<fl32> rateHybridArray(_targetNpoints, Radx::missingFl32);
+  vector<fl32> rateZhArray(_interpNpointsVol, Radx::missingFl32);
+  vector<fl32> rateHybridArray(_interpNpointsVol, Radx::missingFl32);
 
-  for (size_t ii = 0; ii < _targetNpoints; ii++) {
+  for (size_t ii = 0; ii < _interpNpointsVol; ii++) {
     
     double dbz = dbzFld->outputField[ii];
     double zdr = zdrFld->outputField[ii];
@@ -2214,7 +2329,7 @@ int RadxCartDP::_computePrecip()
   rateFhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
   rateFhdr.compression_type = Mdvx::COMPRESSION_NONE;
   rateFhdr.data_element_nbytes = sizeof(fl32);
-  rateFhdr.volume_size = _targetNpoints * sizeof(fl32);
+  rateFhdr.volume_size = _interpNpointsVol * sizeof(fl32);
 
   _rateZhField = new MdvxField(rateFhdr, rateVhdr, rateZhArray.data());
   _rateZhField->setFieldName(rateZhFieldName);
