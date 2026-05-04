@@ -951,15 +951,15 @@
     tt->comment_text = tdrpStrDup("Beam blockage and terrain ht are computed by CartBeamBlock, using the same grid as RadxCartDP. We first run RadxCartDP without beam blockage. CartBeamBlock reads in one of the resulting files and uses it as a termplate for computing beam blockage. This ensures that the grids are identical.");
     tt++;
     
-    // Parameter 'read_beam_blockage_data'
+    // Parameter 'read_beam_blockage'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("read_beam_blockage_data");
+    tt->param_name = tdrpStrDup("read_beam_blockage");
     tt->descr = tdrpStrDup("Read in beam blockage data computed using CartBeamBlock.");
     tt->help = tdrpStrDup("Set this to FALSE when creating a template file for CartBeamBlock.");
-    tt->val_offset = (char *) &read_beam_blockage_data - &_start_;
+    tt->val_offset = (char *) &read_beam_blockage - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     

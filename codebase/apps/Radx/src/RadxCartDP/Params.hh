@@ -532,7 +532,7 @@ public:
   model_field_name_t *_model_field_names;
   int model_field_names_n;
 
-  tdrp_bool_t read_beam_blockage_data;
+  tdrp_bool_t read_beam_blockage;
 
   char* beam_block_input_file_path;
 

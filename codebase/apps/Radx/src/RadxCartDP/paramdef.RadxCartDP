@@ -177,7 +177,7 @@ paramdef boolean {
   p_default = TRUE;
   p_descr = "Read in beam blockage data computed using CartBeamBlock.";
   p_help = "Set this to FALSE when creating a template file for CartBeamBlock.";
-} read_beam_blockage_data;
+} read_beam_blockage;
 
 paramdef string {
   p_default = "mdv/beamBlock/radar_name/20000101/20000101_000000.mdv.cf.nc";

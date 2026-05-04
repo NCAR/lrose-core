@@ -98,6 +98,8 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   _rateHybridField = NULL;
   _rateZhFiltField = NULL;
   _rateHybridFiltField = NULL;
+
+  _haveBeamBlock = false;
   
   // set programe name
 
@@ -618,12 +620,18 @@ int RadxCartDP::_processFile(const string &filePath)
 
   // read in beam blockage if requested
 
-  if (_readBeamBlock()) {
-    cerr << "ERROR - RadxCartDP" << endl;
-    cerr << "  Cannot read in beam blockage" << endl;
-    iret = -1;
+  if (_params.read_beam_blockage) {
+    if (!_haveBeamBlock) {
+      if (_readBeamBlock() == 0) {
+        _haveBeamBlock = true;
+      } else {
+        cerr << "ERROR - RadxCartDP" << endl;
+        cerr << "  Cannot read in beam blockage" << endl;
+        iret = -1;
+      }
+    }
   }
-  
+
   // write out MDV file
   
   if (_writeOutputMdv()) {
@@ -1810,6 +1818,10 @@ int RadxCartDP::_readBeamBlock()
 
 {
 
+  if (_params.debug) {
+    cerr << "Reading in beam block file: " << _params.beam_block_input_file_path << endl;
+  }
+  
   // set up read
   
   _beamBlockMdvx.clearRead();
@@ -1821,7 +1833,7 @@ int RadxCartDP::_readBeamBlock()
     }
     _beamBlockMdvx.addReadField(_params._beam_block_field_names[ii].input_name);
   }
-
+  
   // perform read
   
   if (_beamBlockMdvx.readVolume()) {
@@ -1834,6 +1846,40 @@ int RadxCartDP::_readBeamBlock()
 
   // check the grid matches
 
+  const MdvxField *bbField =
+    _beamBlockMdvx.getField(getBeamBlockInputName(Params::BEAME).c_str());
+  if (!bbField) {
+    cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
+    cerr << "  Cannot read beam extinction field: "
+         << getBeamBlockInputName(Params::BEAME) << endl;
+    cerr << "  File path: " << _params.beam_block_input_file_path << endl;
+    return -1;
+  }
+  MdvxProj bbProj(_beamBlockMdvx.getMasterHeader(), bbField->getFieldHeader());
+  if (bbProj != _targetProj) {
+    cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
+    cerr << "  BeamBlock grid does not match target Cart grid" << endl;
+    cerr << "==================================================" << endl;
+    cerr << "================== Target proj ===================" << endl;
+    _targetProj.print(cerr);
+    cerr << "==================================================" << endl;
+    cerr << "================== BeamBlock proj ================" << endl;
+    bbProj.print(cerr);
+    cerr << "==================================================" << endl;
+    return -1;
+  }
+  if (bbField->getFieldHeader().nz != (si64) _targetVlevels.size()) {
+    cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
+    cerr << "  BeamBlock grid nz does not match Cart grid nz" << endl;
+    cerr << "  BeamBlock grid nz: " << bbField->getFieldHeader().nz << endl;
+    cerr << "  Cart grid nz: " << _targetVlevels.size() << endl;
+    return -1;
+  }
+
+  if (_params.debug) {
+    cerr << "SUCCESS - got beam block file: " << _params.beam_block_input_file_path << endl;
+  }
+  
   return 0;
 
 }
@@ -1895,6 +1941,23 @@ int RadxCartDP::_writeOutputMdv()
   if (_rateHybridFiltField) {
     out.addField(_rateHybridFiltField);
     _rateHybridFiltField = nullptr; // memory handling passed to output mdv object
+  }
+  
+  // add beam blockage fields
+  
+  if (_haveBeamBlock) {
+    MdvxField *bbField =
+      _beamBlockMdvx.getField(getBeamBlockInputName(Params::BEAME).c_str());
+    if (bbField) {
+      // make copy since the Mdvx object takes ownership of the field
+      out.addField(new MdvxField(*bbField));
+    }
+    MdvxField *terrainHtField =
+      _beamBlockMdvx.getField(getBeamBlockInputName(Params::TERRAIN_HT).c_str());
+    if (terrainHtField) {
+      // make copy since the Mdvx object takes ownership of the field
+      out.addField(new MdvxField(*terrainHtField));
+    }
   }
   
   // write out file

@@ -94,11 +94,12 @@ public:
   // get field names
   
   string getRadarInputName(Params::radar_field_type_t ftype);
-  string getModelInputName(Params::model_field_type_t ftype);
-  string getBeamBlockInputName(Params::beam_block_field_type_t ftype);
-
   string getRadarOutputName(Params::radar_field_type_t ftype);
+
+  string getModelInputName(Params::model_field_type_t ftype);
   string getModelOutputName(Params::model_field_type_t ftype);
+
+  string getBeamBlockInputName(Params::beam_block_field_type_t ftype);
   string getBeamBlockOutputName(Params::beam_block_field_type_t ftype);
 
   Params::model_field_type_t getModelTypeFromInputName(const string name);
@@ -180,6 +181,7 @@ private:
   // Beam Blockage
   
   DsMdvx _beamBlockMdvx;
+  bool _haveBeamBlock;
 
   // radar interpolation
 
