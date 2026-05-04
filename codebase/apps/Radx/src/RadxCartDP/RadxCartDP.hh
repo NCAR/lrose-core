@@ -43,7 +43,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include "CartInterp.hh"
+#include "RadarInterp.hh"
 #include <string>
 #include <deque>
 #include <toolsa/TaThreadPool.hh>
@@ -162,7 +162,7 @@ private:
 
   // radar interpolation
 
-  CartInterp *_cartInterp;
+  RadarInterp *_radarInterp;
 
   // interpolation fields
   

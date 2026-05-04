@@ -53,7 +53,7 @@ HDRS = \
 	Args.hh \
 	BaseInterp.hh \
 	RadxCartDP.hh \
-	CartInterp.hh \
+	RadarInterp.hh \
 	Orient.hh \
 	OutputMdv.hh \
 	ScalarsCompute.hh \
@@ -65,7 +65,7 @@ CPPC_SRCS = \
 	Args.cc \
 	BaseInterp.cc \
 	RadxCartDP.cc \
-	CartInterp.cc \
+	RadarInterp.cc \
 	Main.cc \
 	Orient.cc \
 	OutputMdv.cc \

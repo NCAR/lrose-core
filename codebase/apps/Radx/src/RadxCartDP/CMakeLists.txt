@@ -18,7 +18,7 @@ set (SRCS
       Args.cc
       BaseInterp.cc
       RadxCartDP.cc
-      CartInterp.cc
+      RadarInterp.cc
       Main.cc
       Orient.cc
       OutputMdv.cc

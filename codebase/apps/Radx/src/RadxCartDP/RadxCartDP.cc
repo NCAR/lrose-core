@@ -91,7 +91,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
 
   OK = true;
 
-  _cartInterp = nullptr;
+  _radarInterp = nullptr;
 
   _pidField = nullptr;
   _pidModeField = nullptr;
@@ -248,8 +248,8 @@ RadxCartDP::~RadxCartDP()
 
   _freeInterpRays();
 
-  if (_cartInterp) {
-    delete _cartInterp;
+  if (_radarInterp) {
+    delete _radarInterp;
   }
 
   // mutex
@@ -601,11 +601,11 @@ int RadxCartDP::_processFile(const string &filePath)
     if (_params.debug) {
       cerr << "  NOTE: data is in RHI mode" << endl;
     }
-    _cartInterp->setRhiMode(true);
-    _cartInterp->interpVol();
+    _radarInterp->setRhiMode(true);
+    _radarInterp->interpVol();
   } else {
-    _cartInterp->setRhiMode(false);
-    _cartInterp->interpVol();
+    _radarInterp->setRhiMode(false);
+    _radarInterp->interpVol();
   }
 
   // compute particle ID type
@@ -667,7 +667,7 @@ int RadxCartDP::_processFile(const string &filePath)
 
   // free up
 
-  _cartInterp->freeMemory();
+  _radarInterp->freeMemory();
   if (_params.free_memory_between_files) {
     _radarVol.clear();
     _freeInterpRays();
@@ -774,8 +774,8 @@ int RadxCartDP::_readFile(const string &filePath)
 
   if (_params.override_radar_location) {
     _radarVol.overrideLocation(_params.radar_latitude_deg,
-                              _params.radar_longitude_deg,
-                              _params.radar_altitude_meters / 1000.0);
+                               _params.radar_longitude_deg,
+                               _params.radar_altitude_meters / 1000.0);
   }
 
   // override beam width if requested
@@ -1597,9 +1597,9 @@ void RadxCartDP::_initInterpFields()
 
 void RadxCartDP::_allocInterpToCart()
 {
-  if (_cartInterp == nullptr) {
-    _cartInterp = new CartInterp(_progName, _params, _radarVol,
-                                 _interpFields, _interpRays);
+  if (_radarInterp == nullptr) {
+    _radarInterp = new RadarInterp(_progName, _params, _radarVol,
+                                   _interpFields, _interpRays);
   }
 }
 
@@ -1694,9 +1694,9 @@ int RadxCartDP::_readModel()
 
   _modelRawMdvx.clearRead();
   _modelRawMdvx.setReadTime(Mdvx::READ_CLOSEST,
-                         _params.model_input_url,
-                         _params.model_search_margin_secs,
-                         radarTime);
+                            _params.model_input_url,
+                            _params.model_search_margin_secs,
+                            radarTime);
 
   for (int ii = 0; ii < _params.model_field_names_n; ii++) {
     if (strlen(_params._model_field_names[ii].input_name) == 0) {
@@ -1951,7 +1951,7 @@ int RadxCartDP::_writeOutputMdv()
 
   // fill with interpolated fields
   
-  _cartInterp->fillOutputMdv(out);
+  _radarInterp->fillOutputMdv(out);
 
   // add the model fields
 
@@ -2127,9 +2127,9 @@ int RadxCartDP::_computePid()
   int kernelSize = _params.PID_mode_filter_kernel_size;
   _modeFilterPid2D(_pidArray.data(),
                    _pidFilt.data(),
-                   _cartInterp->getGridZLevels().size(),
-                   _cartInterp->getGridNy(),
-                   _cartInterp->getGridNx(),
+                   _radarInterp->getGridZLevels().size(),
+                   _radarInterp->getGridNy(),
+                   _radarInterp->getGridNx(),
                    kernelSize);
   
   if (_params.debug) {
@@ -2243,16 +2243,16 @@ int RadxCartDP::_computePrecip()
   
   _medianFilter2D(rateZhArray.data(),
                   _rateZhFilt.data(),
-                  _cartInterp->getGridZLevels().size(),
-                  _cartInterp->getGridNy(),
-                  _cartInterp->getGridNx(),
+                  _radarInterp->getGridZLevels().size(),
+                  _radarInterp->getGridNy(),
+                  _radarInterp->getGridNx(),
                   kernelSize, Radx::missingFl32, true);
   
   _medianFilter2D(rateHybridArray.data(),
                   _rateHybridFilt.data(),
-                  _cartInterp->getGridZLevels().size(),
-                  _cartInterp->getGridNy(),
-                  _cartInterp->getGridNx(),
+                  _radarInterp->getGridZLevels().size(),
+                  _radarInterp->getGridNy(),
+                  _radarInterp->getGridNx(),
                   kernelSize, Radx::missingFl32, true);
  
   _rateZhFiltField = new MdvxField(rateFhdr, rateVhdr, _rateZhFilt.data());
