@@ -34,6 +34,7 @@ HDRS = \
 CPPC_SRCS = \
 	Mdvx.cc \
 	Mdvx_BE.cc \
+	Mdvx_init.cc \
 	Mdvx_ncf.cc \
 	Mdvx_print.cc \
 	Mdvx_read.cc \

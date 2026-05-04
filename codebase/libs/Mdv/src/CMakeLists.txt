@@ -115,6 +115,7 @@ set (SRCS
       ./DsMdvx/msg_print.cc
       ./Mdvx/Mdvx.cc
       ./Mdvx/Mdvx_BE.cc
+      ./Mdvx/Mdvx_init.cc
       ./Mdvx/Mdvx_ncf.cc
       ./Mdvx/Mdvx_print.cc
       ./Mdvx/Mdvx_read.cc

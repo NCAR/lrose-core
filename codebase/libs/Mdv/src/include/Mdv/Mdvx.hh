@@ -478,6 +478,7 @@ public:
 
   // public function prototypes by group
 
+#include <Mdv/Mdvx_init.hh>      // initialize structs
 #include <Mdv/Mdvx_read.hh>      // read interface
 #include <Mdv/Mdvx_write.hh>     // write interface
 #include <Mdv/Mdvx_timelist.hh>  // timelist interface
