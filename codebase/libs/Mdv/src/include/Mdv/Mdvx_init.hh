@@ -33,10 +33,31 @@
 
 #ifdef _in_Mdvx_hh
 
-void init(master_header_t &mhdr);
-void init(field_header_t &fhdr);
-void init(vlevel_header_t &vhdr);
-void init(coord_t &coord);
+void initStruct(master_header_t &val);
+void initStruct(field_header_t &val);
+void initStruct(vlevel_header_t &val);
+void initStruct(chunk_header_t &val);
+
+void initStruct(vsect_waypt_t &val);
+void initStruct(vsect_samplept_t &val);
+void initStruct(vsect_segment_t &val);
+
+void initStruct(chunkVsectWayPtHdr_t &val);
+void initStruct(chunkVsectWayPt_t &val);
+void initStruct(chunkVsectSamplePtHdr_t &val);
+void initStruct(chunkVsectSamplePt_t &val);
+void initStruct(chunkVsectSegmentHdr_t &val);
+void initStruct(chunkVsectSegment_t &val);
+
+void initStruct(flat_params_t &val);
+void initStruct(albers_params_t &val);
+void initStruct(lc2_params_t &val);
+void initStruct(os_params_t &val);
+void initStruct(ps_params_t &val);
+void initStruct(trans_merc_params_t &val);
+void initStruct(vert_persp_params_t &val);
+
+void initStruct(coord_t &val);
 
 #endif
 

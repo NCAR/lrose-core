@@ -36,23 +36,109 @@
 #include <Mdv/Mdvx.hh>
 using namespace std;
 
-void Mdvx::init(Mdvx::master_header_t &mhdr)
+void Mdvx::initStruct(Mdvx::master_header_t &val)
 {
-  memset(&mhdr, 0, sizeof(Mdvx::master_header_t));
+  memset(&val, 0, sizeof(val));
 }
 
-void Mdvx::init(Mdvx::field_header_t &fhdr)
+void Mdvx::initStruct(Mdvx::field_header_t &val)
 {
-  memset(&fhdr, 0, sizeof(Mdvx::field_header_t));
+  memset(&val, 0, sizeof(val));
 }
 
-void Mdvx::init(Mdvx::vlevel_header_t &vhdr)
+void Mdvx::initStruct(Mdvx::vlevel_header_t &val)
 {
-  memset(&vhdr, 0, sizeof(Mdvx::vlevel_header_t));
+  memset(&val, 0, sizeof(val));
 }
 
-void Mdvx::init(Mdvx::coord_t &coord)
+void Mdvx::initStruct(Mdvx::chunk_header_t &val)
 {
-  memset(&coord, 0, sizeof(Mdvx::coord_t));
+  memset(&val, 0, sizeof(val));
 }
+
+void Mdvx::initStruct(Mdvx::vsect_waypt_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::vsect_samplept_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::vsect_segment_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::chunkVsectWayPtHdr_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::chunkVsectWayPt_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::chunkVsectSamplePtHdr_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::chunkVsectSamplePt_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::chunkVsectSegmentHdr_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::chunkVsectSegment_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::flat_params_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::albers_params_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::lc2_params_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::os_params_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::ps_params_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::trans_merc_params_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::vert_persp_params_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
+void Mdvx::initStruct(Mdvx::coord_t &val)
+{
+  memset(&val, 0, sizeof(val));
+}
+
 
