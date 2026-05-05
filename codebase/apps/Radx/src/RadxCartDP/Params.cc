@@ -2896,6 +2896,18 @@
     tt->comment_text = tdrpStrDup("Applies only to INTERP_MODE_CART.");
     tt++;
     
+    // Parameter 'conv_strat_params_file_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_params_file_path");
+    tt->descr = tdrpStrDup("Path for parameters for computing convective-stratiform partition, if specified.");
+    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
+    tt->val_offset = (char *) &conv_strat_params_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("use-defaults");
+    tt++;
+    
     // Parameter 'identify_convective_stratiform_split'
     // ctype is 'tdrp_bool_t'
     

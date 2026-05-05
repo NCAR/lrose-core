@@ -70,6 +70,9 @@ public:
   bool printParamsKdp;
   string printParamsKdpMode;
 
+  bool printParamsConvStrat;
+  string printParamsConvStratMode;
+
   bool startTimeSet, endTimeSet;
   vector<string> inputFileList;
 

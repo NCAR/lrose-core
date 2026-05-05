@@ -46,6 +46,7 @@ Args::Args ()
   printParamsKdp = false;
   printParamsPid = false;
   printParamsRate = false;
+  printParamsConvStrat = false;
   startTimeSet = false;
   endTimeSet = false;
 }
@@ -188,6 +189,19 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	printParamsKdpMode = argv[++i];
       }
 	
+    } else if (!strcmp(argv[i], "-print_params_conv_strat")) {
+
+      printParamsConvStrat = true;
+      if (i < argc - 1) {
+	printParamsConvStratMode = argv[++i];
+      }
+
+    } else if (argv[i][0] == '-') {
+      
+      cerr<< "====>> WARNING - invalid command line argument: '"
+          << argv[i] << "' <<====" << endl;
+      OK = false;
+      
     } // if
 	
   } // i
@@ -253,6 +267,11 @@ void Args::_usage(ostream &out)
   out << endl;
   out << "KDP-specific parameters:" << endl;
   out << "   [ -print_params_kdp [mode]] print KDP params" << endl;
+  out << "     see modes from -print_params above" << endl;
+
+  out << endl;
+  out << "Parameters for convective-stratiform partition:" << endl;
+  out << "   [ -print_params_conv_strat [mode]] print conv_strat params" << endl;
   out << "     see modes from -print_params above" << endl;
 
   out << endl;

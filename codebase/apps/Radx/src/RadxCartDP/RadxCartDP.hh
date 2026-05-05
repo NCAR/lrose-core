@@ -55,6 +55,7 @@
 #include <radar/PrecipRateParams.hh>
 #include <radar/NcarParticleId.hh>
 #include <radar/PrecipRate.hh>
+#include <radar/ConvStratParams.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
 #include <Mdv/MdvxRemapInterp.hh>
@@ -143,6 +144,7 @@ private:
   KdpFiltParams _kdpFiltParams;
   NcarPidParams _ncarPidParams;
   PrecipRateParams _precipRateParams;
+  ConvStratParams _convStratParams;
 
   NcarParticleId _pid;
 
@@ -294,6 +296,7 @@ private:
   void _printParamsRate();
   void _printParamsPid();
   void _printParamsKdp();
+  void _printParamsConvStrat();
 
 };
 

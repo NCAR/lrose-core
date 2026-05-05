@@ -1236,6 +1236,12 @@ commentdef {
   p_text = "Applies only to INTERP_MODE_CART.";
 }
 
+paramdef string {
+  p_default = "use-defaults";
+  p_descr = "Path for parameters for computing convective-stratiform partition, if specified.";
+  p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
+} conv_strat_params_file_path;
+
 paramdef boolean {
   p_default = false;
   p_descr = "Option to identify the convective / stratiform split.";

@@ -747,6 +747,8 @@ public:
 
   int echo_orientation_n_points_sdev_v;
 
+  char* conv_strat_params_file_path;
+
   tdrp_bool_t identify_convective_stratiform_split;
 
   char* conv_strat_dbz_field_name;
@@ -782,7 +784,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[169];
+  mutable TDRPtable _table[170];
 
   const char *_className;
 

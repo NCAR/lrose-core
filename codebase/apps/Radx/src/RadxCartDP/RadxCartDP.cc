@@ -150,7 +150,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   }
   
   // if requested, print params for KDP then exit
-  
+
   if (_args.printParamsKdp) {
     _printParamsKdp();
     exit(0);
@@ -167,6 +167,13 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   
   if (_args.printParamsRate) {
     _printParamsRate();
+    exit(0);
+  }
+  
+  // if requested, print params for convective-stratiform then exit
+  
+  if (_args.printParamsConvStrat) {
+    _printParamsConvStrat();
     exit(0);
   }
   
@@ -2745,6 +2752,55 @@ void RadxCartDP::_printParamsKdp()
   // do the print to stdout
 
   _kdpFiltParams.print(stdout, printMode);
+
+}
+
+////////////////////////////////////////////////////
+// Print params for Convective/Stratiform partition
+
+void RadxCartDP::_printParamsConvStrat()
+{
+
+  if (_params.debug) {
+    cerr << "Reading Convective/Stratiform params from file: "
+         << _params.conv_strat_params_file_path << endl;
+  }
+
+  // do we need to expand environment variables?
+  
+  bool expandEnvVars = false;
+  if (_args.printParamsConvStratMode.find("expand") != string::npos) {
+    expandEnvVars = true;
+  }
+
+  // read in ConvStrat params if applicable
+
+  if (strstr(_params.conv_strat_params_file_path, "use-defaults") == nullptr) {
+    // not using defaults
+    if (_convStratParams.load(_params.conv_strat_params_file_path,
+                              nullptr, expandEnvVars, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for ConvStrat: "
+           << _params.conv_strat_params_file_path << endl;
+      OK = false;
+      return;
+    }
+  }
+  
+  // set print mode
+  
+  tdrp_print_mode_t printMode = PRINT_LONG;
+  if (_args.printParamsConvStratMode.find("short") == 0) {
+    printMode = PRINT_SHORT;
+  } else if (_args.printParamsConvStratMode.find("norm") == 0) {
+    printMode = PRINT_NORM;
+  } else if (_args.printParamsConvStratMode.find("verbose") == 0) {
+    printMode = PRINT_VERBOSE;
+  }
+
+  // do the print to stdout
+  
+  _convStratParams.print(stdout, printMode);
 
 }
 
