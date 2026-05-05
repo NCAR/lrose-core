@@ -117,6 +117,61 @@ ConvStratFinder::~ConvStratFinder()
 }
 
 ////////////////////////////////////////////////////////////////////
+// Set processing options from params object
+// returns 0 on success, -1 on failure
+
+void ConvStratFinder::setFromParams(const ConvStratParams &params)
+
+{
+
+  setUseMultipleThreads(params.use_multiple_threads);
+  
+  setMinValidHtKm(params.min_valid_height);
+  setMaxValidHtKm(params.max_valid_height);
+  setMinValidDbz(params.min_valid_dbz);
+  
+  setBaseDbz(params.base_dbz);
+  setDbzForEchoTops(params.dbz_for_echo_tops);
+
+  setTextureRadiusKm(params.texture_radius_km);
+  setMinValidFractionForTexture(params.min_valid_fraction_for_texture);
+  setMinValidFractionForFit(params.min_valid_fraction_for_fit);
+  setTextureLimitLow(params.texture_limit_low);
+  setTextureLimitHigh(params.texture_limit_high);
+
+  setMinConvectivityForConvective(params.min_convectivity_for_convective);
+  setMaxConvectivityForStratiform(params.max_convectivity_for_stratiform);
+
+  setMinVolForConvectiveKm3(params.min_valid_volume_for_convective);
+  setMinVertExtentForConvectiveKm(params.min_vert_extent_for_convective);
+
+  if (params.clumping_use_dual_thresholds) {
+    setUseDualThresholds(params.clumping_secondary_convectivity,
+                         params.all_subclumps_min_area_fraction,
+                         params.each_subclump_min_area_fraction,
+                         params.each_subclump_min_area_km2);
+  }
+
+  setMinGridOverlapForClumping(params.min_overlap_for_convective_clumps);
+
+  setConstantHtThresholds(params.shallow_threshold_ht,
+                          params.deep_threshold_ht);
+    
+  setTempThresholds(params.shallow_threshold_temp,
+                    params.deep_threshold_temp);
+    
+  setMinConvFractionForDeep(params.min_conv_fraction_for_deep);
+  setMinConvFractionForShallow(params.min_conv_fraction_for_shallow);
+  setMaxShallowConvFractionForElevated(params.max_shallow_conv_fraction_for_elevated);
+  setMaxDeepConvFractionForElevated(params.max_deep_conv_fraction_for_elevated);
+  setMinStratFractionForStratBelow(params.min_strat_fraction_for_strat_below);
+  
+  setMinHtKmAglForMid(params.min_ht_km_agl_for_mid);
+  setMinHtKmAglForDeep(params.min_ht_km_agl_for_deep);
+  
+}
+
+////////////////////////////////////////////////////////////////////
 // Set grid details
 
 void ConvStratFinder::setGrid(size_t nx, size_t ny, 
@@ -184,6 +239,19 @@ void ConvStratFinder::setConstantHtThresholds(double shallowHtKm,
   
 }
 
+////////////////////////////////////////////////////////////////////
+// Set the temp thesholds for freezing level and divergence level (C)
+
+void ConvStratFinder::setTempThresholds(double shallowThresholdTempC,
+                                        double deepThresholdTempC)
+
+{
+  _shallowTempC = shallowThresholdTempC;
+  _deepTempC = deepThresholdTempC;
+}
+
+
+    
 ////////////////////////////////////////////////////////////////////
 // Set the freezing level and divergence level as grids
 // These must be on the same grid as the radar DBZ data

@@ -364,6 +364,8 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
+  tdrp_bool_t use_multiple_threads;
+
   double min_valid_height;
 
   double max_valid_height;
@@ -371,10 +373,6 @@ public:
   double min_valid_dbz;
 
   double base_dbz;
-
-  double min_valid_volume_for_convective;
-
-  double min_vert_extent_for_convective;
 
   double dbz_for_echo_tops;
 
@@ -392,6 +390,10 @@ public:
 
   double max_convectivity_for_stratiform;
 
+  double min_valid_volume_for_convective;
+
+  double min_vert_extent_for_convective;
+
   tdrp_bool_t clumping_use_dual_thresholds;
 
   double clumping_secondary_convectivity;
@@ -405,12 +407,6 @@ public:
   int min_overlap_for_convective_clumps;
 
   vert_levels_type_t vert_levels_type;
-
-  char* temp_profile_url;
-
-  char* temp_profile_field_name;
-
-  int temp_profile_search_margin;
 
   double shallow_threshold_temp;
 
@@ -430,6 +426,10 @@ public:
 
   double min_strat_fraction_for_strat_below;
 
+  double min_ht_km_agl_for_mid;
+
+  double min_ht_km_agl_for_deep;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -437,7 +437,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[43];
 
   const char *_className;
 

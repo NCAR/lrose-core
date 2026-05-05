@@ -14,6 +14,16 @@ commentdef {
 }
 
 commentdef {
+  p_header = "THREADING";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use multiple threads for speed.";
+  p_help = "Computing the texture is the most time consuming step. If this is true, then the texture will be computer for each vertical level in a separate thread, in parallel. This speeds up the processing. If this is false, the threads will be called serially. This is useful for debugging.";
+} use_multiple_threads;
+
+commentdef {
   p_header = "BASIC ALGORITHM PARAMETERS";
 }
 
@@ -40,18 +50,6 @@ paramdef double {
   p_descr = "Set base DBZ value.";
   p_help = "Before computing the texture, we subtract the baseDBZ from the measured DBZ. This adjusts the DBZ values into the positive range. For S-, C- and X-band radars, this can be set to 0 dBZ, which is the default. For Ka-band radars this should be around -10 dBZ. For W-band radars -20 dBZ is appropriate.";
 } base_dbz;
-
-paramdef double {
-  p_default = 30.0;
-  p_descr = "Min volume of a convective region (km3).";	
-  p_help = "Regions of smaller volume will be labeled SMALL.";
-} min_valid_volume_for_convective;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Min vertical echo extent of a convective region (km).";	
-  p_help = "The vertical extent is computed as the mid height of the top layer in the echo minus the mid height of the bottom layer. For an echo that exists in only one layer, the vertical extent would therefore be zero. This parameter lets us require that a valid convective echo exist in multiple layers, which is desirable and helps to remove spurious echoes as candidates for convection.";
-} min_vert_extent_for_convective;
 
 paramdef double {
   p_default = 18;
@@ -115,6 +113,18 @@ paramdef double {
   p_help = "If the convectivity at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_convectivity_for_convective we flag the point as MIXED.";
 } max_convectivity_for_stratiform;
 
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Min volume of a convective region (km3).";	
+  p_help = "Regions of smaller volume will be labeled SMALL.";
+} min_valid_volume_for_convective;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Min vertical echo extent of a convective region (km).";	
+  p_help = "The vertical extent is computed as the mid height of the top layer in the echo minus the mid height of the bottom layer. For an echo that exists in only one layer, the vertical extent would therefore be zero. This parameter lets us require that a valid convective echo exist in multiple layers, which is desirable and helps to remove spurious echoes as candidates for convection.";
+} min_vert_extent_for_convective;
+
 commentdef {
   p_header = "DETERMINING ADVANCED ECHO TYPE USING CLUMPING AND TEMPERATURE";
   p_text = "We performing clumping on the convectivity field to identify convective entities as objects. The main threshold used for the clumping is min_convectivity_for_convective. By default a secondary threshold is also used - see below.";
@@ -151,7 +161,8 @@ paramdef double {
 } each_subclump_min_area_km2;
 
 paramdef int {
-  p_default = 3;
+  p_default = 1;
+  p_private = TRUE;
   p_descr = "Minimum grid overlap in convective regions.";
   p_help = "A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.";
 } min_overlap_for_convective_clumps;
@@ -171,23 +182,6 @@ paramdef enum vert_levels_type_t {
   p_descr = "How we specify the vertical levels.";
   p_help = "If temperatures are used, we need to read in the temperature profile from a model.";
 } vert_levels_type;
-
-paramdef string {
-  p_default = "mdv/model";
-  p_descr = "URL for temperature profile data, in MDV/Netcdf-CF format.";
-  p_help = "We read in the model data that is closest in time to the reflectivity data.";
-} temp_profile_url;
-
-paramdef string {
-  p_default = "Temp";
-  p_descr = "Name of temperature field in the model data. This should be in degrees C.";
-} temp_profile_field_name;
-
-paramdef int {
-  p_default = 21600;
-  p_descr = "Search margin for finding the temp profile data (secs).";	
-  p_help = "The temp profile must be within this number of seconds of the dbz data.";
-} temp_profile_search_margin;
 
 paramdef double {
   p_default = 0.0;
@@ -247,4 +241,16 @@ paramdef double {
   p_descr = "The minimun area fraction of stratiform echo below the clump to determine there is stratiform below.";
   p_help = "For elevated convection, we need to determine if there is stratiform echo below. For a designation of elevated, this is the minimum fraction of the area below the clump that has stratiform echo in the plane immediately below it.";
 } min_strat_fraction_for_strat_below;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Minimum height above ground for mid-level clouds (km).";
+  p_help = "Based on terrain height at each grid point, we force the shallow-to-mid boundary to at least this ht above ground level.";
+} min_ht_km_agl_for_mid;
+
+paramdef double {
+  p_default = 4.0;
+  p_descr = "Minimum height above ground for deep-level clouds (km).";
+  p_help = "Based on terrain height at each grid point, we force the mid-to-deep boundary to at least this ht above ground level.";
+} min_ht_km_agl_for_deep;
 

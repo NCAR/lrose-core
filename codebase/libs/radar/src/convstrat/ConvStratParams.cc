@@ -566,6 +566,27 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 1");
+    tt->comment_hdr = tdrpStrDup("THREADING");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'use_multiple_threads'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_multiple_threads");
+    tt->descr = tdrpStrDup("Option to use multiple threads for speed.");
+    tt->help = tdrpStrDup("Computing the texture is the most time consuming step. If this is true, then the texture will be computer for each vertical level in a separate thread, in parallel. This speeds up the processing. If this is false, the threads will be called serially. This is useful for debugging.");
+    tt->val_offset = (char *) &use_multiple_threads - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'Comment 2'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 2");
     tt->comment_hdr = tdrpStrDup("BASIC ALGORITHM PARAMETERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -618,30 +639,6 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'min_valid_volume_for_convective'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_valid_volume_for_convective");
-    tt->descr = tdrpStrDup("Min volume of a convective region (km3).");
-    tt->help = tdrpStrDup("Regions of smaller volume will be labeled SMALL.");
-    tt->val_offset = (char *) &min_valid_volume_for_convective - &_start_;
-    tt->single_val.d = 30;
-    tt++;
-    
-    // Parameter 'min_vert_extent_for_convective'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_vert_extent_for_convective");
-    tt->descr = tdrpStrDup("Min vertical echo extent of a convective region (km).");
-    tt->help = tdrpStrDup("The vertical extent is computed as the mid height of the top layer in the echo minus the mid height of the bottom layer. For an echo that exists in only one layer, the vertical extent would therefore be zero. This parameter lets us require that a valid convective echo exist in multiple layers, which is desirable and helps to remove spurious echoes as candidates for convection.");
-    tt->val_offset = (char *) &min_vert_extent_for_convective - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
     // Parameter 'dbz_for_echo_tops'
     // ctype is 'double'
     
@@ -654,11 +651,11 @@
     tt->single_val.d = 18;
     tt++;
     
-    // Parameter 'Comment 2'
+    // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 2");
+    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("COMPUTING REFLECTIVITY TEXTURE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -699,11 +696,11 @@
     tt->single_val.d = 0.67;
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("CONVERTING REFLECTIVITY TEXTURE TO CONVECTIVITY");
     tt->comment_text = tdrpStrDup("Convectivity ranges from 0 to 1. To convert texture to convectivity, we apply a piece-wise linear transfer function. This section defines the lower texture limit and the upper texture limit. At or below the lower limit convectivity is set to 0. At or above the upper limit convectivity is set to 1. Between these two limits convectivity varies linearly with texture.");
     tt++;
@@ -732,11 +729,11 @@
     tt->single_val.d = 30;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON CONVECTIVITY");
     tt->comment_text = tdrpStrDup("If neither is set, we flag the point as MIXED.");
     tt++;
@@ -765,11 +762,35 @@
     tt->single_val.d = 0.4;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'min_valid_volume_for_convective'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_valid_volume_for_convective");
+    tt->descr = tdrpStrDup("Min volume of a convective region (km3).");
+    tt->help = tdrpStrDup("Regions of smaller volume will be labeled SMALL.");
+    tt->val_offset = (char *) &min_valid_volume_for_convective - &_start_;
+    tt->single_val.d = 30;
+    tt++;
+    
+    // Parameter 'min_vert_extent_for_convective'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_vert_extent_for_convective");
+    tt->descr = tdrpStrDup("Min vertical echo extent of a convective region (km).");
+    tt->help = tdrpStrDup("The vertical extent is computed as the mid height of the top layer in the echo minus the mid height of the bottom layer. For an echo that exists in only one layer, the vertical extent would therefore be zero. This parameter lets us require that a valid convective echo exist in multiple layers, which is desirable and helps to remove spurious echoes as candidates for convection.");
+    tt->val_offset = (char *) &min_vert_extent_for_convective - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("DETERMINING ADVANCED ECHO TYPE USING CLUMPING AND TEMPERATURE");
     tt->comment_text = tdrpStrDup("We performing clumping on the convectivity field to identify convective entities as objects. The main threshold used for the clumping is min_convectivity_for_convective. By default a secondary threshold is also used - see below.");
     tt++;
@@ -843,14 +864,15 @@
     tt->descr = tdrpStrDup("Minimum grid overlap in convective regions.");
     tt->help = tdrpStrDup("A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.");
     tt->val_offset = (char *) &min_overlap_for_convective_clumps - &_start_;
-    tt->single_val.i = 3;
+    tt->is_private = TRUE;
+    tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("SPECIFYING VERTICAL LEVELS FOR ADVANCED ECHO TYPE - TEMPERATURE or HEIGHT?");
     tt->comment_text = tdrpStrDup("We need to specify the vertical separation between shallow, mid-level and high clouds. We use the freezing level to separate warm clouds and cold clouds. And we use the divergence level to separate the mid-level clouds from high-level clouds such as anvil. These vertical limits can be specified as heights MSL (in km), or as temperatures. If temperatures are used, we read in the temperature profile from a model.");
     tt++;
@@ -873,42 +895,6 @@
       tt->enum_def.fields[1].name = tdrpStrDup("VERT_LEVELS_BY_HT");
       tt->enum_def.fields[1].val = VERT_LEVELS_BY_HT;
     tt->single_val.e = VERT_LEVELS_BY_HT;
-    tt++;
-    
-    // Parameter 'temp_profile_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("temp_profile_url");
-    tt->descr = tdrpStrDup("URL for temperature profile data, in MDV/Netcdf-CF format.");
-    tt->help = tdrpStrDup("We read in the model data that is closest in time to the reflectivity data.");
-    tt->val_offset = (char *) &temp_profile_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdv/model");
-    tt++;
-    
-    // Parameter 'temp_profile_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("temp_profile_field_name");
-    tt->descr = tdrpStrDup("Name of temperature field in the model data. This should be in degrees C.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &temp_profile_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("Temp");
-    tt++;
-    
-    // Parameter 'temp_profile_search_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("temp_profile_search_margin");
-    tt->descr = tdrpStrDup("Search margin for finding the temp profile data (secs).");
-    tt->help = tdrpStrDup("The temp profile must be within this number of seconds of the dbz data.");
-    tt->val_offset = (char *) &temp_profile_search_margin - &_start_;
-    tt->single_val.i = 21600;
     tt++;
     
     // Parameter 'shallow_threshold_temp'
@@ -959,11 +945,11 @@
     tt->single_val.d = 9;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("DETERMINING ADVANCED CATEGORY FROM CLUMP PROPERTIES");
     tt->comment_text = tdrpStrDup("Based on the temp or height criteria above, we compute the deep, mid and shallow convective fractions within each sub-clump. We also determine whether there is stratiform echo below the clump. The following parameters are then used to determine the deep, elevated, mid or shallow echo types for the convection. If a determination is not clear, the overall category is set to mixed.");
     tt++;
@@ -1026,6 +1012,30 @@
     tt->help = tdrpStrDup("For elevated convection, we need to determine if there is stratiform echo below. For a designation of elevated, this is the minimum fraction of the area below the clump that has stratiform echo in the plane immediately below it.");
     tt->val_offset = (char *) &min_strat_fraction_for_strat_below - &_start_;
     tt->single_val.d = 0.9;
+    tt++;
+    
+    // Parameter 'min_ht_km_agl_for_mid'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_ht_km_agl_for_mid");
+    tt->descr = tdrpStrDup("Minimum height above ground for mid-level clouds (km).");
+    tt->help = tdrpStrDup("Based on terrain height at each grid point, we force the shallow-to-mid boundary to at least this ht above ground level.");
+    tt->val_offset = (char *) &min_ht_km_agl_for_mid - &_start_;
+    tt->single_val.d = 2;
+    tt++;
+    
+    // Parameter 'min_ht_km_agl_for_deep'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_ht_km_agl_for_deep");
+    tt->descr = tdrpStrDup("Minimum height above ground for deep-level clouds (km).");
+    tt->help = tdrpStrDup("Based on terrain height at each grid point, we force the mid-to-deep boundary to at least this ht above ground level.");
+    tt->val_offset = (char *) &min_ht_km_agl_for_deep - &_start_;
+    tt->single_val.d = 4;
     tt++;
     
     // trailing entry has param_name set to NULL

@@ -45,6 +45,7 @@
 #include <dataport/port_types.h>
 #include <euclid/ClumpingMgr.hh>
 #include <euclid/ClumpProps.hh>
+#include <radar/ConvStratParams.hh>
 using namespace std;
 
 ////////////////////////
@@ -95,6 +96,12 @@ public:
       _debug = true;
     }
   }
+
+  ////////////////////////////////////////////////////////////////////
+  // Set processing options from params object
+  // returns 0 on success, -1 on failure
+
+  void setFromParams(const ConvStratParams &params);
 
   ////////////////////////////////////////////////////////////////////
   // Set use of multiple threads, default is TRUE
@@ -254,6 +261,12 @@ public:
   
   void setConstantHtThresholds(double shallowHtKm,
                                double deepHtKm);
+
+  ////////////////////////////////////////////////////////////////////
+  // Set the temp thesholds for freezing level and divergence level (C)
+  
+  void setTempThresholds(double shallowThresholdTempC,
+                         double deepThresholdTempC);
 
   // Set the shallow and deep height thresholds as a grid
   // These are generally derived from model temperature
@@ -437,6 +450,9 @@ private:
   
   double _shallowHtKm;
   double _deepHtKm;
+
+  double _shallowTempC;
+  double _deepTempC;
 
   // fractions for determining the advanced echo type categories
 
