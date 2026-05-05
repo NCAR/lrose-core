@@ -109,6 +109,8 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   _terrainHtField = nullptr;
   _haveBeamBlock = false;
   
+  _convStratAvailable = false;
+
   // set programe name
 
   _progName = "RadxCartDP";
@@ -219,6 +221,22 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
            << _params.RATE_params_file_path << endl;
       OK = false;
       return;
+    }
+  }
+
+  // read in Convective / Stratiform params
+  
+  if (_params.identify_conv_strat_partition) {
+    if (strstr(_params.conv_strat_params_file_path, "use-defaults") == nullptr) {
+      // not using defaults
+      if (_convStratParams.load(_params.conv_strat_params_file_path,
+                                nullptr, true, _args.tdrpDebug)) {
+        cerr << "ERROR: " << _progName << endl;
+        cerr << "Cannot read params file for Convective/Stratiform partition: "
+             << _params.conv_strat_params_file_path << endl;
+        OK = false;
+        return;
+      }
     }
   }
 
@@ -363,31 +381,6 @@ Params::model_field_type_t RadxCartDP::getModelTypeFromOutputName(const string n
   }
   // not found, assume temp
   return Params::NOT_SET;
-}
-
-//////////////////////////////////////////////////
-// get beam block field name from type
-
-string RadxCartDP::getBeamBlockInputName(Params::beam_block_field_type_t ftype)
-{
-  for (int ii = 0; ii < _params.beam_block_field_names_n; ii++) {
-    if (_params._beam_block_field_names[ii].field_type == ftype) {
-      return _params._beam_block_field_names[ii].input_name;
-    }
-  }
-  // not found
-  return "";
-}
-
-string RadxCartDP::getBeamBlockOutputName(Params::beam_block_field_type_t ftype)
-{
-  for (int ii = 0; ii < _params.beam_block_field_names_n; ii++) {
-    if (_params._beam_block_field_names[ii].field_type == ftype) {
-      return _params._beam_block_field_names[ii].output_name;
-    }
-  }
-  // not found
-  return "";
 }
 
 //////////////////////////////////////////////////
@@ -651,7 +644,7 @@ int RadxCartDP::_processFile(const string &filePath)
 
   if (_params.add_qpe_field) {
     if (_haveBeamBlock) {
-      if (_computeQpeFields()) {
+      if (_computeQpe()) {
         cerr << "ERROR - RadxCartDP" << endl;
         cerr << "  Cannot add QPE field" << endl;
         iret = -1;
@@ -665,6 +658,18 @@ int RadxCartDP::_processFile(const string &filePath)
     }
   }
 
+  // compute convective stratiform split
+
+  _convStratAvailable = false;
+  if (_params.identify_conv_strat_partition) {
+    // convective / stratiform split
+    // _printRunTime("Cart interp - before strat/conv");
+    if (_computeConvStrat() == 0) {
+      _convStratAvailable = true;
+    }
+    // _printRunTime("Cart interp - after strat/conv");
+  }
+  
   // write out MDV file
   
   if (_writeOutputMdv()) {
@@ -1860,13 +1865,9 @@ int RadxCartDP::_readBeamBlock()
   
   _beamBlockMdvx.clearRead();
   _beamBlockMdvx.setReadPath(_params.beam_block_input_file_path);
-  
-  for (int ii = 0; ii < _params.beam_block_field_names_n; ii++) {
-    if (strlen(_params._beam_block_field_names[ii].input_name) == 0) {
-      continue;
-    }
-    _beamBlockMdvx.addReadField(_params._beam_block_field_names[ii].input_name);
-  }
+
+  _beamBlockMdvx.addReadField(_params.beam_extinction_field_name);
+  _beamBlockMdvx.addReadField(_params.terrain_ht_field_name);
   
   // perform read
   
@@ -1880,13 +1881,13 @@ int RadxCartDP::_readBeamBlock()
 
   // set field pointers
 
-  _extinctionField = _beamBlockMdvx.getField(getBeamBlockInputName(Params::BEAME).c_str());
-  _terrainHtField = _beamBlockMdvx.getField(getBeamBlockInputName(Params::TERRAIN_HT).c_str());
+  _extinctionField = _beamBlockMdvx.getField(_params.beam_extinction_field_name);
+  _terrainHtField = _beamBlockMdvx.getField(_params.terrain_ht_field_name);
 
   if (!_extinctionField) {
     cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
     cerr << "  Cannot read beam extinction field: "
-         << getBeamBlockInputName(Params::BEAME) << endl;
+         << _params.beam_extinction_field_name << endl;
     cerr << "  File path: " << _params.beam_block_input_file_path << endl;
     return -1;
   }
@@ -1894,16 +1895,10 @@ int RadxCartDP::_readBeamBlock()
   if (!_terrainHtField) {
     cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
     cerr << "  Cannot read terrain height field: "
-         << getBeamBlockInputName(Params::TERRAIN_HT) << endl;
+         << _params.terrain_ht_field_name << endl;
     cerr << "  File path: " << _params.beam_block_input_file_path << endl;
     return -1;
   }
-
-  // cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
-  // _terrainHtField->print(cerr);
-  // cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
-  // _terrainHtField->printVoldata(cerr);
-  // cerr << "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" << endl;
 
   // check the beam blocl grid matches the interpolation grid
   
@@ -1937,241 +1932,6 @@ int RadxCartDP::_readBeamBlock()
 
 }
 
-/////////////////////////////////////////////////////////
-// compute QPE fields
-// Returns 0 on success, -1 on failure.
-
-int RadxCartDP::_computeQpeFields()
-
-{
-
-  if (_params.debug) {
-    cerr << "Computing QPE fields" << endl;
-  }
-  
-  // allocate 2D arrays
-  
-  _qpeZr.resize(_interpNpointsPlane, Radx::missingFl32);
-  _qpeHybrid.resize(_interpNpointsPlane, Radx::missingFl32);
-  
-  // beam blockage and terrain ht arrays
-
-  MdvxField extinctionField(*_extinctionField);
-  extinctionField.convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
-  const fl32 *extinct = (const fl32*) extinctionField.getVol();
-
-  MdvxField terrainHtField(*_terrainHtField);
-  terrainHtField.convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
-  const fl32 *terrainHt = (const fl32*) terrainHtField.getVol();
-  
-  // beam ht field
-  
-  BaseInterp::Field *beamHtFld = _getInterpField(beamHtFieldName);
-  const fl32 *beamHt = beamHtFld->outputField.data();
-
-  // loop through the (y,x) domain
-
-  size_t index2D = 0;
-  for (int iy = 0; iy < _interpCoord.ny; iy++) {
-    for (int ix = 0; ix < _interpCoord.nx; ix++, index2D++) {
-
-      double tHtKm = terrainHt[index2D] / 1000.0;
-      double minValidHtKm = tHtKm + _params.qpe_ht_margin_above_terrain_km;
-      
-      // start at the bottom of the column and move upwards
-      
-      size_t index3D = index2D;
-      for (int iz = 0; iz < _interpCoord.nz; iz++, index3D += _interpNpointsPlane) {
-
-        // move up if too close to terrain
-        
-        double zKm = _interpVlevels[iz];
-
-        if (zKm < minValidHtKm) {
-          continue;
-        }
-        
-        // move up if we are below the lowest beam
-
-        if (beamHt[index3D] == Radx::missingFl32) {
-          continue;
-        }
-
-        // move up if beam is blocked in excess of threshold
-
-        if (extinct[index3D] > _params.qpe_max_extinction_fraction) {
-          continue;
-        }
-
-        // passes all tests, set QPE values
-
-        _qpeZr[index2D] = _rateZrFilt[index3D];
-        _qpeHybrid[index2D] = _rateHybridFilt[index3D];
-        
-        // done with this (x,y) location
-
-        break;
-        
-      } // iz
-      
-    } // ix
-  } // iy
-  
-  // create QPE Mdvx fields
-
-  // field header
-  
-  Mdvx::field_header_t fhdr(_rateZrFiltField->getFieldHeader());
-  fhdr.nz = 1;
-  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-  fhdr.dz_constant = true;
-  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
-  fhdr.data_element_nbytes = 4;
-  fhdr.volume_size = fhdr.nx * fhdr.ny * 1 * sizeof(fl32);
-  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
-  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
-  fhdr.scaling_type = Mdvx::SCALING_NONE;
-  fhdr.grid_dz = 1.0;
-  fhdr.grid_minz = 0;
-  fhdr.scale = 1.0;
-  fhdr.bias = 0.0;
-  fhdr.bad_data_value = Radx::missingFl32;
-  fhdr.missing_data_value = Radx::missingFl32;
-  fhdr.min_value = 0;
-  fhdr.max_value = 0;
-  fhdr.min_value_orig_vol = 0;
-  fhdr.max_value_orig_vol = 0;
-  
-  // vlevel header
-  
-  Mdvx::vlevel_header_t vhdr;
-  MEM_zero(vhdr);
-  vhdr.level[0] = 0;
-  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
-
-  // hybrid field
-  
-  _qpeHybridField = new MdvxField(fhdr, vhdr);
-  _qpeHybridField->setFieldName(_params.qpe_hybrid_field_name);
-  _qpeHybridField->setFieldNameLong(_rateZrFiltField->getFieldNameLong());
-  _qpeHybridField->setUnits(_rateZrFiltField->getUnits());
-  _qpeHybridField->setVolData(_qpeHybrid.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
-  _qpeHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
-
-  // Zr field
-
-  _qpeZrField = new MdvxField(fhdr, vhdr);
-  _qpeZrField->setFieldName(_params.qpe_zr_field_name);
-  _qpeZrField->setFieldNameLong(_rateZrFiltField->getFieldNameLong());
-  _qpeZrField->setUnits(_rateZrFiltField->getUnits());
-  _qpeZrField->setVolData(_qpeZr.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
-  _qpeZrField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
-
-  return 0;
-
-}
-
-/////////////////////////////////////////////////////
-// write out MDV data
-
-int RadxCartDP::_writeOutputMdv()
-{
-
-  if (_params.debug) {
-    cerr << "  Writing output file and compressing ... " << endl;
-  }
-
-  // initialize
-  
-  OutputMdv out(_progName, _params);
-  out.setMasterHeader(_radarVol);
-
-  // fill with interpolated fields
-  
-  _radarInterp->fillOutputMdv(out);
-
-  // add the model fields
-
-  for (size_t ii = 0; ii < _modelInterpMdvx.getNFields(); ii++) {
-    // make a copy of the field, since the mdvx object takes memory ownership
-    MdvxField *field = new MdvxField(*_modelInterpMdvx.getField(ii));
-    // add to output object
-    out.addField(field);
-  } // ii
-
-  // add PID fields
-
-  if (_pidField) {
-    out.addField(_pidField);
-    _pidField = nullptr; // memory handling passed to output mdv object
-  }
-  if (_pidModeField) {
-    out.addField(_pidModeField);
-    _pidModeField = nullptr; // memory handling passed to output mdv object
-  }
-  
-  // add precip rate fields
-
-  if (_rateZrField) {
-    out.addField(_rateZrField);
-    _rateZrField = nullptr; // memory handling passed to output mdv object
-  }
-  if (_rateHybridField) {
-    out.addField(_rateHybridField);
-    _rateHybridField = nullptr; // memory handling passed to output mdv object
-  }
-
-  if (_rateZrFiltField) {
-    out.addField(_rateZrFiltField);
-    _rateZrFiltField = nullptr; // memory handling passed to output mdv object
-  }
-  if (_rateHybridFiltField) {
-    out.addField(_rateHybridFiltField);
-    _rateHybridFiltField = nullptr; // memory handling passed to output mdv object
-  }
-  
-  // add QPE fields
-
-  if (_qpeHybridField) {
-    out.addField(_qpeHybridField);
-    _qpeHybridField = nullptr; // memory handling passed to output mdv object
-  }
-  if (_qpeZrField) {
-    out.addField(_qpeZrField);
-    _qpeZrField = nullptr; // memory handling passed to output mdv object
-  }
-
-  // add beam blockage fields
-  
-  if (_haveBeamBlock) {
-    if (_extinctionField) {
-      // make copy since the Mdvx object takes ownership of the field
-      MdvxField *eField = new MdvxField(*_extinctionField);
-      eField->setFieldName(getBeamBlockOutputName(Params::BEAME).c_str());
-      out.addField(eField);
-    }
-    if (_terrainHtField) {
-      // make copy since the Mdvx object takes ownership of the field
-      MdvxField *htField = new MdvxField(*_terrainHtField);
-      htField->setFieldName(getBeamBlockOutputName(Params::TERRAIN_HT).c_str());
-      out.addField(htField);
-    }
-  }
-  
-  // write out file
-  
-  if (out.writeVol()) {
-    cerr << "ERROR - RadxCartDP::_writeOutputMdv" << endl;
-    cerr << "  Cannot write file to output_dir: "
-         << _params.output_dir << endl;
-    return -1;
-  }
-  
-  return 0;
-
-}
-  
 //////////////////////////////////////////////////
 // compute the PID field
 
@@ -2416,6 +2176,317 @@ int RadxCartDP::_computePrecip()
   
 }
 
+/////////////////////////////////////////////////////////
+// compute QPE fields
+// Returns 0 on success, -1 on failure.
+
+int RadxCartDP::_computeQpe()
+
+{
+
+  if (_params.debug) {
+    cerr << "Computing QPE fields" << endl;
+  }
+  
+  // allocate 2D arrays
+  
+  _qpeZr.resize(_interpNpointsPlane, Radx::missingFl32);
+  _qpeHybrid.resize(_interpNpointsPlane, Radx::missingFl32);
+  
+  // beam blockage and terrain ht arrays
+
+  MdvxField extinctionField(*_extinctionField);
+  extinctionField.convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+  const fl32 *extinct = (const fl32*) extinctionField.getVol();
+
+  MdvxField terrainHtField(*_terrainHtField);
+  terrainHtField.convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+  const fl32 *terrainHt = (const fl32*) terrainHtField.getVol();
+  
+  // beam ht field
+  
+  BaseInterp::Field *beamHtFld = _getInterpField(beamHtFieldName);
+  const fl32 *beamHt = beamHtFld->outputField.data();
+
+  // loop through the (y,x) domain
+
+  size_t index2D = 0;
+  for (int iy = 0; iy < _interpCoord.ny; iy++) {
+    for (int ix = 0; ix < _interpCoord.nx; ix++, index2D++) {
+
+      double tHtKm = terrainHt[index2D] / 1000.0;
+      double minValidHtKm = tHtKm + _params.qpe_ht_margin_above_terrain_km;
+      
+      // start at the bottom of the column and move upwards
+      
+      size_t index3D = index2D;
+      for (int iz = 0; iz < _interpCoord.nz; iz++, index3D += _interpNpointsPlane) {
+
+        // move up if too close to terrain
+        
+        double zKm = _interpVlevels[iz];
+
+        if (zKm < minValidHtKm) {
+          continue;
+        }
+        
+        // move up if we are below the lowest beam
+
+        if (beamHt[index3D] == Radx::missingFl32) {
+          continue;
+        }
+
+        // move up if beam is blocked in excess of threshold
+
+        if (extinct[index3D] > _params.qpe_max_extinction_fraction) {
+          continue;
+        }
+
+        // passes all tests, set QPE values
+
+        _qpeZr[index2D] = _rateZrFilt[index3D];
+        _qpeHybrid[index2D] = _rateHybridFilt[index3D];
+        
+        // done with this (x,y) location
+
+        break;
+        
+      } // iz
+      
+    } // ix
+  } // iy
+  
+  // create QPE Mdvx fields
+
+  // field header
+  
+  Mdvx::field_header_t fhdr(_rateZrFiltField->getFieldHeader());
+  fhdr.nz = 1;
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.dz_constant = true;
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = 4;
+  fhdr.volume_size = fhdr.nx * fhdr.ny * 1 * sizeof(fl32);
+  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
+  fhdr.scaling_type = Mdvx::SCALING_NONE;
+  fhdr.grid_dz = 1.0;
+  fhdr.grid_minz = 0;
+  fhdr.scale = 1.0;
+  fhdr.bias = 0.0;
+  fhdr.bad_data_value = Radx::missingFl32;
+  fhdr.missing_data_value = Radx::missingFl32;
+  fhdr.min_value = 0;
+  fhdr.max_value = 0;
+  fhdr.min_value_orig_vol = 0;
+  fhdr.max_value_orig_vol = 0;
+  
+  // vlevel header
+  
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  vhdr.level[0] = 0;
+  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+
+  // hybrid field
+  
+  _qpeHybridField = new MdvxField(fhdr, vhdr);
+  _qpeHybridField->setFieldName(_params.qpe_hybrid_field_name);
+  _qpeHybridField->setFieldNameLong(_rateZrFiltField->getFieldNameLong());
+  _qpeHybridField->setUnits(_rateZrFiltField->getUnits());
+  _qpeHybridField->setVolData(_qpeHybrid.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
+  _qpeHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
+
+  // Zr field
+
+  _qpeZrField = new MdvxField(fhdr, vhdr);
+  _qpeZrField->setFieldName(_params.qpe_zr_field_name);
+  _qpeZrField->setFieldNameLong(_rateZrFiltField->getFieldNameLong());
+  _qpeZrField->setUnits(_rateZrFiltField->getUnits());
+  _qpeZrField->setVolData(_qpeZr.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
+  _qpeZrField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
+
+  if (_params.debug) {
+    cerr << "DONE computing QPE fields" << endl;
+  }
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// compute Convective / Stratiform partition
+// Returns 0 on success, -1 on failure.
+
+int RadxCartDP::_computeConvStrat()
+
+{
+
+  if (_params.debug) {
+    cerr << "Computing CONV-STRAT fields" << endl;
+  }
+
+  // set up parameters
+  
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    _convStrat.setVerbose(true);
+  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _convStrat.setDebug(true);
+  }
+
+  _convStrat.setFromParams(_convStratParams);
+  
+  // set the grid in the ConvStratFinder object
+  
+  bool isLatLon = (_params.grid_projection == Params::PROJ_LATLON);
+  _convStrat.setGrid(_interpCoord.nx, _interpCoord.ny,
+                     _interpCoord.dx, _interpCoord.dy,
+                     _interpCoord.minx, _interpCoord.miny,
+                     _interpVlevels,
+                     isLatLon);
+
+  // get the dbz field for ConvStratFinder
+  
+  string dbzFieldName(getRadarInputName(Params::DBZ));
+  BaseInterp::Field *dbzFld = _getInterpField(dbzFieldName);
+  if (!dbzFld) {
+    cerr << "ERROR - RadarInterp::_computeConvStrat()" << endl;
+    cerr << "  Cannot find dbz field: " << dbzFieldName << endl;
+    cerr << "  conv/strat partition will not be computed" << endl;
+    return -1;
+  }
+  fl32 *dbzVals = dbzFld->outputField.data();
+  if (dbzVals == NULL) {
+    cerr << "ERROR - RadarInterp::_computeConvStrat()" << endl;
+    cerr << "  Cannot find dbz data: " << dbzFieldName << endl;
+    cerr << "  conv/strat partition will not be computed" << endl;
+    return -1;
+  }
+  
+  // compute the convective/stratiform partition
+  
+  if (_convStrat.computeEchoType(dbzVals, Radx::missingFl32)) {
+    cerr << "ERROR - RadarInterp::_computeConvStrat()" << endl;
+    cerr << "  _convStrat.computePartition() failed" << endl;
+    return -1;
+  }
+
+  if (_params.debug) {
+    cerr << "DONE computing CONV-STRAT fields" << endl;
+  }
+  
+  return 0;
+  
+}
+
+/////////////////////////////////////////////////////
+// write out MDV data
+
+int RadxCartDP::_writeOutputMdv()
+{
+
+  if (_params.debug) {
+    cerr << "  Writing output file and compressing ... " << endl;
+  }
+
+  // initialize
+  
+  OutputMdv out(_progName, _params);
+  out.setMasterHeader(_radarVol);
+
+  // fill with interpolated fields
+  
+  _radarInterp->fillOutputMdv(out);
+
+  // add the model fields
+
+  for (size_t ii = 0; ii < _modelInterpMdvx.getNFields(); ii++) {
+    // make a copy of the field, since the mdvx object takes memory ownership
+    MdvxField *field = new MdvxField(*_modelInterpMdvx.getField(ii));
+    // add to output object
+    out.addField(field);
+  } // ii
+
+  // add PID fields
+
+  if (_pidField) {
+    out.addField(_pidField);
+    _pidField = nullptr; // memory handling passed to output mdv object
+  }
+  if (_pidModeField) {
+    out.addField(_pidModeField);
+    _pidModeField = nullptr; // memory handling passed to output mdv object
+  }
+  
+  // add precip rate fields
+
+  if (_rateZrField) {
+    out.addField(_rateZrField);
+    _rateZrField = nullptr; // memory handling passed to output mdv object
+  }
+  if (_rateHybridField) {
+    out.addField(_rateHybridField);
+    _rateHybridField = nullptr; // memory handling passed to output mdv object
+  }
+
+  if (_rateZrFiltField) {
+    out.addField(_rateZrFiltField);
+    _rateZrFiltField = nullptr; // memory handling passed to output mdv object
+  }
+  if (_rateHybridFiltField) {
+    out.addField(_rateHybridFiltField);
+    _rateHybridFiltField = nullptr; // memory handling passed to output mdv object
+  }
+  
+  // add QPE fields
+
+  if (_qpeHybridField) {
+    out.addField(_qpeHybridField);
+    _qpeHybridField = nullptr; // memory handling passed to output mdv object
+  }
+  if (_qpeZrField) {
+    out.addField(_qpeZrField);
+    _qpeZrField = nullptr; // memory handling passed to output mdv object
+  }
+
+  // add beam blockage fields
+  
+  if (_haveBeamBlock) {
+    if (_extinctionField) {
+      // make copy since the Mdvx object takes ownership of the field
+      MdvxField *eField = new MdvxField(*_extinctionField);
+      eField->setFieldName(_params.beam_extinction_field_name);
+      out.addField(eField);
+    }
+    if (_terrainHtField) {
+      // make copy since the Mdvx object takes ownership of the field
+      MdvxField *htField = new MdvxField(*_terrainHtField);
+      htField->setFieldName(_params.terrain_ht_field_name);
+      out.addField(htField);
+    }
+  }
+  
+  // convective stratiform split
+
+  if (_params.identify_conv_strat_partition) {
+    out.addConvStratFields(_convStrat, _radarVol,
+                           _interpProj, _interpVlevels);
+  }
+
+  // write out file
+  
+  if (out.writeVol()) {
+    cerr << "ERROR - RadxCartDP::_writeOutputMdv" << endl;
+    cerr << "  Cannot write file to output_dir: "
+         << _params.output_dir << endl;
+    return -1;
+  }
+  
+  return 0;
+
+}
+  
 //////////////////////////////////////////////////////////////////////////
 // filter floating-point planes using the median in a 2D kernel
 

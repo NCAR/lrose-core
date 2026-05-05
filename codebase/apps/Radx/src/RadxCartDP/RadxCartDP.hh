@@ -55,6 +55,7 @@
 #include <radar/PrecipRateParams.hh>
 #include <radar/NcarParticleId.hh>
 #include <radar/PrecipRate.hh>
+#include <radar/ConvStratFinder.hh>
 #include <radar/ConvStratParams.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
@@ -99,9 +100,6 @@ public:
 
   string getModelInputName(Params::model_field_type_t ftype);
   string getModelOutputName(Params::model_field_type_t ftype);
-
-  string getBeamBlockInputName(Params::beam_block_field_type_t ftype);
-  string getBeamBlockOutputName(Params::beam_block_field_type_t ftype);
 
   Params::model_field_type_t getModelTypeFromInputName(const string name);
   Params::model_field_type_t getModelTypeFromOutputName(const string name);
@@ -221,6 +219,11 @@ private:
   MdvxField *_qpeHybridField;
   vector<fl32> _qpeZr, _qpeHybrid;
 
+  // convective / stratiform split
+
+  ConvStratFinder _convStrat;
+  bool _convStratAvailable;
+  
   // private methods
 
   int _runFilelist();
@@ -263,12 +266,12 @@ private:
 
   int _readBeamBlock();
 
-  int _computeQpeFields();
-
-  int _writeOutputMdv();
-
   int _computePid();
   int _computePrecip();
+  int _computeQpe();
+  int _computeConvStrat();
+
+  int _writeOutputMdv();
 
   BaseInterp::Field *_getInterpField(const string &name);
 

@@ -102,11 +102,6 @@ public:
   } model_field_type_t;
 
   typedef enum {
-    TERRAIN_HT = 0,
-    BEAME = 1
-  } beam_block_field_type_t;
-
-  typedef enum {
     RATE_ZR = 0,
     RATE_ZR_SNOW = 1,
     RATE_Z_ZDR = 2,
@@ -154,12 +149,6 @@ public:
     char* input_name;
     char* output_name;
   } model_field_name_t;
-
-  typedef struct {
-    beam_block_field_type_t field_type;
-    char* input_name;
-    char* output_name;
-  } beam_block_field_name_t;
 
   typedef struct {
     output_field_id_t id;
@@ -536,8 +525,9 @@ public:
 
   char* beam_block_input_file_path;
 
-  beam_block_field_name_t *_beam_block_field_names;
-  int beam_block_field_names_n;
+  char* beam_extinction_field_name;
+
+  char* terrain_ht_field_name;
 
   tdrp_bool_t add_qpe_field;
 
@@ -747,27 +737,9 @@ public:
 
   int echo_orientation_n_points_sdev_v;
 
+  tdrp_bool_t identify_conv_strat_partition;
+
   char* conv_strat_params_file_path;
-
-  tdrp_bool_t identify_convective_stratiform_split;
-
-  char* conv_strat_dbz_field_name;
-
-  double conv_strat_min_valid_height;
-
-  double conv_strat_max_valid_height;
-
-  double conv_strat_min_valid_dbz;
-
-  double conv_strat_texture_radius_km;
-
-  double conv_strat_min_valid_fraction_for_texture;
-
-  double conv_strat_min_convectivity_for_convective;
-
-  double conv_strat_max_convectivity_for_stratiform;
-
-  int conv_strat_min_overlap_for_convective_clumps;
 
   tdrp_bool_t conv_strat_write_partition;
 
@@ -784,7 +756,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[170];
+  mutable TDRPtable _table[162];
 
   const char *_className;
 

@@ -116,26 +116,26 @@ RadarInterp::RadarInterp(const string &progName,
 
   // set up ConvStratFinder object
 
-  if (_params.identify_convective_stratiform_split) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      _convStrat.setVerbose(true);
-    } else if (_params.debug) {
-      _convStrat.setDebug(true);
-    }
-    _convStrat.setMinValidHtKm(_params.conv_strat_min_valid_height);
-    _convStrat.setMaxValidHtKm(_params.conv_strat_max_valid_height);
-    _convStrat.setMinValidDbz(_params.conv_strat_min_valid_dbz);
-    _convStrat.setTextureRadiusKm(_params.conv_strat_texture_radius_km);
-    _convStrat.setMinValidFractionForTexture
-      (_params.conv_strat_min_valid_fraction_for_texture);
-    _convStrat.setMinConvectivityForConvective
-      (_params.conv_strat_min_convectivity_for_convective);
-    _convStrat.setMaxConvectivityForStratiform
-      (_params.conv_strat_max_convectivity_for_stratiform);
-    _convStrat.setMinGridOverlapForClumping
-      (_params.conv_strat_min_overlap_for_convective_clumps);
-  }
-  _gotConvStrat = false;
+  // if (_params.identify_CONV_STRAT_partition) {
+  //   if (_params.debug >= Params::DEBUG_VERBOSE) {
+  //     _convStrat.setVerbose(true);
+  //   } else if (_params.debug) {
+  //     _convStrat.setDebug(true);
+  //   }
+  //   _convStrat.setMinValidHtKm(_params.conv_strat_min_valid_height);
+  //   _convStrat.setMaxValidHtKm(_params.conv_strat_max_valid_height);
+  //   _convStrat.setMinValidDbz(_params.conv_strat_min_valid_dbz);
+  //   _convStrat.setTextureRadiusKm(_params.conv_strat_texture_radius_km);
+  //   _convStrat.setMinValidFractionForTexture
+  //     (_params.conv_strat_min_valid_fraction_for_texture);
+  //   _convStrat.setMinConvectivityForConvective
+  //     (_params.conv_strat_min_convectivity_for_convective);
+  //   _convStrat.setMaxConvectivityForStratiform
+  //     (_params.conv_strat_max_convectivity_for_stratiform);
+  //   _convStrat.setMinGridOverlapForClumping
+  //     (_params.conv_strat_min_overlap_for_convective_clumps);
+  // }
+  // _gotConvStrat = false;
 
   // set up orientation object
 
@@ -266,15 +266,15 @@ int RadarInterp::interpVol()
 
   // compute convective stratiform split
 
-  _gotConvStrat = false;
-  if (_params.identify_convective_stratiform_split) {
-    // convective / stratiform split
-    _printRunTime("Cart interp - before strat/conv");
-    if (_convStratCompute() == 0) {
-      _gotConvStrat = true;
-    }
-    _printRunTime("Cart interp - after strat/conv");
-  }
+  // _gotConvStrat = false;
+  // if (_params.identify_convective_stratiform_split) {
+  //   // convective / stratiform split
+  //   _printRunTime("Cart interp - before strat/conv");
+  //   if (_convStratCompute() == 0) {
+  //     _gotConvStrat = true;
+  //   }
+  //   _printRunTime("Cart interp - after strat/conv");
+  // }
   
   return 0;
 
@@ -317,13 +317,6 @@ void RadarInterp::fillOutputMdv(OutputMdv &out)
                    dfld->name, dfld->longName, dfld->units,
                    Radx::FL32, 1.0, 0.0, missingFl32, dfld->data);
     }
-  }
-
-  // convective stratiform split
-
-  if (_params.identify_convective_stratiform_split && _gotConvStrat) {
-    out.addConvStratFields(_convStrat, _readVol,
-                           _proj, _gridZLevels);
   }
 
   // chunks
@@ -2386,6 +2379,7 @@ double RadarInterp::_conditionAz(double az)
   return az;
 }
 
+#ifdef NOTNOW
 //////////////////////////////////////////////////
 // Compute convective/stratiform split
 
@@ -2432,6 +2426,7 @@ int RadarInterp::_convStratCompute()
   return 0;
   
 }
+#endif
 
 ///////////////////////////////////////////////////////////////
 // FillSearchLowerLeft thread

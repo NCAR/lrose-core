@@ -40,7 +40,6 @@
 #include "OutputMdv.hh"
 #include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
-#include <radar/ConvStratFinder.hh>
 class DsMdvx;
 class Orient;
 
@@ -186,11 +185,6 @@ private:
   Orient *_orient;
   bool _echoOrientationAvailable;
 
-  // convective / stratiform split
-
-  ConvStratFinder _convStrat;
-  bool _gotConvStrat;
-
   // private methods
 
   void _createThreads();
@@ -305,8 +299,6 @@ private:
                         const Neighbors &wts);
   
   double _conditionAz(double az);
-
-  int _convStratCompute();
 
   //////////////////////////////////////////////////////////////
   // Classes for threads

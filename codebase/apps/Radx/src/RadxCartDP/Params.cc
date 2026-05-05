@@ -975,56 +975,28 @@
     tt->single_val.s = tdrpStrDup("mdv/beamBlock/radar_name/20000101/20000101_000000.mdv.cf.nc");
     tt++;
     
-    // Parameter 'beam_block_field_names'
-    // ctype is '_beam_block_field_name_t'
+    // Parameter 'beam_extinction_field_name'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("beam_block_field_names");
-    tt->descr = tdrpStrDup("Converts field type to string.");
-    tt->help = tdrpStrDup("If input_field is empty the field is assumed to not exist in the input data set.");
-    tt->array_offset = (char *) &_beam_block_field_names - &_start_;
-    tt->array_n_offset = (char *) &beam_block_field_names_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = TRUE;
-    tt->array_elem_size = sizeof(beam_block_field_name_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("beam_block_field_name_t");
-    tt->struct_def.nfields = 3;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("beam_block_field_type_t");
-      tt->struct_def.fields[0].fname = tdrpStrDup("field_type");
-      tt->struct_def.fields[0].ptype = ENUM_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_beam_block_field_names->field_type - (char *) _beam_block_field_names;
-        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("beam_block_field_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 2;
-        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("TERRAIN_HT");
-        tt->struct_def.fields[0].enum_def.fields[0].val = TERRAIN_HT;
-        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("BEAME");
-        tt->struct_def.fields[0].enum_def.fields[1].val = BEAME;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("input_name");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_beam_block_field_names->input_name - (char *) _beam_block_field_names;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("output_name");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_beam_block_field_names->output_name - (char *) _beam_block_field_names;
-    tt->n_struct_vals = 6;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].e = BEAME;
-      tt->struct_vals[1].s = tdrpStrDup("BEAME");
-      tt->struct_vals[2].s = tdrpStrDup("BEAME");
-      tt->struct_vals[3].e = TERRAIN_HT;
-      tt->struct_vals[4].s = tdrpStrDup("Terrain");
-      tt->struct_vals[5].s = tdrpStrDup("Terrain");
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("beam_extinction_field_name");
+    tt->descr = tdrpStrDup("Name of extinction field in beam block data set.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &beam_extinction_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("extinction");
+    tt++;
+    
+    // Parameter 'terrain_ht_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("terrain_ht_field_name");
+    tt->descr = tdrpStrDup("Name of terrain height field in beam block data set.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &terrain_ht_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("terrain_ht");
     tt++;
     
     // Parameter 'Comment 7'
@@ -2892,8 +2864,20 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 33");
-    tt->comment_hdr = tdrpStrDup("OPTION TO IDENTIFY THE CONVECTIVE/STRATIFORM SPLIT");
-    tt->comment_text = tdrpStrDup("Applies only to INTERP_MODE_CART.");
+    tt->comment_hdr = tdrpStrDup("CONVECTIVE/STRATIFORM PARTITION");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'identify_conv_strat_partition'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("identify_conv_strat_partition");
+    tt->descr = tdrpStrDup("Option to identify the convective / stratiform split.");
+    tt->help = tdrpStrDup("Uses the standard deviation of reflectivity as a texture field for each Cartesian plane. Low variability indicates stratiform conditions.");
+    tt->val_offset = (char *) &identify_conv_strat_partition - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'conv_strat_params_file_path'
@@ -2906,126 +2890,6 @@
     tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
     tt->val_offset = (char *) &conv_strat_params_file_path - &_start_;
     tt->single_val.s = tdrpStrDup("use-defaults");
-    tt++;
-    
-    // Parameter 'identify_convective_stratiform_split'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("identify_convective_stratiform_split");
-    tt->descr = tdrpStrDup("Option to identify the convective / stratiform split.");
-    tt->help = tdrpStrDup("Uses the standard deviation of reflectivity as a texture field for each Cartesian plane. Low variability indicates stratiform conditions.");
-    tt->val_offset = (char *) &identify_convective_stratiform_split - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'conv_strat_dbz_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_dbz_field_name");
-    tt->descr = tdrpStrDup("Name of reflectivity field in input data.");
-    tt->help = tdrpStrDup("This is used for computing reflectivity texture.");
-    tt->val_offset = (char *) &conv_strat_dbz_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("DBZ");
-    tt++;
-    
-    // Parameter 'conv_strat_min_valid_height'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_min_valid_height");
-    tt->descr = tdrpStrDup("Min height used in analysis (km).");
-    tt->help = tdrpStrDup("Only data at or above this altitude is used.");
-    tt->val_offset = (char *) &conv_strat_min_valid_height - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'conv_strat_max_valid_height'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_max_valid_height");
-    tt->descr = tdrpStrDup("Max height used in analysis (km).");
-    tt->help = tdrpStrDup("Only data at or below this altitude is used.");
-    tt->val_offset = (char *) &conv_strat_max_valid_height - &_start_;
-    tt->single_val.d = 25;
-    tt++;
-    
-    // Parameter 'conv_strat_min_valid_dbz'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_min_valid_dbz");
-    tt->descr = tdrpStrDup("Minimum reflectivity threshold for this analysis (dBZ).");
-    tt->help = tdrpStrDup("Reflectivity below this threshold is set to missing.");
-    tt->val_offset = (char *) &conv_strat_min_valid_dbz - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'conv_strat_texture_radius_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_texture_radius_km");
-    tt->descr = tdrpStrDup("Radius for texture analysis (km).");
-    tt->help = tdrpStrDup("We determine the reflectivity 'texture' at a point by computing the standard deviation of the square of the reflectivity, for all grid points within this radius of the central point. We then compute the square root of that sdev.");
-    tt->val_offset = (char *) &conv_strat_texture_radius_km - &_start_;
-    tt->single_val.d = 7;
-    tt++;
-    
-    // Parameter 'conv_strat_min_valid_fraction_for_texture'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_min_valid_fraction_for_texture");
-    tt->descr = tdrpStrDup("Minimum fraction of surroundingpoints for texture computations.");
-    tt->help = tdrpStrDup("For a valid computation of texture, we require at least this fraction of points around the central point to have reflectivity in excess of min_valid_dbz.");
-    tt->val_offset = (char *) &conv_strat_min_valid_fraction_for_texture - &_start_;
-    tt->single_val.d = 0.33;
-    tt++;
-    
-    // Parameter 'conv_strat_min_convectivity_for_convective'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_min_convectivity_for_convective");
-    tt->descr = tdrpStrDup("Minimum convectivity for convective at a point.");
-    tt->help = tdrpStrDup("If the convectivity at a point exceeds this value, we set the convective flag at this point.");
-    tt->val_offset = (char *) &conv_strat_min_convectivity_for_convective - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'conv_strat_max_convectivity_for_stratiform'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_max_convectivity_for_stratiform");
-    tt->descr = tdrpStrDup("Maximum convectivity for stratiform at a point.");
-    tt->help = tdrpStrDup("If the convectivity at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_convectivity_for_convective we flag the point as MIXED.");
-    tt->val_offset = (char *) &conv_strat_max_convectivity_for_stratiform - &_start_;
-    tt->single_val.d = 0.4;
-    tt++;
-    
-    // Parameter 'conv_strat_min_overlap_for_convective_clumps'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_min_overlap_for_convective_clumps");
-    tt->descr = tdrpStrDup("Minimum grid overlap in convective regions.");
-    tt->help = tdrpStrDup("A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.");
-    tt->val_offset = (char *) &conv_strat_min_overlap_for_convective_clumps - &_start_;
-    tt->single_val.i = 3;
     tt++;
     
     // Parameter 'conv_strat_write_partition'
