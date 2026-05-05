@@ -2469,9 +2469,8 @@ int RadxCartDP::_writeOutputMdv()
   
   // convective stratiform split
 
-  if (_params.identify_conv_strat_partition) {
-    out.addConvStratFields(_convStrat, _radarVol,
-                           _interpProj, _interpVlevels);
+  if (_convStratAvailable) {
+    out.addConvStratFields(_convStrat, _radarVol, _interpProj, _interpVlevels);
   }
 
   // write out file
