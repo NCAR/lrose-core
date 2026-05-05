@@ -23,6 +23,7 @@ HDRS = \
 	../include/radar/ConvStratFinder.hh
 
 CPPC_SRCS = \
+	ConvStratParams.cc \
 	ConvStratFinder.cc
 
 #
@@ -34,6 +35,13 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 #
 # local targets
 #
+
+ConvStratParams.cc: paramdef.ConvStrat
+	tdrp_gen -f paramdef.ConvStrat -c++ -class ConvStratParams -lib radar -add_ncar_copyright
+	/bin/mv -f ConvStratParams.hh ../include/radar
+
+clean_tdrp:
+	$(RM) ConvStratParams.cc ../include/radar/ConvStratParams.hh
 
 depend: depend_generic
 
