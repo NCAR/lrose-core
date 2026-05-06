@@ -188,8 +188,9 @@ void ConvStratFinder::setGrid(size_t nx, size_t ny,
   _minx = minx;
   _miny = miny;
   _zKm = zKm;
+  _nz = _zKm.size();
   _nxy = _nx * _ny;
-  _nxyz = _nxy * _zKm.size();
+  _nxyz = _nxy * _nz;
   _projIsLatLon = projIsLatLon;
   _gridSet = true;
 
@@ -309,16 +310,16 @@ int ConvStratFinder::computeEchoType(const fl32 *dbz,
 
   // 2D case
 
-  if (_zKm.size() == 1) {
+  if (_nz == 1) {
     return _computeEchoType2D(dbz, dbzMissingVal);
   }
 
   // compute min and max vert indices
 
   _minIz = 0;
-  _maxIz = _zKm.size() - 1;
+  _maxIz = _nz - 1;
   
-  for (size_t iz = 0; iz < _zKm.size(); iz++) {
+  for (size_t iz = 0; iz < _nz; iz++) {
     double zz = _zKm[iz];
     if (zz <= _minValidHtKm) {
       _minIz = iz;
@@ -812,7 +813,7 @@ void ConvStratFinder::_computeConvectivity()
   double textureRange = _textureLimitHigh - _textureLimitLow;
   double convectivitySlope = 1.0 / textureRange;
   
-  for (size_t iz = 0; iz < _zKm.size(); iz++) {
+  for (size_t iz = 0; iz < _nz; iz++) {
     
     // loop through a plane
     
@@ -963,7 +964,7 @@ void ConvStratFinder::_setEchoType3D()
       
       // loop through the planes, accumulating layer info
   
-      for (size_t iz = 0; iz < _zKm.size(); iz++) {
+      for (size_t iz = 0; iz < _nz; iz++) {
         
         int offset3D = iz * nPtsPlane + offset2D;
 
@@ -1223,8 +1224,8 @@ void ConvStratFinder::_printSettings(ostream &out)
   out << "  _dxKm: " << _dxKm << endl;
   out << "  _dyKm: " << _dyKm << endl;
 
-  out << "  nz: " << _zKm.size();
-  for (size_t ii = 0; ii < _zKm.size(); ii++) {
+  out << "  nz: " << _nz;
+  for (size_t ii = 0; ii < _nz; ii++) {
     out << "    ii, z: " << ii << ", " << _zKm[ii] << endl;
   }
 
@@ -1450,7 +1451,7 @@ void ConvStratFinder::StormClump::computeGeom()
   // in each height layer
   
   int nx = _finder->_nx;
-  int nz = _finder->_zKm.size();
+  int nz = _finder->_nz;
   
   const fl32 *shallowHtGrid = _finder->_shallowHtGrid.dat();
   const fl32 *deepHtGrid = _finder->_deepHtGrid.dat();
@@ -1635,6 +1636,100 @@ bool ConvStratFinder::StormClump::stratiformBelow()
   } else {
     return false;
   }
+
+}
+
+/////////////////////////////////////////////////////////
+// set temperature-based heights for shallow-to-mid and
+// mid-to-deep transitions
+
+void ConvStratFinder::setTempBasedHts(const fl32 *tempGrid3D, fl32 tempMiss)
+
+{
+  
+  _setHts(_shallowTempC, tempGrid3D, tempMiss, _shallowHtGrid);
+  _setHts(_deepTempC, tempGrid3D, tempMiss, _deepHtGrid);
+  
+}
+
+/////////////////////////////////////////////////////////
+// fill temperature level ht array
+
+void ConvStratFinder::_setHts(double tempC,
+                              const fl32 *tempGrid3D,
+                              fl32 tempMiss,
+                              TaArray<fl32> &htGrid)
+  
+{
+
+  // resize array and initialize
+
+  size_t nxy = _nx * _ny;
+  size_t nxyz = nxy * _nz;
+  htGrid.alloc(nxyz);
+  for (size_t ii = 0; ii < nxyz; ii++) {
+    htGrid[ii] = _missingFl32;
+  }
+  
+  // loop through the (x, y) plane
+  
+  si64 xyIndex = 0;
+  for (size_t iy = 0; iy < _ny; iy++) {
+    for (size_t ix = 0; ix < _nx; ix++, xyIndex++) {
+      
+      // initialize
+
+      fl32 bottomTemp = tempMiss;
+      double bottomHt = _zKm[0]; // if temp is below grid
+      
+      fl32 topTemp = tempMiss;
+      double topHt = _zKm[_nz-1]; // if temp is above grid
+      
+      htGrid[xyIndex] = bottomHt;
+      
+      // loop through heights, looking for temps that straddle
+      // the required temp
+
+      bool htFound = false;
+      for (size_t iz = 1; iz < _nz; iz++) {
+        si64 zIndexBelow = xyIndex + (iz - 1) * nxy; 
+        si64 zIndexAbove = zIndexBelow + nxy; 
+        double tempBelow = tempGrid3D[zIndexBelow];
+        double tempAbove = tempGrid3D[zIndexAbove];
+        // set bottom temp
+        if (tempBelow != tempMiss && bottomTemp == tempMiss) {
+          bottomTemp = tempBelow;
+        }
+        // set top temp
+        if (tempAbove != tempMiss) {
+          topTemp = tempAbove;
+        }
+        if (!htFound && (tempBelow != tempMiss) && (tempAbove != tempMiss)) {
+          // check for normal profile and inversion
+          if ((tempBelow >= tempC && tempAbove <= tempC) ||
+              (tempBelow <= tempC && tempAbove >= tempC)) {
+            double deltaTemp = tempAbove - tempBelow;
+            double deltaHt = _zKm[iz] - _zKm[iz-1];
+            double interpHt =
+              _zKm[iz] + ((tempC - tempBelow) / deltaTemp) * deltaHt;
+            htGrid[xyIndex] = interpHt;
+            htFound = true;
+          }
+        }
+      } // iz
+      
+      if (!htFound) {
+        if (tempC >= bottomTemp) {
+          // required temp is below grid
+          htGrid[xyIndex] = bottomHt;
+        } else if (tempC <= topTemp) {
+          // required temp is above grid
+          htGrid[xyIndex] = topHt;
+        }
+      }
+
+    } // ix
+  } // iy
 
 }
 

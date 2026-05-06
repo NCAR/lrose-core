@@ -331,6 +331,11 @@ public:
   
   void setTerrainHtField(const fl32 *ht, fl32 missingVal);
 
+  // set temperature-based heights for shallow-to-mid and
+  // mid-to-deep transitions
+  
+  void setTempBasedHts(const fl32 *tempGrid3D, fl32 tempMiss);
+
   ////////////////////////////////////////////////////////////////////
   // compute the echoType
   // Returns 0 on success, -1 on failure
@@ -466,7 +471,7 @@ private:
 
   bool _gridSet;
   
-  size_t _nx, _ny;
+  size_t _nx, _ny, _nz;
   double _minx, _miny;
   double _dx, _dy;
   double _dxKm, _dyKm;
@@ -537,7 +542,9 @@ private:
   void _set2DFields();
   void _computeKernels();
   void _printSettings(ostream &out);
-
+  void _setHts(double tempC, const fl32 *tempGrid3D,
+               fl32 tempMiss, TaArray<fl32> &htGrid);
+  
   /////////////////////////////////////////////////////////
   // inner class for starting timers in a separate thread
 
