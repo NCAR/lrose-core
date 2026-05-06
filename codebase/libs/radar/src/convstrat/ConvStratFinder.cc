@@ -154,8 +154,8 @@ void ConvStratFinder::setFromParams(const ConvStratParams &params)
 
   setMinGridOverlapForClumping(params.min_overlap_for_convective_clumps);
 
-  setConstantHtThresholds(params.shallow_threshold_ht,
-                          params.deep_threshold_ht);
+  // setConstantHtThresholds(params.shallow_threshold_ht,
+  //                         params.deep_threshold_ht);
     
   setTempThresholds(params.shallow_threshold_temp,
                     params.deep_threshold_temp);

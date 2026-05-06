@@ -196,7 +196,7 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	printParamsConvStratMode = argv[++i];
       }
 
-    } else if (argv[i][0] == '-') {
+    } else if (argv[i][0] == '-' && !tdrpIsArgValid(argv[i])) {
       
       cerr<< "====>> WARNING - invalid command line argument: '"
           << argv[i] << "' <<====" << endl;
