@@ -2346,6 +2346,28 @@ int RadxCartDP::_computeConvStrat()
                      _interpVlevels,
                      isLatLon);
 
+  // set the terrain height array
+  
+  MdvxField terrainHtField(*_terrainHtField);
+  terrainHtField.convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE);
+  const fl32 *terrainHt = (const fl32*) terrainHtField.getVol();
+  fl32 htMiss = terrainHtField.getFieldHeader().missing_data_value;
+  _convStrat.setTerrainHtField(terrainHt, htMiss);
+  
+  // set the temperature arrays
+  
+  MdvxField *tempFld =
+    _modelInterpMdvx.getField(getModelOutputName(Params::TEMP).c_str());
+  if (tempFld == nullptr) {
+    cerr << "ERROR - RadxCartDP::_computeConvStrat" << endl;
+    cerr << "  Cannot find temp field in model: "
+         << getModelOutputName(Params::TEMP).c_str() << endl;
+    return -1;
+  }
+  const fl32 *tempVol = (const fl32 *) tempFld->getVol();
+  fl32 tempMiss = tempFld->getFieldHeader().missing_data_value;
+  _convStrat.setTempBasedHts(tempVol, tempMiss);
+  
   // get the dbz field for ConvStratFinder
   
   string dbzFieldName(getRadarInputName(Params::DBZ));
