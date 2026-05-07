@@ -269,7 +269,9 @@ private:
   int _computePid();
   int _computePrecip();
   int _computeQpe();
+
   int _computeConvStrat();
+  void _addConvStratToOutput(OutputMdv &out);
 
   int _writeOutputMdv();
 

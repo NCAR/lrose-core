@@ -131,17 +131,18 @@ void OutputMdv::addField(MdvxField *field)
   _mdvx.addField(field);
 }
 
-void OutputMdv::addField(const RadxVol &vol,
-                         MdvxProj &proj,
-                         const vector<double> &vlevels,
-                         const string &field_name,
-                         const string &field_name_long,
-			 const string &units,
-                         Radx::DataType_t inputDataType,
-                         double inputScale,
-                         double inputOffset,
-                         fl32 missingVal,
-			 const fl32 *data)
+////////////////////////////////////////////////////////////////////
+// create a field and add - float 32
+//
+
+void OutputMdv::createFieldAndAdd(const RadxVol &vol,
+                                  MdvxProj &proj,
+                                  const vector<double> &vlevels,
+                                  const string &field_name,
+                                  const string &field_name_long,
+                                  const string &units,
+                                  fl32 missingVal,
+                                  const fl32 *data)
   
 {
   
@@ -149,11 +150,11 @@ void OutputMdv::addField(const RadxVol &vol,
   Mdvx::coord_t coord = proj.getCoord();
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "  Adding field: " << field_name << endl;
+    cerr << "  Adding float field: " << field_name << endl;
   }
 
   if (coord.nx == 0 || coord.ny == 0 || nz == 0) {
-    cerr << "WARNING - OutputMdv::addField" << endl;
+    cerr << "WARNING - OutputMdv::createFieldAndAdd" << endl;
     cerr << "  Zero length field, not adding, name: " << field_name << endl;
     cerr << "  nx, ny, nz: "
          << coord.nx << ", " << coord.ny << ", " << nz << endl;
@@ -179,7 +180,11 @@ void OutputMdv::addField(const RadxVol &vol,
     }
   }
   fhdr.proj_type = proj.getProjType();
-  fhdr.dz_constant = false;
+  if (nz == 1 || !_params.specify_individual_z_levels) {
+    fhdr.dz_constant = true;
+  } else {
+    fhdr.dz_constant = false;
+  }
 
   fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
   fhdr.data_element_nbytes = 4;
@@ -188,9 +193,9 @@ void OutputMdv::addField(const RadxVol &vol,
   fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
   fhdr.scaling_type = Mdvx::SCALING_NONE;
   
-  fhdr.proj_origin_lat = vol.getLatitudeDeg();
-  fhdr.proj_origin_lon = vol.getLongitudeDeg();
-  fhdr.user_data_fl32[0] = vol.getAltitudeKm();
+  fhdr.proj_origin_lat = coord.proj_origin_lat;
+  fhdr.proj_origin_lon = coord.proj_origin_lon;
+  fhdr.user_data_fl32[0] = vlevels[0];
 
   fhdr.grid_dx = coord.dx;
   fhdr.grid_dy = coord.dy;
@@ -231,16 +236,13 @@ void OutputMdv::addField(const RadxVol &vol,
   // create field
 
   MdvxField *fld = new MdvxField(fhdr, vhdr, data);
-  if (inputDataType == Radx::SI08 ||
-      inputDataType == Radx::UI08 ||
-      inputDataType == Radx::SI16 ||
-      inputDataType == Radx::UI16) {
-    fld->convertType(Mdvx::ENCODING_INT16);
-  } else {
-    fld->convertType(Mdvx::ENCODING_INT16);
-    // fld->convertType(Mdvx::ENCODING_FLOAT32);
-  }
 
+  // convert to int16 and set compression
+  
+  fld->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
+
+  // convert to latlon if requested
+  
   if (_params.auto_remap_flat_to_latlon &&
       _params.grid_projection == Params::PROJ_FLAT) {
     fld->autoRemap2Latlon(_remapLut);
@@ -259,69 +261,87 @@ void OutputMdv::addField(const RadxVol &vol,
 
 }
 
-void OutputMdv::addConvStratBool(const RadxVol &vol,
-                                 MdvxProj &proj,
-                                 const string &field_name,
-                                 const string &field_name_long,
-                                 ui08 missingVal,
-                                 const ui08 *data)
+////////////////////////////////////////////////////////////////////
+// create a field and add - byte
+//
+
+void OutputMdv::createFieldAndAdd(const RadxVol &vol,
+                                  MdvxProj &proj,
+                                  const vector<double> &vlevels,
+                                  const string &field_name,
+                                  const string &field_name_long,
+                                  const string &units,
+                                  fl32 missingVal,
+                                  const ui08 *data)
   
 {
   
+  int nz = (int) vlevels.size();
   Mdvx::coord_t coord = proj.getCoord();
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "  Adding field: " << field_name << endl;
+    cerr << "  Adding byte field: " << field_name << endl;
   }
 
-  if (coord.nx == 0 || coord.ny == 0) {
-    cerr << "WARNING - OutputMdv::addField" << endl;
+  if (coord.nx == 0 || coord.ny == 0 || nz == 0) {
+    cerr << "WARNING - OutputMdv::createFieldAndAdd" << endl;
     cerr << "  Zero length field, not adding, name: " << field_name << endl;
-    cerr << "  nx, ny: "
-         << coord.nx << ", " << coord.ny << endl;
+    cerr << "  nx, ny, nz: "
+         << coord.nx << ", " << coord.ny << ", " << nz << endl;
     return;
   }
 
   // field header
-  
+
   Mdvx::field_header_t fhdr;
   MEM_zero(fhdr);
 
   fhdr.nx = coord.nx;
   fhdr.ny = coord.ny;
-  fhdr.nz = 1;
+  fhdr.nz = nz;
 
   fhdr.native_vlevel_type = Mdvx::VERT_TYPE_ELEV;
-  fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
   
+  if (vol.getNSweeps() > 0) {
+    const RadxSweep *sweep = vol.getSweeps()[0];
+    if (sweep->getSweepMode() == Radx::SWEEP_MODE_RHI) {
+      fhdr.native_vlevel_type = Mdvx::VERT_TYPE_AZ;
+    }
+  }
   fhdr.proj_type = proj.getProjType();
-  fhdr.dz_constant = true;
+  if (nz == 1 || !_params.specify_individual_z_levels) {
+    fhdr.dz_constant = true;
+  } else {
+    fhdr.dz_constant = false;
+  }
   
-  int volSize08 = fhdr.nx * fhdr.ny * sizeof(ui08);
-  fhdr.volume_size = volSize08;
   fhdr.encoding_type = Mdvx::ENCODING_INT8;
   fhdr.data_element_nbytes = 1;
-
+  fhdr.volume_size = coord.nx * coord.ny * nz * sizeof(fl32);
   fhdr.compression_type = Mdvx::COMPRESSION_NONE;
   fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
-  fhdr.scaling_type = Mdvx::SCALING_SPECIFIED;
+  fhdr.scaling_type = Mdvx::SCALING_NONE;
   
-  fhdr.proj_origin_lat = vol.getLatitudeDeg();
-  fhdr.proj_origin_lon = vol.getLongitudeDeg();
-  fhdr.user_data_fl32[0] = vol.getAltitudeKm();
+  fhdr.proj_origin_lat = coord.proj_origin_lat;
+  fhdr.proj_origin_lon = coord.proj_origin_lon;
+  fhdr.user_data_fl32[0] = vlevels[0];
   
   fhdr.grid_dx = coord.dx;
   fhdr.grid_dy = coord.dy;
   fhdr.grid_dz = 1.0;
-  
+  if (nz > 1) {
+    fhdr.grid_dz = vlevels[1] - vlevels[0];
+  }
+
   fhdr.grid_minx = coord.minx;
   fhdr.grid_miny = coord.miny;
-  fhdr.grid_minz = vol.getAltitudeKm();
+  fhdr.grid_minz = vlevels[0];
 
   fhdr.scale = 1.0;
   fhdr.bias = 0.0;
-  fhdr.missing_data_value = missingVal;
   fhdr.bad_data_value = missingVal;
+  fhdr.missing_data_value = missingVal;
   
   fhdr.min_value = 0;
   fhdr.max_value = 0;
@@ -334,12 +354,25 @@ void OutputMdv::addConvStratBool(const RadxVol &vol,
   
   Mdvx::vlevel_header_t vhdr;
   MEM_zero(vhdr);
-  vhdr.level[0] = fhdr.grid_minz;
-  vhdr.type[0] = Mdvx::VERT_TYPE_SURFACE;
+  int nLevels = nz;
+  if (nLevels > MDV_MAX_VLEVELS) {
+    nLevels = MDV_MAX_VLEVELS;
+  }
+  for (int i = 0; i < nLevels; i++) {
+    vhdr.level[i] = vlevels[i];
+    vhdr.type[i] = fhdr.vlevel_type;
+  }
   
   // create field
 
   MdvxField *fld = new MdvxField(fhdr, vhdr, data);
+  
+  // set compression
+  
+  fld->convertType(Mdvx::ENCODING_INT8, Mdvx::COMPRESSION_GZIP);
+
+  // convert to latlon if requested
+  
   if (_params.auto_remap_flat_to_latlon &&
       _params.grid_projection == Params::PROJ_FLAT) {
     fld->autoRemap2Latlon(_remapLut);
@@ -349,7 +382,7 @@ void OutputMdv::addConvStratBool(const RadxVol &vol,
   
   fld->setFieldName(field_name.c_str());
   fld->setFieldNameLong(field_name_long.c_str());
-  fld->setUnits("");
+  fld->setUnits(units.c_str());
   fld->setTransform("");
   
   // add to object
@@ -358,82 +391,62 @@ void OutputMdv::addConvStratBool(const RadxVol &vol,
 
 }
 
-////////////////////////////////////////
-// add convective stratiform fields
+/////////////////////////////////////////////////////////
+// create a float field
 
-void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
-                                   const RadxVol &vol,
-                                   MdvxProj &proj,
-                                   const vector<double> &vlevels)
+MdvxField *OutputMdv::makeField(Mdvx::field_header_t &fhdrTemplate,
+                                Mdvx::vlevel_header_t &vhdr,
+                                const fl32 *data,
+                                Mdvx::encoding_type_t outputEncoding,
+                                string fieldName,
+                                string longName,
+                                string units)
   
 {
 
-  Mdvx::coord_t projCoord = proj.getCoord();
-  if ((int) convStrat.getGridNx() != projCoord.nx ||
-      (int) convStrat.getGridNy() != projCoord.ny) {
-    cerr << "ERROR - OutputMdv::addConvStratFields" << endl;
-    cerr << "  ConvStrat grid size does not match Proj grid size" << endl;
-    cerr << "  ConvStrat nx, ny: " 
-         << convStrat.getGridNx() << ", "
-         << convStrat.getGridNy() << endl;
-    MdvxProj::printCoord(projCoord, cerr);
-    return;
-  }
+  Mdvx::field_header_t fhdr = fhdrTemplate;
+  MdvxField::setFieldName(fieldName, fhdr);
+  MdvxField::setFieldNameLong(longName, fhdr);
+  MdvxField::setUnits(units, fhdr);
+  MdvxField *newField =
+    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(fl32);
+  newField->setVolData(data, volSize, Mdvx::ENCODING_FLOAT32);
+  newField->convertType(outputEncoding, Mdvx::COMPRESSION_GZIP);
 
-  vector<double> vlevel2D;
-  vlevel2D.push_back(vol.getAltitudeKm());
-  
-  if (_params.conv_strat_write_partition) {
-    addConvStratBool(vol, proj,
-                     "ConvStrat",
-                     "1 = stratiform, 2 = convective",
-                     ConvStratFinder::CATEGORY_MISSING,
-                     convStrat.getEchoType2D());
-  }
-
-  if (_params.conv_strat_write_max_texture) {
-    addField(vol, proj, vlevel2D,
-             "DbzTextureMax",
-             "max_of_dbz_texture_over_height",
-             "dBZ",
-             Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingFl32(),
-             convStrat.getTexture2D());
-  }
-  
-  if (_params.conv_strat_write_convective_dbz) {
-    addField(vol, proj, vlevels,
-             "DbzConv",
-             "dbz_in_convection",
-             "dBZ",
-             Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingFl32(),
-             convStrat.getConvectiveDbz());
-  }
-
-  if (_params.conv_strat_write_debug_fields) {
-
-    addField(vol, proj, vlevel2D,
-             "DbzColMax",
-             "dbz_column_maximum",
-             "dBZ",
-             Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingFl32(),
-             convStrat.getDbzColMax());
-    
-    addField(vol, proj, vlevel2D,
-             "FractionActive",
-             "fraction_of_texture_kernel_with_active_dbz",
-             "",
-             Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingFl32(),
-             convStrat.getFractionActive());
-
-
-  }
+  return newField;
 
 }
+
+/////////////////////////////////////////////////////////
+// create a byte field
+
+MdvxField *OutputMdv::makeField(Mdvx::field_header_t &fhdrTemplate,
+                                Mdvx::vlevel_header_t &vhdr,
+                                const ui08 *data,
+                                Mdvx::encoding_type_t outputEncoding,
+                                string fieldName,
+                                string longName,
+                                string units)
   
+{
+  
+  Mdvx::field_header_t fhdr = fhdrTemplate;
+  MdvxField::setFieldName(fieldName, fhdr);
+  MdvxField::setFieldNameLong(longName, fhdr);
+  MdvxField::setUnits(units, fhdr);
+  MdvxField *newField =
+    new MdvxField(fhdr, vhdr, NULL, false, false, false);
+  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = npts * sizeof(ui08);
+  newField->setVolData(data, volSize, Mdvx::ENCODING_INT8);
+  newField->convertType(outputEncoding, Mdvx::COMPRESSION_GZIP);
+  
+  return newField;
+
+}
+
 ////////////////////////////////////////
 // addChunks()
 //

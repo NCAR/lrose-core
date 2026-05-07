@@ -114,29 +114,6 @@ RadarInterp::RadarInterp(const string &progName,
 
   _createThreads();
 
-  // set up ConvStratFinder object
-
-  // if (_params.identify_CONV_STRAT_partition) {
-  //   if (_params.debug >= Params::DEBUG_VERBOSE) {
-  //     _convStrat.setVerbose(true);
-  //   } else if (_params.debug) {
-  //     _convStrat.setDebug(true);
-  //   }
-  //   _convStrat.setMinValidHtKm(_params.conv_strat_min_valid_height);
-  //   _convStrat.setMaxValidHtKm(_params.conv_strat_max_valid_height);
-  //   _convStrat.setMinValidDbz(_params.conv_strat_min_valid_dbz);
-  //   _convStrat.setTextureRadiusKm(_params.conv_strat_texture_radius_km);
-  //   _convStrat.setMinValidFractionForTexture
-  //     (_params.conv_strat_min_valid_fraction_for_texture);
-  //   _convStrat.setMinConvectivityForConvective
-  //     (_params.conv_strat_min_convectivity_for_convective);
-  //   _convStrat.setMaxConvectivityForStratiform
-  //     (_params.conv_strat_max_convectivity_for_stratiform);
-  //   _convStrat.setMinGridOverlapForClumping
-  //     (_params.conv_strat_min_overlap_for_convective_clumps);
-  // }
-  // _gotConvStrat = false;
-
   // set up orientation object
 
   if (_params.use_echo_orientation) {
@@ -264,18 +241,6 @@ int RadarInterp::interpVol()
   _doInterp();
   _printRunTime("Interpolating");
 
-  // compute convective stratiform split
-
-  // _gotConvStrat = false;
-  // if (_params.identify_convective_stratiform_split) {
-  //   // convective / stratiform split
-  //   _printRunTime("Cart interp - before strat/conv");
-  //   if (_convStratCompute() == 0) {
-  //     _gotConvStrat = true;
-  //   }
-  //   _printRunTime("Cart interp - after strat/conv");
-  // }
-  
   return 0;
 
 }
@@ -283,39 +248,36 @@ int RadarInterp::interpVol()
 /////////////////////////////////////////////////////
 // fill output MDV data
 
-void RadarInterp::fillOutputMdv(OutputMdv &out)
+void RadarInterp::addToOutputMdv(OutputMdv &out)
 {
 
   // all other formats go via the MDV class
   
   for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
     const Field &ifld = _interpFields[ifield];
-    out.addField(_readVol, _proj, _gridZLevels,
-                 ifld.outputName, ifld.longName, ifld.units,
-                 ifld.inputDataType,
-                 ifld.inputScale,
-                 ifld.inputOffset,
-                 missingFl32,
-                 _interpFields[ifield].outputField.data());
+    out.createFieldAndAdd(_readVol, _proj, _gridZLevels,
+                          ifld.outputName, ifld.longName, ifld.units,
+                          missingFl32,
+                          _interpFields[ifield].outputField.data());
   } // ifield
 
   // debug (test) fields
-
+  
   for (size_t ii = 0; ii < _derived3DFields.size(); ii++) {
     const DerivedField *dfld = _derived3DFields[ii];
     if (dfld->writeToFile) {
-      out.addField(_readVol, _proj, dfld->vertLevels,
-                   dfld->name, dfld->longName, dfld->units,
-                   Radx::FL32, 1.0, 0.0, missingFl32, dfld->data);
+      out.createFieldAndAdd(_readVol, _proj, dfld->vertLevels,
+                            dfld->name, dfld->longName, dfld->units,
+                            missingFl32, dfld->data);
     }
   }
 
   for (size_t ii = 0; ii < _derived2DFields.size(); ii++) {
     const DerivedField *dfld = _derived2DFields[ii];
     if (dfld->writeToFile) {
-      out.addField(_readVol, _proj, dfld->vertLevels,
-                   dfld->name, dfld->longName, dfld->units,
-                   Radx::FL32, 1.0, 0.0, missingFl32, dfld->data);
+      out.createFieldAndAdd(_readVol, _proj, dfld->vertLevels,
+                            dfld->name, dfld->longName, dfld->units,
+                            missingFl32, dfld->data);
     }
   }
 
@@ -2378,55 +2340,6 @@ double RadarInterp::_conditionAz(double az)
   }
   return az;
 }
-
-#ifdef NOTNOW
-//////////////////////////////////////////////////
-// Compute convective/stratiform split
-
-int RadarInterp::_convStratCompute()
-{
-
-  // set the grid in the ConvStratFinder object
-
-  bool isLatLon = (_params.grid_projection == Params::PROJ_LATLON);
-  _convStrat.setGrid(_gridNx, _gridNy,
-                     _gridDx, _gridDy,
-                     _gridMinx, _gridMiny,
-                     _gridZLevels,
-                     isLatLon);
-
-  // get the dbz field for ConvStratFinder
-
-  string dbzName(_params.conv_strat_dbz_field_name);
-  fl32 *dbzVals = NULL;
-  for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
-    const Field &ifld = _interpFields[ifield];
-    if (ifld.radxName == dbzName) {
-      dbzVals = _interpFields[ifield].outputField.data();
-      break;
-    }
-  }
-  if (dbzVals == NULL) {
-    cerr << "ERROR - RadarInterp::_convStratCompute()" << endl;
-    cerr << "  Cannot find dbz field: " << dbzName << endl;
-    cerr << "  conv/strat partition will not be computed" << endl;
-    return -1;
-  }
-
-  // compute the convective/stratiform partition
-  
-  if (_convStrat.computeEchoType(dbzVals, missingFl32)) {
-    cerr << "ERROR - RadarInterp::_convStratCompute()" << endl;
-    cerr << "  _convStrat.computePartition() failed" << endl;
-    return -1;
-  }
-
-  _printRunTime("RadarInterp::_convStratCompute");
-
-  return 0;
-  
-}
-#endif
 
 ///////////////////////////////////////////////////////////////
 // FillSearchLowerLeft thread

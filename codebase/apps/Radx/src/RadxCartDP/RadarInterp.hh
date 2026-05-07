@@ -74,9 +74,9 @@ public:
 
   void setRhiMode(bool state) { _rhiMode = state; }
 
-  // fill the output MDV file with interpolated data
+  // add fields to output mdv
   
-  void fillOutputMdv(OutputMdv &out);
+  void addToOutputMdv(OutputMdv &out);
 
   // free up memory between calls
 
@@ -193,7 +193,6 @@ private:
   void _addDpDerivedFields();
 
   void _createDebugFields();
-  void _createConvStratFields();
   void _freeDerivedFields();
 
   void _initZLevels();

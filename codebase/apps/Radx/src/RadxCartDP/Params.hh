@@ -743,9 +743,11 @@ public:
 
   tdrp_bool_t conv_strat_write_partition;
 
-  tdrp_bool_t conv_strat_write_max_texture;
+  tdrp_bool_t conv_strat_write_convectivity;
 
   tdrp_bool_t conv_strat_write_convective_dbz;
+
+  tdrp_bool_t conv_strat_write_echo_tops;
 
   tdrp_bool_t conv_strat_write_debug_fields;
 
@@ -756,7 +758,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[162];
+  mutable TDRPtable _table[163];
 
   const char *_className;
 

@@ -67,30 +67,46 @@ public:
   
   void addField(MdvxField *field);
 
-  void addField(const RadxVol &vol,
-                MdvxProj &proj,
-                const vector<double> &vlevels,
-                const string &field_name,
-                const string &field_name_long,
-		const string &units,
-		Radx::DataType_t inputDataType,
-                double inputScale,
-                double inputOffset,
-                fl32 missingVal,
-		const fl32 *data);
+  // create a field and add - float 32
+  
+  void createFieldAndAdd(const RadxVol &vol,
+                         MdvxProj &proj,
+                         const vector<double> &vlevels,
+                         const string &field_name,
+                         const string &field_name_long,
+                         const string &units,
+                         fl32 missingVal,
+                         const fl32 *data);
 
-  void addConvStratBool(const RadxVol &vol,
-                        MdvxProj &proj,
-                        const string &field_name,
-                        const string &field_name_long,
-                        ui08 missingVal,
-                        const ui08 *data);
+  // create a field and add - int 08
   
-  void addConvStratFields(const ConvStratFinder &convStrat,
-                          const RadxVol &vol,
-                          MdvxProj &proj,
-                          const vector<double> &vlevels);
+  void createFieldAndAdd(const RadxVol &vol,
+                         MdvxProj &proj,
+                         const vector<double> &vlevels,
+                         const string &field_name,
+                         const string &field_name_long,
+                         const string &units,
+                         fl32 missingVal,
+                         const ui08 *data);
+
+  // make a field
   
+  MdvxField *makeField(Mdvx::field_header_t &fhdrTemplate,
+                       Mdvx::vlevel_header_t &vhdr,
+                       const fl32 *data,
+                       Mdvx::encoding_type_t outputEncoding,
+                       string fieldName,
+                       string longName,
+                       string units);
+  
+  MdvxField *makeField(Mdvx::field_header_t &fhdrTemplate,
+                       Mdvx::vlevel_header_t &vhdr,
+                       const ui08 *data,
+                       Mdvx::encoding_type_t outputEncoding,
+                       string fieldName,
+                       string longName,
+                       string units);
+
   // add the radarParams as a chunk
 
   void addChunks(const RadxVol &vol, int nFields);

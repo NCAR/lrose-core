@@ -2899,21 +2899,21 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("conv_strat_write_partition");
     tt->descr = tdrpStrDup("Option to write out the convective/stratiform partition.");
-    tt->help = tdrpStrDup("If true, the 2-D partition will be added to the output file.");
+    tt->help = tdrpStrDup("If true, the 3-D partition will be added to the output file.");
     tt->val_offset = (char *) &conv_strat_write_partition - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'conv_strat_write_max_texture'
+    // Parameter 'conv_strat_write_convectivity'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_write_max_texture");
-    tt->descr = tdrpStrDup("Option to write out the max texture.");
-    tt->help = tdrpStrDup("If true, the mean texture will be written to the output file. This is a 2-D field - the max over height of the 3-D texture fields.");
-    tt->val_offset = (char *) &conv_strat_write_max_texture - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->param_name = tdrpStrDup("conv_strat_write_convectivity");
+    tt->descr = tdrpStrDup("Option to write out the convective/stratiform partition.");
+    tt->help = tdrpStrDup("If true, the 3-D convectivity field will be added to the output file.");
+    tt->val_offset = (char *) &conv_strat_write_convectivity - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'conv_strat_write_convective_dbz'
@@ -2928,6 +2928,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'conv_strat_write_echo_tops'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_write_echo_tops");
+    tt->descr = tdrpStrDup("Option to write out echo tops fields.");
+    tt->help = tdrpStrDup("If true, the echo tops and convective echo tops will be written to the output file.");
+    tt->val_offset = (char *) &conv_strat_write_echo_tops - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'conv_strat_write_debug_fields'
     // ctype is 'tdrp_bool_t'
     
@@ -2935,7 +2947,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("conv_strat_write_debug_fields");
     tt->descr = tdrpStrDup("Option to write out the intermediate fields for debug purposes.");
-    tt->help = tdrpStrDup("If true, the intermdiate fields will be written to the output file.");
+    tt->help = tdrpStrDup("If true, the intermediate fields will be written to the output file.");
     tt->val_offset = (char *) &conv_strat_write_debug_fields - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
