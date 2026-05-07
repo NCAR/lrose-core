@@ -40,7 +40,6 @@
 
 #include <string>
 #include <vector>
-#include <toolsa/TaArray.hh>
 #include <toolsa/TaThread.hh>
 #include <dataport/port_types.h>
 #include <euclid/ClumpingMgr.hh>
@@ -342,34 +341,70 @@ public:
 
   int computeEchoType(const fl32 *dbz, fl32 dbzMissingVal);
 
-  // get the input fields
+  // get parameters
   
-  const fl32 *getDbz3D() const { return _dbz3D.dat(); }
-  const fl32 *getShallowHtGrid() const { return _shallowHtGrid.dat(); }
-  const fl32 *getDeepHtGrid() const { return _deepHtGrid.dat(); }
-  const fl32 *getDbzColMax() const { return _dbzColMax.dat(); }
-  const fl32 *getFractionActive() const { return _fractionActive.dat(); }
+  bool getUseDbzColMax() const { return _useDbzColMax; }
+  bool getUseDualThresholds() const { return _useDualThresholds; }
+  int getMinOverlapForClumping() const { return _minOverlapForClumping; }
+
+  double getMinValidHtKm() const { return _minValidHtKm; }
+  double getMaxValidHtKm() const { return _maxValidHtKm; }
+  double getMinValidDbz() const { return _minValidDbz; }
+  double getBaseDbz() const { return _baseDbz; }
+  double getDbzForEchoTops() const { return _dbzForEchoTops; }
+  double getMinHtKmAglForMid() const { return _minHtKmAglForMid; }
+  double getMinHtKmAglForDeep() const { return _minHtKmAglForDeep; }
+  double getMinConvectivityForConvective() const { return _minConvectivityForConvective; }
+  double getMaxConvectivityForStratiform() const { return _maxConvectivityForStratiform; }
+  double getSecondaryConvectivityThreshold() const { return _secondaryConvectivityThreshold; }
+  double getMinFractionAllParts() const { return _minFractionAllParts; }
+  double getMinFractionEachPart() const { return _minFractionEachPart; }
+  double getMinSizeEachPart() const { return _minSizeEachPart; }
+  double getTextureRadiusKm() const { return _textureRadiusKm; }
+  double getMinValidFractionForTexture() const { return _minValidFractionForTexture; }
+  double getMinValidFractionForFit() const { return _minValidFractionForFit; }
+  double getMinVolForConvectiveKm3() const { return _minVolForConvectiveKm3; }
+  double getMinVertExtentForConvectiveKm() const { return _minVertExtentForConvectiveKm; }
+  double getTextureLimitLow() const { return _textureLimitLow; }
+  double getTextureLimitHigh() const { return _textureLimitHigh; }
+  double getShallowHtKm() const { return _shallowHtKm; }
+  double getDeepHtKm() const { return _deepHtKm; }
+  double getShallowTempC() const { return _shallowTempC; }
+  double getDeepTempC() const { return _deepTempC; }
+  double getMinConvFractionForDeep() const { return _minConvFractionForDeep; }
+  double getMinConvFractionForShallow() const { return _minConvFractionForShallow; }
+  double getMaxShallowConvFractionForElevated() const { return _maxShallowConvFractionForElevated; }
+  double getMaxDeepConvFractionForElevated() const { return _maxDeepConvFractionForElevated; }
+  double getMinStratFractionForStratBelow() const { return _minStratFractionForStratBelow; }
+
+  // get the input fields
+
+  const fl32 *getDbz3D() const { return _dbz3D.data(); }
+  const fl32 *getShallowHtGrid() const { return _shallowHtGrid.data(); }
+  const fl32 *getDeepHtGrid() const { return _deepHtGrid.data(); }
+  const fl32 *getDbzColMax() const { return _dbzColMax.data(); }
+  const fl32 *getFractionActive() const { return _fractionActive.data(); }
   
   ////////////////////////////////////////////////////////////////////
   // get the resulting echoType
   // will be set to the relevant category
 
-  const ui08 *getEchoType3D() const { return _echoType3D.dat(); }
-  const ui08 *getEchoType2D() const { return _echoType2D.dat(); }
-  const fl32 *getConvectiveDbz() const { return _convDbz.dat(); }
+  const ui08 *getEchoType3D() const { return _echoType3D.data(); }
+  const ui08 *getEchoType2D() const { return _echoType2D.data(); }
+  const fl32 *getConvectiveDbz() const { return _convDbz.data(); }
 
   ////////////////////////////////////////////////////////////////////
   // get derived fields
   
-  const fl32 *getTexture3D() const { return _texture3D.dat(); }
-  const fl32 *getTexture2D() const { return _texture2D.dat(); }
+  const fl32 *getTexture3D() const { return _texture3D.data(); }
+  const fl32 *getTexture2D() const { return _texture2D.data(); }
 
-  const fl32 *getConvectivity3D() const { return _convectivity3D.dat(); }
-  const fl32 *getConvectivity2D() const { return _convectivity2D.dat(); }
+  const fl32 *getConvectivity3D() const { return _convectivity3D.data(); }
+  const fl32 *getConvectivity2D() const { return _convectivity2D.data(); }
 
-  const fl32 *getConvTopKm() const { return _convTopKm.dat(); }
-  const fl32 *getStratTopKm() const { return _stratTopKm.dat(); }
-  const fl32 *getEchoTopKm() const { return _echoTopKm.dat(); }
+  const fl32 *getConvTopKm() const { return _convTopKm.data(); }
+  const fl32 *getStratTopKm() const { return _stratTopKm.data(); }
+  const fl32 *getEchoTopKm() const { return _echoTopKm.data(); }
 
   // get missing value for float arrays
 
@@ -422,6 +457,7 @@ private:
   bool _useDbzColMax;
   double _minValidDbz;
   double _baseDbz;
+  double _dbzForEchoTops;
 
   double _minHtKmAglForMid;
   double _minHtKmAglForDeep;
@@ -435,8 +471,6 @@ private:
   double _minFractionAllParts;
   double _minFractionEachPart;
   double _minSizeEachPart;
-
-  double _dbzForEchoTops;
 
   double _textureRadiusKm;
   double _minValidFractionForTexture;
@@ -494,42 +528,43 @@ private:
   
   // inputs
   
-  TaArray<fl32> _dbz3D;
-  TaArray<fl32> _shallowHtGrid; // grid for shallow cloud ht threshold
-  TaArray<fl32> _deepHtGrid;    // grid for deep cloud ht threshold
-  TaArray<fl32> _dbzColMax;
-  TaArray<fl32> _fractionActive;
-  
+  vector<fl32> _dbz3D;
+  vector<fl32> _dbzColMax;
+  vector<fl32> _fractionActive;
+
+  vector<fl32> _shallowHtGrid; // grid for shallow cloud ht threshold
+  vector<fl32> _deepHtGrid;    // grid for deep cloud ht threshold
+
   // texture
   
-  TaArray<fl32> _texture3D;
-  TaArray<fl32> _texture2D;
-  TaArray<fl32> _textureColMax;
+  vector<fl32> _texture3D;
+  vector<fl32> _texture2D;
+  vector<fl32> _textureColMax;
 
   // convectivity
   
-  TaArray<fl32> _convectivity3D;
-  TaArray<fl32> _convectivity2D;
-
-  // echoType
-  
-  TaArray<ui08> _echoType3D;
-  TaArray<ui08> _echoType2D;
+  vector<fl32> _convectivity3D;
+  vector<fl32> _convectivity2D;
 
   // tops etc
 
-  TaArray<fl32> _convTopKm;
-  TaArray<fl32> _stratTopKm;
-  TaArray<fl32> _echoTopKm;
-  TaArray<fl32> _convDbz;
+  vector<fl32> _convTopKm;
+  vector<fl32> _stratTopKm;
+  vector<fl32> _echoTopKm;
+  vector<fl32> _convDbz;
+
+  // echoType
+  
+  vector<ui08> _echoType3D;
+  vector<ui08> _echoType2D;
 
   // methods
   
   int _computeEchoType2D(const fl32 *dbz, fl32 dbzMissingVal);
   void _allocArrays();
   void _initToMissing();
-  void _initToMissing(TaArray<fl32> &array, fl32 missingVal);
-  void _initToMissing(TaArray<ui08> &array, ui08 missingVal);
+  void _initToMissing(vector<fl32> &array, fl32 missingVal);
+  void _initToMissing(vector<ui08> &array, ui08 missingVal);
   void _computeDbzColMax();
   void _finalizeEchoType();
   void _computeTextureMultiThreaded();
@@ -543,7 +578,7 @@ private:
   void _computeKernels();
   void _printSettings(ostream &out);
   void _setHts(double tempC, const fl32 *tempGrid3D,
-               fl32 tempMiss, TaArray<fl32> &htGrid);
+               fl32 tempMiss, vector<fl32> &htGrid);
   
   /////////////////////////////////////////////////////////
   // inner class for starting timers in a separate thread
