@@ -9,8 +9,8 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "RadxCartDP reads radar fields in polar coordinates, radar beam blockage, and model data in Cartesian coordinates. It computes KDP, PID and precip rate, interpolates onto a Cartesian grid, estimates QPE at the surface, and writes out the results to Cartesian files in MDV NetCDF files.";
-  p_text = "The output is written to Cartesian files in CF-compliant NetCDF format.";
+  p_header = "RadxCartDP reads radar fields in polar coordinates, derives dual-polarization-based fields in 3D Cartesian coordinates, and writes out a 3D Cartesian file in MDV CF-NetCDF format.";
+  p_text = "RadxCartDP peforms the following:\n\n * Reads in dual-polarization data in polar coords.\n\n * Computes KDP and texture-based feature fields in polar coords.\n\n * Interpolates those fields onto a 3D Cartesian grid.\n\n * Reads model data and interpolates onto the 3D grid.\n\n * Computes PID and precip rate on the 3D grid.\n\n * Reads in terrain height (DEM) data and interpolates onto the 2D grid.\n\n * Estimates beam blockage fraction for each point in the 3D grid.\n\n * Computes QPE from the 3D precipitation rate, the terrain height and beam blockage.\n\n * Computes the 3D convective/stratiform partition.";
 }
 
 commentdef {
@@ -28,7 +28,7 @@ paramdef enum debug_t {
 } debug;
 
 commentdef {
-  p_header = "RADAR DATA INPUT DIRECTORY and INPUT MODE";
+  p_header = "RADAR DATA INPUT";
 }
 
 paramdef string {
@@ -82,40 +82,48 @@ commentdef {
 }
 
 typedef enum {
-  DBZ, VEL, WIDTH, SNR, ZDR, LDR, PHIDP, RHOHV, KDP
+  DBZ, VEL, WIDTH, SNR, ZDR, PHIDP, RHOHV, KDP, LDR
 } radar_field_type_t;
 
 typedef struct {
   radar_field_type_t field_type;
+  boolean is_available;
   string input_name;
+  boolean do_write;
   string output_name;
-} radar_field_name_t;
+} radar_field_t;
 
-paramdef struct radar_field_name_t {
+paramdef struct radar_field_t {
   p_default = { 
-    { DBZ, "DBZ", "DBZ" },
-    { VEL, "VEL", "VEL" },
-    { WIDTH, "WIDTH", "WIDTH" },
-    { SNR, "SNR", "SNR" },
-    { ZDR, "ZDR", "ZDR"},
-    { LDR, "", "LDR" },
-    { PHIDP, "PHIDP", "PHIDP" },
-    { RHOHV, "RHOHV", "RHOHV" },
-    { KDP, "", "KDP" }
+    { DBZ, TRUE, "DBZ", TRUE, "DBZ" },
+    { VEL, TRUE, "VEL", TRUE, "VEL" },
+    { WIDTH, TRUE, "WIDTH", TRUE, "WIDTH" },
+    { ZDR, TRUE, "ZDR", TRUE, "ZDR" },
+    { PHIDP, TRUE, "PHIDP", TRUE, "PHIDP" },
+    { RHOHV, TRUE, "RHOHV", TRUE, "RHOHV" },
+    { SNR, FALSE, "SNR", TRUE, "SNR" },
+    { KDP, FALSE, "KDP", TRUE, "KDP" },
+    { LDR, FALSE, "LDR", FALSE, "LDR" }
   };
-  p_descr = "Converts field type to strings.";
-  p_help = "If input_name is empty the field is assumed to not exist in the input data set.";
-} radar_field_names[9];
+  p_descr = "Details of available radar fields. Exactly one of each field type must be present.";
+  p_help = "'is_available' specifies whether the field is available in the input file. 'do_write' specifies wiether to write the field in the output data set. You can rename the field on output. The following fields are required: DBZ, VEL, WIDTH, ZDR, PHIDP, RHOHV.";
+} radar_fields[];
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to estimate SNR from DBZ field.";
+  p_help = "If true, we estimate the SNR field from DBZ, using 'noise_dbz_at_100km' adjusted for range.";
+} estimate_snr_from_dbz;
 
 paramdef double {
   p_default = 0.0;
-  p_descr = "The noise value, represented as dBZ at a range of 100km.";
-  p_help = "This is used for computing the SNR from the DBZ field. It is only used if SNR_available is FALSE. The SNR will be computed by range-correcting this value and using it as the noise value.";
+  p_descr = "The estimates noise value, represented as dBZ at a range of 100km.";
+  p_help = "This is used for estimating the SNR from the DBZ field. It is only used if SNR is not available. The SNR will be computed by range-correcting this value and using it as the noise value.";
 } noise_dbz_at_100km;
 
 commentdef {
-  p_header = "MODEL FOR ENVIRONMENTAL FIELDS";
-  p_text = "We need access to model data to provide a temperature profile. We can also make use of moisture and wind fields from the model.";
+  p_header = "MODEL DATA FOR ENVIRONMENTAL CONDITIONS";
+  p_text = "We need access to model data to provide a temperature profile. We may also store the moisture and wind fields from the model for later use.";
 }
 
 paramdef string {
@@ -127,7 +135,7 @@ paramdef string {
 paramdef int {
   p_default = 3600;
   p_descr = "Search margin for model data (secs)";
-  p_help =  "We search for model data within this margin of the radar data.";
+  p_help =  "We search for model data within this margin of the radar data time.";
 } model_search_margin_secs;
 
 paramdef boolean {
@@ -142,31 +150,29 @@ paramdef string {
   p_help = "We interpolate the model data onto the output grid. Writing out this data is useful for debugging, allowing us to compare the original model with the interpolated model.";
 } interpolated_model_output_url;
 
-commentdef {
-  p_header = "MODEL FIELD NAMES";
-}
-
 typedef enum {
-  TEMP, RH, UVEL, VVEL, WVEL, NOT_SET
+  TEMP, RH, UVEL, VVEL, WVEL, MODEL_NOT_SET
 } model_field_type_t;
 
 typedef struct {
   model_field_type_t field_type;
+  boolean is_available;
   string input_name;
+  boolean do_write;
   string output_name;
-} model_field_name_t;
+} model_field_t;
 
-paramdef struct model_field_name_t {
+paramdef struct model_field_t {
   p_default = { 
-    { TEMP, "TEMP", "TEMP" },
-    { RH, "RH", "RH" },
-    { UVEL, "UVEL", "UVEL" },
-    { VVEL, "VVEL", "VVEL" },
-    { WVEL, "WVEL", "WVEL" }
+    { TEMP, TRUE, "TEMP", TRUE, "TEMP" },
+    { RH, TRUE, "RH", TRUE, "RH" },
+    { UVEL, FALSE, "UVEL", FALSE, "UVEL" },
+    { VVEL, FALSE, "VVEL", FALSE, "VVEL" },
+    { WVEL, FALSE, "WVEL", FALSE, "WVEL" }
   };
-  p_descr = "Converts field type to string.";
-  p_help = "If input_name is empty the field is assumed to not exist in the input data set.";
-} model_field_names[5];
+  p_descr = "Specifies names and availability of model fields.";
+  p_help = "'is_available' specifies whether the field is available in the input file. 'do_write' specifies wiether to write the field in the output data set. You can rename the field on output.";
+} model_fields[];
 
 commentdef {
   p_header = "BEAM BLOCKAGE";
@@ -1182,47 +1188,6 @@ paramdef int {
 } n_compute_threads;
 
 commentdef {
-  p_header = "USE ECHO ORIENTATION TO INFORM INTERPOLATION GEOMETRY";
-  p_text = "Vertically-oriented echoes (convective) should be interpolated in the vertical. Horizontally-oriented echoes (stratiform, bright-band, anvil) should be interpolated in the horizontal. This attempts to prevent the typical ringing behavior we see in Cartesian products in regionis with layered structures, for example anvils.";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "If TRUE, we will try to determine echo orientation to inform interpolation.";
-  p_help = "Vertically-oriented echoes should be interpolated in the vertical. Horizontally-oriented echoes should be interpolated in the horizontal. We try to determine the principal orientation of the echoes, so that we will use the correct gates for interpolation.";
-} use_echo_orientation;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Starting azimuth for set of synthetic RHIs computed for determining echo orientation.";
-  p_help = "To find the orientation of echoes, we use a set of synthetic RHIs. These are computed on regular azimuths. This is the starting azimuth for the set of synthetic RHIs.";
-} synthetic_rhis_start_az;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Delta azimuth for set of synthetic RHIs computed for determining echo orientation.";
-  p_help = "To find the orientation of echoes, we use a set of synthetic RHIs. These are computed on regular azimuths. This is the delta azimuth for the set of synthetic RHIs.";
-} synthetic_rhis_delta_az;
-
-paramdef string {
-  p_default = "DBZ";
-  p_descr = "Name of reflectivity field in input data.";
-  p_help = "This is used for determining the orientation of echoes.";
-} echo_orientation_dbz_field_name;
-
-paramdef int {
-  p_default = 3;
-  p_descr = "Number of grid points used to compute the standard deviation of DBZ horizontally.";
-  p_help = "To decide on echo orientation, we need to determine whether the dbz is more constanthorizonatally or vertically. To do this we compute the standard deviation of the dbz field, horizontally and vertically.";
-} echo_orientation_n_points_sdev_h;
-
-paramdef int {
-  p_default = 3;
-  p_descr = "Number of grid points used to compute the standard deviation of DBZ vertically.";
-  p_help = "To decide on echo orientation, we need to determine whether the dbz is more constanthorizonatally or vertically. To do this we compute the standard deviation of the dbz field, horizontally and vertically.";
-} echo_orientation_n_points_sdev_v;
-
-commentdef {
   p_header = "CONVECTIVE/STRATIFORM PARTITION";
 }
 
@@ -1267,4 +1232,45 @@ paramdef boolean {
   p_descr = "Option to write out the intermediate fields for debug purposes.";
   p_help = "If true, the intermediate fields will be written to the output file.";
 } conv_strat_write_debug_fields;
+
+commentdef {
+  p_header = "USE ECHO ORIENTATION TO INFORM INTERPOLATION GEOMETRY";
+  p_text = "Vertically-oriented echoes (convective) should be interpolated in the vertical. Horizontally-oriented echoes (stratiform, bright-band, anvil) should be interpolated in the horizontal. This attempts to prevent the typical ringing behavior we see in Cartesian products in regionis with layered structures, for example anvils.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE, we will try to determine echo orientation to inform interpolation.";
+  p_help = "Vertically-oriented echoes should be interpolated in the vertical. Horizontally-oriented echoes should be interpolated in the horizontal. We try to determine the principal orientation of the echoes, so that we will use the correct gates for interpolation.";
+} use_echo_orientation;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Starting azimuth for set of synthetic RHIs computed for determining echo orientation.";
+  p_help = "To find the orientation of echoes, we use a set of synthetic RHIs. These are computed on regular azimuths. This is the starting azimuth for the set of synthetic RHIs.";
+} synthetic_rhis_start_az;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Delta azimuth for set of synthetic RHIs computed for determining echo orientation.";
+  p_help = "To find the orientation of echoes, we use a set of synthetic RHIs. These are computed on regular azimuths. This is the delta azimuth for the set of synthetic RHIs.";
+} synthetic_rhis_delta_az;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "Name of reflectivity field in input data.";
+  p_help = "This is used for determining the orientation of echoes.";
+} echo_orientation_dbz_field_name;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Number of grid points used to compute the standard deviation of DBZ horizontally.";
+  p_help = "To decide on echo orientation, we need to determine whether the dbz is more constanthorizonatally or vertically. To do this we compute the standard deviation of the dbz field, horizontally and vertically.";
+} echo_orientation_n_points_sdev_h;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Number of grid points used to compute the standard deviation of DBZ vertically.";
+  p_help = "To decide on echo orientation, we need to determine whether the dbz is more constanthorizonatally or vertically. To do this we compute the standard deviation of the dbz field, horizontally and vertically.";
+} echo_orientation_n_points_sdev_v;
 

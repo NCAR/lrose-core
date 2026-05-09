@@ -93,13 +93,25 @@ public:
   double getRadarHtKm() const { return _radarHtKm; }
   double getWavelengthM() const { return _wavelengthM; }
 
+  // get radar field from type
+  // returns null on error
+  // error cannot happen if _checkRadarFields() succeeded
+  
+  Params::radar_field_t *getRadarField(Params::radar_field_type_t rftype);
+
   // get field names
   
-  string getRadarInputName(Params::radar_field_type_t ftype);
-  string getRadarOutputName(Params::radar_field_type_t ftype);
+  string getRadarInputName(Params::radar_field_type_t rftype);
+  string getRadarOutputName(Params::radar_field_type_t rftype);
 
-  string getModelInputName(Params::model_field_type_t ftype);
-  string getModelOutputName(Params::model_field_type_t ftype);
+  // get model field from type
+  // returns null on error
+  // error cannot happen if _checkModelFields() succeeded
+  
+  Params::model_field_t *getModelField(Params::model_field_type_t mftype);
+
+  string getModelInputName(Params::model_field_type_t mftype);
+  string getModelOutputName(Params::model_field_type_t mftype);
 
   Params::model_field_type_t getModelTypeFromInputName(const string name);
   Params::model_field_type_t getModelTypeFromOutputName(const string name);
@@ -138,13 +150,14 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+  vector<Params::radar_field_type_t> _radarFieldTypes;
+  vector<Params::model_field_type_t> _modelFieldTypes;
 
   KdpFiltParams _kdpFiltParams;
   NcarPidParams _ncarPidParams;
   PrecipRateParams _precipRateParams;
   ConvStratParams _convStratParams;
 
-  NcarParticleId _pid;
 
   // input radar data
   
@@ -192,13 +205,14 @@ private:
   TaThreadPool _scalarsThreadPool;
   vector<ScalarsCompute *> _computeScalarsThreads;
 
-  // PID data and fields
+  // PID
   
+  NcarParticleId _pid;
   MdvxField *_pidField;
   MdvxField *_pidModeField;
   vector<fl32> _pidArray, _pidFilt;
 
-  // PRECIP data and fields
+  // PRECIP
   
   MdvxField *_rateZrField;
   MdvxField *_rateHybridField;
@@ -302,6 +316,14 @@ private:
   void _printParamsPid();
   void _printParamsKdp();
   void _printParamsConvStrat();
+
+  void _initRadarFieldTypes();
+  int _checkRadarFields();
+  string _radarFieldType2Str(Params::radar_field_type_t rftype);
+
+  void _initModelFieldTypes();
+  int _checkModelFields();
+  string _modelFieldType2Str(Params::model_field_type_t mftype);
 
 };
 

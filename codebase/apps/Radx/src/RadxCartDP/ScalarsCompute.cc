@@ -405,8 +405,10 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
          << _parent->getRadarInputName(Params::DBZ) << endl;
     return -1;
   }
-  
-  if (_parent->getRadarInputName(Params::SNR).size() > 0) {
+
+  if (_params.estimate_snr_from_dbz) {
+    _computeSnrFromDbz();
+  } else if (_parent->getRadarInputName(Params::SNR).size() > 0) {
     if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::SNR),
                         _snrArray.data())) {
       cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
@@ -414,8 +416,6 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
            << _parent->getRadarInputName(Params::SNR) << endl;
       return -1;
     }
-  } else {
-    _computeSnrFromDbz();
   }
   
   if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::ZDR),
@@ -441,21 +441,17 @@ int ScalarsCompute::_loadInputArrays(RadxRay *inputRay)
          << _parent->getRadarInputName(Params::RHOHV) << endl;
     return -1;
   }
-  
-  if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::LDR),
-                      _ldrArray.data())) {
-    cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
-    cerr << "  Cannot load LDR field name: "
-         << _parent->getRadarInputName(Params::LDR) << endl;
-    return -1;
+
+  Params::radar_field_t *ldrField = _parent->getRadarField(Params::LDR);
+  if (ldrField != nullptr && ldrField->is_available) {
+    if (_loadFieldArray(inputRay, _parent->getRadarInputName(Params::LDR),
+                        _ldrArray.data())) {
+      cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
+      cerr << "  Cannot load LDR field name: "
+           << _parent->getRadarInputName(Params::LDR) << endl;
+      return -1;
+    }
   }
-  
-  // if (_loadFieldArray(inputRay, RadxCartDP::tempFieldName, _tempForPid.data())) {
-  //   cerr << "ERROR - ScalarsCompute::_loadInputArrays" << endl;
-  //   cerr << "  Cannot load temp field name: "
-  //        << RadxCartDP::tempFieldName << endl;
-  //   return -1;
-  // }
   
   return 0;
   

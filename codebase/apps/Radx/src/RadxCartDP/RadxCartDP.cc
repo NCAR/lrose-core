@@ -111,6 +111,9 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   
   _convStratAvailable = false;
 
+  _initRadarFieldTypes();
+  _initModelFieldTypes();
+  
   // set programe name
 
   _progName = "RadxCartDP";
@@ -151,6 +154,18 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
     }
   }
   
+  if (_checkRadarFields()) {
+    cerr << "ERROR - radar_fields params not valid" << endl;
+    cerr << "There must be exactly 1 entry for each type" << endl;
+    OK = false;
+  }
+
+  if (_checkModelFields()) {
+    cerr << "ERROR - model_fields params not valid" << endl;
+    cerr << "There must be exactly 1 entry for each type" << endl;
+    OK = false;
+  }
+
   // if requested, print params for KDP then exit
 
   if (_args.printParamsKdp) {
@@ -178,7 +193,7 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
     _printParamsConvStrat();
     exit(0);
   }
-  
+
   // read params for KdpFilt
   
   if (strstr(_params.KDP_params_file_path, "use-defaults") == nullptr) {
@@ -301,86 +316,6 @@ int RadxCartDP::Run()
   } else {
     return _runRealtime();
   }
-}
-
-//////////////////////////////////////////////////
-// get radar field name from type
-
-string RadxCartDP::getRadarInputName(Params::radar_field_type_t ftype)
-{
-  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
-    if (_params._radar_field_names[ii].field_type == ftype) {
-      return _params._radar_field_names[ii].input_name;
-    }
-  }
-  // not found
-  return "";
-}
-
-string RadxCartDP::getRadarOutputName(Params::radar_field_type_t ftype)
-{
-  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
-    if (_params._radar_field_names[ii].field_type == ftype) {
-      return _params._radar_field_names[ii].output_name;
-    }
-  }
-  // not found
-  return "";
-}
-
-//////////////////////////////////////////////////
-// get model field name from type
-
-string RadxCartDP::getModelInputName(Params::model_field_type_t ftype)
-{
-  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
-    if (_params._model_field_names[ii].field_type == ftype) {
-      return _params._model_field_names[ii].input_name;
-    }
-  }
-  // not found
-  return "";
-}
-
-string RadxCartDP::getModelOutputName(Params::model_field_type_t ftype)
-{
-  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
-    if (_params._model_field_names[ii].field_type == ftype) {
-      return _params._model_field_names[ii].output_name;
-    }
-  }
-  // not found
-  return "";
-}
-
-//////////////////////////////////////////////////
-// get model type from input name
-
-Params::model_field_type_t RadxCartDP::getModelTypeFromInputName(const string name)
-{
-  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
-    string inputName = _params._model_field_names[ii].input_name;
-    if (name == inputName) {
-      return _params._model_field_names[ii].field_type;
-    }
-  }
-  // not found, assume temp
-  return Params::NOT_SET;
-}
-
-//////////////////////////////////////////////////
-// get model type from output name
-
-Params::model_field_type_t RadxCartDP::getModelTypeFromOutputName(const string name)
-{
-  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
-    string outputName = _params._model_field_names[ii].output_name;
-    if (name == outputName) {
-      return _params._model_field_names[ii].field_type;
-    }
-  }
-  // not found, assume temp
-  return Params::NOT_SET;
 }
 
 //////////////////////////////////////////////////
@@ -775,9 +710,9 @@ int RadxCartDP::_readFile(const string &filePath)
 
   // rename fields if requested
 
-  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
-    string inName = _params._radar_field_names[ii].input_name;
-    string outName = _params._radar_field_names[ii].output_name;
+  for (int ii = 0; ii < _params.radar_fields_n; ii++) {
+    string inName = _params._radar_fields[ii].input_name;
+    string outName = _params._radar_fields[ii].output_name;
     if (inName.size() > 0 && inName != outName) {
       _radarVol.renameField(inName, outName);
     }
@@ -850,9 +785,9 @@ void RadxCartDP::_setupRead(RadxFile &file)
     file.setReadMaxRangeKm(_params.max_range_km);
   }
 
-  for (int ii = 0; ii < _params.radar_field_names_n; ii++) {
-    if (strlen(_params._radar_field_names[ii].input_name) > 0) {
-      file.addReadField(_params._radar_field_names[ii].input_name);
+  for (int ii = 0; ii < _params.radar_fields_n; ii++) {
+    if (_params._radar_fields[ii].is_available) {
+      file.addReadField(_params._radar_fields[ii].input_name);
     }
   }
   
@@ -1712,11 +1647,11 @@ int RadxCartDP::_readModel()
                             _params.model_search_margin_secs,
                             radarTime);
 
-  for (int ii = 0; ii < _params.model_field_names_n; ii++) {
-    if (strlen(_params._model_field_names[ii].input_name) == 0) {
+  for (int ii = 0; ii < _params.model_fields_n; ii++) {
+    if (strlen(_params._model_fields[ii].input_name) == 0) {
       continue;
     }
-    _modelRawMdvx.addReadField(_params._model_field_names[ii].input_name);
+    _modelRawMdvx.addReadField(_params._model_fields[ii].input_name);
   }
   
   if (_modelRawMdvx.readVolume()) {
@@ -1841,7 +1776,7 @@ void RadxCartDP::_interpModelToOutputGrid()
     MdvxField *rawFld = _modelRawMdvx.getField(ifield);
     MdvxField *interpField = _modelRemap.interpField(*rawFld);
     string rawName = rawFld->getFieldName();
-    //if (strlen(_params.model_field_names[ifield].
+    //if (strlen(_params.model_fields[ifield].
     _modelInterpMdvx.addField(interpField);
     
   } // ifield
@@ -3276,5 +3211,263 @@ void RadxCartDP::_printParamsConvStrat()
   
   _convStratParams.print(stdout, printMode);
 
+}
+
+//////////////////////////////////////////////////////
+// initialize radar field types array
+
+void RadxCartDP::_initRadarFieldTypes()
+{
+
+  // initialize field types
+  
+  _radarFieldTypes.push_back(Params::DBZ);
+  _radarFieldTypes.push_back(Params::VEL);
+  _radarFieldTypes.push_back(Params::WIDTH);
+  _radarFieldTypes.push_back(Params::SNR);
+  _radarFieldTypes.push_back(Params::ZDR);
+  _radarFieldTypes.push_back(Params::PHIDP);
+  _radarFieldTypes.push_back(Params::RHOHV);
+  _radarFieldTypes.push_back(Params::KDP);
+  _radarFieldTypes.push_back(Params::LDR);
+
+}
+
+//////////////////////////////////////////////////////
+// check all radar fields are present in params file
+// returns 0 on success, -1 on failure
+
+int RadxCartDP::_checkRadarFields()
+{
+  int iret = 0;
+  for (size_t jj = 0; jj < _radarFieldTypes.size(); jj++) {
+    Params::radar_field_type_t rfType = _radarFieldTypes[jj];
+    int count = 0;
+    for (int ii = 0; ii < _params.radar_fields_n; ii++) {
+      if (_params._radar_fields[ii].field_type == rfType) {
+        count++;
+      }
+    } // ii
+    if (count == 0) {
+      cerr << "ERROR - missing radar field type: "
+           << _radarFieldType2Str(_radarFieldTypes[jj]) << endl;
+      iret = -1;
+    } else if (count > 1) {
+      cerr << "ERROR - duplicate radar field type: "
+           << _radarFieldType2Str(_radarFieldTypes[jj]) << endl;
+      iret = -1;
+    }
+  } // jj
+  return iret;
+}
+
+//////////////////////////////////////////////////
+// radar field type to string
+
+string RadxCartDP::_radarFieldType2Str(Params::radar_field_type_t rftype)
+{
+
+  switch (rftype) {
+    case Params::DBZ:
+      return "DBZ";
+    case Params::VEL:
+      return "VEL";
+    case Params::WIDTH:
+      return "WIDTH";
+    case Params::SNR:
+      return "SNR";
+    case Params::ZDR:
+      return "ZDR";
+    case Params::PHIDP:
+      return "PHIDP";
+    case Params::RHOHV:
+      return "RHOHV";
+    case Params::KDP:
+      return "KDP";
+    case Params::LDR:
+      return "LDR";
+    default:
+      return "";
+  }
+  
+}
+
+//////////////////////////////////////////////////
+// get radar field from type
+// returns null on error
+// error cannot happen if _checkRadarFields() succeeded
+
+Params::radar_field_t *RadxCartDP::getRadarField(Params::radar_field_type_t rftype)
+{
+  for (int ii = 0; ii < _params.radar_fields_n; ii++) {
+    if (_params._radar_fields[ii].field_type == rftype) {
+      return &_params._radar_fields[ii];
+    }
+  }
+  // not found
+  return nullptr;
+}
+
+//////////////////////////////////////////////////
+// get radar field names from type
+
+string RadxCartDP::getRadarInputName(Params::radar_field_type_t rftype)
+{
+  for (int ii = 0; ii < _params.radar_fields_n; ii++) {
+    if (_params._radar_fields[ii].field_type == rftype) {
+      return _params._radar_fields[ii].input_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+string RadxCartDP::getRadarOutputName(Params::radar_field_type_t rftype)
+{
+  for (int ii = 0; ii < _params.radar_fields_n; ii++) {
+    if (_params._radar_fields[ii].field_type == rftype) {
+      return _params._radar_fields[ii].output_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+//////////////////////////////////////////////////
+// get model field from type
+// returns null on error
+// error cannot happen if _checkModelFields() succeeded
+
+Params::model_field_t *RadxCartDP::getModelField(Params::model_field_type_t rftype)
+{
+  for (int ii = 0; ii < _params.model_fields_n; ii++) {
+    if (_params._model_fields[ii].field_type == rftype) {
+      return &_params._model_fields[ii];
+    }
+  }
+  // not found
+  return nullptr;
+}
+
+//////////////////////////////////////////////////////
+// initialize model field types array
+
+void RadxCartDP::_initModelFieldTypes()
+{
+
+  // initialize field types
+  
+  _modelFieldTypes.push_back(Params::TEMP);
+  _modelFieldTypes.push_back(Params::RH);
+  _modelFieldTypes.push_back(Params::UVEL);
+  _modelFieldTypes.push_back(Params::VVEL);
+  _modelFieldTypes.push_back(Params::WVEL);
+
+}
+
+//////////////////////////////////////////////////////
+// check all model fields are present in params file
+// returns 0 on success, -1 on failure
+
+int RadxCartDP::_checkModelFields()
+{
+  int iret = 0;
+  for (size_t jj = 0; jj < _modelFieldTypes.size(); jj++) {
+    Params::model_field_type_t mftype = _modelFieldTypes[jj];
+    int count = 0;
+    for (int ii = 0; ii < _params.model_fields_n; ii++) {
+      if (_params._model_fields[ii].field_type == mftype) {
+        count++;
+      }
+    } // ii
+    if (count == 0) {
+      cerr << "ERROR - missing model field type: "
+           << _modelFieldType2Str(_modelFieldTypes[jj]) << endl;
+      iret = -1;
+    } else if (count > 1) {
+      cerr << "ERROR - duplicate model field type: "
+           << _modelFieldType2Str(_modelFieldTypes[jj]) << endl;
+      iret = -1;
+    }
+  } // jj
+  return iret;
+}
+
+//////////////////////////////////////////////////
+// model field type to string
+
+string RadxCartDP::_modelFieldType2Str(Params::model_field_type_t mftype)
+{
+
+  switch (mftype) {
+    case Params::TEMP:
+      return "TEMP";
+    case Params::RH:
+      return "RH";
+    case Params::UVEL:
+      return "UVEL";
+    case Params::VVEL:
+      return "VVEL";
+    case Params::WVEL:
+      return "WVEL";
+    default:
+      return "";
+  }
+  
+}
+
+//////////////////////////////////////////////////
+// get model field name from type
+
+string RadxCartDP::getModelInputName(Params::model_field_type_t mftype)
+{
+  for (int ii = 0; ii < _params.model_fields_n; ii++) {
+    if (_params._model_fields[ii].field_type == mftype) {
+      return _params._model_fields[ii].input_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+string RadxCartDP::getModelOutputName(Params::model_field_type_t mftype)
+{
+  for (int ii = 0; ii < _params.model_fields_n; ii++) {
+    if (_params._model_fields[ii].field_type == mftype) {
+      return _params._model_fields[ii].output_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+//////////////////////////////////////////////////
+// get model type from input name
+
+Params::model_field_type_t RadxCartDP::getModelTypeFromInputName(const string name)
+{
+  for (int ii = 0; ii < _params.model_fields_n; ii++) {
+    string inputName = _params._model_fields[ii].input_name;
+    if (name == inputName) {
+      return _params._model_fields[ii].field_type;
+    }
+  }
+  // not found, assume temp
+  return Params::MODEL_NOT_SET;
+}
+
+//////////////////////////////////////////////////
+// get model type from output name
+
+Params::model_field_type_t RadxCartDP::getModelTypeFromOutputName(const string name)
+{
+  for (int ii = 0; ii < _params.model_fields_n; ii++) {
+    string outputName = _params._model_fields[ii].output_name;
+    if (name == outputName) {
+      return _params._model_fields[ii].field_type;
+    }
+  }
+  // not found, assume temp
+  return Params::MODEL_NOT_SET;
 }
 

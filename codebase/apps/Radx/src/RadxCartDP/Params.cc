@@ -559,8 +559,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("RadxCartDP reads radar fields in polar coordinates, radar beam blockage, and model data in Cartesian coordinates. It computes KDP, PID and precip rate, interpolates onto a Cartesian grid, estimates QPE at the surface, and writes out the results to Cartesian files in MDV NetCDF files.");
-    tt->comment_text = tdrpStrDup("The output is written to Cartesian files in CF-compliant NetCDF format.");
+    tt->comment_hdr = tdrpStrDup("RadxCartDP reads radar fields in polar coordinates, derives dual-polarization-based fields in 3D Cartesian coordinates, and writes out a 3D Cartesian file in MDV CF-NetCDF format.");
+    tt->comment_text = tdrpStrDup("RadxCartDP peforms the following:\n\n * Reads in dual-polarization data in polar coords.\n\n * Computes KDP and texture-based feature fields in polar coords.\n\n * Interpolates those fields onto a 3D Cartesian grid.\n\n * Reads model data and interpolates onto the 3D grid.\n\n * Computes PID and precip rate on the 3D grid.\n\n * Reads in terrain height (DEM) data and interpolates onto the 2D grid.\n\n * Estimates beam blockage fraction for each point in the 3D grid.\n\n * Computes QPE from the 3D precipitation rate, the terrain height and beam blockage.\n\n * Computes the 3D convective/stratiform partition.");
     tt++;
     
     // Parameter 'Comment 1'
@@ -601,7 +601,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("RADAR DATA INPUT DIRECTORY and INPUT MODE");
+    tt->comment_hdr = tdrpStrDup("RADAR DATA INPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -708,29 +708,29 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'radar_field_names'
-    // ctype is '_radar_field_name_t'
+    // Parameter 'radar_fields'
+    // ctype is '_radar_field_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("radar_field_names");
-    tt->descr = tdrpStrDup("Converts field type to strings.");
-    tt->help = tdrpStrDup("If input_name is empty the field is assumed to not exist in the input data set.");
-    tt->array_offset = (char *) &_radar_field_names - &_start_;
-    tt->array_n_offset = (char *) &radar_field_names_n - &_start_;
+    tt->param_name = tdrpStrDup("radar_fields");
+    tt->descr = tdrpStrDup("Details of available radar fields. Exactly one of each field type must be present.");
+    tt->help = tdrpStrDup("'is_available' specifies whether the field is available in the input file. 'do_write' specifies wiether to write the field in the output data set. You can rename the field on output. The following fields are required: DBZ, VEL, WIDTH, ZDR, PHIDP, RHOHV.");
+    tt->array_offset = (char *) &_radar_fields - &_start_;
+    tt->array_n_offset = (char *) &radar_fields_n - &_start_;
     tt->is_array = TRUE;
-    tt->array_len_fixed = TRUE;
-    tt->array_elem_size = sizeof(radar_field_name_t);
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(radar_field_t);
     tt->array_n = 9;
-    tt->struct_def.name = tdrpStrDup("radar_field_name_t");
-    tt->struct_def.nfields = 3;
+    tt->struct_def.name = tdrpStrDup("radar_field_t");
+    tt->struct_def.nfields = 5;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("radar_field_type_t");
       tt->struct_def.fields[0].fname = tdrpStrDup("field_type");
       tt->struct_def.fields[0].ptype = ENUM_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_radar_field_names->field_type - (char *) _radar_field_names;
+        (char *) &_radar_fields->field_type - (char *) _radar_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("radar_field_type_t");
         tt->struct_def.fields[0].enum_def.nfields = 9;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
@@ -745,54 +745,94 @@
         tt->struct_def.fields[0].enum_def.fields[3].val = SNR;
         tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("ZDR");
         tt->struct_def.fields[0].enum_def.fields[4].val = ZDR;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("LDR");
-        tt->struct_def.fields[0].enum_def.fields[5].val = LDR;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[6].val = PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("RHOHV");
-        tt->struct_def.fields[0].enum_def.fields[7].val = RHOHV;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("KDP");
-        tt->struct_def.fields[0].enum_def.fields[8].val = KDP;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("input_name");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[5].val = PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[6].val = RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("KDP");
+        tt->struct_def.fields[0].enum_def.fields[7].val = KDP;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("LDR");
+        tt->struct_def.fields[0].enum_def.fields[8].val = LDR;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[1].fname = tdrpStrDup("is_available");
+      tt->struct_def.fields[1].ptype = BOOL_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_radar_field_names->input_name - (char *) _radar_field_names;
+        (char *) &_radar_fields->is_available - (char *) _radar_fields;
       tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("output_name");
+      tt->struct_def.fields[2].fname = tdrpStrDup("input_name");
       tt->struct_def.fields[2].ptype = STRING_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_radar_field_names->output_name - (char *) _radar_field_names;
-    tt->n_struct_vals = 27;
+        (char *) &_radar_fields->input_name - (char *) _radar_fields;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[3].fname = tdrpStrDup("do_write");
+      tt->struct_def.fields[3].ptype = BOOL_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_radar_fields->do_write - (char *) _radar_fields;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[4].fname = tdrpStrDup("output_name");
+      tt->struct_def.fields[4].ptype = STRING_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_radar_fields->output_name - (char *) _radar_fields;
+    tt->n_struct_vals = 45;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = DBZ;
-      tt->struct_vals[1].s = tdrpStrDup("DBZ");
+      tt->struct_vals[1].b = pTRUE;
       tt->struct_vals[2].s = tdrpStrDup("DBZ");
-      tt->struct_vals[3].e = VEL;
-      tt->struct_vals[4].s = tdrpStrDup("VEL");
-      tt->struct_vals[5].s = tdrpStrDup("VEL");
-      tt->struct_vals[6].e = WIDTH;
-      tt->struct_vals[7].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[8].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[9].e = SNR;
-      tt->struct_vals[10].s = tdrpStrDup("SNR");
-      tt->struct_vals[11].s = tdrpStrDup("SNR");
-      tt->struct_vals[12].e = ZDR;
-      tt->struct_vals[13].s = tdrpStrDup("ZDR");
-      tt->struct_vals[14].s = tdrpStrDup("ZDR");
-      tt->struct_vals[15].e = LDR;
-      tt->struct_vals[16].s = tdrpStrDup("");
-      tt->struct_vals[17].s = tdrpStrDup("LDR");
-      tt->struct_vals[18].e = PHIDP;
-      tt->struct_vals[19].s = tdrpStrDup("PHIDP");
-      tt->struct_vals[20].s = tdrpStrDup("PHIDP");
-      tt->struct_vals[21].e = RHOHV;
-      tt->struct_vals[22].s = tdrpStrDup("RHOHV");
-      tt->struct_vals[23].s = tdrpStrDup("RHOHV");
-      tt->struct_vals[24].e = KDP;
-      tt->struct_vals[25].s = tdrpStrDup("");
-      tt->struct_vals[26].s = tdrpStrDup("KDP");
+      tt->struct_vals[3].b = pTRUE;
+      tt->struct_vals[4].s = tdrpStrDup("DBZ");
+      tt->struct_vals[5].e = VEL;
+      tt->struct_vals[6].b = pTRUE;
+      tt->struct_vals[7].s = tdrpStrDup("VEL");
+      tt->struct_vals[8].b = pTRUE;
+      tt->struct_vals[9].s = tdrpStrDup("VEL");
+      tt->struct_vals[10].e = WIDTH;
+      tt->struct_vals[11].b = pTRUE;
+      tt->struct_vals[12].s = tdrpStrDup("WIDTH");
+      tt->struct_vals[13].b = pTRUE;
+      tt->struct_vals[14].s = tdrpStrDup("WIDTH");
+      tt->struct_vals[15].e = ZDR;
+      tt->struct_vals[16].b = pTRUE;
+      tt->struct_vals[17].s = tdrpStrDup("ZDR");
+      tt->struct_vals[18].b = pTRUE;
+      tt->struct_vals[19].s = tdrpStrDup("ZDR");
+      tt->struct_vals[20].e = PHIDP;
+      tt->struct_vals[21].b = pTRUE;
+      tt->struct_vals[22].s = tdrpStrDup("PHIDP");
+      tt->struct_vals[23].b = pTRUE;
+      tt->struct_vals[24].s = tdrpStrDup("PHIDP");
+      tt->struct_vals[25].e = RHOHV;
+      tt->struct_vals[26].b = pTRUE;
+      tt->struct_vals[27].s = tdrpStrDup("RHOHV");
+      tt->struct_vals[28].b = pTRUE;
+      tt->struct_vals[29].s = tdrpStrDup("RHOHV");
+      tt->struct_vals[30].e = SNR;
+      tt->struct_vals[31].b = pFALSE;
+      tt->struct_vals[32].s = tdrpStrDup("SNR");
+      tt->struct_vals[33].b = pTRUE;
+      tt->struct_vals[34].s = tdrpStrDup("SNR");
+      tt->struct_vals[35].e = KDP;
+      tt->struct_vals[36].b = pFALSE;
+      tt->struct_vals[37].s = tdrpStrDup("KDP");
+      tt->struct_vals[38].b = pTRUE;
+      tt->struct_vals[39].s = tdrpStrDup("KDP");
+      tt->struct_vals[40].e = LDR;
+      tt->struct_vals[41].b = pFALSE;
+      tt->struct_vals[42].s = tdrpStrDup("LDR");
+      tt->struct_vals[43].b = pFALSE;
+      tt->struct_vals[44].s = tdrpStrDup("LDR");
+    tt++;
+    
+    // Parameter 'estimate_snr_from_dbz'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("estimate_snr_from_dbz");
+    tt->descr = tdrpStrDup("Option to estimate SNR from DBZ field.");
+    tt->help = tdrpStrDup("If true, we estimate the SNR field from DBZ, using 'noise_dbz_at_100km' adjusted for range.");
+    tt->val_offset = (char *) &estimate_snr_from_dbz - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'noise_dbz_at_100km'
@@ -801,8 +841,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("noise_dbz_at_100km");
-    tt->descr = tdrpStrDup("The noise value, represented as dBZ at a range of 100km.");
-    tt->help = tdrpStrDup("This is used for computing the SNR from the DBZ field. It is only used if SNR_available is FALSE. The SNR will be computed by range-correcting this value and using it as the noise value.");
+    tt->descr = tdrpStrDup("The estimates noise value, represented as dBZ at a range of 100km.");
+    tt->help = tdrpStrDup("This is used for estimating the SNR from the DBZ field. It is only used if SNR is not available. The SNR will be computed by range-correcting this value and using it as the noise value.");
     tt->val_offset = (char *) &noise_dbz_at_100km - &_start_;
     tt->single_val.d = 0;
     tt++;
@@ -812,8 +852,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("MODEL FOR ENVIRONMENTAL FIELDS");
-    tt->comment_text = tdrpStrDup("We need access to model data to provide a temperature profile. We can also make use of moisture and wind fields from the model.");
+    tt->comment_hdr = tdrpStrDup("MODEL DATA FOR ENVIRONMENTAL CONDITIONS");
+    tt->comment_text = tdrpStrDup("We need access to model data to provide a temperature profile. We may also store the moisture and wind fields from the model for later use.");
     tt++;
     
     // Parameter 'model_input_url'
@@ -835,7 +875,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("model_search_margin_secs");
     tt->descr = tdrpStrDup("Search margin for model data (secs)");
-    tt->help = tdrpStrDup("We search for model data within this margin of the radar data.");
+    tt->help = tdrpStrDup("We search for model data within this margin of the radar data time.");
     tt->val_offset = (char *) &model_search_margin_secs - &_start_;
     tt->single_val.i = 3600;
     tt++;
@@ -864,38 +904,29 @@
     tt->single_val.s = tdrpStrDup("mdv/interp_model");
     tt++;
     
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("MODEL FIELD NAMES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'model_field_names'
-    // ctype is '_model_field_name_t'
+    // Parameter 'model_fields'
+    // ctype is '_model_field_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("model_field_names");
-    tt->descr = tdrpStrDup("Converts field type to string.");
-    tt->help = tdrpStrDup("If input_name is empty the field is assumed to not exist in the input data set.");
-    tt->array_offset = (char *) &_model_field_names - &_start_;
-    tt->array_n_offset = (char *) &model_field_names_n - &_start_;
+    tt->param_name = tdrpStrDup("model_fields");
+    tt->descr = tdrpStrDup("Specifies names and availability of model fields.");
+    tt->help = tdrpStrDup("'is_available' specifies whether the field is available in the input file. 'do_write' specifies wiether to write the field in the output data set. You can rename the field on output.");
+    tt->array_offset = (char *) &_model_fields - &_start_;
+    tt->array_n_offset = (char *) &model_fields_n - &_start_;
     tt->is_array = TRUE;
-    tt->array_len_fixed = TRUE;
-    tt->array_elem_size = sizeof(model_field_name_t);
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(model_field_t);
     tt->array_n = 5;
-    tt->struct_def.name = tdrpStrDup("model_field_name_t");
-    tt->struct_def.nfields = 3;
+    tt->struct_def.name = tdrpStrDup("model_field_t");
+    tt->struct_def.nfields = 5;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("model_field_type_t");
       tt->struct_def.fields[0].fname = tdrpStrDup("field_type");
       tt->struct_def.fields[0].ptype = ENUM_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_model_field_names->field_type - (char *) _model_field_names;
+        (char *) &_model_fields->field_type - (char *) _model_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("model_field_type_t");
         tt->struct_def.fields[0].enum_def.nfields = 6;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
@@ -910,43 +941,63 @@
         tt->struct_def.fields[0].enum_def.fields[3].val = VVEL;
         tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("WVEL");
         tt->struct_def.fields[0].enum_def.fields[4].val = WVEL;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("NOT_SET");
-        tt->struct_def.fields[0].enum_def.fields[5].val = NOT_SET;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("input_name");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("MODEL_NOT_SET");
+        tt->struct_def.fields[0].enum_def.fields[5].val = MODEL_NOT_SET;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[1].fname = tdrpStrDup("is_available");
+      tt->struct_def.fields[1].ptype = BOOL_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_model_field_names->input_name - (char *) _model_field_names;
+        (char *) &_model_fields->is_available - (char *) _model_fields;
       tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("output_name");
+      tt->struct_def.fields[2].fname = tdrpStrDup("input_name");
       tt->struct_def.fields[2].ptype = STRING_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_model_field_names->output_name - (char *) _model_field_names;
-    tt->n_struct_vals = 15;
+        (char *) &_model_fields->input_name - (char *) _model_fields;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[3].fname = tdrpStrDup("do_write");
+      tt->struct_def.fields[3].ptype = BOOL_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_model_fields->do_write - (char *) _model_fields;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[4].fname = tdrpStrDup("output_name");
+      tt->struct_def.fields[4].ptype = STRING_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_model_fields->output_name - (char *) _model_fields;
+    tt->n_struct_vals = 25;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = TEMP;
-      tt->struct_vals[1].s = tdrpStrDup("TEMP");
+      tt->struct_vals[1].b = pTRUE;
       tt->struct_vals[2].s = tdrpStrDup("TEMP");
-      tt->struct_vals[3].e = RH;
-      tt->struct_vals[4].s = tdrpStrDup("RH");
-      tt->struct_vals[5].s = tdrpStrDup("RH");
-      tt->struct_vals[6].e = UVEL;
-      tt->struct_vals[7].s = tdrpStrDup("UVEL");
-      tt->struct_vals[8].s = tdrpStrDup("UVEL");
-      tt->struct_vals[9].e = VVEL;
-      tt->struct_vals[10].s = tdrpStrDup("VVEL");
-      tt->struct_vals[11].s = tdrpStrDup("VVEL");
-      tt->struct_vals[12].e = WVEL;
-      tt->struct_vals[13].s = tdrpStrDup("WVEL");
-      tt->struct_vals[14].s = tdrpStrDup("WVEL");
+      tt->struct_vals[3].b = pTRUE;
+      tt->struct_vals[4].s = tdrpStrDup("TEMP");
+      tt->struct_vals[5].e = RH;
+      tt->struct_vals[6].b = pTRUE;
+      tt->struct_vals[7].s = tdrpStrDup("RH");
+      tt->struct_vals[8].b = pTRUE;
+      tt->struct_vals[9].s = tdrpStrDup("RH");
+      tt->struct_vals[10].e = UVEL;
+      tt->struct_vals[11].b = pFALSE;
+      tt->struct_vals[12].s = tdrpStrDup("UVEL");
+      tt->struct_vals[13].b = pFALSE;
+      tt->struct_vals[14].s = tdrpStrDup("UVEL");
+      tt->struct_vals[15].e = VVEL;
+      tt->struct_vals[16].b = pFALSE;
+      tt->struct_vals[17].s = tdrpStrDup("VVEL");
+      tt->struct_vals[18].b = pFALSE;
+      tt->struct_vals[19].s = tdrpStrDup("VVEL");
+      tt->struct_vals[20].e = WVEL;
+      tt->struct_vals[21].b = pFALSE;
+      tt->struct_vals[22].s = tdrpStrDup("WVEL");
+      tt->struct_vals[23].b = pFALSE;
+      tt->struct_vals[24].s = tdrpStrDup("WVEL");
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("BEAM BLOCKAGE");
     tt->comment_text = tdrpStrDup("Beam blockage and terrain ht are computed by CartBeamBlock, using the same grid as RadxCartDP. We first run RadxCartDP without beam blockage. CartBeamBlock reads in one of the resulting files and uses it as a termplate for computing beam blockage. This ensures that the grids are identical.");
     tt++;
@@ -999,11 +1050,11 @@
     tt->single_val.s = tdrpStrDup("terrain_ht");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("QPE - QUANTATIVE PRECIPITATION ESTIMATION");
     tt->comment_text = tdrpStrDup("QPE needs the beam blockage and terrain_ht data from the BEAM BLOCKAGE section above.");
     tt++;
@@ -1068,11 +1119,11 @@
     tt->single_val.s = tdrpStrDup("QPE_ZR");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT DATA DIRECTORY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1089,11 +1140,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/cart/pid");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("WRITE DERIVED POLAR DATA FOR DEBUGGING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1122,11 +1173,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/polar/debug");
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1155,11 +1206,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("COMPUTING PID");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1224,11 +1275,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("COMPUTING PRECIP RATE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1281,11 +1332,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("SPECIFYING PID OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1489,11 +1540,11 @@
       tt->struct_vals[101].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("INTERPOLATION OPTIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1562,11 +1613,11 @@
     tt->single_val.d = 0.5;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("CARTESIAN GRID VERTICAL LEVELS");
     tt->comment_text = tdrpStrDup("\nSet the vertical levels for the Cartesian grid.\n\nYou can either specify a grid with constant vertial spacing, or you can provide an array of heights. The latter allows you to specify a grid with irregular vertical spacing.");
     tt++;
@@ -1650,11 +1701,11 @@
       tt->array_vals[12].d = 10;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("CARTESIAN GRID XY DETAILS");
     tt->comment_text = tdrpStrDup("Specify the grid details in (x,y). This will be a regular Cartesian grid. The units for the grid paramters are in (km,km) for all projections except for PROJ_LATLON. For the LATLON projection, the units are in (deg,deg).");
     tt++;
@@ -1725,11 +1776,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("CARTESIAN GRID PROJECTION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1948,11 +1999,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("SPECIFY COPY-THROUGH FIELDS");
     tt->comment_text = tdrpStrDup("These input fields are read from the input file and added to the interpolated output. This allows the user to consolidate the input and output data set in a single file.");
     tt++;
@@ -2006,11 +2057,11 @@
       tt->struct_vals[3].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("OPTION TO SET FOLDING LIMITS ON SELECTED FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2080,11 +2131,11 @@
       tt->struct_vals[4].d = 25;
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE THE NYQUIST VELOCITY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2113,11 +2164,11 @@
     tt->single_val.d = 25;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("OPTION TO ADD GEOMETRY AND TIME FIELDS");
     tt->comment_text = tdrpStrDup("These fields are computed from the geometry of the radar rays, and then added as input fields in native radial coordinates.");
     tt++;
@@ -2290,11 +2341,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("OPTION TO ADD DEBUG FIELDS");
     tt->comment_text = tdrpStrDup("The debug fields are added to the output Cartesian grid. These are geometry fields, and can be used to ensure the interpolation is working as expected.");
     tt++;
@@ -2311,11 +2362,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("SETTING THE PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2344,11 +2395,11 @@
     tt->single_val.d = 1.33333;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("FILE READ OPTIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2389,11 +2440,11 @@
     tt->single_val.d = 9999;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE RADAR LOCATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2446,11 +2497,11 @@
     tt->single_val.d = -999;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE RADAR BEAM WIDTH");
     tt->comment_text = tdrpStrDup("The beam width is used to decide how far to extend the interpolated data beyond the observed data. The data is extended below the lowest tilt and above the highest tilt, and in the case of sector scans it is extended slightly beyond the sector limits.");
     tt++;
@@ -2491,11 +2542,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE RADAR GATE GEOMETRY");
     tt->comment_text = tdrpStrDup("If the start range and/or gate spacing is not correct in the data, you can override it using the parameters below.");
     tt++;
@@ -2536,11 +2587,11 @@
     tt->single_val.d = 0.25;
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("CF NetCDF OUTPUT DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2689,11 +2740,11 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 29'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 29");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("PROCESS CONTROL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2722,11 +2773,11 @@
     tt->single_val.i = 60;
     tt++;
     
-    // Parameter 'Comment 30'
+    // Parameter 'Comment 29'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 30");
+    tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("MEMORY HANDLING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2743,11 +2794,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 31'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 31");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("THREADING FOR SPEED.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2776,6 +2827,99 @@
     tt->has_min = TRUE;
     tt->min_val.i = 1;
     tt->single_val.i = 8;
+    tt++;
+    
+    // Parameter 'Comment 31'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 31");
+    tt->comment_hdr = tdrpStrDup("CONVECTIVE/STRATIFORM PARTITION");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'identify_conv_strat_partition'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("identify_conv_strat_partition");
+    tt->descr = tdrpStrDup("Option to identify the convective / stratiform split.");
+    tt->help = tdrpStrDup("Uses the standard deviation of reflectivity as a texture field for each Cartesian plane. Low variability indicates stratiform conditions.");
+    tt->val_offset = (char *) &identify_conv_strat_partition - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'conv_strat_params_file_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_params_file_path");
+    tt->descr = tdrpStrDup("Path for parameters for computing convective-stratiform partition, if specified.");
+    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
+    tt->val_offset = (char *) &conv_strat_params_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("use-defaults");
+    tt++;
+    
+    // Parameter 'conv_strat_write_partition'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_write_partition");
+    tt->descr = tdrpStrDup("Option to write out the convective/stratiform partition.");
+    tt->help = tdrpStrDup("If true, the 3-D partition will be added to the output file.");
+    tt->val_offset = (char *) &conv_strat_write_partition - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'conv_strat_write_convectivity'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_write_convectivity");
+    tt->descr = tdrpStrDup("Option to write out the convective/stratiform partition.");
+    tt->help = tdrpStrDup("If true, the 3-D convectivity field will be added to the output file.");
+    tt->val_offset = (char *) &conv_strat_write_convectivity - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'conv_strat_write_convective_dbz'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_write_convective_dbz");
+    tt->descr = tdrpStrDup("Option to write out the dbz field in convection.");
+    tt->help = tdrpStrDup("This is a 3D field - the reflectivity trimmed only to convective regions, based on the convective/stratiform partition.");
+    tt->val_offset = (char *) &conv_strat_write_convective_dbz - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'conv_strat_write_echo_tops'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_write_echo_tops");
+    tt->descr = tdrpStrDup("Option to write out echo tops fields.");
+    tt->help = tdrpStrDup("If true, the echo tops and convective echo tops will be written to the output file.");
+    tt->val_offset = (char *) &conv_strat_write_echo_tops - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'conv_strat_write_debug_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("conv_strat_write_debug_fields");
+    tt->descr = tdrpStrDup("Option to write out the intermediate fields for debug purposes.");
+    tt->help = tdrpStrDup("If true, the intermediate fields will be written to the output file.");
+    tt->val_offset = (char *) &conv_strat_write_debug_fields - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 32'
@@ -2857,99 +3001,6 @@
     tt->help = tdrpStrDup("To decide on echo orientation, we need to determine whether the dbz is more constanthorizonatally or vertically. To do this we compute the standard deviation of the dbz field, horizontally and vertically.");
     tt->val_offset = (char *) &echo_orientation_n_points_sdev_v - &_start_;
     tt->single_val.i = 3;
-    tt++;
-    
-    // Parameter 'Comment 33'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 33");
-    tt->comment_hdr = tdrpStrDup("CONVECTIVE/STRATIFORM PARTITION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'identify_conv_strat_partition'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("identify_conv_strat_partition");
-    tt->descr = tdrpStrDup("Option to identify the convective / stratiform split.");
-    tt->help = tdrpStrDup("Uses the standard deviation of reflectivity as a texture field for each Cartesian plane. Low variability indicates stratiform conditions.");
-    tt->val_offset = (char *) &identify_conv_strat_partition - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'conv_strat_params_file_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_params_file_path");
-    tt->descr = tdrpStrDup("Path for parameters for computing convective-stratiform partition, if specified.");
-    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
-    tt->val_offset = (char *) &conv_strat_params_file_path - &_start_;
-    tt->single_val.s = tdrpStrDup("use-defaults");
-    tt++;
-    
-    // Parameter 'conv_strat_write_partition'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_write_partition");
-    tt->descr = tdrpStrDup("Option to write out the convective/stratiform partition.");
-    tt->help = tdrpStrDup("If true, the 3-D partition will be added to the output file.");
-    tt->val_offset = (char *) &conv_strat_write_partition - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'conv_strat_write_convectivity'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_write_convectivity");
-    tt->descr = tdrpStrDup("Option to write out the convective/stratiform partition.");
-    tt->help = tdrpStrDup("If true, the 3-D convectivity field will be added to the output file.");
-    tt->val_offset = (char *) &conv_strat_write_convectivity - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'conv_strat_write_convective_dbz'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_write_convective_dbz");
-    tt->descr = tdrpStrDup("Option to write out the dbz field in convection.");
-    tt->help = tdrpStrDup("This is a 3D field - the reflectivity trimmed only to convective regions, based on the convective/stratiform partition.");
-    tt->val_offset = (char *) &conv_strat_write_convective_dbz - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'conv_strat_write_echo_tops'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_write_echo_tops");
-    tt->descr = tdrpStrDup("Option to write out echo tops fields.");
-    tt->help = tdrpStrDup("If true, the echo tops and convective echo tops will be written to the output file.");
-    tt->val_offset = (char *) &conv_strat_write_echo_tops - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'conv_strat_write_debug_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("conv_strat_write_debug_fields");
-    tt->descr = tdrpStrDup("Option to write out the intermediate fields for debug purposes.");
-    tt->help = tdrpStrDup("If true, the intermediate fields will be written to the output file.");
-    tt->val_offset = (char *) &conv_strat_write_debug_fields - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // trailing entry has param_name set to NULL

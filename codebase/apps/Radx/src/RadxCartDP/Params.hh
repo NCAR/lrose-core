@@ -86,10 +86,10 @@ public:
     WIDTH = 2,
     SNR = 3,
     ZDR = 4,
-    LDR = 5,
-    PHIDP = 6,
-    RHOHV = 7,
-    KDP = 8
+    PHIDP = 5,
+    RHOHV = 6,
+    KDP = 7,
+    LDR = 8
   } radar_field_type_t;
 
   typedef enum {
@@ -98,7 +98,7 @@ public:
     UVEL = 2,
     VVEL = 3,
     WVEL = 4,
-    NOT_SET = 5
+    MODEL_NOT_SET = 5
   } model_field_type_t;
 
   typedef enum {
@@ -140,15 +140,19 @@ public:
 
   typedef struct {
     radar_field_type_t field_type;
+    tdrp_bool_t is_available;
     char* input_name;
+    tdrp_bool_t do_write;
     char* output_name;
-  } radar_field_name_t;
+  } radar_field_t;
 
   typedef struct {
     model_field_type_t field_type;
+    tdrp_bool_t is_available;
     char* input_name;
+    tdrp_bool_t do_write;
     char* output_name;
-  } model_field_name_t;
+  } model_field_t;
 
   typedef struct {
     output_field_id_t id;
@@ -505,8 +509,10 @@ public:
 
   char* end_time;
 
-  radar_field_name_t *_radar_field_names;
-  int radar_field_names_n;
+  radar_field_t *_radar_fields;
+  int radar_fields_n;
+
+  tdrp_bool_t estimate_snr_from_dbz;
 
   double noise_dbz_at_100km;
 
@@ -518,8 +524,8 @@ public:
 
   char* interpolated_model_output_url;
 
-  model_field_name_t *_model_field_names;
-  int model_field_names_n;
+  model_field_t *_model_fields;
+  int model_fields_n;
 
   tdrp_bool_t read_beam_blockage;
 
@@ -725,18 +731,6 @@ public:
 
   int n_compute_threads;
 
-  tdrp_bool_t use_echo_orientation;
-
-  double synthetic_rhis_start_az;
-
-  double synthetic_rhis_delta_az;
-
-  char* echo_orientation_dbz_field_name;
-
-  int echo_orientation_n_points_sdev_h;
-
-  int echo_orientation_n_points_sdev_v;
-
   tdrp_bool_t identify_conv_strat_partition;
 
   char* conv_strat_params_file_path;
@@ -750,6 +744,18 @@ public:
   tdrp_bool_t conv_strat_write_echo_tops;
 
   tdrp_bool_t conv_strat_write_debug_fields;
+
+  tdrp_bool_t use_echo_orientation;
+
+  double synthetic_rhis_start_az;
+
+  double synthetic_rhis_delta_az;
+
+  char* echo_orientation_dbz_field_name;
+
+  int echo_orientation_n_points_sdev_h;
+
+  int echo_orientation_n_points_sdev_v;
 
   char _end_; // end of data region
               // needed for zeroing out data
