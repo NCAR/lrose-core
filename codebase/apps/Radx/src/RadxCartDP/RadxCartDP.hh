@@ -287,6 +287,7 @@ private:
   int _computeConvStrat();
   void _addConvStratToOutput(OutputMdv &out);
 
+  int _createGridTemplate();
   int _writeOutputMdv();
 
   BaseInterp::Field *_getInterpField(const string &name);

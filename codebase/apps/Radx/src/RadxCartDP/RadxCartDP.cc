@@ -309,6 +309,10 @@ RadxCartDP::~RadxCartDP()
 int RadxCartDP::Run()
 {
 
+  if (_params.create_grid_template_file) {
+    return _createGridTemplate();
+  }
+
   if (_params.radar_input_mode == Params::ARCHIVE) {
     return _runArchive();
   } else if (_params.radar_input_mode == Params::FILELIST) {
@@ -2716,6 +2720,22 @@ void RadxCartDP::_addConvStratToOutput(OutputMdv &out)
   }
   
 #endif
+
+}
+
+/////////////////////////////////////////////////////
+// create grid template file
+
+int RadxCartDP::_createGridTemplate()
+{
+
+  if (_params.debug) {
+    cerr << "INFO - creating grid template file" << endl;
+  }
+
+  _initInterpGrid();
+  
+  return 0;
 
 }
 

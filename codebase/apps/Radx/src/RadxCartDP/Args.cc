@@ -101,6 +101,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-create_grid_template")) {
+      
+      sprintf(tmp_str, "create_grid_template_file = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+
     } else if (!strcmp(argv[i], "-instance")) {
       
       if (i < argc - 1) {
@@ -224,6 +229,9 @@ void Args::_usage(ostream &out)
       << "Options:\n"
       << "\n"
       << "  [ -h ] produce this list.\n"
+      << "\n"
+      << "  [ -create_grid_template ] create file for use as grid template\n"
+      << "     to be used by CartBeamBlock\n"
       << "\n"
       << "  [ -d, -debug ] print debug messages\n"
       << "\n"

@@ -105,9 +105,9 @@ paramdef struct radar_field_t {
     { KDP, FALSE, "KDP", TRUE, "KDP" },
     { LDR, FALSE, "LDR", FALSE, "LDR" }
   };
-  p_descr = "Details of available radar fields. Exactly one of each field type must be present.";
+  p_descr = "Details of available radar fields. Exactly one of each field type must be present in the parameter file.";
   p_help = "'is_available' specifies whether the field is available in the input file. 'do_write' specifies wiether to write the field in the output data set. You can rename the field on output. The following fields are required: DBZ, VEL, WIDTH, ZDR, PHIDP, RHOHV.";
-} radar_fields[];
+} radar_fields[9];
 
 paramdef boolean {
   p_default = TRUE;
@@ -170,9 +170,9 @@ paramdef struct model_field_t {
     { VVEL, FALSE, "VVEL", FALSE, "VVEL" },
     { WVEL, FALSE, "WVEL", FALSE, "WVEL" }
   };
-  p_descr = "Specifies names and availability of model fields.";
+  p_descr = "Details of available model fields. Exactly one of each field type must be present in the parameter file.";
   p_help = "'is_available' specifies whether the field is available in the input file. 'do_write' specifies wiether to write the field in the output data set. You can rename the field on output.";
-} model_fields[];
+} model_fields[5];
 
 commentdef {
   p_header = "BEAM BLOCKAGE";
@@ -596,6 +596,10 @@ paramdef double {
 } beam_width_fraction_for_data_limit_extension;
 
 commentdef {
+  p_header = "CARTESIAN GRID DETAILS";
+}
+
+commentdef {
   p_header = "CARTESIAN GRID VERTICAL LEVELS";
   p_text = 
     "\nSet the vertical levels for the Cartesian grid.\n"
@@ -784,6 +788,21 @@ paramdef double {
   p_descr = "Longitude of offset origin.";
   p_help = "See grid_set_offset_origin.";
 } grid_offset_origin_longitude;
+
+commentdef {
+  p_header = "CREATE A TEMPLATE CARTESIAN FILE";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to create a template file for use by CartBeamBlock.";
+  p_help = "If TRUE, just create an MDV file for use as a template to obtain the Cartesian grid details. The file will contain a single field named 'template'. It will be time stamped with the current time.";
+} create_grid_template_file;
+
+paramdef string {
+  p_default = "/tmp/cart/template";
+  p_descr = "Directory for writing template grid file.";
+} grid_template_dir;
 
 commentdef {
   p_header = "SPECIFY COPY-THROUGH FIELDS";

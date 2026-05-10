@@ -629,6 +629,10 @@ public:
 
   double grid_offset_origin_longitude;
 
+  tdrp_bool_t create_grid_template_file;
+
+  char* grid_template_dir;
+
   tdrp_bool_t copy_selected_input_fields_to_output;
 
   copy_field_t *_copy_fields;
@@ -764,7 +768,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[163];
+  mutable TDRPtable _table[167];
 
   const char *_className;
 
