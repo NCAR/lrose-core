@@ -2086,7 +2086,19 @@
     tt->descr = tdrpStrDup("Directory for writing template grid file.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &grid_template_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/cart/template");
+    tt->single_val.s = tdrpStrDup("/tmp/mdv/template");
+    tt++;
+    
+    // Parameter 'template_3d_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("template_3d_field_name");
+    tt->descr = tdrpStrDup("Name of 3D template field in grid template file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &template_3d_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("template3D");
     tt++;
     
     // Parameter 'Comment 19'

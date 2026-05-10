@@ -821,9 +821,14 @@ paramdef boolean {
 } create_grid_template;
 
 paramdef string {
-  p_default = "/tmp/cart/template";
+  p_default = "/tmp/mdv/template";
   p_descr = "Directory for writing template grid file.";
 } grid_template_dir;
+
+paramdef string {
+  p_default = "template3D";
+  p_descr = "Name of 3D template field in grid template file.";
+} template_3d_field_name;
 
 commentdef {
   p_header = "SPECIFY COPY-THROUGH FIELDS";

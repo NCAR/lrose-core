@@ -641,6 +641,8 @@ public:
 
   char* grid_template_dir;
 
+  char* template_3d_field_name;
+
   tdrp_bool_t copy_selected_input_fields_to_output;
 
   copy_field_t *_copy_fields;
@@ -752,7 +754,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[158];
+  mutable TDRPtable _table[159];
 
   const char *_className;
 

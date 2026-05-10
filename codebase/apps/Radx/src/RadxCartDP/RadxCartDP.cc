@@ -2518,7 +2518,7 @@ int RadxCartDP::_createGridTemplate()
   fl32 missingVal = 0;
   
   out.createFieldAndAdd(_radarVol, _interpProj, _interpVlevels,
-                        "template",
+                        _params.template_3d_field_name,
                         "3D grid template for beam blockage",
                         "",
                         missingVal, vals.data());
