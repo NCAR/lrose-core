@@ -650,16 +650,16 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'dem_path'
+    // Parameter 'dem_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("dem_path");
-    tt->descr = tdrpStrDup("DEM data path");
-    tt->help = tdrpStrDup("The file with input digital elevation model data.");
-    tt->val_offset = (char *) &dem_path - &_start_;
-    tt->single_val.s = tdrpStrDup("./standalone_beam_blocking/data/srtm3");
+    tt->param_name = tdrpStrDup("dem_dir");
+    tt->descr = tdrpStrDup("DEM data directory path");
+    tt->help = tdrpStrDup("The directory containing the digital elevation model data.");
+    tt->val_offset = (char *) &dem_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/data/srtm3");
     tt++;
     
     // Parameter 'dem_data_format'
@@ -694,6 +694,30 @@
       tt->enum_def.fields[8].name = tdrpStrDup("AUSTRALIAN_NATIONAL");
       tt->enum_def.fields[8].val = AUSTRALIAN_NATIONAL;
     tt->single_val.e = SHUTTLE_RADAR_TOPOGRAPHY;
+    tt++;
+    
+    // Parameter 'copy_dem_tiles_used'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("copy_dem_tiles_used");
+    tt->descr = tdrpStrDup("Option to copy the DEM tiles that are used to specified directory.");
+    tt->help = tdrpStrDup("This is useful if you want to create a data set containing only the required tiles.");
+    tt->val_offset = (char *) &copy_dem_tiles_used - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'dem_copy_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("dem_copy_dir");
+    tt->descr = tdrpStrDup("Directory for the copied DEM data files");
+    tt->help = tdrpStrDup("The tiles that are used will be copied to this directory.");
+    tt->val_offset = (char *) &dem_copy_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/data/srtm3_copy");
     tt++;
     
     // Parameter 'Comment 4'

@@ -56,10 +56,10 @@ public:
 
   // constructor
   
-  SrtmTile(const string &demDir,
+  SrtmTile(const Params &params,
+           const string &demDir,
            double centerLat,
-           double centerLon,
-           bool debug = false);
+           double centerLon);
   
   // destructor
   
@@ -85,8 +85,8 @@ protected:
 private:
 
   TaThread::SafeMutex _localMutex;
-  
-  bool _debug;
+
+  const Params &_params;
 
   string _demDir;
   char _demFilePath[MAX_PATH_LEN];

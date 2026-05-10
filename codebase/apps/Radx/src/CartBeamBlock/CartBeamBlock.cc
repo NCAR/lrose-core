@@ -128,9 +128,9 @@ int CartBeamBlock::Run()
 
   // get digital terrain data
 
-  if (_initDem(_params.dem_path)) {
+  if (_initDem(_params.dem_dir)) {
     cerr << "ERROR - CartBeamBlock::Run()" << endl;
-    cerr << "  Cannot read DEM data, path: " << _params.dem_path << endl;
+    cerr << "  Cannot read DEM data, path: " << _params.dem_dir << endl;
     return -1;
   }
 
@@ -420,7 +420,7 @@ int CartBeamBlock::_computeBlockage()
     nThreads = 1;
   }
 
-  size_t nPointsTotal = coord.nx * coord.ny;
+  size_t nPoints2D = coord.nx * coord.ny;
   std::atomic<size_t> nPointsDone(0);
   
   if (_params.debug) {
@@ -431,7 +431,7 @@ int CartBeamBlock::_computeBlockage()
          << coord.nz << endl;
     cerr << "  nThreads: " << nThreads << endl;
     cerr << "  maxRangeKm: " << maxRangeKm << endl;
-    cerr << "  nPointsTotal: " << nPointsTotal << endl;
+    cerr << "  nPoints2D: " << nPoints2D << endl;
     cerr << endl;
   }
 
@@ -546,10 +546,10 @@ int CartBeamBlock::_computeBlockage()
     // monitor progress from main thread
 
     size_t prevPercent = 999;
-    while (nPointsDone.load() < nPointsTotal) {
+    while (nPointsDone.load() < nPoints2D) {
 
       size_t done = nPointsDone.load();
-      size_t percent = (done * 100) / nPointsTotal;
+      size_t percent = (done * 100) / nPoints2D;
 
       if (percent != prevPercent) {
         cerr << "\rINFO - blockage computation, % complete, nPointsDone: "

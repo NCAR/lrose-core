@@ -43,9 +43,9 @@ DemProvider::DemProvider(const Params &params) :
     for (int ilon = 0; ilon < nLon; ilon++) {
       double centerLat = ilat + 0.5 - 90.0;
       double centerLon = ilon + 0.5 - 180.0;
-      _tiles[ilat][ilon] = new SrtmTile(_params.dem_path,
-                                        centerLat, centerLon,
-                                        _params.debug >= Params::DEBUG_VERBOSE);
+      _tiles[ilat][ilon] = new SrtmTile(_params,
+                                        _params.dem_dir,
+                                        centerLat, centerLon);
     }
   }
   
@@ -79,7 +79,7 @@ int DemProvider::set(const std::pair<double,double> &sw,
   {
     case Params::SHUTTLE_RADAR_TOPOGRAPHY:
       _dem.reset(new digital_elevation_srtm3(_params.debug >= Params::DEBUG_VERBOSE,
-                                             _params.dem_path));
+                                             _params.dem_dir));
       break;
     case Params::ESRI_I65:
     case Params::ESRI_ANS:
@@ -191,7 +191,7 @@ void DemProvider::_set(const std::pair<double,double> &sw,
   latlon lne(a0, a1);
 
   _dem.reset(new digital_elevation_esri(_params.debug,
-                                        _params.dem_path, lsw, lne,
+                                        _params.dem_dir, lsw, lne,
 					spheroid(which)));
 }
 

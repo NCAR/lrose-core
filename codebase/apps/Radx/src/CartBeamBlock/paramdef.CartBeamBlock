@@ -57,10 +57,10 @@ commentdef {
 }
 
 paramdef string {
-  p_descr = "DEM data path";
-  p_help = "The file with input digital elevation model data.";
-  p_default = "./standalone_beam_blocking/data/srtm3";
-} dem_path;
+  p_descr = "DEM data directory path";
+  p_help = "The directory containing the digital elevation model data.";
+  p_default = "/tmp/data/srtm3";
+} dem_dir;
 
 typedef enum {
   SHUTTLE_RADAR_TOPOGRAPHY,
@@ -83,6 +83,18 @@ paramdef enum DigitalElevationModel_t {
   "  ESRI grid data (spheroid), with the various standard spheroids\n";
   p_default = SHUTTLE_RADAR_TOPOGRAPHY;
 } dem_data_format;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to copy the DEM tiles that are used to specified directory.";
+  p_help = "This is useful if you want to create a data set containing only the required tiles.";
+} copy_dem_tiles_used;
+
+paramdef string {
+  p_descr = "Directory for the copied DEM data files";
+  p_help = "The tiles that are used will be copied to this directory.";
+  p_default = "/tmp/data/srtm3_copy";
+} dem_copy_dir;
 
 commentdef {
   p_header = "SETTING THE PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS";

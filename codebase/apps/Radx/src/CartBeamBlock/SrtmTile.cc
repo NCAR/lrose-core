@@ -39,6 +39,7 @@
 #include <dataport/bigend.h>
 #include <toolsa/mem.h>
 #include <toolsa/file_io.h>
+#include <toolsa/TaFile.hh>
 #include <iostream>
 #include <cmath>
 #include <cerrno>
@@ -48,11 +49,11 @@ using namespace std;
 
 // Constructor
 
-SrtmTile::SrtmTile(const string &demDir,
+SrtmTile::SrtmTile(const Params &params,
+                   const string &demDir,
                    double centerLat,
-                   double centerLon,
-                   bool debug /* = false */) :
-        _debug(debug),
+                   double centerLon) :
+        _params(params),
         _demDir(demDir),
         _centerLat(centerLat),
         _centerLon(centerLon)
@@ -208,7 +209,7 @@ int SrtmTile::_readFromFile()
   }
 
   
-  if (_debug) {
+  if (_params.debug) {
     cerr << "SrtmTile, lat, lon: " << _centerLat << ", " << _centerLon << endl;
     cerr << "  Reading in DEM file; " << _demFilePath << endl;
   }
@@ -236,6 +237,16 @@ int SrtmTile::_readFromFile()
   // close file
   
   fclose(in);
+
+  // copy file if required
+
+  if (_params.copy_dem_tiles_used) {
+    if (TaFile::copyFileToDir(_demFilePath, _params.dem_copy_dir)) {
+      cerr << "WARNING - SrtmTile::_readFromFile()" << endl;
+      cerr << "  Cannot make a copy of the DEM file: " << _demFilePath << endl;
+      cerr << "  to dir: " << _params.dem_copy_dir << endl;
+    }
+  }
 
   return 0;
 

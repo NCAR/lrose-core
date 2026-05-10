@@ -405,9 +405,13 @@ public:
 
   char* template_3d_field_name;
 
-  char* dem_path;
+  char* dem_dir;
 
   DigitalElevationModel_t dem_data_format;
+
+  tdrp_bool_t copy_dem_tiles_used;
+
+  char* dem_copy_dir;
 
   tdrp_bool_t override_standard_pseudo_earth_radius;
 
@@ -466,7 +470,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[41];
+  mutable TDRPtable _table[43];
 
   const char *_className;
 
