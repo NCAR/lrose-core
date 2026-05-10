@@ -2061,19 +2061,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 18");
-    tt->comment_hdr = tdrpStrDup("CREATE A TEMPLATE CARTESIAN FILE");
+    tt->comment_hdr = tdrpStrDup("CREATE A CARTESIAN GRID TEMPLATE CARTESIAN");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'create_grid_template_file'
+    // Parameter 'create_grid_template'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("create_grid_template_file");
+    tt->param_name = tdrpStrDup("create_grid_template");
     tt->descr = tdrpStrDup("Option to create a template file for use by CartBeamBlock.");
     tt->help = tdrpStrDup("If TRUE, just create an MDV file for use as a template to obtain the Cartesian grid details. The file will contain a single field named 'template'. It will be time stamped with the current time. In order to get the grid details correct, we need to read in one radar volume from 'radar_input_dir'.");
-    tt->val_offset = (char *) &create_grid_template_file - &_start_;
+    tt->val_offset = (char *) &create_grid_template - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

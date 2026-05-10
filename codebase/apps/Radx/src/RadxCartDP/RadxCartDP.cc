@@ -309,10 +309,14 @@ RadxCartDP::~RadxCartDP()
 int RadxCartDP::Run()
 {
 
-  if (_params.create_grid_template_file) {
+  // special case - create grid template
+  
+  if (_params.create_grid_template) {
     return _createGridTemplate();
   }
-
+  
+  // runtime mode
+  
   if (_params.radar_input_mode == Params::ARCHIVE) {
     return _runArchive();
   } else if (_params.radar_input_mode == Params::FILELIST) {

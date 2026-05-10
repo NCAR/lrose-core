@@ -811,14 +811,14 @@ paramdef double {
 } grid_offset_origin_longitude;
 
 commentdef {
-  p_header = "CREATE A TEMPLATE CARTESIAN FILE";
+  p_header = "CREATE A CARTESIAN GRID TEMPLATE CARTESIAN";
 }
 
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to create a template file for use by CartBeamBlock.";
   p_help = "If TRUE, just create an MDV file for use as a template to obtain the Cartesian grid details. The file will contain a single field named 'template'. It will be time stamped with the current time. In order to get the grid details correct, we need to read in one radar volume from 'radar_input_dir'.";
-} create_grid_template_file;
+} create_grid_template;
 
 paramdef string {
   p_default = "/tmp/cart/template";

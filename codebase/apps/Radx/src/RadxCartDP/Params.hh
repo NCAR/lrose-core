@@ -637,7 +637,7 @@ public:
 
   double grid_offset_origin_longitude;
 
-  tdrp_bool_t create_grid_template_file;
+  tdrp_bool_t create_grid_template;
 
   char* grid_template_dir;
 

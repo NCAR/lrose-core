@@ -103,7 +103,7 @@ int Args::parse (int argc, char **argv, string &prog_name)
       
     } else if (!strcmp(argv[i], "-create_grid_template")) {
       
-      sprintf(tmp_str, "create_grid_template_file = TRUE;");
+      sprintf(tmp_str, "create_grid_template = TRUE;");
       TDRP_add_override(&override, tmp_str);
 
     } else if (!strcmp(argv[i], "-instance")) {
