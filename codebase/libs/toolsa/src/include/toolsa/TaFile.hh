@@ -213,6 +213,11 @@ public:
   bool uncompressPerformed() { return _uncompressPerformed; }
   string &getUncompressedPath() { return _uncompressedPath; }
 
+  // copy a file to a directory
+
+  static int copyFileToDir(const std::string &sourceFilePath,
+                           const std::string &targetDirPath);
+
 protected:
 
   string _path;           // the file path

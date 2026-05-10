@@ -42,16 +42,18 @@
 
 
 #include <toolsa/TaFile.hh>
+#include <filesystem>
 #include <iostream>
+#include <string>
 #include <cstdio>
 #include <cerrno>
 #include <cstring>
 #include <cstdlib>
 #include <unistd.h>
 #include <toolsa/safe_snprintf.hh>
-using namespace std;
 
-using std::endl;
+using namespace std;
+namespace fs = std::filesystem;
 
 //////////////////////
 // default constructor
@@ -565,4 +567,64 @@ int TaFile::_bunzip2(const string &path)
   
   return -1;
 
+}
+
+/////////////////////////////////////////////////////
+// copy a file to a directory
+// static method
+// Returns 0 on success, -1 on failure
+
+int TaFile::copyFileToDir(const std::string &sourceFilePath,
+                          const std::string &targetDirPath)
+
+{
+
+  try {
+    
+    fs::path sourcePath(sourceFilePath);
+    fs::path targetDir(targetDirPath);
+    
+    // Check source file exists
+    if (!fs::exists(sourcePath)) {
+      std::cerr << "ERROR - TaFile::copyFileToDir()" << endl;
+      std::cerr << "Source file does not exist: " << sourcePath << std::endl;
+      return -1;
+    }
+    
+    // Check source is a regular file
+    if (!fs::is_regular_file(sourcePath)) {
+      std::cerr << "ERROR - TaFile::copyFileToDir()" << endl;
+      std::cerr << "Source is not a regular file: " << sourcePath << std::endl;
+      return -1;
+    }
+    
+    // Create target directory if needed
+    if (!fs::exists(targetDir)) {
+      fs::create_directories(targetDir);
+    }
+    
+    // Construct target file path
+    fs::path targetPath = targetDir / sourcePath.filename();
+
+    // Copy file
+    fs::copy_file(sourcePath,
+                  targetPath,
+                  fs::copy_options::overwrite_existing);
+
+    return 0;
+
+  } catch (const fs::filesystem_error &e) {
+
+    std::cerr << "ERROR - TaFile::copyFileToDir()" << endl;
+    std::cerr << "Filesystem error: " << e.what() << std::endl;
+    return -1;
+    
+  } catch (const std::exception &e) {
+    
+    std::cerr << "ERROR - TaFile::copyFileToDir()" << endl;
+    std::cerr << "Exception: " << e.what() << std::endl;
+    return -1;
+    
+  }
+  
 }
