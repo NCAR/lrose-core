@@ -617,28 +617,28 @@
     tt->comment_text = tdrpStrDup("We read in a 3D Cartesian file which we use as a template to determine the 3D grid details.");
     tt++;
     
-    // Parameter 'grid_template_path'
+    // Parameter 'grid_template_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("grid_template_path");
-    tt->descr = tdrpStrDup("Directory or file path for Cartesian input data.");
-    tt->help = tdrpStrDup("This specifies the path to either:\n\n\t(a) a single 3D Cartesian file, or \n\t(b) a directory containing such files.\n\nThese files must have been previously created by running Radx2Grid or RadxCartDP.");
-    tt->val_offset = (char *) &grid_template_path - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/cart_template/example_cart_file.nc");
+    tt->param_name = tdrpStrDup("grid_template_dir");
+    tt->descr = tdrpStrDup("Directory for grid template file.");
+    tt->help = tdrpStrDup("This is the directory containing the MDV file with the grid template.\n\nThese files must have been previously created by running RadxCartDP -create_grid_template.");
+    tt->val_offset = (char *) &grid_template_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("$(HOME)/data/pecan/mdv/radarCart/kftg/template");
     tt++;
     
-    // Parameter 'template_field_name'
+    // Parameter 'template_3d_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("template_field_name");
+    tt->param_name = tdrpStrDup("template_3d_field_name");
     tt->descr = tdrpStrDup("Field name for 3D Cartesian input data.");
-    tt->help = tdrpStrDup("This should be a 3D field in the template Cartesian file.");
-    tt->val_offset = (char *) &template_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("DBZ");
+    tt->help = tdrpStrDup("This should be a 3D field in the template Cartesian file created by running 'RadxCartDP -create_grid_template'.");
+    tt->val_offset = (char *) &template_3d_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("template3D");
     tt++;
     
     // Parameter 'Comment 3'

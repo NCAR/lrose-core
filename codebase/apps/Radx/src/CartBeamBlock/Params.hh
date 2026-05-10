@@ -401,9 +401,9 @@ public:
 
   int n_compute_threads;
 
-  char* grid_template_path;
+  char* grid_template_dir;
 
-  char* template_field_name;
+  char* template_3d_field_name;
 
   char* dem_path;
 

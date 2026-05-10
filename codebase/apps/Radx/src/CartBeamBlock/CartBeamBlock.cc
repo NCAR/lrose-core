@@ -120,9 +120,9 @@ int CartBeamBlock::Run()
 
   // read a Cart file to get the grid details
 
-  if (_readGridTemplate(_params.grid_template_path)) {
+  if (_readGridTemplate()) {
     cerr << "ERROR - CartBeamBlock::Run()" << endl;
-    cerr << "  Cannot find template file, path: " << _params.grid_template_path << endl;
+    cerr << "  Cannot find template file, dir: " << _params.grid_template_dir << endl;
     return -1;
   }
 
@@ -157,47 +157,27 @@ int CartBeamBlock::Run()
 //////////////////////////////////////////////////
 // Read in the grid details from a template file
 
-int CartBeamBlock::_readGridTemplate(const string &path)
+int CartBeamBlock::_readGridTemplate()
 {
 
-  // check whether we have a file or directory
-  
-  if (fs::is_directory(path)) {
+  DsInputPath input(_progName,
+                    _params.debug >= Params::DEBUG_VERBOSE,
+                    _params.grid_template_dir,
+                    0, time(NULL));
 
-    DsInputPath input(_progName,
-                      _params.debug >= Params::DEBUG_VERBOSE,
-                      path,
-                      0, time(NULL));
-
-    const char *filePath = input.next();
-    if (filePath == nullptr) {
-      cerr << "ERROR - CartBeamBlock::_readGridTemplate" << endl;
-      cerr << "  Cannot find any files, dir: " << path << endl;
-      return -1;
-    }
-    
-    if (_readTemplateFile(filePath)) {
-      cerr << "ERROR - CartBeamBlock::_readGridTemplate" << endl;
-      cerr << "  Cannot read template from dir, file path: " << filePath << endl;
-      return -1;
-    }
-
-  } else if (fs::is_regular_file(path)) {
-    
-    if (_readTemplateFile(path)) {
-      cerr << "ERROR - CartBeamBlock::_readGridTemplate" << endl;
-      cerr << "  Cannot read specified template file: " << path << endl;
-      return -1;
-    }
-
-  } else {
-
+  const char *filePath = input.next();
+  if (filePath == nullptr) {
     cerr << "ERROR - CartBeamBlock::_readGridTemplate" << endl;
-    cerr << "  Path does not exist as dir or file: " << path << endl;
+    cerr << "  Cannot find any files, dir: " << _params.grid_template_dir << endl;
     return -1;
-
   }
-
+  
+  if (_readTemplateFile(filePath)) {
+    cerr << "ERROR - CartBeamBlock::_readGridTemplate" << endl;
+    cerr << "  Cannot read template from dir, file path: " << filePath << endl;
+    return -1;
+  }
+  
   return 0;
   
 }
@@ -207,7 +187,7 @@ int CartBeamBlock::_readTemplateFile(const string &path)
 
   _templateMdvx.clear();
   _templateMdvx.setReadPath(path);
-  _templateMdvx.addReadField(_params.template_field_name);
+  _templateMdvx.addReadField(_params.template_3d_field_name);
   if (_templateMdvx.readVolume()) {
     cerr << "ERROR - CartBeamBlock::_readTemplateFile" << endl;
     cerr << "  Cannot read template file: " << path << endl;
@@ -217,13 +197,13 @@ int CartBeamBlock::_readTemplateFile(const string &path)
   if (_templateMdvx.getNFieldsFile() < 1) {
     cerr << "ERROR - CartBeamBlock::_readTemplateFile" << endl;
     cerr << "  Cannot find specified field in template file: " << path << endl;
-    cerr << "  Field name: " << _params.template_field_name << endl;
+    cerr << "  Field name: " << _params.template_3d_field_name << endl;
     return -1;
   }
-  _templateField = _templateMdvx.getField(_params.template_field_name);
+  _templateField = _templateMdvx.getField(_params.template_3d_field_name);
   if (_templateField == nullptr) {
     cerr << "  Cannot find specified field in template file: " << path << endl;
-    cerr << "  Field name: " << _params.template_field_name << endl;
+    cerr << "  Field name: " << _params.template_3d_field_name << endl;
     return -1;
   }
   

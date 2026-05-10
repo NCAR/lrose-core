@@ -119,7 +119,7 @@ private:
 
   Mdvx _outMdvx;
 
-  int _readGridTemplate(const string &path);
+  int _readGridTemplate();
   int _readTemplateFile(const string &path);
   int _initDem(const string &path);
 
