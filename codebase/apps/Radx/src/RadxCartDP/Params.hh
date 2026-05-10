@@ -701,10 +701,6 @@ public:
 
   double gate_spacing_km;
 
-  tdrp_bool_t specify_output_filename;
-
-  char* output_filename;
-
   tdrp_bool_t name_file_from_start_time;
 
   char* netcdf_file_prefix;
@@ -768,7 +764,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[167];
+  mutable TDRPtable _table[165];
 
   const char *_className;
 

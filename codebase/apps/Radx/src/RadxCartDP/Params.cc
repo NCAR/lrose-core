@@ -2024,7 +2024,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("create_grid_template_file");
     tt->descr = tdrpStrDup("Option to create a template file for use by CartBeamBlock.");
-    tt->help = tdrpStrDup("If TRUE, just create an MDV file for use as a template to obtain the Cartesian grid details. The file will contain a single field named 'template'. It will be time stamped with the current time.");
+    tt->help = tdrpStrDup("If TRUE, just create an MDV file for use as a template to obtain the Cartesian grid details. The file will contain a single field named 'template'. It will be time stamped with the current time. In order to get the grid details correct, we need to read in one radar volume from 'radar_input_dir'.");
     tt->val_offset = (char *) &create_grid_template_file - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -2636,30 +2636,6 @@
     tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("CF NetCDF OUTPUT DETAILS");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'specify_output_filename'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_output_filename");
-    tt->descr = tdrpStrDup("If true, the file will be named 'output_filename'.");
-    tt->help = tdrpStrDup("If false, the file name will be computed from the data time.");
-    tt->val_offset = (char *) &specify_output_filename - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_filename'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_filename");
-    tt->descr = tdrpStrDup("Name of output file.");
-    tt->help = tdrpStrDup("Applies only if specify_output_filename is true.");
-    tt->val_offset = (char *) &output_filename - &_start_;
-    tt->single_val.s = tdrpStrDup("ncfGrid.nc");
     tt++;
     
     // Parameter 'name_file_from_start_time'

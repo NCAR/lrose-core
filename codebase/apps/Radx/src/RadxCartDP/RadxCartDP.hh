@@ -243,10 +243,10 @@ private:
   int _runFilelist();
   int _runArchive();
   int _runRealtime();
-  int _processFile(const string &filePath);
-  bool _fileNameValid(const string &filePath);
+  int _processFile(const string &radarPath);
+  bool _fileNameValid(const string &radarPath);
 
-  int _readFile(const string &filePath);
+  int _readFile(const string &radarPath);
   void _setupRead(RadxFile &file);
 
   void _addRayGeomFieldsToInput();

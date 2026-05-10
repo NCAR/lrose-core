@@ -796,7 +796,7 @@ commentdef {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to create a template file for use by CartBeamBlock.";
-  p_help = "If TRUE, just create an MDV file for use as a template to obtain the Cartesian grid details. The file will contain a single field named 'template'. It will be time stamped with the current time.";
+  p_help = "If TRUE, just create an MDV file for use as a template to obtain the Cartesian grid details. The file will contain a single field named 'template'. It will be time stamped with the current time. In order to get the grid details correct, we need to read in one radar volume from 'radar_input_dir'.";
 } create_grid_template_file;
 
 paramdef string {
@@ -1098,18 +1098,6 @@ paramdef double {
 commentdef {
   p_header = "CF NetCDF OUTPUT DETAILS";
 }
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "If true, the file will be named 'output_filename'.";
-  p_help = "If false, the file name will be computed from the data time.";
-} specify_output_filename;
-
-paramdef string {
-  p_default = "ncfGrid.nc";
-  p_descr = "Name of output file.";
-  p_help = "Applies only if specify_output_filename is true.";
-} output_filename;
 
 paramdef boolean {
   p_default = true;

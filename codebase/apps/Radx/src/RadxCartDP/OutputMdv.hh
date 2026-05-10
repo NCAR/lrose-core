@@ -113,7 +113,7 @@ public:
 
   // write out merged volume
   
-  int writeVol();
+  int writeVol(const string &outputDir);
 
   // get valid time of MDV data set
   
@@ -140,9 +140,6 @@ private:
   int _getDsFollowMode(Radx::FollowMode_t mode);
   int _getDsPolarizationMode(Radx::PolarizationMode_t mode);
   int _getDsPrfMode(Radx::PrtMode_t mode, double prtRatio);
-  
-  string _computeCfNetcdfPath();
-  void _writeLdataInfo(const string &outputPath);
   
 };
 

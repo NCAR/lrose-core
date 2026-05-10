@@ -456,14 +456,14 @@ int RadxCartDP::_runRealtime()
 // Process a file
 // Returns 0 on success, -1 on failure
 
-int RadxCartDP::_processFile(const string &filePath)
+int RadxCartDP::_processFile(const string &radarPath)
 {
 
   PMU_auto_register("Processing file");
 
   // check file name
 
-  if (!_fileNameValid(filePath)) {
+  if (!_fileNameValid(radarPath)) {
     // skip this file
     return 0;
   }
@@ -478,7 +478,7 @@ int RadxCartDP::_processFile(const string &filePath)
   
   // read in file
   
-  if (_readFile(filePath)) {
+  if (_readFile(radarPath)) {
     cerr << "ERROR - RadxCartDP::_processFile" << endl;
     cerr << "  Cannot read file: " << _radarVol.getPathInUse() << endl;
     return -1;
@@ -633,14 +633,14 @@ int RadxCartDP::_processFile(const string &filePath)
 // Check file name is valid
 // Returns true on success, false on failure
 
-bool RadxCartDP::_fileNameValid(const string &filePath)
+bool RadxCartDP::_fileNameValid(const string &radarPath)
 {
   
   if (strlen(_params.radar_file_search_ext) > 0) {
-    RadxPath rpath(filePath);
+    RadxPath rpath(radarPath);
     if (strcmp(rpath.getExt().c_str(), _params.radar_file_search_ext)) {
       if (_params.debug) {
-        cerr << "WARNING - ignoring file: " << filePath << endl;
+        cerr << "WARNING - ignoring file: " << radarPath << endl;
         cerr << "  Does not have correct extension: "
              << _params.radar_file_search_ext << endl;
       }
@@ -649,10 +649,10 @@ bool RadxCartDP::_fileNameValid(const string &filePath)
   }
   
   if (strlen(_params.radar_file_search_substr) > 0) {
-    RadxPath rpath(filePath);
+    RadxPath rpath(radarPath);
     if (rpath.getFile().find(_params.radar_file_search_substr) == string::npos) {
       if (_params.debug) {
-        cerr << "WARNING - ignoring file: " << filePath << endl;
+        cerr << "WARNING - ignoring file: " << radarPath << endl;
         cerr << "  Does not contain required substr: "
              << _params.radar_file_search_substr << endl;
       }
@@ -668,7 +668,7 @@ bool RadxCartDP::_fileNameValid(const string &filePath)
 // Read in a RADX file
 // Returns 0 on success, -1 on failure
 
-int RadxCartDP::_readFile(const string &filePath)
+int RadxCartDP::_readFile(const string &radarPath)
 {
 
   GenericRadxFile inFile;
@@ -676,7 +676,7 @@ int RadxCartDP::_readFile(const string &filePath)
   
   // read in file
   
-  if (inFile.readFromPath(filePath, _radarVol)) {
+  if (inFile.readFromPath(radarPath, _radarVol)) {
     cerr << "ERROR - RadxCartDP::_readFile" << endl;
     cerr << inFile.getErrStr() << endl;
     return -1;
@@ -2452,279 +2452,13 @@ void RadxCartDP::_addConvStratToOutput(OutputMdv &out)
 
   }
   
-#ifdef NOTNOW
-
-  if (_params.conv_strat_write_partition) {
-  }
-  
-  if (_params.write_partition) {
-    // echoType for full volume
-    size_t volSize08 = fhdr3d.nx * fhdr3d.ny * fhdr3d.nz * sizeof(ui08);
-    fhdr3d.volume_size = volSize08;
-    fhdr3d.encoding_type = Mdvx::ENCODING_INT8;
-    fhdr3d.data_element_nbytes = 1;
-    fhdr3d.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
-    fhdr3d.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
-    _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getEchoType3D(),
-                                 Mdvx::ENCODING_INT8,
-                                 "EchoType3D",
-                                 "convective_stratiform_echo_type_3D",
-                                 ""));
-  }
-
-  vector<double> vlevel2D;
-  vlevel2D.push_back(vol.getAltitudeKm());
-  
-  if (_params.conv_strat_write_convective_dbz) {
-    addField(vol, proj, vlevels,
-             "DbzConv",
-             "dbz_in_convection",
-             "dBZ",
-             Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingFl32(),
-             convStrat.getConvectiveDbz());
-  }
-
-  if (_params.conv_strat_write_debug_fields) {
-
-    addField(vol, proj, vlevel2D,
-             "DbzTextureMax",
-             "max_of_dbz_texture_over_height",
-             "dBZ",
-             Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingFl32(),
-             convStrat.getTexture2D());
-
-    addField(vol, proj, vlevel2D,
-             "DbzColMax",
-             "dbz_column_maximum",
-             "dBZ",
-             Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingFl32(),
-             convStrat.getDbzColMax());
-    
-    addField(vol, proj, vlevel2D,
-             "FractionActive",
-             "fraction_of_texture_kernel_with_active_dbz",
-             "",
-             Radx::FL32, 1.0, 0.0,
-             convStrat.getMissingFl32(),
-             convStrat.getFractionActive());
-
-    
-  }
-
-  // initial fields are float32
-
-  MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
-  Mdvx::field_header_t fhdr2d = dbzField->getFieldHeader();
-  fhdr2d.nz = 1;
-  fhdr2d.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-  size_t planeSize32 = fhdr2d.nx * fhdr2d.ny * sizeof(fl32);
-  fhdr2d.volume_size = planeSize32;
-  fhdr2d.encoding_type = Mdvx::ENCODING_FLOAT32;
-  fhdr2d.data_element_nbytes = 4;
-  fhdr2d.missing_data_value = _missingFl32;
-  fhdr2d.bad_data_value = _missingFl32;
-  fhdr2d.scale = 1.0;
-  fhdr2d.bias = 0.0;
-  
-  Mdvx::vlevel_header_t vhdr2d;
-  MEM_zero(vhdr2d);
-  vhdr2d.level[0] = 0;
-  vhdr2d.type[0] = Mdvx::VERT_TYPE_SURFACE;
-
-  if (_params.write_texture) {
-    // add 2D max texture field
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getTexture2D(),
-                                 Mdvx::ENCODING_INT16,
-                                 "DbzTextureComp",
-                                 "reflectivity_texture_composite",
-                                 "dBZ"));
-  }
-  
-  if (_params.write_convectivity) {
-    // convectivity max in 2D
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getConvectivity2D(),
-                                 Mdvx::ENCODING_INT16,
-                                 "ConvectivityComp",
-                                 "likelihood_of_convection_composite",
-                                 ""));
-  }
-
-  if (_params.write_col_max_dbz) {
-    // col max dbz
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getDbzColMax(),
-                                 Mdvx::ENCODING_INT16,
-                                 "DbzComp",
-                                 "dbz_composite",
-                                 "dBZ"));
-  }
-    
-  if (_params.write_fraction_active) {
-    // load up fraction of texture kernel covered
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getFractionActive(),
-                                 Mdvx::ENCODING_INT16,
-                                 "FractionActive",
-                                 "fraction_of_texture_kernel_active",
-                                 ""));
-  }
-    
-  if (_params.write_tops) {
-    // tops
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getConvTopKm(),
-                                 Mdvx::ENCODING_INT16,
-                                 "ConvTops",
-                                 "convective_tops",
-                                 "km"));
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getStratTopKm(),
-                                 Mdvx::ENCODING_INT16,
-                                 "StratTops",
-                                 "stratiform_tops",
-                                 "km"));
-    char longName[256];
-    snprintf(longName, 256, "%g_dbz_echo_tops", _params.dbz_for_echo_tops);
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getEchoTopKm(),
-                                 Mdvx::ENCODING_INT16,
-                                 "EchoTops", longName, "km"));
-  }
-  
-  if (_params.write_height_grids &&
-      _params.vert_levels_type == Params::VERT_LEVELS_BY_TEMP) {
-    _shallowHtField.convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
-    _outMdvx.addField(new MdvxField(_shallowHtField));
-    _deepHtField.convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
-    _outMdvx.addField(new MdvxField(_deepHtField));
-  }
-  
-  if (_params.write_temperature && _tempField != NULL) {
-    MdvxField * tempField = new MdvxField(*_tempField);
-    tempField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
-    _outMdvx.addField(tempField);
-  }
-
-  // the following 2d fields are unsigned bytes
-  
-  size_t planeSize08 = fhdr2d.nx * fhdr2d.ny * sizeof(ui08);
-  fhdr2d.volume_size = planeSize08;
-  fhdr2d.encoding_type = Mdvx::ENCODING_INT8;
-  fhdr2d.data_element_nbytes = 1;
-  fhdr2d.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
-  fhdr2d.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
-  
-  // echoType field
-  
-  if (_params.write_partition) {
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getEchoType2D(),
-                                 Mdvx::ENCODING_INT8,
-                                 "EchoTypeComp",
-                                 "convective_stratiform_echo_type_composite",
-                                 ""));
-  }
-  
-  // the following 3d fields are floats
-  
-  Mdvx::field_header_t fhdr3d = dbzField->getFieldHeader();
-  Mdvx::vlevel_header_t vhdr3d = dbzField->getVlevelHeader();
-  fhdr3d.missing_data_value = _missingFl32;
-  fhdr3d.bad_data_value = _missingFl32;
-
-  if (_params.write_convective_dbz) {
-    // reflectivity only where convection has been identified
-    MdvxField *convDbz = _makeField(fhdr3d, vhdr3d,
-                                    _finder.getConvectiveDbz(),
-                                    Mdvx::ENCODING_INT16,
-                                    "DbzConv",
-                                    "convective_reflectivity_3D",
-                                    "dBZ");
-    _outMdvx.addField(convDbz);
-  }
-  
-  if (_params.write_texture) {
-    // texture in 3D
-    _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getTexture3D(),
-                                 Mdvx::ENCODING_INT16,
-                                 "DbzTexture3D",
-                                 "reflectivity_texture_3D",
-                                 "dBZ"));
-  }
-
-  if (_params.write_convectivity) {
-    // convectivity in 3D
-    _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getConvectivity3D(),
-                                 Mdvx::ENCODING_INT16,
-                                 "Convectivity3D",
-                                 "likelihood_of_convection_3D",
-                                 ""));
-  }
-
-  if (_params.write_3D_dbz) {
-    // echo the input DBZ field
-    _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getDbz3D(),
-                                 Mdvx::ENCODING_INT16,
-                                 "Dbz3D",
-                                 "reflectivity_3D",
-                                 "dBZ"));
-  }
-  
-  if (_params.write_partition) {
-    // echoType for full volume
-    size_t volSize08 = fhdr3d.nx * fhdr3d.ny * fhdr3d.nz * sizeof(ui08);
-    fhdr3d.volume_size = volSize08;
-    fhdr3d.encoding_type = Mdvx::ENCODING_INT8;
-    fhdr3d.data_element_nbytes = 1;
-    fhdr3d.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
-    fhdr3d.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
-    _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getEchoType3D(),
-                                 Mdvx::ENCODING_INT8,
-                                 "EchoType3D",
-                                 "convective_stratiform_echo_type_3D",
-                                 ""));
-  }
-
-  if (_params.write_clumping_debug_fields) {
-    _addClumpingDebugFields();
-  }
-
-  // add ht data if available
-  
-  if (_params.use_terrain_ht_data) {
-    MdvxField *htFieldIn = _inMdvx.getField("TerrainHt");
-    if (htFieldIn != NULL) {
-      MdvxField *htFieldOut = new MdvxField(*htFieldIn);
-      htFieldOut->convertType(Mdvx::ENCODING_ASIS, Mdvx::COMPRESSION_GZIP);
-      _outMdvx.addField(htFieldOut);
-    }
-    // add water field
-    if (_params.add_water_layer) {
-      MdvxField *waterFieldIn = _inMdvx.getField("WaterFlag");
-      if (waterFieldIn != NULL) {
-        MdvxField *waterFieldOut = new MdvxField(*waterFieldIn);
-        waterFieldOut->convertType(Mdvx::ENCODING_ASIS, Mdvx::COMPRESSION_GZIP);
-        _outMdvx.addField(waterFieldOut);
-      }
-    }
-  }
-  
-#endif
-
 }
 
 /////////////////////////////////////////////////////
 // create grid template file
+//
+// We need to read in 1 radar file to ensure the grid
+// location is correct.
 
 int RadxCartDP::_createGridTemplate()
 {
@@ -2733,8 +2467,66 @@ int RadxCartDP::_createGridTemplate()
     cerr << "INFO - creating grid template file" << endl;
   }
 
-  _initInterpGrid();
+  // read in the last file in the radar data set
   
+  RadxTimeList tlist;
+  tlist.setDir(_params.radar_input_dir);
+  tlist.setModeLast();
+  if (tlist.compile()) {
+    cerr << "ERROR - RadxCartDP::_createGridTemplate()" << endl;
+    cerr << "  Cannot find radar files, dir: " << _params.radar_input_dir << endl;
+    cerr << tlist.getErrStr() << endl;
+    return -1;
+  }
+  
+  const vector<string> &paths = tlist.getPathList();
+  if (paths.size() < 1) {
+    cerr << "ERROR - RadxCartDP::_createGridTemplate()" << endl;
+    cerr << "  No files found, dir: " << _params.radar_input_dir << endl;
+    return -1;
+  }
+  
+  // read in file
+
+  _radarVol.clear();
+  string radarPath = paths[0];
+  if (_readFile(radarPath)) {
+    cerr << "ERROR - RadxCartDP::_createGridTemplate()" << endl;
+    cerr << "  Cannot read file: " << radarPath << endl;
+    return -1;
+  }
+  
+  if (_params.debug) {
+    cerr << "SUCCESS - read in radar file: " << _radarVol.getPathInUse() << endl;
+  }
+  
+  // initialize the projection and vlevels of the interp volume
+
+  _initInterpGrid();
+
+  // create the template object
+
+  OutputMdv out(_progName, _params);
+  out.setMasterHeader(_radarVol);
+
+  size_t nptsVol = _interpCoord.nx * _interpCoord.ny * _interpCoord.nz;
+  vector<ui08> vals(nptsVol, 1);
+  fl32 missingVal = 0;
+  
+  out.createFieldAndAdd(_radarVol, _interpProj, _interpVlevels,
+                        "template",
+                        "3D grid template for beam blockage",
+                        "",
+                        missingVal, vals.data());
+
+  // write out file
+  
+  if (out.writeVol(_params.grid_template_dir)) {
+    cerr << "ERROR - RadxCartDP::_createGridTemplate" << endl;
+    cerr << "  Cannot write template file to dir: " << _params.grid_template_dir << endl;
+    return -1;
+  }
+
   return 0;
 
 }
@@ -2834,7 +2626,7 @@ int RadxCartDP::_writeOutputMdv()
 
   // write out file
   
-  if (out.writeVol()) {
+  if (out.writeVol(_params.output_dir)) {
     cerr << "ERROR - RadxCartDP::_writeOutputMdv" << endl;
     cerr << "  Cannot write file to output_dir: "
          << _params.output_dir << endl;

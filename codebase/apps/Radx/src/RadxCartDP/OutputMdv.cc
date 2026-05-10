@@ -119,7 +119,11 @@ void OutputMdv::setMasterHeader(const RadxVol &vol)
   _mdvx.setDataSetInfo(vol.getHistory().c_str());
   _mdvx.setDataSetName(vol.getInstrumentName().c_str());
   _mdvx.setDataSetSource(vol.getSource().c_str());
-  
+
+  _mdvx.setMdv2NcfAttr(_params.ncf_institution,
+                       _params.ncf_references,
+                       _params.ncf_comment);
+
 }
 
 ////////////////////
@@ -840,11 +844,14 @@ int OutputMdv::_getDsPrfMode(Radx::PrtMode_t mode,
 // Write out merged volume in MDV format.
 //
 
-int OutputMdv::writeVol()
+int OutputMdv::writeVol(const string &outputDir)
 
 {
 
+  _outputDir = outputDir;
+
   if (_params.debug) {
+    cerr << "Output dir: " << _outputDir << endl;
     cerr << "Writing output fields:" << endl;
     for (size_t ii = 0; ii < _mdvx.getNFields(); ii++) {
       MdvxField *fld = _mdvx.getField(ii);
@@ -852,8 +859,6 @@ int OutputMdv::writeVol()
     }
   }
   
-  _outputDir = _params.output_dir;
-
   _mdvx.setMdv2NcfAttr(_params.ncf_institution,
                        _params.ncf_references,
                        _params.ncf_comment);
@@ -861,166 +866,18 @@ int OutputMdv::writeVol()
   _mdvx.setMdv2NcfFormat(DsMdvx::NCF_FORMAT_NETCDF4);
   _mdvx.setMdv2NcfCompression(true, 4);
   _mdvx.setMdv2NcfOutput(true, true, true);
-  
-  // write out as CF
-  
-  string outputPath;
-  if (_params.specify_output_filename) {
-    outputPath = _params.output_dir;
-    outputPath += PATH_DELIM;
-    outputPath += _params.output_filename;
-  } else {
-    outputPath = _computeCfNetcdfPath();
-  }
 
-  Mdv2NcfTrans trans;
-  trans.setDebug(_params.debug >= Params::DEBUG_VERBOSE);
-  if (trans.writeCf(_mdvx, outputPath)) {
-    cerr << "ERROR - Mdv2NetCDF::_processData()" << endl;
-    cerr << trans.getErrStr() << endl;
+  if (_mdvx.writeToDir(_outputDir)) {
+    cerr << "ERROR - OutputMdv::writeVol" << endl;
+    cerr << _mdvx.getErrStr() << endl;
     return -1;
+  } else {
+    if (_params.debug) {
+      cerr << "INFO - wrote output file: " << _mdvx.getPathInUse() << endl;
+    }
   }
-  
-  // write latest data info
 
-  _writeLdataInfo(outputPath);
-    
   return 0;
-
-}
-
-//////////////////////////////////////
-// Compute output path for netCDF file
-
-string OutputMdv::_computeCfNetcdfPath()
-{
-
-  // Get the proper time to assign to filename
-  
-  const Mdvx::master_header_t &mhdr = _mdvx.getMasterHeader();
-  DateTime validTime(mhdr.time_centroid);
-  DateTime genTime(mhdr.time_gen);
-  
-  bool isForecast = false;
-  int year, month, day, hour, minute, seconds;
-  
-  if (mhdr.data_collection_type == Mdvx::DATA_EXTRAPOLATED ||
-      mhdr.data_collection_type == Mdvx::DATA_FORECAST ||
-      mhdr.forecast_time > 0) {
-    year = genTime.getYear();
-    month = genTime.getMonth();
-    day =  genTime.getDay();
-    hour = genTime.getHour();
-    minute = genTime.getMin();
-    seconds = genTime.getSec();
-    isForecast = true;
-  } else {
-    year = validTime.getYear();
-    month = validTime.getMonth();
-    day =  validTime.getDay();
-    hour = validTime.getHour();
-    minute = validTime.getMin();
-    seconds = validTime.getSec();
-  }
-
-  // compute output dir
-
-  _outputDir = _params.output_dir;
-  char dayStr[128];
-  sprintf(dayStr, "%.4d%.2d%.2d", year, month, day);
-  _outputDir += PATH_DELIM;
-  _outputDir += dayStr;
-
-  // ensure output dir exists
-  
-  if (ta_makedir_recurse(_outputDir.c_str())) {
-    cerr << "ERROR - Mdv2NetCDF::_initNcFile()" << endl;
-    cerr << "  Cannot make output dir: " << _outputDir;
-  }
-
-  // Create output filepath
-
-  char outputPath[1024];
-  
-  if (_params.use_iso8601_filename_convention) {
-    
-    if (isForecast) { 
-      int leadTime = mhdr.forecast_delta;
-      int leadTimeHrs = leadTime/3600;
-      int leadTimeMins = (leadTime % 3600 )/ 60;
-      sprintf(outputPath, "%s/%s%.4d-%.2d-%.2dT%.2d:%.2d:%.2d.PT%.2d:%.2d.nc",
-              _outputDir.c_str(), _params.netcdf_file_prefix,
-              year, month, day, hour, minute, seconds,
-              leadTimeHrs, leadTimeMins);   
-    } else {
-      sprintf(outputPath, "%s/%s%.4d-%.2d-%.2dT%.2d:%.2d:%.2d.nc",
-              _outputDir.c_str(), _params.netcdf_file_prefix,
-              year, month, day, hour, minute, seconds);
-    }
-    
-  } else {
-    
-    string v_yyyymmdd = validTime.getDateStrPlain();
-    string v_hhmmss = validTime.getTimeStrPlain();
-    char filename[256];
-    
-    snprintf(filename, 256, "%s%s_%s%s.nc",
-             _params.netcdf_file_prefix,
-             v_yyyymmdd.c_str(), v_hhmmss.c_str(),
-             _params.netcdf_file_suffix);
-    
-    if (isForecast) { 
-      string g_hhmmss = genTime.getTimeStrPlain();
-      snprintf(outputPath, 1024, "%s/g_%s/%s",
-               _outputDir.c_str(), g_hhmmss.c_str(), filename);
-    } else {
-      snprintf(outputPath, 1024, "%s/%s", _outputDir.c_str(), filename);
-    }
-    
-  }
-
-  return outputPath;
-  
-}
-
-//////////////////////////////////////
-
-void OutputMdv::_writeLdataInfo(const string &outputPath)
-{
-  
-  const Mdvx::master_header_t &mhdr = _mdvx.getMasterHeader();
-
-  // Write LdataInfo file
-
-  DsLdataInfo ldata(_params.output_dir, _params.debug);
-
-  ldata.setWriter("CartPidQpe");
-  ldata.setDataFileExt("nc");
-  ldata.setDataType("netCDF");
-
-  string fileName;
-  Path::stripDir(_outputDir, outputPath, fileName);
-  ldata.setRelDataPath(fileName);
-  
-  if (mhdr.data_collection_type == Mdvx::DATA_EXTRAPOLATED ||
-      mhdr.data_collection_type == Mdvx::DATA_FORECAST ||
-      mhdr.forecast_time > 0)
-  {
-    ldata.setIsFcast(true);
-    int leadtime = mhdr.forecast_delta;
-    ldata.setLeadTime(leadtime);
-    ldata.write(mhdr.time_gen);
-  }
-  else
-  {
-    ldata.setIsFcast(false);
-    ldata.write(mhdr.time_centroid);
-  }
-  
-  if (_params.debug) {
-    cerr << "OutputMdv::_writeLdataInfo(): Data written to "
-         << outputPath << endl;
-  }
 
 }
 
