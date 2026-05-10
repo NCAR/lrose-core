@@ -547,6 +547,14 @@ public:
 
   char* output_dir;
 
+  tdrp_bool_t name_file_from_start_time;
+
+  char* ncf_institution;
+
+  char* ncf_references;
+
+  char* ncf_comment;
+
   tdrp_bool_t write_debug_polar_output;
 
   char* debug_polar_output_dir;
@@ -701,26 +709,6 @@ public:
 
   double gate_spacing_km;
 
-  tdrp_bool_t name_file_from_start_time;
-
-  char* netcdf_file_prefix;
-
-  char* netcdf_file_suffix;
-
-  tdrp_bool_t use_iso8601_filename_convention;
-
-  char* ncf_title;
-
-  char* ncf_institution;
-
-  char* ncf_references;
-
-  char* ncf_source;
-
-  char* ncf_history;
-
-  char* ncf_comment;
-
   char* instance;
 
   int procmap_register_interval;
@@ -764,7 +752,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[165];
+  mutable TDRPtable _table[158];
 
   const char *_className;
 

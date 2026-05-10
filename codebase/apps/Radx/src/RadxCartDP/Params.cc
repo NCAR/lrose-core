@@ -1124,7 +1124,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OUTPUT DATA DIRECTORY");
+    tt->comment_hdr = tdrpStrDup("OUTPUT DATA");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1138,6 +1138,54 @@
     tt->help = tdrpStrDup("Files will be written to this directory.");
     tt->val_offset = (char *) &output_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/cart/pid");
+    tt++;
+    
+    // Parameter 'name_file_from_start_time'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("name_file_from_start_time");
+    tt->descr = tdrpStrDup("If true, name the output file using the start time.");
+    tt->help = tdrpStrDup("If false, the end time is used, in the MDV tradition.");
+    tt->val_offset = (char *) &name_file_from_start_time - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'ncf_institution'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ncf_institution");
+    tt->descr = tdrpStrDup("Institution string for netCDF file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ncf_institution - &_start_;
+    tt->single_val.s = tdrpStrDup("EOL/NCAR");
+    tt++;
+    
+    // Parameter 'ncf_references'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ncf_references");
+    tt->descr = tdrpStrDup("References string for netCDF file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ncf_references - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'ncf_comment'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ncf_comment");
+    tt->descr = tdrpStrDup("Comment string for netCDF file.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &ncf_comment - &_start_;
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'Comment 8'
@@ -2634,135 +2682,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 29");
-    tt->comment_hdr = tdrpStrDup("CF NetCDF OUTPUT DETAILS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'name_file_from_start_time'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("name_file_from_start_time");
-    tt->descr = tdrpStrDup("If true, name the output file using the start time.");
-    tt->help = tdrpStrDup("If false, the end time is used, in the MDV tradition.");
-    tt->val_offset = (char *) &name_file_from_start_time - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'netcdf_file_prefix'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_file_prefix");
-    tt->descr = tdrpStrDup("User-specified output file prefix, comes before date_time.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &netcdf_file_prefix - &_start_;
-    tt->single_val.s = tdrpStrDup("ncf_");
-    tt++;
-    
-    // Parameter 'netcdf_file_suffix'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_file_suffix");
-    tt->descr = tdrpStrDup("User-specified output file suffix, comes after the date_time and before the .nc which gets automatically added on.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &netcdf_file_suffix - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'use_iso8601_filename_convention'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_iso8601_filename_convention");
-    tt->descr = tdrpStrDup("If true the output filename uses the prefix, followed by ISO 8601 timestamp convention");
-    tt->help = tdrpStrDup("eg. prefix.2008-05-22T14:00:00.nc");
-    tt->val_offset = (char *) &use_iso8601_filename_convention - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'ncf_title'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ncf_title");
-    tt->descr = tdrpStrDup("Title string for netCDF file.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ncf_title - &_start_;
-    tt->single_val.s = tdrpStrDup("SPOL radar data");
-    tt++;
-    
-    // Parameter 'ncf_institution'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ncf_institution");
-    tt->descr = tdrpStrDup("Institution string for netCDF file.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ncf_institution - &_start_;
-    tt->single_val.s = tdrpStrDup("EOL/NCAR");
-    tt++;
-    
-    // Parameter 'ncf_references'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ncf_references");
-    tt->descr = tdrpStrDup("References string for netCDF file.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ncf_references - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'ncf_source'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ncf_source");
-    tt->descr = tdrpStrDup("Source string for netCDF file.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ncf_source - &_start_;
-    tt->single_val.s = tdrpStrDup("SPOL radar");
-    tt++;
-    
-    // Parameter 'ncf_history'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ncf_history");
-    tt->descr = tdrpStrDup("History string for netCDF file.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ncf_history - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'ncf_comment'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ncf_comment");
-    tt->descr = tdrpStrDup("Comment string for netCDF file.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ncf_comment - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 30'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("PROCESS CONTROL");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2791,11 +2710,11 @@
     tt->single_val.i = 60;
     tt++;
     
-    // Parameter 'Comment 31'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 31");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("MEMORY HANDLING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2812,11 +2731,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 32'
+    // Parameter 'Comment 31'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 32");
+    tt->param_name = tdrpStrDup("Comment 31");
     tt->comment_hdr = tdrpStrDup("THREADING FOR SPEED.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2847,11 +2766,11 @@
     tt->single_val.i = 8;
     tt++;
     
-    // Parameter 'Comment 33'
+    // Parameter 'Comment 32'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 33");
+    tt->param_name = tdrpStrDup("Comment 32");
     tt->comment_hdr = tdrpStrDup("CONVECTIVE/STRATIFORM PARTITION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2940,11 +2859,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 34'
+    // Parameter 'Comment 33'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 34");
+    tt->param_name = tdrpStrDup("Comment 33");
     tt->comment_hdr = tdrpStrDup("USE ECHO ORIENTATION TO INFORM INTERPOLATION GEOMETRY");
     tt->comment_text = tdrpStrDup("Vertically-oriented echoes (convective) should be interpolated in the vertical. Horizontally-oriented echoes (stratiform, bright-band, anvil) should be interpolated in the horizontal. This attempts to prevent the typical ringing behavior we see in Cartesian products in regionis with layered structures, for example anvils.");
     tt++;

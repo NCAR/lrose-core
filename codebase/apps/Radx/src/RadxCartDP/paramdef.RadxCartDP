@@ -237,7 +237,7 @@ paramdef string {
 } qpe_zr_field_name;
 
 commentdef {
-  p_header = "OUTPUT DATA DIRECTORY";
+  p_header = "OUTPUT DATA";
 }
 
 paramdef string {
@@ -245,6 +245,27 @@ paramdef string {
   p_descr = "Output directory for writing files.";
   p_help = "Files will be written to this directory.";
 } output_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true, name the output file using the start time.";
+  p_help = "If false, the end time is used, in the MDV tradition.";
+} name_file_from_start_time;
+
+paramdef string {
+  p_default = "EOL/NCAR";
+  p_descr = "Institution string for netCDF file.";
+} ncf_institution;
+
+paramdef string {
+  p_default = "";
+  p_descr = "References string for netCDF file.";
+} ncf_references;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Comment string for netCDF file.";
+} ncf_comment;
 
 commentdef {
   p_header = "WRITE DERIVED POLAR DATA FOR DEBUGGING";
@@ -1094,62 +1115,6 @@ paramdef double {
   p_descr = "Gate spacing (km).";
   p_help = "Used for overriding the gate spacing in the data.";
 } gate_spacing_km;
-
-commentdef {
-  p_header = "CF NetCDF OUTPUT DETAILS";
-}
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "If true, name the output file using the start time.";
-  p_help = "If false, the end time is used, in the MDV tradition.";
-} name_file_from_start_time;
-
-paramdef string {
-  p_default = "ncf_";
-  p_descr = "User-specified output file prefix, comes before date_time.";
-} netcdf_file_prefix;
-
-paramdef string {
-  p_default = "";
-  p_descr = "User-specified output file suffix, comes after the date_time and before the .nc which gets automatically added on.";
-} netcdf_file_suffix;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "If true the output filename uses the prefix, followed by ISO 8601 timestamp convention";
-  p_help = "eg. prefix.2008-05-22T14:00:00.nc";
-} use_iso8601_filename_convention;
-
-paramdef string {
-  p_default = "SPOL radar data";
-  p_descr = "Title string for netCDF file.";
-} ncf_title;
-
-paramdef string {
-  p_default = "EOL/NCAR";
-  p_descr = "Institution string for netCDF file.";
-} ncf_institution;
-
-paramdef string {
-  p_default = "";
-  p_descr = "References string for netCDF file.";
-} ncf_references;
-
-paramdef string {
-  p_default = "SPOL radar";
-  p_descr = "Source string for netCDF file.";
-} ncf_source;
-
-paramdef string {
-  p_default = "";
-  p_descr = "History string for netCDF file.";
-} ncf_history;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Comment string for netCDF file.";
-} ncf_comment;
 
 commentdef {
   p_header = "PROCESS CONTROL";
