@@ -708,7 +708,7 @@ void CartBeamBlock::_addBlockageField(Mdvx &mdvx)
 {
   
   if (_params.debug) {
-    cerr << "-->> Adding blockage field: " << _params.blockage_field_name << endl;
+    cerr << "-->> Adding beam extinction field: " << _params.extinction_field_name << endl;
   }
 
   // field header
@@ -743,7 +743,7 @@ void CartBeamBlock::_addBlockageField(Mdvx &mdvx)
   // create field
   
   MdvxField *fld = new MdvxField(fhdr, vhdr);
-  fld->setFieldName(_params.blockage_field_name);
+  fld->setFieldName(_params.extinction_field_name);
   fld->setFieldNameLong("beam_extinction_from_terrain");
   fld->setUnits("");
   fld->setVolData(_blockage.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);

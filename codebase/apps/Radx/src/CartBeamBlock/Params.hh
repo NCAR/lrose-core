@@ -449,7 +449,7 @@ public:
 
   datetime_t output_time_stamp;
 
-  char* blockage_field_name;
+  char* extinction_field_name;
 
   char* elev_field_name;
 

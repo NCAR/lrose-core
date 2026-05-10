@@ -1047,15 +1047,15 @@
       tt->struct_vals[5].i = 0;
     tt++;
     
-    // Parameter 'blockage_field_name'
+    // Parameter 'extinction_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("blockage_field_name");
-    tt->descr = tdrpStrDup("Name of blockge field in MDV output file.");
+    tt->param_name = tdrpStrDup("extinction_field_name");
+    tt->descr = tdrpStrDup("Name of beam extinction field in MDV output file.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &blockage_field_name - &_start_;
+    tt->val_offset = (char *) &extinction_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("extinction");
     tt++;
     

@@ -243,8 +243,8 @@ paramdef struct datetime_t {
 
 paramdef string {
   p_default = "extinction";
-  p_descr = "Name of blockge field in MDV output file.";
-} blockage_field_name;
+  p_descr = "Name of beam extinction field in MDV output file.";
+} extinction_field_name;
 
 paramdef string {
   p_default = "elevation";
