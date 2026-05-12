@@ -679,7 +679,7 @@ public:
 
   tdrp_bool_t interp_time_field;
 
-  tdrp_bool_t output_debug_fields;
+  tdrp_bool_t write_interp_debug_fields;
 
   tdrp_bool_t override_standard_pseudo_earth_radius;
 
@@ -754,7 +754,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[159];
+  mutable TDRPtable _table[158];
 
   const char *_className;
 

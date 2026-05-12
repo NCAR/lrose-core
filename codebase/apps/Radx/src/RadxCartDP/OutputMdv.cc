@@ -398,58 +398,58 @@ void OutputMdv::createFieldAndAdd(const RadxVol &vol,
 /////////////////////////////////////////////////////////
 // create a float field
 
-MdvxField *OutputMdv::makeField(Mdvx::field_header_t &fhdrTemplate,
-                                Mdvx::vlevel_header_t &vhdr,
-                                const fl32 *data,
-                                Mdvx::encoding_type_t outputEncoding,
-                                string fieldName,
-                                string longName,
-                                string units)
+// MdvxField *OutputMdv::makeField(Mdvx::field_header_t &fhdrTemplate,
+//                                 Mdvx::vlevel_header_t &vhdr,
+//                                 const fl32 *data,
+//                                 Mdvx::encoding_type_t outputEncoding,
+//                                 string fieldName,
+//                                 string longName,
+//                                 string units)
   
-{
+// {
 
-  Mdvx::field_header_t fhdr = fhdrTemplate;
-  MdvxField::setFieldName(fieldName, fhdr);
-  MdvxField::setFieldNameLong(longName, fhdr);
-  MdvxField::setUnits(units, fhdr);
-  MdvxField *newField =
-    new MdvxField(fhdr, vhdr, NULL, false, false, false);
-  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
-  size_t volSize = npts * sizeof(fl32);
-  newField->setVolData(data, volSize, Mdvx::ENCODING_FLOAT32);
-  newField->convertType(outputEncoding, Mdvx::COMPRESSION_GZIP);
+//   Mdvx::field_header_t fhdr = fhdrTemplate;
+//   MdvxField::setFieldName(fieldName, fhdr);
+//   MdvxField::setFieldNameLong(longName, fhdr);
+//   MdvxField::setUnits(units, fhdr);
+//   MdvxField *newField =
+//     new MdvxField(fhdr, vhdr, NULL, false, false, false);
+//   size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+//   size_t volSize = npts * sizeof(fl32);
+//   newField->setVolData(data, volSize, Mdvx::ENCODING_FLOAT32);
+//   newField->convertType(outputEncoding, Mdvx::COMPRESSION_GZIP);
 
-  return newField;
+//   return newField;
 
-}
+// }
 
 /////////////////////////////////////////////////////////
 // create a byte field
 
-MdvxField *OutputMdv::makeField(Mdvx::field_header_t &fhdrTemplate,
-                                Mdvx::vlevel_header_t &vhdr,
-                                const ui08 *data,
-                                Mdvx::encoding_type_t outputEncoding,
-                                string fieldName,
-                                string longName,
-                                string units)
+// MdvxField *OutputMdv::makeField(Mdvx::field_header_t &fhdrTemplate,
+//                                 Mdvx::vlevel_header_t &vhdr,
+//                                 const ui08 *data,
+//                                 Mdvx::encoding_type_t outputEncoding,
+//                                 string fieldName,
+//                                 string longName,
+//                                 string units)
   
-{
+// {
   
-  Mdvx::field_header_t fhdr = fhdrTemplate;
-  MdvxField::setFieldName(fieldName, fhdr);
-  MdvxField::setFieldNameLong(longName, fhdr);
-  MdvxField::setUnits(units, fhdr);
-  MdvxField *newField =
-    new MdvxField(fhdr, vhdr, NULL, false, false, false);
-  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
-  size_t volSize = npts * sizeof(ui08);
-  newField->setVolData(data, volSize, Mdvx::ENCODING_INT8);
-  newField->convertType(outputEncoding, Mdvx::COMPRESSION_GZIP);
+//   Mdvx::field_header_t fhdr = fhdrTemplate;
+//   MdvxField::setFieldName(fieldName, fhdr);
+//   MdvxField::setFieldNameLong(longName, fhdr);
+//   MdvxField::setUnits(units, fhdr);
+//   MdvxField *newField =
+//     new MdvxField(fhdr, vhdr, NULL, false, false, false);
+//   size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
+//   size_t volSize = npts * sizeof(ui08);
+//   newField->setVolData(data, volSize, Mdvx::ENCODING_INT8);
+//   newField->convertType(outputEncoding, Mdvx::COMPRESSION_GZIP);
   
-  return newField;
+//   return newField;
 
-}
+// }
 
 ////////////////////////////////////////
 // addChunks()

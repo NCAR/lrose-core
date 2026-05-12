@@ -91,21 +91,21 @@ public:
 
   // make a field
   
-  MdvxField *makeField(Mdvx::field_header_t &fhdrTemplate,
-                       Mdvx::vlevel_header_t &vhdr,
-                       const fl32 *data,
-                       Mdvx::encoding_type_t outputEncoding,
-                       string fieldName,
-                       string longName,
-                       string units);
+  // MdvxField *makeField(Mdvx::field_header_t &fhdrTemplate,
+  //                      Mdvx::vlevel_header_t &vhdr,
+  //                      const fl32 *data,
+  //                      Mdvx::encoding_type_t outputEncoding,
+  //                      string fieldName,
+  //                      string longName,
+  //                      string units);
   
-  MdvxField *makeField(Mdvx::field_header_t &fhdrTemplate,
-                       Mdvx::vlevel_header_t &vhdr,
-                       const ui08 *data,
-                       Mdvx::encoding_type_t outputEncoding,
-                       string fieldName,
-                       string longName,
-                       string units);
+  // MdvxField *makeField(Mdvx::field_header_t &fhdrTemplate,
+  //                      Mdvx::vlevel_header_t &vhdr,
+  //                      const ui08 *data,
+  //                      Mdvx::encoding_type_t outputEncoding,
+  //                      string fieldName,
+  //                      string longName,
+  //                      string units);
 
   // add the radarParams as a chunk
 

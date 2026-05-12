@@ -102,7 +102,7 @@ RadarInterp::RadarInterp(const string &progName,
   
   // create debug fields if needed
 
-  if (_params.output_debug_fields) {
+  if (_params.write_interp_debug_fields) {
     _createDebugFields();
   }
   
