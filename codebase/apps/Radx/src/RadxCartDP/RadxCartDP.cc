@@ -1478,6 +1478,7 @@ void RadxCartDP::_initInterpFields()
   for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
 
     string radxName = fieldNames[ifield];
+    Params::radar_field_t *fieldParams = getRadarField(radxName);
 
     vector<RadxRay *> &rays = _radarVol.getRays();
     for (size_t iray = 0; iray < rays.size(); iray++) {
@@ -1502,6 +1503,9 @@ void RadxCartDP::_initInterpFields()
         }
         if (field->getIsDiscrete()) {
           interpField.isDiscrete = true;
+        }
+        if (fieldParams && fieldParams->do_write) {
+          interpField.writeToFile = true;
         }
         _interpFields.push_back(interpField);
         break;
@@ -3117,6 +3121,22 @@ Params::radar_field_t *RadxCartDP::getRadarField(Params::radar_field_type_t rfty
 {
   for (int ii = 0; ii < _params.radar_fields_n; ii++) {
     if (_params._radar_fields[ii].field_type == rftype) {
+      return &_params._radar_fields[ii];
+    }
+  }
+  // not found
+  return nullptr;
+}
+
+//////////////////////////////////////////////////
+// get radar field from name
+// returns null on error
+// error cannot happen if _checkRadarFields() succeeded
+
+Params::radar_field_t *RadxCartDP::getRadarField(const string &fieldName)
+{
+  for (int ii = 0; ii < _params.radar_fields_n; ii++) {
+    if (fieldName == std::string(_params._radar_fields[ii].input_name)) {
       return &_params._radar_fields[ii];
     }
   }

@@ -255,10 +255,12 @@ void RadarInterp::addToOutputMdv(OutputMdv &out)
   
   for (size_t ifield = 0; ifield < _interpFields.size(); ifield++) {
     const Field &ifld = _interpFields[ifield];
-    out.createFieldAndAdd(_readVol, _proj, _gridZLevels,
-                          ifld.outputName, ifld.longName, ifld.units,
-                          missingFl32,
-                          _interpFields[ifield].outputField.data());
+    if (ifld.writeToFile) {
+      out.createFieldAndAdd(_readVol, _proj, _gridZLevels,
+                            ifld.outputName, ifld.longName, ifld.units,
+                            missingFl32,
+                            _interpFields[ifield].outputField.data());
+    }
   } // ifield
 
   // debug (test) fields

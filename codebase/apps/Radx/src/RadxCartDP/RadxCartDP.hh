@@ -93,13 +93,14 @@ public:
   double getRadarHtKm() const { return _radarHtKm; }
   double getWavelengthM() const { return _wavelengthM; }
 
-  // get radar field from type
+  // get radar field from type or name
   // returns null on error
   // error cannot happen if _checkRadarFields() succeeded
   
   Params::radar_field_t *getRadarField(Params::radar_field_type_t rftype);
-
-  // get field names
+  Params::radar_field_t *getRadarField(const string &fieldName);
+  
+  // get radar field names
   
   string getRadarInputName(Params::radar_field_type_t rftype);
   string getRadarOutputName(Params::radar_field_type_t rftype);

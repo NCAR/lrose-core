@@ -70,9 +70,14 @@ public:
     Radx::DataType_t inputDataType;
     double inputScale;
     double inputOffset;
+    bool writeToFile;
     vector<fl32> outputField;
     Field() {
       fieldFolds = false;
+      isDiscrete = false;
+      foldLimitLower = 0.0;
+      foldLimitUpper = 0.0;
+      foldRange = 0.0;
       isDiscrete = false;
       isBounded = false;
       boundLimitLower = 0.0;
@@ -80,6 +85,7 @@ public:
       inputDataType = Radx::FL32;
       inputScale = 1.0;
       inputOffset = 0.0;
+      writeToFile = false;
     }
   };
 
