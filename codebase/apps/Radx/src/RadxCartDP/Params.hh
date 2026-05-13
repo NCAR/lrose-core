@@ -520,10 +520,6 @@ public:
 
   int model_search_margin_secs;
 
-  tdrp_bool_t write_interpolated_model_data;
-
-  char* interpolated_model_output_url;
-
   model_field_t *_model_fields;
   int model_fields_n;
 
@@ -754,7 +750,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[158];
+  mutable TDRPtable _table[156];
 
   const char *_className;
 

@@ -95,7 +95,7 @@ public:
 
   // get radar field from type or name
   // returns null on error
-  // error cannot happen if _checkRadarFields() succeeded
+  // NOTE: error cannot happen if _checkRadarFields() succeeded
   
   Params::radar_field_t *getRadarField(Params::radar_field_type_t rftype);
   Params::radar_field_t *getRadarField(const string &fieldName);
@@ -105,11 +105,12 @@ public:
   string getRadarInputName(Params::radar_field_type_t rftype);
   string getRadarOutputName(Params::radar_field_type_t rftype);
 
-  // get model field from type
+  // get model field from type or name
   // returns null on error
-  // error cannot happen if _checkModelFields() succeeded
+  // NOTE: error cannot happen if _checkModelFields() succeeded
   
   Params::model_field_t *getModelField(Params::model_field_type_t mftype);
+  Params::model_field_t *getModelField(const string &fieldName);
 
   string getModelInputName(Params::model_field_type_t mftype);
   string getModelOutputName(Params::model_field_type_t mftype);

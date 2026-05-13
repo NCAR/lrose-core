@@ -719,7 +719,7 @@
     tt->array_offset = (char *) &_radar_fields - &_start_;
     tt->array_n_offset = (char *) &radar_fields_n - &_start_;
     tt->is_array = TRUE;
-    tt->array_len_fixed = TRUE;
+    tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(radar_field_t);
     tt->array_n = 9;
     tt->struct_def.name = tdrpStrDup("radar_field_t");
@@ -880,30 +880,6 @@
     tt->single_val.i = 3600;
     tt++;
     
-    // Parameter 'write_interpolated_model_data'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_interpolated_model_data");
-    tt->descr = tdrpStrDup("Write out interpolated model data?");
-    tt->help = tdrpStrDup("This is useful for debugging.");
-    tt->val_offset = (char *) &write_interpolated_model_data - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'interpolated_model_output_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("interpolated_model_output_url");
-    tt->descr = tdrpStrDup("URL for interpolated model data, in MDV/Netcdf-CF format.");
-    tt->help = tdrpStrDup("We interpolate the model data onto the output grid. Writing out this data is useful for debugging, allowing us to compare the original model with the interpolated model.");
-    tt->val_offset = (char *) &interpolated_model_output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdv/interp_model");
-    tt++;
-    
     // Parameter 'model_fields'
     // ctype is '_model_field_t'
     
@@ -915,7 +891,7 @@
     tt->array_offset = (char *) &_model_fields - &_start_;
     tt->array_n_offset = (char *) &model_fields_n - &_start_;
     tt->is_array = TRUE;
-    tt->array_len_fixed = TRUE;
+    tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(model_field_t);
     tt->array_n = 5;
     tt->struct_def.name = tdrpStrDup("model_field_t");

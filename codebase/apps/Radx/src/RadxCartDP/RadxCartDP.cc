@@ -1660,7 +1660,7 @@ int RadxCartDP::_readModel()
                             radarTime);
 
   for (int ii = 0; ii < _params.model_fields_n; ii++) {
-    if (strlen(_params._model_fields[ii].input_name) == 0) {
+    if (_params._model_fields[ii].is_available) {
       continue;
     }
     _modelRawMdvx.addReadField(_params._model_fields[ii].input_name);
@@ -1682,29 +1682,29 @@ int RadxCartDP::_readModel()
 
   // rename fields as appropriate
 
-  for (size_t ifld = 0; ifld < _modelInterpMdvx.getNFields(); ifld++) {
-    MdvxField *fld = _modelInterpMdvx.getField(ifld);
-    string inputName = fld->getFieldName();
-    Params::model_field_type_t mtype = getModelTypeFromInputName(inputName);
-    string outputName = getModelOutputName(mtype);
-    fld->setFieldName(outputName);
-  }
+  // for (size_t ifld = 0; ifld < _modelInterpMdvx.getNFields(); ifld++) {
+  //   MdvxField *fld = _modelInterpMdvx.getField(ifld);
+  //   string inputName = fld->getFieldName();
+  //   Params::model_field_type_t mtype = getModelTypeFromInputName(inputName);
+  //   string outputName = getModelOutputName(mtype);
+  //   fld->setFieldName(outputName);
+  // }
 
   // debug write
   
-  if (_params.write_interpolated_model_data) {
-    if (_params.debug) {
-      cerr << "Writing interpolated model data file" << endl;
-    }
-    if (_modelInterpMdvx.writeToDir(_params.interpolated_model_output_url)) {
-      cerr << "WARNING - error writing model data" << endl;
-      cerr << _modelInterpMdvx.getErrStr() << endl;
-    }
-    if (_params.debug) {
-      cerr << "Wrote interpolated model data, path: "
-           << _modelInterpMdvx.getPathInUse() << endl;
-    }
-  }
+  // if (_params.write_interpolated_model_data) {
+  //   if (_params.debug) {
+  //     cerr << "Writing interpolated model data file" << endl;
+  //   }
+  //   if (_modelInterpMdvx.writeToDir(_params.interpolated_model_output_url)) {
+  //     cerr << "WARNING - error writing model data" << endl;
+  //     cerr << _modelInterpMdvx.getErrStr() << endl;
+  //   }
+  //   if (_params.debug) {
+  //     cerr << "Wrote interpolated model data, path: "
+  //          << _modelInterpMdvx.getPathInUse() << endl;
+  //   }
+  // }
   
   // compute the temperature profile from the model data
 
@@ -1728,7 +1728,7 @@ int RadxCartDP::_computeTempProfile()
   _tempProfile.clear();
 
   MdvxField *tempFld =
-    _modelInterpMdvx.getField(getModelOutputName(Params::TEMP).c_str());
+    _modelInterpMdvx.getField(getModelInputName(Params::TEMP).c_str());
   if (tempFld == nullptr) {
     cerr << "ERROR - RadxCartDP::_computeTempProfile" << endl;
     cerr << "  Cannot find temp field in model, time: "
@@ -1790,7 +1790,6 @@ void RadxCartDP::_interpModelToOutputGrid()
     string rawName = rawFld->getFieldName();
     //if (strlen(_params.model_fields[ifield].
     _modelInterpMdvx.addField(interpField);
-    
   } // ifield
   
 }
@@ -1907,7 +1906,7 @@ int RadxCartDP::_computePid()
     return -1;
   }
 
-  string modelTempName = getModelOutputName(Params::TEMP);
+  string modelTempName = getModelInputName(Params::TEMP);
   MdvxField *tempFld = _modelInterpMdvx.getField(modelTempName.c_str());
   if (!tempFld) {
     cerr << "ERROR - _computePID" << endl;
@@ -2304,11 +2303,11 @@ int RadxCartDP::_computeConvStrat()
   // set the temperature arrays
   
   MdvxField *tempFld =
-    _modelInterpMdvx.getField(getModelOutputName(Params::TEMP).c_str());
+    _modelInterpMdvx.getField(getModelInputName(Params::TEMP).c_str());
   if (tempFld == nullptr) {
     cerr << "ERROR - RadxCartDP::_computeConvStrat" << endl;
     cerr << "  Cannot find temp field in model: "
-         << getModelOutputName(Params::TEMP).c_str() << endl;
+         << getModelInputName(Params::TEMP).c_str() << endl;
     return -1;
   }
   const fl32 *tempVol = (const fl32 *) tempFld->getVol();
@@ -2561,10 +2560,17 @@ int RadxCartDP::_writeOutputMdv()
   // add the model fields
 
   for (size_t ii = 0; ii < _modelInterpMdvx.getNFields(); ii++) {
-    // make a copy of the field, since the mdvx object takes memory ownership
-    MdvxField *field = new MdvxField(*_modelInterpMdvx.getField(ii));
-    // add to output object
-    out.addField(field);
+    // check whether this should be written
+    string fieldName = _modelInterpMdvx.getField(ii)->getFieldName();
+    Params::model_field_t *modelField = getModelField(fieldName);
+    if (modelField && modelField->do_write) {
+      // make a copy of the field, since the mdvx object takes memory ownership
+      MdvxField *ofld = new MdvxField(*_modelInterpMdvx.getField(ii));
+      // rename
+      ofld->setFieldName(modelField->output_name);
+      // add to output object
+      out.addField(ofld);
+    }
   } // ii
 
   // add PID fields
@@ -3115,7 +3121,7 @@ string RadxCartDP::_radarFieldType2Str(Params::radar_field_type_t rftype)
 //////////////////////////////////////////////////
 // get radar field from type
 // returns null on error
-// error cannot happen if _checkRadarFields() succeeded
+// NOTE: error cannot happen if _checkRadarFields() succeeded
 
 Params::radar_field_t *RadxCartDP::getRadarField(Params::radar_field_type_t rftype)
 {
@@ -3131,7 +3137,7 @@ Params::radar_field_t *RadxCartDP::getRadarField(Params::radar_field_type_t rfty
 //////////////////////////////////////////////////
 // get radar field from name
 // returns null on error
-// error cannot happen if _checkRadarFields() succeeded
+// NOTE: error cannot happen if _checkRadarFields() succeeded
 
 Params::radar_field_t *RadxCartDP::getRadarField(const string &fieldName)
 {
@@ -3172,12 +3178,28 @@ string RadxCartDP::getRadarOutputName(Params::radar_field_type_t rftype)
 //////////////////////////////////////////////////
 // get model field from type
 // returns null on error
-// error cannot happen if _checkModelFields() succeeded
+// NOTE: error cannot happen if _checkModelFields() succeeded
 
 Params::model_field_t *RadxCartDP::getModelField(Params::model_field_type_t rftype)
 {
   for (int ii = 0; ii < _params.model_fields_n; ii++) {
     if (_params._model_fields[ii].field_type == rftype) {
+      return &_params._model_fields[ii];
+    }
+  }
+  // not found
+  return nullptr;
+}
+
+//////////////////////////////////////////////////
+// get model field from name
+// returns null on error
+// NOTE: error cannot happen if _checkModelFields() succeeded
+
+Params::model_field_t *RadxCartDP::getModelField(const string &fieldName)
+{
+  for (int ii = 0; ii < _params.model_fields_n; ii++) {
+    if (fieldName == std::string(_params._model_fields[ii].input_name)) {
       return &_params._model_fields[ii];
     }
   }
