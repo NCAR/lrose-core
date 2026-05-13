@@ -265,8 +265,8 @@ void RadarInterp::addToOutputMdv(OutputMdv &out)
 
   // debug (test) fields
   
-  for (size_t ii = 0; ii < _derived3DFields.size(); ii++) {
-    const DerivedField *dfld = _derived3DFields[ii];
+  for (size_t ii = 0; ii < _derivedFields3D.size(); ii++) {
+    const DerivedField *dfld = _derivedFields3D[ii];
     if (dfld->writeToFile) {
       out.createFieldAndAdd(_readVol, _proj, dfld->vertLevels,
                             dfld->name, dfld->longName, dfld->units,
@@ -274,13 +274,12 @@ void RadarInterp::addToOutputMdv(OutputMdv &out)
     }
   }
 
-  for (size_t ii = 0; ii < _derived2DFields.size(); ii++) {
-    const DerivedField *dfld = _derived2DFields[ii];
+  for (size_t ii = 0; ii < _derivedFields2D.size(); ii++) {
+    const DerivedField *dfld = _derivedFields2D[ii];
     if (dfld->writeToFile) {
       out.createFieldAndAdd(_readVol, _proj, dfld->vertLevels,
                             dfld->name, dfld->longName, dfld->units,
-                            missingFl32, dfld->data);
-    }
+                            missingFl32, dfld->data);    }
   }
 
   // chunks
@@ -373,42 +372,42 @@ void RadarInterp::_createDebugFields()
 {
   
   _nContribDebug = new DerivedField("nContrib", "n_points_contrib", "count", true);
-  _derived3DFields.push_back(_nContribDebug);
+  _derivedFields3D.push_back(_nContribDebug);
   
   _gridAzDebug = new DerivedField("gridAz", "grid_azimiuth", "deg", true);
-  _derived3DFields.push_back(_gridAzDebug);
+  _derivedFields3D.push_back(_gridAzDebug);
   
   _gridElDebug = new DerivedField("gridEl", "grid_elevation", "deg", true);
-  _derived3DFields.push_back(_gridElDebug);
+  _derivedFields3D.push_back(_gridElDebug);
   
   _gridRangeDebug = new DerivedField("gridRange", "grid_slant_range", "km", true);
-  _derived3DFields.push_back(_gridRangeDebug);
+  _derivedFields3D.push_back(_gridRangeDebug);
   
   _llElDebug = new DerivedField("llEl", "lower_left_el", "deg", true);
-  _derived3DFields.push_back(_llElDebug);
+  _derivedFields3D.push_back(_llElDebug);
   _llAzDebug = new DerivedField("llAz", "lower_left_az", "deg", true);
-  _derived3DFields.push_back(_llAzDebug);
+  _derivedFields3D.push_back(_llAzDebug);
   
   _lrElDebug = new DerivedField("lrEl", "lower_right_el", "deg", true);
-  _derived3DFields.push_back(_lrElDebug);
+  _derivedFields3D.push_back(_lrElDebug);
   _lrAzDebug = new DerivedField("lrAz", "lower_right_az", "deg", true);
-  _derived3DFields.push_back(_lrAzDebug);
+  _derivedFields3D.push_back(_lrAzDebug);
   
   _ulElDebug = new DerivedField("ulEl", "upper_left_el", "deg", true);
-  _derived3DFields.push_back(_ulElDebug);
+  _derivedFields3D.push_back(_ulElDebug);
   _ulAzDebug = new DerivedField("ulAz", "upper_left_az", "deg", true);
-  _derived3DFields.push_back(_ulAzDebug);
+  _derivedFields3D.push_back(_ulAzDebug);
   
   _urElDebug = new DerivedField("urEl", "upper_right_el", "deg", true);
-  _derived3DFields.push_back(_urElDebug);
+  _derivedFields3D.push_back(_urElDebug);
   _urAzDebug = new DerivedField("urAz", "upper_right_az", "deg", true);
-  _derived3DFields.push_back(_urAzDebug);
+  _derivedFields3D.push_back(_urAzDebug);
 
   if (_params.use_echo_orientation) {
     _sdevDbzH = new DerivedField("SdevDbzH", "sdev_of_dbz_horizontal", "dBZ", true);
-    _derived3DFields.push_back(_sdevDbzH);
+    _derivedFields3D.push_back(_sdevDbzH);
     _sdevDbzV = new DerivedField("SdevDbzV", "sdev_of_dbz_vertical", "dBZ", true);
-    _derived3DFields.push_back(_sdevDbzV);
+    _derivedFields3D.push_back(_sdevDbzV);
   }
   
 }
@@ -419,14 +418,14 @@ void RadarInterp::_createDebugFields()
 void RadarInterp::_freeDerivedFields()
   
 {
-  for (size_t ii = 0; ii < _derived3DFields.size(); ii++) {
-    delete _derived3DFields[ii];
+  for (size_t ii = 0; ii < _derivedFields3D.size(); ii++) {
+    delete _derivedFields3D[ii];
   }
-  _derived3DFields.clear();
-  for (size_t ii = 0; ii < _derived2DFields.size(); ii++) {
-    delete _derived2DFields[ii];
+  _derivedFields3D.clear();
+  for (size_t ii = 0; ii < _derivedFields2D.size(); ii++) {
+    delete _derivedFields2D[ii];
   }
-  _derived2DFields.clear();
+  _derivedFields2D.clear();
 }
 
 
@@ -508,14 +507,14 @@ void RadarInterp::_initGrid()
     }
   }
 
-  for (size_t ii = 0; ii < _derived3DFields.size(); ii++) {
-    _derived3DFields[ii]->alloc(_nPointsVol, _gridZLevels);
+  for (size_t ii = 0; ii < _derivedFields3D.size(); ii++) {
+    _derivedFields3D[ii]->alloc(_nPointsVol, _gridZLevels);
   }
 
   vector<double> singleLevel;
   singleLevel.push_back(0.0);
-  for (size_t ii = 0; ii < _derived2DFields.size(); ii++) {
-    _derived2DFields[ii]->alloc(_nPointsPlane, singleLevel);
+  for (size_t ii = 0; ii < _derivedFields2D.size(); ii++) {
+    _derivedFields2D[ii]->alloc(_nPointsPlane, singleLevel);
   }
 
 }

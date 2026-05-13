@@ -177,8 +177,8 @@ private:
 
   DerivedField *_sdZdr;
   
-  vector<DerivedField *> _derived3DFields;
-  vector<DerivedField *> _derived2DFields;
+  vector<DerivedField *> _derivedFields3D;
+  vector<DerivedField *> _derivedFields2D;
 
   // echo orientation
 
