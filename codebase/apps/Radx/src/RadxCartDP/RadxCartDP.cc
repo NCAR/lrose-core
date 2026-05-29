@@ -95,12 +95,12 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   Mdvx::initStruct(_interpCoord);
 
   _pidField = nullptr;
-  _pidModeField = nullptr;
+  // _pidModeField = nullptr;
 
   _rateZrField = nullptr;
   _rateHybridField = nullptr;
-  _rateZrFiltField = nullptr;
-  _rateHybridFiltField = nullptr;
+  // _rateZrFiltField = nullptr;
+  // _rateHybridFiltField = nullptr;
 
   _qpeZrField = nullptr;
   _qpeHybridField = nullptr;
@@ -1944,23 +1944,6 @@ int RadxCartDP::_computePid()
     
   } // ii
   
-  // create MdvxField for pid
-  
-  Mdvx::field_header_t pidFhdr(tempFld->getFieldHeader());
-  Mdvx::vlevel_header_t pidVhdr(tempFld->getVlevelHeader());
-  
-  pidFhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
-  pidFhdr.compression_type = Mdvx::COMPRESSION_NONE;
-  pidFhdr.data_element_nbytes = sizeof(fl32);
-  pidFhdr.volume_size = _interpNpointsVol * sizeof(fl32);
-  
-  _pidField = new MdvxField(pidFhdr, pidVhdr, _pidArray.data());
-  _pidField->setFieldName(pidFieldName);
-  _pidField->setFieldNameLong("hydrometeor_particle_type");
-  _pidField->setUnits("");
-  _pidField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
-                         Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
-
   // create PID field filtered with a mode in 2D planes
 
   if (_params.debug) {
@@ -1980,12 +1963,30 @@ int RadxCartDP::_computePid()
     cerr << "DONE applying mode filter to PID" << endl;
   }
   
-  _pidModeField = new MdvxField(pidFhdr, pidVhdr, _pidFilt.data());
-  _pidModeField->setFieldName("PID_FILT");
-  _pidModeField->setFieldNameLong("hydrometeor_particle_type");
-  _pidModeField->setUnits("");
-  _pidModeField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
-                             Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+  // create MdvxField for pid
+  
+  Mdvx::field_header_t pidFhdr(tempFld->getFieldHeader());
+  Mdvx::vlevel_header_t pidVhdr(tempFld->getVlevelHeader());
+  
+  pidFhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  pidFhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  pidFhdr.data_element_nbytes = sizeof(fl32);
+  pidFhdr.volume_size = _interpNpointsVol * sizeof(fl32);
+  
+  // _pidField = new MdvxField(pidFhdr, pidVhdr, _pidArray.data());
+  // _pidField->setFieldName(pidFieldName);
+  // _pidField->setFieldNameLong("hydrometeor_particle_type");
+  // _pidField->setUnits("");
+  // _pidField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+  //                        Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+
+  _pidField = new MdvxField(pidFhdr, pidVhdr, _pidFilt.data());
+  _pidField->setFieldName(pidFieldName);
+  // _pidField->setFieldName("PID_FILT");
+  _pidField->setFieldNameLong("hydrometeor_particle_type");
+  _pidField->setUnits("");
+  _pidField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+                         Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
   
   if (_params.debug) {
     cerr << "DONE computing PID" << endl;
@@ -2050,30 +2051,6 @@ int RadxCartDP::_computePrecip()
     
   } // ii
   
-  // create MdvxFields for precip
-  
-  Mdvx::field_header_t rateFhdr(_pidField->getFieldHeader());
-  Mdvx::vlevel_header_t rateVhdr(_pidField->getVlevelHeader());
-  
-  rateFhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
-  rateFhdr.compression_type = Mdvx::COMPRESSION_NONE;
-  rateFhdr.data_element_nbytes = sizeof(fl32);
-  rateFhdr.volume_size = _interpNpointsVol * sizeof(fl32);
-
-  _rateZrField = new MdvxField(rateFhdr, rateVhdr, rateZrArray.data());
-  _rateZrField->setFieldName(rateZrFieldName);
-  _rateZrField->setFieldNameLong("precip_rate_from_reflectivity");
-  _rateZrField->setUnits("mm/hr");
-  _rateZrField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
-                            Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
-  
-  _rateHybridField = new MdvxField(rateFhdr, rateVhdr, rateHybridArray.data());
-  _rateHybridField->setFieldName(rateHybridFieldName);
-  _rateHybridField->setFieldNameLong("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
-  _rateHybridField->setUnits("mm/hr");
-  _rateHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
-                                Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
-
   // median filter for precip
   
   if (_params.debug) {
@@ -2099,19 +2076,49 @@ int RadxCartDP::_computePrecip()
                   _radarInterp->getGridNx(),
                   kernelSize, Radx::missingFl32, true);
  
-  _rateZrFiltField = new MdvxField(rateFhdr, rateVhdr, _rateZrFilt.data());
-  _rateZrFiltField->setFieldName("RATE_ZR_FILT");
-  _rateZrFiltField->setFieldNameLong("precip_rate_from_reflectivity");
-  _rateZrFiltField->setUnits("mm/hr");
-  _rateZrFiltField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
-                                Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+  if (_params.debug) {
+    cerr << "Done applying median filter to precip" << endl;
+  }
   
-  _rateHybridFiltField = new MdvxField(rateFhdr, rateVhdr, _rateHybridFilt.data());
-  _rateHybridFiltField->setFieldName("RATE_HYBRID_FILT");
-  _rateHybridFiltField->setFieldNameLong("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
-  _rateHybridFiltField->setUnits("mm/hr");
-  _rateHybridFiltField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
-                                    Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+  // create MdvxFields for precip
+  
+  Mdvx::field_header_t rateFhdr(_pidField->getFieldHeader());
+  Mdvx::vlevel_header_t rateVhdr(_pidField->getVlevelHeader());
+  
+  rateFhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  rateFhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  rateFhdr.data_element_nbytes = sizeof(fl32);
+  rateFhdr.volume_size = _interpNpointsVol * sizeof(fl32);
+
+  // _rateZrField = new MdvxField(rateFhdr, rateVhdr, rateZrArray.data());
+  // _rateZrField->setFieldName(rateZrFieldName);
+  // _rateZrField->setFieldNameLong("precip_rate_from_reflectivity");
+  // _rateZrField->setUnits("mm/hr");
+  // _rateZrField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+  //                           Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+  
+  // _rateHybridField = new MdvxField(rateFhdr, rateVhdr, rateHybridArray.data());
+  // _rateHybridField->setFieldName(rateHybridFieldName);
+  // _rateHybridField->setFieldNameLong("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
+  // _rateHybridField->setUnits("mm/hr");
+  // _rateHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+  //                               Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+
+  _rateZrField = new MdvxField(rateFhdr, rateVhdr, _rateZrFilt.data());
+  _rateZrField->setFieldName(rateZrFieldName);
+  // _rateZrField->setFieldName("RATE_ZR_FILT");
+  _rateZrField->setFieldNameLong("precip_rate_from_reflectivity");
+  _rateZrField->setUnits("mm/hr");
+  _rateZrField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+                            Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
+  
+  _rateHybridField = new MdvxField(rateFhdr, rateVhdr, _rateHybridFilt.data());
+  _rateHybridField->setFieldName(rateHybridFieldName);
+  // _rateHybridField->setFieldName("RATE_HYBRID_FILT");
+  _rateHybridField->setFieldNameLong("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
+  _rateHybridField->setUnits("mm/hr");
+  _rateHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
+                                Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
   
   if (_params.debug) {
     cerr << "DONE applying median filter to precip" << endl;
@@ -2206,7 +2213,7 @@ int RadxCartDP::_computeQpe()
 
   // field header
   
-  Mdvx::field_header_t fhdr(_rateZrFiltField->getFieldHeader());
+  Mdvx::field_header_t fhdr(_rateZrField->getFieldHeader());
   fhdr.nz = 1;
   fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
   fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
@@ -2239,8 +2246,8 @@ int RadxCartDP::_computeQpe()
   
   _qpeHybridField = new MdvxField(fhdr, vhdr);
   _qpeHybridField->setFieldName(_params.qpe_hybrid_field_name);
-  _qpeHybridField->setFieldNameLong(_rateZrFiltField->getFieldNameLong());
-  _qpeHybridField->setUnits(_rateZrFiltField->getUnits());
+  _qpeHybridField->setFieldNameLong(_rateZrField->getFieldNameLong());
+  _qpeHybridField->setUnits(_rateZrField->getUnits());
   _qpeHybridField->setVolData(_qpeHybrid.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
   _qpeHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
 
@@ -2248,8 +2255,8 @@ int RadxCartDP::_computeQpe()
 
   _qpeZrField = new MdvxField(fhdr, vhdr);
   _qpeZrField->setFieldName(_params.qpe_zr_field_name);
-  _qpeZrField->setFieldNameLong(_rateZrFiltField->getFieldNameLong());
-  _qpeZrField->setUnits(_rateZrFiltField->getUnits());
+  _qpeZrField->setFieldNameLong(_rateZrField->getFieldNameLong());
+  _qpeZrField->setUnits(_rateZrField->getUnits());
   _qpeZrField->setVolData(_qpeZr.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
   _qpeZrField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
 
@@ -2579,10 +2586,10 @@ int RadxCartDP::_writeOutputMdv()
     out.addField(_pidField);
     _pidField = nullptr; // memory handling passed to output mdv object
   }
-  if (_pidModeField) {
-    out.addField(_pidModeField);
-    _pidModeField = nullptr; // memory handling passed to output mdv object
-  }
+  // if (_pidModeField) {
+  //   out.addField(_pidModeField);
+  //   _pidModeField = nullptr; // memory handling passed to output mdv object
+  // }
   
   // add precip rate fields
 
@@ -2595,14 +2602,14 @@ int RadxCartDP::_writeOutputMdv()
     _rateHybridField = nullptr; // memory handling passed to output mdv object
   }
 
-  if (_rateZrFiltField) {
-    out.addField(_rateZrFiltField);
-    _rateZrFiltField = nullptr; // memory handling passed to output mdv object
-  }
-  if (_rateHybridFiltField) {
-    out.addField(_rateHybridFiltField);
-    _rateHybridFiltField = nullptr; // memory handling passed to output mdv object
-  }
+  // if (_rateZrFiltField) {
+  //   out.addField(_rateZrFiltField);
+  //   _rateZrFiltField = nullptr; // memory handling passed to output mdv object
+  // }
+  // if (_rateHybridFiltField) {
+  //   out.addField(_rateHybridFiltField);
+  //   _rateHybridFiltField = nullptr; // memory handling passed to output mdv object
+  // }
   
   // add QPE fields
 
