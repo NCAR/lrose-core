@@ -1350,51 +1350,28 @@ void Cf2RadxFile::_readLocation()
 
 {
 
-  // loop through the variables, checking for latitude, longitude, altitude
+  // latitude
+     
+  try {
+    _file.readDoubleVar(LATITUDE, _latitude, Radx::missingFl64);
+  } catch (NcxxException &e) {
+    _latitude = 0.0;
+    cerr << "WARNING - Cf2RadxFile::_readLocation" << endl;
+    cerr << "  No latitude variable" << endl;
+    cerr << "  Setting latitude to 0" << endl;
+  }
+     
+  // longitude
 
-  const multimap<string, NcxxVar> &vars = _sweepGroup.getVars();
-   
-  for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
-       iter != vars.end(); iter++) {
-     
-    NcxxVar var = iter->second;
-    if (var.isNull()) {
-      continue;
-    }
-    string name = var.getName();
-    int numDims = var.getDimCount();
-    if (numDims != 1) {
-      continue;
-    }
-     
-    // latitude
-     
-    if (name.find("latitude") != string::npos) {
-      try {
-        _file.readDoubleVar(name, _latitude, Radx::missingFl64);
-      } catch (NcxxException &e) {
-        _latitude = 0.0;
-        cerr << "WARNING - Cf2RadxFile::_readLocation" << endl;
-        cerr << "  No latitude variable" << endl;
-        cerr << "  Setting latitude to 0" << endl;
-      }
-    }
-     
-    // longitude
+  try {
+    _file.readDoubleVar(LONGITUDE, _longitude, Radx::missingFl64);
+  } catch (NcxxException &e) {
+    _longitude = 0.0;
+    cerr << "WARNING - Cf2RadxFile::_readLocation" << endl;
+    cerr << "  No longitude variable" << endl;
+    cerr << "  Setting longitude to 0" << endl;
+  }
 
-    if (name.find("longitude") != string::npos) {
-      try {
-        _file.readDoubleVar(name, _longitude, Radx::missingFl64);
-      } catch (NcxxException &e) {
-        _longitude = 0.0;
-        cerr << "WARNING - Cf2RadxFile::_readLocation" << endl;
-        cerr << "  No longitude variable" << endl;
-        cerr << "  Setting longitude to 0" << endl;
-      }
-    }
-
-  } // multimap iter
-     
   // altitude
 
   try {

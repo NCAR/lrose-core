@@ -55,13 +55,14 @@ GemSweepField::GemSweepField(int num, bool debug, bool verbose) :
 
   clear();
   _initPulseWidths();
+  _volNum = 0;
   
 }
 
 // Copy constructor
 
 GemSweepField::GemSweepField(const GemSweepField &orig, int num, 
-                   bool debug, bool verbose) :
+                             bool debug, bool verbose) :
         _debug(debug),
         _verbose(verbose),
         _sweepNum(num),
