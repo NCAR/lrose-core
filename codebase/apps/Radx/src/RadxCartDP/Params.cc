@@ -2332,7 +2332,7 @@
     tt->descr = tdrpStrDup("Name of range field, if written.");
     tt->help = tdrpStrDup("See 'output_range_field'.");
     tt->val_offset = (char *) &range_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("range");
+    tt->single_val.s = tdrpStrDup("SlantRange");
     tt++;
     
     // Parameter 'output_height_field'
@@ -2356,7 +2356,7 @@
     tt->descr = tdrpStrDup("Name of height field, if written.");
     tt->help = tdrpStrDup("See 'output_height_field'.");
     tt->val_offset = (char *) &height_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("height");
+    tt->single_val.s = tdrpStrDup("BeamHt");
     tt++;
     
     // Parameter 'output_coverage_field'

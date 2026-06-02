@@ -1551,6 +1551,61 @@ void RadxCartDP::_initInterpFields()
     } // ii
   }
 
+  // range field
+  
+  if (_params.output_range_field) {
+    BaseInterp::Field rangeField;
+    rangeField.radxName = _params.range_field_name;
+    rangeField.outputName = _params.range_field_name;
+    rangeField.longName = "slant_range";
+    rangeField.standardName = "slant_range";
+    rangeField.units = "km";
+    rangeField.isDiscrete = false;
+    rangeField.writeToFile = true;
+    _interpFields.push_back(rangeField);
+  }
+
+  // height field
+  
+  if (_params.output_height_field) {
+    BaseInterp::Field heightField;
+    heightField.radxName = _params.height_field_name;
+    heightField.outputName = _params.height_field_name;
+    heightField.longName = "beam_height";
+    heightField.standardName = "height";
+    heightField.units = "km";
+    heightField.isDiscrete = false;
+    heightField.writeToFile = true;
+    _interpFields.push_back(heightField);
+  }
+
+  // coverage field
+  
+  if (_params.output_coverage_field) {
+    BaseInterp::Field coverageField;
+    coverageField.radxName = _params.coverage_field_name;
+    coverageField.outputName = _params.coverage_field_name;
+    coverageField.longName = "radar_coverage";
+    coverageField.standardName = "radar_coverage";
+    coverageField.units = "";
+    coverageField.isDiscrete = true;
+    coverageField.writeToFile = true;
+    _interpFields.push_back(coverageField);
+  }
+
+  // time field
+  
+  if (_params.output_time_field) {
+    BaseInterp::Field timeField;
+    timeField.radxName = _params.time_field_name;
+    timeField.outputName = _params.time_field_name;
+    timeField.longName = "time_since_start_of_volume";
+    timeField.standardName = "time";
+    timeField.units = "secs";
+    timeField.writeToFile = true;
+    _interpFields.push_back(timeField);
+  }
+
 }
 
 ////////////////////////////////////////////////////////////
@@ -2312,7 +2367,7 @@ int RadxCartDP::_computeConvStrat()
   MdvxField *tempFld =
     _modelInterpMdvx.getField(getModelInputName(Params::TEMP).c_str());
   if (tempFld == nullptr) {
-    cerr << "ERROR - RadxCartDP::_computeConvStrat" << endl;
+    cerr << "ERROR - _computeConvStrat" << endl;
     cerr << "  Cannot find temp field in model: "
          << getModelInputName(Params::TEMP).c_str() << endl;
     return -1;
@@ -2326,14 +2381,14 @@ int RadxCartDP::_computeConvStrat()
   string dbzFieldName(getRadarInputName(Params::DBZ));
   BaseInterp::Field *dbzFld = _getInterpField(dbzFieldName);
   if (!dbzFld) {
-    cerr << "ERROR - RadarInterp::_computeConvStrat()" << endl;
+    cerr << "ERROR - _computeConvStrat()" << endl;
     cerr << "  Cannot find dbz field: " << dbzFieldName << endl;
     cerr << "  conv/strat partition will not be computed" << endl;
     return -1;
   }
   fl32 *dbzVals = dbzFld->outputField.data();
   if (dbzVals == NULL) {
-    cerr << "ERROR - RadarInterp::_computeConvStrat()" << endl;
+    cerr << "ERROR - _computeConvStrat()" << endl;
     cerr << "  Cannot find dbz data: " << dbzFieldName << endl;
     cerr << "  conv/strat partition will not be computed" << endl;
     return -1;
@@ -2342,7 +2397,7 @@ int RadxCartDP::_computeConvStrat()
   // compute the convective/stratiform partition
   
   if (_convStrat.computeEchoType(dbzVals, Radx::missingFl32)) {
-    cerr << "ERROR - RadarInterp::_computeConvStrat()" << endl;
+    cerr << "ERROR - _computeConvStrat()" << endl;
     cerr << "  _convStrat.computePartition() failed" << endl;
     return -1;
   }

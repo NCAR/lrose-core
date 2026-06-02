@@ -952,7 +952,7 @@ paramdef boolean {
 } output_range_field;
 
 paramdef string {
-  p_default = "range";
+  p_default = "SlantRange";
   p_descr = "Name of range field, if written.";
   p_help = "See 'output_range_field'.";
 } range_field_name;
@@ -964,7 +964,7 @@ paramdef boolean {
 } output_height_field;
 
 paramdef string {
-  p_default = "height";
+  p_default = "BeamHt";
   p_descr = "Name of height field, if written.";
   p_help = "See 'output_height_field'.";
 } height_field_name;
