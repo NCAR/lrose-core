@@ -211,15 +211,12 @@ private:
   
   NcarParticleId _pid;
   MdvxField *_pidField;
-  // MdvxField *_pidModeField;
   vector<fl32> _pidArray, _pidFilt;
 
   // PRECIP
   
   MdvxField *_rateZrField;
   MdvxField *_rateHybridField;
-  // MdvxField *_rateZrFiltField;
-  // MdvxField *_rateHybridFiltField;
   vector<fl32> _rateZrFilt, _rateHybridFilt;
 
   // Beam Blockage and terrain height

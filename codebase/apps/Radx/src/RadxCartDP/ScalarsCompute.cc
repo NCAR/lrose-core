@@ -55,13 +55,11 @@ ScalarsCompute::ScalarsCompute(RadxCartDP *parent,
                                const Params &params,
                                const KdpFiltParams &kdpFiltParams,
                                const NcarPidParams &ncarPidParams,
-                               // const PrecipRateParams &precipRateParams,
                                int id)  :
         _parent(parent),
         _params(params),
         _kdpFiltParams(kdpFiltParams),
         _ncarPidParams(ncarPidParams),
-        // _precipRateParams(precipRateParams),
         _id(id)
   
 {
@@ -76,8 +74,6 @@ ScalarsCompute::ScalarsCompute(RadxCartDP *parent,
     OK = false;
   }
 
-  // _precipInit();
-
 }
 
 // destructor
@@ -87,33 +83,6 @@ ScalarsCompute::~ScalarsCompute()
 {
 
 }
-
-///////////////////////////////////////////////////////////
-// Load the temperature profile for PID computations,
-// for the specified time.
-// This reads in a new sounding if needed.
-// If no sounding is available, the static profile is used
-
-// void ScalarsCompute::loadTempProfile(time_t dataTime)
-// {
-//   _pid.loadTempProfile(dataTime);
-// }
-
-///////////////////////////////////////////////////////////
-// Set the temperature profile
-
-// void ScalarsCompute::setTempProfile(const TempProfile &profile)
-// {
-//   _pid.setTempProfile(profile);
-// }
-
-///////////////////////////////////////////////////////////
-// Get the temperature profile
-
-// const TempProfile &ScalarsCompute::getTempProfile() const
-// {
-//   return _pid.getTempProfile();
-// }
 
 //////////////////////////////////////////////////
 // compute the derived fields for given input ray
@@ -172,16 +141,8 @@ RadxRay *ScalarsCompute::doCompute(RadxRay *inputRay,
 
   // compute pid
 
-  // if (_pid.loadTempProfile(inputRay->getTimeSecs())) {
-  //   cerr << "ERROR - RadxRate::ScalarsCompute - cannot load temp profile" << endl;
-  //   return NULL;
-  // }
   _pidPrepare();
 
-  // compute precip
-
-  // _precipCompute();
-  
   // load output fields into the moments ray
   
   _loadOutputFields(inputRay, outputRay);
@@ -308,65 +269,6 @@ void ScalarsCompute::_pidPrepare()
   
 }
 
-#ifdef NOTNOW
-
-//////////////////////////////////////
-// initialize PRECIP
-  
-void ScalarsCompute::_precipInit()
-  
-{
-
-  // initialize PRECIP object
-
-  _precip.setFromParams(_precipRateParams);
-
-}
-
-//////////////////////////////////////
-// compute PRECIP
-  
-void ScalarsCompute::_precipCompute()
-  
-{
-  
-  // select fields
-
-  const double *kdpArray = _kdpArray;
-  if (_params.RATE_use_KDP_self_consistency) {
-    kdpArray = _kdpScArray;
-  }
-
-  const double *dbzArray = _dbzArray.data();
-  const double *zdrArray = _zdrArray.data();
-  if (_params.RATE_use_attenuation_corrected_fields) {
-    dbzArray = _kdp.getDbzCorrected();
-    zdrArray = _kdp.getZdrCorrected();
-  }
-
-  // compute rates
-  
-  _precip.computePrecipRates(_nGates, _snrArray.data(),
-                             dbzArray, zdrArray,
-                             kdpArray, missingDbl,
-                             &_pid);
-    
-  // save results
-
-  memcpy(_rateZ, _precip.getRateZ(), _nGates * sizeof(double));
-  memcpy(_rateZSnow, _precip.getRateZSnow(), _nGates * sizeof(double));
-  memcpy(_rateZZdr, _precip.getRateZZdr(), _nGates * sizeof(double));
-  memcpy(_rateKdp, _precip.getRateKdp(), _nGates * sizeof(double));
-  memcpy(_rateKdpZdr, _precip.getRateKdpZdr(), _nGates * sizeof(double));
-  memcpy(_rateHybrid, _precip.getRateHybrid(), _nGates * sizeof(double));
-  memcpy(_ratePid, _precip.getRatePid(), _nGates * sizeof(double));
-  memcpy(_rateHidro, _precip.getRateHidro(), _nGates * sizeof(double));
-  memcpy(_rateBringi, _precip.getRateBringi(), _nGates * sizeof(double));
-
-}
-
-#endif
-
 //////////////////////////////////////
 // alloc computational arrays
   
@@ -383,8 +285,6 @@ void ScalarsCompute::_allocArrays()
 
   _kdpArray.resize(_nGates);
   _kdpScArray.resize(_nGates);
-
-  // _tempForPid.resize(_nGates);
 
   _sdZdr.resize(_nGates);
   _sdPhidp.resize(_nGates);

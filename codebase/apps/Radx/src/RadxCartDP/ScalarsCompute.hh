@@ -44,14 +44,11 @@
 #include <radar/KdpFiltParams.hh>
 #include <radar/NcarPidParams.hh>
 #include <radar/NcarParticleId.hh>
-// #include <radar/PrecipRate.hh>
-// #include <radar/PrecipRateParams.hh>
 #include <Radx/Radx.hh>
 #include <Radx/RadxTime.hh>
 class RadxCartDP;
 class RadxRay;
 class RadxField;
-// class TempProfile;
 #include <pthread.h>
 #include <vector>
 using namespace std;
@@ -66,27 +63,11 @@ public:
                  const Params &params,
                  const KdpFiltParams &kdpFiltParams,
                  const NcarPidParams &ncarPidParams,
-                 // const PrecipRateParams &precipRateParams,
                  int id);
 
   // destructor
   
   ~ScalarsCompute();
-
-  // Load the temperature profile for PID computations,
-  // for the specified time.
-  // This reads in a new sounding if needed.
-  // If no sounding is available, the static profile is used
-  
-  // void loadTempProfile(time_t dataTime);
-  
-  // Set the temperature profile
-  
-  // void setTempProfile(const TempProfile &profile);
-
-  // Get the temperature profile
-  
-  // const TempProfile &getTempProfile() const;
 
   // Creates derived fields ray and returns it.
   // It must be freed by caller.
@@ -113,7 +94,6 @@ private:
   const Params &_params;
   const KdpFiltParams &_kdpFiltParams;
   const NcarPidParams &_ncarPidParams;
-  // const PrecipRateParams &_precipRateParams;
 
   int _id; // thread ID
   
@@ -148,7 +128,6 @@ private:
 
   vector<double> _kdpArray;
   vector<double> _kdpScArray;
-  // vector<double> _tempForPid;
   vector<double> _sdZdr;
   vector<double> _sdPhidp;
 
@@ -159,11 +138,6 @@ private:
   // pid
 
   NcarParticleId _pid;
-  // const TempProfile *_tempProfile;
-
-  // precip
-
-  // PrecipRate _precip;
 
   // debug printing
 
@@ -177,9 +151,6 @@ private:
   int _pidInit();
   void _pidPrepare();
   
-  // void _precipInit();
-  // void _precipCompute();
-
   void _allocArrays();
   
   int _loadInputArrays(RadxRay *inputRay);

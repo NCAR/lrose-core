@@ -95,12 +95,9 @@ RadxCartDP::RadxCartDP(int argc, char **argv)
   Mdvx::initStruct(_interpCoord);
 
   _pidField = nullptr;
-  // _pidModeField = nullptr;
 
   _rateZrField = nullptr;
   _rateHybridField = nullptr;
-  // _rateZrFiltField = nullptr;
-  // _rateHybridFiltField = nullptr;
 
   _qpeZrField = nullptr;
   _qpeHybridField = nullptr;
@@ -1040,13 +1037,15 @@ int RadxCartDP::_writeDebugPolarOutput()
   }
   if (out.writeToDir(_radarVol, _params.debug_polar_output_dir, true, false)) {
     cerr << "ERROR - RadxCartDP::_writeDebugPolarOutput()" << endl;
-    cerr << "  Cannot write debug polar file, path: " << out.getPathInUse() << endl;
+    cerr << "  Cannot write debug polar file, path: "
+         << out.getPathInUse() << endl;
     cerr << out.getErrStr() << endl;
     return -1;
   }
 
   if (_params.debug) {
-    cerr << "SUCCESS - wrote debug polar file, path: " << out.getPathInUse() << endl;
+    cerr << "SUCCESS - wrote debug polar file, path: "
+         << out.getPathInUse() << endl;
   }
   
   return 0;
@@ -1543,12 +1542,26 @@ void RadxCartDP::_initInterpFields()
             _interpFields[ifld].foldLimitLower = foldLimitLower;
             _interpFields[ifld].foldLimitUpper = foldLimitUpper;
           }
-          _interpFields[ifld].foldRange =
-            _interpFields[ifld].foldLimitUpper - _interpFields[ifld].foldLimitLower;
+          _interpFields[ifld].foldRange = (_interpFields[ifld].foldLimitUpper -
+                                           _interpFields[ifld].foldLimitLower);
           break;
         }
       } // ifld
     } // ii
+  }
+
+  // KDP field
+  
+  if (_params.output_KDP_field) {
+    BaseInterp::Field KDPField;
+    KDPField.radxName = kdpForPidFieldName;
+    KDPField.outputName = _params.KDP_field_name;
+    KDPField.longName = "specific_differential_phase";
+    KDPField.standardName = "specific_differential_phase";
+    KDPField.units = "deg/km";
+    KDPField.isDiscrete = false;
+    KDPField.writeToFile = true;
+    _interpFields.push_back(KDPField);
   }
 
   // range field
@@ -1735,32 +1748,6 @@ int RadxCartDP::_readModel()
 
   _interpModelToOutputGrid();
 
-  // rename fields as appropriate
-
-  // for (size_t ifld = 0; ifld < _modelInterpMdvx.getNFields(); ifld++) {
-  //   MdvxField *fld = _modelInterpMdvx.getField(ifld);
-  //   string inputName = fld->getFieldName();
-  //   Params::model_field_type_t mtype = getModelTypeFromInputName(inputName);
-  //   string outputName = getModelOutputName(mtype);
-  //   fld->setFieldName(outputName);
-  // }
-
-  // debug write
-  
-  // if (_params.write_interpolated_model_data) {
-  //   if (_params.debug) {
-  //     cerr << "Writing interpolated model data file" << endl;
-  //   }
-  //   if (_modelInterpMdvx.writeToDir(_params.interpolated_model_output_url)) {
-  //     cerr << "WARNING - error writing model data" << endl;
-  //     cerr << _modelInterpMdvx.getErrStr() << endl;
-  //   }
-  //   if (_params.debug) {
-  //     cerr << "Wrote interpolated model data, path: "
-  //          << _modelInterpMdvx.getPathInUse() << endl;
-  //   }
-  // }
-  
   // compute the temperature profile from the model data
 
   if (_computeTempProfile()) {
@@ -1843,7 +1830,6 @@ void RadxCartDP::_interpModelToOutputGrid()
     MdvxField *rawFld = _modelRawMdvx.getField(ifield);
     MdvxField *interpField = _modelRemap.interpField(*rawFld);
     string rawName = rawFld->getFieldName();
-    //if (strlen(_params.model_fields[ifield].
     _modelInterpMdvx.addField(interpField);
   } // ifield
   
@@ -1859,7 +1845,8 @@ int RadxCartDP::_readBeamBlock()
 {
 
   if (_params.debug) {
-    cerr << "Reading in beam block file: " << _params.beam_block_input_file_path << endl;
+    cerr << "Reading in beam block file: "
+         << _params.beam_block_input_file_path << endl;
   }
   
   // set up read
@@ -1901,9 +1888,10 @@ int RadxCartDP::_readBeamBlock()
     return -1;
   }
 
-  // check the beam blocl grid matches the interpolation grid
+  // check the beam block grid matches the interpolation grid
   
-  MdvxProj bbProj(_beamBlockMdvx.getMasterHeader(), _extinctionField->getFieldHeader());
+  MdvxProj bbProj(_beamBlockMdvx.getMasterHeader(),
+                  _extinctionField->getFieldHeader());
   if (bbProj != _interpProj) {
     cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
     cerr << "  BeamBlock grid does not match interp Cart grid" << endl;
@@ -1920,13 +1908,15 @@ int RadxCartDP::_readBeamBlock()
   if (_extinctionField->getFieldHeader().nz != (si64) _interpVlevels.size()) {
     cerr << "ERROR - RadxCartDP::_readBeamBlock" << endl;
     cerr << "  BeamBlock grid nz does not match Cart grid nz" << endl;
-    cerr << "  BeamBlock grid nz: " << _extinctionField->getFieldHeader().nz << endl;
+    cerr << "  BeamBlock grid nz: "
+         << _extinctionField->getFieldHeader().nz << endl;
     cerr << "  Cart grid nz: " << _interpVlevels.size() << endl;
     return -1;
   }
 
   if (_params.debug) {
-    cerr << "SUCCESS - got beam block file: " << _params.beam_block_input_file_path << endl;
+    cerr << "SUCCESS - got beam block file: "
+         << _params.beam_block_input_file_path << endl;
   }
   
   return 0;
@@ -2028,16 +2018,8 @@ int RadxCartDP::_computePid()
   pidFhdr.data_element_nbytes = sizeof(fl32);
   pidFhdr.volume_size = _interpNpointsVol * sizeof(fl32);
   
-  // _pidField = new MdvxField(pidFhdr, pidVhdr, _pidArray.data());
-  // _pidField->setFieldName(pidFieldName);
-  // _pidField->setFieldNameLong("hydrometeor_particle_type");
-  // _pidField->setUnits("");
-  // _pidField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
-  //                        Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
-
   _pidField = new MdvxField(pidFhdr, pidVhdr, _pidFilt.data());
   _pidField->setFieldName(pidFieldName);
-  // _pidField->setFieldName("PID_FILT");
   _pidField->setFieldNameLong("hydrometeor_particle_type");
   _pidField->setUnits("");
   _pidField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
@@ -2145,23 +2127,8 @@ int RadxCartDP::_computePrecip()
   rateFhdr.data_element_nbytes = sizeof(fl32);
   rateFhdr.volume_size = _interpNpointsVol * sizeof(fl32);
 
-  // _rateZrField = new MdvxField(rateFhdr, rateVhdr, rateZrArray.data());
-  // _rateZrField->setFieldName(rateZrFieldName);
-  // _rateZrField->setFieldNameLong("precip_rate_from_reflectivity");
-  // _rateZrField->setUnits("mm/hr");
-  // _rateZrField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
-  //                           Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
-  
-  // _rateHybridField = new MdvxField(rateFhdr, rateVhdr, rateHybridArray.data());
-  // _rateHybridField->setFieldName(rateHybridFieldName);
-  // _rateHybridField->setFieldNameLong("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
-  // _rateHybridField->setUnits("mm/hr");
-  // _rateHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
-  //                               Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
-
   _rateZrField = new MdvxField(rateFhdr, rateVhdr, _rateZrFilt.data());
   _rateZrField->setFieldName(rateZrFieldName);
-  // _rateZrField->setFieldName("RATE_ZR_FILT");
   _rateZrField->setFieldNameLong("precip_rate_from_reflectivity");
   _rateZrField->setUnits("mm/hr");
   _rateZrField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
@@ -2169,8 +2136,8 @@ int RadxCartDP::_computePrecip()
   
   _rateHybridField = new MdvxField(rateFhdr, rateVhdr, _rateHybridFilt.data());
   _rateHybridField->setFieldName(rateHybridFieldName);
-  // _rateHybridField->setFieldName("RATE_HYBRID_FILT");
-  _rateHybridField->setFieldNameLong("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
+  _rateHybridField->setFieldNameLong
+    ("precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr");
   _rateHybridField->setUnits("mm/hr");
   _rateHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP,
                                 Mdvx::SCALING_SPECIFIED, 1.0, 0.0);
@@ -2303,7 +2270,8 @@ int RadxCartDP::_computeQpe()
   _qpeHybridField->setFieldName(_params.qpe_hybrid_field_name);
   _qpeHybridField->setFieldNameLong(_rateZrField->getFieldNameLong());
   _qpeHybridField->setUnits(_rateZrField->getUnits());
-  _qpeHybridField->setVolData(_qpeHybrid.data(), fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
+  _qpeHybridField->setVolData(_qpeHybrid.data(),
+                              fhdr.volume_size, Mdvx::ENCODING_FLOAT32);
   _qpeHybridField->convertType(Mdvx::ENCODING_INT16, Mdvx::COMPRESSION_GZIP);
 
   // Zr field
@@ -2592,7 +2560,8 @@ int RadxCartDP::_createGridTemplate()
   
   if (out.writeVol(_params.grid_template_dir)) {
     cerr << "ERROR - RadxCartDP::_createGridTemplate" << endl;
-    cerr << "  Cannot write template file to dir: " << _params.grid_template_dir << endl;
+    cerr << "  Cannot write template file to dir: "
+         << _params.grid_template_dir << endl;
     return -1;
   }
 
@@ -2641,10 +2610,6 @@ int RadxCartDP::_writeOutputMdv()
     out.addField(_pidField);
     _pidField = nullptr; // memory handling passed to output mdv object
   }
-  // if (_pidModeField) {
-  //   out.addField(_pidModeField);
-  //   _pidModeField = nullptr; // memory handling passed to output mdv object
-  // }
   
   // add precip rate fields
 
@@ -2657,15 +2622,6 @@ int RadxCartDP::_writeOutputMdv()
     _rateHybridField = nullptr; // memory handling passed to output mdv object
   }
 
-  // if (_rateZrFiltField) {
-  //   out.addField(_rateZrFiltField);
-  //   _rateZrFiltField = nullptr; // memory handling passed to output mdv object
-  // }
-  // if (_rateHybridFiltField) {
-  //   out.addField(_rateHybridFiltField);
-  //   _rateHybridFiltField = nullptr; // memory handling passed to output mdv object
-  // }
-  
   // add QPE fields
 
   if (_qpeHybridField) {
@@ -2963,7 +2919,8 @@ void RadxCartDP::_printParamsPid()
 {
 
   if (_params.debug) {
-    cerr << "Reading PID params from file: " << _params.PID_params_file_path << endl;
+    cerr << "Reading PID params from file: "
+         << _params.PID_params_file_path << endl;
   }
 
   // do we need to expand environment variables?
@@ -3011,7 +2968,8 @@ void RadxCartDP::_printParamsKdp()
 {
 
   if (_params.debug) {
-    cerr << "Reading KDP params from file: " << _params.KDP_params_file_path << endl;
+    cerr << "Reading KDP params from file: "
+         << _params.KDP_params_file_path << endl;
   }
 
   // do we need to expand environment variables?
@@ -3116,7 +3074,6 @@ void RadxCartDP::_initRadarFieldTypes()
   _radarFieldTypes.push_back(Params::ZDR);
   _radarFieldTypes.push_back(Params::PHIDP);
   _radarFieldTypes.push_back(Params::RHOHV);
-  _radarFieldTypes.push_back(Params::KDP);
   _radarFieldTypes.push_back(Params::LDR);
 
 }
@@ -3170,8 +3127,6 @@ string RadxCartDP::_radarFieldType2Str(Params::radar_field_type_t rftype)
       return "PHIDP";
     case Params::RHOHV:
       return "RHOHV";
-    case Params::KDP:
-      return "KDP";
     case Params::LDR:
       return "LDR";
     default:

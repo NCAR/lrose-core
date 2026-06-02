@@ -88,8 +88,7 @@ public:
     ZDR = 4,
     PHIDP = 5,
     RHOHV = 6,
-    KDP = 7,
-    LDR = 8
+    LDR = 7
   } radar_field_type_t;
 
   typedef enum {
@@ -100,29 +99,6 @@ public:
     WVEL = 4,
     MODEL_NOT_SET = 5
   } model_field_type_t;
-
-  typedef enum {
-    RATE_ZR = 0,
-    RATE_ZR_SNOW = 1,
-    RATE_Z_ZDR = 2,
-    RATE_KDP = 3,
-    RATE_KDP_ZDR = 4,
-    RATE_HYBRID = 5,
-    RATE_PID = 6,
-    RATE_HIDRO = 7,
-    RATE_BRINGI = 8,
-    PID_OUT = 9,
-    PID_INTEREST = 10,
-    TEMP_FOR_PID = 11,
-    SD_ZDR = 12,
-    SD_PHIDP = 13,
-    KDP_OUT = 14,
-    KDP_SC = 15,
-    DBZ_ATTEN_CORRECTION = 16,
-    ZDR_ATTEN_CORRECTION = 17,
-    DBZ_ATTEN_CORRECTED = 18,
-    ZDR_ATTEN_CORRECTED = 19
-  } output_field_id_t;
 
   typedef enum {
     PROJ_LATLON = 0,
@@ -153,15 +129,6 @@ public:
     tdrp_bool_t do_write;
     char* output_name;
   } model_field_t;
-
-  typedef struct {
-    output_field_id_t id;
-    char* name;
-    char* long_name;
-    char* standard_name;
-    char* units;
-    tdrp_bool_t do_write;
-  } output_field_t;
 
   typedef struct {
     int nz;
@@ -557,8 +524,6 @@ public:
 
   char* KDP_params_file_path;
 
-  tdrp_bool_t KDP_write_debug_fields;
-
   char* PID_params_file_path;
 
   tdrp_bool_t PID_use_KDP_self_consistency;
@@ -567,8 +532,6 @@ public:
 
   int PID_mode_filter_kernel_size;
 
-  tdrp_bool_t PID_write_debug_fields;
-
   char* RATE_params_file_path;
 
   tdrp_bool_t RATE_use_KDP_self_consistency;
@@ -576,9 +539,6 @@ public:
   tdrp_bool_t RATE_use_attenuation_corrected_fields;
 
   int RATE_median_filter_kernel_size;
-
-  output_field_t *_output_fields;
-  int output_fields_n;
 
   tdrp_bool_t use_nearest_neighbor;
 
@@ -653,9 +613,9 @@ public:
 
   double nyquist_velocity;
 
-  tdrp_bool_t output_angle_fields;
+  tdrp_bool_t output_KDP_field;
 
-  angle_fields_t angle_fields;
+  char* KDP_field_name;
 
   tdrp_bool_t output_range_field;
 
@@ -674,6 +634,10 @@ public:
   char* time_field_name;
 
   tdrp_bool_t interp_time_field;
+
+  tdrp_bool_t output_angle_fields;
+
+  angle_fields_t angle_fields;
 
   tdrp_bool_t write_interp_debug_fields;
 
@@ -750,7 +714,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[156];
+  mutable TDRPtable _table[154];
 
   const char *_className;
 

@@ -82,7 +82,7 @@ commentdef {
 }
 
 typedef enum {
-  DBZ, VEL, WIDTH, SNR, ZDR, PHIDP, RHOHV, KDP, LDR
+  DBZ, VEL, WIDTH, SNR, ZDR, PHIDP, RHOHV, LDR
 } radar_field_type_t;
 
 typedef struct {
@@ -102,7 +102,6 @@ paramdef struct radar_field_t {
     { PHIDP, TRUE, "PHIDP", TRUE, "PHIDP" },
     { RHOHV, TRUE, "RHOHV", TRUE, "RHOHV" },
     { SNR, FALSE, "SNR", TRUE, "SNR" },
-    { KDP, FALSE, "KDP", TRUE, "KDP" },
     { LDR, FALSE, "LDR", FALSE, "LDR" }
   };
   p_descr = "Details of available radar fields. Exactly one of each field type must be present in the parameter file.";
@@ -292,12 +291,6 @@ paramdef string {
   p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
 } KDP_params_file_path;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Write extra fields to assist with KDP debugging.";
-  p_help = "These are the intermediate fields used in computing KDP and attenuation.";
-} KDP_write_debug_fields;
-
 commentdef {
   p_header = "COMPUTING PID";
 }
@@ -326,12 +319,6 @@ paramdef int {
   p_help = "The PID field is filtered, using the mode over a 2D kernel for each plane. The kernel is moved across each Cartesian plane, the mode is computed, and the value at the kernel center is replaced with the mode.";
 } PID_mode_filter_kernel_size;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Write extra fields to assist with PID debugging.";
-  p_help = "These are the intermediate fields used in computing PID.";
-} PID_write_debug_fields;
-
 commentdef {
   p_header = "COMPUTING PRECIP RATE";
 }
@@ -359,226 +346,6 @@ paramdef int {
   p_descr = "Kernel size for 2D median filter";
   p_help = "The precip rate field is filtered, using the median over a 2D kernel for each plane. The kernel is moved across each Cartesian plane, the median is computed, and the value at the kernel center is replaced with the median.";
 } RATE_median_filter_kernel_size;
-
-commentdef {
-  p_header = "SPECIFYING PID OUTPUT FIELDS";
-}
-
-typedef enum {
-
-  RATE_ZR,
-  RATE_ZR_SNOW,
-  RATE_Z_ZDR,
-  RATE_KDP,
-  RATE_KDP_ZDR,
-  RATE_HYBRID,
-  RATE_PID,
-  RATE_HIDRO,
-  RATE_BRINGI,
-
-  PID_OUT,
-  PID_INTEREST,
-  TEMP_FOR_PID,
-  SD_ZDR,
-  SD_PHIDP,
-
-  KDP_OUT,
-  KDP_SC,
-
-  DBZ_ATTEN_CORRECTION,
-  ZDR_ATTEN_CORRECTION,
-  DBZ_ATTEN_CORRECTED,
-  ZDR_ATTEN_CORRECTED
-
-} output_field_id_t;
-
-typedef struct {
-  output_field_id_t id;
-  string name; 
-  string long_name; 
-  string standard_name; 
-  string units;
-  boolean do_write;
-} output_field_t;
-
-paramdef struct output_field_t {
-  p_default = {
-    {
-      id = RATE_ZR,
-      name = "RATE_ZR",
-      long_name = "precip_rate_from_z",
-      standard_name = "precip_rate_from_z",
-      units = "mm/hr",
-      do_write = TRUE
-    }
-    ,
-    {
-      id = RATE_ZR_SNOW,
-      name = "RATE_ZR_SNOW",
-      long_name = "precip_rate_from_z_for_snow",
-      standard_name = "precip_rate_from_z_for_snow",
-      units = "mm/hr",
-      do_write = TRUE
-    }
-    ,
-    {
-      id = RATE_Z_ZDR,
-      name = "RATE_Z_ZDR",
-      long_name = "precip_rate_from_z_and_zdr",
-      standard_name = "precip_rate_from_z_and_zdr",
-      units = "mm/hr",
-      do_write = TRUE
-    }
-    ,
-    {
-      id = RATE_KDP,
-      name = "RATE_KDP",
-      long_name = "precip_rate_from_kdp",
-      standard_name = "precip_rate_from_kdp",
-      units = "mm/hr",
-      do_write = TRUE
-    }
-    ,
-    {
-      id = RATE_KDP_ZDR,
-      name = "RATE_KDP_ZDR",
-      long_name = "precip_rate_from_kdp_and_zdr",
-      standard_name = "precip_rate_from_kdp_and_zdr",
-      units = "mm/hr",
-      do_write = TRUE
-    }
-    ,
-    {
-      id = RATE_HYBRID,
-      name = "RATE_HYBRID",
-      long_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
-      standard_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
-      units = "mm/hr",
-      do_write = TRUE
-    }
-    ,
-    {
-      id = RATE_PID,
-      name = "RATE_PID",
-      long_name = "precip_rate_based_on_pid",
-      standard_name = "precip_rate_based_on_pid",
-      units = "mm/hr",
-      do_write = TRUE
-    }
-    ,
-    {
-      id = PID_OUT,
-      name = "PID",
-      long_name = "particle_id",
-      standard_name = "hydrometeor_type",
-      units = "",
-      do_write = TRUE
-    }
-    ,
-    {
-      id = PID_INTEREST,
-      name = "PID_INTEREST",
-      long_name = "final_interest_value_for_pid_decision",
-      standard_name = "final_interest_value_for_pid_decision",
-      units = "",
-      do_write = FALSE
-    }
-    ,
-    {
-      id = TEMP_FOR_PID,
-      name = "TEMP_FOR_PID",
-      long_name = "temperature_for_computing_pid",
-      standard_name = "temperature",
-      units = "C",
-      do_write = FALSE
-    }
-    ,
-    {
-      id = SD_ZDR,
-      name = "SD_ZDR",
-      long_name = "stdev_of_zdr_for_computing_pid",
-      standard_name = "sdev_zdr",
-      units = "dB",
-      do_write = FALSE
-    }
-    ,
-    {   
-      id = SD_PHIDP,
-      name = "SD_PHIDP",
-      long_name = "sdev_of_phidp_for_computing_pid",
-      standard_name = "sdev_phidp",
-      units = "deg",
-      do_write = TRUE
-    }
-    ,
-    {
-      id = KDP_OUT,
-      name = "KDP",
-      long_name = "specific_differential_phase",
-      standard_name = "specific_differential_phase_hv",
-      units = "deg/km",
-      do_write = TRUE
-    }
-    ,
-    {
-      id = KDP_SC,
-      name = "KDP_SC",
-      long_name = "kdp_conditioned_using_ZZDR_self_consistency",
-      standard_name = "specific_differential_phase_hv",
-      units = "deg/km",
-      do_write = FALSE
-    }
-    ,
-    {
-      id = ZDR_ATTEN_CORRECTION,
-      name = "ZDR_ATTEN_CORRECTION",
-      long_name = "correction_to_zdr_for_attenuation",
-      standard_name = "zdr_attenuation_correction",
-      units = "dB",
-      do_write = FALSE
-    }
-    ,
-    {
-      id = DBZ_ATTEN_CORRECTED,
-      name = "DBZ_ATTEN_CORRECTED",
-      long_name = "dbz_corrected_for_attenuation",
-      standard_name = "dbz_corrected_for_attenuation",
-      units = "dBZ",
-      do_write = FALSE
-    }
-    ,
-    {
-      id = ZDR_ATTEN_CORRECTED,
-      name = "ZDR_ATTEN_CORRECTED",
-      long_name = "zdr_corrected_for_attenuation",
-      standard_name = "zdr_corrected_for_attenuation",
-      units = "dB",
-      do_write = FALSE
-    }
-  };
-  p_descr = "Indicate which fields should be written to the output file.";
-  p_help = "Choose the ID from the list.\n"
-    "\nThe name and units can be set however the user prefers.\n"
-    "\nThe output_encoding apply to CfRadial output only. \n\n"
-    "\tRATE_ZR: Precip rate from ZR\n"
-    "\tRATE_ZR_SNOW: Precip rate from ZR in dry snow\n"
-    "\tRATE_Z_ZDR: Precip rate from Z and ZDR\n"
-    "\tRATE_KDP: Precip rate from KDP\n"
-    "\tRATE_KDP_ZDR: Precip rate from KDP and ZDR\n"
-    "\tRATE_HYBRID: Precip rate from NCAR hybrid\n"
-    "\tRATE_PID: Precip rate using PID to select the appropriate rate\n"
-    "\tRATE_HIDRO: Precip rate using CSU HIDRO hybrid\n"
-    "\tRATE_BRINGI: Precip rate using Bringi hybrid\n"
-    "\tPID: NCAR Particle ID\n"
-    "\tPID_INTEREST: final interest map for NCAR Particle ID values\n"
-    "\tTEMP_FOR_PID: temperature field for PID (C)\n"
-    "\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n"
-    "\tKDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)\n"
-    "\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n"
-    "\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n"
-    "\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n"
-    "\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n";
-} output_fields[];
 
 commentdef {
   p_header = "INTERPOLATION OPTIONS";
@@ -910,9 +677,75 @@ paramdef double {
 } nyquist_velocity;
 
 commentdef {
-  p_header = "OPTION TO ADD GEOMETRY AND TIME FIELDS";
+  p_header = "OPTION TO ADD DERIVED FIELDS";
   p_text = "These fields are computed from the geometry of the radar rays, and then added as input fields in native radial coordinates.";
 }
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to add KDP field to the output.";
+  p_help = "KDP is derived from PHIDP.";
+} output_KDP_field;
+
+paramdef string {
+  p_default = "KDP";
+  p_descr = "Name of KDP field to be written.";
+  p_help = "See 'output_KDP_field'.";
+} KDP_field_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to add range field to the output.";
+  p_help = "This is the range, in km, from the radar to each gate.";
+} output_range_field;
+
+paramdef string {
+  p_default = "SlantRange";
+  p_descr = "Name of range field, if written.";
+  p_help = "See 'output_range_field'.";
+} range_field_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to add height field to the output.";
+  p_help = "This is the height, in km msl, of the center of each gate.";
+} output_height_field;
+
+paramdef string {
+  p_default = "BeamHt";
+  p_descr = "Name of height field, if written.";
+  p_help = "See 'output_height_field'.";
+} height_field_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output a field indicating radar coverage.";
+  p_help = "This is a flag field, with a 1 indicating that the radar covers that location, and a 0 indicating that is does not. See also 'coverage_field_name'. This field is always transformed using nearest neighbor.";
+} output_coverage_field;
+
+paramdef string {
+  p_default = "Coverage";
+  p_descr = "Name of coverage field, if written.";
+  p_help = "See 'output_coverage_field'.";
+} coverage_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output a field of time since start of volume (secs)";
+  p_help = "If true, time time elapsed field is included in the output file. See also 'time_field_name' and 'interp_time_field'.";
+} output_time_field;
+
+paramdef string {
+  p_default = "time_elapsed";
+  p_descr = "Name of time field, if written.";
+  p_help = "See 'output_time_field'.";
+} time_field_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to perform interpolation on the time field.";
+  p_help = "If false, nearest neighbor will be used for the time field.";
+} interp_time_field;
 
 paramdef boolean {
   p_default = false;
@@ -944,60 +777,6 @@ paramdef struct angle_fields_t {
     "\tbeta: cos(az) * cos(el)\n"
     "\tgamma: sin(el)\n";
 } angle_fields;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to add range field to the output.";
-  p_help = "This is the range, in km, from the radar to each gate.";
-} output_range_field;
-
-paramdef string {
-  p_default = "SlantRange";
-  p_descr = "Name of range field, if written.";
-  p_help = "See 'output_range_field'.";
-} range_field_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to add height field to the output.";
-  p_help = "This is the height, in km msl, of the center of each gate.";
-} output_height_field;
-
-paramdef string {
-  p_default = "BeamHt";
-  p_descr = "Name of height field, if written.";
-  p_help = "See 'output_height_field'.";
-} height_field_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to output a field indicating radar coverage.";
-  p_help = "This is a flag field, with a 1 indicating that the radar covers that location, and a 0 indicating that is does not. See also 'coverage_field_name'. This field is always transformed using nearest neighbor.";
-} output_coverage_field;
-
-paramdef string {
-  p_default = "Coverage";
-  p_descr = "Name of coverage field, if written.";
-  p_help = "See 'output_coverage_field'.";
-} coverage_field_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to output a field of time since start of volume (secs)";
-  p_help = "If true, time time elapsed field is included in the output file. See also 'time_field_name' and 'interp_time_field'.";
-} output_time_field;
-
-paramdef string {
-  p_default = "time_elapsed";
-  p_descr = "Name of time field, if written.";
-  p_help = "See 'output_time_field'.";
-} time_field_name;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to perform interpolation on the time field.";
-  p_help = "If false, nearest neighbor will be used for the time field.";
-} interp_time_field;
 
 paramdef boolean {
   p_default = false;
