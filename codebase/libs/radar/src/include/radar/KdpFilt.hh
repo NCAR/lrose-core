@@ -704,14 +704,14 @@ private:
   /// filter the unfolded phidp array and compute kdp
   
   void _computeKdp();
-  void _copyArray(double *array, const double *vals);
-  void _copyArrayCond(double *array, const double *vals,
+  void _copyArray(double *out, const double *in);
+  void _copyArrayCond(double *out, const double *in,
                       const double *original);
   void _padArray(double *array);
   void _loadKdp();
   void _loadPhidpAccumFilt(const double *phidp, double *accum);
   void _computeAttenCorrection();
-  void _applyFirFilter(const double *in, double *out);
+  void _applyFirFilter(double *out, const double *in);
   double _getFirFilterGain();
   void _computeDbzMax();
   void _computePhidpConditioned();

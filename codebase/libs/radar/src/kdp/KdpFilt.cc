@@ -958,7 +958,7 @@ void KdpFilt::_computeKdp()
   // apply FIR filter, computing work1 from work2, iterate
     
   for (int iloop = 0; iloop < _nFiltIterUnfolded; iloop++) {
-    _applyFirFilter(work2, work1);
+    _applyFirFilter(work1, work2);
     _copyArray(work2, work1);
   } // iloop
   
@@ -977,7 +977,7 @@ void KdpFilt::_computeKdp()
     _padArray(work2);
 
     for (int iloop = 0; iloop < _nFiltIterCond; iloop++) {
-      _applyFirFilter(work2, work1);
+      _applyFirFilter(work1, work2);
       _copyArrayCond(work2, work1, _phidpCond);
     } // iloop
     
@@ -995,7 +995,7 @@ void KdpFilt::_computeKdp()
     _padArray(work2);
     
     for (int iloop = 0; iloop < _nFiltIterCond; iloop++) {
-      _applyFirFilter(work2, work1);
+      _applyFirFilter(work1, work2);
       _copyArray(work2, work1);
     } // iloop
 
@@ -1016,25 +1016,25 @@ void KdpFilt::_computeKdp()
 /////////////////////////////////////////////
 // load array ready for filter
 
-void KdpFilt::_copyArray(double *array, const double *vals)
+void KdpFilt::_copyArray(double *out, const double *in)
 
 {
-  memcpy(array, vals, _nGates * sizeof(double));
+  memcpy(out, in, _nGates * sizeof(double));
 }
 
 /////////////////////////////////////////////
 // copy array conditionally
 
-void KdpFilt::_copyArrayCond(double *array, const double *vals,
+void KdpFilt::_copyArrayCond(double *out, const double *in,
                              const double *original)
 
 {
   for (int ii = 0; ii < _nGates; ii++) {
-    double diff = vals[ii] - array[ii];
+    double diff = in[ii] - out[ii];
     if (fabs(diff) < _phidpDiffThreshold) {
-      array[ii] = original[ii];
+      out[ii] = original[ii];
     } else {
-      array[ii] = vals[ii];
+      out[ii] = in[ii];
     }
   }
 }
@@ -1174,7 +1174,7 @@ void KdpFilt::_computeAttenCorrection()
 /////////////////////////////////////////////
 // Apply FIR filter
 
-void KdpFilt::_applyFirFilter(const double *in, double *out)
+void KdpFilt::_applyFirFilter(double *out, const double *in)
 
 {
 
