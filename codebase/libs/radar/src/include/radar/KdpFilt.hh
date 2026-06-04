@@ -474,8 +474,8 @@ private:
   int _nFiltIterCond;  /**< Number of times the filter is
                         * iteratively applied to filtered constrained */
   
-  bool _useIterativeFiltering;
-  double _phidpDiffThreshold;
+  bool _useIterativeFiltering; /* for phase shift on backscatter removal */
+  double _phidpDiffThreshold; /* for phase shift on backscatter removal */
 
   int _nGates;          /**< n gates in input array */
   int _nGatesStats;     /**< n gates for computing phidp stats
