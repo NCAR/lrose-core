@@ -1761,7 +1761,7 @@ void KdpFilt::_writeRayDataToFile()
   DateTime rtime(_timeSecs);
   int msecs = (int) (_timeFractionSecs * 1000.0 + 0.5);
   sprintf(filePath,
-          "%s%skdpray_%.4d%.2d%.2d-%.2d%.2d%.2d.%.3d_el-%05.1f_az-%05.1f_.txt",
+          "%s%skdpray_%.4d%.2d%.2d-%.2d%.2d%.2d.%.3d_el-%06.2f_az-%06.2f_.txt",
           _rayFileDir.c_str(), PATH_DELIM,
           rtime.getYear(), rtime.getMonth(), rtime.getDay(),
           rtime.getHour(), rtime.getMin(), rtime.getSec(), msecs,
