@@ -468,6 +468,16 @@ void RadxKdp::_setupRead(RadxFile &file)
     }
   }
 
+  if (_params.set_fixed_angle_limits) {
+    file.setReadFixedAngleLimits(_params.lower_fixed_angle_limit,
+                                 _params.upper_fixed_angle_limit);
+    if (_params.lower_fixed_angle_limit == _params.upper_fixed_angle_limit) {
+      // relax strict angle checking since only a single angle is specified
+      // which means the user wants the closest angle
+      file.setReadStrictAngleLimits(false);
+    }
+  }
+    
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }

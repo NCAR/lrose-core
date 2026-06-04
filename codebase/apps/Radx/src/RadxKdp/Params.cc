@@ -715,6 +715,63 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("OPTIONAL FIXED ANGLE LIMITS");
+    tt->comment_text = tdrpStrDup("Fixed angles are elevation in PPI mode and azimuth in RHI mode.");
+    tt++;
+    
+    // Parameter 'set_fixed_angle_limits'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_fixed_angle_limits");
+    tt->descr = tdrpStrDup("Option to set fixed angle limits");
+    tt->help = tdrpStrDup("Only use sweeps within the specified fixed angle limits.");
+    tt->val_offset = (char *) &set_fixed_angle_limits - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'apply_strict_angle_limits'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("apply_strict_angle_limits");
+    tt->descr = tdrpStrDup("Option to apply strict checking for angle or sweep number limits on read.");
+    tt->help = tdrpStrDup("If true, an error will occur if the fixed angle limits or sweep num limits are outside the bounds of the data. If false, a read is guaranteed to return at least 1 sweep - if no sweep lies within the angle limits set, the nearest sweep will be returned.");
+    tt->val_offset = (char *) &apply_strict_angle_limits - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'lower_fixed_angle_limit'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("lower_fixed_angle_limit");
+    tt->descr = tdrpStrDup("Lower fixed angle limit - degrees.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &lower_fixed_angle_limit - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'upper_fixed_angle_limit'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("upper_fixed_angle_limit");
+    tt->descr = tdrpStrDup("Upper fixed angle limit - degrees.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &upper_fixed_angle_limit - &_start_;
+    tt->single_val.d = 90;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("INPUT FIELD INFORMATION");
     tt->comment_text = tdrpStrDup("Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. If SNR is not available, it is computed from DBZ.");
     tt++;
@@ -803,11 +860,11 @@
     tt->single_val.s = tdrpStrDup("RHOHV");
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP");
     tt->comment_text = tdrpStrDup("The parameters for KDP computations are contained in a separate file. An example default file can be generated using the -print_params_kdp command line argument.");
     tt++;
@@ -824,11 +881,11 @@
     tt->single_val.s = tdrpStrDup("use-defaults");
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("SPECIFYING OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -958,11 +1015,11 @@
     tt->single_val.e = OUTPUT_ENCODING_INT16;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("SPECIFY COPY-THROUGH FIELDS");
     tt->comment_text = tdrpStrDup("These fields are copied unchanged from the input file to the output file. This allows the user to consolidate the input and output data set in a single file.");
     tt++;
@@ -1016,11 +1073,11 @@
       tt->struct_vals[3].s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("WRITING DEBUG FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1037,11 +1094,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("WRITING THE OUTPUT FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1126,11 +1183,11 @@
     tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("REALTIME OPERATIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;

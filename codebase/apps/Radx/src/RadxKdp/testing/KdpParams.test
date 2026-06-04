@@ -418,7 +418,7 @@ KDP_zdr_attenuation_exponent = 1.05;
 // Type: boolean
 //
 
-KDP_debug = FALSE;
+KDP_debug = TRUE;
 
 ///////////// KDP_write_ray_files /////////////////////
 //
@@ -428,7 +428,7 @@ KDP_debug = FALSE;
 // Type: boolean
 //
 
-KDP_write_ray_files = FALSE;
+KDP_write_ray_files = TRUE;
 
 ///////////// KDP_ray_files_dir ///////////////////////
 //

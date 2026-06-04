@@ -21,14 +21,12 @@
 //
 // If set, debug messages will be printed appropriately.
 //
-//
 // Type: enum
 // Options:
 //     DEBUG_OFF
 //     DEBUG_NORM
 //     DEBUG_VERBOSE
 //     DEBUG_EXTRA
-//
 
 debug = DEBUG_OFF;
 
@@ -55,7 +53,6 @@ debug = DEBUG_OFF;
 // Minimum val: 1
 //
 // Type: int
-//
 
 n_compute_threads = 4;
 
@@ -78,13 +75,11 @@ n_compute_threads = 4;
 // In FILELIST mode, it moves through the list of file names specified 
 //   on the command line.
 //
-//
 // Type: enum
 // Options:
 //     REALTIME
 //     ARCHIVE
 //     FILELIST
-//
 
 mode = FILELIST;
 
@@ -94,11 +89,9 @@ mode = FILELIST;
 //
 // Files will be searched for in this directory.
 //
-//
 // Type: string
-//
 
-input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur";
+input_dir = "$(HOME)/data/pecan/cfradial/spol/sur";
 
 ///////////// input_file_search_ext ///////////////////
 //
@@ -106,9 +99,7 @@ input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur";
 //
 // If set, only files with this extension will be processed.
 //
-//
 // Type: string
-//
 
 input_file_search_ext = "nc";
 
@@ -119,9 +110,7 @@ input_file_search_ext = "nc";
 // If set, only files with names containing this sub-string will be 
 //   processed.
 //
-//
 // Type: string
-//
 
 input_file_search_substr = "cfrad";
 
@@ -131,9 +120,7 @@ input_file_search_substr = "cfrad";
 //
 // Format is 'yyyy mm dd hh mm ss'.
 //
-//
 // Type: string
-//
 
 start_time = "2015 06 26 00 00 00";
 
@@ -143,11 +130,57 @@ start_time = "2015 06 26 00 00 00";
 //
 // Format is 'yyyy mm dd hh mm ss'.
 //
-//
 // Type: string
-//
 
 end_time = "2015 06 26 12 00 00";
+
+//======================================================================
+//
+// OPTIONAL FIXED ANGLE LIMITS.
+//
+// Fixed angles are elevation in PPI mode and azimuth in RHI mode.
+//
+//======================================================================
+ 
+///////////// set_fixed_angle_limits //////////////////
+//
+// Option to set fixed angle limits.
+//
+// Only use sweeps within the specified fixed angle limits.
+//
+// Type: boolean
+
+set_fixed_angle_limits = TRUE;
+
+///////////// apply_strict_angle_limits ///////////////
+//
+// Option to apply strict checking for angle or sweep number limits on 
+//   read.
+//
+// If true, an error will occur if the fixed angle limits or sweep num 
+//   limits are outside the bounds of the data. If false, a read is 
+//   guaranteed to return at least 1 sweep - if no sweep lies within the 
+//   angle limits set, the nearest sweep will be returned.
+//
+// Type: boolean
+
+apply_strict_angle_limits = TRUE;
+
+///////////// lower_fixed_angle_limit /////////////////
+//
+// Lower fixed angle limit - degrees.
+//
+// Type: double
+
+lower_fixed_angle_limit = 1.5;
+
+///////////// upper_fixed_angle_limit /////////////////
+//
+// Upper fixed angle limit - degrees.
+//
+// Type: double
+
+upper_fixed_angle_limit = 2.0;
 
 //======================================================================
 //
@@ -166,9 +199,7 @@ end_time = "2015 06 26 12 00 00";
 // If not, SNR will be computed from the DBZ field. See 
 //   'noise_dbz_at_100km'.
 //
-//
 // Type: boolean
-//
 
 SNR_available = TRUE;
 
@@ -178,9 +209,7 @@ SNR_available = TRUE;
 //
 // Signal-to-noise ratio (dB).
 //
-//
 // Type: string
-//
 
 SNR_field_name = "SNRHC_F";
 
@@ -192,9 +221,7 @@ SNR_field_name = "SNRHC_F";
 //   used if SNR_available is FALSE. The SNR will be computed by 
 //   range-correcting this value and using it as the noise value.
 //
-//
 // Type: double
-//
 
 noise_dbz_at_100km = 0;
 
@@ -204,9 +231,7 @@ noise_dbz_at_100km = 0;
 //
 // Horizontally-polarized reflectivity factor.
 //
-//
 // Type: string
-//
 
 DBZ_field_name = "DBZ_F";
 
@@ -214,9 +239,7 @@ DBZ_field_name = "DBZ_F";
 //
 // Field name for ZDR.
 //
-//
 // Type: string
-//
 
 ZDR_field_name = "ZDR_F";
 
@@ -224,9 +247,7 @@ ZDR_field_name = "ZDR_F";
 //
 // Field name for PHIDP.
 //
-//
 // Type: string
-//
 
 PHIDP_field_name = "PHIDP_F";
 
@@ -234,9 +255,7 @@ PHIDP_field_name = "PHIDP_F";
 //
 // Field name for RHOHV.
 //
-//
 // Type: string
-//
 
 RHOHV_field_name = "RHOHV_F";
 
@@ -257,9 +276,7 @@ RHOHV_field_name = "RHOHV_F";
 // If set to use-defaults, no parameter file will be read in, and the 
 //   default parameters will be used.
 //
-//
 // Type: string
-//
 
 KDP_params_file_path = "./KdpParams.test";
 
@@ -286,7 +303,6 @@ KDP_params_file_path = "./KdpParams.test";
 // 	DBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)
 // 	ZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB).
 //
-//
 // Type: struct
 //   typedef struct {
 //      output_field_id_t id;
@@ -305,7 +321,6 @@ KDP_params_file_path = "./KdpParams.test";
 //   }
 //
 // 1D array - variable length.
-//
 
 output_fields = {
   {
@@ -369,12 +384,10 @@ output_fields = {
 //
 // INT16 provides better compression. FL32 writes 32-bit floats.
 //
-//
 // Type: enum
 // Options:
 //     OUTPUT_ENCODING_FL32
 //     OUTPUT_ENCODING_INT16
-//
 
 output_encoding = OUTPUT_ENCODING_INT16;
 
@@ -392,9 +405,7 @@ output_encoding = OUTPUT_ENCODING_INT16;
 //
 // Option to copy input fields unchanged to the output file.
 //
-//
 // Type: boolean
-//
 
 copy_selected_input_fields_to_output = TRUE;
 
@@ -404,7 +415,6 @@ copy_selected_input_fields_to_output = TRUE;
 //
 // You can change the name of the field on output.
 //
-//
 // Type: struct
 //   typedef struct {
 //      string input_name;
@@ -412,7 +422,6 @@ copy_selected_input_fields_to_output = TRUE;
 //   }
 //
 // 1D array - variable length.
-//
 
 copy_fields = {
   {
@@ -464,9 +473,7 @@ copy_fields = {
 // These are the intermediate fields used in computing KDP and 
 //   attenuation.
 //
-//
 // Type: boolean
-//
 
 KDP_write_debug_fields = TRUE;
 
@@ -482,9 +489,7 @@ KDP_write_debug_fields = TRUE;
 //
 // Files will be written to this directory.
 //
-//
 // Type: string
-//
 
 output_dir = "/tmp/cfradial/spol/kdp";
 
@@ -496,13 +501,11 @@ output_dir = "/tmp/cfradial/spol/kdp";
 //   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
 //   include only end time in file name.
 //
-//
 // Type: enum
 // Options:
 //     START_AND_END_TIMES
 //     START_TIME_ONLY
 //     END_TIME_ONLY
-//
 
 output_filename_mode = START_AND_END_TIMES;
 
@@ -512,9 +515,7 @@ output_filename_mode = START_AND_END_TIMES;
 //
 // Path will be output_dir/yyyymmdd/filename.
 //
-//
 // Type: boolean
-//
 
 append_day_dir_to_output_dir = TRUE;
 
@@ -524,9 +525,7 @@ append_day_dir_to_output_dir = TRUE;
 //
 // Path will be output_dir/yyyy/yyyymmdd/filename.
 //
-//
 // Type: boolean
-//
 
 append_year_dir_to_output_dir = FALSE;
 
@@ -534,13 +533,11 @@ append_year_dir_to_output_dir = FALSE;
 //
 // Format for the output files.
 //
-//
 // Type: enum
 // Options:
 //     OUTPUT_FORMAT_CFRADIAL
 //     OUTPUT_FORMAT_DORADE
 //     OUTPUT_FORMAT_UF
-//
 
 output_format = OUTPUT_FORMAT_CFRADIAL;
 
@@ -557,9 +554,7 @@ output_format = OUTPUT_FORMAT_CFRADIAL;
 // This application registers with procmap. This is the instance used 
 //   for registration.
 //
-//
 // Type: string
-//
 
 instance = "spol";
 
@@ -571,9 +566,7 @@ instance = "spol";
 //   interval, to update its status. If it does not register within twice 
 //   this interval, the auto_restart script will restart the app.
 //
-//
 // Type: int
-//
 
 procmap_register_interval = 60;
 
@@ -583,9 +576,7 @@ procmap_register_interval = 60;
 //
 // Only data less old than this will be used.
 //
-//
 // Type: int
-//
 
 max_realtime_data_age_secs = 300;
 

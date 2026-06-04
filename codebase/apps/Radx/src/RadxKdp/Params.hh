@@ -432,6 +432,14 @@ public:
 
   char* end_time;
 
+  tdrp_bool_t set_fixed_angle_limits;
+
+  tdrp_bool_t apply_strict_angle_limits;
+
+  double lower_fixed_angle_limit;
+
+  double upper_fixed_angle_limit;
+
   tdrp_bool_t SNR_available;
 
   char* SNR_field_name;
@@ -483,7 +491,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[41];
+  mutable TDRPtable _table[46];
 
   const char *_className;
 
