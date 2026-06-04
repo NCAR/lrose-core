@@ -12,11 +12,6 @@ commentdef {
   p_header = "KdpFilt computes KDP from PHIDP.\n\nKDP is defined as half the change in PHIDP per km in range.\n\nRegions with valid PHIDP are determined by examining the quality of the PHIDP data, from RHOHV, and optionally from SNR and the variance of ZDR.\n\nPHIPD folds, so unfolding is the first step in the processing. After unfolding, filtering is applied to smooth PHIDP in range. This is followed by a step to identify regions with phase shift on backscatter.\n\nKDP is then computed as the PHIDP slope between range gates. For DBZ values < 20, 8 gates are used; for DBZ between 20 and 35, 4 gates are used; and if the DBZ exceeds 35, 2 adjacent gates are used.\n\nThe various filtering steps smeer out the KDP in range, which means that the high KDP values are not always located in the core of the precip. To help correct for this effect, we can make use of the self-consistency approach. This allows us to theoretically determine KDP from Z and ZDR - we can call this KDP_ZZDR. We can then use these self-consistent KDP_ZZDR values to compute a conditioned KDP field, by constraining the estimated KDP values to the relevant gates. This reduces the smeering effect. We refer to this KDP field, conditioned using self-consistency, as KDP_SC.";
 }
 
-commentdef {
-  p_header = "UNFOLDING AND INITIAL FILTERING";
-  p_text = "The first step is to unfold the PHIDP data. PHIDP folds at -180/180 for simultaneous mode radars, and at -90/90 for alternating mode radars. In order to compute the gradient of PHIDP, we need to unfold it so that it varies smoothly rather than folding.";
-}
-
 typedef enum {
   KDP_FIR_LEN_125,
   KDP_FIR_LEN_60,
@@ -37,6 +32,33 @@ paramdef int {
   p_descr = "Sets the number of iterations for the initial FIR filter for unfolded PHIDP.";
   p_help = "After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a set number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.";
 } KDP_n_filt_iterations_unfolded;
+
+typedef enum {
+  FIR_FILTER, REGRESSION_FILTER
+} range_filter_method_t;
+
+paramdef enum range_filter_method_t {
+  p_default = FIR_FILTER;
+  p_descr = "Method for filtering PHIDP in range.";
+  p_help = "Traditionally the Hubbert/Bringi approach used an FIR filter. More recently we have added the option to use the REGRESSION filter approach.";
+} range_filter_method;
+
+paramdef double {
+  p_default = 5.0;
+  p_descr = "Applies to the regression filter only.";
+  p_help = "For the regression filter we need to determine the polynomial order. We divide the ray into valid segments in range - i.e. segments with valid signal as opposed to range gates with no valid signal. For the regression filter we fit a polynomial to the phidp values in the valid segment. The longer the segment the higher the polynomial order required to fit the likely features in that segment. The order is computed as (segment-range/feature_length + 1). A minimum order is also applied - see 'min_polynomial_order' below.";
+} phidp_feature_length_km;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Minimum order for polynomial used in regression filter.";
+  p_help = "See 'phidp_feature_length_km' above.";
+} min_polynomial_order;
+
+commentdef {
+  p_header = "UNFOLDING AND INITIAL FILTERING";
+  p_text = "The first step is to unfold the PHIDP data. PHIDP folds at -180/180 for simultaneous mode radars, and at -90/90 for alternating mode radars. In order to compute the gradient of PHIDP, we need to unfold it so that it varies smoothly rather than folding.";
+}
 
 commentdef {
   p_header = "HANDLING PHASE SHIFT ON BACKSCATTER";

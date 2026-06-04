@@ -75,6 +75,11 @@ public:
   } KDP_fir_filter_len_t;
 
   typedef enum {
+    FIR_FILTER = 0,
+    REGRESSION_FILTER = 1
+  } range_filter_method_t;
+
+  typedef enum {
     HUBBERT_BRINGI_METHOD = 0,
     PEAK_REMOVAL_METHOD = 1
   } psob_method_t;
@@ -377,6 +382,12 @@ public:
 
   int KDP_n_filt_iterations_unfolded;
 
+  range_filter_method_t range_filter_method;
+
+  double phidp_feature_length_km;
+
+  int min_polynomial_order;
+
   psob_method_t KDP_psob_method;
 
   int KDP_n_filt_iterations_hubbert_bringi;
@@ -430,7 +441,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[34];
+  mutable TDRPtable _table[37];
 
   const char *_className;
 
