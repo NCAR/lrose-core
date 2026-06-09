@@ -464,21 +464,10 @@ int KdpFilt::compute(time_t timeSecs,
 
   _nGates = nGates;
 
-  // compute max number of valid gates
-
-  int nGatesMaxValid = _nGates;
-  if (_limitMaxRange) {
-    int nGatesMaxValid =
-      (int) ((_maxRangeKm - _startRangeKm) / _gateSpacingKm + 0.5);
-    if (nGatesMaxValid > _nGates) {
-      nGatesMaxValid = _nGates;
-    }
-  }
-
   // initialize the data arrays
   
   _missingValue = missingValue;
-  _initArrays(snr, dbz, zdr, rhohv, phidp, nGatesMaxValid);
+  _initArrays(snr, dbz, zdr, rhohv, phidp, _getNGatesMaxValid());
   
   // unfold phidp
   
@@ -574,21 +563,10 @@ int KdpFilt::computePhidpStats(int nGates,
 
   _nGates = nGates;
 
-  // compute max number of valid gates
-  
-  int nGatesMaxValid = _nGates;
-  if (_limitMaxRange) {
-    int nGatesMaxValid =
-      (int) ((_maxRangeKm - _startRangeKm) / _gateSpacingKm + 0.5);
-    if (nGatesMaxValid > _nGates) {
-      nGatesMaxValid = _nGates;
-    }
-  }
-
   // initialize the data arrays
   
   _missingValue = missingValue;
-  _initArrays(NULL, NULL, NULL, NULL, phidp, nGatesMaxValid);
+  _initArrays(NULL, NULL, NULL, NULL, phidp, _getNGatesMaxValid());
   
   // check if fold is at 90 or 180
   
@@ -616,6 +594,27 @@ int KdpFilt::computePhidpStats(int nGates,
 
 }
   
+/////////////////////////////////////
+// get max number of valid gates
+
+int KdpFilt::_getNGatesMaxValid()
+  
+{
+  
+  int nValid = _nGates;
+
+  if (_limitMaxRange) {
+    nValid =
+      (int) ((_maxRangeKm - _startRangeKm) / _gateSpacingKm + 0.5);
+    if (nValid > _nGates) {
+      nValid = _nGates;
+    }
+  }
+
+  return nValid;
+
+}
+
 /////////////////////////////////////
 // initialize arrays
 

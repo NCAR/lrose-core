@@ -481,7 +481,7 @@ private:
   int _nGatesStats;     /**< n gates for computing phidp stats
                          * default is 9 */
   int _nGatesStatsHalf; /**< half of _nGatesPhidpStats, truncated */
-
+  
   // option to limit max range
   // can be useful to avoid including the test pulse
   
@@ -682,7 +682,11 @@ private:
   int _kdpZZdrMedianLen;
 
   // methods
- 
+
+  // get max number of valid gates
+  
+  int _getNGatesMaxValid();
+  
   /**
    * Initialize local arrays and copy input data for filtering,
    * manipulation, etc.
