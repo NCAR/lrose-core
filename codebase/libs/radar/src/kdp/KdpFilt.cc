@@ -216,6 +216,18 @@ KdpFilt::KdpFilt()
   _debug = false;
   _writeRayFile = false;
 
+  // allocate the array of forsythe fit objects,
+  // for supported orders and nsamples
+  // this is done for efficiency
+
+  for (size_t ii = 0; ii < REGR_ORDER_MAX; ii++) {
+    vector<ForsytheFit *> row;
+    for (size_t jj = 0; jj < REGR_NGATES_MAX; jj++) {
+      row.push_back(NULL);
+    }
+    _forsytheArray.push_back(row);
+  }
+
 }
 
 // Destructor
@@ -223,6 +235,16 @@ KdpFilt::KdpFilt()
 KdpFilt::~KdpFilt()
   
 {
+
+  // clean up regression filter arrays
+  
+  for (size_t ii = 0; ii < REGR_ORDER_MAX; ii++) {
+    for (size_t jj = 0; jj < REGR_NGATES_MAX; jj++) {
+      if (_forsytheArray[ii][jj] != NULL) {
+        delete _forsytheArray[ii][jj];
+      }
+    } // jj
+  } // ii
 
 }
 
@@ -361,6 +383,7 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
                    params.KDP_zdr_attenuation_exponent);
   }
   setComputeAttenCorr(true);
+  setPhidpFeatureLengthKm(params.phidp_feature_length_km);
 
 }
 
@@ -493,6 +516,10 @@ int KdpFilt::compute(time_t timeSecs,
   // and kdp from the filtered data
 
   _computeKdp();
+
+  // compute phidp filtered with regression filter
+  
+  _computePhidpRegrFilt();
 
   // compute phase shift on backscatter as the difference between
   // measured and filtered phidp
@@ -637,36 +664,38 @@ void KdpFilt::_initArrays(const double *snr,
   // copy input arrays, leaving extra space at the beginning
   // for negative indices and at the end for filtering as required
 
-  _snr = _snr_.alloc(_nGates);
-  _dbz = _dbz_.alloc(_nGates);
-  _dbzMax = _dbzMax_.alloc(_nGates);
-  _dbzMedian = _dbzMedian_.alloc(_nGates);
-  _zdr = _zdr_.alloc(_nGates);
-  _zdrSdev = _zdrSdev_.alloc(_nGates);
-  _zdrMedian = _zdrMedian_.alloc(_nGates);
-  _rhohv = _rhohv_.alloc(_nGates);
-  _phidp = _phidp_.alloc(_nGates);
-  _phidpMean = _phidpMean_.alloc(_nGates);
-  _phidpMeanValid = _phidpMeanValid_.alloc(_nGates);
-  _phidpSdev = _phidpSdev_.alloc(_nGates);
-  _phidpJitter = _phidpJitter_.alloc(_nGates);
-  _phidpMeanUnfold = _phidpMeanUnfold_.alloc(_nGates);
-  _phidpUnfold = _phidpUnfold_.alloc(_nGates);
-  _phidpFilt = _phidpFilt_.alloc(_nGates);
-  _phidpCond = _phidpCond_.alloc(_nGates);
-  _phidpCondFilt = _phidpCondFilt_.alloc(_nGates);
-  _phidpAccumFilt = _phidpAccumFilt_.alloc(_nGates);
-  _validForKdp = _validForKdp_.alloc(_nGates);
-  _validForUnfold = _validForUnfold_.alloc(_nGates);
-  _kdp = _kdp_.alloc(_nGates);
-  _kdpZZdr = _kdpZZdr_.alloc(_nGates);
-  _kdpSC = _kdpSC_.alloc(_nGates);
-  _psob = _psob_.alloc(_nGates);
-  _dbzAttenCorr = _dbzAttenCorr_.alloc(_nGates);
-  _zdrAttenCorr = _zdrAttenCorr_.alloc(_nGates);
-  _dbzCorrected = _dbzCorrected_.alloc(_nGates);
-  _zdrCorrected = _zdrCorrected_.alloc(_nGates);
-  _gateStates = _gateStates_.alloc(_nGates);
+  _snr_.resize(_nGates); _snr = _snr_.data();
+  _dbz_.resize(_nGates); _dbz = _dbz_.data();
+  _dbzMax_.resize(_nGates); _dbzMax = _dbzMax_.data();
+  _dbzMedian_.resize(_nGates); _dbzMedian = _dbzMedian_.data();
+  _zdr_.resize(_nGates); _zdr = _zdr_.data();
+  _zdrSdev_.resize(_nGates); _zdrSdev = _zdrSdev_.data();
+  _zdrMedian_.resize(_nGates); _zdrMedian = _zdrMedian_.data();
+  _rhohv_.resize(_nGates); _rhohv = _rhohv_.data();
+  _phidp_.resize(_nGates); _phidp = _phidp_.data();
+  _phidpMean_.resize(_nGates); _phidpMean = _phidpMean_.data();
+  _phidpMeanValid_.resize(_nGates); _phidpMeanValid = _phidpMeanValid_.data();
+  _phidpSdev_.resize(_nGates); _phidpSdev = _phidpSdev_.data();
+  _phidpJitter_.resize(_nGates); _phidpJitter = _phidpJitter_.data();
+  _phidpMeanUnfold_.resize(_nGates); _phidpMeanUnfold = _phidpMeanUnfold_.data();
+  _phidpUnfold_.resize(_nGates); _phidpUnfold = _phidpUnfold_.data();
+  _phidpFilt_.resize(_nGates); _phidpFilt = _phidpFilt_.data();
+  _phidpCond_.resize(_nGates); _phidpCond = _phidpCond_.data();
+  _phidpCondFilt_.resize(_nGates); _phidpCondFilt = _phidpCondFilt_.data();
+  _phidpAccumFilt_.resize(_nGates); _phidpAccumFilt = _phidpAccumFilt_.data();
+  _validForKdp_.resize(_nGates); _validForKdp = _validForKdp_.data();
+  _validForUnfold_.resize(_nGates); _validForUnfold = _validForUnfold_.data();
+  _kdp_.resize(_nGates); _kdp = _kdp_.data();
+  _kdpZZdr_.resize(_nGates); _kdpZZdr = _kdpZZdr_.data();
+  _kdpSC_.resize(_nGates); _kdpSC = _kdpSC_.data();
+  _psob_.resize(_nGates); _psob = _psob_.data();
+  _dbzAttenCorr_.resize(_nGates); _dbzAttenCorr = _dbzAttenCorr_.data();
+  _zdrAttenCorr_.resize(_nGates); _zdrAttenCorr = _zdrAttenCorr_.data();
+  _dbzCorrected_.resize(_nGates); _dbzCorrected = _dbzCorrected_.data();
+  _zdrCorrected_.resize(_nGates); _zdrCorrected = _zdrCorrected_.data();
+  _gateStates_.resize(_nGates); _gateStates = _gateStates_.data();
+  _regrFilt_.resize(_nGates); _regrFilt = _regrFilt_.data();
+  _xxVals_.resize(_nGates); _xxVals = _xxVals_.data();
   
   // copy data to working arrays
 
@@ -741,6 +770,7 @@ void KdpFilt::_initArrays(const double *snr,
   
   // initialize computed arrays
 
+  double xxDelta = 1.0 / (double) _nGates;
   for (int ii = 0; ii < _nGates; ii++) {
     _zdrSdev[ii] = _missingValue;
     _phidpMean[ii] = _missingValue;
@@ -768,6 +798,8 @@ void KdpFilt::_initArrays(const double *snr,
     }
     _dbzAttenCorr[ii] = 0;
     _zdrAttenCorr[ii] = 0;
+    _regrFilt[ii] = _missingValue;
+    _xxVals[ii] = -0.5 + ii * xxDelta;
   }
   
 }
@@ -944,10 +976,19 @@ void KdpFilt::_computeKdp()
   int arrayLen = _nGates + 2 * arrayOffset;
   
   // allocate working arrays
+
+  vector<double> work1_(arrayLen);
+  double *work1 = work1_.data() + arrayOffset;
   
-  TaArray<double> work1_, work2_;
-  double *work1 = work1_.alloc(arrayLen) + arrayOffset;
-  double *work2 = work2_.alloc(arrayLen) + arrayOffset;
+  vector<double> work2_(arrayLen);
+  double *work2 = work2_.data() + arrayOffset;
+  
+  // vector<double> work1_, work2_;
+  // work1_.resize(arrayLen);
+  // double *work1 = work1_.data() + arrayOffset;
+  // work1_.resize(arrayLen);
+  // double *work1 = work1_.data() + arrayOffset;
+  // double *work2 = work2_.alloc(arrayLen) + arrayOffset;
 
   // initialize working array work2
   
@@ -1010,6 +1051,59 @@ void KdpFilt::_computeKdp()
 
   _loadPhidpAccumFilt(_phidpCondFilt, _phidpAccumFilt);
 
+}
+
+/////////////////////////////////////////////////
+// compute phidp filtered with regression filter
+
+void KdpFilt::_computePhidpRegrFilt()
+
+{
+
+  // compute regression order to be used
+
+  int nGates = _getNGatesMaxValid();
+  double maxRangeKm = nGates * _gateSpacingKm + _startRangeKm;
+  int polyOrder = floor(maxRangeKm / _phidpFeatureLengthKm) + 2;
+  if (polyOrder < 5) {
+    polyOrder = 5;
+  }
+  
+  // find the entry in the forsythe array, if possible
+  
+  ForsytheFit *fit = &_forsythe;
+  
+  if (polyOrder < REGR_ORDER_MAX &&
+      nGates < REGR_NGATES_MAX) {
+
+    // re-use objects
+    // check for existing entry in array of fit objects
+    
+    fit = _forsytheArray[polyOrder][nGates];
+    if (fit == NULL) {
+      // create new object for (order, nsamples)
+      fit = new ForsytheFit;
+      fit->prepareForFit(polyOrder, _xxVals_);
+      _forsytheArray[polyOrder][nGates] = fit;
+    }
+    
+  } else {
+
+    // else use canonical object
+    
+    fit->prepareForFit(polyOrder, _xxVals_);
+    
+  }
+
+  // perform the polynomial fit on unfolded phidp
+  
+  fit->performFit(_phidpUnfold_);
+  vector<double> smoothed = fit->getYEstVector();
+  for (int ii = 0; ii < nGates; ii++) {
+    // _regrFilt[ii] = _phidpUnfold[ii] - smoothed[ii];
+    _regrFilt[ii] = smoothed[ii];
+  }
+  
 }
 
 /////////////////////////////////////////////
@@ -1784,7 +1878,8 @@ void KdpFilt::_writeRayDataToFile()
           "phidpMean phidpMeanValid phidpJitter phidpSdev "
           "phidpMeanUnfold phidpUnfold phidpFilt phidpCond phidpCondFilt "
           "zdrSdev psob kdp "
-          "dbzAtten zdrAtten dbzCorrected zdrCorrected\n");
+          "dbzAtten zdrAtten dbzCorrected zdrCorrected "
+          "regrFilt\n");
 
   // write data
 
@@ -1805,7 +1900,7 @@ void KdpFilt::_writeRayDataToFile()
             "%3d %3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f\n",
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
             (_validForUnfold[igate]?1:0),
@@ -1829,7 +1924,8 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_dbzAttenCorr[igate], 0),
             _getPlotVal(_zdrAttenCorr[igate], 0),
             _getPlotVal(dbzCorrected, 0),
-            _getPlotVal(zdrCorrected, 0)
+            _getPlotVal(zdrCorrected, 0),
+            _getPlotVal(_regrFilt[igate], 0)
             );
   }
   

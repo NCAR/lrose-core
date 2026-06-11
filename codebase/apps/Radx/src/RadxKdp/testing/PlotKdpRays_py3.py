@@ -41,6 +41,7 @@ REQUIRED_COLUMNS = [
     "zdrAtten",
     "dbzCorrected",
     "zdrCorrected",
+    "regrFilt",
 ]
 
 
@@ -238,6 +239,7 @@ class KdpRayPlotter:
         self.ax2.plot(gate_num, self.data["phidpMeanUnfold"], label="meanUnfolded")
         self.ax2.plot(gate_num, self.data["phidpFilt"], label="Filt")
         self.ax2.plot(gate_num, self.data["phidpCondFilt"], label="CondFilt", color="black")
+        self.ax2.plot(gate_num, self.data["regrFilt"], label="RegrFilt", color="magenta")
         self.ax2.plot(gate_num, self.data["phidpSdev"], label="Sdev", color="pink")
         self.ax2.plot(gate_num, self.data["phidpJitter"], label="Jitter", color="orange")
         legend2 = self.ax2.legend(loc="upper right")

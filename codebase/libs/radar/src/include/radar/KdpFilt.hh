@@ -39,8 +39,8 @@
 #ifndef KdpFilt_hh
 #define KdpFilt_hh
 
-#include <toolsa/TaArray.hh>
 #include <radar/KdpFiltParams.hh>
+#include <rapmath/ForsytheFit.hh>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -260,6 +260,10 @@ public:
 
   void setMedianFilterLenForKdpZZdr(int val) { _kdpZZdrMedianLen = val; }
   
+  // phidp feature length for computing regression polynomial order
+
+  void setPhidpFeatureLengthKm(double val) { _phidpFeatureLengthKm = val; }
+  
   /**
    * Set parameters from KdpFiltParams object
    */
@@ -361,8 +365,8 @@ public:
    * Get flag of valid gates after calling compute()
    * @return an array of flag values
    */
-  const bool *getValidForKdp() const { return _validForKdp; }
-  const bool *getValidForUnfold() const { return _validForUnfold; }
+  const int *getValidForKdp() const { return _validForKdp; }
+  const int *getValidForUnfold() const { return _validForUnfold; }
   
   /**
    * Get phase shift on backscatter (deg) after calling compute()
@@ -437,6 +441,9 @@ protected:
   
 private:
 
+  static const int REGR_ORDER_MAX = 64;
+  static const int REGR_NGATES_MAX = 2048;
+  
   double _missingValue; /**< Value for missing or bad data */
 
   // parameters
@@ -549,7 +556,7 @@ private:
     double phidpJitter;
   };
 
-  TaArray<GateState> _gateStates_;
+  vector<GateState> _gateStates_;
   GateState *_gateStates;
   
   bool _foldsAt90;
@@ -569,95 +576,101 @@ private:
   int _arrayLen;
   
   bool _snrAvailable;
-  TaArray<double> _snr_;
+  vector<double> _snr_;
   double *_snr;
   
-  TaArray<double> _dbz_;
+  vector<double> _dbz_;
   double *_dbz;
 
-  TaArray<double> _dbzMedian_;
+  vector<double> _dbzMedian_;
   double *_dbzMedian;
 
-  TaArray<double> _dbzMax_;
+  vector<double> _dbzMax_;
   double *_dbzMax;
   
   bool _rhohvAvailable;
-  TaArray<double> _rhohv_;
+  vector<double> _rhohv_;
   double *_rhohv;
 
   bool _zdrAvailable;
-  TaArray<double> _zdr_;
+  vector<double> _zdr_;
   double *_zdr;
 
-  TaArray<double> _zdrSdev_;
+  vector<double> _zdrSdev_;
   double *_zdrSdev;
 
-  TaArray<double> _zdrMedian_;
+  vector<double> _zdrMedian_;
   double *_zdrMedian;
 
-  TaArray<double> _phidp_;
+  vector<double> _phidp_;
   double *_phidp;
   
-  TaArray<double> _phidpMean_;
+  vector<double> _phidpMean_;
   double *_phidpMean;
   
-  TaArray<double> _phidpMeanValid_;
+  vector<double> _phidpMeanValid_;
   double *_phidpMeanValid;
   
-  TaArray<double> _phidpJitter_;
+  vector<double> _phidpJitter_;
   double *_phidpJitter;
   
-  TaArray<double> _phidpSdev_;
+  vector<double> _phidpSdev_;
   double *_phidpSdev;
   
-  TaArray<double> _phidpMeanUnfold_;
+  vector<double> _phidpMeanUnfold_;
   double *_phidpMeanUnfold;
   
-  TaArray<double> _phidpUnfold_;
+  vector<double> _phidpUnfold_;
   double *_phidpUnfold;
   
-  TaArray<double> _phidpFilt_;
+  vector<double> _phidpFilt_;
   double *_phidpFilt;
   
-  TaArray<double> _phidpCond_;
+  vector<double> _phidpCond_;
   double *_phidpCond;
   
-  TaArray<double> _phidpCondFilt_;
+  vector<double> _phidpCondFilt_;
   double *_phidpCondFilt;
   
-  TaArray<double> _phidpAccumFilt_;
+  vector<double> _phidpAccumFilt_;
   double *_phidpAccumFilt;
   
-  TaArray<bool> _validForKdp_;
-  bool *_validForKdp;
+  vector<int> _validForKdp_;
+  int *_validForKdp;
   
-  TaArray<bool> _validForUnfold_;
-  bool *_validForUnfold;
+  vector<int> _validForUnfold_;
+  int *_validForUnfold;
   
-  TaArray<double> _kdp_;
+  vector<double> _kdp_;
   double *_kdp;
 
-  TaArray<double> _kdpZZdr_;
+  vector<double> _kdpZZdr_;
   double *_kdpZZdr;
 
-  TaArray<double> _kdpSC_;
+  vector<double> _kdpSC_;
   double *_kdpSC;
 
-  TaArray<double> _psob_;
+  vector<double> _psob_;
   double *_psob;
 
-  TaArray<double> _dbzAttenCorr_;
+  vector<double> _dbzAttenCorr_;
   double *_dbzAttenCorr;
 
-  TaArray<double> _zdrAttenCorr_;
+  vector<double> _zdrAttenCorr_;
   double *_zdrAttenCorr;
 
-  TaArray<double> _dbzCorrected_;
+  vector<double> _dbzCorrected_;
   double *_dbzCorrected;
 
-  TaArray<double> _zdrCorrected_;
+  vector<double> _zdrCorrected_;
   double *_zdrCorrected;
 
+  vector<double> _regrFilt_;
+  double *_regrFilt;
+  
+  vector<double> _xxVals_;
+  double *_xxVals;
+  
   // Z and ZDR attenuation correction
 
   bool _doComputeAttenCorr;
@@ -681,6 +694,24 @@ private:
   double _kdpMinForSelfConsistency;
   int _kdpZZdrMedianLen;
 
+  // forsythe regression filter
+
+  // single forsythe orthogonal polynomial object
+  // if array not suitable
+  
+  ForsytheFit _forsythe;
+  
+  // array of forsythe objects for efficiency
+  // this allows us to re-use objects that have been
+  // previously set up
+
+  vector<vector<ForsytheFit *>> _forsytheArray;
+
+  // nominal length of a feature in PHIDP
+
+  double _phidpFeatureLengthKm;
+  
+  //////////////////////////////////////////
   // methods
 
   // get max number of valid gates
@@ -708,6 +739,13 @@ private:
   /// filter the unfolded phidp array and compute kdp
   
   void _computeKdp();
+
+  // compute regression-filtered phidp
+  
+  void _computePhidpRegrFilt();
+
+  // worker methods
+  
   void _copyArray(double *out, const double *in);
   void _copyArrayCond(double *out, const double *in,
                       const double *original);
