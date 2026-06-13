@@ -1106,6 +1106,61 @@ void KdpFilt::_computePhidpRegrFilt()
   
 }
 
+/////////////////////////////////////////////////
+// compute phidp filtered with regression filter
+// weighted by rhohv
+
+void KdpFilt::_computePhidpWtRegrFilt()
+
+{
+
+  // compute regression order to be used
+
+  int nGates = _getNGatesMaxValid();
+  double maxRangeKm = nGates * _gateSpacingKm + _startRangeKm;
+  int polyOrder = floor(maxRangeKm / _phidpFeatureLengthKm) + 2;
+  if (polyOrder < 5) {
+    polyOrder = 5;
+  }
+
+  // compute weighted phidp and x data
+
+  vector<double> xxValsWt(nGates);
+  vector<double> phidpUnfoldWt(nGates);
+
+  double rho0 = 0.85;
+  
+  for (int ii = 0; ii < nGates; ii++) {
+
+    double rhohv = _rhohv[ii];
+    double wt = 1.0;
+    if (rhohv <= rho0) {
+      wt = 0.01;
+    } else {
+      wt = (rhohv - rho0) / (1.0 - rho0);
+    }
+
+    xxValsWt[ii] = _xxVals[ii] * wt;
+    phidpUnfoldWt[ii] = _phidpUnfold[ii] * wt; 
+    
+  } // ii
+  
+  // find the entry in the forsythe array, if possible
+  
+  ForsytheFit fit;
+  fit.prepareForFit(polyOrder, xxValsWt);
+    
+  // perform the polynomial fit on unfolded phidp
+  
+  fit.performFit(phidpUnfoldWt);
+  vector<double> smoothed = fit.getYEstVector();
+  for (int ii = 0; ii < nGates; ii++) {
+    // _regrFilt[ii] = _phidpUnfold[ii] - smoothed[ii];
+    _regrFilt[ii] = smoothed[ii];
+  }
+  
+}
+
 /////////////////////////////////////////////
 // load array ready for filter
 

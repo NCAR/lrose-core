@@ -743,6 +743,7 @@ private:
   // compute regression-filtered phidp
   
   void _computePhidpRegrFilt();
+  void _computePhidpWtRegrFilt();
 
   // worker methods
   
