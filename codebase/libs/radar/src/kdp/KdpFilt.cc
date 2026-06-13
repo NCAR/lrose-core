@@ -519,7 +519,7 @@ int KdpFilt::compute(time_t timeSecs,
 
   // compute phidp filtered with regression filter
   
-  _computePhidpRegrFilt();
+  _computePhidpWtRegrFilt();
 
   // compute phase shift on backscatter as the difference between
   // measured and filtered phidp
@@ -1128,17 +1128,20 @@ void KdpFilt::_computePhidpWtRegrFilt()
   vector<double> xxValsWt(nGates);
   vector<double> phidpUnfoldWt(nGates);
 
-  double rho0 = 0.85;
+  // double rho0 = 0.85;
   
   for (int ii = 0; ii < nGates; ii++) {
 
-    double rhohv = _rhohv[ii];
+    // double rhohv = _rhohv[ii];
+    // double wt = sqrt(rhohv);
     double wt = 1.0;
-    if (rhohv <= rho0) {
-      wt = 0.01;
-    } else {
-      wt = (rhohv - rho0) / (1.0 - rho0);
-    }
+    
+    // double wt = 1.0;
+    // if (rhohv <= rho0) {
+    //   wt = 0.0;
+    // } else {
+    //   wt = sqrt((rhohv - rho0) / (1.0 - rho0));
+    // }
 
     xxValsWt[ii] = _xxVals[ii] * wt;
     phidpUnfoldWt[ii] = _phidpUnfold[ii] * wt; 
