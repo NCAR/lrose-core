@@ -133,6 +133,7 @@ set (SRCS
       ./umath/usvd.c
       ./umath/uv_2_dir_speed.c
       ./umath/ForsytheFit.cc
+      ./umath/NasaPolyFit.cc
       ./umath/PlaneFit.cc
       ./umath/PolyFit.cc
       ./umath/usort_stl.cc
