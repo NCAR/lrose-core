@@ -30,6 +30,7 @@ HDRS = ../include/rapmath/umath.h \
 
 CPPC_SRCS = \
 	ForsytheFit.cc \
+	NasaPolyFit.cc \
 	PlaneFit.cc \
 	PolyFit.cc \
 	usort_stl.cc \
