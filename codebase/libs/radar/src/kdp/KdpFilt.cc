@@ -517,7 +517,7 @@ int KdpFilt::compute(time_t timeSecs,
   // compute phidp filtered with regression filter
   
   // _computePhidpWtRegrFilt();
-  _computePhidpRegrFilt2();
+  _computePhidpRegrFilt();
 
   // compute phase shift on backscatter as the difference between
   // measured and filtered phidp
