@@ -71,6 +71,7 @@ endif(DEFINED MAMBA_BUILD)
 set (SRCS
       ./calib/RadarCalib.cc
       ./complex/RadarComplex.cc
+      ./convstrat/ConvStratParams.cc
       ./convstrat/ConvStratFinder.cc
       ./dorade/spol_C_utils.c
       ./dorade/DFileInput.cc
