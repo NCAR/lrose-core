@@ -48,18 +48,18 @@
  *
  * Usage:
  *
- *   #include "PolyFit.hh"
+ *   #include <rapmath/NasaPolyFit.hh>
  *
  *   std::vector<double> x = {...};
  *   std::vector<double> y = {...};
  *   std::vector<double> weights = {...};
  *
- *   polyfit::FitResult fit = polyfit::fitPolynomial(x, y, weights, 3);
+ *   nasapolyfit::FitResult fit = nasapolyfit::fitPolynomial(x, y, weights, 3);
  *
  *   if (fit.success) {
  *     const std::vector<double>& c = fit.coeffs;
- *     double y0 = polyfit::evaluatePolynomial(c, x0);
- *     double dydx = polyfit::evaluatePolynomialDerivative(c, x0);
+ *     double y0 = nasapolyfit::evaluatePolynomial(c, x0);
+ *     double dydx = nasapolyfit::evaluatePolynomialDerivative(c, x0);
  *   }
  *
  * Compile example:
@@ -81,7 +81,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace polyfit {
+namespace nasapolyfit {
 namespace {
 
 using Matrix = std::vector<std::vector<double>>;
@@ -372,4 +372,4 @@ double evaluatePolynomialDerivative(const std::vector<double>& coeffs, double x)
   return dydx;
 }
 
-}  // namespace polyfit
+}  // namespace nasapolyfit

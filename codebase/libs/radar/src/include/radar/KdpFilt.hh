@@ -699,13 +699,13 @@ private:
   // single forsythe orthogonal polynomial object
   // if array not suitable
   
-  ForsytheFit _forsythe;
+  // ForsytheFit _forsythe;
   
   // array of forsythe objects for efficiency
   // this allows us to re-use objects that have been
   // previously set up
 
-  vector<vector<ForsytheFit *>> _forsytheArray;
+  // vector<vector<ForsytheFit *>> _forsytheArray;
 
   // nominal length of a feature in PHIDP
 
@@ -743,6 +743,7 @@ private:
   // compute regression-filtered phidp
   
   void _computePhidpRegrFilt();
+  void _computePhidpRegrFilt2();
   void _computePhidpWtRegrFilt();
 
   // worker methods

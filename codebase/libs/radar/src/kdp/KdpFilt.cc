@@ -29,15 +29,12 @@
 // Feb 2008
 //
 ///////////////////////////////////////////////////////////////
-//
-// Kdp for SBand - based on Bringi code
-//
-////////////////////////////////////////////////////////////////
 
 #include <iomanip>
 #include <cerrno>
 #include <cmath>
 #include <cstring>
+#include <rapmath/NasaPolyFit.hh>
 #include <toolsa/os_config.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/file_io.h>
@@ -220,13 +217,13 @@ KdpFilt::KdpFilt()
   // for supported orders and nsamples
   // this is done for efficiency
 
-  for (size_t ii = 0; ii < REGR_ORDER_MAX; ii++) {
-    vector<ForsytheFit *> row;
-    for (size_t jj = 0; jj < REGR_NGATES_MAX; jj++) {
-      row.push_back(NULL);
-    }
-    _forsytheArray.push_back(row);
-  }
+  // for (size_t ii = 0; ii < REGR_ORDER_MAX; ii++) {
+  //   vector<ForsytheFit *> row;
+  //   for (size_t jj = 0; jj < REGR_NGATES_MAX; jj++) {
+  //     row.push_back(NULL);
+  //   }
+  //   _forsytheArray.push_back(row);
+  // }
 
 }
 
@@ -238,13 +235,13 @@ KdpFilt::~KdpFilt()
 
   // clean up regression filter arrays
   
-  for (size_t ii = 0; ii < REGR_ORDER_MAX; ii++) {
-    for (size_t jj = 0; jj < REGR_NGATES_MAX; jj++) {
-      if (_forsytheArray[ii][jj] != NULL) {
-        delete _forsytheArray[ii][jj];
-      }
-    } // jj
-  } // ii
+  // for (size_t ii = 0; ii < REGR_ORDER_MAX; ii++) {
+  //   for (size_t jj = 0; jj < REGR_NGATES_MAX; jj++) {
+  //     if (_forsytheArray[ii][jj] != NULL) {
+  //       delete _forsytheArray[ii][jj];
+  //     }
+  //   } // jj
+  // } // ii
 
 }
 
@@ -519,7 +516,8 @@ int KdpFilt::compute(time_t timeSecs,
 
   // compute phidp filtered with regression filter
   
-  _computePhidpWtRegrFilt();
+  // _computePhidpWtRegrFilt();
+  _computePhidpRegrFilt2();
 
   // compute phase shift on backscatter as the difference between
   // measured and filtered phidp
@@ -1069,39 +1067,40 @@ void KdpFilt::_computePhidpRegrFilt()
     polyOrder = 5;
   }
   
-  // find the entry in the forsythe array, if possible
+  // prepare for the fit
   
-  ForsytheFit *fit = &_forsythe;
-  
-  if (polyOrder < REGR_ORDER_MAX &&
-      nGates < REGR_NGATES_MAX) {
-
-    // re-use objects
-    // check for existing entry in array of fit objects
-    
-    fit = _forsytheArray[polyOrder][nGates];
-    if (fit == NULL) {
-      // create new object for (order, nsamples)
-      fit = new ForsytheFit;
-      fit->prepareForFit(polyOrder, _xxVals_);
-      _forsytheArray[polyOrder][nGates] = fit;
-    }
-    
-  } else {
-
-    // else use canonical object
-    
-    fit->prepareForFit(polyOrder, _xxVals_);
-    
-  }
+  ForsytheFit fit;
+  fit.prepareForFit(polyOrder, _xxVals_);
 
   // perform the polynomial fit on unfolded phidp
   
-  fit->performFit(_phidpUnfold_);
-  vector<double> smoothed = fit->getYEstVector();
+  fit.performFit(_phidpUnfold_);
+  vector<double> smoothed = fit.getYEstVector();
   for (int ii = 0; ii < nGates; ii++) {
     // _regrFilt[ii] = _phidpUnfold[ii] - smoothed[ii];
     _regrFilt[ii] = smoothed[ii];
+  }
+  
+}
+
+void KdpFilt::_computePhidpRegrFilt2()
+
+{
+
+  // compute regression order to be used
+
+  int nGates = _getNGatesMaxValid();
+  double maxRangeKm = nGates * _gateSpacingKm + _startRangeKm;
+  int polyOrder = floor(maxRangeKm / _phidpFeatureLengthKm) + 2;
+  if (polyOrder < 5) {
+    polyOrder = 5;
+  }
+  
+  // find the entry in the forsythe array, if possible
+
+  nasapolyfit::FitResult res = nasapolyfit::fitPolynomial(_xxVals_, _phidpUnfold_, polyOrder);
+  for (int ii = 0; ii < nGates; ii++) {
+    _regrFilt[ii] = nasapolyfit::evaluatePolynomial(res.coeffs, _xxVals_[ii]);
   }
   
 }

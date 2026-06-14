@@ -42,8 +42,8 @@
 // ********************************************************************
 
 
-#ifndef POLYFIT_HH
-#define POLYFIT_HH
+#ifndef NASAPOLYFIT_HH
+#define NASAPOLYFIT_HH
 
 /**********************************************************************
  * PolyFit.hh
@@ -52,40 +52,8 @@
  *
  * Usage example:
  *
- *   #include "PolyFit.hh"
- *   #include <iostream>
- *   #include <vector>
- *
- *   int main() {
- *     std::vector<double> x = {0.0, 1.0, 2.0, 3.0, 4.0};
- *     std::vector<double> y = {1.0, 2.1, 3.9, 6.2, 8.1};
- *     std::vector<double> w = {1.0, 1.0, 0.5, 1.0, 1.0};
- *
- *     const int order = 2;
- *
- *     polyfit::FitResult fit = polyfit::fitPolynomial(x, y, w, order);
- *
- *     if (fit.success) {
- *       // Polynomial is:
- *       //   y = c[0] + c[1] * x + c[2] * x^2 + ...
- *       const std::vector<double>& c = fit.coeffs;
- *
- *       double yFit = polyfit::evaluatePolynomial(c, 2.5);
- *       double dyDx = polyfit::evaluatePolynomialDerivative(c, 2.5);
- *
- *       std::cout << "yFit = " << yFit << "\n";
- *       std::cout << "dy/dx = " << dyDx << "\n";
- *     }
- *   }
- *
- * Unweighted fit:
- *
- *   polyfit::FitResult fit = polyfit::fitPolynomial(x, y, order);
- *
- * Pointer-array interface, useful for legacy code:
- *
- *   polyfit::FitResult fit =
- *       polyfit::fitPolynomial(xPtr, yPtr, wPtr, nPoints, order);
+ *   #include <rapmath/NasaPolyFit.hh>
+ *       nasapolyfit::fitPolynomial(xPtr, yPtr, wPtr, nPoints, order);
  *
  * Notes:
  *
@@ -101,7 +69,7 @@
 #include <string>
 #include <vector>
 
-namespace polyfit {
+namespace nasapolyfit {
 
 struct FitResult {
   bool success = false;
@@ -143,6 +111,6 @@ double evaluatePolynomial(const std::vector<double>& coeffs, double x);
 // Evaluate derivative: c[1] + 2*c[2]*x + 3*c[3]*x^2 + ...
 double evaluatePolynomialDerivative(const std::vector<double>& coeffs, double x);
 
-}  // namespace polyfit
+}  // namespace nasapolyfit
 
-#endif  // POLYFIT_HH
+#endif  // NASAPOLYFIT_HH
