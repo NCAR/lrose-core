@@ -517,7 +517,7 @@ int KdpFilt::compute(time_t timeSecs,
   // compute phidp filtered with regression filter
   
   // _computePhidpWtRegrFilt();
-  _computePhidpRegrFilt();
+  _computePhidpRegrFilt2();
 
   // compute phase shift on backscatter as the difference between
   // measured and filtered phidp
@@ -1087,6 +1087,22 @@ void KdpFilt::_computePhidpRegrFilt2()
 
 {
 
+  // initialize
+
+  _regrFilt_ = _phidpUnfold_;
+
+  // filter each valid run
+  
+  for (size_t irun = 0; irun < _validRuns.size(); irun++) {
+    _computeRegrFiltValidRun(irun);
+  }
+  
+}
+
+void KdpFilt::_computePhidpRegrFilt3()
+
+{
+
   // compute regression order to be used
 
   int nGates = _getNGatesMaxValid();
@@ -1161,6 +1177,48 @@ void KdpFilt::_computePhidpWtRegrFilt()
     _regrFilt[ii] = smoothed[ii];
   }
   
+}
+
+///////////////////////////////////////////////////////
+// run regression filter on a valid run
+
+void KdpFilt::_computeRegrFiltValidRun(int runNum)
+
+{
+
+  const PhidpRun &run = _validRuns[runNum];
+  
+  // compute regression order to be used
+
+  int nGates = run.iend - run.ibegin;
+  double dRangeKm = nGates * _gateSpacingKm;
+  int polyOrder = floor(dRangeKm / _phidpFeatureLengthKm) + 2;
+  if (polyOrder < 5) {
+    polyOrder = 5;
+  }
+  
+  // prepare for the fit
+  
+  ForsytheFit fit;
+  vector<double> xx;
+  for (int ii = run.ibegin; ii <= run.iend; ii++) {
+    xx.push_back(_xxVals_[ii]);
+  }
+  fit.prepareForFit(polyOrder, xx);
+  
+  // perform the polynomial fit on unfolded phidp
+  
+  vector<double> phidp;
+  for (int ii = run.ibegin; ii <= run.iend; ii++) {
+    phidp.push_back(_phidpUnfold_[ii]);
+  }
+  fit.performFit(phidp);
+
+  vector<double> smoothed = fit.getYEstVector();
+  for (int ii = run.ibegin; ii <= run.iend; ii++) {
+    _regrFilt[ii] = smoothed[ii - run.ibegin];
+  }
+
 }
 
 /////////////////////////////////////////////
@@ -1678,6 +1736,18 @@ int KdpFilt::_findValidRuns()
       }
     }
   }
+
+  // cerr << "*********************** valid runs **************************" << endl;
+  // for (size_t irun = 0; irun < _validRuns.size(); irun++) {
+  //   _validRuns[irun].print(irun, cerr);
+  // }
+  // cerr << "*************************************************************" << endl;
+
+  // cerr << "*********************** gap runs **************************" << endl;
+  // for (size_t irun = 0; irun < _gapRuns.size(); irun++) {
+  //   _gapRuns[irun].print(irun, cerr);
+  // }
+  // cerr << "*************************************************************" << endl;
 
   return 0;
 

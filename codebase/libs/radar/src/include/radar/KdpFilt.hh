@@ -744,7 +744,9 @@ private:
   
   void _computePhidpRegrFilt();
   void _computePhidpRegrFilt2();
+  void _computePhidpRegrFilt3();
   void _computePhidpWtRegrFilt();
+  void _computeRegrFiltValidRun(int runNum);
 
   // worker methods
   
