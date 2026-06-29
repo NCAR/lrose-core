@@ -1089,7 +1089,7 @@ void KdpFilt::_computePhidpRegrFilt2()
 
   // initialize
 
-  _regrFilt_ = _phidpUnfold_;
+  _regrFilt_ = _phidpMeanUnfold_;
 
   // filter each valid run
   
@@ -1210,7 +1210,7 @@ void KdpFilt::_computeRegrFiltValidRun(int runNum)
   
   vector<double> phidp;
   for (int ii = run.ibegin; ii <= run.iend; ii++) {
-    phidp.push_back(_phidpUnfold_[ii]);
+    phidp.push_back(_phidpMeanUnfold_[ii]);
   }
   fit.performFit(phidp);
 

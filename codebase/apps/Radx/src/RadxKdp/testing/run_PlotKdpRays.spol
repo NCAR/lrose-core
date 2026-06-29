@@ -2,6 +2,6 @@
 
 cd $HOME/git/lrose-core/codebase/apps/Radx/src/RadxKdp/testing
 
-./PlotKdpRays_py3.py --file /tmp/kdp_ray_files/kdpray_20150626-000836.928_el-001.66_az-085.50_.txt
+./PlotKdpRays_py3.py --file /tmp/kdp_ray_files/kdpray_20150626-000836.928_el-001.66_az-085.50_.txt --width 600 --height 250
 
 

@@ -33,24 +33,12 @@
 //
 //======================================================================
  
-//======================================================================
-//
-// UNFOLDING AND INITIAL FILTERING.
-//
-// The first step is to unfold the PHIDP data. PHIDP folds at -180/180 
-//   for simultaneous mode radars, and at -90/90 for alternating mode 
-//   radars. In order to compute the gradient of PHIDP, we need to unfold 
-//   it so that it varies smoothly rather than folding.
-//
-//======================================================================
- 
 ///////////// KDP_fir_filter_len //////////////////////
 //
 // Filter length for the FIR filter for PHIDP (gates).
 //
 // When computing KDP, an FIR filter is first applied to PHIDP to smooth 
 //   it. This is the length of that filter, in gates.
-//
 //
 // Type: enum
 // Options:
@@ -60,7 +48,6 @@
 //     KDP_FIR_LEN_30
 //     KDP_FIR_LEN_20
 //     KDP_FIR_LEN_10
-//
 
 KDP_fir_filter_len = KDP_FIR_LEN_10;
 
@@ -73,12 +60,63 @@ KDP_fir_filter_len = KDP_FIR_LEN_10;
 //   phidp, a set number of times, to smooth it. The effect of the filter 
 //   is a combination of the filter length and the number of iterations.
 //
-//
 // Type: int
-//
 
 KDP_n_filt_iterations_unfolded = 2;
 
+///////////// range_filter_method /////////////////////
+//
+// Method for filtering PHIDP in range.
+//
+// Traditionally the Hubbert/Bringi approach used an FIR filter. More 
+//   recently we have added the option to use the REGRESSION filter 
+//   approach.
+//
+// Type: enum
+// Options:
+//     FIR_FILTER
+//     REGRESSION_FILTER
+
+range_filter_method = FIR_FILTER;
+
+///////////// phidp_feature_length_km /////////////////
+//
+// Applies to the regression filter only.
+//
+// For the regression filter we need to determine the polynomial order. 
+//   We divide the ray into valid segments in range - i.e. segments with 
+//   valid signal as opposed to range gates with no valid signal. For the 
+//   regression filter we fit a polynomial to the phidp values in the 
+//   valid segment. The longer the segment the higher the polynomial order 
+//   required to fit the likely features in that segment. The order is 
+//   computed as (segment-range/feature_length + 1). A minimum order is 
+//   also applied - see 'min_polynomial_order' below.
+//
+// Type: double
+
+phidp_feature_length_km = 2;
+
+///////////// min_polynomial_order ////////////////////
+//
+// Minimum order for polynomial used in regression filter.
+//
+// See 'phidp_feature_length_km' above.
+//
+// Type: int
+
+min_polynomial_order = 5;
+
+//======================================================================
+//
+// UNFOLDING AND INITIAL FILTERING.
+//
+// The first step is to unfold the PHIDP data. PHIDP folds at -180/180 
+//   for simultaneous mode radars, and at -90/90 for alternating mode 
+//   radars. In order to compute the gradient of PHIDP, we need to unfold 
+//   it so that it varies smoothly rather than folding.
+//
+//======================================================================
+ 
 //======================================================================
 //
 // HANDLING PHASE SHIFT ON BACKSCATTER.
@@ -104,12 +142,10 @@ KDP_n_filt_iterations_unfolded = 2;
 //
 // Method for handling pbase shift on backscatter.
 //
-//
 // Type: enum
 // Options:
 //     HUBBERT_BRINGI_METHOD
 //     PEAK_REMOVAL_METHOD
-//
 
 KDP_psob_method = PEAK_REMOVAL_METHOD;
 
@@ -119,9 +155,7 @@ KDP_psob_method = PEAK_REMOVAL_METHOD;
 //
 // See above.
 //
-//
 // Type: int
-//
 
 KDP_n_filt_iterations_hubbert_bringi = 4;
 
@@ -134,9 +168,7 @@ KDP_n_filt_iterations_hubbert_bringi = 4;
 //   value at that gate is retained. If the difference exceeds this 
 //   parameter, the new filtered value is retained.
 //
-//
 // Type: double
-//
 
 KDP_phidp_difference_threshold_hubbert_bringi = 4;
 
@@ -160,9 +192,7 @@ KDP_phidp_difference_threshold_hubbert_bringi = 4;
 //   This parameter is the number of gates over which these statistics are 
 //   computed.
 //
-//
 // Type: int
-//
 
 KDP_ngates_for_stats = 9;
 
@@ -175,9 +205,7 @@ KDP_ngates_for_stats = 9;
 //   present. If the sdev is less than this value, we conclude we are in 
 //   weather echo and the PHIDP is valid and KDP should be computed.
 //
-//
 // Type: double
-//
 
 KDP_phidp_sdev_max = 20;
 
@@ -191,9 +219,7 @@ KDP_phidp_sdev_max = 20;
 //   value, we conclude we are in weather echo, the PHIDP is valid and KDP 
 //   should be computed at this gate.
 //
-//
 // Type: double
-//
 
 KDP_phidp_jitter_max = 25;
 
@@ -201,9 +227,7 @@ KDP_phidp_jitter_max = 25;
 //
 // Check the RHOHV.
 //
-//
 // Type: boolean
-//
 
 KDP_check_rhohv = TRUE;
 
@@ -214,9 +238,7 @@ KDP_check_rhohv = TRUE;
 // If the RHOHV drops below this value, KDP will not be computed at this 
 //   gate.
 //
-//
 // Type: double
-//
 
 KDP_rhohv_threshold = 0.95;
 
@@ -224,9 +246,7 @@ KDP_rhohv_threshold = 0.95;
 //
 // Check the SNR.
 //
-//
 // Type: boolean
-//
 
 KDP_check_snr = FALSE;
 
@@ -237,9 +257,7 @@ KDP_check_snr = FALSE;
 // If the SNR drops below this value, KDP will not be computed at this 
 //   gate.
 //
-//
 // Type: double
-//
 
 KDP_snr_threshold = -6;
 
@@ -247,9 +265,7 @@ KDP_snr_threshold = -6;
 //
 // Check the standard deviation of ZDR in range?.
 //
-//
 // Type: boolean
-//
 
 KDP_check_zdr_sdev = FALSE;
 
@@ -260,9 +276,7 @@ KDP_check_zdr_sdev = FALSE;
 // The sdev of zdr is a good test for clutter. If the sdev is less than 
 //   this value, we conclude we are in weather echo rather than clutter.
 //
-//
 // Type: double
-//
 
 KDP_zdr_sdev_max = 2;
 
@@ -289,9 +303,7 @@ KDP_zdr_sdev_max = 2;
 //   KDP_SC such that the PHIDP change over these gates is the same for 
 //   both KDP and KDP_SC.
 //
-//
 // Type: double
-//
 
 KDP_minimum_for_self_consistency = 0.25;
 
@@ -303,9 +315,7 @@ KDP_minimum_for_self_consistency = 0.25;
 //   and ZDR in range. This parameter is the length of that median filter, 
 //   in gates.
 //
-//
 // Type: int
-//
 
 KDP_median_filter_len_for_ZZDR = 5;
 
@@ -323,9 +333,7 @@ KDP_median_filter_len_for_ZZDR = 5;
 //
 // Values less than this are set to 0.
 //
-//
 // Type: double
-//
 
 KDP_min_valid_abs_kdp = 0.01;
 
@@ -350,9 +358,7 @@ KDP_min_valid_abs_kdp = 0.01;
 // If false, the default coefficients will be determined for the radar 
 //   wavelength.
 //
-//
 // Type: boolean
-//
 
 KDP_specify_coefficients_for_attenuation_correction = FALSE;
 
@@ -362,9 +368,7 @@ KDP_specify_coefficients_for_attenuation_correction = FALSE;
 //
 // Default is 0.017. See Bringi and Chandrasekar, Table 7.1, page 494.
 //
-//
 // Type: double
-//
 
 KDP_dbz_attenuation_coefficient = 0.017;
 
@@ -374,9 +378,7 @@ KDP_dbz_attenuation_coefficient = 0.017;
 //
 // Default is 0.84. See Bringi and Chandrasekar, Table 7.1, page 494.
 //
-//
 // Type: double
-//
 
 KDP_dbz_attenuation_exponent = 0.84;
 
@@ -386,9 +388,7 @@ KDP_dbz_attenuation_exponent = 0.84;
 //
 // Default is 0.003. See Bringi and Chandrasekar, Table 7.1, page 494.
 //
-//
 // Type: double
-//
 
 KDP_zdr_attenuation_coefficient = 0.003;
 
@@ -398,9 +398,7 @@ KDP_zdr_attenuation_coefficient = 0.003;
 //
 // Default is 1.05. See Bringi and Chandrasekar, Table 7.1, page 494.
 //
-//
 // Type: double
-//
 
 KDP_zdr_attenuation_exponent = 1.05;
 
@@ -414,9 +412,7 @@ KDP_zdr_attenuation_exponent = 1.05;
 //
 // Option to print debug messages in KDP computation.
 //
-//
 // Type: boolean
-//
 
 KDP_debug = TRUE;
 
@@ -424,9 +420,7 @@ KDP_debug = TRUE;
 //
 // Option to write ray files to debug KDP computation.
 //
-//
 // Type: boolean
-//
 
 KDP_write_ray_files = TRUE;
 
@@ -434,9 +428,7 @@ KDP_write_ray_files = TRUE;
 //
 // Directory for KDP ray files.
 //
-//
 // Type: string
-//
 
 KDP_ray_files_dir = "/tmp/kdp_ray_files";
 
