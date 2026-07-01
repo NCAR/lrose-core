@@ -2837,6 +2837,7 @@ void iwrf_pulse_header_print(FILE *out,
   fprintf(out, "  start_range_m: %g\n", copy.start_range_m);
   fprintf(out, "  gate_spacing_m: %g\n", copy.gate_spacing_m);
 
+  fprintf(out, "  event_flags: %d\n", copy.event_flags);
   if (copy.event_flags & IWRF_END_OF_SWEEP) {
     fprintf(out, "  event: end_of_sweep\n");
   }
@@ -2849,15 +2850,23 @@ void iwrf_pulse_header_print(FILE *out,
   if (copy.event_flags & IWRF_START_OF_VOLUME) {
     fprintf(out, "  event: start_of_volume\n");
   }
+  if (copy.event_flags & IWRF_START_OF_BLOCK) {
+    fprintf(out, "  event: start_of_block\n");
+  }
+  if (copy.event_flags & IWRF_END_OF_BLOCK) {
+    fprintf(out, "  event: end_of_block\n");
+  }
 
+  fprintf(out, "  txrx_state: %d\n", copy.txrx_state);
   if (copy.txrx_state & IWRF_TXRX_LONG_PRT) {
     fprintf(out, "  txrx state: long PRT\n");
   }
   if (copy.txrx_state & IWRF_TXRX_SHORT_PRT) {
     fprintf(out, "  txrx state: short PRT\n");
   }
-
+  
   fprintf(out, "  tx_phase_deg: %g\n", copy.tx_phase_deg);
+  fprintf(out, "  block_num: %d\n", copy.block_num);
 
   if (georef != NULL) {
     iwrf_platform_georef_t gcopy = *georef;
