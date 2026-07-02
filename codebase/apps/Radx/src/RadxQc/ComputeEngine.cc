@@ -193,7 +193,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *rhohvForKdp = _kdp.getRhohv();
   const double *snrForKdp = _kdp.getSnr();
   const double *zdrSdevForKdp = _kdp.getZdrSdev();
-  const bool *validFlagForKdp = _kdp.getValidForKdp();
+  const int *validFlagForKdp = _kdp.getValidForKdp();
 
   const double *phidpForKdp = _kdp.getPhidp();
   const double *phidpMeanForKdp = _kdp.getPhidpMean();

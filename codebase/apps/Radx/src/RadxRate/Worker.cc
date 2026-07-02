@@ -1088,7 +1088,7 @@ void Worker::_addField(RadxRay *outputRay,
                        const string &units,
                        const string &longName,
                        const string standardName,
-                       const bool *arrayBool)
+                       const int *arrayBool)
 
 {
 

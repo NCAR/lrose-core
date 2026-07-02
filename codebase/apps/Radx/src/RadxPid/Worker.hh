@@ -217,7 +217,7 @@ private:
                  const string &units,
                  const string &longName,
                  const string standardName,
-                 const bool *arrayBool);
+                 const int *arrayBool);
 
 
 };
