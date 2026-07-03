@@ -94,7 +94,7 @@ range_filter_method = FIR_FILTER;
 //
 // Type: double
 
-phidp_feature_length_km = 2;
+phidp_feature_length_km = 1;
 
 ///////////// min_polynomial_order ////////////////////
 //
@@ -207,7 +207,7 @@ KDP_ngates_for_stats = 9;
 //
 // Type: double
 
-KDP_phidp_sdev_max = 20;
+KDP_phidp_sdev_max = 10;
 
 ///////////// KDP_phidp_jitter_max ////////////////////
 //
@@ -221,7 +221,7 @@ KDP_phidp_sdev_max = 20;
 //
 // Type: double
 
-KDP_phidp_jitter_max = 25;
+KDP_phidp_jitter_max = 15;
 
 ///////////// KDP_check_rhohv /////////////////////////
 //
@@ -240,7 +240,7 @@ KDP_check_rhohv = TRUE;
 //
 // Type: double
 
-KDP_rhohv_threshold = 0.95;
+KDP_rhohv_threshold = 0.9;
 
 ///////////// KDP_check_snr ///////////////////////////
 //
