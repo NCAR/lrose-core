@@ -489,6 +489,10 @@ int KdpFilt::compute(time_t timeSecs,
   _missingValue = missingValue;
   _initArrays(snr, dbz, zdr, rhohv, phidp, _getNGatesMaxValid());
   
+  // check if fold is at 90 or 180
+  
+  _computeFoldingRange();
+  
   // unfold phidp
   
   if (_unfoldPhidp()) {
@@ -808,10 +812,6 @@ void KdpFilt::_initArrays(const double *snr,
 int KdpFilt::_unfoldPhidp()
 
 {
-  
-  // check if fold is at 90 or 180
-  
-  _computeFoldingRange();
   
   // initialize the gate states - the state at each gate is
   // dependent on the phidp values and the spatial relatioship
