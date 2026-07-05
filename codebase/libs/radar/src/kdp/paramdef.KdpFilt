@@ -215,8 +215,13 @@ commentdef {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to print debug messages in KDP computation.";
+  p_descr = "Option to print concise debug messages in KDP computation.";
 } KDP_debug;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print verbose debug messages in KDP computation.";
+} KDP_verbose;
 
 paramdef boolean {
   p_default = false;

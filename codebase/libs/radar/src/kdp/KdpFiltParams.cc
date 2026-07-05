@@ -962,9 +962,21 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("KDP_debug");
-    tt->descr = tdrpStrDup("Option to print debug messages in KDP computation.");
+    tt->descr = tdrpStrDup("Option to print concise debug messages in KDP computation.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &KDP_debug - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'KDP_verbose'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("KDP_verbose");
+    tt->descr = tdrpStrDup("Option to print verbose debug messages in KDP computation.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &KDP_verbose - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

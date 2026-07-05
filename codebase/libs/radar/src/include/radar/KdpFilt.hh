@@ -397,6 +397,7 @@ public:
    * Debug print output will go to stderr
    */
   void setDebug(bool state = true) { _debug = state; }
+  void setVerbose(bool state = true) { _verbose = state; }
 
   /**
    * set writing of ray file
@@ -441,9 +442,6 @@ protected:
   
 private:
 
-  static const int REGR_ORDER_MAX = 64;
-  static const int REGR_NGATES_MAX = 2048;
-  
   double _missingValue; /**< Value for missing or bad data */
 
   // parameters
@@ -611,6 +609,9 @@ private:
   vector<double> _phidp180Filt_;
   double *_phidp180Filt;
   
+  vector<double> _phidpFftFilt_;
+  double *_phidpFftFilt;
+  
   vector<double> _phidpMean_;
   double *_phidpMean;
   
@@ -689,6 +690,8 @@ private:
   // debug printing and writing ray files
 
   bool _debug;
+  bool _verbose;
+
   bool _writeRayFile;
   string _rayFileDir;
 
@@ -699,19 +702,6 @@ private:
   double _kdpZZdrCoeff;
   double _kdpMinForSelfConsistency;
   int _kdpZZdrMedianLen;
-
-  // forsythe regression filter
-
-  // single forsythe orthogonal polynomial object
-  // if array not suitable
-  
-  // ForsytheFit _forsythe;
-  
-  // array of forsythe objects for efficiency
-  // this allows us to re-use objects that have been
-  // previously set up
-
-  // vector<vector<ForsytheFit *>> _forsytheArray;
 
   // nominal length of a feature in PHIDP
 

@@ -430,6 +430,8 @@ public:
 
   tdrp_bool_t KDP_debug;
 
+  tdrp_bool_t KDP_verbose;
+
   tdrp_bool_t KDP_write_ray_files;
 
   char* KDP_ray_files_dir;
@@ -441,7 +443,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[37];
+  mutable TDRPtable _table[38];
 
   const char *_className;
 

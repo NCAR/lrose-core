@@ -94,7 +94,7 @@ range_filter_method = FIR_FILTER;
 //
 // Type: double
 
-phidp_feature_length_km = 1;
+phidp_feature_length_km = 3;
 
 ///////////// min_polynomial_order ////////////////////
 //

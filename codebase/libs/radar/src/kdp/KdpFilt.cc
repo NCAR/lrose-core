@@ -215,19 +215,8 @@ KdpFilt::KdpFilt()
   // debugging
 
   _debug = false;
+  _verbose = false;
   _writeRayFile = false;
-
-  // allocate the array of forsythe fit objects,
-  // for supported orders and nsamples
-  // this is done for efficiency
-
-  // for (size_t ii = 0; ii < REGR_ORDER_MAX; ii++) {
-  //   vector<ForsytheFit *> row;
-  //   for (size_t jj = 0; jj < REGR_NGATES_MAX; jj++) {
-  //     row.push_back(NULL);
-  //   }
-  //   _forsytheArray.push_back(row);
-  // }
 
 }
 
@@ -236,16 +225,6 @@ KdpFilt::KdpFilt()
 KdpFilt::~KdpFilt()
   
 {
-
-  // clean up regression filter arrays
-  
-  // for (size_t ii = 0; ii < REGR_ORDER_MAX; ii++) {
-  //   for (size_t jj = 0; jj < REGR_NGATES_MAX; jj++) {
-  //     if (_forsytheArray[ii][jj] != NULL) {
-  //       delete _forsytheArray[ii][jj];
-  //     }
-  //   } // jj
-  // } // ii
 
 }
 
@@ -373,6 +352,10 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
   if (params.KDP_debug) {
     setDebug(true);
   }
+  if (params.KDP_verbose) {
+    setDebug(true);
+    setVerbose(true);
+  }
   if (params.KDP_write_ray_files) {
     setWriteRayFile(true, params.KDP_ray_files_dir);
   }
@@ -462,7 +445,7 @@ int KdpFilt::compute(time_t timeSecs,
     }
   }
 
-  if (_debug) {
+  if (_verbose) {
     if (_doComputeAttenCorr) {
       cerr << "DEBUG - KdpFilt::compute" << endl;
       cerr << "  Performing attenuation correction from KDP" << endl;
@@ -685,6 +668,7 @@ void KdpFilt::_initArrays(const double *snr,
   _phidp_.resize(_nGates); _phidp = _phidp_.data();
   _phidp180_.resize(_nGates); _phidp180 = _phidp180_.data();
   _phidp180Filt_.resize(_nGates); _phidp180Filt = _phidp180Filt_.data();
+  _phidpFftFilt_.resize(_nGates); _phidpFftFilt = _phidpFftFilt_.data();
   _phidpMean_.resize(_nGates); _phidpMean = _phidpMean_.data();
   _phidpMeanValid_.resize(_nGates); _phidpMeanValid = _phidpMeanValid_.data();
   _phidpSdev_.resize(_nGates); _phidpSdev = _phidpSdev_.data();
@@ -788,6 +772,7 @@ void KdpFilt::_initArrays(const double *snr,
     _phidpMean[ii] = _missingValue;
     _phidp180[ii] = _missingValue;
     _phidp180Filt[ii] = _missingValue;
+    _phidpFftFilt[ii] = _missingValue;
     _phidpMeanValid[ii] = _missingValue;
     _phidpJitter[ii] = _missingValue;
     _phidpSdev[ii] = _missingValue;
@@ -1101,7 +1086,9 @@ void KdpFilt::_computePhidpRegrFilt2()
 
   // initialize
 
-  _regrFilt_ = _phidpMeanUnfold_;
+  for (int ii = 0; ii < _nGates; ii++) {
+    _regrFilt[ii] = _phidpMeanUnfold[ii];
+  }
 
   // filter each valid run
   
@@ -2030,7 +2017,7 @@ void KdpFilt::_writeRayDataToFile()
           "phidpMeanUnfold phidpUnfold phidpFilt phidpCond phidpCondFilt "
           "zdrSdev psob kdp "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected "
-          "regrFilt phidp180 phidp180Filt\n");
+          "regrFilt phidp180 phidp180Filt phidpFftFilt\n");
 
   // write data
 
@@ -2051,7 +2038,7 @@ void KdpFilt::_writeRayDataToFile()
             "%3d %3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
             (_validForUnfold[igate]?1:0),
@@ -2078,7 +2065,8 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(zdrCorrected, 0),
             _getPlotVal(_regrFilt[igate], 0),
             _getPlotVal(_phidp180[igate], 0),
-            _getPlotVal(_phidp180Filt[igate], 0)
+            _getPlotVal(_phidp180Filt[igate], 0),
+            _getPlotVal(_phidpFftFilt[igate], 0)
             );
   }
   
@@ -2245,6 +2233,7 @@ void KdpFilt::_fftFilter()
   assert(_gateSpacingKm > 0.0);
   assert(_phidp180 == _phidp180_.data());
   assert(_phidp180Filt == _phidp180Filt_.data());
+  assert(_phidpFftFilt == _phidpFftFilt_.data());
   
   vector<RadarComplex_t> phiSpec;
   phiSpec.resize(_nGates);
@@ -2255,6 +2244,7 @@ void KdpFilt::_fftFilter()
   // determine cutoff
   
   const double f_cut = 1.0 / _phidpFeatureLengthKm;  // cycles/km
+  // const double f_cut = 1.0 / 4.0;  // cycles/km
 
   // apply filter
   
@@ -2276,6 +2266,11 @@ void KdpFilt::_fftFilter()
 
   for (int kk = 0; kk < _nGates; ++kk) {
     _phidp180Filt[kk] = RadarComplex::argDeg(phiComplex[kk]);
+    if (_foldsAt90) {
+      _phidpFftFilt[kk] = _phidp180Filt[kk] / 2.0;
+    } else {
+      _phidpFftFilt[kk] = _phidp180Filt[kk];
+    }
   }
 
 }

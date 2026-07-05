@@ -42,6 +42,9 @@ REQUIRED_COLUMNS = [
     "dbzCorrected",
     "zdrCorrected",
     "regrFilt",
+    "phidp180",
+    "phidp180Filt",
+    "phidpFftFilt",
 ]
 
 
@@ -58,6 +61,7 @@ class KdpRayPlotter:
         self.ax1 = None
         self.ax2 = None
         self.ax3 = None
+        self.ax4 = None
 
     def read_file_list(self):
         if not os.path.isdir(self.dir_path):
@@ -180,9 +184,10 @@ class KdpRayPlotter:
         self.fig = plt.figure(1, (width_in, height_in))
         self.fig.canvas.mpl_connect("key_press_event", self.press)
 
-        self.ax1 = self.fig.add_subplot(1, 3, 1, xmargin=0.0)
-        self.ax2 = self.fig.add_subplot(1, 3, 2, xmargin=0.0)
-        self.ax3 = self.fig.add_subplot(1, 3, 3, xmargin=0.0)
+        self.ax1 = self.fig.add_subplot(2, 2, 1, xmargin=0.0)
+        self.ax2 = self.fig.add_subplot(2, 2, 2, xmargin=0.0)
+        self.ax3 = self.fig.add_subplot(2, 2, 3, xmargin=0.0)
+        self.ax4 = self.fig.add_subplot(2, 2, 4, xmargin=0.0)
 
         self.do_plot()
         self.fig.suptitle(self.options.title)
@@ -200,12 +205,13 @@ class KdpRayPlotter:
         self.ax1.clear()
         self.ax2.clear()
         self.ax3.clear()
+        self.ax4.clear()
 
         filename = self.file_list[self.file_index]
         name_parts = filename.split("_")
         time_str = "Time " + name_parts[1] if len(name_parts) > 1 else filename
-        az_str = name_parts[2] if len(name_parts) > 2 else "azimuth"
-        el_str = name_parts[3] if len(name_parts) > 3 else "elevation"
+        el_str = name_parts[2] if len(name_parts) > 2 else "elevation"
+        az_str = name_parts[3] if len(name_parts) > 3 else "azimuth"
 
         gate_num = self.data["gateNum"]
         valid_kdp = self.data["validKdp"]
@@ -239,7 +245,8 @@ class KdpRayPlotter:
         self.ax2.plot(gate_num, self.data["phidpMeanUnfold"], label="meanUnfolded")
         self.ax2.plot(gate_num, self.data["phidpFilt"], label="Filt")
         self.ax2.plot(gate_num, self.data["phidpCondFilt"], label="CondFilt", color="black")
-        # self.ax2.plot(gate_num, self.data["regrFilt"], label="RegrFilt", color="magenta")
+        #self.ax2.plot(gate_num, self.data["regrFilt"], label="RegrFilt", color="magenta")
+        self.ax2.plot(gate_num, self.data["phidpFftFilt"], label="FftFilt", color="magenta")
         self.ax2.plot(gate_num, self.data["phidpSdev"], label="Sdev", color="pink")
         self.ax2.plot(gate_num, self.data["phidpJitter"], label="Jitter", color="orange")
         legend2 = self.ax2.legend(loc="upper right")
@@ -261,6 +268,17 @@ class KdpRayPlotter:
             label.set_fontsize("small")
         self.ax3.set_xlabel("gateNum")
         self.ax3.set_ylabel("KDP,PSOB")
+
+        self.ax4.set_title(az_str, fontsize=12)
+        self.ax4.plot(gate_num, valid_kdp2, "k:", label="validKdp")
+        self.ax4.plot(gate_num, valid_unfold2, "b:", label="validUnfold")
+        self.ax4.plot(gate_num, self.data["phidp180"], label="phidp180")
+        self.ax4.plot(gate_num, self.data["phidp180Filt"], label="phidp180Filt")
+        legend2 = self.ax4.legend(loc="upper right")
+        for label in legend2.get_texts():
+            label.set_fontsize("small")
+        self.ax4.set_xlabel("gateNum")
+        self.ax4.set_ylabel("PHIDP")
 
 
 #=========================================================================
