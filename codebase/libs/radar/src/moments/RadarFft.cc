@@ -41,6 +41,8 @@
 #include <cstring>
 using namespace std;
 
+pthread_mutex_t RadarFft::_initMutex = PTHREAD_MUTEX_INITIALIZER;
+
 // Constructors
 
 RadarFft::RadarFft()
@@ -70,6 +72,9 @@ void RadarFft::init(int n)
   _sqrtN = sqrt((double) n);
   
   // set up Fft plans
+  // protect with mutext because fftw initialization is not thread-safe
+  
+  pthread_mutex_lock(&_initMutex);
 
   if (_n > 0) {
     if (_in) fftw_free(_in);
@@ -85,6 +90,8 @@ void RadarFft::init(int n)
 
   _n = n;
 
+  pthread_mutex_unlock(&_initMutex);
+
 }
 
 RadarFft::RadarFft(int n) :
@@ -97,6 +104,9 @@ RadarFft::RadarFft(int n) :
   _sqrtN = sqrt((double) _n);
   
   // set up Fft plans
+  // protect with mutext because fftw initialization is not thread-safe
+
+  pthread_mutex_lock(&_initMutex);
 
   _in = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * _n);
   _out = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * _n);
@@ -104,6 +114,8 @@ RadarFft::RadarFft(int n) :
 
   _fftFwd = fftw_plan_dft_1d(_n, _in, _out, FFTW_FORWARD, FFTW_MEASURE);
   _fftBck = fftw_plan_dft_1d(_n, _in, _out, FFTW_BACKWARD, FFTW_MEASURE);
+
+  pthread_mutex_unlock(&_initMutex);
 
 }
 
@@ -128,6 +140,10 @@ void RadarFft::_free()
     return;
   }
 
+  // protect with mutext because fftw free is not thread-safe
+
+  pthread_mutex_lock(&_initMutex);
+
   fftw_destroy_plan(_fftFwd);
   fftw_destroy_plan(_fftBck);
   
@@ -145,6 +161,10 @@ void RadarFft::_free()
     fftw_free(_tmp);
     _tmp = NULL;
   }
+
+  _n = 0;
+
+  pthread_mutex_unlock(&_initMutex);
 
 }
 
@@ -394,4 +414,3 @@ void RadarFft::computeDft(const vector<RadarComplex_t> &in,
   }
   
 }
-

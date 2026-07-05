@@ -37,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <fftw3.h>
+#include <pthread.h>
 #include <radar/RadarComplex.hh>
 
 using namespace std;
@@ -55,8 +56,8 @@ public:
   void init(int n);
   
   // constructor - initializes for given size
-  // note that the constructor and destructor are not
-  // thread-safe, but the other methods are thread-safe
+  // note that fftw initialization is not inherently thread-safe
+  // so we use a mutex for safety
   
   RadarFft(int n);
   
@@ -133,6 +134,8 @@ private:
   fftw_complex *_in;
   fftw_complex *_out;
   fftw_complex *_tmp;
+
+  static pthread_mutex_t _initMutex;
   
   mutable vector<vector<double> > _cosArray;
   mutable vector<vector<double> > _sinArray;
@@ -142,7 +145,6 @@ private:
 };
 
 #endif
-
 
 
 
