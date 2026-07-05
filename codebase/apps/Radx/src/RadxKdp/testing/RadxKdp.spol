@@ -278,7 +278,7 @@ RHOHV_field_name = "RHOHV_F";
 //
 // Type: string
 
-KDP_params_file_path = "./KdpParams.test";
+KDP_params_file_path = "./testing/KdpParams.test";
 
 //======================================================================
 //
