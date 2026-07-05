@@ -32,8 +32,10 @@
 
 #include <iomanip>
 #include <cerrno>
+#include <cassert>
 #include <cmath>
 #include <cstring>
+#include <random>
 #include <rapmath/NasaPolyFit.hh>
 #include <toolsa/os_config.h>
 #include <toolsa/toolsa_macros.h>
@@ -44,6 +46,8 @@
 #include <radar/FilterUtils.hh>
 #include <radar/DpolFilter.hh>
 #include <radar/KdpFiltParams.hh>
+#include <radar/RadarComplex.hh>
+#include <radar/RadarFft.hh>
 using namespace std;
 
 const double KdpFilt::firCoeff_125[FIR_LEN_125+1] = {
@@ -492,7 +496,11 @@ int KdpFilt::compute(time_t timeSecs,
   // check if fold is at 90 or 180
   
   _computeFoldingRange();
+
+  // filter with low-pass FFT
   
+  _fftFilter();
+
   // unfold phidp
   
   if (_unfoldPhidp()) {
@@ -675,6 +683,8 @@ void KdpFilt::_initArrays(const double *snr,
   _zdrMedian_.resize(_nGates); _zdrMedian = _zdrMedian_.data();
   _rhohv_.resize(_nGates); _rhohv = _rhohv_.data();
   _phidp_.resize(_nGates); _phidp = _phidp_.data();
+  _phidp180_.resize(_nGates); _phidp180 = _phidp180_.data();
+  _phidp180Filt_.resize(_nGates); _phidp180Filt = _phidp180Filt_.data();
   _phidpMean_.resize(_nGates); _phidpMean = _phidpMean_.data();
   _phidpMeanValid_.resize(_nGates); _phidpMeanValid = _phidpMeanValid_.data();
   _phidpSdev_.resize(_nGates); _phidpSdev = _phidpSdev_.data();
@@ -776,6 +786,8 @@ void KdpFilt::_initArrays(const double *snr,
   for (int ii = 0; ii < _nGates; ii++) {
     _zdrSdev[ii] = _missingValue;
     _phidpMean[ii] = _missingValue;
+    _phidp180[ii] = _missingValue;
+    _phidp180Filt[ii] = _missingValue;
     _phidpMeanValid[ii] = _missingValue;
     _phidpJitter[ii] = _missingValue;
     _phidpSdev[ii] = _missingValue;
@@ -1596,6 +1608,18 @@ void KdpFilt::_computeFoldingRange()
     }
   }
 
+  // populate phidp array that folds at 180
+
+  if (_foldsAt90) {
+    for (int igate = 0; igate < _nGates; igate++) {
+      if (_phidp[igate] != _missingValue) {
+        _phidp180[igate] = _phidp[igate] * 2.0;
+      }
+    }
+  } else {
+    std::copy(_phidp, _phidp + _nGates, _phidp180);
+  }
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2006,7 +2030,7 @@ void KdpFilt::_writeRayDataToFile()
           "phidpMeanUnfold phidpUnfold phidpFilt phidpCond phidpCondFilt "
           "zdrSdev psob kdp "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected "
-          "regrFilt\n");
+          "regrFilt phidp180 phidp180Filt\n");
 
   // write data
 
@@ -2027,7 +2051,7 @@ void KdpFilt::_writeRayDataToFile()
             "%3d %3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
             (_validForUnfold[igate]?1:0),
@@ -2052,7 +2076,9 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_zdrAttenCorr[igate], 0),
             _getPlotVal(dbzCorrected, 0),
             _getPlotVal(zdrCorrected, 0),
-            _getPlotVal(_regrFilt[igate], 0)
+            _getPlotVal(_regrFilt[igate], 0),
+            _getPlotVal(_phidp180[igate], 0),
+            _getPlotVal(_phidp180Filt[igate], 0)
             );
   }
   
@@ -2194,6 +2220,86 @@ void KdpFilt::_loadKdpSCRun(int startGate, int endGate)
 
 }
 
+////////////////////////////////////////////////////////////
+/// filter phidp using FFT
 
+void KdpFilt::_fftFilter()
 
+{
 
+  // fill missing gates with random values
+
+  _fillPhidpMissingGates();
+
+  // create complex array for phidp180
+
+  vector<RadarComplex_t> phiComplex;
+  phiComplex.resize(_nGates);
+  for (int igate = 0; igate < _nGates; igate++) {
+    RadarComplex::setFromDegrees(_phidp180[igate], phiComplex[igate]);
+  }
+
+  // perform forward FFT
+
+  assert(_nGates > 0);
+  assert(_gateSpacingKm > 0.0);
+  assert(_phidp180 == _phidp180_.data());
+  assert(_phidp180Filt == _phidp180Filt_.data());
+  
+  vector<RadarComplex_t> phiSpec;
+  phiSpec.resize(_nGates);
+  RadarFft fft;
+  fft.init(_nGates);
+  fft.fwd(phiComplex.data(), phiSpec.data());
+
+  // determine cutoff
+  
+  const double f_cut = 1.0 / _phidpFeatureLengthKm;  // cycles/km
+
+  // apply filter
+  
+  for (int kk = 0; kk < _nGates; ++kk) {
+    // FFT bin interpreted as signed frequency index
+    int kk_signed = (kk <= _nGates / 2) ? kk : kk - _nGates;
+    double f = std::abs(kk_signed) / (_nGates * _gateSpacingKm);  // cycles/km
+    if (f > f_cut) {
+      phiSpec[kk].re = 0.0;
+      phiSpec[kk].im = 0.0;
+    }
+  }
+  
+  // perform inverse FFT
+  
+  fft.inv(phiSpec.data(), phiComplex.data());
+
+  // compute the filtered PHIDP
+
+  for (int kk = 0; kk < _nGates; ++kk) {
+    _phidp180Filt[kk] = RadarComplex::argDeg(phiComplex[kk]);
+  }
+
+}
+
+////////////////////////////////////////////////////////////
+/// fill phidp missing gates with random values
+
+void KdpFilt::_fillPhidpMissingGates()
+
+{
+
+  // Seed source
+  std::random_device rd;
+  
+  // Mersenne Twister generator
+  std::mt19937 gen(rd());
+  
+  // Uniform distribution [0, 1)
+  std::uniform_real_distribution<double> dist(0.0, 1.0);
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+    if (_phidp[igate] == _missingValue) {
+      _phidp180[igate] = (dist(gen) - 0.5) * 180.0;
+    }
+  }
+
+}

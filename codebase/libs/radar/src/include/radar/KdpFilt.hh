@@ -605,6 +605,12 @@ private:
   vector<double> _phidp_;
   double *_phidp;
   
+  vector<double> _phidp180_;
+  double *_phidp180;
+  
+  vector<double> _phidp180Filt_;
+  double *_phidp180Filt;
+  
   vector<double> _phidpMean_;
   double *_phidpMean;
   
@@ -800,6 +806,14 @@ private:
 
   void _loadKdpSC();
   void _loadKdpSCRun(int startGate, int endGate);
+
+  /// filter phidp using FFT
+  
+  void _fftFilter();
+    
+  /// fill phidp missing gates with noise
+
+  void _fillPhidpMissingGates();
 
 };
 
