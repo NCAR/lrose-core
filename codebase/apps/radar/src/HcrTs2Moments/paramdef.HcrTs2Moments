@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////
-// parameter definitions Ts2Moments
+// parameter definitions HcrTs2Moments
 //
 // EOL, NCAR,
 // P.O.Box 3000, Boulder, CO, USA, 80307-3000
@@ -13,7 +13,7 @@
 //////////////////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "Ts2Moments reads raw time-series data, computes the moments and writes the contents into a moments FMQ.";
+  p_header = "HcrTs2Moments reads raw time-series data, computes the moments and writes the contents into a moments FMQ.";
 }
 
 commentdef {
@@ -97,21 +97,9 @@ commentdef {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Option to invert the sense of the HV flag in alternating mode.";
-  p_help = "In alternating dual-pol mode, the HV flag indicates whether the pulse is horizontally or vertically polarized. Normally 1 indicates H and 0 V. This parameter allows you to invert the sense of the flag, so that 1 is interpreted as V and 0 as H.";
-} invert_hv_flag;
-
-paramdef boolean {
-  p_default = FALSE;
   p_descr = "Option to swap the H and V channels for IQ data from the receiver.";
   p_help = "It is possible that the receiver was incorrectly connected and the channels (H and V for example) are swapped. If this flag is set to TRUE, the channels in the data will be swapped before computing the moments.";
 } swap_receiver_channels;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to cohere the pulse IQ data to the burst phase.";
-  p_help = "This is intended for magnetron systems with random phase. If the radar processor has not cohered the IQ data to the burst phase, this can be done as each pulse is read. Set this to TRUE to cohere to burst on read.";
-} cohere_iq_to_burst_phase;
 
 paramdef boolean {
   p_default = TRUE;
@@ -130,88 +118,6 @@ paramdef boolean {
   p_descr = "Option to change the sign of the velocity in staggered mode.";
   p_help = "If true, the sign of the velocity will be changed only in staggered mode. Both this and the 'change_velocity_sign' parameter in moments_params will be applied, so if both are true they will cancel out.";
 } change_velocity_sign_staggered;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to use the pulse width in the ts_processing headers.";
-  p_help = "The default mode is to use the pulse width from the pulse headers. However, for some radar systems the pulse width is correct in the ts_processing headers, but not correct in the pulse headers. So this option allows you to override the pulse width in the pulse headers by copying it over from the ts_processing header.";
-} use_pulse_width_from_ts_proc;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the prt in the time series.";
-  p_help = "If false, we will use the prt in the time series. If true, primary_prt_secs will be used instead.";
-} override_primary_prt;
-
-paramdef double {
-  p_default = 0.001;
-  p_descr = "PRT (secs).";
-  p_help = "See override_primary_prt.";
-} primary_prt_secs;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to apply an offset to the azimuth values.";
-  p_help = "If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.";
-} apply_azimuth_offset;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Azimuth offset (degrees).";
-  p_help = "See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.";
-} azimuth_offset;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to apply an offset to the elevation values.";
-  p_help = "If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.";
-} apply_elevation_offset;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Elevation offset (degrees).";
-  p_help = "See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.";
-} elevation_offset;
-
-typedef enum {
-
-  SCAN_MODE_UNKNOWN = 0,
-  SCAN_MODE_SECTOR = 1,
-  SCAN_MODE_COPLANE = 2,
-  SCAN_MODE_RHI = 3,
-  SCAN_MODE_VERTICAL_POINTING = 4,
-  SCAN_MODE_IDLE = 7,
-  SCAN_MODE_SURVEILLANCE = 8,
-  SCAN_MODE_SUNSCAN = 11,
-  SCAN_MODE_POINTING = 12,
-  SCAN_MODE_MANUAL_PPI = 15,
-  SCAN_MODE_MANUAL_RHI = 16
-
-} scan_mode_t;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override the scan mode in the time series data.";
-  p_help = "Set this to TRUE if the scan_mode is incorrect in the time series, and you can override to a constant scan mode.";
-} override_scan_mode;
-
-paramdef enum scan_mode_t {
-  p_default = SCAN_MODE_UNKNOWN;
-  p_descr = "Select the scan mode for override";
-  p_help = "See 'override_scan_mode'";
-} scan_mode_for_override;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to check the radar ID in the time series data stream.";
-  p_help = "If TRUE, we will check that the radar_id in the header packet info is either the specified radar_id, or is 0. This allows us to filter out unwanted data from the time series stream. Mostly this is not applicable. However, in some cases time series data from multiple sources is included in a single stream, in which case we need to filter it accordingly.";
-} check_radar_id;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "radar_id to be used for filtering incoming data.";
-  p_help = "See 'check_radar_id' above.";
-} radar_id;
 
 commentdef {
   p_header = "OVERRIDING RADAR PARAMETERS";
@@ -399,8 +305,6 @@ typedef enum {
 } beam_method_t;
 
 typedef struct {
-  boolean check_scan_mode;
-  scan_mode_t scan_mode;
   boolean check_prf;
   double prf_lower_limit;
   double prf_upper_limit;
@@ -427,8 +331,6 @@ typedef struct {
 paramdef struct moments_params_t {
   p_default = {
     {
-      check_scan_mode = TRUE,
-      scan_mode = SCAN_MODE_SURVEILLANCE,
       check_prf = FALSE,
       prf_lower_limit = 0,
       prf_upper_limit = 2000,
@@ -451,87 +353,9 @@ paramdef struct moments_params_t {
       check_scan_name = FALSE,
       scan_name = "not-set"
     }
-    ,
-    {
-      check_scan_mode = TRUE,
-      scan_mode = SCAN_MODE_SECTOR,
-      check_prf = FALSE,
-      prf_lower_limit = 0,
-      prf_upper_limit = 2000,
-      check_antenna_rate = FALSE,
-      antenna_rate_lower_limit = 0,
-      antenna_rate_upper_limit = 90,
-      beam_method = BEAM_SPECIFY_N_SAMPLES,
-      beam_n_samples = 192,
-      beam_angle_deg = 1.0,
-      index_the_beams = TRUE,
-      indexed_resolution = 0.75,
-      min_antenna_rate_for_indexing = 4,
-      window = WINDOW_VONHANN,
-      switching_receiver = TRUE,
-      xmit_rcv_mode = DP_ALT_HV_CO_CROSS,
-      apply_clutter_filter = TRUE,
-      apply_sz = FALSE,
-      change_velocity_sign = FALSE,
-      proc_flags = PROC_FLAGS_NONE,
-      check_scan_name = FALSE,
-      scan_name = "not-set"
-    }
-    ,
-    {
-      check_scan_mode = TRUE,
-      scan_mode = SCAN_MODE_RHI,
-      check_prf = FALSE,
-      prf_lower_limit = 0,
-      prf_upper_limit = 2000,
-      check_antenna_rate = FALSE,
-      antenna_rate_lower_limit = 0,
-      antenna_rate_upper_limit = 90,
-      beam_method = BEAM_SPECIFY_N_SAMPLES,
-      beam_n_samples = 192,
-      beam_angle_deg = 1.0,
-      index_the_beams = TRUE,
-      indexed_resolution = 0.5,
-      min_antenna_rate_for_indexing = 3,
-      window = WINDOW_VONHANN,
-      switching_receiver = TRUE,
-      xmit_rcv_mode = DP_ALT_HV_CO_CROSS,
-      apply_clutter_filter = TRUE,
-      apply_sz = FALSE,
-      change_velocity_sign = FALSE,
-      proc_flags = PROC_FLAGS_NONE,
-      check_scan_name = FALSE,
-      scan_name = "not-set"
-    }
-    ,
-    {
-      check_scan_mode = FALSE,
-      scan_mode = SCAN_MODE_RHI,
-      check_prf = FALSE,
-      prf_lower_limit = 0,
-      prf_upper_limit = 2000,
-      check_antenna_rate = FALSE,
-      antenna_rate_lower_limit = 0,
-      antenna_rate_upper_limit = 90,
-      beam_method = BEAM_SPECIFY_N_SAMPLES,
-      beam_n_samples = 192,
-      beam_angle_deg = 1.0,
-      index_the_beams = TRUE,
-      indexed_resolution = 0.5,
-      min_antenna_rate_for_indexing = 3,
-      window = WINDOW_VONHANN,
-      switching_receiver = TRUE,
-      xmit_rcv_mode = DP_ALT_HV_CO_CROSS,
-      apply_clutter_filter = TRUE,
-      apply_sz = FALSE,
-      change_velocity_sign = FALSE,
-      proc_flags = PROC_FLAGS_NONE,
-      check_scan_name = FALSE,
-      scan_name = "not-set"
-    }
   };
   p_descr = "Moments algorithm parameters.";
-  p_help = "Sets the moments algorithm parameters by searching through the list of available options.\n\nSEARCHING FOR CORRECT ENTRY IN LIST: we check 5 possible conditions: (a) scan_mode, (b) prf (pulses per second), (c) antenna rate in degrees/sec, (d) xmit_rcv_mode and (e) scan_name.\nThe specified scan mode is checked against the mode in the incoming data.\nSimilarly for the specified scan name, which is checked against the segment_scan_name in the IWRF time series scan_segment header.\nTo ensure that the data will always be processed, include as the last option a default entry in which none of the checks are performed.\n\nPROCESSING OPTIONS:\n(a) beam_n_samples: number of hits.\n(b) index_the_beams: compute beams indexed on evenly-spaced angles.\n(c) index_resolution: angular resolution of the indexed beams.\n(d) min_antenna_rate_for_indexing (deg/sec): if the antenna rate is less than this value, non-indexed beams will be used.\n(e) window: window to be applied to time series. Note that if the VONHANN or BLACKMAN windows are used, beam_n_samples is automatically adjusted to account for the fact that the window concentrates the power in the central part of the time series. The adjustment corrects beam_n_samples by computing the fraction of the window in which 90% of the power occurs. For the VONHANN window this factor is just below 2.0, and for the BLACKMAN window it is just above 2.0. TUKEY_10 refers to a Tukey window with alpha of 0.1. Similarly TUKEY_20 means alpha is 0.2, etc.\n(f) switching_receiver: DEPRECATED (NO LONGER USED), we assuming a switching receiver for the following modes: DP_ALT_HV_CO_ONLY, DP_ALT_HV_CO_CROSS, DP_SIM_HV_SWITCHED_HV.\n(g) xmit_rcv_mode:  mode for xmit and receive for polarization diversity\n(h) apply_clutter_filter: should we apply clutter filtering?\n(i) apply_sz: apply phase decoding? See PHASE DECODING later in this parameter file.\n\nxmit_rcv_mode options:\n SINGLE_POL: single polarization, H channel.\n SINGLE_POL_V: single polarization, V channel.\n DP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar receiver only (e.g. CP2 S-band)\n DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and cross-polar receivers (e.g. SPOL with Mitch Switch and receiver in switching mode, CHILL)\n DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and V receivers (e.g. SPOL with Mitch Switch and receivers in fixed mode)\n DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and V receivers (e.g. NEXRAD upgrade, SPOL with T and receivers in fixed mode)\n DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, switching H and V receivers (e.g. SPOL with T and receivers in switching mode)\n DP_H_ONLY_FIXED_HV: Dual pol, H transmission, fixed H and V receivers (e.g. CP2 X band)\n DP_V_ONLY_FIXED_HV: Dual pol, V transmission, fixed H and V receivers\n\nchange_vel_sign: Option to change the sign of the velocity field. For some radars, the signal processing is set up in such a way that the velocity sign is incorrect. Set this flag to TRUE to change the sign.\n\nproc_flags: special processing options, not active yet.\n\nbeam_method:\nBEAM_SPECIFY_N_SAMPLES:\n  take the next N samples to form the beam;\nBEANM_SPECIFY_ANGLE:\n  check the scanning angles, use those pulses that traverse the specified angular arc;\nBEAM_CONSTANT_STEERING_ANGLE:\n  process all pulses with a constant azimuth and elevation - this applies to some electronically-steered radars, where the beam is steered to a fixed angle for a while, and then jumps to a different pointing direction. We use all of the pulses with a constant steering angle to form the beam;\nBEAM_PULSE_WIDTH_CHANGE: create beams (dwells) with with constant pulse width - if the pulse width changes we move to a new dwell. Also, optionally specify the pulse width and ignore pulses that do not match the specified value.";
+  p_help = "Sets the moments algorithm parameters by searching through the list of available options.\n\nSEARCHING FOR CORRECT ENTRY IN LIST: we check 4 possible conditions: (a) prf (pulses per second), (b) antenna rate in degrees/sec, (c) xmit_rcv_mode and (d) scan_name.\nThe specified scan name is checked against the segment_scan_name in the IWRF time series scan_segment header.\nTo ensure that the data will always be processed, include as the last option a default entry in which none of the checks are performed.\n\nPROCESSING OPTIONS:\n(a) beam_n_samples: number of hits.\n(b) index_the_beams: compute beams indexed on evenly-spaced angles.\n(c) index_resolution: angular resolution of the indexed beams.\n(d) min_antenna_rate_for_indexing (deg/sec): if the antenna rate is less than this value, non-indexed beams will be used.\n(e) window: window to be applied to time series. Note that if the VONHANN or BLACKMAN windows are used, beam_n_samples is automatically adjusted to account for the fact that the window concentrates the power in the central part of the time series. The adjustment corrects beam_n_samples by computing the fraction of the window in which 90% of the power occurs. For the VONHANN window this factor is just below 2.0, and for the BLACKMAN window it is just above 2.0. TUKEY_10 refers to a Tukey window with alpha of 0.1. Similarly TUKEY_20 means alpha is 0.2, etc.\n(f) switching_receiver: DEPRECATED (NO LONGER USED), we assuming a switching receiver for the following modes: DP_ALT_HV_CO_ONLY, DP_ALT_HV_CO_CROSS, DP_SIM_HV_SWITCHED_HV.\n(g) xmit_rcv_mode:  mode for xmit and receive for polarization diversity\n(h) apply_clutter_filter: should we apply clutter filtering?\n(i) apply_sz: apply phase decoding? See PHASE DECODING later in this parameter file.\n\nxmit_rcv_mode options:\n SINGLE_POL: single polarization, H channel.\n SINGLE_POL_V: single polarization, V channel.\n DP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar receiver only (e.g. CP2 S-band)\n DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and cross-polar receivers (e.g. SPOL with Mitch Switch and receiver in switching mode, CHILL)\n DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and V receivers (e.g. SPOL with Mitch Switch and receivers in fixed mode)\n DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and V receivers (e.g. NEXRAD upgrade, SPOL with T and receivers in fixed mode)\n DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, switching H and V receivers (e.g. SPOL with T and receivers in switching mode)\n DP_H_ONLY_FIXED_HV: Dual pol, H transmission, fixed H and V receivers (e.g. CP2 X band)\n DP_V_ONLY_FIXED_HV: Dual pol, V transmission, fixed H and V receivers\n\nchange_vel_sign: Option to change the sign of the velocity field. For some radars, the signal processing is set up in such a way that the velocity sign is incorrect. Set this flag to TRUE to change the sign.\n\nproc_flags: special processing options, not active yet.\n\nbeam_method:\nBEAM_SPECIFY_N_SAMPLES:\n  take the next N samples to form the beam;\nBEANM_SPECIFY_ANGLE:\n  check the scanning angles, use those pulses that traverse the specified angular arc;\nBEAM_CONSTANT_STEERING_ANGLE:\n  process all pulses with a constant azimuth and elevation - this applies to some electronically-steered radars, where the beam is steered to a fixed angle for a while, and then jumps to a different pointing direction. We use all of the pulses with a constant steering angle to form the beam;\nBEAM_PULSE_WIDTH_CHANGE: create beams (dwells) with with constant pulse width - if the pulse width changes we move to a new dwell. Also, optionally specify the pulse width and ignore pulses that do not match the specified value.";
 } moments_params[];
 
 paramdef int {
@@ -836,7 +660,7 @@ commentdef {
 paramdef boolean {
   p_default = false;
   p_descr = "Option to correct the calibration receiver gains based on temperature.";
-  p_help = "Receiver channel gains can change with temperature and may require correction. If this parameter is TRUE, the gains will be adjusted, using temperature values stored in the status_xml in the time series. IMPORTANT NOTE: this computes the CORRECTION. The correction is then applied to the calibration values read in by Ts2Moments.";
+  p_help = "Receiver channel gains can change with temperature and may require correction. If this parameter is TRUE, the gains will be adjusted, using temperature values stored in the status_xml in the time series. IMPORTANT NOTE: this computes the CORRECTION. The correction is then applied to the calibration values read in by HcrTs2Moments.";
 } correct_rx_gains_for_temperature;
 
 typedef enum {

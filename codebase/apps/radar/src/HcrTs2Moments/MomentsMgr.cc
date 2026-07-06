@@ -50,7 +50,6 @@ MomentsMgr::MomentsMgr(const string &prog_name,
 
 {
   MEM_zero(_mparams);
-  _scanMode = IWRF_SCAN_MODE_NOT_SET;
   _nSamples = 0;
   _nSamplesHalf = 0;
   _xmitRcvMode = IWRF_XMIT_RCV_MODE_NOT_SET;
@@ -89,43 +88,6 @@ void MomentsMgr::init(const Params::moments_params_t &mparams)
 
   _mparams = mparams;
   
-  switch (_mparams.scan_mode) {
-    
-    case Params::SCAN_MODE_SECTOR:
-      _scanMode = IWRF_SCAN_MODE_SECTOR;
-      break;
-    case Params::SCAN_MODE_COPLANE:
-      _scanMode = IWRF_SCAN_MODE_COPLANE;
-      break;
-    case Params::SCAN_MODE_RHI:
-      _scanMode = IWRF_SCAN_MODE_RHI;
-      break;
-    case Params::SCAN_MODE_VERTICAL_POINTING:
-      _scanMode = IWRF_SCAN_MODE_VERTICAL_POINTING;
-      break;
-    case Params::SCAN_MODE_IDLE:
-      _scanMode = IWRF_SCAN_MODE_IDLE;
-      break;
-    case Params::SCAN_MODE_SURVEILLANCE:
-      _scanMode = IWRF_SCAN_MODE_AZ_SUR_360;
-      break;
-    case Params::SCAN_MODE_SUNSCAN:
-      _scanMode = IWRF_SCAN_MODE_SUNSCAN;
-      break;
-    case Params::SCAN_MODE_POINTING:
-      _scanMode = IWRF_SCAN_MODE_POINTING;
-      break;
-    case Params::SCAN_MODE_MANUAL_PPI:
-      _scanMode = IWRF_SCAN_MODE_MANPPI;
-      break;
-    case Params::SCAN_MODE_MANUAL_RHI:
-      _scanMode = IWRF_SCAN_MODE_MANRHI;
-      break;
-    default:
-      _scanMode = IWRF_SCAN_MODE_NOT_SET;
-
-  } // switch
-
   switch (_mparams.xmit_rcv_mode) {
     
     case Params::SINGLE_POL: 
@@ -198,12 +160,6 @@ bool MomentsMgr::checkSuitable(int scanMode,
   
 {
 
-  if (checkScanMode()) {
-    if (scanMode != _scanMode) {
-      return false;
-    }
-  }
-
   if (checkScanName()) {
     if (scanName != getScanName()) {
       return false;
@@ -234,8 +190,6 @@ void MomentsMgr::print(ostream &out) const
 {
 
   out << "========= MomentsMgr ==========" << endl;
-  out << "  checkScanMode: " << checkScanMode() << endl;
-  out << "  scanMode: " << iwrf_scan_mode_to_str(getScanMode()) << endl;
   out << "  checkScanName: " << checkScanName() << endl;
   out << "  scanName: " << getScanName() << endl;
   out << "  checkPrf: " << checkPrf() << endl;

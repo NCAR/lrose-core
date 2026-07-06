@@ -227,18 +227,6 @@ BeamReader::BeamReader(const string &prog_name,
     _pulseReader = new IwrfTsReaderFile(inputPathList, iwrfDebug);
   }
 
-  if (_params.cohere_iq_to_burst_phase) {
-    _pulseReader->setCohereIqToBurst(true);
-  }
-
-  if (_params.use_pulse_width_from_ts_proc) {
-    _pulseReader->setCopyPulseWidthFromTsProc(true);
-  }
-
-  if (_params.check_radar_id) {
-    _pulseReader->setRadarId(_params.radar_id);
-  }
-
   if (_params.use_secondary_georeference) {
     _pulseReader->setGeorefUseSecondary(true);
   }
@@ -1334,10 +1322,6 @@ shared_ptr<IwrfTsPulse> BeamReader::_getNextPulse()
       _endOfVolPulseSeqNum = pulse->getPulseSeqNum();
     }
 
-    if (_params.invert_hv_flag) {
-      pulse->setInvertHvFlag(true);
-    }
-    
     // check radar info and processing info are active
 
     if (!_pulseReader->getOpsInfo().isRadarInfoActive() ||
@@ -1352,14 +1336,6 @@ shared_ptr<IwrfTsPulse> BeamReader::_getNextPulse()
       if (pulseTime < _startTime || pulseTime > _endTime) {
         continue;
       }
-    }
-
-    // override scan mode if appropriate
-
-    if (_params.override_scan_mode) {
-      pulse->set_scan_mode(_params.scan_mode_for_override);
-      IwrfTsInfo &info = _pulseReader->getOpsInfo();
-      info.set_scan_mode(_params.scan_mode_for_override);
     }
 
     // get scan name
@@ -2128,9 +2104,6 @@ void BeamReader::_setPrt()
   // set prt, assuming single PRT for now
   
   _prt = _pulseQueue[0]->getPrt();
-  if (_params.override_primary_prt) {
-    _prt = _params.primary_prt_secs;
-  }
 
   // check for staggered mode first, and then alternating
   // if staggered, it cannot be alternating
@@ -2638,13 +2611,6 @@ void BeamReader::_checkIsStaggeredPrt()
   }
 
   _prt = _prtShort;
-
-  if (_params.override_primary_prt) {
-    double ratio = _params.primary_prt_secs / _prt;
-    _prt *= ratio;
-    _prtShort *= ratio;
-    _prtLong *= ratio;
-  }
 
 }
 

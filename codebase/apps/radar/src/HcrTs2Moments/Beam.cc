@@ -6834,10 +6834,6 @@ double Beam::_getCorrectedAz(double az)
   
 {
   
-  if (_params.apply_azimuth_offset) {
-    az += _params.azimuth_offset;
-  }
-
   while (az > 360.0) {
     az -= 360.0;
   }
@@ -6858,10 +6854,6 @@ double Beam::_getCorrectedAz(double az)
 double Beam::_getCorrectedEl(double el)
 
 {
-
-  if (_params.apply_elevation_offset) {
-    el += _params.elevation_offset;
-  }
 
   while (el > 180.0) {
     el -= 360.0;

@@ -82,20 +82,6 @@ public:
   } mode_t;
 
   typedef enum {
-    SCAN_MODE_UNKNOWN = 0,
-    SCAN_MODE_SECTOR = 1,
-    SCAN_MODE_COPLANE = 2,
-    SCAN_MODE_RHI = 3,
-    SCAN_MODE_VERTICAL_POINTING = 4,
-    SCAN_MODE_IDLE = 7,
-    SCAN_MODE_SURVEILLANCE = 8,
-    SCAN_MODE_SUNSCAN = 11,
-    SCAN_MODE_POINTING = 12,
-    SCAN_MODE_MANUAL_PPI = 15,
-    SCAN_MODE_MANUAL_RHI = 16
-  } scan_mode_t;
-
-  typedef enum {
     PLATFORM_FIXED = 1,
     PLATFORM_VEHICLE = 2,
     PLATFORM_SHIP = 3,
@@ -423,8 +409,6 @@ public:
   // struct typedefs
 
   typedef struct {
-    tdrp_bool_t check_scan_mode;
-    scan_mode_t scan_mode;
     tdrp_bool_t check_prf;
     double prf_lower_limit;
     double prf_upper_limit;
@@ -796,39 +780,13 @@ public:
 
   char* input_dir;
 
-  tdrp_bool_t invert_hv_flag;
-
   tdrp_bool_t swap_receiver_channels;
-
-  tdrp_bool_t cohere_iq_to_burst_phase;
 
   tdrp_bool_t prt_is_for_previous_interval;
 
   tdrp_bool_t compute_prt_from_interpulse_periods;
 
   tdrp_bool_t change_velocity_sign_staggered;
-
-  tdrp_bool_t use_pulse_width_from_ts_proc;
-
-  tdrp_bool_t override_primary_prt;
-
-  double primary_prt_secs;
-
-  tdrp_bool_t apply_azimuth_offset;
-
-  double azimuth_offset;
-
-  tdrp_bool_t apply_elevation_offset;
-
-  double elevation_offset;
-
-  tdrp_bool_t override_scan_mode;
-
-  scan_mode_t scan_mode_for_override;
-
-  tdrp_bool_t check_radar_id;
-
-  int radar_id;
 
   platform_type_t platform_type;
 
@@ -1368,7 +1326,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[318];
+  mutable TDRPtable _table[305];
 
   const char *_className;
 

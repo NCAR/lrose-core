@@ -79,13 +79,6 @@ public:
 
   // get methods
 
-  inline bool checkScanMode() const {
-    return _mparams.check_scan_mode; 
-  }
-  inline iwrf_scan_mode_t getScanMode() const {
-    return _scanMode;
-  }
-  
   inline bool checkScanName() const { 
     return _mparams.check_scan_name; 
   }
@@ -172,10 +165,6 @@ private:
   const Params &_params;
   Params::moments_params_t _mparams;
 
-  // scan mode
-
-  iwrf_scan_mode_t _scanMode;
-  
   // number of pulse samples
   
   static const int _nSamplesSz1 = 64;

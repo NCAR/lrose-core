@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Ts2Moments reads raw time-series data, computes the moments and writes the contents into a moments FMQ.");
+    tt->comment_hdr = tdrpStrDup("HcrTs2Moments reads raw time-series data, computes the moments and writes the contents into a moments FMQ.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -733,18 +733,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'invert_hv_flag'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("invert_hv_flag");
-    tt->descr = tdrpStrDup("Option to invert the sense of the HV flag in alternating mode.");
-    tt->help = tdrpStrDup("In alternating dual-pol mode, the HV flag indicates whether the pulse is horizontally or vertically polarized. Normally 1 indicates H and 0 V. This parameter allows you to invert the sense of the flag, so that 1 is interpreted as V and 0 as H.");
-    tt->val_offset = (char *) &invert_hv_flag - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'swap_receiver_channels'
     // ctype is 'tdrp_bool_t'
     
@@ -754,18 +742,6 @@
     tt->descr = tdrpStrDup("Option to swap the H and V channels for IQ data from the receiver.");
     tt->help = tdrpStrDup("It is possible that the receiver was incorrectly connected and the channels (H and V for example) are swapped. If this flag is set to TRUE, the channels in the data will be swapped before computing the moments.");
     tt->val_offset = (char *) &swap_receiver_channels - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'cohere_iq_to_burst_phase'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("cohere_iq_to_burst_phase");
-    tt->descr = tdrpStrDup("Option to cohere the pulse IQ data to the burst phase.");
-    tt->help = tdrpStrDup("This is intended for magnetron systems with random phase. If the radar processor has not cohered the IQ data to the burst phase, this can be done as each pulse is read. Set this to TRUE to cohere to burst on read.");
-    tt->val_offset = (char *) &cohere_iq_to_burst_phase - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -803,164 +779,6 @@
     tt->help = tdrpStrDup("If true, the sign of the velocity will be changed only in staggered mode. Both this and the 'change_velocity_sign' parameter in moments_params will be applied, so if both are true they will cancel out.");
     tt->val_offset = (char *) &change_velocity_sign_staggered - &_start_;
     tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'use_pulse_width_from_ts_proc'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_pulse_width_from_ts_proc");
-    tt->descr = tdrpStrDup("Option to use the pulse width in the ts_processing headers.");
-    tt->help = tdrpStrDup("The default mode is to use the pulse width from the pulse headers. However, for some radar systems the pulse width is correct in the ts_processing headers, but not correct in the pulse headers. So this option allows you to override the pulse width in the pulse headers by copying it over from the ts_processing header.");
-    tt->val_offset = (char *) &use_pulse_width_from_ts_proc - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'override_primary_prt'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_primary_prt");
-    tt->descr = tdrpStrDup("Option to override the prt in the time series.");
-    tt->help = tdrpStrDup("If false, we will use the prt in the time series. If true, primary_prt_secs will be used instead.");
-    tt->val_offset = (char *) &override_primary_prt - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'primary_prt_secs'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("primary_prt_secs");
-    tt->descr = tdrpStrDup("PRT (secs).");
-    tt->help = tdrpStrDup("See override_primary_prt.");
-    tt->val_offset = (char *) &primary_prt_secs - &_start_;
-    tt->single_val.d = 0.001;
-    tt++;
-    
-    // Parameter 'apply_azimuth_offset'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_azimuth_offset");
-    tt->descr = tdrpStrDup("Option to apply an offset to the azimuth values.");
-    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.");
-    tt->val_offset = (char *) &apply_azimuth_offset - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'azimuth_offset'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("azimuth_offset");
-    tt->descr = tdrpStrDup("Azimuth offset (degrees).");
-    tt->help = tdrpStrDup("See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.");
-    tt->val_offset = (char *) &azimuth_offset - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'apply_elevation_offset'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_elevation_offset");
-    tt->descr = tdrpStrDup("Option to apply an offset to the elevation values.");
-    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.");
-    tt->val_offset = (char *) &apply_elevation_offset - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'elevation_offset'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("elevation_offset");
-    tt->descr = tdrpStrDup("Elevation offset (degrees).");
-    tt->help = tdrpStrDup("See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.");
-    tt->val_offset = (char *) &elevation_offset - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'override_scan_mode'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_scan_mode");
-    tt->descr = tdrpStrDup("Option to override the scan mode in the time series data.");
-    tt->help = tdrpStrDup("Set this to TRUE if the scan_mode is incorrect in the time series, and you can override to a constant scan mode.");
-    tt->val_offset = (char *) &override_scan_mode - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'scan_mode_for_override'
-    // ctype is '_scan_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("scan_mode_for_override");
-    tt->descr = tdrpStrDup("Select the scan mode for override");
-    tt->help = tdrpStrDup("See 'override_scan_mode'");
-    tt->val_offset = (char *) &scan_mode_for_override - &_start_;
-    tt->enum_def.name = tdrpStrDup("scan_mode_t");
-    tt->enum_def.nfields = 11;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("SCAN_MODE_UNKNOWN");
-      tt->enum_def.fields[0].val = SCAN_MODE_UNKNOWN;
-      tt->enum_def.fields[1].name = tdrpStrDup("SCAN_MODE_SECTOR");
-      tt->enum_def.fields[1].val = SCAN_MODE_SECTOR;
-      tt->enum_def.fields[2].name = tdrpStrDup("SCAN_MODE_COPLANE");
-      tt->enum_def.fields[2].val = SCAN_MODE_COPLANE;
-      tt->enum_def.fields[3].name = tdrpStrDup("SCAN_MODE_RHI");
-      tt->enum_def.fields[3].val = SCAN_MODE_RHI;
-      tt->enum_def.fields[4].name = tdrpStrDup("SCAN_MODE_VERTICAL_POINTING");
-      tt->enum_def.fields[4].val = SCAN_MODE_VERTICAL_POINTING;
-      tt->enum_def.fields[5].name = tdrpStrDup("SCAN_MODE_IDLE");
-      tt->enum_def.fields[5].val = SCAN_MODE_IDLE;
-      tt->enum_def.fields[6].name = tdrpStrDup("SCAN_MODE_SURVEILLANCE");
-      tt->enum_def.fields[6].val = SCAN_MODE_SURVEILLANCE;
-      tt->enum_def.fields[7].name = tdrpStrDup("SCAN_MODE_SUNSCAN");
-      tt->enum_def.fields[7].val = SCAN_MODE_SUNSCAN;
-      tt->enum_def.fields[8].name = tdrpStrDup("SCAN_MODE_POINTING");
-      tt->enum_def.fields[8].val = SCAN_MODE_POINTING;
-      tt->enum_def.fields[9].name = tdrpStrDup("SCAN_MODE_MANUAL_PPI");
-      tt->enum_def.fields[9].val = SCAN_MODE_MANUAL_PPI;
-      tt->enum_def.fields[10].name = tdrpStrDup("SCAN_MODE_MANUAL_RHI");
-      tt->enum_def.fields[10].val = SCAN_MODE_MANUAL_RHI;
-    tt->single_val.e = SCAN_MODE_UNKNOWN;
-    tt++;
-    
-    // Parameter 'check_radar_id'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("check_radar_id");
-    tt->descr = tdrpStrDup("Option to check the radar ID in the time series data stream.");
-    tt->help = tdrpStrDup("If TRUE, we will check that the radar_id in the header packet info is either the specified radar_id, or is 0. This allows us to filter out unwanted data from the time series stream. Mostly this is not applicable. However, in some cases time series data from multiple sources is included in a single stream, in which case we need to filter it accordingly.");
-    tt->val_offset = (char *) &check_radar_id - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'radar_id'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("radar_id");
-    tt->descr = tdrpStrDup("radar_id to be used for filtering incoming data.");
-    tt->help = tdrpStrDup("See 'check_radar_id' above.");
-    tt->val_offset = (char *) &radar_id - &_start_;
-    tt->single_val.i = 0;
     tt++;
     
     // Parameter 'Comment 5'
@@ -1200,315 +1018,208 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("moments_params");
     tt->descr = tdrpStrDup("Moments algorithm parameters.");
-    tt->help = tdrpStrDup("Sets the moments algorithm parameters by searching through the list of available options.\n\nSEARCHING FOR CORRECT ENTRY IN LIST: we check 5 possible conditions: (a) scan_mode, (b) prf (pulses per second), (c) antenna rate in degrees/sec, (d) xmit_rcv_mode and (e) scan_name.\nThe specified scan mode is checked against the mode in the incoming data.\nSimilarly for the specified scan name, which is checked against the segment_scan_name in the IWRF time series scan_segment header.\nTo ensure that the data will always be processed, include as the last option a default entry in which none of the checks are performed.\n\nPROCESSING OPTIONS:\n(a) beam_n_samples: number of hits.\n(b) index_the_beams: compute beams indexed on evenly-spaced angles.\n(c) index_resolution: angular resolution of the indexed beams.\n(d) min_antenna_rate_for_indexing (deg/sec): if the antenna rate is less than this value, non-indexed beams will be used.\n(e) window: window to be applied to time series. Note that if the VONHANN or BLACKMAN windows are used, beam_n_samples is automatically adjusted to account for the fact that the window concentrates the power in the central part of the time series. The adjustment corrects beam_n_samples by computing the fraction of the window in which 90% of the power occurs. For the VONHANN window this factor is just below 2.0, and for the BLACKMAN window it is just above 2.0. TUKEY_10 refers to a Tukey window with alpha of 0.1. Similarly TUKEY_20 means alpha is 0.2, etc.\n(f) switching_receiver: DEPRECATED (NO LONGER USED), we assuming a switching receiver for the following modes: DP_ALT_HV_CO_ONLY, DP_ALT_HV_CO_CROSS, DP_SIM_HV_SWITCHED_HV.\n(g) xmit_rcv_mode:  mode for xmit and receive for polarization diversity\n(h) apply_clutter_filter: should we apply clutter filtering?\n(i) apply_sz: apply phase decoding? See PHASE DECODING later in this parameter file.\n\nxmit_rcv_mode options:\n SINGLE_POL: single polarization, H channel.\n SINGLE_POL_V: single polarization, V channel.\n DP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar receiver only (e.g. CP2 S-band)\n DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and cross-polar receivers (e.g. SPOL with Mitch Switch and receiver in switching mode, CHILL)\n DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and V receivers (e.g. SPOL with Mitch Switch and receivers in fixed mode)\n DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and V receivers (e.g. NEXRAD upgrade, SPOL with T and receivers in fixed mode)\n DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, switching H and V receivers (e.g. SPOL with T and receivers in switching mode)\n DP_H_ONLY_FIXED_HV: Dual pol, H transmission, fixed H and V receivers (e.g. CP2 X band)\n DP_V_ONLY_FIXED_HV: Dual pol, V transmission, fixed H and V receivers\n\nchange_vel_sign: Option to change the sign of the velocity field. For some radars, the signal processing is set up in such a way that the velocity sign is incorrect. Set this flag to TRUE to change the sign.\n\nproc_flags: special processing options, not active yet.\n\nbeam_method:\nBEAM_SPECIFY_N_SAMPLES:\n  take the next N samples to form the beam;\nBEANM_SPECIFY_ANGLE:\n  check the scanning angles, use those pulses that traverse the specified angular arc;\nBEAM_CONSTANT_STEERING_ANGLE:\n  process all pulses with a constant azimuth and elevation - this applies to some electronically-steered radars, where the beam is steered to a fixed angle for a while, and then jumps to a different pointing direction. We use all of the pulses with a constant steering angle to form the beam;\nBEAM_PULSE_WIDTH_CHANGE: create beams (dwells) with with constant pulse width - if the pulse width changes we move to a new dwell. Also, optionally specify the pulse width and ignore pulses that do not match the specified value.");
+    tt->help = tdrpStrDup("Sets the moments algorithm parameters by searching through the list of available options.\n\nSEARCHING FOR CORRECT ENTRY IN LIST: we check 4 possible conditions: (a) prf (pulses per second), (b) antenna rate in degrees/sec, (c) xmit_rcv_mode and (d) scan_name.\nThe specified scan name is checked against the segment_scan_name in the IWRF time series scan_segment header.\nTo ensure that the data will always be processed, include as the last option a default entry in which none of the checks are performed.\n\nPROCESSING OPTIONS:\n(a) beam_n_samples: number of hits.\n(b) index_the_beams: compute beams indexed on evenly-spaced angles.\n(c) index_resolution: angular resolution of the indexed beams.\n(d) min_antenna_rate_for_indexing (deg/sec): if the antenna rate is less than this value, non-indexed beams will be used.\n(e) window: window to be applied to time series. Note that if the VONHANN or BLACKMAN windows are used, beam_n_samples is automatically adjusted to account for the fact that the window concentrates the power in the central part of the time series. The adjustment corrects beam_n_samples by computing the fraction of the window in which 90% of the power occurs. For the VONHANN window this factor is just below 2.0, and for the BLACKMAN window it is just above 2.0. TUKEY_10 refers to a Tukey window with alpha of 0.1. Similarly TUKEY_20 means alpha is 0.2, etc.\n(f) switching_receiver: DEPRECATED (NO LONGER USED), we assuming a switching receiver for the following modes: DP_ALT_HV_CO_ONLY, DP_ALT_HV_CO_CROSS, DP_SIM_HV_SWITCHED_HV.\n(g) xmit_rcv_mode:  mode for xmit and receive for polarization diversity\n(h) apply_clutter_filter: should we apply clutter filtering?\n(i) apply_sz: apply phase decoding? See PHASE DECODING later in this parameter file.\n\nxmit_rcv_mode options:\n SINGLE_POL: single polarization, H channel.\n SINGLE_POL_V: single polarization, V channel.\n DP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar receiver only (e.g. CP2 S-band)\n DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and cross-polar receivers (e.g. SPOL with Mitch Switch and receiver in switching mode, CHILL)\n DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and V receivers (e.g. SPOL with Mitch Switch and receivers in fixed mode)\n DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and V receivers (e.g. NEXRAD upgrade, SPOL with T and receivers in fixed mode)\n DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, switching H and V receivers (e.g. SPOL with T and receivers in switching mode)\n DP_H_ONLY_FIXED_HV: Dual pol, H transmission, fixed H and V receivers (e.g. CP2 X band)\n DP_V_ONLY_FIXED_HV: Dual pol, V transmission, fixed H and V receivers\n\nchange_vel_sign: Option to change the sign of the velocity field. For some radars, the signal processing is set up in such a way that the velocity sign is incorrect. Set this flag to TRUE to change the sign.\n\nproc_flags: special processing options, not active yet.\n\nbeam_method:\nBEAM_SPECIFY_N_SAMPLES:\n  take the next N samples to form the beam;\nBEANM_SPECIFY_ANGLE:\n  check the scanning angles, use those pulses that traverse the specified angular arc;\nBEAM_CONSTANT_STEERING_ANGLE:\n  process all pulses with a constant azimuth and elevation - this applies to some electronically-steered radars, where the beam is steered to a fixed angle for a while, and then jumps to a different pointing direction. We use all of the pulses with a constant steering angle to form the beam;\nBEAM_PULSE_WIDTH_CHANGE: create beams (dwells) with with constant pulse width - if the pulse width changes we move to a new dwell. Also, optionally specify the pulse width and ignore pulses that do not match the specified value.");
     tt->array_offset = (char *) &_moments_params - &_start_;
     tt->array_n_offset = (char *) &moments_params_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(moments_params_t);
-    tt->array_n = 4;
+    tt->array_n = 1;
     tt->struct_def.name = tdrpStrDup("moments_params_t");
-    tt->struct_def.nfields = 23;
+    tt->struct_def.nfields = 21;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[0].fname = tdrpStrDup("check_scan_mode");
+      tt->struct_def.fields[0].fname = tdrpStrDup("check_prf");
       tt->struct_def.fields[0].ptype = BOOL_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_moments_params->check_scan_mode - (char *) _moments_params;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("scan_mode_t");
-      tt->struct_def.fields[1].fname = tdrpStrDup("scan_mode");
-      tt->struct_def.fields[1].ptype = ENUM_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_moments_params->scan_mode - (char *) _moments_params;
-        tt->struct_def.fields[1].enum_def.name = tdrpStrDup("scan_mode_t");
-        tt->struct_def.fields[1].enum_def.nfields = 11;
-        tt->struct_def.fields[1].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[1].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[1].enum_def.fields[0].name = tdrpStrDup("SCAN_MODE_UNKNOWN");
-        tt->struct_def.fields[1].enum_def.fields[0].val = SCAN_MODE_UNKNOWN;
-        tt->struct_def.fields[1].enum_def.fields[1].name = tdrpStrDup("SCAN_MODE_SECTOR");
-        tt->struct_def.fields[1].enum_def.fields[1].val = SCAN_MODE_SECTOR;
-        tt->struct_def.fields[1].enum_def.fields[2].name = tdrpStrDup("SCAN_MODE_COPLANE");
-        tt->struct_def.fields[1].enum_def.fields[2].val = SCAN_MODE_COPLANE;
-        tt->struct_def.fields[1].enum_def.fields[3].name = tdrpStrDup("SCAN_MODE_RHI");
-        tt->struct_def.fields[1].enum_def.fields[3].val = SCAN_MODE_RHI;
-        tt->struct_def.fields[1].enum_def.fields[4].name = tdrpStrDup("SCAN_MODE_VERTICAL_POINTING");
-        tt->struct_def.fields[1].enum_def.fields[4].val = SCAN_MODE_VERTICAL_POINTING;
-        tt->struct_def.fields[1].enum_def.fields[5].name = tdrpStrDup("SCAN_MODE_IDLE");
-        tt->struct_def.fields[1].enum_def.fields[5].val = SCAN_MODE_IDLE;
-        tt->struct_def.fields[1].enum_def.fields[6].name = tdrpStrDup("SCAN_MODE_SURVEILLANCE");
-        tt->struct_def.fields[1].enum_def.fields[6].val = SCAN_MODE_SURVEILLANCE;
-        tt->struct_def.fields[1].enum_def.fields[7].name = tdrpStrDup("SCAN_MODE_SUNSCAN");
-        tt->struct_def.fields[1].enum_def.fields[7].val = SCAN_MODE_SUNSCAN;
-        tt->struct_def.fields[1].enum_def.fields[8].name = tdrpStrDup("SCAN_MODE_POINTING");
-        tt->struct_def.fields[1].enum_def.fields[8].val = SCAN_MODE_POINTING;
-        tt->struct_def.fields[1].enum_def.fields[9].name = tdrpStrDup("SCAN_MODE_MANUAL_PPI");
-        tt->struct_def.fields[1].enum_def.fields[9].val = SCAN_MODE_MANUAL_PPI;
-        tt->struct_def.fields[1].enum_def.fields[10].name = tdrpStrDup("SCAN_MODE_MANUAL_RHI");
-        tt->struct_def.fields[1].enum_def.fields[10].val = SCAN_MODE_MANUAL_RHI;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[2].fname = tdrpStrDup("check_prf");
-      tt->struct_def.fields[2].ptype = BOOL_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
         (char *) &_moments_params->check_prf - (char *) _moments_params;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("prf_lower_limit");
-      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("prf_lower_limit");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
         (char *) &_moments_params->prf_lower_limit - (char *) _moments_params;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("prf_upper_limit");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_moments_params->prf_upper_limit - (char *) _moments_params;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[3].fname = tdrpStrDup("check_antenna_rate");
+      tt->struct_def.fields[3].ptype = BOOL_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_moments_params->check_antenna_rate - (char *) _moments_params;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("prf_upper_limit");
+      tt->struct_def.fields[4].fname = tdrpStrDup("antenna_rate_lower_limit");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_moments_params->prf_upper_limit - (char *) _moments_params;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[5].fname = tdrpStrDup("check_antenna_rate");
-      tt->struct_def.fields[5].ptype = BOOL_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &_moments_params->check_antenna_rate - (char *) _moments_params;
-      tt->struct_def.fields[6].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[6].fname = tdrpStrDup("antenna_rate_lower_limit");
-      tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[6].rel_offset = 
         (char *) &_moments_params->antenna_rate_lower_limit - (char *) _moments_params;
-      tt->struct_def.fields[7].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[7].fname = tdrpStrDup("antenna_rate_upper_limit");
-      tt->struct_def.fields[7].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[7].rel_offset = 
+      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[5].fname = tdrpStrDup("antenna_rate_upper_limit");
+      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
         (char *) &_moments_params->antenna_rate_upper_limit - (char *) _moments_params;
-      tt->struct_def.fields[8].ftype = tdrpStrDup("beam_method_t");
-      tt->struct_def.fields[8].fname = tdrpStrDup("beam_method");
-      tt->struct_def.fields[8].ptype = ENUM_TYPE;
-      tt->struct_def.fields[8].rel_offset = 
+      tt->struct_def.fields[6].ftype = tdrpStrDup("beam_method_t");
+      tt->struct_def.fields[6].fname = tdrpStrDup("beam_method");
+      tt->struct_def.fields[6].ptype = ENUM_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
         (char *) &_moments_params->beam_method - (char *) _moments_params;
-        tt->struct_def.fields[8].enum_def.name = tdrpStrDup("beam_method_t");
-        tt->struct_def.fields[8].enum_def.nfields = 4;
-        tt->struct_def.fields[8].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[8].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[8].enum_def.fields[0].name = tdrpStrDup("BEAM_SPECIFY_N_SAMPLES");
-        tt->struct_def.fields[8].enum_def.fields[0].val = BEAM_SPECIFY_N_SAMPLES;
-        tt->struct_def.fields[8].enum_def.fields[1].name = tdrpStrDup("BEAM_SPECIFY_ANGLE");
-        tt->struct_def.fields[8].enum_def.fields[1].val = BEAM_SPECIFY_ANGLE;
-        tt->struct_def.fields[8].enum_def.fields[2].name = tdrpStrDup("BEAM_CONSTANT_STEERING_ANGLE");
-        tt->struct_def.fields[8].enum_def.fields[2].val = BEAM_CONSTANT_STEERING_ANGLE;
-        tt->struct_def.fields[8].enum_def.fields[3].name = tdrpStrDup("BEAM_PULSE_WIDTH_CHANGE");
-        tt->struct_def.fields[8].enum_def.fields[3].val = BEAM_PULSE_WIDTH_CHANGE;
-      tt->struct_def.fields[9].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[9].fname = tdrpStrDup("beam_n_samples");
-      tt->struct_def.fields[9].ptype = INT_TYPE;
-      tt->struct_def.fields[9].rel_offset = 
+        tt->struct_def.fields[6].enum_def.name = tdrpStrDup("beam_method_t");
+        tt->struct_def.fields[6].enum_def.nfields = 4;
+        tt->struct_def.fields[6].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[6].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[6].enum_def.fields[0].name = tdrpStrDup("BEAM_SPECIFY_N_SAMPLES");
+        tt->struct_def.fields[6].enum_def.fields[0].val = BEAM_SPECIFY_N_SAMPLES;
+        tt->struct_def.fields[6].enum_def.fields[1].name = tdrpStrDup("BEAM_SPECIFY_ANGLE");
+        tt->struct_def.fields[6].enum_def.fields[1].val = BEAM_SPECIFY_ANGLE;
+        tt->struct_def.fields[6].enum_def.fields[2].name = tdrpStrDup("BEAM_CONSTANT_STEERING_ANGLE");
+        tt->struct_def.fields[6].enum_def.fields[2].val = BEAM_CONSTANT_STEERING_ANGLE;
+        tt->struct_def.fields[6].enum_def.fields[3].name = tdrpStrDup("BEAM_PULSE_WIDTH_CHANGE");
+        tt->struct_def.fields[6].enum_def.fields[3].val = BEAM_PULSE_WIDTH_CHANGE;
+      tt->struct_def.fields[7].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[7].fname = tdrpStrDup("beam_n_samples");
+      tt->struct_def.fields[7].ptype = INT_TYPE;
+      tt->struct_def.fields[7].rel_offset = 
         (char *) &_moments_params->beam_n_samples - (char *) _moments_params;
+      tt->struct_def.fields[8].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[8].fname = tdrpStrDup("beam_angle_deg");
+      tt->struct_def.fields[8].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[8].rel_offset = 
+        (char *) &_moments_params->beam_angle_deg - (char *) _moments_params;
+      tt->struct_def.fields[9].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[9].fname = tdrpStrDup("index_the_beams");
+      tt->struct_def.fields[9].ptype = BOOL_TYPE;
+      tt->struct_def.fields[9].rel_offset = 
+        (char *) &_moments_params->index_the_beams - (char *) _moments_params;
       tt->struct_def.fields[10].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[10].fname = tdrpStrDup("beam_angle_deg");
+      tt->struct_def.fields[10].fname = tdrpStrDup("indexed_resolution");
       tt->struct_def.fields[10].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[10].rel_offset = 
-        (char *) &_moments_params->beam_angle_deg - (char *) _moments_params;
-      tt->struct_def.fields[11].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[11].fname = tdrpStrDup("index_the_beams");
-      tt->struct_def.fields[11].ptype = BOOL_TYPE;
-      tt->struct_def.fields[11].rel_offset = 
-        (char *) &_moments_params->index_the_beams - (char *) _moments_params;
-      tt->struct_def.fields[12].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[12].fname = tdrpStrDup("indexed_resolution");
-      tt->struct_def.fields[12].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[12].rel_offset = 
         (char *) &_moments_params->indexed_resolution - (char *) _moments_params;
-      tt->struct_def.fields[13].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[13].fname = tdrpStrDup("min_antenna_rate_for_indexing");
-      tt->struct_def.fields[13].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[13].rel_offset = 
+      tt->struct_def.fields[11].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[11].fname = tdrpStrDup("min_antenna_rate_for_indexing");
+      tt->struct_def.fields[11].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[11].rel_offset = 
         (char *) &_moments_params->min_antenna_rate_for_indexing - (char *) _moments_params;
-      tt->struct_def.fields[14].ftype = tdrpStrDup("window_t");
-      tt->struct_def.fields[14].fname = tdrpStrDup("window");
+      tt->struct_def.fields[12].ftype = tdrpStrDup("window_t");
+      tt->struct_def.fields[12].fname = tdrpStrDup("window");
+      tt->struct_def.fields[12].ptype = ENUM_TYPE;
+      tt->struct_def.fields[12].rel_offset = 
+        (char *) &_moments_params->window - (char *) _moments_params;
+        tt->struct_def.fields[12].enum_def.name = tdrpStrDup("window_t");
+        tt->struct_def.fields[12].enum_def.nfields = 8;
+        tt->struct_def.fields[12].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[12].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[12].enum_def.fields[0].name = tdrpStrDup("WINDOW_RECT");
+        tt->struct_def.fields[12].enum_def.fields[0].val = WINDOW_RECT;
+        tt->struct_def.fields[12].enum_def.fields[1].name = tdrpStrDup("WINDOW_VONHANN");
+        tt->struct_def.fields[12].enum_def.fields[1].val = WINDOW_VONHANN;
+        tt->struct_def.fields[12].enum_def.fields[2].name = tdrpStrDup("WINDOW_BLACKMAN");
+        tt->struct_def.fields[12].enum_def.fields[2].val = WINDOW_BLACKMAN;
+        tt->struct_def.fields[12].enum_def.fields[3].name = tdrpStrDup("WINDOW_BLACKMAN_NUTTALL");
+        tt->struct_def.fields[12].enum_def.fields[3].val = WINDOW_BLACKMAN_NUTTALL;
+        tt->struct_def.fields[12].enum_def.fields[4].name = tdrpStrDup("WINDOW_TUKEY_10");
+        tt->struct_def.fields[12].enum_def.fields[4].val = WINDOW_TUKEY_10;
+        tt->struct_def.fields[12].enum_def.fields[5].name = tdrpStrDup("WINDOW_TUKEY_20");
+        tt->struct_def.fields[12].enum_def.fields[5].val = WINDOW_TUKEY_20;
+        tt->struct_def.fields[12].enum_def.fields[6].name = tdrpStrDup("WINDOW_TUKEY_30");
+        tt->struct_def.fields[12].enum_def.fields[6].val = WINDOW_TUKEY_30;
+        tt->struct_def.fields[12].enum_def.fields[7].name = tdrpStrDup("WINDOW_TUKEY_50");
+        tt->struct_def.fields[12].enum_def.fields[7].val = WINDOW_TUKEY_50;
+      tt->struct_def.fields[13].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[13].fname = tdrpStrDup("switching_receiver");
+      tt->struct_def.fields[13].ptype = BOOL_TYPE;
+      tt->struct_def.fields[13].rel_offset = 
+        (char *) &_moments_params->switching_receiver - (char *) _moments_params;
+      tt->struct_def.fields[14].ftype = tdrpStrDup("xmit_rcv_mode_t");
+      tt->struct_def.fields[14].fname = tdrpStrDup("xmit_rcv_mode");
       tt->struct_def.fields[14].ptype = ENUM_TYPE;
       tt->struct_def.fields[14].rel_offset = 
-        (char *) &_moments_params->window - (char *) _moments_params;
-        tt->struct_def.fields[14].enum_def.name = tdrpStrDup("window_t");
-        tt->struct_def.fields[14].enum_def.nfields = 8;
+        (char *) &_moments_params->xmit_rcv_mode - (char *) _moments_params;
+        tt->struct_def.fields[14].enum_def.name = tdrpStrDup("xmit_rcv_mode_t");
+        tt->struct_def.fields[14].enum_def.nfields = 9;
         tt->struct_def.fields[14].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[14].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[14].enum_def.fields[0].name = tdrpStrDup("WINDOW_RECT");
-        tt->struct_def.fields[14].enum_def.fields[0].val = WINDOW_RECT;
-        tt->struct_def.fields[14].enum_def.fields[1].name = tdrpStrDup("WINDOW_VONHANN");
-        tt->struct_def.fields[14].enum_def.fields[1].val = WINDOW_VONHANN;
-        tt->struct_def.fields[14].enum_def.fields[2].name = tdrpStrDup("WINDOW_BLACKMAN");
-        tt->struct_def.fields[14].enum_def.fields[2].val = WINDOW_BLACKMAN;
-        tt->struct_def.fields[14].enum_def.fields[3].name = tdrpStrDup("WINDOW_BLACKMAN_NUTTALL");
-        tt->struct_def.fields[14].enum_def.fields[3].val = WINDOW_BLACKMAN_NUTTALL;
-        tt->struct_def.fields[14].enum_def.fields[4].name = tdrpStrDup("WINDOW_TUKEY_10");
-        tt->struct_def.fields[14].enum_def.fields[4].val = WINDOW_TUKEY_10;
-        tt->struct_def.fields[14].enum_def.fields[5].name = tdrpStrDup("WINDOW_TUKEY_20");
-        tt->struct_def.fields[14].enum_def.fields[5].val = WINDOW_TUKEY_20;
-        tt->struct_def.fields[14].enum_def.fields[6].name = tdrpStrDup("WINDOW_TUKEY_30");
-        tt->struct_def.fields[14].enum_def.fields[6].val = WINDOW_TUKEY_30;
-        tt->struct_def.fields[14].enum_def.fields[7].name = tdrpStrDup("WINDOW_TUKEY_50");
-        tt->struct_def.fields[14].enum_def.fields[7].val = WINDOW_TUKEY_50;
+        tt->struct_def.fields[14].enum_def.fields[0].name = tdrpStrDup("SINGLE_POL");
+        tt->struct_def.fields[14].enum_def.fields[0].val = SINGLE_POL;
+        tt->struct_def.fields[14].enum_def.fields[1].name = tdrpStrDup("DP_ALT_HV_CO_ONLY");
+        tt->struct_def.fields[14].enum_def.fields[1].val = DP_ALT_HV_CO_ONLY;
+        tt->struct_def.fields[14].enum_def.fields[2].name = tdrpStrDup("DP_ALT_HV_CO_CROSS");
+        tt->struct_def.fields[14].enum_def.fields[2].val = DP_ALT_HV_CO_CROSS;
+        tt->struct_def.fields[14].enum_def.fields[3].name = tdrpStrDup("DP_ALT_HV_FIXED_HV");
+        tt->struct_def.fields[14].enum_def.fields[3].val = DP_ALT_HV_FIXED_HV;
+        tt->struct_def.fields[14].enum_def.fields[4].name = tdrpStrDup("DP_SIM_HV_FIXED_HV");
+        tt->struct_def.fields[14].enum_def.fields[4].val = DP_SIM_HV_FIXED_HV;
+        tt->struct_def.fields[14].enum_def.fields[5].name = tdrpStrDup("DP_SIM_HV_SWITCHED_HV");
+        tt->struct_def.fields[14].enum_def.fields[5].val = DP_SIM_HV_SWITCHED_HV;
+        tt->struct_def.fields[14].enum_def.fields[6].name = tdrpStrDup("DP_H_ONLY_FIXED_HV");
+        tt->struct_def.fields[14].enum_def.fields[6].val = DP_H_ONLY_FIXED_HV;
+        tt->struct_def.fields[14].enum_def.fields[7].name = tdrpStrDup("DP_V_ONLY_FIXED_HV");
+        tt->struct_def.fields[14].enum_def.fields[7].val = DP_V_ONLY_FIXED_HV;
+        tt->struct_def.fields[14].enum_def.fields[8].name = tdrpStrDup("SINGLE_POL_V");
+        tt->struct_def.fields[14].enum_def.fields[8].val = SINGLE_POL_V;
       tt->struct_def.fields[15].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[15].fname = tdrpStrDup("switching_receiver");
+      tt->struct_def.fields[15].fname = tdrpStrDup("apply_clutter_filter");
       tt->struct_def.fields[15].ptype = BOOL_TYPE;
       tt->struct_def.fields[15].rel_offset = 
-        (char *) &_moments_params->switching_receiver - (char *) _moments_params;
-      tt->struct_def.fields[16].ftype = tdrpStrDup("xmit_rcv_mode_t");
-      tt->struct_def.fields[16].fname = tdrpStrDup("xmit_rcv_mode");
-      tt->struct_def.fields[16].ptype = ENUM_TYPE;
+        (char *) &_moments_params->apply_clutter_filter - (char *) _moments_params;
+      tt->struct_def.fields[16].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[16].fname = tdrpStrDup("apply_sz");
+      tt->struct_def.fields[16].ptype = BOOL_TYPE;
       tt->struct_def.fields[16].rel_offset = 
-        (char *) &_moments_params->xmit_rcv_mode - (char *) _moments_params;
-        tt->struct_def.fields[16].enum_def.name = tdrpStrDup("xmit_rcv_mode_t");
-        tt->struct_def.fields[16].enum_def.nfields = 9;
-        tt->struct_def.fields[16].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[16].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[16].enum_def.fields[0].name = tdrpStrDup("SINGLE_POL");
-        tt->struct_def.fields[16].enum_def.fields[0].val = SINGLE_POL;
-        tt->struct_def.fields[16].enum_def.fields[1].name = tdrpStrDup("DP_ALT_HV_CO_ONLY");
-        tt->struct_def.fields[16].enum_def.fields[1].val = DP_ALT_HV_CO_ONLY;
-        tt->struct_def.fields[16].enum_def.fields[2].name = tdrpStrDup("DP_ALT_HV_CO_CROSS");
-        tt->struct_def.fields[16].enum_def.fields[2].val = DP_ALT_HV_CO_CROSS;
-        tt->struct_def.fields[16].enum_def.fields[3].name = tdrpStrDup("DP_ALT_HV_FIXED_HV");
-        tt->struct_def.fields[16].enum_def.fields[3].val = DP_ALT_HV_FIXED_HV;
-        tt->struct_def.fields[16].enum_def.fields[4].name = tdrpStrDup("DP_SIM_HV_FIXED_HV");
-        tt->struct_def.fields[16].enum_def.fields[4].val = DP_SIM_HV_FIXED_HV;
-        tt->struct_def.fields[16].enum_def.fields[5].name = tdrpStrDup("DP_SIM_HV_SWITCHED_HV");
-        tt->struct_def.fields[16].enum_def.fields[5].val = DP_SIM_HV_SWITCHED_HV;
-        tt->struct_def.fields[16].enum_def.fields[6].name = tdrpStrDup("DP_H_ONLY_FIXED_HV");
-        tt->struct_def.fields[16].enum_def.fields[6].val = DP_H_ONLY_FIXED_HV;
-        tt->struct_def.fields[16].enum_def.fields[7].name = tdrpStrDup("DP_V_ONLY_FIXED_HV");
-        tt->struct_def.fields[16].enum_def.fields[7].val = DP_V_ONLY_FIXED_HV;
-        tt->struct_def.fields[16].enum_def.fields[8].name = tdrpStrDup("SINGLE_POL_V");
-        tt->struct_def.fields[16].enum_def.fields[8].val = SINGLE_POL_V;
+        (char *) &_moments_params->apply_sz - (char *) _moments_params;
       tt->struct_def.fields[17].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[17].fname = tdrpStrDup("apply_clutter_filter");
+      tt->struct_def.fields[17].fname = tdrpStrDup("change_velocity_sign");
       tt->struct_def.fields[17].ptype = BOOL_TYPE;
       tt->struct_def.fields[17].rel_offset = 
-        (char *) &_moments_params->apply_clutter_filter - (char *) _moments_params;
-      tt->struct_def.fields[18].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[18].fname = tdrpStrDup("apply_sz");
-      tt->struct_def.fields[18].ptype = BOOL_TYPE;
+        (char *) &_moments_params->change_velocity_sign - (char *) _moments_params;
+      tt->struct_def.fields[18].ftype = tdrpStrDup("processing_flags_t");
+      tt->struct_def.fields[18].fname = tdrpStrDup("proc_flags");
+      tt->struct_def.fields[18].ptype = ENUM_TYPE;
       tt->struct_def.fields[18].rel_offset = 
-        (char *) &_moments_params->apply_sz - (char *) _moments_params;
+        (char *) &_moments_params->proc_flags - (char *) _moments_params;
+        tt->struct_def.fields[18].enum_def.name = tdrpStrDup("processing_flags_t");
+        tt->struct_def.fields[18].enum_def.nfields = 2;
+        tt->struct_def.fields[18].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[18].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[18].enum_def.fields[0].name = tdrpStrDup("PROC_FLAGS_NONE");
+        tt->struct_def.fields[18].enum_def.fields[0].val = PROC_FLAGS_NONE;
+        tt->struct_def.fields[18].enum_def.fields[1].name = tdrpStrDup("PROC_FLAGS_DUAL_PRT");
+        tt->struct_def.fields[18].enum_def.fields[1].val = PROC_FLAGS_DUAL_PRT;
       tt->struct_def.fields[19].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[19].fname = tdrpStrDup("change_velocity_sign");
+      tt->struct_def.fields[19].fname = tdrpStrDup("check_scan_name");
       tt->struct_def.fields[19].ptype = BOOL_TYPE;
       tt->struct_def.fields[19].rel_offset = 
-        (char *) &_moments_params->change_velocity_sign - (char *) _moments_params;
-      tt->struct_def.fields[20].ftype = tdrpStrDup("processing_flags_t");
-      tt->struct_def.fields[20].fname = tdrpStrDup("proc_flags");
-      tt->struct_def.fields[20].ptype = ENUM_TYPE;
-      tt->struct_def.fields[20].rel_offset = 
-        (char *) &_moments_params->proc_flags - (char *) _moments_params;
-        tt->struct_def.fields[20].enum_def.name = tdrpStrDup("processing_flags_t");
-        tt->struct_def.fields[20].enum_def.nfields = 2;
-        tt->struct_def.fields[20].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[20].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[20].enum_def.fields[0].name = tdrpStrDup("PROC_FLAGS_NONE");
-        tt->struct_def.fields[20].enum_def.fields[0].val = PROC_FLAGS_NONE;
-        tt->struct_def.fields[20].enum_def.fields[1].name = tdrpStrDup("PROC_FLAGS_DUAL_PRT");
-        tt->struct_def.fields[20].enum_def.fields[1].val = PROC_FLAGS_DUAL_PRT;
-      tt->struct_def.fields[21].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[21].fname = tdrpStrDup("check_scan_name");
-      tt->struct_def.fields[21].ptype = BOOL_TYPE;
-      tt->struct_def.fields[21].rel_offset = 
         (char *) &_moments_params->check_scan_name - (char *) _moments_params;
-      tt->struct_def.fields[22].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[22].fname = tdrpStrDup("scan_name");
-      tt->struct_def.fields[22].ptype = STRING_TYPE;
-      tt->struct_def.fields[22].rel_offset = 
+      tt->struct_def.fields[20].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[20].fname = tdrpStrDup("scan_name");
+      tt->struct_def.fields[20].ptype = STRING_TYPE;
+      tt->struct_def.fields[20].rel_offset = 
         (char *) &_moments_params->scan_name - (char *) _moments_params;
-    tt->n_struct_vals = 92;
+    tt->n_struct_vals = 21;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].b = pTRUE;
-      tt->struct_vals[1].e = SCAN_MODE_SURVEILLANCE;
-      tt->struct_vals[2].b = pFALSE;
-      tt->struct_vals[3].d = 0;
-      tt->struct_vals[4].d = 2000;
-      tt->struct_vals[5].b = pFALSE;
-      tt->struct_vals[6].d = 0;
-      tt->struct_vals[7].d = 90;
-      tt->struct_vals[8].e = BEAM_SPECIFY_N_SAMPLES;
-      tt->struct_vals[9].i = 192;
+      tt->struct_vals[0].b = pFALSE;
+      tt->struct_vals[1].d = 0;
+      tt->struct_vals[2].d = 2000;
+      tt->struct_vals[3].b = pFALSE;
+      tt->struct_vals[4].d = 0;
+      tt->struct_vals[5].d = 90;
+      tt->struct_vals[6].e = BEAM_SPECIFY_N_SAMPLES;
+      tt->struct_vals[7].i = 192;
+      tt->struct_vals[8].d = 1;
+      tt->struct_vals[9].b = pTRUE;
       tt->struct_vals[10].d = 1;
-      tt->struct_vals[11].b = pTRUE;
-      tt->struct_vals[12].d = 1;
-      tt->struct_vals[13].d = 5;
-      tt->struct_vals[14].e = WINDOW_VONHANN;
+      tt->struct_vals[11].d = 5;
+      tt->struct_vals[12].e = WINDOW_VONHANN;
+      tt->struct_vals[13].b = pTRUE;
+      tt->struct_vals[14].e = DP_ALT_HV_CO_CROSS;
       tt->struct_vals[15].b = pTRUE;
-      tt->struct_vals[16].e = DP_ALT_HV_CO_CROSS;
-      tt->struct_vals[17].b = pTRUE;
-      tt->struct_vals[18].b = pFALSE;
+      tt->struct_vals[16].b = pFALSE;
+      tt->struct_vals[17].b = pFALSE;
+      tt->struct_vals[18].e = PROC_FLAGS_NONE;
       tt->struct_vals[19].b = pFALSE;
-      tt->struct_vals[20].e = PROC_FLAGS_NONE;
-      tt->struct_vals[21].b = pFALSE;
-      tt->struct_vals[22].s = tdrpStrDup("not-set");
-      tt->struct_vals[23].b = pTRUE;
-      tt->struct_vals[24].e = SCAN_MODE_SECTOR;
-      tt->struct_vals[25].b = pFALSE;
-      tt->struct_vals[26].d = 0;
-      tt->struct_vals[27].d = 2000;
-      tt->struct_vals[28].b = pFALSE;
-      tt->struct_vals[29].d = 0;
-      tt->struct_vals[30].d = 90;
-      tt->struct_vals[31].e = BEAM_SPECIFY_N_SAMPLES;
-      tt->struct_vals[32].i = 192;
-      tt->struct_vals[33].d = 1;
-      tt->struct_vals[34].b = pTRUE;
-      tt->struct_vals[35].d = 0.75;
-      tt->struct_vals[36].d = 4;
-      tt->struct_vals[37].e = WINDOW_VONHANN;
-      tt->struct_vals[38].b = pTRUE;
-      tt->struct_vals[39].e = DP_ALT_HV_CO_CROSS;
-      tt->struct_vals[40].b = pTRUE;
-      tt->struct_vals[41].b = pFALSE;
-      tt->struct_vals[42].b = pFALSE;
-      tt->struct_vals[43].e = PROC_FLAGS_NONE;
-      tt->struct_vals[44].b = pFALSE;
-      tt->struct_vals[45].s = tdrpStrDup("not-set");
-      tt->struct_vals[46].b = pTRUE;
-      tt->struct_vals[47].e = SCAN_MODE_RHI;
-      tt->struct_vals[48].b = pFALSE;
-      tt->struct_vals[49].d = 0;
-      tt->struct_vals[50].d = 2000;
-      tt->struct_vals[51].b = pFALSE;
-      tt->struct_vals[52].d = 0;
-      tt->struct_vals[53].d = 90;
-      tt->struct_vals[54].e = BEAM_SPECIFY_N_SAMPLES;
-      tt->struct_vals[55].i = 192;
-      tt->struct_vals[56].d = 1;
-      tt->struct_vals[57].b = pTRUE;
-      tt->struct_vals[58].d = 0.5;
-      tt->struct_vals[59].d = 3;
-      tt->struct_vals[60].e = WINDOW_VONHANN;
-      tt->struct_vals[61].b = pTRUE;
-      tt->struct_vals[62].e = DP_ALT_HV_CO_CROSS;
-      tt->struct_vals[63].b = pTRUE;
-      tt->struct_vals[64].b = pFALSE;
-      tt->struct_vals[65].b = pFALSE;
-      tt->struct_vals[66].e = PROC_FLAGS_NONE;
-      tt->struct_vals[67].b = pFALSE;
-      tt->struct_vals[68].s = tdrpStrDup("not-set");
-      tt->struct_vals[69].b = pFALSE;
-      tt->struct_vals[70].e = SCAN_MODE_RHI;
-      tt->struct_vals[71].b = pFALSE;
-      tt->struct_vals[72].d = 0;
-      tt->struct_vals[73].d = 2000;
-      tt->struct_vals[74].b = pFALSE;
-      tt->struct_vals[75].d = 0;
-      tt->struct_vals[76].d = 90;
-      tt->struct_vals[77].e = BEAM_SPECIFY_N_SAMPLES;
-      tt->struct_vals[78].i = 192;
-      tt->struct_vals[79].d = 1;
-      tt->struct_vals[80].b = pTRUE;
-      tt->struct_vals[81].d = 0.5;
-      tt->struct_vals[82].d = 3;
-      tt->struct_vals[83].e = WINDOW_VONHANN;
-      tt->struct_vals[84].b = pTRUE;
-      tt->struct_vals[85].e = DP_ALT_HV_CO_CROSS;
-      tt->struct_vals[86].b = pTRUE;
-      tt->struct_vals[87].b = pFALSE;
-      tt->struct_vals[88].b = pFALSE;
-      tt->struct_vals[89].e = PROC_FLAGS_NONE;
-      tt->struct_vals[90].b = pFALSE;
-      tt->struct_vals[91].s = tdrpStrDup("not-set");
+      tt->struct_vals[20].s = tdrpStrDup("not-set");
     tt++;
     
     // Parameter 'min_n_samples'
@@ -2173,7 +1884,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("correct_rx_gains_for_temperature");
     tt->descr = tdrpStrDup("Option to correct the calibration receiver gains based on temperature.");
-    tt->help = tdrpStrDup("Receiver channel gains can change with temperature and may require correction. If this parameter is TRUE, the gains will be adjusted, using temperature values stored in the status_xml in the time series. IMPORTANT NOTE: this computes the CORRECTION. The correction is then applied to the calibration values read in by Ts2Moments.");
+    tt->help = tdrpStrDup("Receiver channel gains can change with temperature and may require correction. If this parameter is TRUE, the gains will be adjusted, using temperature values stored in the status_xml in the time series. IMPORTANT NOTE: this computes the CORRECTION. The correction is then applied to the calibration values read in by HcrTs2Moments.");
     tt->val_offset = (char *) &correct_rx_gains_for_temperature - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
