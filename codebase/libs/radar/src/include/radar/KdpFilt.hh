@@ -805,6 +805,21 @@ private:
 
   void _fillPhidpMissingGates();
 
+  /// pack valid run data into packed vector
+
+  void _packValid(const vector<double> &unpacked,
+                  vector<double> &packed);
+
+  /// unpack packed vector into full
+
+  void _unpackValid(const vector<double> &packed,
+                    vector<double> &unpacked);
+
+  /// unpack packed vector and fill gaps with adjacent values
+  
+  void _unpackAndFill(const vector<double> &packed,
+                      vector<double> &unpacked);
+  
 };
 
 #endif

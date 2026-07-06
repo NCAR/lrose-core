@@ -2227,6 +2227,18 @@ void KdpFilt::_fftFilter()
     RadarComplex::setFromDegrees(_phidp180[igate], phiComplex[igate]);
   }
 
+  // set invalid gates to {0, 0} to pad complex numbers
+
+#ifdef NOTYET
+  for (size_t ii = 0; ii < _gapRuns.size(); ii++) {
+    const PhidpRun &run = _gapRuns[ii];
+    for (int jj = run.ibegin; jj <= run.iend; jj++) {
+      phiComplex[jj].re = 0.0;
+      phiComplex[jj].im = 0.0;
+    }
+  } // ii
+#endif
+
   // perform forward FFT
 
   assert(_nGates > 0);
@@ -2240,7 +2252,7 @@ void KdpFilt::_fftFilter()
   RadarFft fft;
   fft.init(_nGates);
   fft.fwd(phiComplex.data(), phiSpec.data());
-
+  
   // determine cutoff
   
   const double f_cut = 1.0 / _phidpFeatureLengthKm;  // cycles/km
@@ -2273,6 +2285,87 @@ void KdpFilt::_fftFilter()
     }
   }
 
+#ifdef NOTYET
+  
+  // fill missing gates with random values
+
+  _fillPhidpMissingGates();
+
+  // create complex array for phidp180
+
+  vector<double> phiPacked;
+  _packValid(_phidp180_, phiPacked);
+  cerr << "111111111111 nGates, nPacked: " << _nGates << ", " << phiPacked.size() << endl;
+
+  if (phiPacked.size() == 0) {
+    for (int ii = 0; ii < _nGates; ii++) {
+      _phidpFftFilt_[ii] = _missingValue;
+      return;
+    }
+  }
+
+  int nPacked = phiPacked.size();
+  
+  vector<RadarComplex_t> phiComplex;
+  phiComplex.resize(nPacked);
+  for (int igate = 0; igate < nPacked; igate++) {
+    RadarComplex::setFromDegrees(phiPacked[igate], phiComplex[igate]);
+  }
+
+  // perform forward FFT
+
+  assert(nPacked > 0);
+  assert(_gateSpacingKm > 0.0);
+  assert(_phidp180 == _phidp180_.data());
+  assert(_phidp180Filt == _phidp180Filt_.data());
+  assert(_phidpFftFilt == _phidpFftFilt_.data());
+  
+  vector<RadarComplex_t> phiSpec;
+  phiSpec.resize(nPacked);
+  RadarFft fft;
+  fft.init(nPacked);
+  fft.fwd(phiComplex.data(), phiSpec.data());
+
+  // determine filter frequency cutoff
+  
+  const double f_cut = 1.0 / _phidpFeatureLengthKm;  // cycles/km
+
+  // apply filter
+  
+  for (int kk = 0; kk < nPacked; ++kk) {
+    // FFT bin interpreted as signed frequency index
+    int kk_signed = (kk <= nPacked / 2) ? kk : kk - nPacked;
+    double f = std::abs(kk_signed) / (nPacked * _gateSpacingKm);  // cycles/km
+    if (f > f_cut) {
+      phiSpec[kk].re = 0.0;
+      phiSpec[kk].im = 0.0;
+    }
+  }
+  
+  // perform inverse FFT
+  
+  fft.inv(phiSpec.data(), phiComplex.data());
+
+  return;
+
+  // compute the filtered PHIDP
+  
+  vector<double> fftFilt;
+  fftFilt.resize(nPacked);
+  for (int kk = 0; kk < nPacked; ++kk) {
+    double arg = RadarComplex::argDeg(phiComplex[kk]);
+    if (_foldsAt90) {
+      arg /= 2.0;
+    }
+    fftFilt[kk] = arg;
+  }
+
+  // unpack the filtered values into the full array
+  
+  _unpackAndFill(fftFilt, _phidpFftFilt_);
+
+#endif
+
 }
 
 ////////////////////////////////////////////////////////////
@@ -2298,3 +2391,87 @@ void KdpFilt::_fillPhidpMissingGates()
   }
 
 }
+
+////////////////////////////////////////////////////////////
+/// pack valid run data into packed vector
+
+void KdpFilt::_packValid(const vector<double> &unpacked,
+                         vector<double> &packed)
+
+{
+
+  packed.clear();
+
+  for (size_t ii = 0; ii < _validRuns.size(); ii++) {
+    const PhidpRun &run = _validRuns[ii];
+    for (int jj = run.ibegin; jj <= run.iend; jj++) {
+      packed.push_back(unpacked[jj]);
+    }
+  } // ii
+
+}
+
+////////////////////////////////////////////////////////////
+/// unpack packed vector into full vector
+
+void KdpFilt::_unpackValid(const vector<double> &packed,
+                           vector<double> &unpacked)
+
+{
+
+  for (int jj = 0; jj < _nGates; jj++) {
+    unpacked[jj] = _missingValue;
+  }
+
+  int index = 0;
+  for (size_t ii = 0; ii < _validRuns.size(); ii++) {
+    const PhidpRun &run = _validRuns[ii];
+    for (int jj = run.ibegin; jj <= run.iend; jj++, index++) {
+      assert(index < (int) packed.size());
+      unpacked[jj] = packed[index];
+    }
+  } // ii
+
+}
+
+////////////////////////////////////////////////////////////
+/// unpack packed vector and fill gaps with adjacent values
+
+void KdpFilt::_unpackAndFill(const vector<double> &packed,
+                             vector<double> &unpacked)
+  
+{
+  
+  for (int jj = 0; jj < _nGates; jj++) {
+    unpacked[jj] = _missingValue;
+  }
+  
+  int gapStart = 0;
+  int index = 0;
+  for (size_t ii = 0; ii < _validRuns.size(); ii++) {
+    
+    const PhidpRun &run = _validRuns[ii];
+
+    // valid region
+    
+    for (int jj = run.ibegin; jj <= run.iend; jj++, index++) {
+      assert(index < (int) packed.size());
+      unpacked[jj] = packed[index];
+    } // jj
+
+    // gap before valid region
+    
+    for (int jj = gapStart; jj < run.ibegin; jj++) {
+      unpacked[jj] = unpacked[run.ibegin];
+    }
+
+  } // ii
+
+  // last gap
+  
+  for (int jj = index; jj < _nGates; jj++) {
+    unpacked[jj] = unpacked[index-1];
+  }
+
+}
+
