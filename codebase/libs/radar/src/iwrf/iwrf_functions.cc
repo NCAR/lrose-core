@@ -618,7 +618,7 @@ void iwrf_pulse_header_init(iwrf_pulse_header_t &val)
   val.n_gates_burst = 0;
 
   val.tx_phase_deg = IWRF_MISSING_FLOAT;
-  val.block_num = IWRF_MISSING_INT; 
+  val.block_id = IWRF_MISSING_INT; 
   
 }
 
@@ -2866,7 +2866,7 @@ void iwrf_pulse_header_print(FILE *out,
   }
   
   fprintf(out, "  tx_phase_deg: %g\n", copy.tx_phase_deg);
-  fprintf(out, "  block_num: %d\n", copy.block_num);
+  fprintf(out, "  block_id: %d\n", copy.block_id);
 
   if (georef != NULL) {
     iwrf_platform_georef_t gcopy = *georef;
