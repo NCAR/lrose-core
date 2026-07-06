@@ -1,0 +1,233 @@
+Implementation notes for Ts2Moments
+===============================
+
+1. IQ time-series data
+----------------------
+
+The IwrfTs classes are used for reading in the time series data.
+
+A IwrfTsPulse object owns the pulse header data and the IQ data.
+There is one IwrfTsPulse for each pulse.
+
+A IwrfTsInfo object stores the operational information, which does not
+change as fast as the pulse header information. The info is
+updated every so often, for example when something changes or once
+every tilt.
+
+Pulses and info are read into IwrfTsPulse and IwrfTsInfo objects, 
+using a IwrfTsReader object. As currently implemented, the reader
+can handle data from a file in SIGMET TsArchive format or a file message
+queue (FMQ) in IwrfTs format. The IwrfTs format is specified in
+the ds_radar_ts.h header file, in rapformats.
+
+2. Forming pulses into beams
+----------------------------
+
+A BeamReader object manages a IwrfTsReader object. It determines when a
+series of pulses is ready to be formed into a Beam.
+
+The getNextBeam() method creates a new Beam object and returns it.
+
+Beams may be indexed or not indexed. BeamReader will automatically
+switch to non-indexed beams when the antenna azimuth rate drops below
+some pre-set value.
+
+3. Beam objects
+---------------
+
+A Beam object holds a pointer to a MomentsMgr object. The MomentsMgr objects
+are managed by the top level object, Ts2Moments.
+
+When a Beam is created, it loads the IQ data from the IwrfTsPulse objects
+into the MomentsMgr object. So Beam does not itself hold the IQ data. This
+is done for efficiency. The MomentsMgr objects are long-lived, so the memory
+associated with the IQ data, and intermediate results of the moments
+computations, is not repeatedly created and destroyed.
+
+The Beam object does own the final moments results. It contains a 
+one Field object for unfiltered moments and one Field object for
+filtered moments.
+
+
+4. MomentsMgr objects.
+----------------------
+
+A MomentsMgr object is used by a Beam object to manage the moments 
+computations. A separate MomentsMgr object is needed for each type
+of processing which is required. The processing types are specified
+in the parameter file, and the PRF is used to determine which of
+a number of possible processing types should be used for a particular
+beam.
+
+A MomentsMgr object owns the IQ data for a Beam. This is held in
+the form of a vector of GateData objects, one for each gate in the
+beam.
+
+The IQ data is loaded into the GateData vector by the loadBeamData()
+method, which is called by a Beam when it is constructed. This method
+handles the copying of IQ data from the pulse objects to the
+MomentsMgr object. Once a Beam has been constructed, the Pulse objects
+can be freed.
+
+A MomentsMgr object holds a Moments object, which holds the code
+for actually computing the moments. You can think of it in this way:
+the MomentsMgr object is responsible for marshalling the data and
+getting it into the correct place. The Moments obeject is responsible
+for actually computing the moments.
+
+The MomentMgr object also manages clutter filtering. It has a CMD
+object, which computes the likelihood of clutter at a gate. Filtering
+itself is done by the Moments objects, which in turn hold a ClutFilter
+object.
+
+The MomentMgr object contains two vectors of MomentsThread objects,
+one for handling moments computations and one for handling IQ filtering.
+Each MomentsThread object contains an Fft object, so that fftw only 
+requires initialization at program startup. This improves efficiency.
+
+When the MomentsMgr computeMoments() method is called, it spawns
+a number of threads, some for computing moments and some for filtering
+the IQ data for computing filtered moments. The order of computation 
+is as follows:
+
+  * compute unfiltered moments, using unfiltered IQ
+  * compute CMD to determine which gates to filter
+  * compute filtered IQ at gates indicated by CMD
+  * compute filtered moments from filtered IQ
+
+5. Moments objects
+------------------
+
+Each MomentsMgr object contains a Moments object. This is responsible
+for actually computing the moments.
+
+The Moments class has code for handling the different polarization
+possiblities, such as single-pol, dual pol alternating, dual pol
+simultaneous etc.
+
+There are two methods for each type of processing. One method accepts
+IQ data. The other method accepts pre-computed co-variances. The former
+methods are called from the MomentsMgr. The latter methods are suitable
+for post-processing in which only the co-variances are available.
+
+The moments computations are identical for filtered or unfiltered
+data. For filtered moments, the IQ data is filtered prior to calling
+the Moments methods.
+
+Each Moments object holds a ClutFilter object, which 
+
+6. Clutter Mitigation Decision (CMD)
+------------------------------------
+
+CMD uses fuzzy-logic reasoning to determine which gates are likely to 
+have clutter and which should not be filtered. CMD uses pre-computed
+moments for a Beam.
+
+The Cmd object computes a number of 'feature fields', such as the texture
+of reflectivity and the standard deviation of ZDR.
+
+Each Cmd object has a series of InterestMap objects, which are used
+to convert the feature field values into interest values, which range from
+0 to 1. The fuzzy-logic math is done on the interest fields. A combined
+CMD field is computed, which is a fuzzy combination of the interest fields.
+
+The combined CMD interest field indicates the likelihood of clutter at a
+gate. A threshold is applied to the field. A flag is set at each gate
+for which the combined interest exceeds a set threshold (normally 0.5).
+
+7. ClutFilter
+-------------
+
+The ClutFilter class contains only static methods, which
+filter IQ data using the Spectral Static Echo Filter (SSEF).
+
+8. Calibration data
+-------------------
+
+The Calibration class holds the calibration data. The main Ts2Moments object
+holds a calibration object, which is initialized when the application starts.
+Calibration data is required, the app will exit if reading the calibration
+data fails.
+
+Optionally, new calibration data can be read from a directory. For this to
+work, calibration files must be written to a specified directory.
+
+When Ts2Moments processes a Beam object, it sets the calibration data for
+that Beam using the latest available calibration. The calibration data
+is then owned by that Beam. It is used in the moments computations and
+written out with the moments data.
+
+9. OutputFmq
+------------
+
+Moments are written by Ts2Moments to a moments file message queue (FMQ) by an
+OutputFmq object. The format is the RAL DsRadar format, specified in
+the rapformats library.
+
+10. Ts2Moments
+----------
+
+Ts2Moments is the main object for this application. There is only one
+Ts2Moments object.
+
+Ts2Moments owns the following:
+
+  * 1 BeamReader object
+  * 1 OutputFmq object
+  * 1 Calibration object
+  * a vector of MomentsMgr objects
+
+The MomentsMgr vector is actually a vector of
+
+  vector<MomentsMgr *> _momentsMgrArray[2];
+
+So, for every processing type there are 2 MomentsMgr objects. This is
+done to handle threading, which will be dealt with below. The MomentsMgr
+object holds the GateData for the beam.  This is loaded in the reader
+thread, and used in the compute thread. These threads run concurrently.
+Therefore, the MomentsMgr associated with a consecutive beams toggles
+between the two available managers.
+
+11. Threading
+-------------
+
+There are two levels of multi-threading in the application.
+
+At the top level, the following threads exist, as a pipeline:
+
+  * read  thread
+  * main  thread
+  * write thread
+
+The timing is as follows:
+
+  Time    Read             Main (compute)     Write
+          thread           thread             thread
+
+  1       reading-beam-1
+  2       reading-beam-2   computing-beam-1
+  3       reading-beam-3   computing-beam-2   writing-beam-1
+  4       reading-beam-4   computing-beam-3   writing-beam-2
+  5       reading-beam-5   computing-beam-4   writing-beam-3
+
+The concurrency of one time step between the read thread and the
+compute thread is the reason why 2 MomentsMgr objects are required.
+One MomentsMgr is being loaded with IQ data while another is being
+used in the computations. These toggle each time step.
+
+The second level of threading exists in the Main (compute) thread.
+When the moments computations are done, the gates are divided into
+a number of segments in range. Computing the moments for each segment
+is handled by a different thread.
+
+The MomentsMgr actually spawns 3 sets of compute threads. The sequence
+of events is as follows:
+
+  1. Spawn threads to compute unfiltered moments
+  2. Wait for unfiltered moments to complete.
+  3. Compute CMD - clutter likelihood.
+  4. Spawn threads to filter IQ data.
+  5. Wait for IQ filtering to complete.
+  6. Spawn threads to compute filtered moments
+  7. Wait for filtered moments to complete.
+

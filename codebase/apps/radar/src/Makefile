@@ -30,6 +30,7 @@ SUB_DIRS = \
 	HawkEye \
 	HawkEdit \
 	HcrTempRxGain \
+	HcrTs2Moments \
 	HcrVelCorrect \
 	Hsrl2Radx \
 	IntfRemove \
