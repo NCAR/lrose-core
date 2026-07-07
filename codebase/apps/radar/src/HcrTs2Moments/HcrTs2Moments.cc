@@ -54,46 +54,6 @@ HcrTs2Moments::HcrTs2Moments(int argc, char **argv)
   _fmq = NULL;
   _calib = NULL;
 
-  _beamScanMode = -1;
-
-  _beamVolNum = -1;
-  _prevVolNum = -1;
-
-  _beamSweepNum = -1;
-  _prevSweepNum = -1;
-
-  _currentScanMode = -1;
-  _currentVolNum = -1;
-  _currentSweepNum = -1;
-
-  _endOfVolFlag = false;
-  _endOfSweepFlag = false;
-
-  _startOfSweepPending = false;
-  _startOfVolPending = false;
-  _endOfVolPending = false;
-
-  _antennaTransition = false;
-
-  _prevAntennaTransition = false;
-  _inTransition = false;
-  _prevAngle = 0.0;
-  _motionDirn = 0.0;
-  _nRaysInSweep = 0;
-
-  _volMinEl = 180.0;
-  _volMaxEl = -180.0;
-  _nBeamsThisVol = 0;
-
-  _prevPrtForEndOfVol = -1; 
-  _prevPulseWidthForEndOfVol = -1;
-
-  _prevPrtForParams = -1;
-  _prevPrtForMoments = -1;
-  _prevNGatesForParams = -1;
-  _prevScanModeForParams = -1;
-  
-  _prevEl = -180;
   _nBeamsSinceParams = 0;
 
   _beamReader = NULL;
@@ -128,7 +88,7 @@ HcrTs2Moments::HcrTs2Moments(int argc, char **argv)
     return;
   }
 
-  if (_params.discard_beams_with_missing_pulses) {
+  if (_params.discard_dwells_with_missing_pulses) {
     _params.check_for_missing_pulses = pTRUE;
   }
   
@@ -144,28 +104,11 @@ HcrTs2Moments::HcrTs2Moments(int argc, char **argv)
     return;
   }
     
-  // set up vector of moments manager objects
-
-  for (int ii = 0; ii < _params.moments_params_n; ii++) {
-    MomentsMgr *mgr = new MomentsMgr(_progName, _params);
-    mgr->init(_params._moments_params[ii]);
-    _momentsMgrArray.push_back(mgr);
-  }
-  if (_momentsMgrArray.size() < 1) {
-    cerr << "ERROR: HcrTs2Moments::HcrTs2Moments." << endl;
-    cerr << "  No algorithm geometry specified."; 
-    cerr << "  The param moments_menuetry must have at least 1 entry."
-         << endl;
-    constructorOK = false;
-    return;
-  }
-
   // create the beam reader
 
   pthread_mutex_init(&_beamRecyclePoolMutex, NULL);
   _beamReader = new BeamReader(_progName, _params, _args,
-                               _beamRecyclePool, _beamRecyclePoolMutex,
-                               _momentsMgrArray);
+                               _beamRecyclePool, _beamRecyclePoolMutex);
   if (!_beamReader->constructorOK) {
     constructorOK = false;
   }
@@ -261,11 +204,6 @@ HcrTs2Moments::~HcrTs2Moments()
   // if (_beamReader) {
   //   delete _beamReader;
   // }
-  
-  for (size_t ii = 0; ii < _momentsMgrArray.size(); ii++) {
-    delete _momentsMgrArray[ii];
-  }
-  _momentsMgrArray.clear();
   
   if (_fmq) {
     delete _fmq;
@@ -364,7 +302,6 @@ int HcrTs2Moments::_runSingleThreaded()
 
   int iret = 0;
   PMU_auto_register("Run single threaded");
-  Beam *latestBeam = NULL;
   
   while (true) {
     
@@ -377,7 +314,6 @@ int HcrTs2Moments::_runSingleThreaded()
       break;
     }
 
-    latestBeam = beam;
     _nGatesComputed += beam->getNGates();
     
     // process the current beam
@@ -387,24 +323,13 @@ int HcrTs2Moments::_runSingleThreaded()
       break;
     }
     
-    _nBeamsThisVol++;
     _nBeamsSinceParams++;
     
   } // while
   
-  // put final end of sweep and volume flags
-
-  if (latestBeam != NULL) {
-    _fmq->putEndOfTilt(_currentSweepNum, *latestBeam);
-    _fmq->putEndOfVolume(_currentVolNum, *latestBeam);
-  }
-
   return iret;
 
 }
-
-// #define TESTING
-#ifdef TESTING
 
 //////////////////////////////////////////////////
 // Run in multi-threaded mode
@@ -415,60 +340,6 @@ int HcrTs2Moments::_runMultiThreaded()
   PMU_auto_register("Run multi-threaded");
 
   int iret = 0;
-  Beam *latestBeam = NULL;
-  
-  Beam *beams[30];
-  for (int ii = 0; ii < 30; ii++) {
-    beams[ii] = _beamReader->getNextBeam();
-  }
-
-  for (int ii = 0; ii < 10000; ii++) {
-
-    // get next incoming beam
-    
-    Beam *beam = beams[ii % 30];
-    if (beam == NULL) {
-      continue;
-    }
-    
-    _nGatesComputed += beam->getNGates();
-    latestBeam = beam;
-    
-    // process the current beam
-    
-    if (_processBeamMultiThreaded(beam)) {
-      iret = -1;
-      break;
-    }
-    
-    _nBeamsThisVol++;
-    _nBeamsSinceParams++;
-
-  } // while
-  
-  // put final end of sweep and volume flags
-
-  if (latestBeam != NULL) {
-    _fmq->putEndOfTilt(_currentSweepNum, latestBeam);
-    _fmq->putEndOfVolume(_currentVolNum, latestBeam);
-  }
-  
-  return iret;
-
-}
-
-#else
-
-//////////////////////////////////////////////////
-// Run in multi-threaded mode
-
-int HcrTs2Moments::_runMultiThreaded()
-{
-
-  PMU_auto_register("Run multi-threaded");
-
-  int iret = 0;
-  Beam *latestBeam = NULL;
   
   while (true) {
 
@@ -482,7 +353,6 @@ int HcrTs2Moments::_runMultiThreaded()
     }
     
     _nGatesComputed += beam->getNGates();
-    latestBeam = beam;
     
     // process the current beam
     
@@ -491,23 +361,13 @@ int HcrTs2Moments::_runMultiThreaded()
       break;
     }
     
-    _nBeamsThisVol++;
     _nBeamsSinceParams++;
 
   } // while
   
-  // put final end of sweep and volume flags
-
-  if (latestBeam != NULL) {
-    _fmq->putEndOfTilt(_currentSweepNum, *latestBeam);
-    _fmq->putEndOfVolume(_currentVolNum, *latestBeam);
-  }
-
   return iret;
 
 }
-
-#endif
 
 ///////////////////////////////////////
 // process beam in single threaded mode
@@ -530,32 +390,21 @@ int HcrTs2Moments::_processBeamSingleThreaded(Beam *beam)
   
   beam->computeMoments();
 
-  // write the sweep and volume flags
-
-  _handleSweepAndVolChange(beam);
-  
   // write the radar params, field params and calibration
   
   _writeParamsAndCalib(beam);
 
   // write out beam
 
-  beam->setVolNum(_currentVolNum);
-  beam->setSweepNum(_currentSweepNum);
   if (_fmq->writeBeam(*beam)) {
     cerr << "ERROR - HcrTs2Moments::_processFile" << endl;
     cerr << "  Cannot write the beam data to output FMQ" << endl;
     return -1;
   }
 
-#ifdef TESTING
-#else  
-
   pthread_mutex_lock(&_beamRecyclePoolMutex);
   _beamRecyclePool.push_front(beam);
   pthread_mutex_unlock(&_beamRecyclePoolMutex);
-
-#endif
 
   return 0;
 
@@ -603,31 +452,10 @@ int HcrTs2Moments::_writeParamsAndCalib(const Beam *beam)
   
   // put the params if needed
 
-  if (_beamReader->isOpsInfoNew() ||
-      _endOfSweepFlag ||
-      _endOfVolFlag ||
-      (_nBeamsSinceParams > _params.nbeams_for_params_and_calib) ||
-      (fabs(beam->getPrt() - _prevPrtForParams) > 1.0) ||
-      (beam->getNGatesOut() != _prevNGatesForParams) ||
-      (beam->getScanMode() != _prevScanModeForParams)) {
-
+  if (_nBeamsSinceParams > _params.nbeams_for_params_and_calib) {
+    
     if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
-      cerr << "Writing params and calibs, for following reasons:" << endl;
-      if (_beamReader->isOpsInfoNew()) cerr << "==>> ops info is new" << endl;
-      if(_endOfSweepFlag) cerr << "==>> end of sweep" << endl;
-      if (_endOfVolFlag) cerr << "==>> end of volume" << endl;
-      if (_nBeamsSinceParams > _params.nbeams_for_params_and_calib) {
-	cerr << "==>> _nBeamsSinceParams: " << _nBeamsSinceParams << endl;
-      }
-      if (fabs(beam->getPrt() - _prevPrtForParams) > 1.0) {
-	cerr << "==>> prt has changed to: " << beam->getPrt() << endl;
-      }
-      if (beam->getNGatesOut() != _prevNGatesForParams) {
-	cerr << "==>> ngates out has changed to: " << beam->getNGatesOut() << endl;
-      }
-      if (beam->getScanMode() != _prevScanModeForParams) {
-	cerr << "==>> scan mode has changed to: " << beam->getScanMode() << endl;
-      }
+      cerr << "==>> _nBeamsSinceParams: " << _nBeamsSinceParams << endl;
     }
     
     if (_fmq->writeParams(*beam)) {
@@ -648,9 +476,6 @@ int HcrTs2Moments::_writeParamsAndCalib(const Beam *beam)
       return -1;
     }
     
-    _prevPrtForParams = beam->getPrt();
-    _prevNGatesForParams = beam->getNGatesOut();
-    _prevScanModeForParams = beam->getScanMode();
     _nBeamsSinceParams = 0;
     
   }
@@ -806,18 +631,12 @@ int HcrTs2Moments::writeBeams()
     
     if (beam != NULL && thread->getBeamReadyForWrite()) {
 
-      // write the sweep and volume flags
-      
-      _handleSweepAndVolChange(beam);
-      
       // write the radar params, field params and calibration
       
       _writeParamsAndCalib(beam);
       
       // write beam to FMQ
       
-      beam->setVolNum(_currentVolNum);
-      beam->setSweepNum(_currentSweepNum);
       if (_fmq->writeBeam(*beam)) {
         cerr << "ERROR - HcrTs2Moments::_writeBeams" << endl;
         cerr << "  Cannot write the beam data to output FMQ" << endl;
@@ -838,15 +657,10 @@ int HcrTs2Moments::writeBeams()
 
     // delete the beam
     
-#ifdef TESTING
-#else  
-
-  pthread_mutex_lock(&_beamRecyclePoolMutex);
-  _beamRecyclePool.push_front((Beam *) beam);
-  pthread_mutex_unlock(&_beamRecyclePoolMutex);
-
-#endif
-
+    pthread_mutex_lock(&_beamRecyclePoolMutex);
+    _beamRecyclePool.push_front((Beam *) beam);
+    pthread_mutex_unlock(&_beamRecyclePoolMutex);
+    
   } // while
 
   return -1;
@@ -894,18 +708,12 @@ int HcrTs2Moments::_writeRemainingBeamsOnExit()
 
       if (thread->getBeamReadyForWrite()) {
         
-        // write the sweep and volume flags
-        
-        _handleSweepAndVolChange(beam);
-        
         // write the radar params, field params and calibration
         
         _writeParamsAndCalib(beam);
         
         // write beam to FMQ
         
-        beam->setVolNum(_currentVolNum);
-        beam->setSweepNum(_currentSweepNum);
         if (_fmq->writeBeam(*beam)) {
           cerr << "ERROR - HcrTs2Moments::_writeBeams" << endl;
           cerr << "  Cannot write the beam data to output FMQ" << endl;
@@ -929,355 +737,6 @@ int HcrTs2Moments::_writeRemainingBeamsOnExit()
   } // while (_threadPoolRetrievePos != endRetrievePos) {
 
   return iret;
-
-}
-
-////////////////////////////////////////////////////////////////////////
-// handle sweep and volume changes, writing flags as appropriate
-
-void HcrTs2Moments::_handleSweepAndVolChange(const Beam *beam)
-  
-{
-
-  // initialize end of sweep and volume flags
-
-  if (_params.use_volume_info_from_time_series) {
-    _endOfVolFlag = beam->getEndOfVolFlag();
-    if (_endOfVolFlag) {
-      _endOfVolPending = true;
-    }
-  } else {
-    _endOfVolFlag = false;
-  }
-
-  if (_params.use_sweep_info_from_time_series) {
-    _endOfSweepFlag = beam->getEndOfSweepFlag();
-  } else {
-    _endOfSweepFlag = false;
-  }
-
-  // scan mode change
-  
-  _beamScanMode = beam->getScanMode();
-  if (_currentScanMode != _beamScanMode) {
-    _fmq->putNewScanType(_beamScanMode, *beam);
-    _currentScanMode = _beamScanMode;
-    if (_params.set_end_of_sweep_when_antenna_changes_direction) {
-      _endOfVolPending = true;
-    }
-    if (_params.debug) {
-      cerr << "Scan mode change to: "
-           << iwrf_scan_mode_to_str(_currentScanMode) << endl;
-    }
-  }
-
-  if (!_params.use_volume_info_from_time_series) {
-    // have to deduce the end of volume condition
-    _deduceEndOfVol(beam);
-    return;
-  }
-  
-  // set vol and sweep num from beam
-
-  _prevVolNum = _beamVolNum;
-  _beamVolNum = beam->getVolNum();
-  if (_prevVolNum != _beamVolNum) {
-    _endOfVolFlag = true;
-    _endOfVolPending = true;
-  }
-
-  _prevSweepNum = _beamSweepNum;
-  _beamSweepNum = beam->getSweepNum();
-  _antennaTransition = beam->getAntennaTransition();
-
-  // initialize first time through
-
-  if (_currentVolNum < 0) {
-    _currentVolNum = _beamVolNum;
-  }
-  if (_currentScanMode < 0) {
-    _currentScanMode = _beamScanMode;
-  }
-  if (_currentSweepNum < 0) {
-    _currentSweepNum = _beamSweepNum;
-  }
-  
-  // if requested, use procedure to find dirn reversal to
-  // trigger end of sweep
-
-  if (_params.set_end_of_sweep_when_antenna_changes_direction) {
-    if (_beamScanMode == IWRF_SCAN_MODE_RHI ||
-        _beamScanMode == IWRF_SCAN_MODE_IDLE ||
-        _beamScanMode == IWRF_SCAN_MODE_SECTOR) {
-      _changeSweepOnDirectionChange(beam);
-      return;
-    }
-  }
-
-  if (_currentSweepNum != _beamSweepNum) {
-    _endOfSweepFlag = true;
-  }
-  
-  // set pending flags
-  
-  if (_endOfVolFlag) {
-    _startOfVolPending = true;
-  }
-
-  if (_endOfSweepFlag) {
-    _startOfSweepPending = true;
-  }
-
-  // end of sweep?
-
-  if (_endOfSweepFlag) {
-    _fmq->putEndOfTilt(_currentSweepNum, *beam);
-    if (_params.debug) {
-      cerr << "End of sweep num: " << _currentSweepNum << endl;
-    }
-    _currentSweepNum = _beamSweepNum;
-  }
-
-  // end of vol?
-  
-  if (_endOfVolFlag) {
-    _putEndOfVol(beam);
-  }
-  
-  // start of vol?
-  
-  if (_startOfVolPending) {
-    if (!_params.delay_tilt_start_msg_during_ant_trans ||
-        !_antennaTransition) {
-      _fmq->putStartOfVolume(_currentVolNum, *beam);
-      if (_params.debug) {
-        cerr << "Start of vol num: " << _currentVolNum << endl;
-      }
-      _startOfVolPending = false;
-    }
-  }
-
-  // start of sweep?
-  
-  if (_startOfSweepPending) {
-    if (!_params.delay_tilt_start_msg_during_ant_trans ||
-        !_antennaTransition) {
-      _fmq->putStartOfTilt(_currentSweepNum, *beam);
-      if (_params.debug) {
-        cerr << "Start of sweep num: " << _currentSweepNum << endl;
-      }
-      _startOfSweepPending = false;
-    }
-  }
-
-}
-
-////////////////////////////////////////////////////////////////////////
-// Put end of volume
-
-void HcrTs2Moments::_putEndOfVol(const Beam *beam)
-  
-{
-
-  _fmq->putEndOfVolume(_currentVolNum, *beam);
-  if (_params.debug) {
-    cerr << "End of vol num: " << _currentVolNum << endl;
-  }
-  _currentVolNum = _beamVolNum;
-  _nBeamsThisVol = 0;
-
-}
-
-////////////////////////////////////////////////////////////////////////
-// Deduce end of vol condition
-
-void HcrTs2Moments::_deduceEndOfVol(const Beam *beam)
-  
-{
-  
-  // set tilt number to missing
-
-  _endOfVolFlag = false;
-  _currentSweepNum = -1;
-  
-  // set elev stats
-  
-  if (beam->getEl() < _prevEl && beam->getEl() < _volMinEl) {
-    _volMinEl = beam->getEl();
-  }
-  if (beam->getEl() > _prevEl && beam->getEl() > _volMaxEl) {
-    _volMaxEl = beam->getEl();
-  }
-  
-  // guess at end of vol condition
-  
-  if (_params.set_end_of_vol_from_elev_angle) {
-    if (_nBeamsThisVol >= _params.min_beams_per_vol) {
-      if (_params.vol_starts_at_bottom) {
-        double deltaEl = _volMaxEl - beam->getEl();
-        if (deltaEl > _params.elev_change_for_end_of_vol) {
-          _endOfVolFlag = true;
-        }
-      } else {
-        double deltaEl = beam->getEl() - _volMinEl;
-        if (deltaEl > _params.elev_change_for_end_of_vol) {
-          _endOfVolFlag = true;
-        }
-      }
-    }
-  }
-
-  if (_params.set_end_of_vol_on_prf_change) {
-    if (fabs(beam->getPrt() - _prevPrtForEndOfVol) > 1.0e-5) {
-      _endOfVolFlag = true;
-      _prevPrtForEndOfVol = beam->getPrt();
-    }
-  }
-  
-  if (_params.set_end_of_vol_on_pulse_width_change) {
-    if (fabs(beam->getPulseWidth() - _prevPulseWidthForEndOfVol) > 1.0e-5) {
-      _endOfVolFlag = true;
-      _prevPulseWidthForEndOfVol = beam->getPulseWidth();
-    }
-  }
-  
-  if (_endOfVolFlag) {
-    
-    _fmq->putEndOfVolume(_currentVolNum, *beam);
-    _currentVolNum++;
-    _fmq->putStartOfVolume(_currentVolNum, *beam);
-    
-    _volMinEl = 180.0;
-    _volMaxEl = -180.0;
-    _nBeamsThisVol = 0;
-    
-  }
-  
-  _prevEl = beam->getEl();
-  
-}
-
-////////////////////////////////////////////////////////////////////////
-// delay sweep change until antenna changes direction
-
-void HcrTs2Moments::_changeSweepOnDirectionChange(const Beam *beam)
-  
-{
-  
-  // no transitions in this mode, we change sweep number instanteously
-
-  _antennaTransition = false;
-  _nRaysInSweep++;
-  
-  // compute angle change
-
-  double angle;
-  if (_beamScanMode == IWRF_SCAN_MODE_RHI) {
-    angle = beam->getEl();
-  } else {
-    angle = beam->getAz();
-  }
-  double deltaAngle = angle - _prevAngle;
-  if (deltaAngle > 180) {
-    deltaAngle -= 360.0;
-  } else if (deltaAngle < -180) {
-    deltaAngle += 360.0;
-  }
-  if (fabs(deltaAngle) < _params.required_delta_angle_for_antenna_direction_change) {
-    return;
-  }
-  _prevAngle = angle;
-
-  // check for dirn change
-
-  bool dirnChange = false;
-  if (_motionDirn * deltaAngle < 0) {
-    dirnChange = true;
-  }
-
-  if (deltaAngle > 0) {
-    _motionDirn = 1.0;
-  } else {
-    _motionDirn = -1.0;
-  }
-  
-  // do nothing if number of rays is too small
-  
-  if (_nRaysInSweep < _params.min_rays_in_sweep_for_antenna_direction_change) {
-    return;
-  }
-  
-  // do nothing if the direction of motion has not changed
-  
-  if (!dirnChange && !_endOfVolFlag) {
-    return;
-  }
-  
-  // set flags on change
-  
-  _endOfSweepFlag = true;
-  _fmq->putEndOfTilt(_currentSweepNum, *beam);
-
-  if (dirnChange && _params.debug) {
-    cerr << "Dirn change, end of sweep num: " << _currentSweepNum << endl;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "    nrays, el, az, angle, prevAngle, deltaAngle, _motionDirn, dirnChange: "
-           << _nRaysInSweep << ", "
-           << beam->getEl() << ", " << beam->getAz() << ", "
-           << angle << ", "
-           << _prevAngle << ", "
-           << deltaAngle << ", "
-           << _motionDirn << ", "
-           << dirnChange << endl;
-    }
-  }
-  _nRaysInSweep = 0;
-
-  // increment sweep number
-
-  if (_endOfVolPending) {
-    _endOfVolFlag = true;
-    _endOfVolPending = false;
-  }
-
-  if (!_endOfVolFlag) {
-    _currentSweepNum++;
-  }
-
-  // end of vol?
-  
-  bool maxSweepReached = false;
-  if (_currentSweepNum >
-      _params.max_sweeps_in_vol_for_antenna_direction_change) {
-    _endOfVolFlag = true;
-    maxSweepReached = true;
-  }
-  
-  if (_endOfVolFlag) {
-    _fmq->putEndOfVolume(_currentVolNum, *beam);
-    if (_params.debug) {
-      cerr << "End of vol num: " << _currentVolNum << endl;
-    }
-    if (maxSweepReached) {
-      _currentVolNum++;
-    } else {
-      _currentVolNum = _beamVolNum;
-    }
-    _fmq->putStartOfVolume(_currentVolNum, *beam);
-    if (_params.debug) {
-      cerr << "Start of vol num: " << _currentVolNum << endl;
-    }
-    _nBeamsThisVol = 0;
-    _currentSweepNum = 0;
-    _endOfVolFlag = false;
-  }
-  
-  // start of sweep
-  
-  _fmq->putStartOfTilt(_currentSweepNum, *beam);
-  if (_params.debug) {
-    cerr << "Start of sweep num: " << _currentSweepNum << endl;
-  }
 
 }
 

@@ -57,10 +57,8 @@ HDRS = \
 	Beam.hh \
 	BeamReader.hh \
 	Calibration.hh \
-	Cmd.hh \
 	EgmCorrection.hh \
 	HcrTs2Moments.hh \
-	MomentsMgr.hh \
 	OutputFmq.hh \
 	PulseQueue.hh \
 	Threads.hh
@@ -71,10 +69,8 @@ CPPC_SRCS = \
 	Beam.cc \
 	BeamReader.cc \
 	Calibration.cc \
-	Cmd.cc \
 	EgmCorrection.cc \
 	HcrTs2Moments.cc \
-	MomentsMgr.cc \
 	Main.cc \
 	OutputFmq.cc \
 	PulseQueue.cc \
@@ -101,18 +97,6 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 # local targets
 #
-
-#GmapFilter: FORCE
-#	$(RM) ClutFilter.o
-#	$(MAKE) _CC="$(CC)" _CPPC="$(CPPC)" \
-#	DBUG_OPT_FLAGS="-O2 -DUSE_GMAP" ClutFilter.o \
-#	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LOC_LD_LIBRARY_PATH):$(SYS_LD_LIBRARY_PATH)
-#	$(RM) GmapFilter
-#	$(_CPPC) $(DBUG_OPT_FLAGS) -o GmapFilter -static \
-#	$(OBJS) $(DEBUG_LDFLAGS) $(LDFLAGS) $(LIBS)
-#	$(RM) ClutFilter.o
-
-#FORCE:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

@@ -44,7 +44,6 @@
 #include <rapformats/DsRadarSweep.hh>
 #include "Args.hh"
 #include "Params.hh"
-#include "MomentsMgr.hh"
 #include "OutputFmq.hh"
 #include "BeamReader.hh"
 #include "Threads.hh"
@@ -89,12 +88,6 @@ public:
   
   int writeBeams();
 
-  // SZ constants
-  
-  static const int maxTrips = 3;
-  static const int maxBins = 4096;
-  static const int maxGates = maxBins * maxTrips;
-
   pthread_mutex_t *getDebugPrintMutex() { return &_debugPrintMutex; }
 
 protected:
@@ -138,60 +131,8 @@ private:
 
   Calibration *_calib;
 
-  // Moments computation management.
-  // We keep two sets of managers, so that we can toggle between them
-  // for each alternate beam. This keeps the memory separate when we
-  // are using a separate thread for the BeamReader.
-  
-  vector<const MomentsMgr *> _momentsMgrArray;
-  double _prevPrtForMoments;
-  
-  // sweep and volume identification
-  
-  int _beamScanMode;
-
-  int _beamVolNum;
-  int _prevVolNum;
-
-  int _beamSweepNum;
-  int _prevSweepNum;
-
-  int _currentScanMode;
-  int _currentVolNum;
-  int _currentSweepNum;
-
-  bool _endOfVolFlag;
-  bool _endOfSweepFlag;
-
-  bool _startOfSweepPending;
-  bool _startOfVolPending;
-  bool _endOfVolPending;
-
-  bool _antennaTransition;
-
-  double _prevEl;
-  double _volMinEl;
-  double _volMaxEl;
-  int _nBeamsThisVol;
-
-  // delaying sweep change until antenna changes direction
-
-  bool _prevAntennaTransition;
-  bool _inTransition;
-  double _prevAngle;
-  double _motionDirn;
-  int _nRaysInSweep;
-  
-  // end of vol decision
-
-  double _prevPrtForEndOfVol;
-  double _prevPulseWidthForEndOfVol;
-
   // send params to fmq?
   
-  double _prevPrtForParams;
-  int _prevNGatesForParams;
-  int _prevScanModeForParams;
   int _nBeamsSinceParams;
 
   // run time
@@ -199,7 +140,7 @@ private:
   double _startTimeSecs;
   double _endTimeSecs;
   double _nGatesComputed;
-
+  
   // private functions
 
   void _cleanUp();
@@ -221,13 +162,6 @@ private:
   // write any remaining beams on exit
   
   int _writeRemainingBeamsOnExit();
-
-// sweep and vol info
-
-  void _handleSweepAndVolChange(const Beam *beam);
-  void _putEndOfVol(const Beam *beam);
-  void _deduceEndOfVol(const Beam *beam);
-  void _changeSweepOnDirectionChange(const Beam *beam);
 
 };
 

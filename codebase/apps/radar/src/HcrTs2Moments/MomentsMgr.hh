@@ -135,24 +135,6 @@ public:
     return _xmitRcvMode;
   }
   
-  inline bool applyClutterFilter() const {
-    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_NONE) {
-      return false;
-    } else {
-      return _mparams.apply_clutter_filter;
-    }
-  }
-
-  inline bool applyPhaseDecoding() const { return _mparams.apply_sz; }
-
-  inline bool changeVelocitySign() const {
-    return _mparams.change_velocity_sign;
-  }
-
-  inline bool isDualPrt() const {
-    return (_mparams.proc_flags == Params::PROC_FLAGS_DUAL_PRT);
-  }
-
   // print members
   
   void print(ostream &out) const;

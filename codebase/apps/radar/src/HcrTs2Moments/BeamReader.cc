@@ -51,27 +51,16 @@ BeamReader::BeamReader(const string &prog_name,
                        const Params &params,
                        const Args &args,
                        deque<Beam *> &beamRecyclePool,
-                       pthread_mutex_t &beamRecyclePoolMutex,
-                       vector<const MomentsMgr *> &momentsMgrArray) :
+                       pthread_mutex_t &beamRecyclePoolMutex) :
         constructorOK(true),
         _progName(prog_name),
         _params(params),
         _args(args),
         _beamRecyclePool(beamRecyclePool),
         _beamRecyclePoolMutex(beamRecyclePoolMutex),
-        _momentsMgrArray(momentsMgrArray),
-        _momentsMgr(NULL),
-        _mgrIndex(-1),
-        _missMgrCount(0),
         _pulseReader(NULL),
         _startTime(args.startTime),
         _endTime(args.endTime),
-        _endOfSweepPending(false),
-        _endOfVolPending(false),
-        _endOfVolPulseSeqNum(0),
-        _endOfSweepPulseSeqNum(0),
-        _endOfSweepFlag(false),
-        _endOfVolFlag(false),
 
         // Create the pulse pool, starting with 0 pulses, and providing a custom
         // pulse factory function (since IwrfTsPulse has no default constructor).
@@ -85,12 +74,6 @@ BeamReader::BeamReader(const string &prog_name,
         _pulseCache(),
         _pulseCount(0),
         _pulseCountSinceStatus(0),
-        _interpQueue(),
-        _interpReady(false),
-        _interpOverflow(false),
-        _prevAzInterp(-9999.0),
-        _prevElInterp(-9999.0),
-        _burstPhases(),
         _beamCount(0),
         _midIndex(0),
         _startIndex(0),
@@ -98,62 +81,26 @@ BeamReader::BeamReader(const string &prog_name,
         _prevBeamPulseSeqNum(0),
         _scanType(Beam::SCAN_TYPE_UNKNOWN),
         _nGates(0),
-        _nSamples(_params.min_n_samples),
+        _nSamples(100),
         _az(0.0),
         _el(0.0),
         _prt(0.001),
         _meanPrf(1000.0),
         _pulseWidthUs(1.0),
-        _isAlternating(false),
-        _startsOnHoriz(true),
-        _isStaggeredPrt(false),
-        _startsOnPrtShort(true),
-        _prtShort(0.001),
-        _prtLong(0.001),
-        _nGatesPrtShort(0),
-        _nGatesPrtLong(0),
-        _isDualPrt(false),
-        _isDualReady(false),
-        _dualPrtIndexStart(0),
-        _dualPrtIndexEnd(0),
         _azIndex(0),
         _prevAzIndex(-999),
         _elIndex(0),
         _prevElIndex(-999),
-
-        // initialize rate computations
-
-        _azRateInitialized(false),
-        _prevTimeForAzRate(0),
-        _prevAzForRate(-999),
-        _progressiveAzRate(0),
-        _beamAzRate(0),
-        _rotationClockwise(true),
-        
-        _elRateInitialized(false),
-        _prevTimeForElRate(0),
-        _prevElForRate(-999),
-        _progressiveElRate(0),
-        _beamElRate(0),
-        _rotationUpwards(true),
-
-        // beam indexing
-
-        _indexTheBeams(false),
-        _indexedResolution(1.0),
-        _beamAngleDeg(1.0),
 
         // windowing
 
         _windowFactorRect(),
         _windowFactorVonhann(),
         _windowFactorBlackman(),
-        _windowFactorBlackmanNuttall(),
+        _windowFactorBlackmanNuttall()
 
-        // atmospheric attenuation
-
-        _atmosAtten()
 {
+
   // compute the window factors
   
   _computeWindowFactors();

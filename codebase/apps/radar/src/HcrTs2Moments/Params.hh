@@ -106,39 +106,22 @@ public:
   } primary_axis_t;
 
   typedef enum {
-    SINGLE_POL = 0,
-    DP_ALT_HV_CO_ONLY = 1,
-    DP_ALT_HV_CO_CROSS = 2,
-    DP_ALT_HV_FIXED_HV = 3,
-    DP_SIM_HV_FIXED_HV = 4,
-    DP_SIM_HV_SWITCHED_HV = 5,
+    DWELL_SPECIFY_N_SAMPLES = 0,
+    DWELL_SPECIFY_BLOCK_ID = 1,
+    DWELL_PULSE_WIDTH_CHANGE = 2
+  } dwell_method_t;
+
+  typedef enum {
     DP_H_ONLY_FIXED_HV = 6,
-    DP_V_ONLY_FIXED_HV = 7,
-    SINGLE_POL_V = 10
+    DP_V_ONLY_FIXED_HV = 7
   } xmit_rcv_mode_t;
 
   typedef enum {
     WINDOW_RECT = 0,
     WINDOW_VONHANN = 1,
     WINDOW_BLACKMAN = 2,
-    WINDOW_BLACKMAN_NUTTALL = 3,
-    WINDOW_TUKEY_10 = 4,
-    WINDOW_TUKEY_20 = 5,
-    WINDOW_TUKEY_30 = 6,
-    WINDOW_TUKEY_50 = 7
-  } window_t;
-
-  typedef enum {
-    PROC_FLAGS_NONE = 0,
-    PROC_FLAGS_DUAL_PRT = 1
-  } processing_flags_t;
-
-  typedef enum {
-    BEAM_SPECIFY_N_SAMPLES = 0,
-    BEAM_SPECIFY_ANGLE = 1,
-    BEAM_CONSTANT_STEERING_ANGLE = 2,
-    BEAM_PULSE_WIDTH_CHANGE = 3
-  } beam_method_t;
+    WINDOW_BLACKMAN_NUTTALL = 3
+  } window_type_t;
 
   typedef enum {
     WIDTH_METHOD_R0R1 = 0,
@@ -160,38 +143,9 @@ public:
   } atmos_atten_method_t;
 
   typedef enum {
-    CLUTTER_FILTER_ADAPTIVE = 0,
-    CLUTTER_FILTER_REGRESSION = 1,
-    CLUTTER_FILTER_NOTCH = 2,
-    CLUTTER_FILTER_NONE = 3
-  } clutter_filter_type_t;
-
-  typedef enum {
-    INTERP_METHOD_NONE = 0,
-    INTERP_METHOD_LINEAR = 1,
-    INTERP_METHOD_GAUSSIAN = 2
-  } notch_interp_method_t;
-
-  typedef enum {
-    FIR_LEN_125 = 0,
-    FIR_LEN_60 = 1,
-    FIR_LEN_40 = 2,
-    FIR_LEN_30 = 3,
-    FIR_LEN_20 = 4,
-    FIR_LEN_10 = 5
-  } fir_filter_len_t;
-
-  typedef enum {
     NOISE_RAY_BY_RAY = 0,
     NOISE_RUNNING_MEDIAN = 1
   } noise_method_t;
-
-  typedef enum {
-    PHASE_DECODE_NONE = 0,
-    PHASE_DECODE_RANDOM = 1,
-    PHASE_DECODE_SZ = 2,
-    PHASE_DECODE_SZ1 = 3
-  } phase_decoding_t;
 
   typedef enum {
     CENSORING_NONE = 0,
@@ -399,38 +353,7 @@ public:
     TEST9 = 196
   } field_id_t;
 
-  typedef enum {
-    TRANSITION_FLAG_AT_CENTER = 0,
-    TRANSITION_FLAG_AT_BOTH_ENDS = 1,
-    TRANSITION_FLAG_AT_EITHER_END = 2,
-    TRANSITION_FLAG_MISSING = 3
-  } transition_method_t;
-
   // struct typedefs
-
-  typedef struct {
-    tdrp_bool_t check_prf;
-    double prf_lower_limit;
-    double prf_upper_limit;
-    tdrp_bool_t check_antenna_rate;
-    double antenna_rate_lower_limit;
-    double antenna_rate_upper_limit;
-    beam_method_t beam_method;
-    int beam_n_samples;
-    double beam_angle_deg;
-    tdrp_bool_t index_the_beams;
-    double indexed_resolution;
-    double min_antenna_rate_for_indexing;
-    window_t window;
-    tdrp_bool_t switching_receiver;
-    xmit_rcv_mode_t xmit_rcv_mode;
-    tdrp_bool_t apply_clutter_filter;
-    tdrp_bool_t apply_sz;
-    tdrp_bool_t change_velocity_sign;
-    processing_flags_t proc_flags;
-    tdrp_bool_t check_scan_name;
-    char* scan_name;
-  } moments_params_t;
 
   typedef struct {
     double pulse_width_us;
@@ -452,11 +375,6 @@ public:
     double value;
     double interest;
   } interest_map_point_t;
-
-  typedef struct {
-    int length;
-    double min_valid_cmd;
-  } speckle_threshold_t;
 
   typedef struct {
     field_id_t id;
@@ -812,56 +730,23 @@ public:
 
   double start_range_meters;
 
-  tdrp_bool_t override_radar_wavelength;
+  dwell_method_t dwell_method;
 
-  double radar_wavelength_cm;
+  int dwell_n_samples;
 
-  moments_params_t *_moments_params;
-  int moments_params_n;
-
-  int min_n_samples;
-
-  int max_n_samples;
-
-  tdrp_bool_t specify_fixed_pulse_width;
-
-  double fixed_pulse_width_us;
-
-  tdrp_bool_t control_beam_indexing_from_time_series;
-
-  tdrp_bool_t discard_non_indexed_beams;
-
-  tdrp_bool_t control_n_samples_from_time_series;
-
-  tdrp_bool_t control_xmit_rcv_mode_from_time_series;
+  int dwell_block_id;
 
   tdrp_bool_t check_for_missing_pulses;
 
-  tdrp_bool_t discard_beams_with_missing_pulses;
+  tdrp_bool_t discard_dwells_with_missing_pulses;
 
-  tdrp_bool_t compute_zdr_using_snr;
+  xmit_rcv_mode_t xmit_rcv_mode;
 
-  tdrp_bool_t adjust_dbz_for_measured_xmit_power;
+  window_type_t window_type;
 
-  tdrp_bool_t adjust_zdr_for_measured_xmit_power;
-
-  double min_measured_xmit_power_dbm;
-
-  double max_measured_xmit_power_dbm;
-
-  tdrp_bool_t correct_for_system_phidp;
-
-  int zdr_median_filter_len;
-
-  int rhohv_median_filter_len;
-
-  int staggered_prt_median_filter_len;
+  tdrp_bool_t change_velocity_sign;
 
   spectrum_width_method_t spectrum_width_method;
-
-  tdrp_bool_t threshold_zdr_using_snr;
-
-  double min_snr_db_for_zdr;
 
   tdrp_bool_t threshold_ldr_using_snr;
 
@@ -892,21 +777,11 @@ public:
 
   double dbz_correction;
 
-  tdrp_bool_t override_cal_zdr_correction;
-
-  double zdr_correction_db;
-
   tdrp_bool_t override_cal_ldr_corrections;
 
   double ldr_correction_db_h;
 
   double ldr_correction_db_v;
-
-  tdrp_bool_t override_cal_system_phidp;
-
-  double system_phidp_deg;
-
-  tdrp_bool_t change_phidp_sign;
 
   tdrp_bool_t correct_rx_gains_for_temperature;
 
@@ -943,105 +818,11 @@ public:
 
   char* noise_mon_tag_list_site_temp;
 
-  double noise_mon_zdrm_corr;
-
-  double noise_mon_mean_site_temp;
-
-  double noise_mon_zdr_temp_slope;
-
-  tdrp_bool_t apply_precip_attenuation_correction;
-
-  tdrp_bool_t specify_coefficients_for_attenuation_correction;
-
-  double dbz_attenuation_coefficient;
-
-  double dbz_attenuation_exponent;
-
-  double zdr_attenuation_coefficient;
-
-  double zdr_attenuation_exponent;
-
   atmos_atten_method_t atmos_atten_method;
 
   double atmos_atten_db_per_km;
 
-  clutter_filter_type_t clutter_filter_type;
-
-  double clutter_model_width_in_adaptive_filter;
-
-  double init_notch_width_in_adaptive_filter;
-
-  tdrp_bool_t apply_residue_correction_in_adaptive_filter;
-
-  double min_snr_db_for_residue_correction;
-
-  tdrp_bool_t regression_filter_determine_order_from_cnr;
-
-  int regression_filter_specified_polynomial_order;
-
-  double regression_filter_clutter_width_factor;
-
-  double regression_filter_cnr_exponent;
-
-  double regression_filter_min_cnr_db;
-
-  double regression_filter_min_csr_db;
-
-  notch_interp_method_t regression_filter_notch_interp_method;
-
-  double simple_notch_filter_width_mps;
-
-  tdrp_bool_t use_h_only_for_alt_mode_clutter_vel;
-
   tdrp_bool_t write_alt_mode_vel_debug_fields;
-
-  fir_filter_len_t KDP_fir_filter_len;
-
-  int KDP_n_filt_iterations_unfolded;
-
-  int KDP_n_filt_iterations_conditioned;
-
-  tdrp_bool_t KDP_use_iterative_filtering;
-
-  double KDP_phidp_difference_threshold;
-
-  int KDP_ngates_for_stats;
-
-  double KDP_phidp_sdev_max;
-
-  double KDP_phidp_jitter_max;
-
-  tdrp_bool_t KDP_check_snr;
-
-  double KDP_snr_threshold;
-
-  tdrp_bool_t KDP_check_rhohv;
-
-  double KDP_rhohv_threshold;
-
-  tdrp_bool_t KDP_check_zdr_sdev;
-
-  double KDP_zdr_sdev_max;
-
-  double KDP_min_valid_abs_kdp;
-
-  tdrp_bool_t KDP_debug;
-
-  tdrp_bool_t KDP_write_ray_files;
-
-  char* KDP_ray_files_dir;
-
-  tdrp_bool_t KDP_compute_using_hubbert_bringi_method;
-
-  fir_filter_len_t KDP_HB_fir_filter_len;
-
-  double KDP_HB_phidp_difference_threshold;
-
-  double KDP_HB_phidp_sdev_threshold;
-
-  double KDP_HB_zdr_sdev_threshold;
-
-  double KDP_HB_rhohv_threshold;
 
   tdrp_bool_t use_estimated_noise_for_noise_subtraction;
 
@@ -1086,165 +867,7 @@ public:
 
   double interest_threshold_for_signal;
 
-  tdrp_bool_t change_aiq_sign;
-
-  phase_decoding_t phase_decoding;
-
-  int phase_decoding_ntrips_check;
-
-  int phase_decoding_ntrips_save;
-
-  double phase_decoding_ncp_threshold;
-
-  double phase_decoding_snr_threshold;
-
-  double phase_decoding_notch_width;
-
-  tdrp_bool_t sz1_negate_phase_codes;
-
-  double sz1_strong_to_weak_power_ratio_threshold;
-
-  double sz1_out_of_trip_power_ratio_threshold;
-
-  int sz1_out_of_trip_power_n_replicas;
-
-  tdrp_bool_t sz1_use_regression_filter;
-
-  int cmd_kernel_ngates_tdbz;
-
-  int cmd_kernel_ngates_spin;
-
-  int cmd_kernel_ngates_zdr_sdev;
-
-  int cmd_kernel_ngates_phidp_sdev;
-
-  double cmd_spin_dbz_threshold;
-
-  double cmd_snr_threshold;
-
-  int cpa_median_filter_len;
-
-  tdrp_bool_t cpa_compute_using_alternative;
-
-  double cmd_threshold_for_clutter;
-
-  tdrp_bool_t cmd_check_for_offzero_weather;
-
-  double cmd_threshold_for_offzero_weather;
-
-  double min_snr_for_offzero_weather;
-
-  double notch_width_for_offzero_snr;
-
-  tdrp_bool_t cmd_check_for_windfarm_clutter;
-
-  double min_spectral_snr_for_windfarm_clutter;
-
-  double min_snr_for_windfarm_clutter_check;
-
-  double min_cpa_for_windfarm_clutter_check;
-
-  tdrp_bool_t apply_db_for_db_correction;
-
-  double db_for_db_ratio;
-
-  double db_for_db_threshold;
-
-  tdrp_bool_t apply_cmd_speckle_filter;
-
-  speckle_threshold_t *_cmd_speckle_filter_thresholds;
-  int cmd_speckle_filter_thresholds_n;
-
-  tdrp_bool_t apply_cmd_gap_filter;
-
-  int cmd_gap_filter_len;
-
-  double cmd_gap_filter_threshold;
-
-  tdrp_bool_t apply_nexrad_spike_filter_after_cmd;
-
-  interest_map_point_t *_tdbz_interest_map;
-  int tdbz_interest_map_n;
-
-  double tdbz_interest_weight;
-
-  interest_map_point_t *_spin_interest_map;
-  int spin_interest_map_n;
-
-  double spin_interest_weight;
-
-  double max_of_tdbz_and_spin_interest_weight;
-
-  interest_map_point_t *_cpa_interest_map;
-  int cpa_interest_map_n;
-
-  double cpa_interest_weight;
-
-  interest_map_point_t *_zdr_sdev_interest_map;
-  int zdr_sdev_interest_map_n;
-
-  double zdr_sdev_interest_weight;
-
-  interest_map_point_t *_phidp_sdev_interest_map;
-  int phidp_sdev_interest_map_n;
-
-  double phidp_sdev_interest_weight;
-
-  tdrp_bool_t apply_rhohv_test_in_cmd;
-
-  double rhohv_improv_thresh_for_power;
-
-  double rhohv_improv_thresh_for_vel;
-
-  double rhohv_improv_thresh_for_phase;
-
-  double rhohv_improv_thresh_for_rho;
-
-  tdrp_bool_t run_spectral_cmd;
-
-  clutter_filter_type_t spec_cmd_clutter_filter_type;
-
-  window_t spec_cmd_window_type;
-
-  int spec_cmd_tdbz_kernel_ngates;
-
-  int spec_cmd_tdbz_kernel_nsamples;
-
-  int spec_cmd_sdev_zdr_kernel_ngates;
-
-  int spec_cmd_sdev_zdr_kernel_nsamples;
-
-  int spec_cmd_sdev_phidp_kernel_ngates;
-
-  int spec_cmd_sdev_phidp_kernel_nsamples;
-
-  interest_map_point_t *_spec_cmd_snr_interest_map;
-  int spec_cmd_snr_interest_map_n;
-
-  double spec_cmd_snr_interest_weight;
-
-  interest_map_point_t *_spec_cmd_tdbz_interest_map;
-  int spec_cmd_tdbz_interest_map_n;
-
-  double spec_cmd_tdbz_interest_weight;
-
-  interest_map_point_t *_spec_cmd_zdr_sdev_interest_map;
-  int spec_cmd_zdr_sdev_interest_map_n;
-
-  double spec_cmd_zdr_sdev_interest_weight;
-
-  interest_map_point_t *_spec_cmd_phidp_sdev_interest_map;
-  int spec_cmd_phidp_sdev_interest_map_n;
-
-  double spec_cmd_phidp_sdev_interest_weight;
-
-  double spec_cmd_threshold_for_wtc_detection;
-
-  double spec_cmd_threshold_for_moments;
-
   char* output_fmq_url;
-
-  tdrp_bool_t output_moments_in_radx_format;
 
   int output_fmq_size;
 
@@ -1271,54 +894,6 @@ public:
   output_field_t *_output_fields;
   int output_fields_n;
 
-  tdrp_bool_t use_sweep_info_from_time_series;
-
-  tdrp_bool_t delay_tilt_start_msg_during_ant_trans;
-
-  tdrp_bool_t set_end_of_sweep_when_antenna_changes_direction;
-
-  double required_delta_angle_for_antenna_direction_change;
-
-  int min_rays_in_sweep_for_antenna_direction_change;
-
-  int max_sweeps_in_vol_for_antenna_direction_change;
-
-  tdrp_bool_t use_volume_info_from_time_series;
-
-  tdrp_bool_t set_end_of_vol_from_elev_angle;
-
-  tdrp_bool_t vol_starts_at_bottom;
-
-  double elev_change_for_end_of_vol;
-
-  int min_beams_per_vol;
-
-  tdrp_bool_t set_end_of_vol_on_prf_change;
-
-  tdrp_bool_t set_end_of_vol_on_pulse_width_change;
-
-  transition_method_t transition_method;
-
-  tdrp_bool_t check_transition_from_fixed_angle_error;
-
-  double max_fixed_angle_error_ppi;
-
-  double max_fixed_angle_error_rhi;
-
-  double nsecs_for_antenna_rate;
-
-  tdrp_bool_t interpolate_antenna_angles;
-
-  double angle_interp_max_change;
-
-  int angle_interp_max_queue_size;
-
-  tdrp_bool_t angle_interp_adjust_for_latency;
-
-  double angle_interp_latency;
-
-  tdrp_bool_t angle_interp_debug;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -1326,7 +901,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[305];
+  mutable TDRPtable _table[123];
 
   const char *_className;
 
