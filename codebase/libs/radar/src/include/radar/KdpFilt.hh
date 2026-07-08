@@ -816,6 +816,10 @@ private:
   void _unpackAndFill(const vector<double> &packed,
                       vector<double> &unpacked);
   
+  /// get quality based on rhohv
+
+  double _rhohvQuality(double rhohv);
+  
 };
 
 #endif

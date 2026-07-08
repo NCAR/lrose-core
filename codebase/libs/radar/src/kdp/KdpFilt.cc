@@ -2196,38 +2196,41 @@ void KdpFilt::_fftFilter()
 
   _fillPhidpMissingGates();
 
-  // create complex array for phidp180
+  // create complex array for phidp
+  // pad out to avoid ringing at extremities
 
-  vector<RadarComplex_t> phiComplex;
-  phiComplex.resize(_nGates);
+  int nGatesPad = 20;
+  int nGatesFft = _nGates + nGatesPad * 2;
+  vector<RadarComplex_t> phiComplex_;
+  phiComplex_.resize(nGatesFft);
+  RadarComplex_t *phiComplex = phiComplex_.data() + nGatesPad;
   for (int igate = 0; igate < _nGates; igate++) {
     RadarComplex::setFromDegrees(_phidpUnfold[igate], phiComplex[igate]);
   }
-
-  // set invalid gates to {0, 0} to pad complex numbers
-
-#ifdef NOTYET
-  for (size_t ii = 0; ii < _gapRuns.size(); ii++) {
-    const PhidpRun &run = _gapRuns[ii];
-    for (int jj = run.ibegin; jj <= run.iend; jj++) {
-      phiComplex[jj].re = 0.0;
-      phiComplex[jj].im = 0.0;
-    }
-  } // ii
-#endif
+  for (int igate = 0; igate < nGatesPad; igate++) {
+    phiComplex[-1 - igate] = phiComplex[0];
+    phiComplex[_nGates + igate] = phiComplex[_nGates - 1];
+  }
+  // for (int igate = 0; igate < _nGates; igate++) {
+  //   double rhohvQual = _rhohvQuality(_rhohv[igate]);
+  //   double sinVal, cosVal;
+  //   ta_sincos(_phidpUnfold[igate] * DEG_TO_RAD, &sinVal, &cosVal);
+  //   phiComplex[igate].re = cosVal * rhohvQual;
+  //   phiComplex[igate].im = sinVal * rhohvQual;
+  // }
 
   // perform forward FFT
-
+  
   assert(_nGates > 0);
   assert(_gateSpacingKm > 0.0);
   assert(_phidp == _phidp_.data());
   assert(_phidpFilt == _phidpFilt_.data());
   assert(_phidpFftFilt == _phidpFftFilt_.data());
   
-  vector<RadarComplex_t> phiSpec;
-  phiSpec.resize(_nGates);
-  _fft.init(_nGates);
-  _fft.fwd(phiComplex.data(), phiSpec.data());
+  vector<RadarComplex_t> phiSpec_;
+  phiSpec_.resize(nGatesFft);
+  _fft.init(nGatesFft);
+  _fft.fwd(phiComplex_.data(), phiSpec_.data());
   
   // determine cutoff
   
@@ -2236,19 +2239,19 @@ void KdpFilt::_fftFilter()
 
   // apply filter
   
-  for (int kk = 0; kk < _nGates; ++kk) {
+  for (int kk = 0; kk < nGatesFft; ++kk) {
     // FFT bin interpreted as signed frequency index
-    int kk_signed = (kk <= _nGates / 2) ? kk : kk - _nGates;
-    double f = std::abs(kk_signed) / (_nGates * _gateSpacingKm);  // cycles/km
+    int kk_signed = (kk <= nGatesFft / 2) ? kk : kk - nGatesFft;
+    double f = std::abs(kk_signed) / (nGatesFft * _gateSpacingKm);  // cycles/km
     if (f > f_cut) {
-      phiSpec[kk].re = 0.0;
-      phiSpec[kk].im = 0.0;
+      phiSpec_[kk].re = 0.0;
+      phiSpec_[kk].im = 0.0;
     }
   }
   
   // perform inverse FFT
   
-  _fft.inv(phiSpec.data(), phiComplex.data());
+  _fft.inv(phiSpec_.data(), phiComplex_.data());
 
   // compute the filtered PHIDP
 
@@ -2365,3 +2368,25 @@ void KdpFilt::_unpackAndFill(const vector<double> &packed,
 
 }
 
+////////////////////////////////////////////////////////////
+/// get quality based on rhohv
+
+double KdpFilt::_rhohvQuality(double rhohv)
+{
+
+  constexpr double rho0 = 0.90;
+  constexpr double rho1 = 0.98;
+  constexpr double smallVal = 0.00001;
+  
+
+  if (!std::isfinite(rhohv) || rhohv == _missingValue || rhohv < rho0) {
+    return smallVal;
+  }
+  if (rhohv >= rho1) return 1.0;
+  
+  const double x = (rhohv - rho0) / (rho1 - rho0);
+  
+  // Smoothstep: zero slope at both ends
+  return x * x * (3.0 - 2.0 * x);
+  
+}
