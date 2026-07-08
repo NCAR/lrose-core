@@ -43,6 +43,7 @@ REQUIRED_COLUMNS = [
     "zdrCorrected",
     "regrFilt",
     "phidpFftFilt",
+    "phidpFftCond",
 ]
 
 
@@ -241,11 +242,12 @@ class KdpRayPlotter:
         self.ax2.plot(gate_num, valid_kdp2, "k:", label="validKdp")
         self.ax2.plot(gate_num, valid_unfold2, "b:", label="validUnfold")
         self.ax2.plot(gate_num, self.data["phidpUnfold"], label="unfolded", color="green")
-        self.ax2.plot(gate_num, self.data["phidpMeanUnfold"], label="meanUnfolded", color="cyan")
+        # self.ax2.plot(gate_num, self.data["phidpMeanUnfold"], label="meanUnfolded", color="cyan")
         self.ax2.plot(gate_num, self.data["phidpFilt"], label="Filt", color="red")
         self.ax2.plot(gate_num, self.data["phidpCondFilt"], label="CondFilt", color="black")
-        #self.ax2.plot(gate_num, self.data["regrFilt"], label="RegrFilt", color="magenta")
+        #self.ax2.plot(gate_num, self.data["regrFilt"], label="RegrFilt", color="cyan")
         self.ax2.plot(gate_num, self.data["phidpFftFilt"], label="FftFilt", color="magenta")
+        self.ax2.plot(gate_num, self.data["phidpFftCond"], label="FftCond", color="cyan")
         self.ax2.plot(gate_num, self.data["phidpSdev"], label="Sdev", color="pink")
         self.ax2.plot(gate_num, self.data["phidpJitter"], label="Jitter", color="orange")
         legend2 = self.ax2.legend(loc="upper right")

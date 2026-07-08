@@ -129,6 +129,15 @@ public:
   }
 
   /**
+   * Set number of gates, and padding
+   */
+
+  void setNGates(int n) {
+    _nGates = n;
+    _nGatesPadded = _nGates + 2 * _nGatesPad;
+  }
+
+  /**
    * Set number of gates for computing phidp stats
    * default is 9
    * @param[in] number of gates for stats
@@ -487,6 +496,8 @@ private:
   int _nGatesStats;     /**< n gates for computing phidp stats
                          * default is 9 */
   int _nGatesStatsHalf; /**< half of _nGatesPhidpStats, truncated */
+  int _nGatesPad;       /**< padding at each end for regr and fft filters */
+  int _nGatesPadded;    /**< gates including padding */
   
   // option to limit max range
   // can be useful to avoid including the test pulse
@@ -601,9 +612,6 @@ private:
   vector<double> _phidp_;
   double *_phidp;
   
-  vector<double> _phidpFftFilt_;
-  double *_phidpFftFilt;
-  
   vector<double> _phidpMean_;
   double *_phidpMean;
   
@@ -664,6 +672,12 @@ private:
   vector<double> _zdrCorrected_;
   double *_zdrCorrected;
 
+  vector<double> _phidpFftFilt_;
+  double *_phidpFftFilt;
+  
+  vector<double> _phidpFftCond_;
+  double *_phidpFftCond;
+  
   vector<double> _regrFilt_;
   double *_regrFilt;
   
@@ -735,10 +749,6 @@ private:
   // compute regression-filtered phidp
   
   void _computePhidpRegrFilt();
-  void _computePhidpRegrFilt2();
-  void _computePhidpRegrFilt3();
-  void _computePhidpWtRegrFilt();
-  void _computeRegrFiltValidRun(int runNum);
 
   // worker methods
   
@@ -753,6 +763,7 @@ private:
   double _getFirFilterGain();
   void _computeDbzMax();
   void _computePhidpConditioned();
+  void _computeFftConditioned();
 
   /// Compute the folding range by inspecting the phidp data
 

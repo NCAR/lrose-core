@@ -160,7 +160,8 @@ KdpFilt::KdpFilt()
   _nFiltIterUnfolded = 2;
   _nFiltIterCond = 4;
 
-  _nGates = 0;
+  _nGatesPad = 21;
+  setNGates(0);
   setNGatesStats(9);
 
   _limitMaxRange = false;
@@ -380,7 +381,7 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
 void KdpFilt::initializeArrays(int nGates)
 
 {
-  _nGates = nGates;
+  setNGates(nGates);
   _initArrays(NULL, NULL, NULL, NULL, NULL, _nGates);
 }
 
@@ -468,7 +469,7 @@ int KdpFilt::compute(time_t timeSecs,
 
   // set number of gates
 
-  _nGates = nGates;
+  setNGates(nGates);
 
   // initialize the data arrays
   
@@ -510,8 +511,7 @@ int KdpFilt::compute(time_t timeSecs,
 
   // compute phidp filtered with regression filter
   
-  // _computePhidpWtRegrFilt();
-  _computePhidpRegrFilt2();
+  _computePhidpRegrFilt();
 
   // compute phase shift on backscatter as the difference between
   // measured and filtered phidp
@@ -580,7 +580,7 @@ int KdpFilt::computePhidpStats(int nGates,
 
   // set number of gates
 
-  _nGates = nGates;
+  setNGates(nGates);
 
   // initialize the data arrays
   
@@ -659,7 +659,6 @@ void KdpFilt::_initArrays(const double *snr,
   _zdrMedian_.resize(_nGates); _zdrMedian = _zdrMedian_.data();
   _rhohv_.resize(_nGates); _rhohv = _rhohv_.data();
   _phidp_.resize(_nGates); _phidp = _phidp_.data();
-  _phidpFftFilt_.resize(_nGates); _phidpFftFilt = _phidpFftFilt_.data();
   _phidpMean_.resize(_nGates); _phidpMean = _phidpMean_.data();
   _phidpMeanValid_.resize(_nGates); _phidpMeanValid = _phidpMeanValid_.data();
   _phidpSdev_.resize(_nGates); _phidpSdev = _phidpSdev_.data();
@@ -681,8 +680,10 @@ void KdpFilt::_initArrays(const double *snr,
   _dbzCorrected_.resize(_nGates); _dbzCorrected = _dbzCorrected_.data();
   _zdrCorrected_.resize(_nGates); _zdrCorrected = _zdrCorrected_.data();
   _gateStates_.resize(_nGates); _gateStates = _gateStates_.data();
+  _phidpFftFilt_.resize(_nGates); _phidpFftFilt = _phidpFftFilt_.data();
+  _phidpFftCond_.resize(_nGates); _phidpFftCond = _phidpFftCond_.data();
   _regrFilt_.resize(_nGates); _regrFilt = _regrFilt_.data();
-  _xxVals_.resize(_nGates); _xxVals = _xxVals_.data();
+  _xxVals_.resize(_nGatesPadded); _xxVals = _xxVals_.data();
   
   // copy data to working arrays
 
@@ -757,11 +758,9 @@ void KdpFilt::_initArrays(const double *snr,
   
   // initialize computed arrays
 
-  double xxDelta = 1.0 / (double) _nGates;
   for (int ii = 0; ii < _nGates; ii++) {
     _zdrSdev[ii] = _missingValue;
     _phidpMean[ii] = _missingValue;
-    _phidpFftFilt[ii] = _missingValue;
     _phidpMeanValid[ii] = _missingValue;
     _phidpJitter[ii] = _missingValue;
     _phidpSdev[ii] = _missingValue;
@@ -787,8 +786,15 @@ void KdpFilt::_initArrays(const double *snr,
     _dbzAttenCorr[ii] = 0;
     _zdrAttenCorr[ii] = 0;
     _regrFilt[ii] = _missingValue;
+    _phidpFftFilt[ii] = _missingValue;
+    _phidpFftCond[ii] = _missingValue;
+  }
+  
+  double xxDelta = 1.0 / (double) _nGatesPadded;
+  for (int ii = 0; ii < _nGatesPadded; ii++) {
     _xxVals[ii] = -0.5 + ii * xxDelta;
   }
+  
   
 }
 
@@ -1027,6 +1033,10 @@ void KdpFilt::_computeKdp()
 
   }
   
+  // compute fft-filtered phidp conditioned to remove phase shift on backscatter
+  
+  _computeFftConditioned();
+    
   // compute KDP as slope between successive gates
 
   _loadKdp();
@@ -1046,9 +1056,8 @@ void KdpFilt::_computePhidpRegrFilt()
 
   // compute regression order to be used
 
-  int nGates = _getNGatesMaxValid();
-  double maxRangeKm = nGates * _gateSpacingKm + _startRangeKm;
-  int polyOrder = floor(maxRangeKm / _phidpFeatureLengthKm) + 2;
+  double deltaRangeKm = _nGatesPadded * _gateSpacingKm;
+  int polyOrder = floor(deltaRangeKm / _phidpFeatureLengthKm) + 2;
   if (polyOrder < 5) {
     polyOrder = 5;
   }
@@ -1057,156 +1066,26 @@ void KdpFilt::_computePhidpRegrFilt()
   
   ForsytheFit fit;
   fit.prepareForFit(polyOrder, _xxVals_);
-
-  // perform the polynomial fit on unfolded phidp
   
-  fit.performFit(_phidpUnfold_);
-  vector<double> smoothed = fit.getYEstVector();
-  for (int ii = 0; ii < nGates; ii++) {
-    // _regrFilt[ii] = _phidpUnfold[ii] - smoothed[ii];
-    _regrFilt[ii] = smoothed[ii];
+  // perform the polynomial fit on unfolded phidp
+
+  vector<double> phiRegr_;
+  phiRegr_.resize(_nGatesPadded);
+  double *phiRegr = phiRegr_.data() + _nGatesPad;
+  for (int igate = 0; igate < _nGates; igate++) {
+    phiRegr[igate] = _phidpUnfold[igate];
+  }
+  for (int igate = 0; igate < _nGatesPad; igate++) {
+    phiRegr[-1 - igate] = phiRegr[0];
+    phiRegr[_nGates + igate] = phiRegr[_nGates - 1];
   }
   
-}
-
-void KdpFilt::_computePhidpRegrFilt2()
-
-{
-
-  // initialize
-
+  fit.performFit(phiRegr_);
+  vector<double> smoothed = fit.getYEstVector();
   for (int ii = 0; ii < _nGates; ii++) {
-    _regrFilt[ii] = _phidpMeanUnfold[ii];
-  }
-
-  // filter each valid run
-  
-  for (size_t irun = 0; irun < _validRuns.size(); irun++) {
-    _computeRegrFiltValidRun(irun);
+    _regrFilt[ii] = smoothed[ii + _nGatesPad];
   }
   
-}
-
-void KdpFilt::_computePhidpRegrFilt3()
-
-{
-
-  // compute regression order to be used
-
-  int nGates = _getNGatesMaxValid();
-  double maxRangeKm = nGates * _gateSpacingKm + _startRangeKm;
-  int polyOrder = floor(maxRangeKm / _phidpFeatureLengthKm) + 2;
-  if (polyOrder < 5) {
-    polyOrder = 5;
-  }
-  
-  // find the entry in the forsythe array, if possible
-
-  nasapolyfit::FitResult res = nasapolyfit::fitPolynomial(_xxVals_, _phidpUnfold_, polyOrder);
-  for (int ii = 0; ii < nGates; ii++) {
-    _regrFilt[ii] = nasapolyfit::evaluatePolynomial(res.coeffs, _xxVals_[ii]);
-  }
-  
-}
-
-/////////////////////////////////////////////////
-// compute phidp filtered with regression filter
-// weighted by rhohv
-
-void KdpFilt::_computePhidpWtRegrFilt()
-
-{
-
-  // compute regression order to be used
-
-  int nGates = _getNGatesMaxValid();
-  double maxRangeKm = nGates * _gateSpacingKm + _startRangeKm;
-  int polyOrder = floor(maxRangeKm / _phidpFeatureLengthKm) + 2;
-  if (polyOrder < 5) {
-    polyOrder = 5;
-  }
-
-  // compute weighted phidp and x data
-
-  vector<double> xxValsWt(nGates);
-  vector<double> phidpUnfoldWt(nGates);
-
-  // double rho0 = 0.85;
-  
-  for (int ii = 0; ii < nGates; ii++) {
-
-    // double rhohv = _rhohv[ii];
-    // double wt = sqrt(rhohv);
-    double wt = 1.0;
-    
-    // double wt = 1.0;
-    // if (rhohv <= rho0) {
-    //   wt = 0.0;
-    // } else {
-    //   wt = sqrt((rhohv - rho0) / (1.0 - rho0));
-    // }
-
-    xxValsWt[ii] = _xxVals[ii] * wt;
-    phidpUnfoldWt[ii] = _phidpUnfold[ii] * wt; 
-    
-  } // ii
-  
-  // find the entry in the forsythe array, if possible
-  
-  ForsytheFit fit;
-  fit.prepareForFit(polyOrder, xxValsWt);
-    
-  // perform the polynomial fit on unfolded phidp
-  
-  fit.performFit(phidpUnfoldWt);
-  vector<double> smoothed = fit.getYEstVector();
-  for (int ii = 0; ii < nGates; ii++) {
-    // _regrFilt[ii] = _phidpUnfold[ii] - smoothed[ii];
-    _regrFilt[ii] = smoothed[ii];
-  }
-  
-}
-
-///////////////////////////////////////////////////////
-// run regression filter on a valid run
-
-void KdpFilt::_computeRegrFiltValidRun(int runNum)
-
-{
-
-  const PhidpRun &run = _validRuns[runNum];
-  
-  // compute regression order to be used
-
-  int nGates = run.iend - run.ibegin;
-  double dRangeKm = nGates * _gateSpacingKm;
-  int polyOrder = floor(dRangeKm / _phidpFeatureLengthKm) + 2;
-  if (polyOrder < 5) {
-    polyOrder = 5;
-  }
-  
-  // prepare for the fit
-  
-  ForsytheFit fit;
-  vector<double> xx;
-  for (int ii = run.ibegin; ii <= run.iend; ii++) {
-    xx.push_back(_xxVals_[ii]);
-  }
-  fit.prepareForFit(polyOrder, xx);
-  
-  // perform the polynomial fit on unfolded phidp
-  
-  vector<double> phidp;
-  for (int ii = run.ibegin; ii <= run.iend; ii++) {
-    phidp.push_back(_phidpMeanUnfold_[ii]);
-  }
-  fit.performFit(phidp);
-
-  vector<double> smoothed = fit.getYEstVector();
-  for (int ii = run.ibegin; ii <= run.iend; ii++) {
-    _regrFilt[ii] = smoothed[ii - run.ibegin];
-  }
-
 }
 
 /////////////////////////////////////////////
@@ -1298,7 +1177,8 @@ void KdpFilt::_loadKdp()
     if (len < 1) {
       _kdp[ii] = 0;
     } else {
-      double dphi = _phidpCondFilt[i1] - _phidpCondFilt[i0];
+      // double dphi = _phidpCondFilt[i1] - _phidpCondFilt[i0];
+      double dphi = _phidpFftCond[i1] - _phidpFftCond[i0];
       _kdp[ii] = (dphi / (_gateSpacingKm * len)) / 2.0;
     }
 
@@ -1440,7 +1320,7 @@ void KdpFilt::_computePhidpConditioned()
     PhidpRun &run = _validRuns[irun];
     run.phidpBegin = _phidpMeanUnfold[run.ibegin];
     run.phidpEnd = _phidpMeanUnfold[run.iend];
-
+    
     // find the regions where phidp increases and then comes down again
 
     bool increasing = false;
@@ -1536,6 +1416,136 @@ void KdpFilt::_computePhidpConditioned()
               cerr << "EEEEEE val, igate: " << val << ", " << igate << endl;
             for (int jgate = prevBotIndex + 1; jgate < igate; jgate++) {
               _phidpCond[jgate] = prevBotVal;
+            } // jgate
+            break;
+          }
+        } // igate
+      }
+
+      prevBotIndex = botIndex;
+      
+    } // ii
+
+  } // irun
+
+}
+  
+/////////////////////////////////////////////////////////////////////////////////
+// compute fft-filtered phidp conditioned to remove phase shift on backscatter
+
+void KdpFilt::_computeFftConditioned()
+
+{
+
+  bool debug = false;
+
+  // loop through the valid runs
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    _phidpFftCond[igate] = _phidpFftFilt[igate];
+  }
+  
+  for (size_t irun = 0; irun < _validRuns.size(); irun++) {
+
+    PhidpRun &run = _validRuns[irun];
+    run.phidpBegin = _phidpMeanUnfold[run.ibegin];
+    run.phidpEnd = _phidpMeanUnfold[run.iend];
+    
+    // find the regions where phidp increases and then comes down again
+
+    bool increasing = false;
+    bool decreasing = false;
+    double prevDiff = 0.0;
+    
+    int topIndex = -1;
+    int botIndex = -1;
+    
+    vector<int> topIndices;
+    vector<int> botIndices;
+    
+    for (int igate = run.ibegin + 1; igate <= run.iend; igate++) {
+    
+      double diff = _phidpFftFilt[igate] - _phidpFftFilt[igate-1];
+      
+      // look for increasing trend
+      
+      if (diff > 0 && prevDiff > 0) {
+        if (!increasing) {
+          botIndex = igate - 2;
+          increasing = true;
+          if (topIndex > 0) {
+            topIndices.push_back(topIndex);
+            botIndices.push_back(botIndex);
+          }
+        }
+      } else {
+        increasing = false;
+      }
+      
+      // look for decreasing trend
+      
+      if (diff < 0 && prevDiff < 0) {
+        if (!decreasing) {
+          topIndex = igate - 2;
+          decreasing = true;
+        }
+      } else {
+        decreasing = false;
+      }
+      
+      prevDiff = diff;
+      
+    } // igate
+    
+    // for each bot index, look back for the previous location at
+    // the same value
+    
+    int prevBotIndex = 0;
+    for (size_t ii = 0; ii < botIndices.size(); ii++) {
+      
+      if (debug)
+        cerr << "----------------------------------------" << endl;
+      
+      // look back for the point where the phidp value
+      // drops below the bottom value
+      int botIndex = botIndices[ii];
+      double botVal = _phidpFftFilt[botIndex];
+      bool matchFound = false;
+      
+      if (debug)
+        cerr << "DDDDDDD prevBotIndex, botIndex, botVal: "
+             << prevBotIndex << ", " << botIndex << ", " << botVal << endl;
+      
+      for (int igate = topIndices[ii]; igate >= prevBotIndex; igate--) {
+        double val = _phidpFftFilt[igate];
+        if (val < botVal) {
+          if (debug)
+            cerr << "CCCCCCC val, igate: " << val << ", " << igate << endl;
+          for (int jgate = igate + 1; jgate < botIndices[ii]; jgate++) {
+            _phidpFftCond[jgate] = botVal;
+          } // jgate
+          matchFound = true;
+          break;
+        }
+      } // igate
+      
+      if (debug)
+        cerr << "FFFFFFF matchFound: " << matchFound << endl;
+      
+      if (!matchFound && prevBotIndex > 0) {
+        // did not find a value below the bottom value
+        // so move forward instead
+        double prevBotVal = _phidpFftFilt[prevBotIndex];
+        if (debug)
+          cerr << "HHHHHHH prevBotIndex, prevBotVal: "
+               << prevBotIndex << ", " << prevBotVal << endl;
+        for (int igate = prevBotIndex + 1; igate <= botIndex; igate++) {
+          double val = _phidpFftFilt[igate];
+          if (val <= prevBotVal) {
+            if (debug)
+              cerr << "EEEEEE val, igate: " << val << ", " << igate << endl;
+            for (int jgate = prevBotIndex + 1; jgate < igate; jgate++) {
+              _phidpFftCond[jgate] = prevBotVal;
             } // jgate
             break;
           }
@@ -1996,7 +2006,7 @@ void KdpFilt::_writeRayDataToFile()
           "phidpMeanUnfold phidpUnfold phidpFilt phidpCond phidpCondFilt "
           "zdrSdev psob kdp "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected "
-          "regrFilt phidpFftFilt\n");
+          "regrFilt phidpFftFilt phidpFftCond\n");
 
   // write data
 
@@ -2017,7 +2027,7 @@ void KdpFilt::_writeRayDataToFile()
             "%3d %3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
             (_validForUnfold[igate]?1:0),
@@ -2043,7 +2053,8 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(dbzCorrected, 0),
             _getPlotVal(zdrCorrected, 0),
             _getPlotVal(_regrFilt[igate], 0),
-            _getPlotVal(_phidpFftFilt[igate], 0)
+            _getPlotVal(_phidpFftFilt[igate], 0),
+            _getPlotVal(_phidpFftCond[igate], 0)
             );
   }
   
@@ -2199,50 +2210,34 @@ void KdpFilt::_fftFilter()
   // create complex array for phidp
   // pad out to avoid ringing at extremities
 
-  int nGatesPad = 20;
-  int nGatesFft = _nGates + nGatesPad * 2;
   vector<RadarComplex_t> phiComplex_;
-  phiComplex_.resize(nGatesFft);
-  RadarComplex_t *phiComplex = phiComplex_.data() + nGatesPad;
+  phiComplex_.resize(_nGatesPadded);
+  RadarComplex_t *phiComplex = phiComplex_.data() + _nGatesPad;
   for (int igate = 0; igate < _nGates; igate++) {
-    RadarComplex::setFromDegrees(_phidpUnfold[igate], phiComplex[igate]);
+    RadarComplex::setFromDegrees(_phidpMeanUnfold[igate], phiComplex[igate]);
   }
-  for (int igate = 0; igate < nGatesPad; igate++) {
+  for (int igate = 0; igate < _nGatesPad; igate++) {
     phiComplex[-1 - igate] = phiComplex[0];
     phiComplex[_nGates + igate] = phiComplex[_nGates - 1];
   }
-  // for (int igate = 0; igate < _nGates; igate++) {
-  //   double rhohvQual = _rhohvQuality(_rhohv[igate]);
-  //   double sinVal, cosVal;
-  //   ta_sincos(_phidpUnfold[igate] * DEG_TO_RAD, &sinVal, &cosVal);
-  //   phiComplex[igate].re = cosVal * rhohvQual;
-  //   phiComplex[igate].im = sinVal * rhohvQual;
-  // }
-
+  
   // perform forward FFT
   
-  assert(_nGates > 0);
-  assert(_gateSpacingKm > 0.0);
-  assert(_phidp == _phidp_.data());
-  assert(_phidpFilt == _phidpFilt_.data());
-  assert(_phidpFftFilt == _phidpFftFilt_.data());
-  
   vector<RadarComplex_t> phiSpec_;
-  phiSpec_.resize(nGatesFft);
-  _fft.init(nGatesFft);
+  phiSpec_.resize(_nGatesPadded);
+  _fft.init(_nGatesPadded);
   _fft.fwd(phiComplex_.data(), phiSpec_.data());
   
   // determine cutoff
   
   const double f_cut = 1.0 / _phidpFeatureLengthKm;  // cycles/km
-  // const double f_cut = 1.0 / 4.0;  // cycles/km
 
   // apply filter
   
-  for (int kk = 0; kk < nGatesFft; ++kk) {
+  for (int kk = 0; kk < _nGatesPadded; ++kk) {
     // FFT bin interpreted as signed frequency index
-    int kk_signed = (kk <= nGatesFft / 2) ? kk : kk - nGatesFft;
-    double f = std::abs(kk_signed) / (nGatesFft * _gateSpacingKm);  // cycles/km
+    int kk_signed = (kk <= _nGatesPadded / 2) ? kk : kk - _nGatesPadded;
+    double f = std::abs(kk_signed) / (_nGatesPadded * _gateSpacingKm);  // cycles/km
     if (f > f_cut) {
       phiSpec_[kk].re = 0.0;
       phiSpec_[kk].im = 0.0;
