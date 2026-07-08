@@ -1412,7 +1412,7 @@ typedef struct iwrf_pulse_header {
 
   fl32 tx_phase_deg; /** phase on transmit - for phase-coded ops */
 
-  si32 block_num; /** pulse block number */ 
+  si32 block_id; /** pulse block ID */ 
 
   si32 unused[4];
 
