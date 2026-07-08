@@ -40,6 +40,7 @@
 #define KdpFilt_hh
 
 #include <radar/KdpFiltParams.hh>
+#include <radar/RadarFft.hh>
 #include <rapmath/ForsytheFit.hh>
 #include <string>
 #include <vector>
@@ -570,9 +571,6 @@ private:
   // arrays for input and computed data
   // and pointers to those arrays
 
-  int _arrayExtra;
-  int _arrayLen;
-  
   bool _snrAvailable;
   vector<double> _snr_;
   double *_snr;
@@ -602,12 +600,6 @@ private:
 
   vector<double> _phidp_;
   double *_phidp;
-  
-  vector<double> _phidp180_;
-  double *_phidp180;
-  
-  vector<double> _phidp180Filt_;
-  double *_phidp180Filt;
   
   vector<double> _phidpFftFilt_;
   double *_phidpFftFilt;
@@ -706,6 +698,10 @@ private:
   // nominal length of a feature in PHIDP
 
   double _phidpFeatureLengthKm;
+
+  // FFT for filtering
+  
+  RadarFft _fft;
   
   //////////////////////////////////////////
   // methods

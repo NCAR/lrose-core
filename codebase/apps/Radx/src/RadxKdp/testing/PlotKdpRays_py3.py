@@ -42,8 +42,6 @@ REQUIRED_COLUMNS = [
     "dbzCorrected",
     "zdrCorrected",
     "regrFilt",
-    "phidp180",
-    "phidp180Filt",
     "phidpFftFilt",
 ]
 
@@ -242,8 +240,9 @@ class KdpRayPlotter:
         self.ax2.set_title(az_str, fontsize=12)
         self.ax2.plot(gate_num, valid_kdp2, "k:", label="validKdp")
         self.ax2.plot(gate_num, valid_unfold2, "b:", label="validUnfold")
-        self.ax2.plot(gate_num, self.data["phidpMeanUnfold"], label="meanUnfolded")
-        self.ax2.plot(gate_num, self.data["phidpFilt"], label="Filt")
+        self.ax2.plot(gate_num, self.data["phidpUnfold"], label="unfolded", color="green")
+        self.ax2.plot(gate_num, self.data["phidpMeanUnfold"], label="meanUnfolded", color="cyan")
+        self.ax2.plot(gate_num, self.data["phidpFilt"], label="Filt", color="red")
         self.ax2.plot(gate_num, self.data["phidpCondFilt"], label="CondFilt", color="black")
         #self.ax2.plot(gate_num, self.data["regrFilt"], label="RegrFilt", color="magenta")
         self.ax2.plot(gate_num, self.data["phidpFftFilt"], label="FftFilt", color="magenta")
@@ -263,6 +262,7 @@ class KdpRayPlotter:
         self.ax3.plot(gate_num, valid_unfold3, "b:", label="validUnfold")
         self.ax3.plot(gate_num, self.data["psob"], label="psob", color="orange")
         self.ax3.plot(gate_num, self.data["kdp"], label="KDP", color="red")
+        self.ax3.plot(gate_num, self.data["rhohv"], label="RHOHV", color="green")
         legend3 = self.ax3.legend(loc="upper left")
         for label in legend3.get_texts():
             label.set_fontsize("small")
@@ -272,8 +272,8 @@ class KdpRayPlotter:
         self.ax4.set_title(az_str, fontsize=12)
         self.ax4.plot(gate_num, valid_kdp2, "k:", label="validKdp")
         self.ax4.plot(gate_num, valid_unfold2, "b:", label="validUnfold")
-        self.ax4.plot(gate_num, self.data["phidp180"], label="phidp180")
-        self.ax4.plot(gate_num, self.data["phidp180Filt"], label="phidp180Filt")
+        self.ax4.plot(gate_num, self.data["phidp"], label="phidp")
+        self.ax4.plot(gate_num, self.data["phidpFftFilt"], label="phidpFftFilt")
         legend2 = self.ax4.legend(loc="upper right")
         for label in legend2.get_texts():
             label.set_fontsize("small")
