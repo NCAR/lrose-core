@@ -83,17 +83,13 @@ public:
 
   typedef enum {
     PLATFORM_FIXED = 1,
-    PLATFORM_VEHICLE = 2,
-    PLATFORM_SHIP = 3,
     PLATFORM_AIRCRAFT = 4,
     PLATFORM_AIRCRAFT_FORE = 5,
     PLATFORM_AIRCRAFT_AFT = 6,
     PLATFORM_AIRCRAFT_TAIL = 7,
     PLATFORM_AIRCRAFT_BELLY = 8,
     PLATFORM_AIRCRAFT_ROOF = 9,
-    PLATFORM_AIRCRAFT_NOSE = 10,
-    PLATFORM_SATELLITE_ORBIT = 11,
-    PLATFORM_SATELLITE_GEOSTAT = 12
+    PLATFORM_AIRCRAFT_NOSE = 10
   } platform_type_t;
 
   typedef enum {
@@ -200,8 +196,6 @@ public:
     char* cal_dir;
     tdrp_bool_t check_xmit_rcv_mode;
     xmit_rcv_mode_t xmit_rcv_mode;
-    double zdr_correction_db;
-    double system_phidp_deg;
   } pulse_width_cal_t;
 
   typedef struct {
@@ -544,8 +538,6 @@ public:
 
   tdrp_bool_t compute_prt_from_interpulse_periods;
 
-  tdrp_bool_t change_velocity_sign_staggered;
-
   double nsecs_for_antenna_rate;
 
   platform_type_t platform_type;
@@ -565,12 +557,6 @@ public:
   double radar_longitude_deg;
 
   double radar_altitude_meters;
-
-  tdrp_bool_t override_gate_geometry;
-
-  double gate_spacing_meters;
-
-  double start_range_meters;
 
   dwell_method_t dwell_method;
 
@@ -614,8 +600,6 @@ public:
   int pulse_width_cals_n;
 
   int cal_recheck_period;
-
-  tdrp_bool_t use_cal_from_time_series;
 
   tdrp_bool_t override_cal_dbz_correction;
 
@@ -723,7 +707,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[113];
+  mutable TDRPtable _table[108];
 
   const char *_className;
 

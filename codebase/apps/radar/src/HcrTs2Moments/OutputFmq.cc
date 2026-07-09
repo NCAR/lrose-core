@@ -214,15 +214,6 @@ int OutputFmq::_writePlatformRadx(const Beam &beam)
   platform.setInstrumentType(Radx::INSTRUMENT_TYPE_RADAR);
 
   switch (_params.platform_type) {
-    case Params::PLATFORM_VEHICLE:
-      platform.setPlatformType(Radx::PLATFORM_TYPE_VEHICLE);
-      break;
-    case Params::PLATFORM_SHIP:
-      platform.setPlatformType(Radx::PLATFORM_TYPE_SHIP);
-      break;
-    case Params::PLATFORM_AIRCRAFT:
-      platform.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT);
-      break;
     case Params::PLATFORM_AIRCRAFT_FORE:
       platform.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_FORE);
       break;
@@ -241,15 +232,9 @@ int OutputFmq::_writePlatformRadx(const Beam &beam)
     case Params::PLATFORM_AIRCRAFT_NOSE:
       platform.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_NOSE);
       break;
-    case Params::PLATFORM_SATELLITE_ORBIT:
-      platform.setPlatformType(Radx::PLATFORM_TYPE_SATELLITE_ORBIT);
-      break;
-    case Params::PLATFORM_SATELLITE_GEOSTAT:
-      platform.setPlatformType(Radx::PLATFORM_TYPE_SATELLITE_GEOSTAT);
-      break;
-    case Params::PLATFORM_FIXED:
+    case Params::PLATFORM_AIRCRAFT:
     default:
-      platform.setPlatformType(Radx::PLATFORM_TYPE_FIXED);
+      platform.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT);
   }
 
   switch (_params.primary_axis) {

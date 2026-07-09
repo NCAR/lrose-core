@@ -781,18 +781,6 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'change_velocity_sign_staggered'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("change_velocity_sign_staggered");
-    tt->descr = tdrpStrDup("Option to change the sign of the velocity in staggered mode.");
-    tt->help = tdrpStrDup("If true, the sign of the velocity will be changed only in staggered mode. Both this and the 'change_velocity_sign' parameter in moments_params will be applied, so if both are true they will cancel out.");
-    tt->val_offset = (char *) &change_velocity_sign_staggered - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'nsecs_for_antenna_rate'
     // ctype is 'double'
     
@@ -821,37 +809,29 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("platform_type");
     tt->descr = tdrpStrDup("Set the platform type.");
-    tt->help = tdrpStrDup("\tPLATFORM_FIXED  - radar is in a fixed location\n\tPLATFORM_VEHICLE - radar is mounted on a land vehicle\n\tPLATFORM_SHIP - radar is mounted on a ship\n\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA, HCR\n\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n\tPLATFORM_SATELLITE_ORBIT - orbiting satellite\n\tPLATFORM_SATELLITE_GEOSTAT - geostationary satellite\n");
+    tt->help = tdrpStrDup("\tPLATFORM_FIXED  - radar is in a fixed location\n\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA, HCR\n\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n");
     tt->val_offset = (char *) &platform_type - &_start_;
     tt->enum_def.name = tdrpStrDup("platform_type_t");
-    tt->enum_def.nfields = 12;
+    tt->enum_def.nfields = 8;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("PLATFORM_FIXED");
       tt->enum_def.fields[0].val = PLATFORM_FIXED;
-      tt->enum_def.fields[1].name = tdrpStrDup("PLATFORM_VEHICLE");
-      tt->enum_def.fields[1].val = PLATFORM_VEHICLE;
-      tt->enum_def.fields[2].name = tdrpStrDup("PLATFORM_SHIP");
-      tt->enum_def.fields[2].val = PLATFORM_SHIP;
-      tt->enum_def.fields[3].name = tdrpStrDup("PLATFORM_AIRCRAFT");
-      tt->enum_def.fields[3].val = PLATFORM_AIRCRAFT;
-      tt->enum_def.fields[4].name = tdrpStrDup("PLATFORM_AIRCRAFT_FORE");
-      tt->enum_def.fields[4].val = PLATFORM_AIRCRAFT_FORE;
-      tt->enum_def.fields[5].name = tdrpStrDup("PLATFORM_AIRCRAFT_AFT");
-      tt->enum_def.fields[5].val = PLATFORM_AIRCRAFT_AFT;
-      tt->enum_def.fields[6].name = tdrpStrDup("PLATFORM_AIRCRAFT_TAIL");
-      tt->enum_def.fields[6].val = PLATFORM_AIRCRAFT_TAIL;
-      tt->enum_def.fields[7].name = tdrpStrDup("PLATFORM_AIRCRAFT_BELLY");
-      tt->enum_def.fields[7].val = PLATFORM_AIRCRAFT_BELLY;
-      tt->enum_def.fields[8].name = tdrpStrDup("PLATFORM_AIRCRAFT_ROOF");
-      tt->enum_def.fields[8].val = PLATFORM_AIRCRAFT_ROOF;
-      tt->enum_def.fields[9].name = tdrpStrDup("PLATFORM_AIRCRAFT_NOSE");
-      tt->enum_def.fields[9].val = PLATFORM_AIRCRAFT_NOSE;
-      tt->enum_def.fields[10].name = tdrpStrDup("PLATFORM_SATELLITE_ORBIT");
-      tt->enum_def.fields[10].val = PLATFORM_SATELLITE_ORBIT;
-      tt->enum_def.fields[11].name = tdrpStrDup("PLATFORM_SATELLITE_GEOSTAT");
-      tt->enum_def.fields[11].val = PLATFORM_SATELLITE_GEOSTAT;
-    tt->single_val.e = PLATFORM_AIRCRAFT_TAIL;
+      tt->enum_def.fields[1].name = tdrpStrDup("PLATFORM_AIRCRAFT");
+      tt->enum_def.fields[1].val = PLATFORM_AIRCRAFT;
+      tt->enum_def.fields[2].name = tdrpStrDup("PLATFORM_AIRCRAFT_FORE");
+      tt->enum_def.fields[2].val = PLATFORM_AIRCRAFT_FORE;
+      tt->enum_def.fields[3].name = tdrpStrDup("PLATFORM_AIRCRAFT_AFT");
+      tt->enum_def.fields[3].val = PLATFORM_AIRCRAFT_AFT;
+      tt->enum_def.fields[4].name = tdrpStrDup("PLATFORM_AIRCRAFT_TAIL");
+      tt->enum_def.fields[4].val = PLATFORM_AIRCRAFT_TAIL;
+      tt->enum_def.fields[5].name = tdrpStrDup("PLATFORM_AIRCRAFT_BELLY");
+      tt->enum_def.fields[5].val = PLATFORM_AIRCRAFT_BELLY;
+      tt->enum_def.fields[6].name = tdrpStrDup("PLATFORM_AIRCRAFT_ROOF");
+      tt->enum_def.fields[6].val = PLATFORM_AIRCRAFT_ROOF;
+      tt->enum_def.fields[7].name = tdrpStrDup("PLATFORM_AIRCRAFT_NOSE");
+      tt->enum_def.fields[7].val = PLATFORM_AIRCRAFT_NOSE;
+    tt->single_val.e = PLATFORM_AIRCRAFT;
     tt++;
     
     // Parameter 'override_primary_axis'
@@ -863,7 +843,7 @@
     tt->descr = tdrpStrDup("Option to override primary axis on read. If true, the file will be read in, the primary axis will be changed, and then any post-read processing will be performed.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &override_primary_axis - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'primary_axis'
@@ -964,42 +944,6 @@
     tt->help = tdrpStrDup("See override_radar_location.");
     tt->val_offset = (char *) &radar_altitude_meters - &_start_;
     tt->single_val.d = 1742;
-    tt++;
-    
-    // Parameter 'override_gate_geometry'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_gate_geometry");
-    tt->descr = tdrpStrDup("Option to override the gate geometry.");
-    tt->help = tdrpStrDup("If true, the gate_spacing and start_range in the time series data is overridden by the parameters in this file.");
-    tt->val_offset = (char *) &override_gate_geometry - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'gate_spacing_meters'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("gate_spacing_meters");
-    tt->descr = tdrpStrDup("Gate spacing (meters).");
-    tt->help = tdrpStrDup("See override_gate_geometry.");
-    tt->val_offset = (char *) &gate_spacing_meters - &_start_;
-    tt->single_val.d = 150;
-    tt++;
-    
-    // Parameter 'start_range_meters'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("start_range_meters");
-    tt->descr = tdrpStrDup("Start range (meters).");
-    tt->help = tdrpStrDup("See override_gate_geometry.");
-    tt->val_offset = (char *) &start_range_meters - &_start_;
-    tt->single_val.d = 150;
     tt++;
     
     // Parameter 'Comment 6'
@@ -1291,7 +1235,7 @@
     tt->descr = tdrpStrDup("File name for calibration to be read at startup. Required.");
     tt->help = tdrpStrDup("The startup calibration file is required. The startup cal will be overridden if set_cal_by_pulse_width is true, or if use_cal_from_time_series is true.");
     tt->val_offset = (char *) &startup_cal_file - &_start_;
-    tt->single_val.s = tdrpStrDup("./startup_cal.xml");
+    tt->single_val.s = tdrpStrDup("$(PROJ_DIR)/calibration/data/wband_256ns/combined/TsCalAuto_Wband-HCR-256ns_20240415_234224.xml");
     tt++;
     
     // Parameter 'set_cal_by_pulse_width'
@@ -1313,15 +1257,15 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("pulse_width_cals");
     tt->descr = tdrpStrDup("Specify the directories in which the calibration files for each pulse width will be stored.");
-    tt->help = tdrpStrDup("See 'set_cal_by_pulse_width'. First, the app will determine which of the specified pulse widths best matches the pulse width in the data. The closest available pulse width will be used. The corresponding directory will then be searched. The cal file in that directory which is closest in time to the beam time will be used.\nYou can optionally specify that we check the xmit_rcv_mode and use different cal directories for different modes.\nNOTE - the pulse width is specified in micro-seconds. In addition, (a) if override_cal_zdr_correction is true, and zdr_correction_db != -9999, then the specified zdr_correction_db is applied, and (b) if override_cal_system_phidp is true, and system_phidp_deg != -9999, then the specified system phidp is used.");
+    tt->help = tdrpStrDup("See 'set_cal_by_pulse_width'. First, the app will determine which of the specified pulse widths best matches the pulse width in the data. The closest available pulse width will be used. The corresponding directory will then be searched. The cal file in that directory which is closest in time to the beam time will be used.\nYou can optionally specify that we check the xmit_rcv_mode and use different cal directories for different modes.\nNOTE - the pulse width is specified in micro-seconds.");
     tt->array_offset = (char *) &_pulse_width_cals - &_start_;
     tt->array_n_offset = (char *) &pulse_width_cals_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(pulse_width_cal_t);
-    tt->array_n = 3;
+    tt->array_n = 2;
     tt->struct_def.name = tdrpStrDup("pulse_width_cal_t");
-    tt->struct_def.nfields = 6;
+    tt->struct_def.nfields = 4;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("double");
@@ -1352,37 +1296,17 @@
         tt->struct_def.fields[3].enum_def.fields[0].val = DP_H_ONLY_FIXED_HV;
         tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("DP_V_ONLY_FIXED_HV");
         tt->struct_def.fields[3].enum_def.fields[1].val = DP_V_ONLY_FIXED_HV;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_correction_db");
-      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &_pulse_width_cals->zdr_correction_db - (char *) _pulse_width_cals;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[5].fname = tdrpStrDup("system_phidp_deg");
-      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &_pulse_width_cals->system_phidp_deg - (char *) _pulse_width_cals;
-    tt->n_struct_vals = 18;
+    tt->n_struct_vals = 8;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 0.5;
-      tt->struct_vals[1].s = tdrpStrDup("/tmp/cal_pw_0.5");
+      tt->struct_vals[0].d = 0.256;
+      tt->struct_vals[1].s = tdrpStrDup("$(PROJ_DIR)/calibration/data/wband_256ns/combined");
       tt->struct_vals[2].b = pFALSE;
       tt->struct_vals[3].e = DP_V_ONLY_FIXED_HV;
-      tt->struct_vals[4].d = -9999;
-      tt->struct_vals[5].d = -9999;
-      tt->struct_vals[6].d = 1;
-      tt->struct_vals[7].s = tdrpStrDup("/tmp/cal_pw_1.0");
-      tt->struct_vals[8].b = pFALSE;
-      tt->struct_vals[9].e = DP_V_ONLY_FIXED_HV;
-      tt->struct_vals[10].d = -9999;
-      tt->struct_vals[11].d = -9999;
-      tt->struct_vals[12].d = 2;
-      tt->struct_vals[13].s = tdrpStrDup("/tmp/cal_pw_2.0");
-      tt->struct_vals[14].b = pFALSE;
-      tt->struct_vals[15].e = DP_V_ONLY_FIXED_HV;
-      tt->struct_vals[16].d = -9999;
-      tt->struct_vals[17].d = -9999;
+      tt->struct_vals[4].d = 0.512;
+      tt->struct_vals[5].s = tdrpStrDup("$(PROJ_DIR)/calibration/data/wband_512ns/combined");
+      tt->struct_vals[6].b = pFALSE;
+      tt->struct_vals[7].e = DP_V_ONLY_FIXED_HV;
     tt++;
     
     // Parameter 'cal_recheck_period'
@@ -1395,18 +1319,6 @@
     tt->help = tdrpStrDup("The program will scan the calibration directory structure once every period, to check for new calibration files.");
     tt->val_offset = (char *) &cal_recheck_period - &_start_;
     tt->single_val.i = 600;
-    tt++;
-    
-    // Parameter 'use_cal_from_time_series'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_cal_from_time_series");
-    tt->descr = tdrpStrDup("Option to use cal information from time series data.");
-    tt->help = tdrpStrDup("If true, the cal information in the time series data will be used, if available. If false, the cal info in the param file will be used.");
-    tt->val_offset = (char *) &use_cal_from_time_series - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'override_cal_dbz_correction'
@@ -1672,7 +1584,7 @@
     tt->descr = tdrpStrDup("Option to correct power for estimated noise.");
     tt->help = tdrpStrDup("We estimate the noise by identifying regions with noise and computing the mean power - see above. If this parameter is set to TRUE, we use the estimated noise instead of teh calibrated noise to compute the noise-subtracted powers.");
     tt->val_offset = (char *) &use_estimated_noise_for_noise_subtraction - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'max_valid_noise_bias_db'
