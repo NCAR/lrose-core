@@ -41,7 +41,7 @@
 #include "Params.hh"
 #include "Beam.hh"
 #include <Fmq/DsFmq.hh>
-#include <Fmq/DsRadarQueue.hh>
+// #include <Fmq/DsRadarQueue.hh>
 #include <Radx/RadxField.hh>
 class IwrfTsInfo;
 using namespace std;
@@ -106,13 +106,13 @@ private:
   
   string _progName;
   const Params &_params;
-  bool _useRadx;
+  // bool _useRadx;
 
   // DsRadar moments queue
 
-  DsRadarQueue *_dsrQueue;
-  DsRadarMsg _msg;
-  int _nFields;
+  // DsRadarQueue *_dsrQueue;
+  // DsRadarMsg _msg;
+  // int _nFields;
 
   // Radx moments queue
 
@@ -133,50 +133,32 @@ private:
 
   // functions
 
-  int _writeParamsDsRadar(const Beam &beam);
   int _writePlatformRadx(const Beam &beam);
-  
-  int _writeCalibDsRadar(const Beam &beam);
   int _writeCalibRadx(const Beam &beam);
-  
-  int _writeStatusXmlDsRadar(const Beam &beam);
   int _writeStatusXmlRadx(const Beam &beam);
-  
-  int _writeBeamDsRadar(const Beam &beam);
   int _writeBeamRadx(const Beam &beam);
-  
-  void _putEndOfVolumeDsRadar(int volNum, const Beam &beam);
   void _putEndOfVolumeRadx(int volNum, const Beam &beam);
-
-  void _putStartOfVolumeDsRadar(int volNum, const Beam &beam);
   void _putStartOfVolumeRadx(int volNum, const Beam &beam);
-
-  void _putEndOfTiltDsRadar(int tiltNum, const Beam &beam);
   void _putEndOfTiltRadx(int tiltNum, const Beam &beam);
-
-  void _putStartOfTiltDsRadar(int tiltNum, const Beam &beam);
   void _putStartOfTiltRadx(int tiltNum, const Beam &beam);
-
-  void _putNewScanTypeDsRadar(int scanType, const Beam &beam);
   void _putNewScanTypeRadx(int scanType, const Beam &beam);
 
   int _openFmq();
-  int _openDsRadarQueue();
   int _openRadxQueue();
 
-  // Add a field to the dsradar field params message.
+  // Add a field to the field params message.
 
-  inline void _addField(const string &name,
-                        const string &units,
-                        double scale,
-                        double bias,
-                        vector<DsFieldParams*> &fp)
-  {
-    DsFieldParams* fparams =
-      new DsFieldParams(name.c_str(), units.c_str(),
-                        scale, bias, sizeof(ui16));
-    fp.push_back(fparams);
-  }
+  // inline void _addField(const string &name,
+  //                       const string &units,
+  //                       double scale,
+  //                       double bias,
+  //                       vector<DsFieldParams*> &fp)
+  // {
+  //   DsFieldParams* fparams =
+  //     new DsFieldParams(name.c_str(), units.c_str(),
+  //                       scale, bias, sizeof(ui16));
+  //   fp.push_back(fparams);
+  // }
 
   // convert double to ui16, applying scale and bias
 

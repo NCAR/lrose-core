@@ -76,7 +76,6 @@ public:
   // initialize before use
   
   void init(int nSamples,
-            int nSamplesRect,
             int nGates,
             double prt,
             iwrf_xmit_rcv_mode_t xmitRcvMode,
@@ -101,7 +100,6 @@ public:
   // get methods
 
   int getNSamples() const { return _nSamples; }
-  int getNSamplesRect() const { return _nSamplesRect; }
 
   double getEl() const { return _el; }
   double getAz() const { return _az; }
@@ -165,7 +163,6 @@ private:
   int _nSamples; // nsamples making adjustment for window
   int _nSamplesHalf;
   int _nSamplesAlloc;
-  int _nSamplesRect; // effective nsamples adjusting for window
 
   // number of gates, gate geometry
   

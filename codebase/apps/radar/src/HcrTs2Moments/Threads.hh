@@ -40,7 +40,6 @@
 
 #include <pthread.h>
 #include <radar/RadarFft.hh>
-#include <radar/ForsytheRegrFilter.hh>
 class BeamReader;
 class OutputFmq;
 class Beam;
@@ -153,13 +152,7 @@ public:
   ComputeThread();
   virtual ~ComputeThread();
   void initFfts(size_t nSamples);
-  void initFftsStag(size_t nSamples, int stagM, int stagN);
-  void initRegr(size_t nSamples);
-  void initRegrStag(size_t nSamples, int stagM, int stagN);
-  void initRegr(const ForsytheRegrFilter &master,
-                const ForsytheRegrFilter &masterHalf);
-  void initRegrStag(const ForsytheRegrFilter &master);
-
+  
   //////////////////////////////////////////////////////////////
   // create and destroy FFT objects in a thread safe manner
   
@@ -176,24 +169,6 @@ public:
   size_t nSamplesFft;
   RadarFft *fft;
   RadarFft *fftHalf;
-
-  // FFT support - staggered mode
-  
-  size_t nSamplesFftStag;
-  int fftStagM, fftStagN;
-  RadarFft *fftStag;
-  
-  // regression clutter filtering
-
-  size_t nSamplesRegr;
-  ForsytheRegrFilter regr;
-  ForsytheRegrFilter regrHalf;
-
-  // regression clutter filtering - staggered prt
-
-  size_t nSamplesRegrStag;
-  int regrStagM, regrStagN;
-  ForsytheRegrFilter regrStag;
 
   // beam for computations
   
@@ -223,17 +198,8 @@ public:
   WriteThread();
   virtual ~WriteThread();
 
-  inline void setVolNum(int val) { _volNum = val; }
-  int getVolNum() const { return _volNum; }
-
-  inline void setTiltNum(int val) { _tiltNum = val; }
-  int getTiltNum() const { return _tiltNum; }
-  
 private:
   
-  int _volNum;
-  int _tiltNum;
-
 };
 
 #endif

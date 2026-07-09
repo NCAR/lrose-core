@@ -124,7 +124,6 @@ Beam::Beam(const string &progName,
 // Initialize before use
 
 void Beam::init(int nSamples,
-                int nSamplesRect,
                 int nGates,
                 double prt,
                 iwrf_xmit_rcv_mode_t xmitRcvMode,
@@ -134,7 +133,6 @@ void Beam::init(int nSamples,
 {
 
   _nSamples = nSamples;
-  _nSamplesRect = nSamplesRect;
   _nGates = nGates;
   _prt = prt;
   _xmitRcvMode = xmitRcvMode;

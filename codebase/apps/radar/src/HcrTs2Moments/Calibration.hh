@@ -98,23 +98,11 @@ private:
   string _radarName;
   time_t _calTime;
 
-  time_t _noiseMonTime;
-  int _noiseMonCount;
-  double _noiseMonZdr;
-  double _noiseMonDbmHc;
-  double _noiseMonDbmVc;
-
   int _tempCount;
   double _noiseMonSiteTempC;
 
-  double _noiseMonZdrm;
-
-  bool _useNoiseMonCalib;
-  IwrfCalib _noiseMonCalib;
-  
   // functions
   
-  void _setCalFromTimeSeries(Beam *beam);
   int _checkPulseWidthAndRead(Beam *beam);
   int _readCal(time_t utime, const string &calDir);
   int _readCalFromFile(const string &calPath);
@@ -122,7 +110,6 @@ private:
   iwrf_xmit_rcv_mode_t _getXmitRcvMode(Params::xmit_rcv_mode_t mode);
   void _applyCorrections();
   double _getValFromXml(const string &xml, const string &tag) const;
-  int _adjustCalGainFromNoiseMon(Beam *beam);
   
 };
 

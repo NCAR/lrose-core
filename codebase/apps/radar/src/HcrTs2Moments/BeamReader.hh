@@ -142,38 +142,25 @@ private:
   double _prt;
   double _meanPrf;
   double _pulseWidthUs;
-  deque<bool> _fixedPulseWidthCheck;
 
-  // beam location/rate in azimuth - PPI mode
+  // antenna rate
 
-  int _azIndex;
-  int _prevAzIndex;
-
-  // beam location/rate in elevation - RHI mode
+  bool _elRateInitialized;
+  double _prevTimeForElRate;
+  double _prevElForRate;
+  double _progressiveElRate;
+  double _beamElRate;
+  bool _rotationUpwards;
   
-  int _elIndex;
-  int _prevElIndex;
-
-  // window 90% factors
-  // this is the fraction of the window width, centered, which
-  // accounts for 90 percent of the power
-
-  double _windowFactorRect;
-  double _windowFactorVonhann;
-  double _windowFactorBlackman;
-  double _windowFactorBlackmanNuttall;
-
   // private functions
   
   int _initializeQueue();
 
-  int _readNonIndexedBeam();
+  int _readNSamplesBeam();
   int _readPulseWidthChangeBeam();
-  int _readIndexedBeam();
-
-  int _finalizeNonIndexedBeam();
-  int _checkStartConditions();
-  int _checkFixedPulseWidth();
+  int _readBlockBeam();
+  
+  int _finalizeNSamplesBeam();
   void _constrainPulsesToWithinDwell();
 
   shared_ptr<IwrfTsPulse> _getNextPulse();
@@ -188,36 +175,19 @@ private:
   void _recyclePulses();
   shared_ptr<IwrfTsPulse> _getPulseFromRecyclePool();
 
-  // void _initPpiMode();
-  // void _initRhiMode();
-  // void _initVertMode();
+  void _initRhiMode();
+  void _initVertMode();
 
   void _setPrt();
   
-  // int _findBeamCenterPpi();
-  // int _findBeamCenterRhi();
-
   int _computeMinNGates();
-  int _computeNSamplesIndexed();
-  int _computeNSamplesRect(int nSamples);
-
-  // void _checkIsAlternating();
-  // void _checkAlternatingStartsOnH();
-  // void _checkIsStaggeredPrt();
-  // void _checkStaggeredStartsOnShort();
 
   double _conditionAz(double az);
   double _conditionEl(double el);
-  
-  // void _computeProgressiveAzRate(const shared_ptr<IwrfTsPulse> pulse);
-  // void _computeProgressiveElRate(const shared_ptr<IwrfTsPulse> pulse);
+  void _computeProgressiveElRate(const shared_ptr<IwrfTsPulse> pulse);
+  void _computeBeamElRate(int endIndex, int nSamples);
 
-  // void _computeBeamAzRate(int endIndex, int nSamples);
-  // void _computeBeamElRate(int endIndex, int nSamples);
-
-  // void _checkForEndFlags(const vector<shared_ptr<IwrfTsPulse>> &beamPulses);
   void _checkQueueStatus();
-  void _computeWindowFactors();
 
 };
 
