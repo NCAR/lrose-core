@@ -36,6 +36,7 @@
 #include <toolsa/sincos.h>
 #include <cmath>
 #include <iomanip>
+#include <complex>
 
 #ifndef RAD_TO_DEG
 #define RAD_TO_DEG 57.29577951308092
@@ -611,6 +612,41 @@ void RadarComplex::printVector(ostream &out,
 // interpolate between 2 values
 // load vector of specified length
 
+std::vector<std::complex<double>>
+  _interpolateAngles(const std::complex<double>& start,
+                     const std::complex<double>& end,
+                     std::size_t n)
+{
+
+  if (std::abs(start) == 0.0 || std::abs(end) == 0.0) {
+    throw std::invalid_argument(
+            "Complex angle representations must have nonzero magnitude");
+  }
+
+  // Normalize so that only phase is used.
+  const std::complex<double> z0 = start / std::abs(start);
+  const std::complex<double> z1 = end   / std::abs(end);
+
+  // Signed angular difference in [-pi, pi].
+  const double angleDelta = std::arg(z1 * std::conj(z0));
+
+  std::vector<std::complex<double>> result;
+  result.reserve(n);
+
+  for (std::size_t i = 1; i <= n; ++i) {
+    const double fraction =
+      static_cast<double>(i) / static_cast<double>(n + 1);
+
+    // Rotate z0 through the required fraction of the angular difference.
+    result.push_back(
+      z0 * std::polar(1.0, fraction * angleDelta)
+    );
+  }
+
+  return result;
+
+}
+
 void RadarComplex::interpAndLoadVec(const RadarComplex_t &start,
                                     const RadarComplex_t &end,
                                     int nInterp,
@@ -618,35 +654,19 @@ void RadarComplex::interpAndLoadVec(const RadarComplex_t &start,
   
 {
 
+  // use std::complex version
+  
+  std::complex cstart(start.re, start.im);
+  std::complex cend(end.re, end.im);
+  std::vector<std::complex<double>> interpAng = 
+    _interpolateAngles(cstart, cend, nInterp);
+
+  // copy to RadxComplex
+  
   interpVec.resize(nInterp);
+  for (size_t ii = 0; ii < interpVec.size(); ii++) {
+    interpVec[ii].set(interpAng[ii].real(), interpAng[ii].imag());
+  }
 
-  double startX = start.re;
-  double startY = start.im;
-  
-  double endX = end.re;
-  double endY = end.im;
-
-  double startMag = sqrt(startX * startX + startY * startY);
-  double endMag = sqrt(endX * endX + endY * endY);
-  
-  double deltaX = (endX - startX) / (nInterp + 1.0);
-  double deltaY = (endY - startY) / (nInterp + 1.0);
-  double deltaMag = (endMag - startMag) / (nInterp + 1.0);
-
-  for (int ii = 0; ii < nInterp; ii++) {
-
-    double jj = ii + 1.0;
-    double xx = startX + jj * deltaX;
-    double yy = startY + jj * deltaY;
-    double mag = sqrt(xx * xx + yy * yy);
-
-    double magInterp = startMag + jj * deltaMag;
-    double magRatio = magInterp / mag;
-
-    interpVec[ii].re = xx * magRatio;
-    interpVec[ii].im = yy * magRatio;
-
-  } // ii
-  
 }
 
