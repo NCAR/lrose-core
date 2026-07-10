@@ -124,7 +124,6 @@ Beam::Beam(const string &progName,
 // Initialize before use
 
 void Beam::init(int nSamples,
-                int nSamplesRect,
                 int nGates,
                 double prt,
                 iwrf_xmit_rcv_mode_t xmitRcvMode,
@@ -134,7 +133,6 @@ void Beam::init(int nSamples,
 {
 
   _nSamples = nSamples;
-  _nSamplesRect = nSamplesRect;
   _nGates = nGates;
   _prt = prt;
   _xmitRcvMode = xmitRcvMode;
@@ -770,10 +768,6 @@ void Beam::_overrideOpsInfo()
     _opsInfo.overrideRadarLocation(_params.radar_altitude_meters,
 				   _params.radar_latitude_deg,
 				   _params.radar_longitude_deg);
-  }
-  if (_params.override_gate_geometry) {
-    _opsInfo.overrideGateGeometry(_params.start_range_meters,
-                                  _params.gate_spacing_meters);
   }
     
   if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {

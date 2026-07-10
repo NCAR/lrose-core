@@ -1317,7 +1317,6 @@ shared_ptr<IwrfTsPulse> BeamReader::_getNextPulse()
     Beam::scan_type_t scanType = Beam::SCAN_TYPE_UNKNOWN;
     int scanMode = pulse->getScanMode();
     if (scanMode == IWRF_SCAN_MODE_RHI || 
-        scanMode == IWRF_SCAN_MODE_VERTICAL_POINTING ||
         scanMode == IWRF_SCAN_MODE_MANRHI) {
       scanType = Beam::SCAN_TYPE_RHI;
     } else if (scanMode == IWRF_SCAN_MODE_VERTICAL_POINTING) {

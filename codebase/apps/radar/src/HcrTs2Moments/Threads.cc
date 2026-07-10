@@ -37,7 +37,6 @@
 
 #include "HcrTs2Moments.hh"
 #include "Threads.hh"
-#include "MomentsMgr.hh"
 #include <cassert>
 
 pthread_mutex_t ComputeThread::_fftMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -194,16 +193,6 @@ ComputeThread::ComputeThread()
   fft = NULL;
   fftHalf = NULL;
 
-  nSamplesFftStag = 0;
-  fftStagM = 0;
-  fftStagN = 0;
-  fftStag = NULL;
-
-  nSamplesRegr = 0;
-  nSamplesRegrStag = 0;
-  regrStagM = 0;
-  regrStagN = 0;
-
   _beam = NULL;
   _beamReadyForWrite = false;
 
@@ -267,150 +256,11 @@ void ComputeThread::initFfts(size_t nSamples)
 
 }
   
-// initialize the FFTs - staggered mode
-
-void ComputeThread::initFftsStag(size_t nSamples, int stagM, int stagN)
-{
-  
-  if (nSamplesFftStag == nSamples &&
-      fftStagM == stagM &&
-      fftStagN == stagN) {
-    return;
-  }
-
-  initFfts(nSamples);
-
-  // delete old object
-  
-  if (fftStag) {
-    delete fftStag;
-  }
-  
-  // create new object for correct size
-
-  int nStaggered =
-    RadarMoments::computeNExpandedStagPrt(nSamples, stagM, stagN);
-  fftStag = new RadarFft(nStaggered);
-  
-  nSamplesFftStag = nSamples;
-  fftStagM = stagM;
-  fftStagN = stagN;
-  
-}
-
-////////////////////////////////////
-// initialize the regression filter
-
-void ComputeThread::initRegr(size_t nSamples)
-{
-
-  if (nSamplesRegr == nSamples) {
-    return;
-  }
-
-  // set up objects for correct size
-
-  assert(_app);
-  const Params &params = _app->getParams();
-  double wavelengthM = _app->getWavelengthM();
-
-  regr.setup(nSamples,
-             params.regression_filter_determine_order_from_cnr,
-             params.regression_filter_specified_polynomial_order,
-             params.regression_filter_clutter_width_factor,
-             params.regression_filter_cnr_exponent,
-             wavelengthM);
-  
-  regrHalf.setup(nSamples / 2,
-                 params.regression_filter_determine_order_from_cnr,
-                 params.regression_filter_specified_polynomial_order,
-                 params.regression_filter_clutter_width_factor,
-                 params.regression_filter_cnr_exponent,
-                 wavelengthM);
-  
-  nSamplesRegr = nSamples;
-  
-}
-
-///////////////////////////////////////////////////////////////////
-// initialize the regression filter from another regression object
-
-void ComputeThread::initRegr(const ForsytheRegrFilter &master,
-                             const ForsytheRegrFilter &masterHalf)
-{
-  
-  if (nSamplesRegr == master.getNSamples()) {
-    return;
-  }
-    
-  // set up objects for correct size
-  
-  regr = master;
-  regrHalf = masterHalf;
-  nSamplesRegr = master.getNSamples();
-  
-}
-
-////////////////////////////////////////////////////
-// initialize the regression filter - staggered PRT
-
-void ComputeThread::initRegrStag(size_t nSamples, int stagM, int stagN)
-{
-  
-  if (nSamplesRegrStag == nSamples &&
-      regrStagM == stagM &&
-      regrStagN == stagN) {
-    return;
-  }
-    
-  // set up objects for correct size
-  
-  assert(_app);
-  const Params &params = _app->getParams();
-  double wavelengthM = _app->getWavelengthM();
-  
-  regrStag.setupStaggered(nSamples, stagM, stagN,
-                          params.regression_filter_determine_order_from_cnr,
-                          params.regression_filter_specified_polynomial_order,
-                          params.regression_filter_clutter_width_factor,
-                          params.regression_filter_cnr_exponent,
-                          wavelengthM);
-  
-  nSamplesRegrStag = nSamples;
-  regrStagM = stagM;
-  regrStagN = stagN;
-  
-}
-
-///////////////////////////////////////////////////////////////////
-// initialize the regression filter from another regression object
-
-void ComputeThread::initRegrStag(const ForsytheRegrFilter &master)
-{
-  
-  if (nSamplesRegrStag == master.getNSamples() &&
-      regrStagM == master.getStaggeredM() &&
-      regrStagN == master.getStaggeredN()) {
-    return;
-  }
-    
-  // set up objects for correct size
-  
-  regrStag = master;
-  nSamplesRegrStag = master.getNSamples();
-  regrStagM = master.getStaggeredM();
-  regrStagN = master.getStaggeredN();
-  
-}
-
 //////////////////////////////////
 // Thread for writing output FMQ
 
 WriteThread::WriteThread()
 {
-
-  _volNum = 0;
-  _tiltNum = 0;
 
 }
 

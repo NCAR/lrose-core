@@ -83,17 +83,13 @@ public:
 
   typedef enum {
     PLATFORM_FIXED = 1,
-    PLATFORM_VEHICLE = 2,
-    PLATFORM_SHIP = 3,
     PLATFORM_AIRCRAFT = 4,
     PLATFORM_AIRCRAFT_FORE = 5,
     PLATFORM_AIRCRAFT_AFT = 6,
     PLATFORM_AIRCRAFT_TAIL = 7,
     PLATFORM_AIRCRAFT_BELLY = 8,
     PLATFORM_AIRCRAFT_ROOF = 9,
-    PLATFORM_AIRCRAFT_NOSE = 10,
-    PLATFORM_SATELLITE_ORBIT = 11,
-    PLATFORM_SATELLITE_GEOSTAT = 12
+    PLATFORM_AIRCRAFT_NOSE = 10
   } platform_type_t;
 
   typedef enum {
@@ -107,7 +103,7 @@ public:
 
   typedef enum {
     DWELL_SPECIFY_N_SAMPLES = 0,
-    DWELL_SPECIFY_BLOCK_ID = 1,
+    DWELL_SPECIFY_BLOCK = 1,
     DWELL_PULSE_WIDTH_CHANGE = 2
   } dwell_method_t;
 
@@ -137,12 +133,6 @@ public:
   } rx_channel_t;
 
   typedef enum {
-    ATMOS_ATTEN_NONE = 0,
-    ATMOS_ATTEN_CONSTANT = 1,
-    ATMOS_ATTEN_CRPL = 2
-  } atmos_atten_method_t;
-
-  typedef enum {
     NOISE_RAY_BY_RAY = 0,
     NOISE_RUNNING_MEDIAN = 1
   } noise_method_t;
@@ -155,202 +145,48 @@ public:
 
   typedef enum {
     DBZ = 0,
-    DBZ_NO_ATMOS_ATTEN = 1,
-    DBZHC = 2,
-    DBZVC = 3,
-    DBZHX = 4,
-    DBZVX = 5,
-    VEL = 6,
-    VEL_ALT = 7,
-    VEL_HV = 8,
-    VEL_H_ONLY = 9,
-    VEL_V_ONLY = 10,
-    VEL_ALT_FOLD_INTERVAL = 11,
-    VEL_ALT_FOLD_CONFIDENCE = 12,
-    VEL_CORR_VERT = 13,
-    VEL_CORR_MOTION = 14,
-    VEL_PRT_SHORT = 15,
-    VEL_PRT_LONG = 16,
-    VEL_DIFF = 17,
-    VEL_UNFOLD_INTERVAL = 18,
-    WIDTH = 19,
-    WIDTH_R0R1 = 20,
-    WIDTH_R1R2 = 21,
-    WIDTH_R1R3 = 22,
-    WIDTH_PPLS = 23,
-    WIDTH_H_ONLY = 24,
-    WIDTH_V_ONLY = 25,
-    WIDTH_PRT_LONG = 26,
-    WIDTH_PRT_SHORT = 27,
-    WIDTH_CORR_MOTION = 28,
-    NCP = 29,
-    NCP_H_ONLY = 30,
-    NCP_V_ONLY = 31,
-    NCP_H_MINUS_V = 32,
-    NCP_TRIP1 = 33,
-    NCP_TRIP2 = 34,
-    NCP_TRIP3 = 35,
-    NCP_TRIP4 = 36,
-    NCP_PRT_LONG = 37,
-    NCP_PRT_SHORT = 38,
-    NCP_TRIP_FLAG = 39,
-    NOISE_BIAS_DB_HC = 40,
-    NOISE_BIAS_DB_HX = 41,
-    NOISE_BIAS_DB_VC = 42,
-    NOISE_BIAS_DB_VX = 43,
-    NOISE_FLAG = 44,
-    SIGNAL_FLAG = 45,
-    NOISE_INTEREST = 46,
-    SIGNAL_INTEREST = 47,
-    NOISE_ACCUM_PHASE_CHANGE = 48,
-    NOISE_PHASE_CHANGE_ERROR = 49,
-    NOISE_DBM_SDEV = 50,
-    NOISE_NCP_MEAN = 51,
-    SNR = 52,
-    SNRHC = 53,
-    SNRHX = 54,
-    SNRVC = 55,
-    SNRVX = 56,
-    DBM = 57,
-    DBMHC = 58,
-    DBMHX = 59,
-    DBMVC = 60,
-    DBMVX = 61,
-    DBMHC_NS = 62,
-    DBMHX_NS = 63,
-    DBMVC_NS = 64,
-    DBMVX_NS = 65,
-    ZDRM = 66,
-    ZDR = 67,
-    ZDR_BIAS = 68,
-    LDR = 69,
-    LDRHM = 70,
-    LDRH = 71,
-    LDRVM = 72,
-    LDRV = 73,
-    LDR_DIFF = 74,
-    LDR_MEAN = 75,
-    RHOHV = 76,
-    RHOHV_NNC = 77,
-    PHIDP0 = 78,
-    PHIDP = 79,
-    PHIDP_COND = 80,
-    PHIDP_FILT = 81,
-    PHIDP_SDEV_4KDP = 82,
-    PHIDP_JITTER_4KDP = 83,
-    ZDR_SDEV_4KDP = 84,
-    KDP = 85,
-    PSOB = 86,
-    KDP_HB = 87,
-    RHO_HC_VX = 88,
-    RHO_VC_HX = 89,
-    RHO_VX_HX = 90,
-    RHO_PHIDP = 91,
-    CPR_MAG = 92,
-    CPR_PHASE = 93,
-    CPR_LDR = 94,
-    DBZ_ATTEN_CORRECTION = 95,
-    ZDR_ATTEN_CORRECTION = 96,
-    DBZ_ATTEN_CORRECTED = 97,
-    ZDR_ATTEN_CORRECTED = 98,
-    CPA = 99,
-    TDBZ = 100,
-    SPIN = 101,
-    MAX_TDBZ_SPIN = 102,
-    ZDR_SDEV = 103,
-    PHIDP_SDEV = 104,
-    DBZ_DIFF_SQ = 105,
-    DBZ_SPIN_CHANGE = 106,
-    CMD = 107,
-    CMD_FLAG = 108,
-    RHOHV_TEST_UNFILT = 109,
-    RHOHV_TEST_FILT = 110,
-    RHOHV_TEST_IMPROV = 111,
-    RHOHV_TEST_FLAG = 112,
-    TDBZ_INTEREST = 113,
-    SPIN_INTEREST = 114,
-    CPA_INTEREST = 115,
-    ZDR_SDEV_INTEREST = 116,
-    PHIDP_SDEV_INTEREST = 117,
-    CLUT = 118,
-    CLUT_2_WX_RATIO = 119,
-    SPECTRAL_NOISE = 120,
-    SPECTRAL_SNR = 121,
-    REGR_FILT_POLY_ORDER = 122,
-    REGR_FILT_CNR_DB = 123,
-    AIQ_HC = 124,
-    NIQ_HC = 125,
-    AIQ_VC = 126,
-    NIQ_VC = 127,
-    SZ_TRIP_FLAG = 128,
-    SZ_LEAKAGE = 129,
-    CENSORING_FLAG = 130,
-    LAG0_HC_DB = 131,
-    LAG0_HX_DB = 132,
-    LAG0_VC_DB = 133,
-    LAG0_VX_DB = 134,
-    LAG0_HC_SHORT_DB = 135,
-    LAG0_VC_SHORT_DB = 136,
-    LAG0_HC_LONG_DB = 137,
-    LAG0_VC_LONG_DB = 138,
-    LAG0_VCHX_DB = 139,
-    LAG0_VCHX_PHASE = 140,
-    LAG0_HCVX_DB = 141,
-    LAG0_HCVX_PHASE = 142,
-    LAG1_HC_DB = 143,
-    LAG1_HC_PHASE = 144,
-    LAG1_VC_DB = 145,
-    LAG1_VC_PHASE = 146,
-    LAG1_HCVC_DB = 147,
-    LAG1_HCVC_PHASE = 148,
-    LAG1_VCHC_DB = 149,
-    LAG1_VCHC_PHASE = 150,
-    LAG1_VXHX_DB = 151,
-    LAG1_VXHX_PHASE = 152,
-    LAG1_HC_LONG_DB = 153,
-    LAG1_HC_LONG_PHASE = 154,
-    LAG1_VC_LONG_DB = 155,
-    LAG1_VC_LONG_PHASE = 156,
-    LAG1_HC_SHORT_DB = 157,
-    LAG1_HC_SHORT_PHASE = 158,
-    LAG1_VC_SHORT_DB = 159,
-    LAG1_VC_SHORT_PHASE = 160,
-    LAG1_HC_LONG_TO_SHORT_DB = 161,
-    LAG1_HC_LONG_TO_SHORT_PHASE = 162,
-    LAG1_VC_LONG_TO_SHORT_DB = 163,
-    LAG1_VC_LONG_TO_SHORT_PHASE = 164,
-    LAG1_HC_SHORT_TO_LONG_DB = 165,
-    LAG1_HC_SHORT_TO_LONG_PHASE = 166,
-    LAG1_VC_SHORT_TO_LONG_DB = 167,
-    LAG1_VC_SHORT_TO_LONG_PHASE = 168,
-    LAG2_HC_DB = 169,
-    LAG2_HC_PHASE = 170,
-    LAG2_VC_DB = 171,
-    LAG2_VC_PHASE = 172,
-    LAG3_HC_DB = 173,
-    LAG3_HC_PHASE = 174,
-    LAG3_VC_DB = 175,
-    LAG3_VC_PHASE = 176,
-    RVVHH0_DB = 177,
-    RVVHH0_PHASE = 178,
-    RVVHH0_LONG_DB = 179,
-    RVVHH0_LONG_PHASE = 180,
-    RVVHH0_SHORT_DB = 181,
-    RVVHH0_SHORT_PHASE = 182,
-    SDEV_VV = 183,
-    PRT = 184,
-    NUM_PULSES = 185,
-    TEST = 186,
-    TEST0 = 187,
-    TEST1 = 188,
-    TEST2 = 189,
-    TEST3 = 190,
-    TEST4 = 191,
-    TEST5 = 192,
-    TEST6 = 193,
-    TEST7 = 194,
-    TEST8 = 195,
-    TEST9 = 196
+    DBZHC = 1,
+    DBZVC = 2,
+    VEL = 3,
+    VEL_CORR_VERT = 4,
+    VEL_CORR_MOTION = 5,
+    WIDTH = 6,
+    WIDTH_CORR_MOTION = 7,
+    NCP = 8,
+    NOISE_BIAS_DB_HC = 9,
+    NOISE_BIAS_DB_VC = 10,
+    NOISE_FLAG = 11,
+    SIGNAL_FLAG = 12,
+    NOISE_INTEREST = 13,
+    SIGNAL_INTEREST = 14,
+    NOISE_ACCUM_PHASE_CHANGE = 15,
+    NOISE_PHASE_CHANGE_ERROR = 16,
+    NOISE_DBM_SDEV = 17,
+    NOISE_NCP_MEAN = 18,
+    SNR = 19,
+    SNRHC = 20,
+    SNRVC = 21,
+    DBM = 22,
+    DBMHC = 23,
+    DBMVC = 24,
+    DBMHC_NS = 25,
+    DBMVC_NS = 26,
+    LDR = 27,
+    LDRH = 28,
+    LDRV = 29,
+    CENSORING_FLAG = 30,
+    PRT = 31,
+    NUM_PULSES = 32,
+    TEST0 = 33,
+    TEST1 = 34,
+    TEST2 = 35,
+    TEST3 = 36,
+    TEST4 = 37,
+    TEST5 = 38,
+    TEST6 = 39,
+    TEST7 = 40,
+    TEST8 = 41,
+    TEST9 = 42
   } field_id_t;
 
   // struct typedefs
@@ -360,8 +196,6 @@ public:
     char* cal_dir;
     tdrp_bool_t check_xmit_rcv_mode;
     xmit_rcv_mode_t xmit_rcv_mode;
-    double zdr_correction_db;
-    double system_phidp_deg;
   } pulse_width_cal_t;
 
   typedef struct {
@@ -382,8 +216,6 @@ public:
     char* units;
     double scale;
     double bias;
-    tdrp_bool_t write_unfiltered;
-    tdrp_bool_t write_filtered;
   } output_field_t;
 
   ///////////////////////////
@@ -698,13 +530,15 @@ public:
 
   char* input_dir;
 
+  int max_n_samples;
+
   tdrp_bool_t swap_receiver_channels;
 
   tdrp_bool_t prt_is_for_previous_interval;
 
   tdrp_bool_t compute_prt_from_interpulse_periods;
 
-  tdrp_bool_t change_velocity_sign_staggered;
+  double nsecs_for_antenna_rate;
 
   platform_type_t platform_type;
 
@@ -724,17 +558,13 @@ public:
 
   double radar_altitude_meters;
 
-  tdrp_bool_t override_gate_geometry;
-
-  double gate_spacing_meters;
-
-  double start_range_meters;
-
   dwell_method_t dwell_method;
 
   int dwell_n_samples;
 
   int dwell_block_id;
+
+  double dwell_pulse_width_us;
 
   tdrp_bool_t check_for_missing_pulses;
 
@@ -771,8 +601,6 @@ public:
 
   int cal_recheck_period;
 
-  tdrp_bool_t use_cal_from_time_series;
-
   tdrp_bool_t override_cal_dbz_correction;
 
   double dbz_correction;
@@ -801,28 +629,6 @@ public:
   char* egm_2008_geoid_file;
 
   tdrp_bool_t georef_fixed_location_mode;
-
-  tdrp_bool_t noise_mon_correct_cal_rx_gain;
-
-  char* noise_mon_spdb_url;
-
-  int noise_mon_search_margin_secs;
-
-  char* noise_mon_tag_main;
-
-  char* noise_mon_tag_list_zdr;
-
-  char* noise_mon_tag_list_dbmhc;
-
-  char* noise_mon_tag_list_dbmvc;
-
-  char* noise_mon_tag_list_site_temp;
-
-  atmos_atten_method_t atmos_atten_method;
-
-  double atmos_atten_db_per_km;
-
-  tdrp_bool_t write_alt_mode_vel_debug_fields;
 
   tdrp_bool_t use_estimated_noise_for_noise_subtraction;
 
@@ -901,7 +707,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[123];
+  mutable TDRPtable _table[108];
 
   const char *_className;
 

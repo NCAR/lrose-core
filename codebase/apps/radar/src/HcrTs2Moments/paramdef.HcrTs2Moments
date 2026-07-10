@@ -91,6 +91,11 @@ paramdef string {
   p_help = "This is used in ARCHIVE mode. In FILELIST and SIMULATE modes, the file paths are specified on the command line.";
 } input_dir;
 
+paramdef int {
+  p_default = 1024;
+  p_descr = "Max number of samples in queue.";
+} max_n_samples;
+
 commentdef {
   p_header = "QUALIFYING AND/OR MODIFYING INPUT METADATA";
 };
@@ -113,11 +118,11 @@ paramdef boolean {
   p_help = "If TRUE, the PRT values will be computed using the time difference between successive pulses. If FALSE, the prt values in the pulse headers will be used.";
 } compute_prt_from_interpulse_periods;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to change the sign of the velocity in staggered mode.";
-  p_help = "If true, the sign of the velocity will be changed only in staggered mode. Both this and the 'change_velocity_sign' parameter in moments_params will be applied, so if both are true they will cancel out.";
-} change_velocity_sign_staggered;
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Time for computing antenna rate (sec).";
+  p_help = "The rate computed over this time period. If angle interpolation is used, then set this to a larger value than the default. A value of 0.5 is suggested for this case.";
+} nsecs_for_antenna_rate;
 
 commentdef {
   p_header = "OVERRIDING RADAR PARAMETERS";
@@ -126,34 +131,26 @@ commentdef {
 
 typedef enum {
   PLATFORM_FIXED = 1,
-  PLATFORM_VEHICLE = 2,
-  PLATFORM_SHIP = 3,
   PLATFORM_AIRCRAFT = 4,
   PLATFORM_AIRCRAFT_FORE = 5,
   PLATFORM_AIRCRAFT_AFT = 6,
   PLATFORM_AIRCRAFT_TAIL = 7,
   PLATFORM_AIRCRAFT_BELLY = 8,
   PLATFORM_AIRCRAFT_ROOF = 9,
-  PLATFORM_AIRCRAFT_NOSE = 10,
-  PLATFORM_SATELLITE_ORBIT = 11,
-  PLATFORM_SATELLITE_GEOSTAT = 12
+  PLATFORM_AIRCRAFT_NOSE = 10
 } platform_type_t;
 
 paramdef enum platform_type_t {
-  p_default = PLATFORM_AIRCRAFT_TAIL;
+  p_default = PLATFORM_AIRCRAFT;
   p_descr = "Set the platform type.";
   p_help =
     "\tPLATFORM_FIXED  - radar is in a fixed location\n"
-    "\tPLATFORM_VEHICLE - radar is mounted on a land vehicle\n"
-    "\tPLATFORM_SHIP - radar is mounted on a ship\n"
     "\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n"
     "\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n"
     "\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA, HCR\n"
     "\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n"
     "\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n"
-    "\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n"
-    "\tPLATFORM_SATELLITE_ORBIT - orbiting satellite\n"
-    "\tPLATFORM_SATELLITE_GEOSTAT - geostationary satellite\n";
+    "\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n";
 } platform_type;
 
 typedef enum {
@@ -166,7 +163,7 @@ typedef enum {
 } primary_axis_t;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to override primary axis on read. If true, the file will be read in, the primary axis will be changed, and then any post-read processing will be performed.";
 } override_primary_axis;
 
@@ -218,38 +215,20 @@ paramdef double {
   p_help = "See override_radar_location.";
 } radar_altitude_meters;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the gate geometry.";
-  p_help = "If true, the gate_spacing and start_range in the time series data is overridden by the parameters in this file.";
-} override_gate_geometry;
-
-paramdef double {
-  p_default = 150;
-  p_descr = "Gate spacing (meters).";
-  p_help = "See override_gate_geometry.";
-} gate_spacing_meters;
-
-paramdef double {
-  p_default = 150;
-  p_descr = "Start range (meters).";
-  p_help = "See override_gate_geometry.";
-} start_range_meters;
-
 commentdef {
   p_header = "DEFINING THE DWELL";
 };
 
 typedef enum {
   DWELL_SPECIFY_N_SAMPLES,
-  DWELL_SPECIFY_BLOCK_ID,
+  DWELL_SPECIFY_BLOCK,
   DWELL_PULSE_WIDTH_CHANGE
 } dwell_method_t;
 
 paramdef enum dwell_method_t {
   p_default = DWELL_SPECIFY_N_SAMPLES;
   p_descr = "How to determine the dwell samples.";
-  p_help = "SPECIFY_N_SAMPLES: take next N_SAMPLES. SPECIFY_BLOCK_ID: use the start and end block flags for the specified block ID. PULSE_WIDTH_CHANGE: dwell changes with pulse width.";
+  p_help = "SPECIFY_N_SAMPLES: take next N_SAMPLES. SPECIFY_BLOCK: use the start and end block flags for the specified block. PULSE_WIDTH_CHANGE: dwell changes with pulse width.";
 } dwell_method;
 
 paramdef int {
@@ -263,6 +242,12 @@ paramdef int {
   p_descr = "Block ID to identift dwell.";
   p_help = "Applies to DWELL_SPECIFY_BLOCK_ID.";
 } dwell_block_id;
+
+paramdef double {
+  p_default = 0.256;
+  p_descr = "Specified dwell pulse width in microseconds.";
+  p_help = "Applies to DWELL_PULSE_WIDTH_CHANGE.";
+} dwell_pulse_width_us;
 
 paramdef boolean {
   p_default = true;
@@ -375,7 +360,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "./startup_cal.xml";
+  p_default = "$(PROJ_DIR)/calibration/data/wband_256ns/combined/TsCalAuto_Wband-HCR-256ns_20240415_234224.xml";
   p_descr = "File name for calibration to be read at startup. Required.";
   p_help = "The startup calibration file is required. The startup cal will be overridden if set_cal_by_pulse_width is true, or if use_cal_from_time_series is true.";
 } startup_cal_file;
@@ -391,18 +376,15 @@ typedef struct {
   string cal_dir;
   boolean check_xmit_rcv_mode;
   xmit_rcv_mode_t xmit_rcv_mode;
-  double zdr_correction_db;
-  double system_phidp_deg;
 } pulse_width_cal_t;
 
 paramdef struct pulse_width_cal_t {
   p_default = {
-    { 0.5, "/tmp/cal_pw_0.5", FALSE, DP_V_ONLY_FIXED_HV, -9999.0, -9999.0 },
-    { 1.0, "/tmp/cal_pw_1.0", FALSE, DP_V_ONLY_FIXED_HV, -9999.0, -9999.0 },
-    { 2.0, "/tmp/cal_pw_2.0", FALSE, DP_V_ONLY_FIXED_HV, -9999.0, -9999.0 }
+    { 0.256, "$(PROJ_DIR)/calibration/data/wband_256ns/combined", FALSE, DP_V_ONLY_FIXED_HV },
+    { 0.512, "$(PROJ_DIR)/calibration/data/wband_512ns/combined", FALSE, DP_V_ONLY_FIXED_HV }
   };
   p_descr = "Specify the directories in which the calibration files for each pulse width will be stored.";
-  p_help = "See 'set_cal_by_pulse_width'. First, the app will determine which of the specified pulse widths best matches the pulse width in the data. The closest available pulse width will be used. The corresponding directory will then be searched. The cal file in that directory which is closest in time to the beam time will be used.\nYou can optionally specify that we check the xmit_rcv_mode and use different cal directories for different modes.\nNOTE - the pulse width is specified in micro-seconds. In addition, (a) if override_cal_zdr_correction is true, and zdr_correction_db != -9999, then the specified zdr_correction_db is applied, and (b) if override_cal_system_phidp is true, and system_phidp_deg != -9999, then the specified system phidp is used.";
+  p_help = "See 'set_cal_by_pulse_width'. First, the app will determine which of the specified pulse widths best matches the pulse width in the data. The closest available pulse width will be used. The corresponding directory will then be searched. The cal file in that directory which is closest in time to the beam time will be used.\nYou can optionally specify that we check the xmit_rcv_mode and use different cal directories for different modes.\nNOTE - the pulse width is specified in micro-seconds.";
 } pulse_width_cals[];
 
 paramdef int {
@@ -410,12 +392,6 @@ paramdef int {
   p_descr = "Frequency at which to check for new cal (secs).";
   p_help = "The program will scan the calibration directory structure once every period, to check for new calibration files.";
 } cal_recheck_period;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to use cal information from time series data.";
-  p_help = "If true, the cal information in the time series data will be used, if available. If false, the cal info in the param file will be used.";
-} use_cal_from_time_series;
 
 paramdef boolean {
   p_default = false;
@@ -551,96 +527,11 @@ paramdef boolean {
 } georef_fixed_location_mode;
 
 commentdef {
-  p_header = "CORRECT CALIBRATION RECEIVER GAIN USING MEASURED NOISE VALUES";
-  p_text = "Noise values are measured using NoiseMon, which computes the noise for gates above a designated height, and checks that rays are not close to the sun or contain significant reflectivity.";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to correct calibration receiver gains using measured noise values.";
-  p_help = "Noise values are measured using NoiseMon.";
-} noise_mon_correct_cal_rx_gain;
-
-paramdef string {
-  p_default = "$(DATA_DIR)/calibration/spol/noise_mon/sband/spdb";
-  p_descr = "URL for NoiseMon results in SPDB.";
-} noise_mon_spdb_url;
-
-paramdef int {
-  p_default = 3600;
-  p_descr = "Search margin for finding NoiseMon data (secs).";
-  p_help = "We search a time period from the radar time minus the margin to the radar time plus the margin. We compute the mean value within this time range.";
-} noise_mon_search_margin_secs;
-
-paramdef string {
-  p_default = "NoiseMonitoring";
-  p_descr = "XML tag for noise monitoring section.";
-} noise_mon_tag_main;
-
-paramdef string {
-  p_default = "<NoiseMonitoring><meanNoiseZdr>";
-  p_descr = "Tag for noise ZDR.";
-  p_help = "This tag must exist in the noise monitoring XML."; 
-} noise_mon_tag_list_zdr;
-
-paramdef string {
-  p_default = "<NoiseMonitoring><meanDbmhc>";
-  p_descr = "Tag for noise dbm in H co-polar channel.";
-} noise_mon_tag_list_dbmhc;
-
-paramdef string {
-  p_default = "<NoiseMonitoring><meanDbmvc>";
-  p_descr = "Tag for noise dbm in V co-polar channel.";
-} noise_mon_tag_list_dbmvc;
-
-paramdef string {
-  p_default = "<SpolStatus><WxStation><tempC>";
-  p_descr = "Tag for site temperature.";
-} noise_mon_tag_list_site_temp;
-
-commentdef {
-  p_header = "ATMOSPHERIC ATTENUATION CORRECTION METHOD";
-}
-
-typedef enum {
-  ATMOS_ATTEN_NONE, 
-  ATMOS_ATTEN_CONSTANT, 
-  ATMOS_ATTEN_CRPL
-} atmos_atten_method_t;
-
-paramdef enum atmos_atten_method_t {
-  p_default = ATMOS_ATTEN_CRPL;
-  p_descr = "Method for computing atmospheric attenuation.";
-  p_help = "This is applied to the DBZ fields only.\n"
-  "\tATMOS_ATTEN_NONE:\n"
-  "\t\tNo correction is applied\n"
-  "\tATMOS_ATTEN_CONSTANT:\n"
-  "\t\tA constant correction in dB/km is applied\n"
-  "\t\tSee atmos_atten_db_per_km\n"
-  "\tATMOS_ATTEN_CRPL:\n"
-  "\t\tUses the method based on the Central Radio Propagation Laboratory\n"
-  "\t\tmeasurements.\n"
-  "\t\tSee Doviak and Zrnic, page 44\n";
-} atmos_atten_method;
-
-paramdef double {
-  p_default = 0.012;
-  p_descr = "Constant atmospheric attenuation (dB/km).";
-  p_help = "DBZ is corrected for this.";
-} atmos_atten_db_per_km;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out debug fields for alternating mode velocity.";
-  p_help = "If true the following fields are written out: test2=meanConfidence, test3=minVelRun, test4=maxVelRun, test5=unfolded, vel=velAlt, vel_alt_fold_interval, vel_alt_fold_confidence, vel_diff, vel_unfold_interval.";
-} write_alt_mode_vel_debug_fields;
-
-commentdef {
   p_header = "NOISE DETECTION";
 }
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to correct power for estimated noise.";
   p_help = "We estimate the noise by identifying regions with noise and computing the mean power - see above. If this parameter is set to TRUE, we use the estimated noise instead of teh calibrated noise to compute the noise-subtracted powers.";
 } use_estimated_noise_for_noise_subtraction;
@@ -859,66 +750,28 @@ typedef enum {
   // reflectivity
 
   DBZ,
-  DBZ_NO_ATMOS_ATTEN,
   DBZHC,
   DBZVC,
-  DBZHX,
-  DBZVX,
 
   // velocity
 
   VEL,
-  VEL_ALT,
-  VEL_HV,
-  VEL_H_ONLY,
-  VEL_V_ONLY,
-  VEL_ALT_FOLD_INTERVAL,
-  VEL_ALT_FOLD_CONFIDENCE,
   VEL_CORR_VERT,
   VEL_CORR_MOTION,
   
-  // STAGGERED PRT VEL
-
-  VEL_PRT_SHORT,
-  VEL_PRT_LONG,
-  VEL_DIFF,
-  VEL_UNFOLD_INTERVAL,
-
   // width
 
   WIDTH,
-  WIDTH_R0R1,
-  WIDTH_R1R2,
-  WIDTH_R1R3,
-  WIDTH_PPLS,
-  WIDTH_H_ONLY,
-  WIDTH_V_ONLY,
-  WIDTH_PRT_LONG,
-  WIDTH_PRT_SHORT,
   WIDTH_CORR_MOTION,
 
   // normalized coherent power
-
+  
   NCP,
-  NCP_H_ONLY,
-  NCP_V_ONLY,
-  NCP_H_MINUS_V,
-
-  NCP_TRIP1,
-  NCP_TRIP2,
-  NCP_TRIP3,
-  NCP_TRIP4,
-
-  NCP_PRT_LONG,
-  NCP_PRT_SHORT,
-  NCP_TRIP_FLAG,
 
   // NOISE BIAS
 
   NOISE_BIAS_DB_HC,
-  NOISE_BIAS_DB_HX,
   NOISE_BIAS_DB_VC,
-  NOISE_BIAS_DB_VX,
 
   // NOISE IDENTIFICATION
   
@@ -926,7 +779,6 @@ typedef enum {
   SIGNAL_FLAG,
   NOISE_INTEREST,
   SIGNAL_INTEREST,
-
   NOISE_ACCUM_PHASE_CHANGE,
   NOISE_PHASE_CHANGE_ERROR,
   NOISE_DBM_SDEV,
@@ -936,209 +788,33 @@ typedef enum {
 
   SNR,
   SNRHC,
-  SNRHX,
   SNRVC,
-  SNRVX,
 
   // UNCALIBRATED POWER
 
   DBM,
   DBMHC,
-  DBMHX,
   DBMVC,
-  DBMVX,
 
   // NOISE SUBTRACTED POWER
-
+  
   DBMHC_NS,
-  DBMHX_NS,
   DBMVC_NS,
-  DBMVX_NS,
 
   // DUAL POL
 
-  ZDRM, // measured
-  ZDR,  // calibrated
-  ZDR_BIAS,  // ZDR - LDR_DIFF
-
   LDR,
-  LDRHM,
   LDRH,
-  LDRVM,
   LDRV,
-  LDR_DIFF,
-  LDR_MEAN,
-
-  RHOHV,
-  RHOHV_NNC,
-
-  PHIDP0, // uncorrected
-  PHIDP, // corrected for system phidp
-
-  PHIDP_COND, // phidp conditioned for kdp
-  PHIDP_FILT, // phidp filt for kdp
-  PHIDP_SDEV_4KDP, // phidp sdev in range when computing KDP
-  PHIDP_JITTER_4KDP, // phidp jitter in range when computing KDP
-  ZDR_SDEV_4KDP, // sdev of zdr as computed for KDP
-  KDP,
-  PSOB, // phase shift on backscatter
-  KDP_HB, // hubbert-bringi method 
-
-  // co-cross correlation
-
-  RHO_HC_VX,
-  RHO_VC_HX,
-  RHO_VX_HX,
-  RHO_PHIDP,
-
-  // cross polar ratio - CPR
-
-  CPR_MAG,
-  CPR_PHASE,
-  CPR_LDR,
-
-  // ATTENUATION CORRECTION
-
-  DBZ_ATTEN_CORRECTION,
-  ZDR_ATTEN_CORRECTION,
-  DBZ_ATTEN_CORRECTED,
-  ZDR_ATTEN_CORRECTED,
-
-  // CMD
-
-  CPA,
-  TDBZ,
-  SPIN,
-  MAX_TDBZ_SPIN,
-  ZDR_SDEV,
-  PHIDP_SDEV,
-  DBZ_DIFF_SQ,
-  DBZ_SPIN_CHANGE,
-  CMD,
-  CMD_FLAG,
-
-  RHOHV_TEST_UNFILT,
-  RHOHV_TEST_FILT,
-  RHOHV_TEST_IMPROV,
-  RHOHV_TEST_FLAG,
-
-  TDBZ_INTEREST,
-  SPIN_INTEREST,
-  CPA_INTEREST,
-  ZDR_SDEV_INTEREST,
-  PHIDP_SDEV_INTEREST,
-
-  // CLUTTER FILTERED
-
-  CLUT, // power
-  CLUT_2_WX_RATIO,
-  SPECTRAL_NOISE,
-  SPECTRAL_SNR,
-  REGR_FILT_POLY_ORDER,
-  REGR_FILT_CNR_DB,
-
-  // REFRACT
-
-  AIQ_HC,
-  NIQ_HC,
-  AIQ_VC,
-  NIQ_VC,
-
-  // SZ8-64
-
-  SZ_TRIP_FLAG,
-  SZ_LEAKAGE,
-
+  
   // censoring flag
 
   CENSORING_FLAG,
-
-  // covariances
-
-  LAG0_HC_DB,
-  LAG0_HX_DB,
-  LAG0_VC_DB,
-  LAG0_VX_DB,
-
-  LAG0_HC_SHORT_DB,
-  LAG0_VC_SHORT_DB,
-  LAG0_HC_LONG_DB,
-  LAG0_VC_LONG_DB,
-
-  LAG0_VCHX_DB,
-  LAG0_VCHX_PHASE,
-
-  LAG0_HCVX_DB,
-  LAG0_HCVX_PHASE,
-
-  LAG1_HC_DB,
-  LAG1_HC_PHASE,
-
-  LAG1_VC_DB,
-  LAG1_VC_PHASE,
-
-  LAG1_HCVC_DB,
-  LAG1_HCVC_PHASE,
-
-  LAG1_VCHC_DB,
-  LAG1_VCHC_PHASE,
-
-  LAG1_VXHX_DB,
-  LAG1_VXHX_PHASE,
-
-  LAG1_HC_LONG_DB,
-  LAG1_HC_LONG_PHASE,
-
-  LAG1_VC_LONG_DB,
-  LAG1_VC_LONG_PHASE,
-
-  LAG1_HC_SHORT_DB,
-  LAG1_HC_SHORT_PHASE,
-
-  LAG1_VC_SHORT_DB,
-  LAG1_VC_SHORT_PHASE,
-
-  LAG1_HC_LONG_TO_SHORT_DB,
-  LAG1_HC_LONG_TO_SHORT_PHASE,
-
-  LAG1_VC_LONG_TO_SHORT_DB,
-  LAG1_VC_LONG_TO_SHORT_PHASE,
-
-  LAG1_HC_SHORT_TO_LONG_DB,
-  LAG1_HC_SHORT_TO_LONG_PHASE,
-
-  LAG1_VC_SHORT_TO_LONG_DB,
-  LAG1_VC_SHORT_TO_LONG_PHASE,
-
-  LAG2_HC_DB,
-  LAG2_HC_PHASE,
-
-  LAG2_VC_DB,
-  LAG2_VC_PHASE,
-
-  LAG3_HC_DB,
-  LAG3_HC_PHASE,
-
-  LAG3_VC_DB,
-  LAG3_VC_PHASE,
-
-  RVVHH0_DB,
-  RVVHH0_PHASE,
-
-  RVVHH0_LONG_DB,
-  RVVHH0_LONG_PHASE,
-
-  RVVHH0_SHORT_DB,
-  RVVHH0_SHORT_PHASE,
-
-  SDEV_VV,
 
   // DEBUG
 
   PRT,
   NUM_PULSES,
-
-  TEST,
   TEST0,
   TEST1,
   TEST2,
@@ -1159,94 +835,29 @@ typedef struct {
   string units;
   double scale;
   double bias;
-  boolean write_unfiltered;
-  boolean write_filtered;
     
 } output_field_t;
 
 paramdef struct output_field_t {
   p_default = {
-    { NCP, "NCP", "", 0.0001, -0.01, TRUE, FALSE},
-    { SNR, "SNR", "dB", 0.01, -320, TRUE, FALSE},
-    { DBM, "DBM", "dBm", 0.01, -320, TRUE, FALSE},
-    { DBZ, "DBZ", "dBZ", 0.01, -320, TRUE, TRUE},
-    { VEL, "VEL", "m/s", 0.01, -320, TRUE, TRUE},
-    { WIDTH, "WIDTH", "m/s", 0.001, -0.01, TRUE, TRUE},
-    { WIDTH_R0R1, "WIDTH_R0R1", "m/s", 0.001, -0.01, TRUE, TRUE},
-    { WIDTH_R1R2, "WIDTH_R1R2", "m/s", 0.001, -0.01, TRUE, TRUE},
-    { WIDTH_R1R3, "WIDTH_R1R3", "m/s", 0.001, -0.01, TRUE, TRUE},
-    { WIDTH_PPLS, "WIDTH_PPLS", "m/s", 0.001, -0.01, TRUE, TRUE},
-    { CLUT, "CLUT", "dB", 0.01, -320, TRUE, FALSE},
-    { CLUT_2_WX_RATIO, "CLUT_2_WX_RATIO", "dB", 0.01, -320, FALSE, FALSE},
-    { SPECTRAL_NOISE, "SPECTRAL_NOISE", "dBm", 0.01, -320, FALSE, FALSE},
-    { SPECTRAL_SNR, "SPECTRAL_SNR", "dB", 0.01, -320, FALSE, FALSE},
-    { ZDR, "ZDR", "dB", 0.001, -32, FALSE, FALSE},
-    { ZDRM, "ZDRM", "dB", 0.001, -32, FALSE, FALSE},
-    { LDRHM, "LDRHM", "dB", 0.005, -160, FALSE, FALSE},
-    { LDRH, "LDRH", "dB", 0.005, -160, FALSE, FALSE},
-    { LDRVM, "LDRVM", "dB", 0.005, -160, FALSE, FALSE},
-    { LDRV, "LDRV", "dB", 0.005, -160, FALSE, FALSE},
-    { RHOHV, "RHOHV", "", 0.0001, -1, FALSE, FALSE},
-    { PHIDP0, "PHIDP0", "deg", 0.06, -200, FALSE, FALSE},
-    { PHIDP, "PHIDP", "deg", 0.06, -200, FALSE, FALSE},
-    { KDP, "KDP", "deg/km", 0.001, -32, FALSE, FALSE},
-    { SNRHC, "SNRHC", "dB", 0.01, -320, FALSE, FALSE},
-    { SNRHX, "SNRHX", "dB", 0.01, -320, FALSE, FALSE},
-    { SNRVC, "SNRVC", "dB", 0.01, -320, FALSE, FALSE},
-    { SNRVX, "SNRVX", "dB", 0.01, -320, FALSE, FALSE},
-    { DBMHC, "DBMHC", "dBm", 0.01, -320, FALSE, FALSE},
-    { DBMHX, "DBMHX", "dBm", 0.01, -320, FALSE, FALSE},
-    { DBMVC, "DBMVC", "dBm", 0.01, -320, FALSE, FALSE},
-    { DBMVX, "DBMVX", "dBm", 0.01, -320, FALSE, FALSE},
-    { CPA, "CPA", "", 0.0001, -1, FALSE, FALSE},
-    { TDBZ, "TDBZ", "dBzSq", 0.1, -0.1, FALSE, FALSE},
-    { SPIN, "SPIN", "", 0.01, -0.1, FALSE, FALSE},
-    { MAX_TDBZ_SPIN, "MAX_TDBZ_SPIN", "", 0.0001, -1, FALSE, FALSE},
-    { ZDR_SDEV, "ZDR_SDEV", "dB", 0.001, -32, FALSE, FALSE},
-    { PHIDP_SDEV, "PHIDP_SDEV", "deg", 0.02, -640, FALSE, FALSE},
-    { DBZ_DIFF_SQ, "DBZ_DIFF_SQ", "dBzSq", 0.01, -320, FALSE, FALSE},
-    { DBZ_SPIN_CHANGE, "DBZ_SPIN_CHANGE", "", 0.01, -320, FALSE, FALSE},
-    { CMD, "CMD", "", 0.001, -0.01, FALSE, FALSE},
-    { CMD_FLAG, "CMD_FLAG", "", 1, -100, FALSE, FALSE},
-    { AIQ_HC, "AIQ_HC", "deg", 0.12, -360, FALSE, FALSE},
-    { NIQ_HC, "NIQ_HC", "dBm", 0.01, -320, FALSE, FALSE},
-    { AIQ_VC, "AIQ_VC", "deg", 0.12, -360, FALSE, FALSE},
-    { NIQ_VC, "NIQ_VC", "dBm", 0.01, -320, FALSE, FALSE},
-    { SZ_TRIP_FLAG, "SZ_TRIP_FLAG", "", 1, -1000, FALSE, FALSE},
-    { SZ_LEAKAGE, "SZ_LEAKAGE", "", 0.0001, -1, FALSE, FALSE},
-    { CENSORING_FLAG, "CENSORING_FLAG", "", 1, -1000, FALSE, FALSE},
-    { LAG0_HC_DB, "LAG0_HC_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG0_HX_DB, "LAG0_HX_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG0_VC_DB, "LAG0_VC_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG0_VX_DB, "LAG0_VX_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG0_HCVX_DB, "LAG0_HCVX_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG0_HCVX_PHASE, "LAG0_HCVX_PHASE", "deg", 0.006, -190, FALSE, FALSE},
-    { LAG0_VCHX_DB, "LAG0_VCHX_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG0_VCHX_PHASE, "LAG0_VCHX_PHASE", "deg", 0.006, -190, FALSE, FALSE},
-    { LAG1_HC_DB, "LAG1_HC_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG1_HC_PHASE, "LAG1_HC_PHASE", "deg", 0.006, -190, FALSE, FALSE},
-    { LAG1_VC_DB, "LAG1_VC_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG1_VC_PHASE, "LAG1_VC_PHASE", "deg", 0.006, -190, FALSE, FALSE},
-    { LAG1_HCVC_DB, "LAG1_HCVC_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG1_HCVC_PHASE, "LAG1_HCVC_PHASE", "deg", 0.006, -190, FALSE, FALSE},
-    { LAG1_VCHC_DB, "LAG1_VCHC_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG1_VCHC_PHASE, "LAG1_VCHC_PHASE", "deg", 0.006, -190, FALSE, FALSE},
-    { LAG1_VXHX_DB, "LAG1_VXHX_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG1_VXHX_PHASE, "LAG1_VXHX_PHASE", "deg", 0.006, -190, FALSE, FALSE},
-    { LAG2_HC_DB, "LAG2_HC_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG2_HC_PHASE, "LAG2_HC_PHASE", "deg", 0.006, -190, FALSE, FALSE},
-    { LAG2_VC_DB, "LAG2_VC_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG2_VC_PHASE, "LAG2_VC_PHASE", "deg", 0.006, -190, FALSE, FALSE},
-    { LAG3_HC_DB, "LAG3_HC_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG3_HC_PHASE, "LAG3_HC_PHASE", "deg", 0.006, -190, FALSE, FALSE},
-    { LAG3_VC_DB, "LAG3_VC_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { LAG3_VC_PHASE, "LAG3_VC_PHASE", "deg", 0.006, -190, FALSE, FALSE},
-    { RVVHH0_DB, "RVVHH0_DB", "dBm", 0.005, -160, FALSE, FALSE},
-    { RVVHH0_PHASE, "RVVHH0_PHASE", "deg", 0.006, -190, FALSE, FALSE},
-    { SDEV_VV, "SDEV_VV", "dBm", 0.01, -320, FALSE, FALSE},
-    { PRT, "PRT", "s", 0.00001, 780e-6, TRUE, FALSE},
-    { NUM_PULSES, "NUM_PULSES", "", 1, 0, TRUE, FALSE},
-    { TEST0, "TEST0", "", 0.01, -320, FALSE, FALSE}
+    { DBZ, "DBZ", "dBZ", 0.01, -320 },
+    { DBZHC, "DBZHC", "dBZ", 0.01, -320 },
+    { DBZVC, "DBZVC", "dBZ", 0.01, -320 },
+    { VEL, "VEL", "m/s", 0.01, -320 },
+    { VEL_CORR_VERT, "VEL_CORR_VERT", "m/s", 0.01, -320 },
+    { VEL_CORR_MOTION, "VEL_CORR_MOTION", "m/s", 0.01, -320 },
+    { WIDTH, "WIDTH", "m/s", 0.001, -0.01 },
+    { WIDTH_CORR_MOTION, "WIDTH_CORR_MOTION", "m/s", 0.001, -0.01 },
+    { NCP, "NCP", "", 0.0001, -0.01 },
+    { SNR, "SNR", "dB", 0.01, -320 },
+    { SNRHC, "SNRHC", "dB", 0.01, -320 },
+    { SNRVC, "SNRVC", "dB", 0.01, -320 },
+    { DBM, "DBM", "dBm", 0.01, -320 },
+    { DBMHC, "DBMHC", "dBm", 0.01, -320 },
+    { DBMVC, "DBMVC", "dBm", 0.01, -320 },
+    { LDR, "LDR", "dB", 0.01, -320 },
+    { LDRH, "LDRH", "dB", 0.01, -320 },
+    { LDRV, "LDRV", "dB", 0.01, -320 }
   };
   p_descr = "Indicate which fields should be written to the Dsr FMQ.";
   p_help = "Choose the ID from the list. The name and units can be set however the user prefers. The scale and bias are applied to the floating point value to compute the 16-bit output value for the FMQ. The write_filtered and write_unfiltered flags indicate which fields should be written.";
