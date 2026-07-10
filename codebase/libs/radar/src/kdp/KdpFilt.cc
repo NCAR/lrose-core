@@ -1139,6 +1139,14 @@ void KdpFilt::_loadKdp()
   
   for (int ii = 0; ii < _nGates; ii++) {
 
+    if (!_validForKdp[ii]) {
+      _kdp[ii] = 0.0;
+      _kdpZZdr[ii] = 0.0;
+      _kdpSC[ii] = 0.0;
+      _psob[ii] = 0.0;
+      continue;
+    }
+      
     // check SNR
     
     if (_snr[ii] < _snrThreshold) {
@@ -1148,7 +1156,7 @@ void KdpFilt::_loadKdp()
       _psob[ii] = _missingValue;
       continue;
     }
-
+    
     // get max DBZ for surrounding gates
     
     double maxDbz = _dbzMax[ii];
@@ -1164,7 +1172,7 @@ void KdpFilt::_loadKdp()
     } else {
       adapLen = 2;
     }
-
+    
     int i0 = ii - adapLen;
     if (i0 < 0) {
       i0 = 0;
@@ -1181,13 +1189,13 @@ void KdpFilt::_loadKdp()
       double dphi = _phidpFftCond[i1] - _phidpFftCond[i0];
       _kdp[ii] = (dphi / (_gateSpacingKm * len)) / 2.0;
     }
-
+    
     if (_foldsAt90) {
       _kdp[ii] /= 2.0;
     }
-
+    
     _kdpZZdr[ii] = _computeKdpFromZZdr(_dbzMedian[ii], _zdrMedian[ii]);
-
+    
   } // ii
 
 }
@@ -1438,6 +1446,10 @@ void KdpFilt::_computeFftConditioned()
 {
 
   bool debug = false;
+  // if (_azDeg > 75 && _azDeg < 125) {
+  //   debug = true;
+  //   cerr << "AAAAAAAAAAAAA az: " << _azDeg << endl;
+  // }
 
   // loop through the valid runs
 
@@ -1448,6 +1460,13 @@ void KdpFilt::_computeFftConditioned()
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
 
     PhidpRun &run = _validRuns[irun];
+
+    if (debug) {
+      cerr << "++++++++++++++++++++++++++++++++++++++++" << endl;
+      cerr << "  irun, ibegin, iend: "
+           << irun << ", " << run.ibegin << ", " << run.iend << endl;
+    }
+
     run.phidpBegin = _phidpMeanUnfold[run.ibegin];
     run.phidpEnd = _phidpMeanUnfold[run.iend];
     
@@ -1503,8 +1522,11 @@ void KdpFilt::_computeFftConditioned()
     int prevBotIndex = 0;
     for (size_t ii = 0; ii < botIndices.size(); ii++) {
       
-      if (debug)
+      if (debug) {
         cerr << "----------------------------------------" << endl;
+        cerr << "  ii, botIndices: " << ii << ", " << botIndices[ii] << endl;
+        cerr << "  ii, topIndices: " << ii << ", " << topIndices[ii] << endl;
+      }
       
       // look back for the point where the phidp value
       // drops below the bottom value
