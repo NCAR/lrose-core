@@ -2216,9 +2216,35 @@ void KdpFilt::_fftFilter()
   for (int igate = 0; igate < _nGates; igate++) {
     RadarComplex::setFromDegrees(_phidpMeanUnfold[igate], phiComplex[igate]);
   }
-  for (int igate = 0; igate < _nGatesPad; igate++) {
-    phiComplex[-1 - igate] = phiComplex[0];
-    phiComplex[_nGates + igate] = phiComplex[_nGates - 1];
+
+  // interpolate between end-points for the padded gates
+
+  RadarComplex_t angleStart = phiComplex[0];
+  RadarComplex_t angleEnd = phiComplex[_nGates - 1];
+  vector<RadarComplex_t> interpVec;
+  RadarComplex::interpAndLoadVec(angleStart, angleEnd, _nGatesPad * 2, interpVec);
+  for (int ii = 0; ii < _nGatesPad; ii++) {
+    phiComplex[-1 - ii] = interpVec[ii];
+    phiComplex[_nGates + ii] = interpVec[_nGatesPad * 2 - 1 - ii];
+  }
+  if (_azDeg >= 118 && _azDeg <= 123) {
+    cerr << "===================================" << endl;
+    cerr << "000000 _azDeg: " << _azDeg << endl;
+    cerr << "1111111111 _nGates: " << _nGates << endl;
+    cerr << "1111111111 _nGatesPad: " << _nGatesPad << endl;
+    cerr << "1111111111 _nGatesPadded: " << _nGatesPadded << endl;
+    cerr << "1111111111 angleStart: " << RadarComplex::argDeg(angleStart) << endl;
+    cerr << "1111111111 angleEnd: " << RadarComplex::argDeg(angleEnd) << endl;
+    for (int ii = 0; ii < _nGatesPadded; ii++) {
+      if (ii == _nGatesPad) {
+        cerr << "----------------------------" << endl;
+      }
+      cerr << "  222222222 ii, angle: " << ii << ", " << RadarComplex::argDeg(phiComplex_[ii]) << endl;
+      if (ii == _nGatesPadded - _nGatesPad - 1) {
+        cerr << "oooooooooooooooooooooooooooo" << endl;
+      }
+    }
+    cerr << "===================================" << endl;
   }
   
   // perform forward FFT

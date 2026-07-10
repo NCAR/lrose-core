@@ -607,3 +607,46 @@ void RadarComplex::printVector(ostream &out,
 
 }
 
+///////////////////////////////
+// interpolate between 2 values
+// load vector of specified length
+
+void RadarComplex::interpAndLoadVec(const RadarComplex_t &start,
+                                    const RadarComplex_t &end,
+                                    int nInterp,
+                                    vector<RadarComplex_t> &interpVec)
+  
+{
+
+  interpVec.resize(nInterp);
+
+  double startX = start.re;
+  double startY = start.im;
+  
+  double endX = end.re;
+  double endY = end.im;
+
+  double startMag = sqrt(startX * startX + startY * startY);
+  double endMag = sqrt(endX * endX + endY * endY);
+  
+  double deltaX = (endX - startX) / (nInterp + 1.0);
+  double deltaY = (endY - startY) / (nInterp + 1.0);
+  double deltaMag = (endMag - startMag) / (nInterp + 1.0);
+
+  for (int ii = 0; ii < nInterp; ii++) {
+
+    double jj = ii + 1.0;
+    double xx = startX + jj * deltaX;
+    double yy = startY + jj * deltaY;
+    double mag = sqrt(xx * xx + yy * yy);
+
+    double magInterp = startMag + jj * deltaMag;
+    double magRatio = magInterp / mag;
+
+    interpVec[ii].re = xx * magRatio;
+    interpVec[ii].im = yy * magRatio;
+
+  } // ii
+  
+}
+
