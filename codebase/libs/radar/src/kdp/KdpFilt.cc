@@ -1482,13 +1482,14 @@ void KdpFilt::_computeFftConditioned()
     vector<int> topIndices;
     vector<int> botIndices;
     
-    for (int igate = run.ibegin + 1; igate <= run.iend; igate++) {
+    for (int igate = run.ibegin + 2; igate <= run.iend; igate++) {
     
-      double diff = _phidpFftFilt[igate] - _phidpFftFilt[igate-1];
+      double diff2 = _phidpFftFilt[igate-1] - _phidpFftFilt[igate-2];
+      double diff1 = _phidpFftFilt[igate] - _phidpFftFilt[igate-1];
       
       // look for increasing trend
       
-      if (diff > 0 && prevDiff > 0) {
+      if (diff1 > 0 && diff2 > 0) {
         if (!increasing) {
           botIndex = igate - 2;
           increasing = true;
@@ -1503,7 +1504,7 @@ void KdpFilt::_computeFftConditioned()
       
       // look for decreasing trend
       
-      if (diff < 0 && prevDiff < 0) {
+      if (diff1 < 0 && diff2 < 0) {
         if (!decreasing) {
           topIndex = igate - 2;
           decreasing = true;
@@ -1511,8 +1512,6 @@ void KdpFilt::_computeFftConditioned()
       } else {
         decreasing = false;
       }
-      
-      prevDiff = diff;
       
     } // igate
     
