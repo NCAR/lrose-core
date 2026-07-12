@@ -1474,7 +1474,6 @@ void KdpFilt::_computeFftConditioned()
 
     bool increasing = false;
     bool decreasing = false;
-    double prevDiff = 0.0;
     
     int topIndex = -1;
     int botIndex = -1;
@@ -2230,14 +2229,14 @@ void KdpFilt::_fftFilter()
 
   // create complex array for phidp
   // pad out to avoid ringing at extremities
-
+  
   vector<RadarComplex_t> phiComplex_;
   phiComplex_.resize(_nGatesPadded);
   RadarComplex_t *phiComplex = phiComplex_.data() + _nGatesPad;
   for (int igate = 0; igate < _nGates; igate++) {
     RadarComplex::setFromDegrees(_phidpMeanUnfold[igate], phiComplex[igate]);
   }
-
+  
   // interpolate between end-points for the padded gates
 
   RadarComplex_t angleStart = phiComplex[0];
