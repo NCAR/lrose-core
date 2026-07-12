@@ -257,11 +257,22 @@ public:
 
 
   /**
+   * Set DBZ threshold for valid run when computing KDP using
+   * Z and ZDR self-consistency
+   */
+
+  void setDbzMinForSelfConsistency(double val) {
+    _dbzMinForSelfConsistency = val;
+  }
+  
+  /**
    * Set KDP threshold for valid run when computing KDP using
    * Z and ZDR self-consistency
    */
 
-  void setKdpMinForSelfConsistency(double val) { _kdpMinForSelfConsistency = val; }
+  void setKdpMinForSelfConsistency(double val) {
+    _kdpMinForSelfConsistency = val;
+  }
   
   /**
    * Set length for Z and ZDR median filter when estimating
@@ -706,6 +717,7 @@ private:
   double _kdpZExpon;
   double _kdpZdrExpon;
   double _kdpZZdrCoeff;
+  double _dbzMinForSelfConsistency;
   double _kdpMinForSelfConsistency;
   int _kdpZZdrMedianLen;
 
@@ -830,6 +842,13 @@ private:
   /// get quality based on rhohv
 
   double _rhohvQuality(double rhohv);
+  
+  /// moving mean along a vector
+  
+  void _movingMean(const std::vector<double>& xx,
+                   size_t filtLen,
+                   std::vector<double>& filt);
+  
   
 };
 

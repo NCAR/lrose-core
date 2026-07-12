@@ -209,6 +209,7 @@ KdpFilt::KdpFilt()
   _kdpZExpon = 1.0;
   _kdpZdrExpon = -2.05;
   _kdpZZdrCoeff = 3.32e-5;
+  _dbzMinForSelfConsistency = 20.0;
   _kdpMinForSelfConsistency = 0.25;
   _kdpZZdrMedianLen = 5;
 
@@ -347,6 +348,7 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
   }
   setZdrSdevMax(params.KDP_zdr_sdev_max);
   setKdpMinForSelfConsistency(params.KDP_minimum_for_self_consistency);
+  setDbzMinForSelfConsistency(params.DBZ_minimum_for_self_consistency);
   setMedianFilterLenForKdpZZdr(params.KDP_median_filter_len_for_ZZDR);
 
   if (params.KDP_debug) {
@@ -487,13 +489,13 @@ int KdpFilt::compute(time_t timeSecs,
     for (int igate = 0; igate < _nGates; igate++) {
       if (_snr[igate] < _snrThreshold) {
         _kdp[igate] = _missingValue;
-        _kdpZZdr[igate] = _missingValue;
         _kdpSC[igate] = _missingValue;
+        _kdpZZdr[igate] = _missingValue;
         _psob[igate] = _missingValue;
       } else {
         _kdp[igate] = 0;
-        _kdpZZdr[igate] = 0;
         _kdpSC[igate] = 0;
+        _kdpZZdr[igate] = 0;
         _psob[igate] = 0;
       }
     }
@@ -525,6 +527,10 @@ int KdpFilt::compute(time_t timeSecs,
     }
   }
   
+  // load up conditional KDP from estimated kdp and kdpZZdr
+
+  _loadKdpSC();
+
   // write ray file if requested
 
   if (_writeRayFile) {
@@ -543,10 +549,6 @@ int KdpFilt::compute(time_t timeSecs,
   //     }
   //   }
   // }
-
-  // load up conditional KDP from estimated kdp and kdpZZdr
-
-  _loadKdpSC();
 
   // compute attenuation corrections
 
@@ -774,13 +776,13 @@ void KdpFilt::_initArrays(const double *snr,
     _validForUnfold[ii] = false;
     if (_snr[ii] < _snrThreshold) {
       _kdp[ii] = _missingValue;
-      _kdpZZdr[ii] = _missingValue;
       _kdpSC[ii] = _missingValue;
+      _kdpZZdr[ii] = _missingValue;
       _psob[ii] = _missingValue;
     } else {
       _kdp[ii] = 0;
-      _kdpZZdr[ii] = 0;
       _kdpSC[ii] = 0;
+      _kdpZZdr[ii] = 0;
       _psob[ii] = 0;
     }
     _dbzAttenCorr[ii] = 0;
@@ -2024,7 +2026,7 @@ void KdpFilt::_writeRayDataToFile()
           "# gateNum validKdp validUnfold snr dbz zdr rhohv phidp "
           "phidpMean phidpMeanValid phidpJitter phidpSdev "
           "phidpMeanUnfold phidpUnfold phidpFilt phidpCond phidpCondFilt "
-          "zdrSdev psob kdp "
+          "zdrSdev psob kdp kdpSC "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected "
           "regrFilt phidpFftFilt phidpFftCond\n");
 
@@ -2046,7 +2048,7 @@ void KdpFilt::_writeRayDataToFile()
     fprintf(out,
             "%3d %3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f"
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
@@ -2068,6 +2070,7 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_zdrSdev[igate], 0),
             _getPlotVal(_psob[igate], 0),
             _getPlotVal(_kdp[igate], 0),
+            _getPlotVal(_kdpSC[igate], 0),
             _getPlotVal(_dbzAttenCorr[igate], 0),
             _getPlotVal(_zdrAttenCorr[igate], 0),
             _getPlotVal(dbzCorrected, 0),
@@ -2136,6 +2139,7 @@ void KdpFilt::_loadKdpSC()
 
     if (_kdp[igate] == _missingValue ||
         _kdp[igate] <= _kdpMinForSelfConsistency ||
+        _dbz[igate] <= _dbzMinForSelfConsistency ||
         _kdpZZdr[igate] == _missingValue) {
       
       // non-positive KDP
@@ -2173,6 +2177,12 @@ void KdpFilt::_loadKdpSC()
   if (inRun) {
     _loadKdpSCRun(startGate, endGate);
   }
+
+  // moving mean on _kdpSC
+  
+  vector<double> filtSC;
+  _movingMean(_kdpSC_, _nGatesStats, filtSC);
+  std::copy(filtSC.begin(), filtSC.end(), _kdpSC_.begin());
 
 }
 
@@ -2410,5 +2420,40 @@ double KdpFilt::_rhohvQuality(double rhohv)
   
   // Smoothstep: zero slope at both ends
   return x * x * (3.0 - 2.0 * x);
+  
+}
+
+////////////////////////////////////////////////////////////
+/// moving mean along a vector
+
+void KdpFilt::_movingMean(const std::vector<double>& xx,
+                          size_t filtLen,
+                          std::vector<double>& filt)
+  
+{
+
+  filt.resize(xx.size());
+  
+  if (filtLen % 2 == 0) {
+    cerr << "WARNING - KdpFilt::_movingMean" << endl;
+    cerr << "  filtLen should be odd, passed in: " << filtLen << endl;
+    filtLen = (filtLen / 2) * 2;
+    cerr << "  will use filtLen: " << filtLen << endl;
+  }
+  
+  size_t half = filtLen / 2;
+  
+  // Running sum
+  double sum = 0.0;
+  for (size_t i = 0; i < filtLen; ++i)
+    sum += xx[i];
+  
+  filt[half] = sum / filtLen;
+  
+  for (size_t i = half + 1; i < xx.size() - half; ++i) {
+    sum += xx[i + half];
+    sum -= xx[i - half - 1];
+    filt[i] = sum / filtLen;
+  }
   
 }

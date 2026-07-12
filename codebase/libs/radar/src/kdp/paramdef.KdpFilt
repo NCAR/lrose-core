@@ -147,9 +147,15 @@ paramdef double {
 } KDP_zdr_sdev_max;
 
 commentdef {
-  p_header = "COMPUTING KDP FROM Z and ZDR";
+  p_header = "COMPUTING self-consistency KDP FROM Z and ZDR";
   p_text = "Using the self-consistency approach, we can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute KDP conditioned using self-consistenty. We call this KDP_SC.";
 }
+
+paramdef double {
+  p_default = 20;
+  p_descr = "Sets the lower limit of DBZ for computing KDP conditioned by self-consistency.";
+  p_help = "DBZ values lower that this will signify a gap in self-consistent KDP.";
+} DBZ_minimum_for_self_consistency;
 
 paramdef double {
   p_default = 0.25;
