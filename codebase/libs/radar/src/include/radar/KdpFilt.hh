@@ -668,6 +668,9 @@ private:
   vector<double> _kdpSC_;
   double *_kdpSC;
 
+  vector<double> _phidpSC_;
+  double *_phidpSC;
+
   vector<double> _psob_;
   double *_psob;
 

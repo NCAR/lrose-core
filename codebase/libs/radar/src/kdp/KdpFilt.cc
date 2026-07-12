@@ -490,11 +490,13 @@ int KdpFilt::compute(time_t timeSecs,
       if (_snr[igate] < _snrThreshold) {
         _kdp[igate] = _missingValue;
         _kdpSC[igate] = _missingValue;
+        _phidpSC[igate] = _missingValue;
         _kdpZZdr[igate] = _missingValue;
         _psob[igate] = _missingValue;
       } else {
         _kdp[igate] = 0;
         _kdpSC[igate] = 0;
+        _phidpSC[igate] = 0;
         _kdpZZdr[igate] = 0;
         _psob[igate] = 0;
       }
@@ -676,6 +678,7 @@ void KdpFilt::_initArrays(const double *snr,
   _kdp_.resize(_nGates); _kdp = _kdp_.data();
   _kdpZZdr_.resize(_nGates); _kdpZZdr = _kdpZZdr_.data();
   _kdpSC_.resize(_nGates); _kdpSC = _kdpSC_.data();
+  _phidpSC_.resize(_nGates); _phidpSC = _phidpSC_.data();
   _psob_.resize(_nGates); _psob = _psob_.data();
   _dbzAttenCorr_.resize(_nGates); _dbzAttenCorr = _dbzAttenCorr_.data();
   _zdrAttenCorr_.resize(_nGates); _zdrAttenCorr = _zdrAttenCorr_.data();
@@ -777,11 +780,13 @@ void KdpFilt::_initArrays(const double *snr,
     if (_snr[ii] < _snrThreshold) {
       _kdp[ii] = _missingValue;
       _kdpSC[ii] = _missingValue;
+      _phidpSC[ii] = _missingValue;
       _kdpZZdr[ii] = _missingValue;
       _psob[ii] = _missingValue;
     } else {
       _kdp[ii] = 0;
       _kdpSC[ii] = 0;
+      _phidpSC[ii] = 0;
       _kdpZZdr[ii] = 0;
       _psob[ii] = 0;
     }
@@ -2028,7 +2033,7 @@ void KdpFilt::_writeRayDataToFile()
           "phidpMeanUnfold phidpUnfold phidpFilt phidpCond phidpCondFilt "
           "zdrSdev psob kdp kdpSC "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected "
-          "regrFilt phidpFftFilt phidpFftCond\n");
+          "regrFilt phidpFftFilt phidpFftCond phidpSC\n");
 
   // write data
 
@@ -2049,7 +2054,7 @@ void KdpFilt::_writeRayDataToFile()
             "%3d %3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f"
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
             (_validForUnfold[igate]?1:0),
@@ -2077,7 +2082,8 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(zdrCorrected, 0),
             _getPlotVal(_regrFilt[igate], 0),
             _getPlotVal(_phidpFftFilt[igate], 0),
-            _getPlotVal(_phidpFftCond[igate], 0)
+            _getPlotVal(_phidpFftCond[igate], 0),
+            _getPlotVal(_phidpSC[igate], 0)
             );
   }
   
@@ -2184,6 +2190,19 @@ void KdpFilt::_loadKdpSC()
   _movingMean(_kdpSC_, _nGatesStats, filtSC);
   std::copy(filtSC.begin(), filtSC.end(), _kdpSC_.begin());
 
+  // compute _phidpSC
+
+  std::copy(_phidpFftFilt_.begin(), _phidpFftFilt_.end(), _phidpSC_.begin());
+  for (size_t irun = 0; irun < _validRuns.size(); irun++) {
+    const PhidpRun &validRun = _validRuns[irun];
+    for (int igate = validRun.ibegin + 1; igate <= validRun.iend; igate++) {
+      double kdpSC =_kdpSC[igate - 1];
+      double deltaPhi = kdpSC * 4 * _gateSpacingKm;
+      _phidpSC[igate] = RadarComplex::sumDeg(_phidpSC[igate - 1], deltaPhi);
+    }
+  }
+
+  
 }
 
 ////////////////////////////////////////////////////////////

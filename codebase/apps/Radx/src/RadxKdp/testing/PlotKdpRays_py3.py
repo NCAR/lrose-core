@@ -45,6 +45,7 @@ REQUIRED_COLUMNS = [
     "regrFilt",
     "phidpFftFilt",
     "phidpFftCond",
+    "phidpSC",
 ]
 
 ############################################################################
@@ -336,6 +337,7 @@ class KdpRayPlotter:
         self.ax2.plot(gate_num, plot_data["phidpFilt"], label="Filt", color="red")
         self.ax2.plot(gate_num, plot_data["phidpCondFilt"], label="CondFilt", color="black")
         self.ax2.plot(gate_num, plot_data["phidpFftFilt"], label="FftFilt", color="magenta")
+        self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="orange")
         self.ax2.set_xlabel("gateNum")
         self.ax2.set_ylabel("PHIDP")
 
