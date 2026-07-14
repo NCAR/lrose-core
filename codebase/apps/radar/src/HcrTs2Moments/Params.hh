@@ -193,9 +193,9 @@ public:
 
   typedef struct {
     double pulse_width_us;
+    tdrp_bool_t specify_file_name;
     char* cal_dir;
-    tdrp_bool_t check_xmit_rcv_mode;
-    xmit_rcv_mode_t xmit_rcv_mode;
+    char* cal_file_name;
   } pulse_width_cal_t;
 
   typedef struct {
@@ -592,14 +592,8 @@ public:
 
   tdrp_bool_t use_secondary_georeference;
 
-  char* startup_cal_file;
-
-  tdrp_bool_t set_cal_by_pulse_width;
-
   pulse_width_cal_t *_pulse_width_cals;
   int pulse_width_cals_n;
-
-  int cal_recheck_period;
 
   tdrp_bool_t override_cal_dbz_correction;
 
@@ -707,7 +701,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[108];
+  mutable TDRPtable _table[105];
 
   const char *_className;
 

@@ -56,6 +56,7 @@ HDRS = \
 	Args.hh \
 	Beam.hh \
 	BeamReader.hh \
+	CalibMgr.hh \
 	Calibration.hh \
 	EgmCorrection.hh \
 	HcrTs2Moments.hh \
@@ -68,6 +69,7 @@ CPPC_SRCS = \
 	Args.cc \
 	Beam.cc \
 	BeamReader.cc \
+	CalibMgr.cc \
 	Calibration.cc \
 	EgmCorrection.cc \
 	HcrTs2Moments.cc \

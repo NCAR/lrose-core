@@ -52,7 +52,7 @@ HcrTs2Moments::HcrTs2Moments(int argc, char **argv)
 {
 
   _fmq = NULL;
-  _calib = NULL;
+  _calMgr = NULL;
 
   _nBeamsSinceParams = 0;
 
@@ -92,18 +92,6 @@ HcrTs2Moments::HcrTs2Moments(int argc, char **argv)
     _params.check_for_missing_pulses = pTRUE;
   }
   
-  // initalize calibration object, read in starting calibration
-
-  _calib = new Calibration(_params);
-  _calib->readCal(_params.startup_cal_file);
-  if (!_calib->isCalAvailable()) {
-    cerr << "ERROR - HcrTs2Moments" << endl;
-    cerr << "  Cannot read startup calibration, file: "
-         << _params.startup_cal_file << endl;
-    constructorOK = false;
-    return;
-  }
-    
   // create the beam reader
 
   pthread_mutex_init(&_beamRecyclePoolMutex, NULL);
@@ -209,8 +197,8 @@ HcrTs2Moments::~HcrTs2Moments()
     delete _fmq;
   }
 
-  if (_calib) {
-    delete _calib;
+  if (_calMgr) {
+    delete _calMgr;
   }
   
   for (size_t ii = 0; ii < _beamRecyclePool.size(); ii++) {
@@ -314,6 +302,17 @@ int HcrTs2Moments::_runSingleThreaded()
       break;
     }
 
+    // read in cals at start of data
+    
+    if (_calMgr == nullptr) {
+      _calMgr = new CalibMgr(_params);
+      if (_calMgr->readCals(beam->getTimeSecs())) {
+        cerr << "ERROR - HcrTs2Moments::_runSingleThreaded()" << endl;
+        cerr << "  Cannot read calibrations" << endl;
+        return -1;
+      }
+    }
+
     _nGatesComputed += beam->getNGates();
     
     // process the current beam
@@ -352,6 +351,17 @@ int HcrTs2Moments::_runMultiThreaded()
       break;
     }
     
+    // read in cals at start of data
+    
+    if (_calMgr == nullptr) {
+      _calMgr = new CalibMgr(_params);
+      if (_calMgr->readCals(beam->getTimeSecs())) {
+        cerr << "ERROR - HcrTs2Moments::_runMultiThreaded()" << endl;
+        cerr << "  Cannot read calibrations" << endl;
+        return -1;
+      }
+    }
+
     _nGatesComputed += beam->getNGates();
     
     // process the current beam
@@ -376,15 +386,11 @@ int HcrTs2Moments::_processBeamSingleThreaded(Beam *beam)
 
 {
 
-  // get a new calibration, as appropriate
-
-  _calib->loadCal(beam);
-
   // set the calibration data on the beam
   // this makes a copy of the DsRadarCalib object, so that
   // it will not change while the compute threads are running
   
-  beam->setCalib(_calib->getIwrfCalib());
+  beam->setCalib(_calMgr->getIwrfCalib(beam->getPulseWidth()));
 
   // compute the moments for this beam
   
@@ -417,15 +423,11 @@ int HcrTs2Moments::_processBeamMultiThreaded(Beam *beam)
 
 {
 
-  // get a new calibration, as appropriate
-  
-  _calib->loadCal(beam);
-
   // set the calibration data on the beam
   // this makes a copy of the DsRadarCalib object, so that
   // it will not change while the compute threads are running
 
-  beam->setCalib(_calib->getIwrfCalib());
+  beam->setCalib(_calMgr->getIwrfCalib(beam->getPulseWidth()));
 
   // get an available thread from the thread pool
 
