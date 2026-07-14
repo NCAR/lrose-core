@@ -47,7 +47,7 @@
 #include "OutputFmq.hh"
 #include "BeamReader.hh"
 #include "Threads.hh"
-#include "Calibration.hh"
+#include "CalibMgr.hh"
 using namespace std;
 
 ////////////////////////
@@ -129,7 +129,7 @@ private:
 
   // calibration
 
-  Calibration *_calib;
+  CalibMgr *_calMgr;
 
   // send params to fmq?
   

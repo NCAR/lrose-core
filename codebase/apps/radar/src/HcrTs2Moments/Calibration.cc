@@ -49,16 +49,14 @@
 //////////////////
 // Constructor
 
-Calibration::Calibration(const Params &params) :
-        _params(params)
+Calibration::Calibration(const Params &params,
+                         double pulse_width_us) :
+        _params(params),
+        _pulseWidthUs(pulse_width_us)
 {
 
   // initialize
   
-  _calAvailable = false;
-  _prevPulseWidth = -1.0;
-  _prevXmitRcvMode = IWRF_XMIT_RCV_MODE_NOT_SET;
-  _radarName = "unknown";
   _calTime = 0;
 
 }
@@ -72,277 +70,10 @@ Calibration::~Calibration()
 }
 
 //////////////////////////////////////////////////////////
-// get current cal values
-
-const IwrfCalib &Calibration::getIwrfCalib() const
-{
-
-  return _calib;
-
-}
-
-//////////////////////////////////////////////////////////
 // Read calibration for a given file path.
 // Returns 0 on success, -1 on failure
 
-int Calibration::readCal(const string &filePath)
-
-{
-
-  // read from file
-
-  if (_readCalFromFile(filePath)) {
-    return -1;
-  }
-
-  // debug print
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _calib.print(cerr);
-  }
-
-  return 0;
-
-}
-
-//////////////////////////////////////////////////////////
-// Load calibration appropriate to a given beam
-// Returns 0 on success, -1 on failure
-
-int Calibration::loadCal(Beam *beam)
-  
-{
-  
-  // read calibration for this pulse width, if appropriate
-  
-  if (_params.set_cal_by_pulse_width) {
-    
-    if (_params.pulse_width_cals_n < 1) {
-      cerr << "WARNING - Calibration::loadCal" << endl;
-      cerr << "  No calibration directories specified for pulse width." << endl;
-      cerr << "  Set parameter 'set_cal_by_pulse_width = false'" << endl;
-      return -1;
-    }
-    
-    if (_checkPulseWidthAndRead(beam)) {
-      return -1;
-    }
-    
-  }
-  
-  return 0;
-
-}
-
-//////////////////////////////////////////////////////////
-// Read calibration for a specific pulse width,
-// appropriate to a given beam.
-// Returns 0 on success, -1 on failure
-
-int Calibration::_checkPulseWidthAndRead(Beam *beam)
-
-{
-
-  // check for change in pulse width
-  
-  double beamPulseWidthUs = beam->getPulseWidth() * 1.0e6;
-  iwrf_xmit_rcv_mode_t xmitRcvMode = beam->getXmitRcvMode();
-  
-  if (fabs(beamPulseWidthUs - _prevPulseWidth) < 0.000001 &&
-      xmitRcvMode == _prevXmitRcvMode) {
-    // don't need to read
-    return 0;
-  }
-
-  // pulse width has changed - reset
-  
-  _calAvailable = false;
-  _calTime = 0;
-  
-  // set directory for pulse width
-  
-  double minDiff = 1.0e99;
-  _calDirForPulseWidth = _params._pulse_width_cals[0].cal_dir;
-  for (int ii = 0; ii < _params.pulse_width_cals_n; ii++) {
-    
-    Params::pulse_width_cal_t entry = _params._pulse_width_cals[ii];
-
-    if (entry.check_xmit_rcv_mode) {
-      if (xmitRcvMode != _getXmitRcvMode(entry.xmit_rcv_mode)) {
-        // xmit rcv mode does not match so do not use this entry
-        continue;
-      }
-    }
-    
-    double pwidth = entry.pulse_width_us;
-    double diff = fabs(pwidth - beamPulseWidthUs);
-    if (diff < minDiff) {
-      _calDirForPulseWidth = entry.cal_dir;
-      minDiff = diff;
-    }
-    
-  } // ii
-  
-  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
-    cerr << "Reading new cal, pulse width (us): " << beamPulseWidthUs << endl;
-    cerr << "  Cal dir: " << _calDirForPulseWidth << endl;
-  }
-  
-  _prevPulseWidth = beamPulseWidthUs;
-  _prevXmitRcvMode = xmitRcvMode;
-
-  // read the calibration
-
-  if (_readCal(beam->getTimeSecs(), _calDirForPulseWidth)) {
-    return -1;
-  }
-  
-  // override from entry as required
-  
-  if (_params.override_cal_dbz_correction) {
-    _calib.setDbzCorrection(_params.dbz_correction);
-  }
-
-  return 0;
-
-}
-
-
-////////////////////////////////////////////////////////////////////////
-// search for and read a cal file, given the time
-
-int Calibration::_readCal(time_t utime, const string &calDir)
-
-{
-
-  if (utime == 0) {
-    if (_params.debug) {
-      cerr << "WARNING - Calibration::_readCal" << endl;
-      cerr << "  Cannot read cal files, data time still 0" << endl;
-    }
-    return -1;
-  }
-
-  // compile file list
-
-  FileMap fileMap;
-  int iret = _compileFileList(calDir, fileMap);
-  if (iret && _params.debug) {
-    cerr << "WARNING - Calibration::_readCal" << endl;
-    cerr << "  Cannot read cal files" << endl;
-  }
-  if (!_calAvailable && fileMap.size() == 0) {
-    cerr << "ERROR - Calibration::_readCal" << endl;
-    cerr << "  No calibration files available" << endl;
-    return -1;
-  }
-
-  // find best file
-
-  double minDiff = 1.0e99;
-  string bestPath = "";
-  time_t bestTime = 0;
-  for (FileMap::iterator it = fileMap.begin(); it != fileMap.end(); it++) {
-    const FilePair &filePair = *it;
-    double fileTime = (double) filePair.first;
-    double diff = fabs((double) utime - fileTime);
-    if (diff < minDiff) {
-      bestTime = filePair.first;
-      const string &path = filePair.second;
-      bestPath = path;
-      minDiff = diff;
-    }
-  } // it
-
-  if (bestPath.size() == 0 && _params.debug) {
-    cerr << "WARNING - Calibration::_readCal" << endl;
-    cerr << "  No cal files available" << endl;
-    return -1;
-  }
-  
-  // print out cal file list
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Data time: " << DateTime::strm(utime) << endl;
-    cerr << "Reading in calibration - available files: " << endl;
-    for (FileMap::iterator it = fileMap.begin(); it != fileMap.end(); it++) {
-      const FilePair &filePair = *it;
-      cerr << "  cal path: " << filePair.second << endl;
-      cerr << "      time: " << DateTime::strm(filePair.first) << endl;
-    } // it
-    cerr << "Best path: " << bestPath << ", time diff (days): " << minDiff / 86400.0 << endl;
-  }
-
-  bool success = false;
-
-  if (bestTime != _calTime) {
-
-    if (_readCalFromFile(bestPath) == 0) {
-
-      _calTime = bestTime;
-      success = true;
-      
-    } else {
-      
-      cerr << "WARNING - Calibration::_readCal" << endl;
-      cerr << "  Cannot read best file: " << bestPath << endl;
-      
-      // try the files in reverse order
-      
-      for (FileMap::reverse_iterator it = fileMap.rbegin();
-	   it != fileMap.rend(); it++) {
-	const FilePair &filePair = *it;
-	const string &path = filePair.second;
-	if (_params.debug) {
-	  cerr << "  Trying cal file: " << path << endl;
-	}
-	if (_readCalFromFile(path) == 0) {
-	  if (_params.debug) {
-	    cerr << "SUCCESS - Calibration::_readCal" << endl;
-	    cerr << "  Read this file instead: " << path << endl;
-	  }
-	  success = true;
-	  continue;
-	}
-      } // it
-    }
-      
-  } else {
-
-    if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
-      cerr << "Skipping cal file - " << bestPath 
-	   << " - File utime same as previous cal" << endl;
-    }
-
-  } // if (bestTime != _calTime)
-
-  if (success) {
-
-    if (_params.debug) {
-      cerr << "Read calibration, time: " << DateTime::strm(_calTime) << endl;
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        _calib.print(cerr);
-      }
-    }
-
-    return 0;
-
-  } else {
-
-    if (bestTime != _calTime) {
-      cerr << "ERROR - Calibration::_readCal" << endl;
-      cerr << "  Could not find new valid param file" << endl;
-    }
-    return -1;
-
-  }
-
-}
-
-////////////////////////////////////////////////////////////////////////
-// read a given cal file
-
-int Calibration::_readCalFromFile(const string &calPath)
+int Calibration::readCal(const string &calPath)
 
 {
 
@@ -351,15 +82,13 @@ int Calibration::_readCalFromFile(const string &calPath)
     cerr << "ERROR - Calibration::_readCalFromFile" << endl;
     cerr << "  Cannot decode cal file: " << calPath << endl;
     cerr << errStr;
-    _calAvailable = false;
     return -1;
   }
   
   _calFilePath = calPath;
-  _calAvailable = true;
-
+  
   // apply corrections as appropriate
-
+  
   _applyCorrections();
 
   if (_params.debug) {
@@ -367,111 +96,6 @@ int Calibration::_readCalFromFile(const string &calPath)
   }
 
   return 0;
-
-}
-
-////////////////////////
-// _checkDirForParams()
-//
-// Recurse down the directory tree, checking for existence
-// of _DsFileDist files
-//
-// The findLdataInfo argument indicates whether we are looking
-// for (a) _DsFileDist params files (false) or
-//     (b) _latest_data_info files (true)
-//
-// Returns 0 on success, -1 on failure.
-
-int Calibration::_compileFileList(const string &dirPath,
-                                  FileMap &fileMap)
-  
-{
-  
-  // Try to open the directory
-  
-  ReadDir rdir;
-  if (rdir.open(dirPath.c_str())) {
-    cerr << "ERROR - " << "Calibration::_compileFileList." << endl;
-    cerr << "  Cannot open dirPath: \'" << dirPath << "\'" << endl;
-    cerr << "  " << strerror(errno) << endl;
-    return (-1);
-  }
-
-  // Loop thru directory looking for sub-directories
-  
-  struct dirent *dp;
-  for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
-    
-    // exclude the '.' and '..' entries
-    
-    if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, "..")) {
-      continue;
-    }
-
-    // stat the file
-    
-    string path = dirPath;
-    path += PATH_DELIM;
-    path += dp->d_name;
-    struct stat fileStat;
-
-    if (stat(path.c_str(), &fileStat)) {
-      // file has disappeared, so ignore
-      continue;
-    }
-
-    // is this an XML file? If not, skip
-
-    if (strstr(dp->d_name, ".xml") == NULL) {
-      continue;
-    }
-    
-    // check for directory
-    
-    if (S_ISDIR(fileStat.st_mode)) {
-
-      // this is a directory, so recurse into it
-      
-      _compileFileList(path, fileMap);
-      
-    } else {
-      
-      // read the file, get the time from it
-
-      IwrfCalib cal;
-      string errStr;
-      if (cal.readFromXmlFile(path, errStr) == 0) {
-        // add to map
-        FilePair filePair(cal.getCalibTime(), path);
-        fileMap.insert(filePair);
-      }
-
-    } // if (S_ISDIR ...
-    
-  } // dp
-    
-  rdir.close();
-  
-  return 0;
-
-}
-
-////////////////////////////////////////////////////////////////
-// get the IWRF xmit/rcv mode from the parameter file enum
-
-iwrf_xmit_rcv_mode_t Calibration::_getXmitRcvMode(Params::xmit_rcv_mode_t mode)
-  
-{
-
-  switch (mode) {
-    
-    case Params::DP_H_ONLY_FIXED_HV:
-      return IWRF_H_ONLY_FIXED_HV;
-    case Params::DP_V_ONLY_FIXED_HV:
-    default:
-      return IWRF_V_ONLY_FIXED_HV;
-      
-  } // switch
 
 }
 
@@ -503,50 +127,3 @@ void Calibration::_applyCorrections()
   
 }
 
-/////////////////////////////////////////////////////////////////
-// get value from XML string, given the tag list
-// returns val, NAN on failure
-
-double Calibration::_getValFromXml(const string &xml,
-                                   const string &tagList) const
-  
-{
-  
-  // get tags in list
-  
-  vector<string> tags;
-  TaStr::tokenize(tagList, "<>", tags);
-  if (tags.size() == 0) {
-    // no tags
-    cerr << "WARNING - Calibration::_getValFromXml()" << endl;
-    cerr << "  deltaGain tag not found: " << tagList << endl;
-    return NAN;
-  }
-  
-  // read through the outer tags in status XML
-  
-  string buf(xml);
-  for (size_t jj = 0; jj < tags.size(); jj++) {
-    string val;
-    if (TaXml::readString(buf, tags[jj], val)) {
-      cerr << "WARNING - Calibration::_getValFromXml()" << endl;
-      cerr << "  Bad tags found in status xml, expecting: "
-           << tagList << endl;
-      return NAN;
-    }
-    buf = val;
-  }
-
-  // read delta gain
-  
-  double val = NAN;
-  if (TaXml::readDouble(buf, val)) {
-    cerr << "WARNING - Calibration::_getValFromXml()" << endl;
-    cerr << "  Bad deltaGain found in status xml, buf: " << buf << endl;
-    return NAN;
-  }
-  
-  return val;
-
-}
-  

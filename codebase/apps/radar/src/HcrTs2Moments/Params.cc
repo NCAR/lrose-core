@@ -1226,38 +1226,14 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'startup_cal_file'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("startup_cal_file");
-    tt->descr = tdrpStrDup("File name for calibration to be read at startup. Required.");
-    tt->help = tdrpStrDup("The startup calibration file is required. The startup cal will be overridden if set_cal_by_pulse_width is true, or if use_cal_from_time_series is true.");
-    tt->val_offset = (char *) &startup_cal_file - &_start_;
-    tt->single_val.s = tdrpStrDup("$(PROJ_DIR)/calibration/data/wband_256ns/combined/TsCalAuto_Wband-HCR-256ns_20240415_234224.xml");
-    tt++;
-    
-    // Parameter 'set_cal_by_pulse_width'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_cal_by_pulse_width");
-    tt->descr = tdrpStrDup("Option to read different cal file depending on the pulse width in the data.");
-    tt->help = tdrpStrDup("The calibration changes with pulse width. Therefore, if the radar supports variable pulse widths, you need to specify the location of the calibration files for each pulse width.\nYou can also optionally specify that we use different directories for different XMIT_RCV_MODEs. These are the same as those used in moments_params above.");
-    tt->val_offset = (char *) &set_cal_by_pulse_width - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'pulse_width_cals'
     // ctype is '_pulse_width_cal_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("pulse_width_cals");
-    tt->descr = tdrpStrDup("Specify the directories in which the calibration files for each pulse width will be stored.");
-    tt->help = tdrpStrDup("See 'set_cal_by_pulse_width'. First, the app will determine which of the specified pulse widths best matches the pulse width in the data. The closest available pulse width will be used. The corresponding directory will then be searched. The cal file in that directory which is closest in time to the beam time will be used.\nYou can optionally specify that we check the xmit_rcv_mode and use different cal directories for different modes.\nNOTE - the pulse width is specified in micro-seconds.");
+    tt->descr = tdrpStrDup("Specify the calibration files for the available pulse widths.");
+    tt->help = tdrpStrDup("If specify_file_name is true, the specified file name is used. If false, the directory is searched for the latest available file.");
     tt->array_offset = (char *) &_pulse_width_cals - &_start_;
     tt->array_n_offset = (char *) &pulse_width_cals_n - &_start_;
     tt->is_array = TRUE;
@@ -1273,52 +1249,32 @@
       tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_pulse_width_cals->pulse_width_us - (char *) _pulse_width_cals;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("cal_dir");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[1].fname = tdrpStrDup("specify_file_name");
+      tt->struct_def.fields[1].ptype = BOOL_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_pulse_width_cals->cal_dir - (char *) _pulse_width_cals;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[2].fname = tdrpStrDup("check_xmit_rcv_mode");
-      tt->struct_def.fields[2].ptype = BOOL_TYPE;
+        (char *) &_pulse_width_cals->specify_file_name - (char *) _pulse_width_cals;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("cal_dir");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_pulse_width_cals->check_xmit_rcv_mode - (char *) _pulse_width_cals;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("xmit_rcv_mode_t");
-      tt->struct_def.fields[3].fname = tdrpStrDup("xmit_rcv_mode");
-      tt->struct_def.fields[3].ptype = ENUM_TYPE;
+        (char *) &_pulse_width_cals->cal_dir - (char *) _pulse_width_cals;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[3].fname = tdrpStrDup("cal_file_name");
+      tt->struct_def.fields[3].ptype = STRING_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_pulse_width_cals->xmit_rcv_mode - (char *) _pulse_width_cals;
-        tt->struct_def.fields[3].enum_def.name = tdrpStrDup("xmit_rcv_mode_t");
-        tt->struct_def.fields[3].enum_def.nfields = 2;
-        tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("DP_H_ONLY_FIXED_HV");
-        tt->struct_def.fields[3].enum_def.fields[0].val = DP_H_ONLY_FIXED_HV;
-        tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("DP_V_ONLY_FIXED_HV");
-        tt->struct_def.fields[3].enum_def.fields[1].val = DP_V_ONLY_FIXED_HV;
+        (char *) &_pulse_width_cals->cal_file_name - (char *) _pulse_width_cals;
     tt->n_struct_vals = 8;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].d = 0.256;
-      tt->struct_vals[1].s = tdrpStrDup("$(PROJ_DIR)/calibration/data/wband_256ns/combined");
-      tt->struct_vals[2].b = pFALSE;
-      tt->struct_vals[3].e = DP_V_ONLY_FIXED_HV;
+      tt->struct_vals[1].b = pFALSE;
+      tt->struct_vals[2].s = tdrpStrDup("$(PROJ_DIR)/calibration/data/wband_256ns/combined");
+      tt->struct_vals[3].s = tdrpStrDup("TsCalAuto_Wband-HCR-256ns_20240415_234224.xml");
       tt->struct_vals[4].d = 0.512;
-      tt->struct_vals[5].s = tdrpStrDup("$(PROJ_DIR)/calibration/data/wband_512ns/combined");
-      tt->struct_vals[6].b = pFALSE;
-      tt->struct_vals[7].e = DP_V_ONLY_FIXED_HV;
-    tt++;
-    
-    // Parameter 'cal_recheck_period'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("cal_recheck_period");
-    tt->descr = tdrpStrDup("Frequency at which to check for new cal (secs).");
-    tt->help = tdrpStrDup("The program will scan the calibration directory structure once every period, to check for new calibration files.");
-    tt->val_offset = (char *) &cal_recheck_period - &_start_;
-    tt->single_val.i = 600;
+      tt->struct_vals[5].b = pFALSE;
+      tt->struct_vals[6].s = tdrpStrDup("$(PROJ_DIR)/calibration/data/wband_512ns/combined");
+      tt->struct_vals[7].s = tdrpStrDup("TsCalAuto_Wband-HCR-512ns_20240415_232321.xml");
     tt++;
     
     // Parameter 'override_cal_dbz_correction'

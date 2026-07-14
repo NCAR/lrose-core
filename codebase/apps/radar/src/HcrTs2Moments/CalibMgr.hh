@@ -22,27 +22,26 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////
-// Calibration.hh
+// CalibMgr.hh
 // 
-// Singleton - read and store calibration data
+// Manages calibration data for different pulse widths
 //
 // EOL, NCAR, Boulder CO
 //
-// August 2007
+// July 2026
 //
 // Mike Dixon
 //
 ///////////////////////////////////////////////////////////
 
-#ifndef Calibration_HH
-#define Calibration_HH
+#ifndef CalibMgr_HH
+#define CalibMgr_HH
 
 #include "Params.hh"
-#include "Beam.hh"
-#include <cstdio>
+#include "Calibration.hh"
+
 #include <radar/IwrfCalib.hh>
 #include <map>
-#include <pthread.h>
 
 typedef multimap<time_t, string, less<time_t> > FileMap;
 typedef pair<const time_t, string > FilePair;
@@ -52,47 +51,48 @@ using namespace std;
 /////////////////////////////////////////////////////
 // clibration for specific pulse width
 
-class Calibration
+class CalibMgr
 {
 
 public:
   
   // Constructor
 
-  Calibration(const Params &params,
-              double pulse_width_us);
+  CalibMgr(const Params &params);
 
   // Destructor
   
-  ~Calibration();
+  ~CalibMgr();
   
-  // Read calibration for a given file.
+  // Read calibrations for pulse widths specified in params file
   // Returns 0 on success, -1 on failure
   
-  int readCal(const string &filePath);
-
-  // get current values
-
-  const IwrfCalib &getIwrfCalib() const { return _calib; }
-  double getPulseWidthUs() const { return _pulseWidthUs; }
-  time_t getCalTime() const { return _calTime; }
-  const string &getCalPath() const { return _calFilePath; }
+  int readCals(time_t dataStartTime);
+  
+  // Load calibration appropriate to a given pulse width
+  
+  const IwrfCalib &getIwrfCalib(double pulseWidthUs) const;
 
 private:
 
-  // data
-
-  const Params &_params;
+  // params
   
-  IwrfCalib _calib;
-  double _pulseWidthUs;
-  time_t _calTime;
-  string _calFilePath;
+  const Params &_params;
 
+  // list of available cals
+  
+  vector<Calibration *> _cals;
+  
   // functions
   
-  void _applyCorrections();
+  int _getBestFilePath(const string &calDir,
+                       time_t dataTime,
+                       string &calPath);
+    
+  int _compileFileList(const string &dirPath,
+                       FileMap &fileMap);
   
+
 };
 
 
