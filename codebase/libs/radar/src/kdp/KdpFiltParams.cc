@@ -829,8 +829,20 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("COMPUTING KDP FROM Z and ZDR");
+    tt->comment_hdr = tdrpStrDup("COMPUTING self-consistency KDP FROM Z and ZDR");
     tt->comment_text = tdrpStrDup("Using the self-consistency approach, we can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute KDP conditioned using self-consistenty. We call this KDP_SC.");
+    tt++;
+    
+    // Parameter 'DBZ_minimum_for_self_consistency'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("DBZ_minimum_for_self_consistency");
+    tt->descr = tdrpStrDup("Sets the lower limit of DBZ for computing KDP conditioned by self-consistency.");
+    tt->help = tdrpStrDup("DBZ values lower that this will signify a gap in self-consistent KDP.");
+    tt->val_offset = (char *) &DBZ_minimum_for_self_consistency - &_start_;
+    tt->single_val.d = 20;
     tt++;
     
     // Parameter 'KDP_minimum_for_self_consistency'

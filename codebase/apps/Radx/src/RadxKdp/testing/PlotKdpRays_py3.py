@@ -37,6 +37,7 @@ REQUIRED_COLUMNS = [
     "phidpCondFilt",
     "psob",
     "kdp",
+    "kdpSC",
     "dbzAtten",
     "zdrAtten",
     "dbzCorrected",
@@ -44,8 +45,11 @@ REQUIRED_COLUMNS = [
     "regrFilt",
     "phidpFftFilt",
     "phidpFftCond",
+    "phidpSC",
 ]
 
+############################################################################
+# initializer
 
 class KdpRayPlotter:
     def __init__(self, options):
@@ -58,9 +62,44 @@ class KdpRayPlotter:
         self.data = {name: [] for name in REQUIRED_COLUMNS}
         self.fig = None
         self.ax1 = None
+        self.ax1r = None
         self.ax2 = None
         self.ax3 = None
         self.ax4 = None
+        self.first_valid = None
+        self.last_valid = None
+
+    # determine and apply the range to be plotted
+
+    def set_plot_limits(self):
+        valid_kdp = self.data["validKdp"]
+
+        if not valid_kdp:
+            self.first_valid = None
+            self.last_valid = None
+            return
+
+        if not self.options.valid_only:
+            self.first_valid = 0
+            self.last_valid = len(valid_kdp) - 1
+            return
+
+        self.first_valid = None
+        self.last_valid = None
+
+        for i, value in enumerate(valid_kdp):
+            if value:
+                if self.first_valid is None:
+                    self.first_valid = i
+                self.last_valid = i
+
+    def trim_valid(self, data):
+        if self.first_valid is None or self.last_valid is None:
+            return []
+
+        return data[self.first_valid:self.last_valid + 1]
+
+    # read list of ray files
 
     def read_file_list(self):
         if not os.path.isdir(self.dir_path):
@@ -94,9 +133,13 @@ class KdpRayPlotter:
             for index, filename in enumerate(self.file_list):
                 print(f"   {index}: {filename}", file=sys.stderr)
 
+    # get file path
+    
     def get_file_path(self):
         return os.path.join(self.dir_path, self.file_list[self.file_index])
 
+    # read column headers in input file
+    
     def read_column_headers(self):
         file_path = self.get_file_path()
 
@@ -121,6 +164,8 @@ class KdpRayPlotter:
             print(f"colHeaders: {self.col_headers}", file=sys.stderr)
             print(f"colIndex: {self.col_index}", file=sys.stderr)
 
+    # read input data from file
+    
     def read_input_data(self):
         self.data = {name: [] for name in REQUIRED_COLUMNS}
         file_path = self.get_file_path()
@@ -161,6 +206,16 @@ class KdpRayPlotter:
         if self.options.debug:
             print(f"Read {len(self.data['gateNum'])} data rows from {file_path}", file=sys.stderr)
 
+        self.set_plot_limits()
+
+        if self.options.debug:
+            print(
+                f"Plot index range: {self.first_valid} to {self.last_valid}",
+                file=sys.stderr,
+            )
+
+    # get key press
+    
     def press(self, event):
         if self.options.debug:
             print(f"press: {event.key}", file=sys.stderr)
@@ -176,6 +231,8 @@ class KdpRayPlotter:
             print(f"  File index: {self.file_index}", file=sys.stderr)
             print(f"  File path: {self.get_file_path()}", file=sys.stderr)
 
+    # do plot
+    
     def plot_xy(self):
         width_in = float(self.options.fig_width_mm) / 25.4
         height_in = float(self.options.fig_height_mm) / 25.4
@@ -184,6 +241,7 @@ class KdpRayPlotter:
         self.fig.canvas.mpl_connect("key_press_event", self.press)
 
         self.ax1 = self.fig.add_subplot(2, 2, 1, xmargin=0.0)
+        self.ax1r = self.ax1.twinx()
         self.ax2 = self.fig.add_subplot(2, 2, 2, xmargin=0.0)
         self.ax3 = self.fig.add_subplot(2, 2, 3, xmargin=0.0)
         self.ax4 = self.fig.add_subplot(2, 2, 4, xmargin=0.0)
@@ -202,6 +260,7 @@ class KdpRayPlotter:
 
     def do_plot(self):
         self.ax1.clear()
+        self.ax1r.clear()
         self.ax2.clear()
         self.ax3.clear()
         self.ax4.clear()
@@ -212,76 +271,153 @@ class KdpRayPlotter:
         el_str = name_parts[2] if len(name_parts) > 2 else "elevation"
         az_str = name_parts[3] if len(name_parts) > 3 else "azimuth"
 
-        gate_num = self.data["gateNum"]
-        valid_kdp = self.data["validKdp"]
-        valid_unfold = self.data["validUnfold"]
+        # Every field uses exactly the same inclusive plot slice.
+        plot_data = {
+            name: self.trim_valid(values)
+            for name, values in self.data.items()
+        }
 
-        valid_kdp1 = [val * 40.0 for val in valid_kdp]
-        valid_unfold1 = [val * -40.0 for val in valid_unfold]
-        rhohv50 = [val * 50.0 for val in self.data["rhohv"]]
-        zdr_sdev10 = [val * 10.0 for val in self.data["zdrSdev"]]
+        gate_num = plot_data["gateNum"]
+        valid_kdp = plot_data["validKdp"]
+
+        if not gate_num:
+            message = "No valid KDP gates" if self.options.valid_only else "No data"
+            for ax in (self.ax1, self.ax2, self.ax3, self.ax4):
+                ax.text(
+                    0.5, 0.5, message,
+                    transform=ax.transAxes,
+                    ha="center", va="center",
+                )
+            self.ax1.set_title(time_str, fontsize=12)
+            self.ax2.set_title(az_str, fontsize=12)
+            self.ax3.set_title(el_str, fontsize=12)
+            self.ax4.set_title(az_str, fontsize=12)
+            return
+
+        zdr_sdev10 = [value * 10.0 for value in plot_data["zdrSdev"]]
+
+        # PLOT 1 - moments
 
         self.ax1.set_title(time_str, fontsize=12)
-        self.ax1.plot(gate_num, valid_kdp1, "k:", label="validKdp")
-        self.ax1.plot(gate_num, valid_unfold1, "b:", label="validUnfold")
-        self.ax1.plot(gate_num, self.data["snr"], label="SNR")
-        self.ax1.plot(gate_num, self.data["dbz"], label="DBZ")
-        self.ax1.plot(gate_num, rhohv50, label="RHOHV*50")
-        self.ax1.plot(gate_num, zdr_sdev10, label="ZdrSdev*10")
-        self.ax1.plot(gate_num, self.data["dbzAtten"], label="dbzAtten")
-        legend1 = self.ax1.legend(loc="upper right")
-        for label in legend1.get_texts():
-            label.set_fontsize("small")
+        self.ax1.plot(gate_num, plot_data["phidpSdev"], label="Sdev", color="pink")
+        self.ax1.plot(gate_num, plot_data["phidpJitter"], label="Jitter", color="orange")
+        self.ax1r.plot(
+            gate_num, plot_data["rhohv"],
+            label="RHOHV", color="seagreen",
+        )
+        self.ax1.plot(gate_num, zdr_sdev10, label="ZdrSdev*10", color="blue")
+        self.ax1.plot(gate_num, plot_data["snr"], label="SNR", color="black")
+        self.ax1.plot(gate_num, plot_data["dbz"], label="DBZ", color="red")
         self.ax1.set_xlabel("gateNum")
         self.ax1.set_ylabel("SNR, DBZ")
 
-        valid_kdp2 = [val * 20.0 for val in valid_kdp]
-        valid_unfold2 = [val * -20.0 for val in valid_unfold]
+        self.ax1r.set_ylabel("RHOHV", color="seagreen")
+        self.ax1r.yaxis.set_label_position("right")
+        self.ax1r.yaxis.tick_right()
+        self.ax1r.set_ylim(-0.2, 1.5)
+        self.ax1r.tick_params(axis="y", labelcolor="seagreen")
+
+        lines1, labels1 = self.ax1.get_legend_handles_labels()
+        lines2, labels2 = self.ax1r.get_legend_handles_labels()
+        legend1 = self.ax1.legend(
+            lines1 + lines2, labels1 + labels2, loc="upper right"
+        )
+        for label in legend1.get_texts():
+            label.set_fontsize("small")
+
+        draw_valid_regions(
+            self.ax1, gate_num, valid_kdp,
+            color="lightgray", alpha=0.4,
+        )
+
+        # PLOT 2 - PHIDP processing
 
         self.ax2.set_title(az_str, fontsize=12)
-        self.ax2.plot(gate_num, valid_kdp2, "k:", label="validKdp")
-        self.ax2.plot(gate_num, valid_unfold2, "b:", label="validUnfold")
-        self.ax2.plot(gate_num, self.data["phidpUnfold"], label="unfolded", color="green")
-        # self.ax2.plot(gate_num, self.data["phidpMeanUnfold"], label="meanUnfolded", color="cyan")
-        self.ax2.plot(gate_num, self.data["phidpFilt"], label="Filt", color="red")
-        self.ax2.plot(gate_num, self.data["phidpCondFilt"], label="CondFilt", color="black")
-        #self.ax2.plot(gate_num, self.data["regrFilt"], label="RegrFilt", color="cyan")
-        self.ax2.plot(gate_num, self.data["phidpFftFilt"], label="FftFilt", color="magenta")
-        self.ax2.plot(gate_num, self.data["phidpFftCond"], label="FftCond", color="cyan")
-        self.ax2.plot(gate_num, self.data["phidpSdev"], label="Sdev", color="pink")
-        self.ax2.plot(gate_num, self.data["phidpJitter"], label="Jitter", color="orange")
-        legend2 = self.ax2.legend(loc="upper right")
-        for label in legend2.get_texts():
-            label.set_fontsize("small")
+        self.ax2.plot(gate_num, plot_data["phidpUnfold"], label="unfolded", color="green")
+        self.ax2.plot(gate_num, plot_data["phidpFilt"], label="Filt", color="red")
+        self.ax2.plot(gate_num, plot_data["phidpCondFilt"], label="CondFilt", color="black")
+        self.ax2.plot(gate_num, plot_data["phidpFftFilt"], label="FftFilt", color="magenta")
+        self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="orange")
         self.ax2.set_xlabel("gateNum")
         self.ax2.set_ylabel("PHIDP")
 
-        valid_kdp3 = [val * 5.0 for val in valid_kdp]
-        valid_unfold3 = [val * -2.0 for val in valid_unfold]
-
-        self.ax3.set_title(el_str, fontsize=12)
-        self.ax3.plot(gate_num, valid_kdp3, "k:", label="validKdp")
-        self.ax3.plot(gate_num, valid_unfold3, "b:", label="validUnfold")
-        self.ax3.plot(gate_num, self.data["psob"], label="psob", color="orange")
-        self.ax3.plot(gate_num, self.data["kdp"], label="KDP", color="red")
-        self.ax3.plot(gate_num, self.data["rhohv"], label="RHOHV", color="green")
-        legend3 = self.ax3.legend(loc="upper left")
-        for label in legend3.get_texts():
-            label.set_fontsize("small")
-        self.ax3.set_xlabel("gateNum")
-        self.ax3.set_ylabel("KDP,PSOB")
-
-        self.ax4.set_title(az_str, fontsize=12)
-        self.ax4.plot(gate_num, valid_kdp2, "k:", label="validKdp")
-        self.ax4.plot(gate_num, valid_unfold2, "b:", label="validUnfold")
-        self.ax4.plot(gate_num, self.data["phidp"], label="phidp")
-        self.ax4.plot(gate_num, self.data["phidpFftFilt"], label="phidpFftFilt")
-        legend2 = self.ax4.legend(loc="upper right")
+        legend2 = self.ax2.legend(loc="upper right")
         for label in legend2.get_texts():
             label.set_fontsize("small")
+
+        draw_valid_regions(
+            self.ax2, gate_num, valid_kdp,
+            color="lightgray", alpha=0.4,
+        )
+
+        # PLOT 3 - KDP and PSOB
+
+        self.ax3.set_title(el_str, fontsize=12)
+        self.ax3.plot(gate_num, plot_data["psob"], label="PSOB", color="orange")
+        self.ax3.plot(gate_num, plot_data["kdp"], label="KDP", color="red")
+        self.ax3.plot(gate_num, plot_data["kdpSC"], label="KDP_SC", color="blue")
+        self.ax3.set_xlabel("gateNum")
+        self.ax3.set_ylabel("KDP, PSOB")
+
+        draw_valid_regions(
+            self.ax3, gate_num, valid_kdp,
+            color="lightgray", alpha=0.4,
+        )
+
+        legend3 = self.ax3.legend(loc="upper right")
+        for label in legend3.get_texts():
+            label.set_fontsize("small")
+
+        # PLOT 4 - PHIDP FFT filtering
+
+        self.ax4.set_title(az_str, fontsize=12)
+        self.ax4.plot(gate_num, plot_data["phidp"], label="phidp")
+        self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt")
         self.ax4.set_xlabel("gateNum")
         self.ax4.set_ylabel("PHIDP")
 
+        draw_valid_regions(
+            self.ax4, gate_num, valid_kdp,
+            color="lightgray", alpha=0.4,
+        )
+
+        legend4 = self.ax4.legend(loc="upper right")
+        for label in legend4.get_texts():
+            label.set_fontsize("small")
+
+
+#=========================================================================
+# draw valid regions on plots
+
+def draw_valid_regions(ax, x, valid,
+                       color='lightgray',
+                       alpha=0.4):
+
+    if not x or not valid:
+        return
+
+    in_run = False
+
+    for i in range(len(valid)):
+
+        if valid[i] and not in_run:
+            start = x[i]
+            in_run = True
+
+        elif not valid[i] and in_run:
+            end = x[i]
+            ax.axvspan(start, end,
+                       facecolor=color,
+                       edgecolor='none',
+                       alpha=alpha)
+            in_run = False
+
+    # Final run reaches end of data
+    if in_run:
+        ax.axvspan(start, x[-1],
+                   facecolor=color,
+                   edgecolor='none',
+                   alpha=alpha)
 
 #=========================================================================
 # Run a command in a shell, wait for it to complete
@@ -314,6 +450,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Plot ray details for KDP analysis")
     parser.add_argument("--debug", action="store_true", help="Set debugging on")
     parser.add_argument("--verbose", action="store_true", help="Set verbose debugging on")
+    parser.add_argument("--valid_only", action="store_true",
+                        help="Plot only from the first through last valid KDP gate")
     parser.add_argument(
         "--file",
         dest="input_file_path",

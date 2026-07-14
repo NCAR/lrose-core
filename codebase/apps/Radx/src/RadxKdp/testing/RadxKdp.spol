@@ -54,7 +54,7 @@ debug = DEBUG_OFF;
 //
 // Type: int
 
-n_compute_threads = 4;
+n_compute_threads = 1;
 
 //======================================================================
 //

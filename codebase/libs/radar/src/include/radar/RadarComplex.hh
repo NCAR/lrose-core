@@ -36,6 +36,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <vector>
 using namespace std;
 
 // data class for use by main class
@@ -252,6 +253,14 @@ public:
                           const string &heading,
                           bool reCenter = false);
 
+  // interpolate between 2 values
+  // load vector of specified length
+  
+  static void interpAndLoadVec(const RadarComplex_t &start,
+                               const RadarComplex_t &end,
+                               int nInterp,
+                               vector<RadarComplex_t> &interpVec);
+  
 private:
 
 };

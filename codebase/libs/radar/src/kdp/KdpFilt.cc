@@ -209,6 +209,7 @@ KdpFilt::KdpFilt()
   _kdpZExpon = 1.0;
   _kdpZdrExpon = -2.05;
   _kdpZZdrCoeff = 3.32e-5;
+  _dbzMinForSelfConsistency = 20.0;
   _kdpMinForSelfConsistency = 0.25;
   _kdpZZdrMedianLen = 5;
 
@@ -347,6 +348,7 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
   }
   setZdrSdevMax(params.KDP_zdr_sdev_max);
   setKdpMinForSelfConsistency(params.KDP_minimum_for_self_consistency);
+  setDbzMinForSelfConsistency(params.DBZ_minimum_for_self_consistency);
   setMedianFilterLenForKdpZZdr(params.KDP_median_filter_len_for_ZZDR);
 
   if (params.KDP_debug) {
@@ -487,13 +489,15 @@ int KdpFilt::compute(time_t timeSecs,
     for (int igate = 0; igate < _nGates; igate++) {
       if (_snr[igate] < _snrThreshold) {
         _kdp[igate] = _missingValue;
-        _kdpZZdr[igate] = _missingValue;
         _kdpSC[igate] = _missingValue;
+        _phidpSC[igate] = _missingValue;
+        _kdpZZdr[igate] = _missingValue;
         _psob[igate] = _missingValue;
       } else {
         _kdp[igate] = 0;
-        _kdpZZdr[igate] = 0;
         _kdpSC[igate] = 0;
+        _phidpSC[igate] = 0;
+        _kdpZZdr[igate] = 0;
         _psob[igate] = 0;
       }
     }
@@ -525,6 +529,10 @@ int KdpFilt::compute(time_t timeSecs,
     }
   }
   
+  // load up conditional KDP from estimated kdp and kdpZZdr
+
+  _loadKdpSC();
+
   // write ray file if requested
 
   if (_writeRayFile) {
@@ -543,10 +551,6 @@ int KdpFilt::compute(time_t timeSecs,
   //     }
   //   }
   // }
-
-  // load up conditional KDP from estimated kdp and kdpZZdr
-
-  _loadKdpSC();
 
   // compute attenuation corrections
 
@@ -674,6 +678,7 @@ void KdpFilt::_initArrays(const double *snr,
   _kdp_.resize(_nGates); _kdp = _kdp_.data();
   _kdpZZdr_.resize(_nGates); _kdpZZdr = _kdpZZdr_.data();
   _kdpSC_.resize(_nGates); _kdpSC = _kdpSC_.data();
+  _phidpSC_.resize(_nGates); _phidpSC = _phidpSC_.data();
   _psob_.resize(_nGates); _psob = _psob_.data();
   _dbzAttenCorr_.resize(_nGates); _dbzAttenCorr = _dbzAttenCorr_.data();
   _zdrAttenCorr_.resize(_nGates); _zdrAttenCorr = _zdrAttenCorr_.data();
@@ -774,13 +779,15 @@ void KdpFilt::_initArrays(const double *snr,
     _validForUnfold[ii] = false;
     if (_snr[ii] < _snrThreshold) {
       _kdp[ii] = _missingValue;
-      _kdpZZdr[ii] = _missingValue;
       _kdpSC[ii] = _missingValue;
+      _phidpSC[ii] = _missingValue;
+      _kdpZZdr[ii] = _missingValue;
       _psob[ii] = _missingValue;
     } else {
       _kdp[ii] = 0;
-      _kdpZZdr[ii] = 0;
       _kdpSC[ii] = 0;
+      _phidpSC[ii] = 0;
+      _kdpZZdr[ii] = 0;
       _psob[ii] = 0;
     }
     _dbzAttenCorr[ii] = 0;
@@ -1139,6 +1146,14 @@ void KdpFilt::_loadKdp()
   
   for (int ii = 0; ii < _nGates; ii++) {
 
+    if (!_validForKdp[ii]) {
+      _kdp[ii] = 0.0;
+      _kdpZZdr[ii] = 0.0;
+      _kdpSC[ii] = 0.0;
+      _psob[ii] = 0.0;
+      continue;
+    }
+      
     // check SNR
     
     if (_snr[ii] < _snrThreshold) {
@@ -1148,7 +1163,7 @@ void KdpFilt::_loadKdp()
       _psob[ii] = _missingValue;
       continue;
     }
-
+    
     // get max DBZ for surrounding gates
     
     double maxDbz = _dbzMax[ii];
@@ -1164,7 +1179,7 @@ void KdpFilt::_loadKdp()
     } else {
       adapLen = 2;
     }
-
+    
     int i0 = ii - adapLen;
     if (i0 < 0) {
       i0 = 0;
@@ -1181,13 +1196,13 @@ void KdpFilt::_loadKdp()
       double dphi = _phidpFftCond[i1] - _phidpFftCond[i0];
       _kdp[ii] = (dphi / (_gateSpacingKm * len)) / 2.0;
     }
-
+    
     if (_foldsAt90) {
       _kdp[ii] /= 2.0;
     }
-
+    
     _kdpZZdr[ii] = _computeKdpFromZZdr(_dbzMedian[ii], _zdrMedian[ii]);
-
+    
   } // ii
 
 }
@@ -1438,6 +1453,10 @@ void KdpFilt::_computeFftConditioned()
 {
 
   bool debug = false;
+  // if (_azDeg > 75 && _azDeg < 125) {
+  //   debug = true;
+  //   cerr << "AAAAAAAAAAAAA az: " << _azDeg << endl;
+  // }
 
   // loop through the valid runs
 
@@ -1448,6 +1467,13 @@ void KdpFilt::_computeFftConditioned()
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
 
     PhidpRun &run = _validRuns[irun];
+
+    if (debug) {
+      cerr << "++++++++++++++++++++++++++++++++++++++++" << endl;
+      cerr << "  irun, ibegin, iend: "
+           << irun << ", " << run.ibegin << ", " << run.iend << endl;
+    }
+
     run.phidpBegin = _phidpMeanUnfold[run.ibegin];
     run.phidpEnd = _phidpMeanUnfold[run.iend];
     
@@ -1455,7 +1481,6 @@ void KdpFilt::_computeFftConditioned()
 
     bool increasing = false;
     bool decreasing = false;
-    double prevDiff = 0.0;
     
     int topIndex = -1;
     int botIndex = -1;
@@ -1463,13 +1488,14 @@ void KdpFilt::_computeFftConditioned()
     vector<int> topIndices;
     vector<int> botIndices;
     
-    for (int igate = run.ibegin + 1; igate <= run.iend; igate++) {
+    for (int igate = run.ibegin + 2; igate <= run.iend; igate++) {
     
-      double diff = _phidpFftFilt[igate] - _phidpFftFilt[igate-1];
+      double diff2 = _phidpFftFilt[igate-1] - _phidpFftFilt[igate-2];
+      double diff1 = _phidpFftFilt[igate] - _phidpFftFilt[igate-1];
       
       // look for increasing trend
       
-      if (diff > 0 && prevDiff > 0) {
+      if (diff1 > 0 && diff2 > 0) {
         if (!increasing) {
           botIndex = igate - 2;
           increasing = true;
@@ -1484,7 +1510,7 @@ void KdpFilt::_computeFftConditioned()
       
       // look for decreasing trend
       
-      if (diff < 0 && prevDiff < 0) {
+      if (diff1 < 0 && diff2 < 0) {
         if (!decreasing) {
           topIndex = igate - 2;
           decreasing = true;
@@ -1492,8 +1518,6 @@ void KdpFilt::_computeFftConditioned()
       } else {
         decreasing = false;
       }
-      
-      prevDiff = diff;
       
     } // igate
     
@@ -1503,8 +1527,11 @@ void KdpFilt::_computeFftConditioned()
     int prevBotIndex = 0;
     for (size_t ii = 0; ii < botIndices.size(); ii++) {
       
-      if (debug)
+      if (debug) {
         cerr << "----------------------------------------" << endl;
+        cerr << "  ii, botIndices: " << ii << ", " << botIndices[ii] << endl;
+        cerr << "  ii, topIndices: " << ii << ", " << topIndices[ii] << endl;
+      }
       
       // look back for the point where the phidp value
       // drops below the bottom value
@@ -2004,9 +2031,9 @@ void KdpFilt::_writeRayDataToFile()
           "# gateNum validKdp validUnfold snr dbz zdr rhohv phidp "
           "phidpMean phidpMeanValid phidpJitter phidpSdev "
           "phidpMeanUnfold phidpUnfold phidpFilt phidpCond phidpCondFilt "
-          "zdrSdev psob kdp "
+          "zdrSdev psob kdp kdpSC "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected "
-          "regrFilt phidpFftFilt phidpFftCond\n");
+          "regrFilt phidpFftFilt phidpFftCond phidpSC\n");
 
   // write data
 
@@ -2026,8 +2053,8 @@ void KdpFilt::_writeRayDataToFile()
     fprintf(out,
             "%3d %3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f"
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
             (_validForUnfold[igate]?1:0),
@@ -2048,13 +2075,15 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_zdrSdev[igate], 0),
             _getPlotVal(_psob[igate], 0),
             _getPlotVal(_kdp[igate], 0),
+            _getPlotVal(_kdpSC[igate], 0),
             _getPlotVal(_dbzAttenCorr[igate], 0),
             _getPlotVal(_zdrAttenCorr[igate], 0),
             _getPlotVal(dbzCorrected, 0),
             _getPlotVal(zdrCorrected, 0),
             _getPlotVal(_regrFilt[igate], 0),
             _getPlotVal(_phidpFftFilt[igate], 0),
-            _getPlotVal(_phidpFftCond[igate], 0)
+            _getPlotVal(_phidpFftCond[igate], 0),
+            _getPlotVal(_phidpSC[igate], 0)
             );
   }
   
@@ -2116,6 +2145,7 @@ void KdpFilt::_loadKdpSC()
 
     if (_kdp[igate] == _missingValue ||
         _kdp[igate] <= _kdpMinForSelfConsistency ||
+        _dbz[igate] <= _dbzMinForSelfConsistency ||
         _kdpZZdr[igate] == _missingValue) {
       
       // non-positive KDP
@@ -2154,6 +2184,25 @@ void KdpFilt::_loadKdpSC()
     _loadKdpSCRun(startGate, endGate);
   }
 
+  // moving mean on _kdpSC
+  
+  vector<double> filtSC;
+  _movingMean(_kdpSC_, _nGatesStats, filtSC);
+  std::copy(filtSC.begin(), filtSC.end(), _kdpSC_.begin());
+
+  // compute _phidpSC
+
+  std::copy(_phidpFftFilt_.begin(), _phidpFftFilt_.end(), _phidpSC_.begin());
+  for (size_t irun = 0; irun < _validRuns.size(); irun++) {
+    const PhidpRun &validRun = _validRuns[irun];
+    for (int igate = validRun.ibegin + 1; igate <= validRun.iend; igate++) {
+      double kdpSC =_kdpSC[igate - 1];
+      double deltaPhi = kdpSC * 4 * _gateSpacingKm;
+      _phidpSC[igate] = RadarComplex::sumDeg(_phidpSC[igate - 1], deltaPhi);
+    }
+  }
+
+  
 }
 
 ////////////////////////////////////////////////////////////
@@ -2209,18 +2258,25 @@ void KdpFilt::_fftFilter()
 
   // create complex array for phidp
   // pad out to avoid ringing at extremities
-
+  
   vector<RadarComplex_t> phiComplex_;
   phiComplex_.resize(_nGatesPadded);
   RadarComplex_t *phiComplex = phiComplex_.data() + _nGatesPad;
   for (int igate = 0; igate < _nGates; igate++) {
     RadarComplex::setFromDegrees(_phidpMeanUnfold[igate], phiComplex[igate]);
   }
-  for (int igate = 0; igate < _nGatesPad; igate++) {
-    phiComplex[-1 - igate] = phiComplex[0];
-    phiComplex[_nGates + igate] = phiComplex[_nGates - 1];
-  }
   
+  // interpolate between end-points for the padded gates
+
+  RadarComplex_t angleStart = phiComplex[0];
+  RadarComplex_t angleEnd = phiComplex[_nGates - 1];
+  vector<RadarComplex_t> interpVec;
+  RadarComplex::interpAndLoadVec(angleStart, angleEnd, _nGatesPad * 2, interpVec);
+  for (int ii = 0; ii < _nGatesPad; ii++) {
+    phiComplex[-1 - ii] = interpVec[ii];
+    phiComplex[_nGates + ii] = interpVec[_nGatesPad * 2 - 1 - ii];
+  }
+
   // perform forward FFT
   
   vector<RadarComplex_t> phiSpec_;
@@ -2383,5 +2439,40 @@ double KdpFilt::_rhohvQuality(double rhohv)
   
   // Smoothstep: zero slope at both ends
   return x * x * (3.0 - 2.0 * x);
+  
+}
+
+////////////////////////////////////////////////////////////
+/// moving mean along a vector
+
+void KdpFilt::_movingMean(const std::vector<double>& xx,
+                          size_t filtLen,
+                          std::vector<double>& filt)
+  
+{
+
+  filt.resize(xx.size());
+  
+  if (filtLen % 2 == 0) {
+    cerr << "WARNING - KdpFilt::_movingMean" << endl;
+    cerr << "  filtLen should be odd, passed in: " << filtLen << endl;
+    filtLen = (filtLen / 2) * 2;
+    cerr << "  will use filtLen: " << filtLen << endl;
+  }
+  
+  size_t half = filtLen / 2;
+  
+  // Running sum
+  double sum = 0.0;
+  for (size_t i = 0; i < filtLen; ++i)
+    sum += xx[i];
+  
+  filt[half] = sum / filtLen;
+  
+  for (size_t i = half + 1; i < xx.size() - half; ++i) {
+    sum += xx[i + half];
+    sum -= xx[i - half - 1];
+    filt[i] = sum / filtLen;
+  }
   
 }

@@ -412,6 +412,8 @@ public:
 
   double KDP_zdr_sdev_max;
 
+  double DBZ_minimum_for_self_consistency;
+
   double KDP_minimum_for_self_consistency;
 
   int KDP_median_filter_len_for_ZZDR;
@@ -443,7 +445,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[38];
+  mutable TDRPtable _table[39];
 
   const char *_className;
 
