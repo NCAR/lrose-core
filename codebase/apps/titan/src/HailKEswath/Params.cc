@@ -839,7 +839,7 @@
     tt->descr = tdrpStrDup("Output directory.");
     tt->help = tdrpStrDup("The swath data is output to this directory in MDV format.");
     tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("$(RAP_DATA_DIR)/mdv/HailKEswath");
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/mdv/HailKEswath");
     tt++;
     
     // Parameter 'data_set_name'

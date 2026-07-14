@@ -148,7 +148,7 @@ paramdef struct restart_time_of_day_t {
 } restart_time_of_day[];
 
 paramdef string {
-  p_default = "$(RAP_DATA_DIR)/mdv/HailKEswath";
+  p_default = "$(DATA_DIR)/mdv/HailKEswath";
   p_descr = "Output directory.";
   p_help = "The swath data is output to this directory in MDV format.";
 } output_dir;

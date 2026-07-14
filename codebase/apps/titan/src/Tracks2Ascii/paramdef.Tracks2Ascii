@@ -37,7 +37,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "$(RAP_DATA_DIR)/titan/storms";
+  p_default = "$(DATA_DIR)/titan/storms";
   p_descr = "Directory path for input data.";
   p_help = "This is used if start and end times are specified on the command line. It is ignored if you specify a file list using -f on the command line.";
 } input_dir;

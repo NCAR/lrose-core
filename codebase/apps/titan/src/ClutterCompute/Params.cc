@@ -644,7 +644,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_dir");
     tt->descr = tdrpStrDup("Directory for input data.");
-    tt->help = tdrpStrDup("This is used in REALTIME and ARCHIVE modes only. If it does not start with . or /, it is relative to $DATA_DIR or $RAP_DATA_DIR. In FILELIST mode, the file paths are specified on the command line.");
+    tt->help = tdrpStrDup("This is used in REALTIME and ARCHIVE modes only. If it does not start with . or /, it is relative to $DATA_DIR. In FILELIST mode, the file paths are specified on the command line.");
     tt->val_offset = (char *) &input_dir - &_start_;
     tt->single_val.s = tdrpStrDup("mdv/input");
     tt++;
@@ -925,7 +925,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("output_path");
     tt->descr = tdrpStrDup("Output path.");
-    tt->help = tdrpStrDup("The exact path to which the output file is written. See 'write_to_path'. If it does not start with . or /, it is relative to $DATA_DIR or $RAP_DATA_DIR. ");
+    tt->help = tdrpStrDup("The exact path to which the output file is written. See 'write_to_path'. If it does not start with . or /, it is relative to $DATA_DIR. ");
     tt->val_offset = (char *) &output_path - &_start_;
     tt->single_val.s = tdrpStrDup("mdv/clutter/clutter.mdv");
     tt++;
@@ -949,7 +949,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("output_dir");
     tt->descr = tdrpStrDup("Output directory.");
-    tt->help = tdrpStrDup("Output data is written to this directory. See 'write_to_dir'. If it does not start with . or /, it is relative to $DATA_DIR or $RAP_DATA_DIR. ");
+    tt->help = tdrpStrDup("Output data is written to this directory. See 'write_to_dir'. If it does not start with . or /, it is relative to $DATA_DIR. ");
     tt->val_offset = (char *) &output_dir - &_start_;
     tt->single_val.s = tdrpStrDup("mdv/clutter");
     tt++;

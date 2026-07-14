@@ -50,7 +50,7 @@ commentdef {
 paramdef string {
   p_default = "titan/storms";
   p_descr = "Directory for input TITAN storm data.";
-  p_help = "If this path is not absolute (starts with /) or relative (starts with .) it will be taken relative to $RAP_DATA_DIR or $DATA_DIR.";
+  p_help = "If this path is not absolute (starts with /) or relative (starts with .) it will be taken relative to $DATA_DIR.";
 } input_dir;
 
 paramdef int {

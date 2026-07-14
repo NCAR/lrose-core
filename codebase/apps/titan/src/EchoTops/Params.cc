@@ -677,7 +677,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("output_url");
     tt->descr = tdrpStrDup("URL for output data.");
-    tt->help = tdrpStrDup("If the directory starts with '/' or '.', the path is absolute. Otherwise it is relative to $DATA_DIR or $RAP_DATA_DIR.");
+    tt->help = tdrpStrDup("If the directory starts with '/' or '.', the path is absolute. Otherwise it is relative to $DATA_DIR.");
     tt->val_offset = (char *) &output_url - &_start_;
     tt->single_val.s = tdrpStrDup("mdv/tops");
     tt++;

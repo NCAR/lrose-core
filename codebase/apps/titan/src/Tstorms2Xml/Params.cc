@@ -646,7 +646,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_dir");
     tt->descr = tdrpStrDup("Directory for input TITAN storm data.");
-    tt->help = tdrpStrDup("If this path is not absolute (starts with /) or relative (starts with .) it will be taken relative to $RAP_DATA_DIR or $DATA_DIR.");
+    tt->help = tdrpStrDup("If this path is not absolute (starts with /) or relative (starts with .) it will be taken relative to $DATA_DIR.");
     tt->val_offset = (char *) &input_dir - &_start_;
     tt->single_val.s = tdrpStrDup("titan/storms");
     tt++;

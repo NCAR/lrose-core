@@ -171,7 +171,7 @@ paramdef double
 paramdef string
 {
   p_descr = "Output directory";
-  p_default = "$(RAP_DATA_DIR)/plots";
+  p_default = "$(DATA_DIR)/plots";
 } output_dir;
 
 paramdef string
@@ -252,5 +252,5 @@ paramdef string
 {
   p_descr = "File path for accumulated output file.";
   p_help = "Used only if accumulate_plots is set to true.";
-  p_default = "$(RAP_DATA_DIR)/ascii/tstorm_vert_stats.txt";
+  p_default = "$(DATA_DIR)/ascii/tstorm_vert_stats.txt";
 } accumulation_file;

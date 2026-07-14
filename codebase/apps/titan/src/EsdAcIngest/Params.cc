@@ -1041,7 +1041,7 @@
     tt->descr = tdrpStrDup("Output SPDB URL.");
     tt->help = tdrpStrDup("This is the path to the output data directory. You can use full URL sytnax and optionally put the data to a remote machine.");
     tt->val_offset = (char *) &output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("$(RAP_DATA_DIR)/spdb/ac_posn");
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/spdb/ac_posn");
     tt++;
     
     // Parameter 'valid_period'
@@ -1079,7 +1079,7 @@
     tt->descr = tdrpStrDup("ASCII SPDB URL.");
     tt->help = tdrpStrDup("Use if 'output_ascii' is TRUE.");
     tt->val_offset = (char *) &ascii_url - &_start_;
-    tt->single_val.s = tdrpStrDup("$(RAP_DATA_DIR)/spdb/ascii_ac_posn");
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/spdb/ascii_ac_posn");
     tt++;
     
     // Parameter 'output_interval'

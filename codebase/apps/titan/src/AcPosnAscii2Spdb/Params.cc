@@ -622,7 +622,7 @@
     tt->descr = tdrpStrDup("Name of input data directory.");
     tt->help = tdrpStrDup("ASCII AC_POSN data files are stored in this directory.");
     tt->val_offset = (char *) &input_data_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("$(RAP_DATA_DIR)/ascii/ac_posn");
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/ascii/ac_posn");
     tt++;
     
     // Parameter 'output_data_dir'
@@ -634,7 +634,7 @@
     tt->descr = tdrpStrDup("Name of output data directory.");
     tt->help = tdrpStrDup("SPDB AC_POSN data files are stored in this directory.");
     tt->val_offset = (char *) &output_data_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("$(RAP_DATA_DIR)/spdb/ac_posn");
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/spdb/ac_posn");
     tt++;
     
     // trailing entry has param_name set to NULL
