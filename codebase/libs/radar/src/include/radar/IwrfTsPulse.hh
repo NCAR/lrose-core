@@ -441,6 +441,12 @@ public:
   inline void set_end_of_volume() {
     _hdr.event_flags |= IWRF_END_OF_VOLUME;
   }
+  inline void set_start_of_block() {
+    _hdr.event_flags |= IWRF_START_OF_BLOCK;
+  }
+  inline void set_end_of_block() {
+    _hdr.event_flags |= IWRF_END_OF_BLOCK;
+  }
 
   inline void set_rvp8_i_version(si32 x) { _rvp8_hdr.i_version = x; }
   inline void set_rvp8_i_flags(ui08 x) { _rvp8_hdr.i_flags = x; }
@@ -517,6 +523,12 @@ public:
   }
   inline bool get_end_of_volume() {
     return (_hdr.event_flags & IWRF_END_OF_VOLUME);
+  }
+  inline bool get_start_of_block() {
+    return (_hdr.event_flags & IWRF_START_OF_BLOCK);
+  }
+  inline bool get_end_of_block() {
+    return (_hdr.event_flags & IWRF_END_OF_BLOCK);
   }
 
   inline si32 get_rvp8_i_version() const { return _rvp8_hdr.i_version; }
