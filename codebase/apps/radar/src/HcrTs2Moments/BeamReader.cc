@@ -64,7 +64,9 @@ BeamReader::BeamReader(const string &prog_name,
 
         // Create the pulse pool, starting with 0 pulses, and providing a custom
         // pulse factory function (since IwrfTsPulse has no default constructor).
-        _pulsePool(0, std::function<IwrfTsPulse*()>([this]() { return new IwrfTsPulse(_pulseReader->getOpsInfo()); })),
+        _pulsePool(0, std::function<IwrfTsPulse*()>([this]() {
+          return new IwrfTsPulse(_pulseReader->getOpsInfo());
+        })),
 
         _pulseSeqNum(0),
         _prevPulseSeqNum(0),
@@ -493,63 +495,66 @@ int BeamReader::_readBlockBeam()
   // read in pulses until PRT changes
   
   int nPulsesInDwell = 0;
-  int warningCount = 0;
-  double pulseWidthUs = -9999;
-  bool pulseWidthChange = false;
+  int blockId = 0;
+  double pulseWidthUs = -9999.0;
+  double prt = -9999.0;
+  bool foundStartOfBlock = false;
   
   while (nPulsesInDwell <= _params.max_n_samples) {
-    
+
     // get a pulse
+    // this adds the pulse to the queue
     shared_ptr<IwrfTsPulse> pulse = _getNextPulse();
     if (pulse == NULL) {
       // end of data
       _beamError = true;
       return -1;
     }
-    warningCount++;
     
-    // save pulse width from first pulse
+    // read pulses until we get the start of a block
     
-    if (nPulsesInDwell == 0) {
-      // check for valid pulse width
-      if (fabs(_params.dwell_pulse_width_us - pulse->getPulseWidthUs()) > 2.0e-3) {
-        // _getNextPulse() automatically inserted this pulse at the front of
-        // _pulseQueue, but we don't want it! Remove it from the deque now.
-        _pulseQueue.pop_front();
-        if (warningCount == _params.max_n_samples * 10) {
-          cerr << "WARNING - " << warningCount << " consecutive pulses with width != "
-               << _params.dwell_pulse_width_us << " us" << endl;
-          warningCount = 0;
-        }
-        // Go back to get a shared pointer to the next pulse
-        continue;
+    if (!foundStartOfBlock) {
+      if (pulse->get_start_of_block()) {
+        // set details for this block
+        foundStartOfBlock = true;
+        blockId = pulse->getBlockId();
+        pulseWidthUs = pulse->getPulseWidthUs();
+        prt = pulse->getPrt();
+      } else {
+        // clear the queue
+        _clearPulseQueue();
       }
-    }
-    pulseWidthUs = pulse->getPulseWidthUs();
-    
-    // check if pulse width has changed
-    
-    if (fabs(pulseWidthUs - pulse->getPulseWidthUs()) > 2.0e-3 && nPulsesInDwell > 1) {
-      pulseWidthChange = true;
-      _cacheLatestPulse(); // save for start of next beam
-      break;
     }
     
     nPulsesInDwell++;
+
+    // check for in-block consistency
+
+    if (blockId != pulse->getBlockId()) {
+      _beamError = true;
+      return -1;
+    }
+
+    if (fabs(pulseWidthUs -pulse->getPulseWidthUs()) > 1.0e-6) {
+      _beamError = true;
+      return -1;
+    }
+
+    if (fabs(prt - pulse->getPrt()) > 1.0e-6) {
+      _beamError = true;
+      return -1;
+    }
+
+    // check for end of block
+    
+    if (pulse->get_end_of_block()) {
+      break;
+    }
     
   } // while
 
-  if (!pulseWidthChange) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "WARNING - BeamReader::_readPulseWidthChangeBeam" << endl;
-      cerr << "  Did not find pulse width change" << endl;
-    }
-    _beamError = true;
-    return 0;
-  }
-  
   // set PRT (and mean PRF)
-
+  
   _setPrt();
 
   // set number of samples, ensuring an even number of pulses
@@ -557,19 +562,15 @@ int BeamReader::_readBlockBeam()
   
   _nSamples = (nPulsesInDwell / 2) * 2;
   _midIndex = _nSamples / 2;
-
+  
   _startIndex = _nSamples - 1;
   _endIndex = 0;
-
+  
   _az = _conditionAz(_pulseQueue[_midIndex]->getAz());
   _el = _conditionEl(_pulseQueue[_midIndex]->getEl());
-
+  
   _computeBeamElRate(0, _nSamples);
 
-  // save sequence numbers in case we switch to indexed search
-  
-  _prevBeamPulseSeqNum = _pulseQueue[_midIndex]->getPulseSeqNum();
-  
   _beamError = false;
   return 0;
 
