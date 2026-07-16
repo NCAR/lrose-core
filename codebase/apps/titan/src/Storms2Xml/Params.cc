@@ -582,7 +582,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("titanDir");
     tt->descr = tdrpStrDup("Input titan directory.");
-    tt->help = tdrpStrDup("If the trigger mode is TRIGGER_LDATAINFO, this is where the\ntitan data are read from, otherwise the titanUrl parameter is used.\nNot relative to RAP_DATA_DIR.");
+    tt->help = tdrpStrDup("If the trigger mode is TRIGGER_LDATAINFO, this is where the\ntitan data are read from, otherwise the titanUrl parameter is used.\nNot relative to DATA_DIR.");
     tt->val_offset = (char *) &titanDir - &_start_;
     tt->single_val.s = tdrpStrDup("/Some/Input/Titan/Directory");
     tt++;
@@ -594,7 +594,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("outDir");
     tt->descr = tdrpStrDup("Output directory.");
-    tt->help = tdrpStrDup("Output file(s) written here. Not relative to RAP_DATA_DIR.");
+    tt->help = tdrpStrDup("Output file(s) written here. Not relative to DATA_DIR.");
     tt->val_offset = (char *) &outDir - &_start_;
     tt->single_val.s = tdrpStrDup("/Some/Directory/Structure");
     tt++;

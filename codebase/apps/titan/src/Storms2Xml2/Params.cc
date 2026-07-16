@@ -668,7 +668,7 @@
     tt->descr = tdrpStrDup("Input titan directory.");
     tt->help = tdrpStrDup("If the trigger mode is TRIGGER_LDATAINFO, this is where the\ntitan data are read from, otherwise the titanUrl parameter is used.");
     tt->val_offset = (char *) &titanDir - &_start_;
-    tt->single_val.s = tdrpStrDup("$DATA_DIR/titan/storms/[station]/");
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/titan/storms/[station]/");
     tt++;
     
     // Parameter 'outDir'
@@ -680,7 +680,7 @@
     tt->descr = tdrpStrDup("Output directory.");
     tt->help = tdrpStrDup("Output file(s) written here. ");
     tt->val_offset = (char *) &outDir - &_start_;
-    tt->single_val.s = tdrpStrDup("$DATA_DIR/titan/storms/[station]/xml/");
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/titan/storms/[station]/xml/");
     tt++;
     
     // Parameter 'timestampFiles'

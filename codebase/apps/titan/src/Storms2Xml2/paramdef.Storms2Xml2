@@ -60,14 +60,14 @@ paramdef string {
   p_descr = "Input titan directory.";
   p_help = "If the trigger mode is TRIGGER_LDATAINFO, this is where the\n"
 	"titan data are read from, otherwise the titanUrl parameter is used.";
-  p_default = {"$DATA_DIR/titan/storms/[station]/"};
+  p_default = {"$(DATA_DIR)/titan/storms/[station]/"};
 } titanDir;
  
 
 paramdef string {
   p_descr = "Output directory.";
   p_help = "Output file(s) written here. "; 
-  p_default = {"$DATA_DIR/titan/storms/[station]/xml/"};
+  p_default = {"$(DATA_DIR)/titan/storms/[station]/xml/"};
 } outDir;
 
 paramdef boolean {

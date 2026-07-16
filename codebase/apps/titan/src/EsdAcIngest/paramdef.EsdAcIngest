@@ -371,7 +371,7 @@ paramdef boolean {
 } new_line_on_echo;
 
 paramdef string {
-  p_default = "$(RAP_DATA_DIR)/spdb/ac_posn";
+  p_default = "$(DATA_DIR)/spdb/ac_posn";
   p_descr = "Output SPDB URL.";
   p_help = "This is the path to the output data directory. You can use full URL sytnax and optionally put the data to a remote machine.";
 } output_url;
@@ -390,7 +390,7 @@ paramdef boolean {
 } output_ascii;
 
 paramdef string {
-  p_default = "$(RAP_DATA_DIR)/spdb/ascii_ac_posn";
+  p_default = "$(DATA_DIR)/spdb/ascii_ac_posn";
   p_descr = "ASCII SPDB URL.";
   p_help = "Use if 'output_ascii' is TRUE.";
 } ascii_url;

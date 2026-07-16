@@ -24,14 +24,14 @@ paramdef string {
   p_descr = "Input titan directory.";
   p_help = "If the trigger mode is TRIGGER_LDATAINFO, this is where the\n"
 	"titan data are read from, otherwise the titanUrl parameter is used.\n"
-	"Not relative to RAP_DATA_DIR."; 
+	"Not relative to DATA_DIR."; 
   p_default = {"/Some/Input/Titan/Directory"};
 } titanDir;
  
 
 paramdef string {
   p_descr = "Output directory.";
-  p_help = "Output file(s) written here. Not relative to RAP_DATA_DIR."; 
+  p_help = "Output file(s) written here. Not relative to DATA_DIR."; 
   p_default = {"/Some/Directory/Structure"};
 } outDir;
 

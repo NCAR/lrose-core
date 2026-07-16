@@ -38,13 +38,13 @@ paramdef string {
 } instance;
 
 paramdef string {
-  p_default = "$(RAP_DATA_DIR)/ascii/ac_posn";
+  p_default = "$(DATA_DIR)/ascii/ac_posn";
   p_descr = "Name of input data directory.";
   p_help = "ASCII AC_POSN data files are stored in this directory.";
 } input_data_dir;
 
 paramdef string {
-  p_default = "$(RAP_DATA_DIR)/spdb/ac_posn";
+  p_default = "$(DATA_DIR)/spdb/ac_posn";
   p_descr = "Name of output data directory.";
   p_help = "SPDB AC_POSN data files are stored in this directory.";
 } output_data_dir;

@@ -30,19 +30,19 @@ paramdef string {
 } instance;
 
 paramdef string {
-  p_default = "$(RAP_DATA_DIR)/mdv/clutter/median.mdv";
+  p_default = "$(DATA_DIR)/mdv/clutter/median.mdv";
   p_descr = "Path for median clutter data.";
   p_help = "This path points to the file containing the median DBZ data.";
 } median_clutter_path;
 
 paramdef string {
-  p_default = "$(RAP_DATA_DIR)/tables/dsr2mdv.lookup";
+  p_default = "$(DATA_DIR)/tables/dsr2mdv.lookup";
   p_descr = "Path for Dsr2Mdv lookup table.";
   p_help = "This file is created by Dsr2MdvLookup.";
 } dsr2mdv_lookup_path;
 
 paramdef string {
-  p_default = "$(RAP_DATA_DIR)/tables/clutter.table";
+  p_default = "$(DATA_DIR)/tables/clutter.table";
   p_descr = "Path for table produced by this program.";
 } clutter_table_path;
 

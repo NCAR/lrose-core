@@ -50,7 +50,7 @@ commentdef {
 paramdef string {
   p_default = "mdv/input";
   p_descr = "Directory for input data.";
-  p_help = "This is used in REALTIME and ARCHIVE modes only. If it does not start with . or /, it is relative to $DATA_DIR or $RAP_DATA_DIR. In FILELIST mode, the file paths are specified on the command line.";
+  p_help = "This is used in REALTIME and ARCHIVE modes only. If it does not start with . or /, it is relative to $DATA_DIR. In FILELIST mode, the file paths are specified on the command line.";
 } input_dir;
 
 paramdef int {
@@ -171,7 +171,7 @@ paramdef boolean {
 paramdef string {
   p_default = "mdv/clutter/clutter.mdv";
   p_descr = "Output path.";
-  p_help = "The exact path to which the output file is written. See 'write_to_path'. If it does not start with . or /, it is relative to $DATA_DIR or $RAP_DATA_DIR. ";
+  p_help = "The exact path to which the output file is written. See 'write_to_path'. If it does not start with . or /, it is relative to $DATA_DIR. ";
 } output_path;
 
 paramdef boolean {
@@ -183,7 +183,7 @@ paramdef boolean {
 paramdef string {
   p_default = "mdv/clutter";
   p_descr = "Output directory.";
-  p_help = "Output data is written to this directory. See 'write_to_dir'. If it does not start with . or /, it is relative to $DATA_DIR or $RAP_DATA_DIR. ";
+  p_help = "Output data is written to this directory. See 'write_to_dir'. If it does not start with . or /, it is relative to $DATA_DIR. ";
 } output_dir;
 
 typedef enum {

@@ -624,7 +624,7 @@
     tt->descr = tdrpStrDup("Directory path for input data.");
     tt->help = tdrpStrDup("This is used if start and end times are specified on the command line. It is ignored if you specify a file list using -f on the command line.");
     tt->val_offset = (char *) &input_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("$(RAP_DATA_DIR)/titan/storms");
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/titan/storms");
     tt++;
     
     // Parameter 'target_entity'
