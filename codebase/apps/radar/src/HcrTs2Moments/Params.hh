@@ -192,6 +192,13 @@ public:
   // struct typedefs
 
   typedef struct {
+    char* block_name;
+    int block_id;
+    double pulse_width_us;
+    double prt_s;
+  } block_def_t;
+
+  typedef struct {
     double pulse_width_us;
     tdrp_bool_t specify_file_name;
     char* cal_dir;
@@ -562,9 +569,10 @@ public:
 
   int dwell_n_samples;
 
-  int dwell_block_id;
-
   double dwell_pulse_width_us;
+
+  block_def_t *_block_defs;
+  int block_defs_n;
 
   tdrp_bool_t check_for_missing_pulses;
 

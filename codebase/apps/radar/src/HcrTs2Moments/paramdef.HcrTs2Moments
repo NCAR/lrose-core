@@ -237,17 +237,45 @@ paramdef int {
   p_help = "Applies to DWELL_SPECIFY_N_SAMPLES.";
 } dwell_n_samples;
 
-paramdef int {
-  p_default = 0;
-  p_descr = "Block ID to identift dwell.";
-  p_help = "Applies to DWELL_SPECIFY_BLOCK_ID.";
-} dwell_block_id;
-
 paramdef double {
   p_default = 0.256;
   p_descr = "Specified dwell pulse width in microseconds.";
   p_help = "Applies to DWELL_PULSE_WIDTH_CHANGE.";
 } dwell_pulse_width_us;
+
+typedef struct {
+  string block_name;
+  int block_id;
+  double pulse_width_us;
+  double prt_s;
+} block_def_t;
+
+paramdef struct block_def_t {
+  p_descr = "Specify the definitions of the blocks to be processed.";
+  p_help = "Applies to DWELL_SPECIFY_BLOCK_ID. These details are originally specified in the configuration file for hcrdrx. The dwell for each block is processed separately. In the time series pulse headers we see the block_id, as well as start and end of block flags.";
+  p_default = {
+    {
+      block_name = "short_short",
+      block_id = 1002,
+      pulse_width_us = 0.256,
+      prt_s = 101.376e-6
+    }
+    ,
+    {
+      block_name = "long_long",
+      block_id = 1003,
+      pulse_width_us = 0.512,
+      prt_s = 152.064e-6
+    }
+    ,
+    {
+      block_name = "long_short",
+      block_id = 1004,
+      pulse_width_us = 0.512,
+      prt_s = 101.376e-6
+    }
+  };
+} block_defs[];
 
 paramdef boolean {
   p_default = true;

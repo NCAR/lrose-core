@@ -989,18 +989,6 @@
     tt->single_val.i = 100;
     tt++;
     
-    // Parameter 'dwell_block_id'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("dwell_block_id");
-    tt->descr = tdrpStrDup("Block ID to identift dwell.");
-    tt->help = tdrpStrDup("Applies to DWELL_SPECIFY_BLOCK_ID.");
-    tt->val_offset = (char *) &dwell_block_id - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
     // Parameter 'dwell_pulse_width_us'
     // ctype is 'double'
     
@@ -1011,6 +999,61 @@
     tt->help = tdrpStrDup("Applies to DWELL_PULSE_WIDTH_CHANGE.");
     tt->val_offset = (char *) &dwell_pulse_width_us - &_start_;
     tt->single_val.d = 0.256;
+    tt++;
+    
+    // Parameter 'block_defs'
+    // ctype is '_block_def_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("block_defs");
+    tt->descr = tdrpStrDup("Specify the definitions of the blocks to be processed.");
+    tt->help = tdrpStrDup("Applies to DWELL_SPECIFY_BLOCK_ID. These details are originally specified in the configuration file for hcrdrx. The dwell for each block is processed separately. In the time series pulse headers we see the block_id, as well as start and end of block flags.");
+    tt->array_offset = (char *) &_block_defs - &_start_;
+    tt->array_n_offset = (char *) &block_defs_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(block_def_t);
+    tt->array_n = 3;
+    tt->struct_def.name = tdrpStrDup("block_def_t");
+    tt->struct_def.nfields = 4;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("block_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_block_defs->block_name - (char *) _block_defs;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[1].fname = tdrpStrDup("block_id");
+      tt->struct_def.fields[1].ptype = INT_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_block_defs->block_id - (char *) _block_defs;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("pulse_width_us");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_block_defs->pulse_width_us - (char *) _block_defs;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("prt_s");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_block_defs->prt_s - (char *) _block_defs;
+    tt->n_struct_vals = 12;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("short_short");
+      tt->struct_vals[1].i = 1002;
+      tt->struct_vals[2].d = 0.256;
+      tt->struct_vals[3].d = 0.000101376;
+      tt->struct_vals[4].s = tdrpStrDup("long_long");
+      tt->struct_vals[5].i = 1003;
+      tt->struct_vals[6].d = 0.512;
+      tt->struct_vals[7].d = 0.000152064;
+      tt->struct_vals[8].s = tdrpStrDup("long_short");
+      tt->struct_vals[9].i = 1004;
+      tt->struct_vals[10].d = 0.512;
+      tt->struct_vals[11].d = 0.000101376;
     tt++;
     
     // Parameter 'check_for_missing_pulses'
