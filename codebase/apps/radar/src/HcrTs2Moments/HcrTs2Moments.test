@@ -141,7 +141,7 @@ position_fmq_at_start = FALSE;
 //
 // Type: string
 
-input_dir = "./input";
+input_dir = "$(HOME)/data/time_series/hcr";
 
 ///////////// max_n_samples ///////////////////////////
 //
@@ -367,16 +367,6 @@ dwell_method = DWELL_SPECIFY_N_SAMPLES;
 
 dwell_n_samples = 100;
 
-///////////// dwell_block_id //////////////////////////
-//
-// Block ID to identift dwell.
-//
-// Applies to DWELL_SPECIFY_BLOCK_ID.
-//
-// Type: int
-
-dwell_block_id = 0;
-
 ///////////// dwell_pulse_width_us ////////////////////
 //
 // Specified dwell pulse width in microseconds.
@@ -386,6 +376,48 @@ dwell_block_id = 0;
 // Type: double
 
 dwell_pulse_width_us = 0.256;
+
+///////////// block_defs //////////////////////////////
+//
+// Specify the definitions of the blocks to be processed.
+//
+// Applies to DWELL_SPECIFY_BLOCK_ID. These details are originally 
+//   specified in the configuration file for hcrdrx. The dwell for each 
+//   block is processed separately. In the time series pulse headers we 
+//   see the block_id, as well as start and end of block flags.
+//
+// Type: struct
+//   typedef struct {
+//      string block_name;
+//      int block_id;
+//      double pulse_width_us;
+//      double prt_s;
+//   }
+//
+// 1D array - variable length.
+
+block_defs = {
+  {
+    block_name = "short_short",
+    block_id = 1002,
+    pulse_width_us = 0.256,
+    prt_s = 0.000101376
+  }
+  ,
+  {
+    block_name = "long_long",
+    block_id = 1003,
+    pulse_width_us = 0.512,
+    prt_s = 0.000152064
+  }
+  ,
+  {
+    block_name = "long_short",
+    block_id = 1004,
+    pulse_width_us = 0.512,
+    prt_s = 0.000101376
+  }
+};
 
 ///////////// check_for_missing_pulses ////////////////
 //
@@ -574,57 +606,19 @@ use_secondary_georeference = FALSE;
 //
 //======================================================================
  
-///////////// startup_cal_file ////////////////////////
-//
-// File name for calibration to be read at startup. Required.
-//
-// The startup calibration file is required. The startup cal will be 
-//   overridden if set_cal_by_pulse_width is true, or if 
-//   use_cal_from_time_series is true.
-//
-// Type: string
-
-startup_cal_file = "$(PROJ_DIR)/calibration/data/wband_256ns/combined/TsCalAuto_Wband-HCR-256ns_20240415_234224.xml";
-
-///////////// set_cal_by_pulse_width //////////////////
-//
-// Option to read different cal file depending on the pulse width in the 
-//   data.
-//
-// The calibration changes with pulse width. Therefore, if the radar 
-//   supports variable pulse widths, you need to specify the location of 
-//   the calibration files for each pulse width.
-// You can also optionally specify that we use different directories for 
-//   different XMIT_RCV_MODEs. These are the same as those used in 
-//   moments_params above.
-//
-// Type: boolean
-
-set_cal_by_pulse_width = FALSE;
-
 ///////////// pulse_width_cals ////////////////////////
 //
-// Specify the directories in which the calibration files for each pulse 
-//   width will be stored.
+// Specify the calibration files for the available pulse widths.
 //
-// See 'set_cal_by_pulse_width'. First, the app will determine which of 
-//   the specified pulse widths best matches the pulse width in the data. 
-//   The closest available pulse width will be used. The corresponding 
-//   directory will then be searched. The cal file in that directory which 
-//   is closest in time to the beam time will be used.
-// You can optionally specify that we check the xmit_rcv_mode and use 
-//   different cal directories for different modes.
-// NOTE - the pulse width is specified in micro-seconds.
+// If specify_file_name is true, the specified file name is used. If 
+//   false, the directory is searched for the latest available file.
 //
 // Type: struct
 //   typedef struct {
 //      double pulse_width_us;
+//      boolean specify_file_name;
 //      string cal_dir;
-//      boolean check_xmit_rcv_mode;
-//      xmit_rcv_mode_t xmit_rcv_mode;
-//        Options:
-//          DP_H_ONLY_FIXED_HV
-//          DP_V_ONLY_FIXED_HV
+//      string cal_file_name;
 //   }
 //
 // 1D array - variable length.
@@ -632,29 +626,18 @@ set_cal_by_pulse_width = FALSE;
 pulse_width_cals = {
   {
     pulse_width_us = 0.256,
+    specify_file_name = FALSE,
     cal_dir = "$(PROJ_DIR)/calibration/data/wband_256ns/combined",
-    check_xmit_rcv_mode = FALSE,
-    xmit_rcv_mode = DP_V_ONLY_FIXED_HV
+    cal_file_name = "TsCalAuto_Wband-HCR-256ns_20240415_234224.xml"
   }
   ,
   {
     pulse_width_us = 0.512,
+    specify_file_name = FALSE,
     cal_dir = "$(PROJ_DIR)/calibration/data/wband_512ns/combined",
-    check_xmit_rcv_mode = FALSE,
-    xmit_rcv_mode = DP_V_ONLY_FIXED_HV
+    cal_file_name = "TsCalAuto_Wband-HCR-512ns_20240415_232321.xml"
   }
 };
-
-///////////// cal_recheck_period //////////////////////
-//
-// Frequency at which to check for new cal (secs).
-//
-// The program will scan the calibration directory structure once every 
-//   period, to check for new calibration files.
-//
-// Type: int
-
-cal_recheck_period = 600;
 
 ///////////// override_cal_dbz_correction /////////////
 //
@@ -1214,7 +1197,7 @@ interest_threshold_for_signal = 0.51;
 //
 // Type: string
 
-output_fmq_url = "/tmp/fmq/moments/50hz.shortPulse/shmem_30256";
+output_fmq_url = "fmqp:://localhost::fmq/lirp";
 
 ///////////// output_fmq_size /////////////////////////
 //
@@ -1225,7 +1208,7 @@ output_fmq_url = "/tmp/fmq/moments/50hz.shortPulse/shmem_30256";
 //
 // Type: int
 
-output_fmq_size = 1000000000;
+output_fmq_size = 50000000;
 
 ///////////// output_fmq_nslots ///////////////////////
 //
@@ -1237,7 +1220,7 @@ output_fmq_size = 1000000000;
 //
 // Type: int
 
-output_fmq_nslots = 10000;
+output_fmq_nslots = 7200;
 
 ///////////// output_fmq_compress /////////////////////
 //
@@ -1260,7 +1243,7 @@ output_fmq_compress = FALSE;
 //
 // Type: int
 
-nbeams_for_params_and_calib = 20;
+nbeams_for_params_and_calib = 360;
 
 ///////////// write_blocking //////////////////////////
 //
