@@ -69,6 +69,7 @@ OutputFmq::OutputFmq(const string &prog_name,
   constructorOK = TRUE;
   _nBeamsWritten = 0;
   _radxQueue = NULL;
+  _sweepMode = Radx::SWEEP_MODE_NOT_SET;
 
   // initialize the output queue
 
@@ -402,13 +403,26 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
   // create ray
   
   RadxRay ray;
+  ray.setVolumeNumber(0);
+  ray.setSweepNumber(0);
   
   ray.setTime(beam.getTimeSecs(), beam.getNanoSecs());
   ray.setScanName(opsInfo.get_scan_segment_name());
   
-  int dsrScanMode = beam.getScanMode();
-  ray.setSweepMode(IwrfMoments::getRadxSweepMode(dsrScanMode));
-
+  switch (beam.getScanType()) {
+    case Beam::SCAN_TYPE_POINT:
+      _sweepMode = Radx::SWEEP_MODE_POINTING;
+      break;
+    case Beam::SCAN_TYPE_RHI:
+      _sweepMode = Radx::SWEEP_MODE_RHI;
+      break;
+    case Beam::SCAN_TYPE_VERT:
+    default:
+      _sweepMode = Radx::SWEEP_MODE_VERTICAL_POINTING;
+      break;
+  }
+  ray.setSweepMode(_sweepMode);
+  
   iwrf_xmit_rcv_mode_t xmitRcvMode = beam.getXmitRcvMode();
   switch(xmitRcvMode) {
     case IWRF_SINGLE_POL:
@@ -458,7 +472,7 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
 
   ray.setNSamples(beam.getNSamples());
   
-  ray.setPulseWidthUsec(beam.getPulseWidth() * 1.0e6);
+  ray.setPulseWidthUsec(beam.getPulseWidthUs());
   ray.setPrtSec(beam.getPrt());
   ray.setNyquistMps(beam.getNyquist());
 
@@ -641,7 +655,7 @@ void OutputFmq::_putStartOfVolumeRadx(int volNum, const Beam &beam)
   event.setTime(beam.getTimeSecs(), beam.getNanoSecs());
   event.setStartOfVolume(true);
   event.setVolumeNumber(volNum);
-  event.setSweepMode((Radx::SweepMode_t) beam.getScanMode());
+  event.setSweepMode(_sweepMode);
   
   // create message
 
@@ -674,7 +688,7 @@ void OutputFmq::_putEndOfVolumeRadx(int volNum, const Beam &beam)
   event.setTime(beam.getTimeSecs(), beam.getNanoSecs());
   event.setEndOfVolume(true);
   event.setVolumeNumber(volNum);
-  event.setSweepMode((Radx::SweepMode_t) beam.getScanMode());
+  event.setSweepMode(_sweepMode);
 
   // create message
 
@@ -707,7 +721,7 @@ void OutputFmq::_putStartOfTiltRadx(int tiltNum, const Beam &beam)
   event.setTime(beam.getTimeSecs(), beam.getNanoSecs());
   event.setStartOfSweep(true);
   event.setSweepNumber(tiltNum);
-  event.setSweepMode((Radx::SweepMode_t) beam.getScanMode());
+  event.setSweepMode(_sweepMode);
 
   // create message
 
@@ -740,7 +754,7 @@ void OutputFmq::_putEndOfTiltRadx(int tiltNum, const Beam &beam)
   event.setTime(beam.getTimeSecs(), beam.getNanoSecs());
   event.setEndOfSweep(true);
   event.setSweepNumber(tiltNum);
-  event.setSweepMode((Radx::SweepMode_t) beam.getScanMode());
+  event.setSweepMode(_sweepMode);
 
   // create message
 

@@ -292,15 +292,33 @@ Beam *BeamReader::getNextBeam()
   }
   pthread_mutex_unlock(&_beamRecyclePoolMutex);
 
+  // set scan type
+  
+  _scanType = Beam::SCAN_TYPE_UNKNOWN;
+  if (fabs(_progressiveElRate) < 0.25) {
+    if (fabs(_el - 90.0) < 0.5 || fabs(_el - -90) < 0.5) {
+      _scanType = Beam::SCAN_TYPE_VERT;
+    } else {
+      _scanType = Beam::SCAN_TYPE_POINT;
+    }
+  } else {
+    _scanType = Beam::SCAN_TYPE_RHI;
+  }
+  
   // initialize the beam
-
+  
   beam->init(_nSamples,
              _nGates,
+             _pulseWidthUs,
              _prt,
+             _el,
+             _az,
+             _progressiveElRate,
+             _scanType,
              xmitRcvMode,
              _pulseReader->getOpsInfo(),
              beamPulses);
-  
+
   double startAz = _conditionAz(_pulseQueue[_startIndex]->getAz());
   double startEl = _conditionEl(_pulseQueue[_startIndex]->getEl());
 
@@ -569,7 +587,7 @@ int BeamReader::_readBlockBeam()
   
   _az = _conditionAz(_pulseQueue[_midIndex]->getAz());
   _el = _conditionEl(_pulseQueue[_midIndex]->getEl());
-  
+
   _computeBeamElRate(0, _nSamples);
 
   _beamError = false;
@@ -664,31 +682,9 @@ shared_ptr<IwrfTsPulse> BeamReader::_getNextPulse()
     
     string scanName = _pulseReader->getOpsInfo().get_scan_segment_name();
     
-    // check scan mode and type
+    // compute the antenna rate in elevation
     
-    Beam::scan_type_t scanType = Beam::SCAN_TYPE_UNKNOWN;
-    int scanMode = pulse->getScanMode();
-    if (scanMode == IWRF_SCAN_MODE_RHI || 
-        scanMode == IWRF_SCAN_MODE_MANRHI) {
-      scanType = Beam::SCAN_TYPE_RHI;
-    } else {
-      scanType = Beam::SCAN_TYPE_VERT;
-    }
-    
-    if (scanType != _scanType) {
-      if (scanType == Beam::SCAN_TYPE_RHI) {
-        _initRhiMode();
-      } else if (scanType == Beam::SCAN_TYPE_VERT) {
-        _initVertMode();
-      }
-      _prevTimeForElRate = 0;
-    }
-    
-    // compute the antenna rate
-    
-    if (_scanType == Beam::SCAN_TYPE_RHI) {
-      _computeProgressiveElRate(pulse);
-    }
+    _computeProgressiveElRate(pulse);
     
     // add to the queue
 
@@ -981,27 +977,6 @@ shared_ptr<IwrfTsPulse> BeamReader::_getPulseFromRecyclePool()
     return _pulsePool.alloc();
 }
 
-//////////////////////
-// initialize rhi mode
-
-void BeamReader::_initRhiMode()
-
-{
-
-  _scanType = Beam::SCAN_TYPE_RHI;
-
-}
-
-//////////////////////
-// initialize vertical pointing mode
-
-void BeamReader::_initVertMode()
-
-{
-
-  _scanType = Beam::SCAN_TYPE_VERT;
-
-}
 
 /////////////////////////////////////////////////
 // set the PRT members - for non-dual PRT mode
@@ -1081,7 +1056,7 @@ void BeamReader::_computeProgressiveElRate(const shared_ptr<IwrfTsPulse> pulse)
   // check we have initialized this routine
 
   if (!_elRateInitialized) {
-    _progressiveElRate = 10;
+    _progressiveElRate = 0;
     _prevTimeForElRate = pulseTime;
     _prevElForRate = el;
     _elRateInitialized = true;
@@ -1153,7 +1128,7 @@ void BeamReader::_computeBeamElRate(int endIndex, int nSamples)
   double timeStart = pulseStart->getFTime();
   double timeEnd = pulseEnd->getFTime();
   double deltaTime = timeEnd - timeStart;
-  
+
   if (deltaTime <= 0) {
     _beamElRate = 0.0;
   } else {

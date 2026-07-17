@@ -390,7 +390,7 @@ int HcrTs2Moments::_processBeamSingleThreaded(Beam *beam)
   // this makes a copy of the DsRadarCalib object, so that
   // it will not change while the compute threads are running
   
-  beam->setCalib(_calMgr->getIwrfCalib(beam->getPulseWidth()));
+  beam->setCalib(_calMgr->getIwrfCalib(beam->getPulseWidthUs()));
 
   // compute the moments for this beam
   
@@ -427,7 +427,7 @@ int HcrTs2Moments::_processBeamMultiThreaded(Beam *beam)
   // this makes a copy of the DsRadarCalib object, so that
   // it will not change while the compute threads are running
 
-  beam->setCalib(_calMgr->getIwrfCalib(beam->getPulseWidth()));
+  beam->setCalib(_calMgr->getIwrfCalib(beam->getPulseWidthUs()));
 
   // get an available thread from the thread pool
 

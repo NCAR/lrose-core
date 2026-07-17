@@ -63,9 +63,9 @@ public:
   
   typedef enum {
     SCAN_TYPE_UNKNOWN,
-    SCAN_TYPE_PPI,
     SCAN_TYPE_RHI,
-    SCAN_TYPE_VERT
+    SCAN_TYPE_VERT,
+    SCAN_TYPE_POINT
   } scan_type_t;
   
   // Constructor
@@ -77,7 +77,12 @@ public:
   
   void init(int nSamples,
             int nGates,
+            double pulseWidthUs,
             double prt,
+            double el,
+            double az,
+            double elRate,
+            scan_type_t scanType,
             iwrf_xmit_rcv_mode_t xmitRcvMode,
             const IwrfTsInfo &opsInfo,
             const vector<shared_ptr<IwrfTsPulse>> &pulses);
@@ -106,7 +111,7 @@ public:
   double getTargetEl() const { return _targetEl; }
   double getTargetAz() const { return _targetAz; }
   double getPrt() const { return _prt; }
-  double getPulseWidth() const { return _pulseWidth; }
+  double getPulseWidthUs() const { return _pulseWidthUs; }
   double getNyquist() const { return _nyquist; }
   double getUnambigRangeKm() const;
 
@@ -114,7 +119,7 @@ public:
   long int getNanoSecs() const { return _nanoSecs; }
   double getDoubleTime() const { return _dtime; }
   
-  int getScanMode() const;
+  Beam::scan_type_t getScanType() const { return _scanType; }
 
   int getNGates() const { return _nGates; }
   int getNGatesOut() const { return _nGatesOut; }
@@ -181,6 +186,7 @@ private:
   double _az;
   double _targetEl;
   double _targetAz;
+  double _elRate;
 
   int _scanMode;
   scan_type_t _scanType;
@@ -203,7 +209,7 @@ private:
 
   double _prt;
   double _nyquist;
-  double _pulseWidth;
+  double _pulseWidthUs;
 
   // manager for computing moments
   

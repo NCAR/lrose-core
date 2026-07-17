@@ -175,9 +175,6 @@ private:
   void _recyclePulses();
   shared_ptr<IwrfTsPulse> _getPulseFromRecyclePool();
 
-  void _initRhiMode();
-  void _initVertMode();
-
   void _setPrt();
   
   int _computeMinNGates();

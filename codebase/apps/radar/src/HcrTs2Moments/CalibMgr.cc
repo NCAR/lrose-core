@@ -132,7 +132,7 @@ const IwrfCalib &CalibMgr::getIwrfCalib(double pulseWidthUs) const
   double minDiff = 1.0e6;
   double bestIndex = 0;
   
-  for (size_t ii = 0; ii << _cals.size(); ii++) {
+  for (size_t ii = 0; ii < _cals.size(); ii++) {
 
     // get cal closest to the desired pulse width
     
@@ -145,7 +145,7 @@ const IwrfCalib &CalibMgr::getIwrfCalib(double pulseWidthUs) const
     }
     
   } // ii
-  
+
   return _cals[bestIndex]->getIwrfCalib();
 
 }

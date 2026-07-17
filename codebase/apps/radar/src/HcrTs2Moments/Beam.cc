@@ -88,16 +88,17 @@ Beam::Beam(const string &progName,
   _targetAz = 0;
 
   _scanMode = IWRF_SCAN_MODE_NOT_SET;
-  _scanType = SCAN_TYPE_PPI;
+  _scanType = SCAN_TYPE_VERT;
 
   _startRangeKm = 0.0;
   _gateSpacingKm = 0.0;
 
   _xmitRcvMode = IWRF_SINGLE_POL;
 
+  _pulseWidthUs = 0;
   _prt = 0;
   _nyquist = 0;
-  _pulseWidth = 0;
+  _pulseWidthUs = 0;
 
   _fields = NULL;
 
@@ -125,7 +126,12 @@ Beam::Beam(const string &progName,
 
 void Beam::init(int nSamples,
                 int nGates,
+                double pulseWidthUs,
                 double prt,
+                double el,
+                double az,
+                double elRate,
+                scan_type_t scanType,
                 iwrf_xmit_rcv_mode_t xmitRcvMode,
                 const IwrfTsInfo &opsInfo,
                 const vector<shared_ptr<IwrfTsPulse>> &pulses)
@@ -137,7 +143,12 @@ void Beam::init(int nSamples,
   _nSamples = nSamples;
   _nSamplesHalf = _nSamples / 2;
   _nGates = nGates;
+  _pulseWidthUs = pulseWidthUs;
   _prt = prt;
+  _el = el;
+  _az = az;
+  _elRate = elRate;
+  _scanType = scanType;
   _xmitRcvMode = xmitRcvMode;
   _opsInfo = opsInfo;
   _wavelengthM = _opsInfo.get_radar_wavelength_cm() / 100.0;
@@ -251,7 +262,7 @@ void Beam::_prepareForComputeMoments()
   // pulse width
   
   shared_ptr<IwrfTsPulse> midPulse = _pulses[_nSamplesHalf];
-  _pulseWidth = midPulse->getPulseWidthUs() / 1.0e6;
+  _pulseWidthUs = midPulse->getPulseWidthUs() / 1.0e6;
 
   // set time
 
@@ -275,32 +286,35 @@ void Beam::_prepareForComputeMoments()
   // set elevation / azimuth
 
   if (_scanType == SCAN_TYPE_VERT) {
-    _el = _conditionEl(_meanPointingAngle);
-    _az = _conditionAz(midPulse->getAz());
+    if (fabs(_el - 90) < 0.5) {
+      _targetEl = 90.0;
+    } else {
+      _targetEl = -90.0;
+    }
   } else if (_scanType == SCAN_TYPE_RHI) {
-    _el = _conditionEl(_meanPointingAngle);
-    _az = _conditionAz(midPulse->getAz());
-  } else {
-    _az = _conditionAz(_meanPointingAngle);
-    _el = _conditionEl(midPulse->getEl());
-  }
-  if (midPulse->getFixedEl() > -990) {
-    _targetEl = _conditionEl(midPulse->getFixedEl());
-  } else {
-    _targetEl = _meanPointingAngle;
-  }
-  if (midPulse->getFixedAz() > -990) {
-    _targetAz = _conditionAz(midPulse->getFixedAz());
-  } else {
-    _targetAz = _meanPointingAngle;
-  }
-
-  if (std::isnan(_targetEl) || _targetEl < -990) {
+    _targetAz = _az;
+  } else if (_scanType == SCAN_TYPE_POINT) {
     _targetEl = _el;
-  }
-  if (std::isnan(_targetAz) || _targetAz < -990) {
     _targetAz = _az;
   }
+  
+  // if (midPulse->getFixedEl() > -990) {
+  //   _targetEl = _conditionEl(midPulse->getFixedEl());
+  // } else {
+  //   _targetEl = _meanPointingAngle;
+  // }
+  // if (midPulse->getFixedAz() > -990) {
+  //   _targetAz = _conditionAz(midPulse->getFixedAz());
+  // } else {
+  //   _targetAz = _meanPointingAngle;
+  // }
+  
+  // if (std::isnan(_targetEl) || _targetEl < -990) {
+  //   _targetEl = _el;
+  // }
+  // if (std::isnan(_targetAz) || _targetAz < -990) {
+  //   _targetAz = _az;
+  // }
 
 #ifdef DEBUG_PRINT_SPECTRA
   GlobAz = _az;
@@ -530,27 +544,6 @@ void Beam::appendStatusXml(const string &extraXml)
 {
 
   _statusXml += extraXml;
-
-}
-
-////////////////////////////////////////////////
-// get scan mode
-
-int Beam::getScanMode() const
-
-{
-
-  int scanMode = _scanMode;
-
-  if (_scanMode == DS_RADAR_UNKNOWN_MODE) {
-    scanMode = _opsInfo.get_scan_mode();
-  }
-
-  if (scanMode < 0) {
-    scanMode = DS_RADAR_SURVEILLANCE_MODE;
-  }
-
-  return scanMode;
 
 }
 

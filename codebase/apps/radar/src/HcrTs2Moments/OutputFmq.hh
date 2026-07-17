@@ -106,17 +106,8 @@ private:
   
   string _progName;
   const Params &_params;
-  // bool _useRadx;
-
-  // DsRadar moments queue
-
-  // DsRadarQueue *_dsrQueue;
-  // DsRadarMsg _msg;
-  // int _nFields;
-
-  // Radx moments queue
-
   DsFmq *_radxQueue;
+  Radx::SweepMode_t _sweepMode;
 
   // mutex to prevent main thread and write thread from
   // accessing these functions concurrently

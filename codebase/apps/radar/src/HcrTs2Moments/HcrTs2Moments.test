@@ -39,7 +39,7 @@ debug = DEBUG_OFF;
 //
 // Type: int
 
-beam_count_for_debug_print = 30;
+beam_count_for_debug_print = 1;
 
 ///////////// instance ////////////////////////////////
 //
@@ -205,7 +205,7 @@ compute_prt_from_interpulse_periods = FALSE;
 //
 // Type: double
 
-nsecs_for_antenna_rate = 0.1;
+nsecs_for_antenna_rate = 0.2;
 
 //======================================================================
 //
