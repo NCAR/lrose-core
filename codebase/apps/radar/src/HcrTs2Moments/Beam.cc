@@ -132,7 +132,10 @@ void Beam::init(int nSamples,
   
 {
 
+  // initialize
+  
   _nSamples = nSamples;
+  _nSamplesHalf = _nSamples / 2;
   _nGates = nGates;
   _prt = prt;
   _xmitRcvMode = xmitRcvMode;
@@ -140,6 +143,13 @@ void Beam::init(int nSamples,
   _wavelengthM = _opsInfo.get_radar_wavelength_cm() / 100.0;
   _pulses = pulses;
   _georefActive = false;
+
+  // set time
+
+  shared_ptr<IwrfTsPulse> midPulse = _pulses[_nSamplesHalf];
+  _timeSecs = (time_t) midPulse->getTime();
+  _nanoSecs = midPulse->getNanoSecs();
+  _dtime = midPulse->getFTime();
 
   // initialize noise computations
 
@@ -346,6 +356,7 @@ void Beam::_prepareForComputeMoments()
   // initialize moments computations objects
   
   _initMomentsObject(_mom);
+  
   _mom->init(_prt, _opsInfo);
   
   // compute windows for FFTs
@@ -453,7 +464,7 @@ void Beam::computeMoments()
   // set calibration data on Moments object, ready for computations
   
   _mom->setCalib(_calib);
-  
+
   // compute the moments
   
   _computeMoments();
@@ -816,7 +827,7 @@ void Beam::_computeWindows()
 void Beam::_initMomentsObject(RadarMoments *mom)
   
 {
-  
+
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     mom->setDebug(true);
   }
@@ -847,8 +858,6 @@ void Beam::_initMomentsObject(RadarMoments *mom)
                         _windowHalfR1,
                         _windowHalfR2,
                         _windowHalfR3);
-
-  mom->loadAtmosAttenCorrection(_nGatesOut, _el, *_atmosAtten);
 
 }
 

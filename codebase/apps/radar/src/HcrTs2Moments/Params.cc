@@ -1962,7 +1962,7 @@
     tt->descr = tdrpStrDup("Output URL for moments data via FMQ");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &output_fmq_url - &_start_;
-    tt->single_val.s = tdrpStrDup("fmqp:://localhost::fmq/lirp");
+    tt->single_val.s = tdrpStrDup("fmqp:://localhost::fmq/hcr");
     tt++;
     
     // Parameter 'output_fmq_size'

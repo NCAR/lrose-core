@@ -189,7 +189,7 @@ int CalibMgr::_getBestFilePath(const string &calDir,
     }
   } // it
   
-  if (bestPath.size()) {
+  if (bestPath.size() == 0) {
     cerr << "ERROR - CalibMgr::_getBestFilePath" << endl;
     cerr << "  Cal dir: " << calDir << endl;
     cerr << "  No cal files available" << endl;
@@ -206,7 +206,6 @@ int CalibMgr::_getBestFilePath(const string &calDir,
     cerr << "======================================================" << endl;
   }
 
-  
   return 0;
 
 }

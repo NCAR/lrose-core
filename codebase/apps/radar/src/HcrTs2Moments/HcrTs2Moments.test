@@ -355,7 +355,7 @@ radar_altitude_meters = 1742;
 //     DWELL_SPECIFY_BLOCK
 //     DWELL_PULSE_WIDTH_CHANGE
 
-dwell_method = DWELL_SPECIFY_N_SAMPLES;
+dwell_method = DWELL_SPECIFY_BLOCK;
 
 ///////////// dwell_n_samples /////////////////////////
 //
@@ -627,14 +627,14 @@ pulse_width_cals = {
   {
     pulse_width_us = 0.256,
     specify_file_name = FALSE,
-    cal_dir = "$(PROJ_DIR)/calibration/data/wband_256ns/combined",
+    cal_dir = "/home/mdtest/git/HCR_configuration/projDir/calibration/data/wband_256ns/combined",
     cal_file_name = "TsCalAuto_Wband-HCR-256ns_20240415_234224.xml"
   }
   ,
   {
     pulse_width_us = 0.512,
     specify_file_name = FALSE,
-    cal_dir = "$(PROJ_DIR)/calibration/data/wband_512ns/combined",
+    cal_dir = "/home/mdtest/git/HCR_configuration/projDir/calibration/data/wband_512ns/combined",
     cal_file_name = "TsCalAuto_Wband-HCR-512ns_20240415_232321.xml"
   }
 };
@@ -1197,7 +1197,7 @@ interest_threshold_for_signal = 0.51;
 //
 // Type: string
 
-output_fmq_url = "fmqp:://localhost::fmq/lirp";
+output_fmq_url = "/tmp/fmq/hcr";
 
 ///////////// output_fmq_size /////////////////////////
 //
@@ -1255,7 +1255,7 @@ nbeams_for_params_and_calib = 360;
 //
 // Type: boolean
 
-write_blocking = FALSE;
+write_blocking = TRUE;
 
 ///////////// beam_wait_msecs /////////////////////////
 //

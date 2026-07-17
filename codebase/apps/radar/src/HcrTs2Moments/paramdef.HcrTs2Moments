@@ -679,7 +679,7 @@ commentdef {
 };
 
 paramdef string {
-  p_default = "fmqp:://localhost::fmq/lirp";
+  p_default = "fmqp:://localhost::fmq/hcr";
   p_descr = "Output URL for moments data via FMQ";
 } output_fmq_url;
 

@@ -195,10 +195,6 @@ private:
   iwrf_platform_georef_t _georef;
   bool _georefActive;
 
-  // atmospheric attenuation
-
-  const AtmosAtten *_atmosAtten;
-
   // modes
 
   iwrf_xmit_rcv_mode_t _xmitRcvMode;

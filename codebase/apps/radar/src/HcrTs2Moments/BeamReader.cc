@@ -523,6 +523,7 @@ int BeamReader::_readBlockBeam()
       } else {
         // clear the queue
         _clearPulseQueue();
+        continue;
       }
     }
     
@@ -572,6 +573,7 @@ int BeamReader::_readBlockBeam()
   _computeBeamElRate(0, _nSamples);
 
   _beamError = false;
+
   return 0;
 
 }
