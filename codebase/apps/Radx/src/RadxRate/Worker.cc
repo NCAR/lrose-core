@@ -869,32 +869,24 @@ void Worker::_addPidDebugFields(const RadxRay *inputRay,
             "melting_layer_interest",
             _pid.getMlInterest());
   
-  const RadxField *beamHtFld = inputRay->getField("BEAM_HT");
-  if (beamHtFld) {
-    _addField(outputRay,
-              "BEAM_HT", "km",
-              "beam_height",
-              "height_to_center_of_beam_msl",
-              beamHtFld->getDataFl32());
-  }
+  _addField(outputRay,
+            "BEAM_HT", "km",
+            "beam_height",
+            "height_to_center_of_beam_msl",
+            inputRay->getField("beam_height")->getDataFl32());
   
-  const RadxField *rangeFld = inputRay->getField("RANGE");
-  if (rangeFld) {
-    _addField(outputRay,
-              "RANGE", "km",
-              "range",
-              "range_to_center_of_gate",
-              rangeFld->getDataFl32());
-  }
+  _addField(outputRay,
+            "RANGE", "km",
+            "range",
+            "range_to_center_of_gate",
+            inputRay->getField("range")->getDataFl32());
   
-  const RadxField *elevFld = inputRay->getField("ELEV");
-  if (elevFld) {
-    _addField(outputRay,
-              "ELEVATION", "deg",
-              "elevation",
-              "elevation_angle",
-              elevFld->getDataFl32());
-  }
+  _addField(outputRay,
+            "ELEVATION", "deg",
+            "elevation",
+            "elevation_angle",
+            inputRay->getField("elevation")->getDataFl32());
+  
   
 }
   
@@ -1088,7 +1080,7 @@ void Worker::_addField(RadxRay *outputRay,
                        const string &units,
                        const string &longName,
                        const string standardName,
-                       const int *arrayBool)
+                       const bool *arrayBool)
 
 {
 
