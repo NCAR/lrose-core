@@ -66,6 +66,7 @@ class KdpRayPlotter:
         self.ax2 = None
         self.ax3 = None
         self.ax4 = None
+        self.ax4r = None
         self.first_valid = None
         self.last_valid = None
 
@@ -245,6 +246,7 @@ class KdpRayPlotter:
         self.ax2 = self.fig.add_subplot(2, 2, 2, xmargin=0.0)
         self.ax3 = self.fig.add_subplot(2, 2, 3, xmargin=0.0)
         self.ax4 = self.fig.add_subplot(2, 2, 4, xmargin=0.0)
+        self.ax4r = self.ax4.twinx()
 
         self.do_plot()
         self.fig.suptitle(self.options.title)
@@ -264,6 +266,7 @@ class KdpRayPlotter:
         self.ax2.clear()
         self.ax3.clear()
         self.ax4.clear()
+        self.ax4r.clear()
 
         filename = self.file_list[self.file_index]
         name_parts = filename.split("_")
@@ -375,6 +378,16 @@ class KdpRayPlotter:
         self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt")
         self.ax4.set_xlabel("gateNum")
         self.ax4.set_ylabel("PHIDP")
+
+        self.ax4r.plot(
+            gate_num, plot_data["zdr"],
+            label="ZDR", color="red",
+        )
+        self.ax4r.set_ylabel("ZDR", color="red")
+        self.ax4r.yaxis.set_label_position("right")
+        self.ax4r.yaxis.tick_right()
+        self.ax4r.set_ylim(-5, 10)
+        self.ax4r.tick_params(axis="y", labelcolor="red")
 
         draw_valid_regions(
             self.ax4, gate_num, valid_kdp,
