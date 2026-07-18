@@ -39,9 +39,8 @@
 #ifndef KdpFilt_hh
 #define KdpFilt_hh
 
+#include <toolsa/TaArray.hh>
 #include <radar/KdpFiltParams.hh>
-#include <radar/RadarFft.hh>
-#include <rapmath/ForsytheFit.hh>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -126,15 +125,6 @@ public:
 
   void setPhidpDiffThreshold(double threshold) {
     _phidpDiffThreshold = threshold;
-  }
-
-  /**
-   * Set number of gates, and padding
-   */
-
-  void setNGates(int n) {
-    _nGates = n;
-    _nGatesPadded = _nGates + 2 * _nGatesPad;
   }
 
   /**
@@ -257,22 +247,11 @@ public:
 
 
   /**
-   * Set DBZ threshold for valid run when computing KDP using
-   * Z and ZDR self-consistency
-   */
-
-  void setDbzMinForSelfConsistency(double val) {
-    _dbzMinForSelfConsistency = val;
-  }
-  
-  /**
    * Set KDP threshold for valid run when computing KDP using
    * Z and ZDR self-consistency
    */
 
-  void setKdpMinForSelfConsistency(double val) {
-    _kdpMinForSelfConsistency = val;
-  }
+  void setKdpMinForSelfConsistency(double val) { _kdpMinForSelfConsistency = val; }
   
   /**
    * Set length for Z and ZDR median filter when estimating
@@ -280,10 +259,6 @@ public:
    */
 
   void setMedianFilterLenForKdpZZdr(int val) { _kdpZZdrMedianLen = val; }
-  
-  // phidp feature length for computing regression polynomial order
-
-  void setPhidpFeatureLengthKm(double val) { _phidpFeatureLengthKm = val; }
   
   /**
    * Set parameters from KdpFiltParams object
@@ -386,8 +361,8 @@ public:
    * Get flag of valid gates after calling compute()
    * @return an array of flag values
    */
-  const int *getValidForKdp() const { return _validForKdp; }
-  const int *getValidForUnfold() const { return _validForUnfold; }
+  const bool *getValidForKdp() const { return _validForKdp; }
+  const bool *getValidForUnfold() const { return _validForUnfold; }
   
   /**
    * Get phase shift on backscatter (deg) after calling compute()
@@ -418,7 +393,6 @@ public:
    * Debug print output will go to stderr
    */
   void setDebug(bool state = true) { _debug = state; }
-  void setVerbose(bool state = true) { _verbose = state; }
 
   /**
    * set writing of ray file
@@ -500,16 +474,14 @@ private:
   int _nFiltIterCond;  /**< Number of times the filter is
                         * iteratively applied to filtered constrained */
   
-  bool _useIterativeFiltering; /* for phase shift on backscatter removal */
-  double _phidpDiffThreshold; /* for phase shift on backscatter removal */
+  bool _useIterativeFiltering;
+  double _phidpDiffThreshold;
 
   int _nGates;          /**< n gates in input array */
   int _nGatesStats;     /**< n gates for computing phidp stats
                          * default is 9 */
   int _nGatesStatsHalf; /**< half of _nGatesPhidpStats, truncated */
-  int _nGatesPad;       /**< padding at each end for regr and fft filters */
-  int _nGatesPadded;    /**< gates including padding */
-  
+
   // option to limit max range
   // can be useful to avoid including the test pulse
   
@@ -577,7 +549,7 @@ private:
     double phidpJitter;
   };
 
-  vector<GateState> _gateStates_;
+  TaArray<GateState> _gateStates_;
   GateState *_gateStates;
   
   bool _foldsAt90;
@@ -593,111 +565,99 @@ private:
   // arrays for input and computed data
   // and pointers to those arrays
 
+  int _arrayExtra;
+  int _arrayLen;
+  
   bool _snrAvailable;
-  vector<double> _snr_;
+  TaArray<double> _snr_;
   double *_snr;
   
-  vector<double> _dbz_;
+  TaArray<double> _dbz_;
   double *_dbz;
 
-  vector<double> _dbzMedian_;
+  TaArray<double> _dbzMedian_;
   double *_dbzMedian;
 
-  vector<double> _dbzMax_;
+  TaArray<double> _dbzMax_;
   double *_dbzMax;
   
   bool _rhohvAvailable;
-  vector<double> _rhohv_;
+  TaArray<double> _rhohv_;
   double *_rhohv;
 
   bool _zdrAvailable;
-  vector<double> _zdr_;
+  TaArray<double> _zdr_;
   double *_zdr;
 
-  vector<double> _zdrSdev_;
+  TaArray<double> _zdrSdev_;
   double *_zdrSdev;
 
-  vector<double> _zdrMedian_;
+  TaArray<double> _zdrMedian_;
   double *_zdrMedian;
 
-  vector<double> _phidp_;
+  TaArray<double> _phidp_;
   double *_phidp;
   
-  vector<double> _phidpMean_;
+  TaArray<double> _phidpMean_;
   double *_phidpMean;
   
-  vector<double> _phidpMeanValid_;
+  TaArray<double> _phidpMeanValid_;
   double *_phidpMeanValid;
   
-  vector<double> _phidpJitter_;
+  TaArray<double> _phidpJitter_;
   double *_phidpJitter;
   
-  vector<double> _phidpSdev_;
+  TaArray<double> _phidpSdev_;
   double *_phidpSdev;
   
-  vector<double> _phidpMeanUnfold_;
+  TaArray<double> _phidpMeanUnfold_;
   double *_phidpMeanUnfold;
   
-  vector<double> _phidpUnfold_;
+  TaArray<double> _phidpUnfold_;
   double *_phidpUnfold;
   
-  vector<double> _phidpFilt_;
+  TaArray<double> _phidpFilt_;
   double *_phidpFilt;
   
-  vector<double> _phidpCond_;
+  TaArray<double> _phidpCond_;
   double *_phidpCond;
   
-  vector<double> _phidpCondFilt_;
+  TaArray<double> _phidpCondFilt_;
   double *_phidpCondFilt;
   
-  vector<double> _phidpAccumFilt_;
+  TaArray<double> _phidpAccumFilt_;
   double *_phidpAccumFilt;
   
-  vector<int> _validForKdp_;
-  int *_validForKdp;
+  TaArray<bool> _validForKdp_;
+  bool *_validForKdp;
   
-  vector<int> _validForUnfold_;
-  int *_validForUnfold;
+  TaArray<bool> _validForUnfold_;
+  bool *_validForUnfold;
   
-  vector<double> _kdp_;
+  TaArray<double> _kdp_;
   double *_kdp;
 
-  vector<double> _kdpZZdr_;
+  TaArray<double> _kdpZZdr_;
   double *_kdpZZdr;
 
-  vector<double> _kdpSC_;
+  TaArray<double> _kdpSC_;
   double *_kdpSC;
 
-  vector<double> _phidpSC_;
-  double *_phidpSC;
-
-  vector<double> _psob_;
+  TaArray<double> _psob_;
   double *_psob;
 
-  vector<double> _dbzAttenCorr_;
+  TaArray<double> _dbzAttenCorr_;
   double *_dbzAttenCorr;
 
-  vector<double> _zdrAttenCorr_;
+  TaArray<double> _zdrAttenCorr_;
   double *_zdrAttenCorr;
 
-  vector<double> _dbzCorrected_;
+  TaArray<double> _dbzCorrected_;
   double *_dbzCorrected;
 
-  vector<double> _zdrCorrected_;
+  TaArray<double> _zdrCorrected_;
   double *_zdrCorrected;
 
-  vector<double> _phidpFftFilt_;
-  double *_phidpFftFilt;
-  
-  vector<double> _phidpFftCond_;
-  double *_phidpFftCond;
-  
-  vector<double> _regrFilt_;
-  double *_regrFilt;
-  
-  vector<double> _xxVals_;
-  double *_xxVals;
-  
   // Z and ZDR attenuation correction
 
   bool _doComputeAttenCorr;
@@ -710,8 +670,6 @@ private:
   // debug printing and writing ray files
 
   bool _debug;
-  bool _verbose;
-
   bool _writeRayFile;
   string _rayFileDir;
 
@@ -720,25 +678,11 @@ private:
   double _kdpZExpon;
   double _kdpZdrExpon;
   double _kdpZZdrCoeff;
-  double _dbzMinForSelfConsistency;
   double _kdpMinForSelfConsistency;
   int _kdpZZdrMedianLen;
 
-  // nominal length of a feature in PHIDP
-
-  double _phidpFeatureLengthKm;
-
-  // FFT for filtering
-  
-  RadarFft _fft;
-  
-  //////////////////////////////////////////
   // methods
-
-  // get max number of valid gates
-  
-  int _getNGatesMaxValid();
-  
+ 
   /**
    * Initialize local arrays and copy input data for filtering,
    * manipulation, etc.
@@ -760,25 +704,17 @@ private:
   /// filter the unfolded phidp array and compute kdp
   
   void _computeKdp();
-
-  // compute regression-filtered phidp
-  
-  void _computePhidpRegrFilt();
-
-  // worker methods
-  
-  void _copyArray(double *out, const double *in);
-  void _copyArrayCond(double *out, const double *in,
+  void _copyArray(double *array, const double *vals);
+  void _copyArrayCond(double *array, const double *vals,
                       const double *original);
   void _padArray(double *array);
   void _loadKdp();
   void _loadPhidpAccumFilt(const double *phidp, double *accum);
   void _computeAttenCorrection();
-  void _applyFirFilter(double *out, const double *in);
+  void _applyFirFilter(const double *in, double *out);
   double _getFirFilterGain();
   void _computeDbzMax();
   void _computePhidpConditioned();
-  void _computeFftConditioned();
 
   /// Compute the folding range by inspecting the phidp data
 
@@ -819,40 +755,6 @@ private:
   void _loadKdpSC();
   void _loadKdpSCRun(int startGate, int endGate);
 
-  /// filter phidp using FFT
-  
-  void _fftFilter();
-    
-  /// fill phidp missing gates with noise
-
-  void _fillPhidpMissingGates();
-
-  /// pack valid run data into packed vector
-
-  void _packValid(const vector<double> &unpacked,
-                  vector<double> &packed);
-
-  /// unpack packed vector into full
-
-  void _unpackValid(const vector<double> &packed,
-                    vector<double> &unpacked);
-
-  /// unpack packed vector and fill gaps with adjacent values
-  
-  void _unpackAndFill(const vector<double> &packed,
-                      vector<double> &unpacked);
-  
-  /// get quality based on rhohv
-
-  double _rhohvQuality(double rhohv);
-  
-  /// moving mean along a vector
-  
-  void _movingMean(const std::vector<double>& xx,
-                   size_t filtLen,
-                   std::vector<double>& filt);
-  
-  
 };
 
 #endif

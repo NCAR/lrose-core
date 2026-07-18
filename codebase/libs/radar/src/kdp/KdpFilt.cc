@@ -29,14 +29,15 @@
 // Feb 2008
 //
 ///////////////////////////////////////////////////////////////
+//
+// Kdp for SBand - based on Bringi code
+//
+////////////////////////////////////////////////////////////////
 
 #include <iomanip>
 #include <cerrno>
-#include <cassert>
 #include <cmath>
 #include <cstring>
-#include <random>
-#include <rapmath/NasaPolyFit.hh>
 #include <toolsa/os_config.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/file_io.h>
@@ -46,7 +47,6 @@
 #include <radar/FilterUtils.hh>
 #include <radar/DpolFilter.hh>
 #include <radar/KdpFiltParams.hh>
-#include <radar/RadarComplex.hh>
 using namespace std;
 
 const double KdpFilt::firCoeff_125[FIR_LEN_125+1] = {
@@ -160,8 +160,7 @@ KdpFilt::KdpFilt()
   _nFiltIterUnfolded = 2;
   _nFiltIterCond = 4;
 
-  _nGatesPad = 21;
-  setNGates(0);
+  _nGates = 0;
   setNGatesStats(9);
 
   _limitMaxRange = false;
@@ -209,14 +208,12 @@ KdpFilt::KdpFilt()
   _kdpZExpon = 1.0;
   _kdpZdrExpon = -2.05;
   _kdpZZdrCoeff = 3.32e-5;
-  _dbzMinForSelfConsistency = 20.0;
   _kdpMinForSelfConsistency = 0.25;
   _kdpZZdrMedianLen = 5;
 
   // debugging
 
   _debug = false;
-  _verbose = false;
   _writeRayFile = false;
 
 }
@@ -348,15 +345,10 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
   }
   setZdrSdevMax(params.KDP_zdr_sdev_max);
   setKdpMinForSelfConsistency(params.KDP_minimum_for_self_consistency);
-  setDbzMinForSelfConsistency(params.DBZ_minimum_for_self_consistency);
   setMedianFilterLenForKdpZZdr(params.KDP_median_filter_len_for_ZZDR);
 
   if (params.KDP_debug) {
     setDebug(true);
-  }
-  if (params.KDP_verbose) {
-    setDebug(true);
-    setVerbose(true);
   }
   if (params.KDP_write_ray_files) {
     setWriteRayFile(true, params.KDP_ray_files_dir);
@@ -369,7 +361,6 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
                    params.KDP_zdr_attenuation_exponent);
   }
   setComputeAttenCorr(true);
-  setPhidpFeatureLengthKm(params.phidp_feature_length_km);
 
 }
 
@@ -383,7 +374,7 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
 void KdpFilt::initializeArrays(int nGates)
 
 {
-  setNGates(nGates);
+  _nGates = nGates;
   _initArrays(NULL, NULL, NULL, NULL, NULL, _nGates);
 }
 
@@ -447,7 +438,7 @@ int KdpFilt::compute(time_t timeSecs,
     }
   }
 
-  if (_verbose) {
+  if (_debug) {
     if (_doComputeAttenCorr) {
       cerr << "DEBUG - KdpFilt::compute" << endl;
       cerr << "  Performing attenuation correction from KDP" << endl;
@@ -471,17 +462,24 @@ int KdpFilt::compute(time_t timeSecs,
 
   // set number of gates
 
-  setNGates(nGates);
+  _nGates = nGates;
+
+  // compute max number of valid gates
+
+  int nGatesMaxValid = _nGates;
+  if (_limitMaxRange) {
+    int nGatesMaxValid =
+      (int) ((_maxRangeKm - _startRangeKm) / _gateSpacingKm + 0.5);
+    if (nGatesMaxValid > _nGates) {
+      nGatesMaxValid = _nGates;
+    }
+  }
 
   // initialize the data arrays
   
   _missingValue = missingValue;
-  _initArrays(snr, dbz, zdr, rhohv, phidp, _getNGatesMaxValid());
+  _initArrays(snr, dbz, zdr, rhohv, phidp, nGatesMaxValid);
   
-  // check if fold is at 90 or 180
-  
-  _computeFoldingRange();
-
   // unfold phidp
   
   if (_unfoldPhidp()) {
@@ -489,33 +487,23 @@ int KdpFilt::compute(time_t timeSecs,
     for (int igate = 0; igate < _nGates; igate++) {
       if (_snr[igate] < _snrThreshold) {
         _kdp[igate] = _missingValue;
-        _kdpSC[igate] = _missingValue;
-        _phidpSC[igate] = _missingValue;
         _kdpZZdr[igate] = _missingValue;
+        _kdpSC[igate] = _missingValue;
         _psob[igate] = _missingValue;
       } else {
         _kdp[igate] = 0;
-        _kdpSC[igate] = 0;
-        _phidpSC[igate] = 0;
         _kdpZZdr[igate] = 0;
+        _kdpSC[igate] = 0;
         _psob[igate] = 0;
       }
     }
     return 0;
   }
 
-  // filter with low-pass FFT
-  
-  _fftFilter();
-
   // compute filtered phidp,
   // and kdp from the filtered data
 
   _computeKdp();
-
-  // compute phidp filtered with regression filter
-  
-  _computePhidpRegrFilt();
 
   // compute phase shift on backscatter as the difference between
   // measured and filtered phidp
@@ -529,10 +517,6 @@ int KdpFilt::compute(time_t timeSecs,
     }
   }
   
-  // load up conditional KDP from estimated kdp and kdpZZdr
-
-  _loadKdpSC();
-
   // write ray file if requested
 
   if (_writeRayFile) {
@@ -551,6 +535,10 @@ int KdpFilt::compute(time_t timeSecs,
   //     }
   //   }
   // }
+
+  // load up conditional KDP from estimated kdp and kdpZZdr
+
+  _loadKdpSC();
 
   // compute attenuation corrections
 
@@ -584,12 +572,23 @@ int KdpFilt::computePhidpStats(int nGates,
 
   // set number of gates
 
-  setNGates(nGates);
+  _nGates = nGates;
+
+  // compute max number of valid gates
+  
+  int nGatesMaxValid = _nGates;
+  if (_limitMaxRange) {
+    int nGatesMaxValid =
+      (int) ((_maxRangeKm - _startRangeKm) / _gateSpacingKm + 0.5);
+    if (nGatesMaxValid > _nGates) {
+      nGatesMaxValid = _nGates;
+    }
+  }
 
   // initialize the data arrays
   
   _missingValue = missingValue;
-  _initArrays(NULL, NULL, NULL, NULL, phidp, _getNGatesMaxValid());
+  _initArrays(NULL, NULL, NULL, NULL, phidp, nGatesMaxValid);
   
   // check if fold is at 90 or 180
   
@@ -618,27 +617,6 @@ int KdpFilt::computePhidpStats(int nGates,
 }
   
 /////////////////////////////////////
-// get max number of valid gates
-
-int KdpFilt::_getNGatesMaxValid()
-  
-{
-  
-  int nValid = _nGates;
-
-  if (_limitMaxRange) {
-    nValid =
-      (int) ((_maxRangeKm - _startRangeKm) / _gateSpacingKm + 0.5);
-    if (nValid > _nGates) {
-      nValid = _nGates;
-    }
-  }
-
-  return nValid;
-
-}
-
-/////////////////////////////////////
 // initialize arrays
 
 void KdpFilt::_initArrays(const double *snr,
@@ -650,45 +628,46 @@ void KdpFilt::_initArrays(const double *snr,
   
 {
   
+  _arrayExtra = _firLength + 1;
+  if (_firLength < _nGatesStats) {
+    _arrayExtra = _nGatesStats + 1;
+  }
+  _arrayLen = _nGates + 2 * _arrayExtra;
+
   // allocate the arrays needed
   // copy input arrays, leaving extra space at the beginning
   // for negative indices and at the end for filtering as required
 
-  _snr_.resize(_nGates); _snr = _snr_.data();
-  _dbz_.resize(_nGates); _dbz = _dbz_.data();
-  _dbzMax_.resize(_nGates); _dbzMax = _dbzMax_.data();
-  _dbzMedian_.resize(_nGates); _dbzMedian = _dbzMedian_.data();
-  _zdr_.resize(_nGates); _zdr = _zdr_.data();
-  _zdrSdev_.resize(_nGates); _zdrSdev = _zdrSdev_.data();
-  _zdrMedian_.resize(_nGates); _zdrMedian = _zdrMedian_.data();
-  _rhohv_.resize(_nGates); _rhohv = _rhohv_.data();
-  _phidp_.resize(_nGates); _phidp = _phidp_.data();
-  _phidpMean_.resize(_nGates); _phidpMean = _phidpMean_.data();
-  _phidpMeanValid_.resize(_nGates); _phidpMeanValid = _phidpMeanValid_.data();
-  _phidpSdev_.resize(_nGates); _phidpSdev = _phidpSdev_.data();
-  _phidpJitter_.resize(_nGates); _phidpJitter = _phidpJitter_.data();
-  _phidpMeanUnfold_.resize(_nGates); _phidpMeanUnfold = _phidpMeanUnfold_.data();
-  _phidpUnfold_.resize(_nGates); _phidpUnfold = _phidpUnfold_.data();
-  _phidpFilt_.resize(_nGates); _phidpFilt = _phidpFilt_.data();
-  _phidpCond_.resize(_nGates); _phidpCond = _phidpCond_.data();
-  _phidpCondFilt_.resize(_nGates); _phidpCondFilt = _phidpCondFilt_.data();
-  _phidpAccumFilt_.resize(_nGates); _phidpAccumFilt = _phidpAccumFilt_.data();
-  _validForKdp_.resize(_nGates); _validForKdp = _validForKdp_.data();
-  _validForUnfold_.resize(_nGates); _validForUnfold = _validForUnfold_.data();
-  _kdp_.resize(_nGates); _kdp = _kdp_.data();
-  _kdpZZdr_.resize(_nGates); _kdpZZdr = _kdpZZdr_.data();
-  _kdpSC_.resize(_nGates); _kdpSC = _kdpSC_.data();
-  _phidpSC_.resize(_nGates); _phidpSC = _phidpSC_.data();
-  _psob_.resize(_nGates); _psob = _psob_.data();
-  _dbzAttenCorr_.resize(_nGates); _dbzAttenCorr = _dbzAttenCorr_.data();
-  _zdrAttenCorr_.resize(_nGates); _zdrAttenCorr = _zdrAttenCorr_.data();
-  _dbzCorrected_.resize(_nGates); _dbzCorrected = _dbzCorrected_.data();
-  _zdrCorrected_.resize(_nGates); _zdrCorrected = _zdrCorrected_.data();
-  _gateStates_.resize(_nGates); _gateStates = _gateStates_.data();
-  _phidpFftFilt_.resize(_nGates); _phidpFftFilt = _phidpFftFilt_.data();
-  _phidpFftCond_.resize(_nGates); _phidpFftCond = _phidpFftCond_.data();
-  _regrFilt_.resize(_nGates); _regrFilt = _regrFilt_.data();
-  _xxVals_.resize(_nGatesPadded); _xxVals = _xxVals_.data();
+  _snr = _snr_.alloc(_nGates);
+  _dbz = _dbz_.alloc(_nGates);
+  _dbzMax = _dbzMax_.alloc(_nGates);
+  _dbzMedian = _dbzMedian_.alloc(_nGates);
+  _zdr = _zdr_.alloc(_nGates);
+  _zdrSdev = _zdrSdev_.alloc(_nGates);
+  _zdrMedian = _zdrMedian_.alloc(_nGates);
+  _rhohv = _rhohv_.alloc(_nGates);
+  _phidp = _phidp_.alloc(_nGates);
+  _phidpMean = _phidpMean_.alloc(_nGates);
+  _phidpMeanValid = _phidpMeanValid_.alloc(_nGates);
+  _phidpSdev = _phidpSdev_.alloc(_nGates);
+  _phidpJitter = _phidpJitter_.alloc(_nGates);
+  _phidpMeanUnfold = _phidpMeanUnfold_.alloc(_nGates);
+  _phidpUnfold = _phidpUnfold_.alloc(_nGates);
+  _phidpFilt = _phidpFilt_.alloc(_nGates);
+  _phidpCond = _phidpCond_.alloc(_nGates);
+  _phidpCondFilt = _phidpCondFilt_.alloc(_nGates);
+  _phidpAccumFilt = _phidpAccumFilt_.alloc(_nGates);
+  _validForKdp = _validForKdp_.alloc(_nGates);
+  _validForUnfold = _validForUnfold_.alloc(_nGates);
+  _kdp = _kdp_.alloc(_nGates);
+  _kdpZZdr = _kdpZZdr_.alloc(_nGates);
+  _kdpSC = _kdpSC_.alloc(_nGates);
+  _psob = _psob_.alloc(_nGates);
+  _dbzAttenCorr = _dbzAttenCorr_.alloc(_nGates);
+  _zdrAttenCorr = _zdrAttenCorr_.alloc(_nGates);
+  _dbzCorrected = _dbzCorrected_.alloc(_nGates);
+  _zdrCorrected = _zdrCorrected_.alloc(_nGates);
+  _gateStates = _gateStates_.alloc(_nGates);
   
   // copy data to working arrays
 
@@ -779,29 +758,18 @@ void KdpFilt::_initArrays(const double *snr,
     _validForUnfold[ii] = false;
     if (_snr[ii] < _snrThreshold) {
       _kdp[ii] = _missingValue;
-      _kdpSC[ii] = _missingValue;
-      _phidpSC[ii] = _missingValue;
       _kdpZZdr[ii] = _missingValue;
+      _kdpSC[ii] = _missingValue;
       _psob[ii] = _missingValue;
     } else {
       _kdp[ii] = 0;
-      _kdpSC[ii] = 0;
-      _phidpSC[ii] = 0;
       _kdpZZdr[ii] = 0;
+      _kdpSC[ii] = 0;
       _psob[ii] = 0;
     }
     _dbzAttenCorr[ii] = 0;
     _zdrAttenCorr[ii] = 0;
-    _regrFilt[ii] = _missingValue;
-    _phidpFftFilt[ii] = _missingValue;
-    _phidpFftCond[ii] = _missingValue;
   }
-  
-  double xxDelta = 1.0 / (double) _nGatesPadded;
-  for (int ii = 0; ii < _nGatesPadded; ii++) {
-    _xxVals[ii] = -0.5 + ii * xxDelta;
-  }
-  
   
 }
 
@@ -811,6 +779,10 @@ void KdpFilt::_initArrays(const double *snr,
 int KdpFilt::_unfoldPhidp()
 
 {
+  
+  // check if fold is at 90 or 180
+  
+  _computeFoldingRange();
   
   // initialize the gate states - the state at each gate is
   // dependent on the phidp values and the spatial relatioship
@@ -973,19 +945,10 @@ void KdpFilt::_computeKdp()
   int arrayLen = _nGates + 2 * arrayOffset;
   
   // allocate working arrays
-
-  vector<double> work1_(arrayLen);
-  double *work1 = work1_.data() + arrayOffset;
   
-  vector<double> work2_(arrayLen);
-  double *work2 = work2_.data() + arrayOffset;
-  
-  // vector<double> work1_, work2_;
-  // work1_.resize(arrayLen);
-  // double *work1 = work1_.data() + arrayOffset;
-  // work1_.resize(arrayLen);
-  // double *work1 = work1_.data() + arrayOffset;
-  // double *work2 = work2_.alloc(arrayLen) + arrayOffset;
+  TaArray<double> work1_, work2_;
+  double *work1 = work1_.alloc(arrayLen) + arrayOffset;
+  double *work2 = work2_.alloc(arrayLen) + arrayOffset;
 
   // initialize working array work2
   
@@ -995,7 +958,7 @@ void KdpFilt::_computeKdp()
   // apply FIR filter, computing work1 from work2, iterate
     
   for (int iloop = 0; iloop < _nFiltIterUnfolded; iloop++) {
-    _applyFirFilter(work1, work2);
+    _applyFirFilter(work2, work1);
     _copyArray(work2, work1);
   } // iloop
   
@@ -1014,7 +977,7 @@ void KdpFilt::_computeKdp()
     _padArray(work2);
 
     for (int iloop = 0; iloop < _nFiltIterCond; iloop++) {
-      _applyFirFilter(work1, work2);
+      _applyFirFilter(work2, work1);
       _copyArrayCond(work2, work1, _phidpCond);
     } // iloop
     
@@ -1032,7 +995,7 @@ void KdpFilt::_computeKdp()
     _padArray(work2);
     
     for (int iloop = 0; iloop < _nFiltIterCond; iloop++) {
-      _applyFirFilter(work1, work2);
+      _applyFirFilter(work2, work1);
       _copyArray(work2, work1);
     } // iloop
 
@@ -1040,10 +1003,6 @@ void KdpFilt::_computeKdp()
 
   }
   
-  // compute fft-filtered phidp conditioned to remove phase shift on backscatter
-  
-  _computeFftConditioned();
-    
   // compute KDP as slope between successive gates
 
   _loadKdp();
@@ -1054,69 +1013,28 @@ void KdpFilt::_computeKdp()
 
 }
 
-/////////////////////////////////////////////////
-// compute phidp filtered with regression filter
-
-void KdpFilt::_computePhidpRegrFilt()
-
-{
-
-  // compute regression order to be used
-
-  double deltaRangeKm = _nGatesPadded * _gateSpacingKm;
-  int polyOrder = floor(deltaRangeKm / _phidpFeatureLengthKm) + 2;
-  if (polyOrder < 5) {
-    polyOrder = 5;
-  }
-  
-  // prepare for the fit
-  
-  ForsytheFit fit;
-  fit.prepareForFit(polyOrder, _xxVals_);
-  
-  // perform the polynomial fit on unfolded phidp
-
-  vector<double> phiRegr_;
-  phiRegr_.resize(_nGatesPadded);
-  double *phiRegr = phiRegr_.data() + _nGatesPad;
-  for (int igate = 0; igate < _nGates; igate++) {
-    phiRegr[igate] = _phidpUnfold[igate];
-  }
-  for (int igate = 0; igate < _nGatesPad; igate++) {
-    phiRegr[-1 - igate] = phiRegr[0];
-    phiRegr[_nGates + igate] = phiRegr[_nGates - 1];
-  }
-  
-  fit.performFit(phiRegr_);
-  vector<double> smoothed = fit.getYEstVector();
-  for (int ii = 0; ii < _nGates; ii++) {
-    _regrFilt[ii] = smoothed[ii + _nGatesPad];
-  }
-  
-}
-
 /////////////////////////////////////////////
 // load array ready for filter
 
-void KdpFilt::_copyArray(double *out, const double *in)
+void KdpFilt::_copyArray(double *array, const double *vals)
 
 {
-  memcpy(out, in, _nGates * sizeof(double));
+  memcpy(array, vals, _nGates * sizeof(double));
 }
 
 /////////////////////////////////////////////
 // copy array conditionally
 
-void KdpFilt::_copyArrayCond(double *out, const double *in,
+void KdpFilt::_copyArrayCond(double *array, const double *vals,
                              const double *original)
 
 {
   for (int ii = 0; ii < _nGates; ii++) {
-    double diff = in[ii] - out[ii];
+    double diff = vals[ii] - array[ii];
     if (fabs(diff) < _phidpDiffThreshold) {
-      out[ii] = original[ii];
+      array[ii] = original[ii];
     } else {
-      out[ii] = in[ii];
+      array[ii] = vals[ii];
     }
   }
 }
@@ -1146,14 +1064,6 @@ void KdpFilt::_loadKdp()
   
   for (int ii = 0; ii < _nGates; ii++) {
 
-    if (!_validForKdp[ii]) {
-      _kdp[ii] = 0.0;
-      _kdpZZdr[ii] = 0.0;
-      _kdpSC[ii] = 0.0;
-      _psob[ii] = 0.0;
-      continue;
-    }
-      
     // check SNR
     
     if (_snr[ii] < _snrThreshold) {
@@ -1163,7 +1073,7 @@ void KdpFilt::_loadKdp()
       _psob[ii] = _missingValue;
       continue;
     }
-    
+
     // get max DBZ for surrounding gates
     
     double maxDbz = _dbzMax[ii];
@@ -1179,7 +1089,7 @@ void KdpFilt::_loadKdp()
     } else {
       adapLen = 2;
     }
-    
+
     int i0 = ii - adapLen;
     if (i0 < 0) {
       i0 = 0;
@@ -1192,17 +1102,12 @@ void KdpFilt::_loadKdp()
     if (len < 1) {
       _kdp[ii] = 0;
     } else {
-      // double dphi = _phidpCondFilt[i1] - _phidpCondFilt[i0];
-      double dphi = _phidpFftCond[i1] - _phidpFftCond[i0];
+      double dphi = _phidpCondFilt[i1] - _phidpCondFilt[i0];
       _kdp[ii] = (dphi / (_gateSpacingKm * len)) / 2.0;
     }
-    
-    if (_foldsAt90) {
-      _kdp[ii] /= 2.0;
-    }
-    
+
     _kdpZZdr[ii] = _computeKdpFromZZdr(_dbzMedian[ii], _zdrMedian[ii]);
-    
+
   } // ii
 
 }
@@ -1269,7 +1174,7 @@ void KdpFilt::_computeAttenCorrection()
 /////////////////////////////////////////////
 // Apply FIR filter
 
-void KdpFilt::_applyFirFilter(double *out, const double *in)
+void KdpFilt::_applyFirFilter(const double *in, double *out)
 
 {
 
@@ -1335,7 +1240,7 @@ void KdpFilt::_computePhidpConditioned()
     PhidpRun &run = _validRuns[irun];
     run.phidpBegin = _phidpMeanUnfold[run.ibegin];
     run.phidpEnd = _phidpMeanUnfold[run.iend];
-    
+
     // find the regions where phidp increases and then comes down again
 
     bool increasing = false;
@@ -1445,148 +1350,6 @@ void KdpFilt::_computePhidpConditioned()
 
 }
   
-/////////////////////////////////////////////////////////////////////////////////
-// compute fft-filtered phidp conditioned to remove phase shift on backscatter
-
-void KdpFilt::_computeFftConditioned()
-
-{
-
-  bool debug = false;
-  // if (_azDeg > 75 && _azDeg < 125) {
-  //   debug = true;
-  //   cerr << "AAAAAAAAAAAAA az: " << _azDeg << endl;
-  // }
-
-  // loop through the valid runs
-
-  for (int igate = 0; igate < _nGates; igate++) {
-    _phidpFftCond[igate] = _phidpFftFilt[igate];
-  }
-  
-  for (size_t irun = 0; irun < _validRuns.size(); irun++) {
-
-    PhidpRun &run = _validRuns[irun];
-
-    if (debug) {
-      cerr << "++++++++++++++++++++++++++++++++++++++++" << endl;
-      cerr << "  irun, ibegin, iend: "
-           << irun << ", " << run.ibegin << ", " << run.iend << endl;
-    }
-
-    run.phidpBegin = _phidpMeanUnfold[run.ibegin];
-    run.phidpEnd = _phidpMeanUnfold[run.iend];
-    
-    // find the regions where phidp increases and then comes down again
-
-    bool increasing = false;
-    bool decreasing = false;
-    
-    int topIndex = -1;
-    int botIndex = -1;
-    
-    vector<int> topIndices;
-    vector<int> botIndices;
-    
-    for (int igate = run.ibegin + 2; igate <= run.iend; igate++) {
-    
-      double diff2 = _phidpFftFilt[igate-1] - _phidpFftFilt[igate-2];
-      double diff1 = _phidpFftFilt[igate] - _phidpFftFilt[igate-1];
-      
-      // look for increasing trend
-      
-      if (diff1 > 0 && diff2 > 0) {
-        if (!increasing) {
-          botIndex = igate - 2;
-          increasing = true;
-          if (topIndex > 0) {
-            topIndices.push_back(topIndex);
-            botIndices.push_back(botIndex);
-          }
-        }
-      } else {
-        increasing = false;
-      }
-      
-      // look for decreasing trend
-      
-      if (diff1 < 0 && diff2 < 0) {
-        if (!decreasing) {
-          topIndex = igate - 2;
-          decreasing = true;
-        }
-      } else {
-        decreasing = false;
-      }
-      
-    } // igate
-    
-    // for each bot index, look back for the previous location at
-    // the same value
-    
-    int prevBotIndex = 0;
-    for (size_t ii = 0; ii < botIndices.size(); ii++) {
-      
-      if (debug) {
-        cerr << "----------------------------------------" << endl;
-        cerr << "  ii, botIndices: " << ii << ", " << botIndices[ii] << endl;
-        cerr << "  ii, topIndices: " << ii << ", " << topIndices[ii] << endl;
-      }
-      
-      // look back for the point where the phidp value
-      // drops below the bottom value
-      int botIndex = botIndices[ii];
-      double botVal = _phidpFftFilt[botIndex];
-      bool matchFound = false;
-      
-      if (debug)
-        cerr << "DDDDDDD prevBotIndex, botIndex, botVal: "
-             << prevBotIndex << ", " << botIndex << ", " << botVal << endl;
-      
-      for (int igate = topIndices[ii]; igate >= prevBotIndex; igate--) {
-        double val = _phidpFftFilt[igate];
-        if (val < botVal) {
-          if (debug)
-            cerr << "CCCCCCC val, igate: " << val << ", " << igate << endl;
-          for (int jgate = igate + 1; jgate < botIndices[ii]; jgate++) {
-            _phidpFftCond[jgate] = botVal;
-          } // jgate
-          matchFound = true;
-          break;
-        }
-      } // igate
-      
-      if (debug)
-        cerr << "FFFFFFF matchFound: " << matchFound << endl;
-      
-      if (!matchFound && prevBotIndex > 0) {
-        // did not find a value below the bottom value
-        // so move forward instead
-        double prevBotVal = _phidpFftFilt[prevBotIndex];
-        if (debug)
-          cerr << "HHHHHHH prevBotIndex, prevBotVal: "
-               << prevBotIndex << ", " << prevBotVal << endl;
-        for (int igate = prevBotIndex + 1; igate <= botIndex; igate++) {
-          double val = _phidpFftFilt[igate];
-          if (val <= prevBotVal) {
-            if (debug)
-              cerr << "EEEEEE val, igate: " << val << ", " << igate << endl;
-            for (int jgate = prevBotIndex + 1; jgate < igate; jgate++) {
-              _phidpFftCond[jgate] = prevBotVal;
-            } // jgate
-            break;
-          }
-        } // igate
-      }
-
-      prevBotIndex = botIndex;
-      
-    } // ii
-
-  } // irun
-
-}
-  
 /////////////////////////////////////////////
 // compute the folding values and range
 // by inspecting the phidp values
@@ -1621,16 +1384,6 @@ void KdpFilt::_computeFoldingRange()
     for (int igate = 0; igate < _nGates; igate++) {
       if (_phidp[igate] != _missingValue) {
         _phidp[igate] -= 180.0;
-      }
-    }
-  }
-
-  // adjust phidp array so that it folds at 180
-
-  if (_foldsAt90) {
-    for (int igate = 0; igate < _nGates; igate++) {
-      if (_phidp[igate] != _missingValue) {
-        _phidp[igate] = _phidp[igate] * 2.0;
       }
     }
   }
@@ -1840,9 +1593,9 @@ void KdpFilt::_gateStatesInit()
       state.missing = false;
       double phase = _phidp[ii];
       state.phidp = _phidp[ii];
-      // if (_foldsAt90) {
-      //   phase *= 2.0;
-      // }
+      if (_foldsAt90) {
+        phase *= 2.0;
+      }
       double sinVal, cosVal;
       ta_sincos(phase * DEG_TO_RAD, &sinVal, &cosVal);
       state.xx = cosVal;
@@ -1914,18 +1667,18 @@ void KdpFilt::_computePhidpStats(int igate)
   istate.meanyy = sumyy / count;
   
   double phase = atan2(istate.meanyy, istate.meanxx) * RAD_TO_DEG;
-  // if (_foldsAt90) {
-  //   phase *= 0.5;
-  // }
+  if (_foldsAt90) {
+    phase *= 0.5;
+  }
   istate.phidpMean = phase;
   
   // jitter
   
   double meanDist = sumDist / count;
   double meanAngChangePerGate = meanDist * RAD_TO_DEG;
-  // if (_foldsAt90) {
-  //   meanAngChangePerGate *= 0.5;
-  // }
+  if (_foldsAt90) {
+    meanAngChangePerGate *= 0.5;
+  }
   istate.phidpJitter = meanAngChangePerGate;
   
   // sdev of distance moved, is a proxy for sdev of phidp
@@ -1935,9 +1688,9 @@ void KdpFilt::_computePhidpStats(int igate)
     double term2 = meanDist * meanDist;
     if (term1 >= term2) {
       double sdev = sqrt(term1 - term2) * RAD_TO_DEG;
-      // if (_foldsAt90) {
-      //   sdev *= 0.5;
-      // }
+      if (_foldsAt90) {
+        sdev *= 0.5;
+      }
       istate.phidpSdev = sdev;
     }
   }
@@ -2008,7 +1761,7 @@ void KdpFilt::_writeRayDataToFile()
   DateTime rtime(_timeSecs);
   int msecs = (int) (_timeFractionSecs * 1000.0 + 0.5);
   sprintf(filePath,
-          "%s%skdpray_%.4d%.2d%.2d-%.2d%.2d%.2d.%.3d_el-%06.2f_az-%06.2f_.txt",
+          "%s%skdpray_%.4d%.2d%.2d-%.2d%.2d%.2d.%.3d_el-%05.1f_az-%05.1f_.txt",
           _rayFileDir.c_str(), PATH_DELIM,
           rtime.getYear(), rtime.getMonth(), rtime.getDay(),
           rtime.getHour(), rtime.getMin(), rtime.getSec(), msecs,
@@ -2031,9 +1784,8 @@ void KdpFilt::_writeRayDataToFile()
           "# gateNum validKdp validUnfold snr dbz zdr rhohv phidp "
           "phidpMean phidpMeanValid phidpJitter phidpSdev "
           "phidpMeanUnfold phidpUnfold phidpFilt phidpCond phidpCondFilt "
-          "zdrSdev psob kdp kdpSC "
-          "dbzAtten zdrAtten dbzCorrected zdrCorrected "
-          "regrFilt phidpFftFilt phidpFftCond phidpSC\n");
+          "zdrSdev psob kdp "
+          "dbzAtten zdrAtten dbzCorrected zdrCorrected\n");
 
   // write data
 
@@ -2053,8 +1805,8 @@ void KdpFilt::_writeRayDataToFile()
     fprintf(out,
             "%3d %3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f"
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
+            "%10.3f %10.3f %10.3f %10.3f %10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
             (_validForUnfold[igate]?1:0),
@@ -2075,15 +1827,10 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_zdrSdev[igate], 0),
             _getPlotVal(_psob[igate], 0),
             _getPlotVal(_kdp[igate], 0),
-            _getPlotVal(_kdpSC[igate], 0),
             _getPlotVal(_dbzAttenCorr[igate], 0),
             _getPlotVal(_zdrAttenCorr[igate], 0),
             _getPlotVal(dbzCorrected, 0),
-            _getPlotVal(zdrCorrected, 0),
-            _getPlotVal(_regrFilt[igate], 0),
-            _getPlotVal(_phidpFftFilt[igate], 0),
-            _getPlotVal(_phidpFftCond[igate], 0),
-            _getPlotVal(_phidpSC[igate], 0)
+            _getPlotVal(zdrCorrected, 0)
             );
   }
   
@@ -2145,7 +1892,6 @@ void KdpFilt::_loadKdpSC()
 
     if (_kdp[igate] == _missingValue ||
         _kdp[igate] <= _kdpMinForSelfConsistency ||
-        _dbz[igate] <= _dbzMinForSelfConsistency ||
         _kdpZZdr[igate] == _missingValue) {
       
       // non-positive KDP
@@ -2184,25 +1930,6 @@ void KdpFilt::_loadKdpSC()
     _loadKdpSCRun(startGate, endGate);
   }
 
-  // moving mean on _kdpSC
-  
-  vector<double> filtSC;
-  _movingMean(_kdpSC_, _nGatesStats, filtSC);
-  std::copy(filtSC.begin(), filtSC.end(), _kdpSC_.begin());
-
-  // compute _phidpSC
-
-  std::copy(_phidpFftFilt_.begin(), _phidpFftFilt_.end(), _phidpSC_.begin());
-  for (size_t irun = 0; irun < _validRuns.size(); irun++) {
-    const PhidpRun &validRun = _validRuns[irun];
-    for (int igate = validRun.ibegin + 1; igate <= validRun.iend; igate++) {
-      double kdpSC =_kdpSC[igate - 1];
-      double deltaPhi = kdpSC * 4 * _gateSpacingKm;
-      _phidpSC[igate] = RadarComplex::sumDeg(_phidpSC[igate - 1], deltaPhi);
-    }
-  }
-
-  
 }
 
 ////////////////////////////////////////////////////////////
@@ -2245,234 +1972,6 @@ void KdpFilt::_loadKdpSCRun(int startGate, int endGate)
 
 }
 
-////////////////////////////////////////////////////////////
-/// filter phidp using FFT
 
-void KdpFilt::_fftFilter()
 
-{
 
-  // fill missing gates with random values
-
-  _fillPhidpMissingGates();
-
-  // create complex array for phidp
-  // pad out to avoid ringing at extremities
-  
-  vector<RadarComplex_t> phiComplex_;
-  phiComplex_.resize(_nGatesPadded);
-  RadarComplex_t *phiComplex = phiComplex_.data() + _nGatesPad;
-  for (int igate = 0; igate < _nGates; igate++) {
-    RadarComplex::setFromDegrees(_phidpMeanUnfold[igate], phiComplex[igate]);
-  }
-  
-  // interpolate between end-points for the padded gates
-
-  RadarComplex_t angleStart = phiComplex[0];
-  RadarComplex_t angleEnd = phiComplex[_nGates - 1];
-  vector<RadarComplex_t> interpVec;
-  RadarComplex::interpAndLoadVec(angleStart, angleEnd, _nGatesPad * 2, interpVec);
-  for (int ii = 0; ii < _nGatesPad; ii++) {
-    phiComplex[-1 - ii] = interpVec[ii];
-    phiComplex[_nGates + ii] = interpVec[_nGatesPad * 2 - 1 - ii];
-  }
-
-  // perform forward FFT
-  
-  vector<RadarComplex_t> phiSpec_;
-  phiSpec_.resize(_nGatesPadded);
-  _fft.init(_nGatesPadded);
-  _fft.fwd(phiComplex_.data(), phiSpec_.data());
-  
-  // determine cutoff
-  
-  const double f_cut = 1.0 / _phidpFeatureLengthKm;  // cycles/km
-
-  // apply filter
-  
-  for (int kk = 0; kk < _nGatesPadded; ++kk) {
-    // FFT bin interpreted as signed frequency index
-    int kk_signed = (kk <= _nGatesPadded / 2) ? kk : kk - _nGatesPadded;
-    double f = std::abs(kk_signed) / (_nGatesPadded * _gateSpacingKm);  // cycles/km
-    if (f > f_cut) {
-      phiSpec_[kk].re = 0.0;
-      phiSpec_[kk].im = 0.0;
-    }
-  }
-  
-  // perform inverse FFT
-  
-  _fft.inv(phiSpec_.data(), phiComplex_.data());
-
-  // compute the filtered PHIDP
-
-  for (int kk = 0; kk < _nGates; ++kk) {
-    _phidpFftFilt[kk] = RadarComplex::argDeg(phiComplex[kk]);
-  }
-
-}
-
-////////////////////////////////////////////////////////////
-/// fill phidp missing gates with random values
-
-void KdpFilt::_fillPhidpMissingGates()
-
-{
-
-  // Seed source
-  std::random_device rd;
-  
-  // Mersenne Twister generator
-  std::mt19937 gen(rd());
-  
-  // Uniform distribution [0, 1)
-  std::uniform_real_distribution<double> dist(0.0, 1.0);
-  
-  for (int igate = 0; igate < _nGates; igate++) {
-    if (_phidp[igate] == _missingValue) {
-      _phidp[igate] = (dist(gen) - 0.5) * 180.0;
-    }
-  }
-
-}
-
-////////////////////////////////////////////////////////////
-/// pack valid run data into packed vector
-
-void KdpFilt::_packValid(const vector<double> &unpacked,
-                         vector<double> &packed)
-
-{
-
-  packed.clear();
-
-  for (size_t ii = 0; ii < _validRuns.size(); ii++) {
-    const PhidpRun &run = _validRuns[ii];
-    for (int jj = run.ibegin; jj <= run.iend; jj++) {
-      packed.push_back(unpacked[jj]);
-    }
-  } // ii
-
-}
-
-////////////////////////////////////////////////////////////
-/// unpack packed vector into full vector
-
-void KdpFilt::_unpackValid(const vector<double> &packed,
-                           vector<double> &unpacked)
-
-{
-
-  for (int jj = 0; jj < _nGates; jj++) {
-    unpacked[jj] = _missingValue;
-  }
-
-  int index = 0;
-  for (size_t ii = 0; ii < _validRuns.size(); ii++) {
-    const PhidpRun &run = _validRuns[ii];
-    for (int jj = run.ibegin; jj <= run.iend; jj++, index++) {
-      assert(index < (int) packed.size());
-      unpacked[jj] = packed[index];
-    }
-  } // ii
-
-}
-
-////////////////////////////////////////////////////////////
-/// unpack packed vector and fill gaps with adjacent values
-
-void KdpFilt::_unpackAndFill(const vector<double> &packed,
-                             vector<double> &unpacked)
-  
-{
-  
-  for (int jj = 0; jj < _nGates; jj++) {
-    unpacked[jj] = _missingValue;
-  }
-  
-  int gapStart = 0;
-  int index = 0;
-  for (size_t ii = 0; ii < _validRuns.size(); ii++) {
-    
-    const PhidpRun &run = _validRuns[ii];
-
-    // valid region
-    
-    for (int jj = run.ibegin; jj <= run.iend; jj++, index++) {
-      assert(index < (int) packed.size());
-      unpacked[jj] = packed[index];
-    } // jj
-
-    // gap before valid region
-    
-    for (int jj = gapStart; jj < run.ibegin; jj++) {
-      unpacked[jj] = unpacked[run.ibegin];
-    }
-
-  } // ii
-
-  // last gap
-  
-  for (int jj = index; jj < _nGates; jj++) {
-    unpacked[jj] = unpacked[index-1];
-  }
-
-}
-
-////////////////////////////////////////////////////////////
-/// get quality based on rhohv
-
-double KdpFilt::_rhohvQuality(double rhohv)
-{
-
-  constexpr double rho0 = 0.90;
-  constexpr double rho1 = 0.98;
-  constexpr double smallVal = 0.00001;
-  
-
-  if (!std::isfinite(rhohv) || rhohv == _missingValue || rhohv < rho0) {
-    return smallVal;
-  }
-  if (rhohv >= rho1) return 1.0;
-  
-  const double x = (rhohv - rho0) / (rho1 - rho0);
-  
-  // Smoothstep: zero slope at both ends
-  return x * x * (3.0 - 2.0 * x);
-  
-}
-
-////////////////////////////////////////////////////////////
-/// moving mean along a vector
-
-void KdpFilt::_movingMean(const std::vector<double>& xx,
-                          size_t filtLen,
-                          std::vector<double>& filt)
-  
-{
-
-  filt.resize(xx.size());
-  
-  if (filtLen % 2 == 0) {
-    cerr << "WARNING - KdpFilt::_movingMean" << endl;
-    cerr << "  filtLen should be odd, passed in: " << filtLen << endl;
-    filtLen = (filtLen / 2) * 2;
-    cerr << "  will use filtLen: " << filtLen << endl;
-  }
-  
-  size_t half = filtLen / 2;
-  
-  // Running sum
-  double sum = 0.0;
-  for (size_t i = 0; i < filtLen; ++i)
-    sum += xx[i];
-  
-  filt[half] = sum / filtLen;
-  
-  for (size_t i = half + 1; i < xx.size() - half; ++i) {
-    sum += xx[i + half];
-    sum -= xx[i - half - 1];
-    filt[i] = sum / filtLen;
-  }
-  
-}

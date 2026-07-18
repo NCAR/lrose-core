@@ -561,6 +561,15 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'Comment 1'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 1");
+    tt->comment_hdr = tdrpStrDup("UNFOLDING AND INITIAL FILTERING");
+    tt->comment_text = tdrpStrDup("The first step is to unfold the PHIDP data. PHIDP folds at -180/180 for simultaneous mode radars, and at -90/90 for alternating mode radars. In order to compute the gradient of PHIDP, we need to unfold it so that it varies smoothly rather than folding.");
+    tt++;
+    
     // Parameter 'KDP_fir_filter_len'
     // ctype is '_KDP_fir_filter_len_t'
     
@@ -599,59 +608,6 @@
     tt->help = tdrpStrDup("After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a set number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
     tt->val_offset = (char *) &KDP_n_filt_iterations_unfolded - &_start_;
     tt->single_val.i = 2;
-    tt++;
-    
-    // Parameter 'range_filter_method'
-    // ctype is '_range_filter_method_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("range_filter_method");
-    tt->descr = tdrpStrDup("Method for filtering PHIDP in range.");
-    tt->help = tdrpStrDup("Traditionally the Hubbert/Bringi approach used an FIR filter. More recently we have added the option to use the REGRESSION filter approach.");
-    tt->val_offset = (char *) &range_filter_method - &_start_;
-    tt->enum_def.name = tdrpStrDup("range_filter_method_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FIR_FILTER");
-      tt->enum_def.fields[0].val = FIR_FILTER;
-      tt->enum_def.fields[1].name = tdrpStrDup("REGRESSION_FILTER");
-      tt->enum_def.fields[1].val = REGRESSION_FILTER;
-    tt->single_val.e = FIR_FILTER;
-    tt++;
-    
-    // Parameter 'phidp_feature_length_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("phidp_feature_length_km");
-    tt->descr = tdrpStrDup("Applies to the regression filter only.");
-    tt->help = tdrpStrDup("For the regression filter we need to determine the polynomial order. We divide the ray into valid segments in range - i.e. segments with valid signal as opposed to range gates with no valid signal. For the regression filter we fit a polynomial to the phidp values in the valid segment. The longer the segment the higher the polynomial order required to fit the likely features in that segment. The order is computed as (segment-range/feature_length + 1). A minimum order is also applied - see 'min_polynomial_order' below.");
-    tt->val_offset = (char *) &phidp_feature_length_km - &_start_;
-    tt->single_val.d = 5;
-    tt++;
-    
-    // Parameter 'min_polynomial_order'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("min_polynomial_order");
-    tt->descr = tdrpStrDup("Minimum order for polynomial used in regression filter.");
-    tt->help = tdrpStrDup("See 'phidp_feature_length_km' above.");
-    tt->val_offset = (char *) &min_polynomial_order - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'Comment 1'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 1");
-    tt->comment_hdr = tdrpStrDup("UNFOLDING AND INITIAL FILTERING");
-    tt->comment_text = tdrpStrDup("The first step is to unfold the PHIDP data. PHIDP folds at -180/180 for simultaneous mode radars, and at -90/90 for alternating mode radars. In order to compute the gradient of PHIDP, we need to unfold it so that it varies smoothly rather than folding.");
     tt++;
     
     // Parameter 'Comment 2'
@@ -829,20 +785,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("COMPUTING self-consistency KDP FROM Z and ZDR");
+    tt->comment_hdr = tdrpStrDup("COMPUTING KDP FROM Z and ZDR");
     tt->comment_text = tdrpStrDup("Using the self-consistency approach, we can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute KDP conditioned using self-consistenty. We call this KDP_SC.");
-    tt++;
-    
-    // Parameter 'DBZ_minimum_for_self_consistency'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("DBZ_minimum_for_self_consistency");
-    tt->descr = tdrpStrDup("Sets the lower limit of DBZ for computing KDP conditioned by self-consistency.");
-    tt->help = tdrpStrDup("DBZ values lower that this will signify a gap in self-consistent KDP.");
-    tt->val_offset = (char *) &DBZ_minimum_for_self_consistency - &_start_;
-    tt->single_val.d = 20;
     tt++;
     
     // Parameter 'KDP_minimum_for_self_consistency'
@@ -974,21 +918,9 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("KDP_debug");
-    tt->descr = tdrpStrDup("Option to print concise debug messages in KDP computation.");
+    tt->descr = tdrpStrDup("Option to print debug messages in KDP computation.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &KDP_debug - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_verbose'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_verbose");
-    tt->descr = tdrpStrDup("Option to print verbose debug messages in KDP computation.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_verbose - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
