@@ -38,6 +38,7 @@ REQUIRED_COLUMNS = [
     "psob",
     "kdp",
     "kdpSC",
+    "kdpZZdr",
     "dbzAtten",
     "zdrAtten",
     "dbzCorrected",
@@ -359,6 +360,7 @@ class KdpRayPlotter:
         self.ax3.plot(gate_num, plot_data["psob"], label="PSOB", color="orange")
         self.ax3.plot(gate_num, plot_data["kdp"], label="KDP", color="red")
         self.ax3.plot(gate_num, plot_data["kdpSC"], label="KDP_SC", color="blue")
+        self.ax3.plot(gate_num, plot_data["kdpZZdr"], label="KDP_ZZDR", color="green")
         self.ax3.set_xlabel("gateNum")
         self.ax3.set_ylabel("KDP, PSOB")
 

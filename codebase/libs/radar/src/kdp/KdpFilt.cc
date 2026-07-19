@@ -207,8 +207,10 @@ KdpFilt::KdpFilt()
   // initialize computation of KDP from Z and ZDR
 
   _kdpZExpon = 1.0;
-  _kdpZdrExpon = -2.05;
-  _kdpZZdrCoeff = 3.32e-5;
+  // _kdpZdrExpon = -2.05;
+  _kdpZdrExpon = 0.0;
+  // _kdpZZdrCoeff = 3.32e-5;
+  _kdpZZdrCoeff = 5.0e-6;
   _dbzMinForSelfConsistency = 20.0;
   _kdpMinForSelfConsistency = 0.25;
   _kdpZZdrMedianLen = 5;
@@ -461,8 +463,10 @@ int KdpFilt::compute(time_t timeSecs,
   // set params for computing KDP from Z and ZDR
 
   _kdpZExpon = 1.0;
-  _kdpZdrExpon = -2.05;
-  _kdpZZdrCoeff = 3.32e-5 * (10.0 / _wavelengthCm);
+  // _kdpZdrExpon = -2.05;
+  _kdpZdrExpon = 0.0;
+  // _kdpZZdrCoeff = 3.32e-5 * (10.0 / _wavelengthCm);
+  _kdpZZdrCoeff = 5.0e-6 * (10.0 / _wavelengthCm);
 
   // set range details
 
@@ -2031,7 +2035,7 @@ void KdpFilt::_writeRayDataToFile()
           "# gateNum validKdp validUnfold snr dbz zdr rhohv phidp "
           "phidpMean phidpMeanValid phidpJitter phidpSdev "
           "phidpMeanUnfold phidpUnfold phidpFilt phidpCond phidpCondFilt "
-          "zdrSdev psob kdp kdpSC "
+          "zdrSdev psob kdp kdpSC kdpZZdr "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected "
           "regrFilt phidpFftFilt phidpFftCond phidpSC\n");
 
@@ -2053,7 +2057,7 @@ void KdpFilt::_writeRayDataToFile()
     fprintf(out,
             "%3d %3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f"
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f"
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
@@ -2076,6 +2080,7 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_psob[igate], 0),
             _getPlotVal(_kdp[igate], 0),
             _getPlotVal(_kdpSC[igate], 0),
+            _getPlotVal(_kdpZZdr[igate], 0),
             _getPlotVal(_dbzAttenCorr[igate], 0),
             _getPlotVal(_zdrAttenCorr[igate], 0),
             _getPlotVal(dbzCorrected, 0),
@@ -2137,6 +2142,59 @@ void KdpFilt::_loadKdpSC()
 
 {
 
+  // copy KDP array to KDP SC
+  
+  std::copy(_kdp_.begin(), _kdp_.end(), _kdpSC_.begin());
+
+  // process the valid runs
+  
+  for (size_t irun = 0; irun < _validRuns.size(); irun++) {
+
+    const PhidpRun &validRun = _validRuns[irun];
+
+    // find the minimum
+
+    size_t igateMin = 0;
+    double phidpMin = 9999.0;
+    for (int igate = validRun.ibegin; igate <= validRun.iend; igate++) {
+      double phidp = _phidpFftFilt[igate];
+      if (phidp < phidpMin) {
+        phidpMin = phidp;
+        igateMin = igate;
+      }
+    }
+    
+    // find last phidp 
+
+    double phidpLast = _phidpFftFilt[validRun.iend];
+    double delPhidp = phidpLast - phidpMin;
+    if (delPhidp < 0) {
+      continue;
+    }
+
+    // load KDP for the run
+    
+    _loadKdpSCRun(igateMin, validRun.iend);
+
+  } // irun
+
+#ifdef NOTNOW
+      
+  _.begin(), _phidpFftFilt_.end(), _phidpSC_.begin());
+    if 
+
+      double kdpSC =_kdpSC[igate - 1];
+      double deltaPhi = kdpSC * 4 * _gateSpacingKm;
+      _phidpSC[igate] = RadarComplex::sumDeg(_phidpSC[igate - 1], deltaPhi);
+
+    }
+
+  } // irun
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    _kdpSC[igate[ = _kdp[igate];
+  }
+  
   int startGate = 0;
   int endGate = 0;
   bool inRun = false;
@@ -2183,6 +2241,8 @@ void KdpFilt::_loadKdpSC()
   if (inRun) {
     _loadKdpSCRun(startGate, endGate);
   }
+
+#endif
 
   // moving mean on _kdpSC
   

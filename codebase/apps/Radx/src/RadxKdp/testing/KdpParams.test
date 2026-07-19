@@ -194,7 +194,7 @@ KDP_phidp_difference_threshold_hubbert_bringi = 4;
 //
 // Type: int
 
-KDP_ngates_for_stats = 7;
+KDP_ngates_for_stats = 9;
 
 ///////////// KDP_phidp_sdev_max //////////////////////
 //
