@@ -692,6 +692,12 @@ private:
   vector<double> _phidpFftCond_;
   double *_phidpFftCond;
   
+  vector<double> _phidpFiltTrend_;
+  double *_phidpFiltTrend;
+  
+  vector<double> _scBlock_;
+  double *_scBlock;
+  
   vector<double> _regrFilt_;
   double *_regrFilt;
   

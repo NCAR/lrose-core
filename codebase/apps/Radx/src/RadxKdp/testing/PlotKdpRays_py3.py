@@ -46,6 +46,8 @@ REQUIRED_COLUMNS = [
     "regrFilt",
     "phidpFftFilt",
     "phidpFftCond",
+    "phidpFiltTrend",
+    "scBlock",
     "phidpSC",
 ]
 
@@ -361,6 +363,8 @@ class KdpRayPlotter:
         self.ax3.plot(gate_num, plot_data["kdp"], label="KDP", color="red")
         self.ax3.plot(gate_num, plot_data["kdpSC"], label="KDP_SC", color="blue")
         self.ax3.plot(gate_num, plot_data["kdpZZdr"], label="KDP_ZZDR", color="green")
+        self.ax3.plot(gate_num, plot_data["phidpFiltTrend"], label="TREND", color="magenta")
+        self.ax3.plot(gate_num, plot_data["scBlock"], label="scBlock", color="black")
         self.ax3.set_xlabel("gateNum")
         self.ax3.set_ylabel("KDP, PSOB")
 
@@ -425,6 +429,8 @@ def draw_valid_regions(ax, x, valid,
                        facecolor=color,
                        edgecolor='none',
                        alpha=alpha)
+            ax.axvline(start, color='black', lw=1)
+            ax.axvline(end,   color='black', lw=1)
             in_run = False
 
     # Final run reaches end of data
@@ -433,6 +439,8 @@ def draw_valid_regions(ax, x, valid,
                    facecolor=color,
                    edgecolor='none',
                    alpha=alpha)
+        ax.axvline(start, color='black', lw=1)
+        ax.axvline(end,   color='black', lw=1)
 
 #=========================================================================
 # Run a command in a shell, wait for it to complete

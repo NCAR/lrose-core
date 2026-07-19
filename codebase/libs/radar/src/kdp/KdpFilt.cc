@@ -691,6 +691,8 @@ void KdpFilt::_initArrays(const double *snr,
   _gateStates_.resize(_nGates); _gateStates = _gateStates_.data();
   _phidpFftFilt_.resize(_nGates); _phidpFftFilt = _phidpFftFilt_.data();
   _phidpFftCond_.resize(_nGates); _phidpFftCond = _phidpFftCond_.data();
+  _phidpFiltTrend_.resize(_nGates); _phidpFiltTrend = _phidpFiltTrend_.data();
+  _scBlock_.resize(_nGates); _scBlock = _scBlock_.data();
   _regrFilt_.resize(_nGates); _regrFilt = _regrFilt_.data();
   _xxVals_.resize(_nGatesPadded); _xxVals = _xxVals_.data();
   
@@ -799,6 +801,8 @@ void KdpFilt::_initArrays(const double *snr,
     _regrFilt[ii] = _missingValue;
     _phidpFftFilt[ii] = _missingValue;
     _phidpFftCond[ii] = _missingValue;
+    _phidpFiltTrend[ii] = _missingValue;
+    _scBlock[ii] = 0;
   }
   
   double xxDelta = 1.0 / (double) _nGatesPadded;
@@ -2037,7 +2041,7 @@ void KdpFilt::_writeRayDataToFile()
           "phidpMeanUnfold phidpUnfold phidpFilt phidpCond phidpCondFilt "
           "zdrSdev psob kdp kdpSC kdpZZdr "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected "
-          "regrFilt phidpFftFilt phidpFftCond phidpSC\n");
+          "regrFilt phidpFftFilt phidpFftCond phidpFiltTrend scBlock phidpSC\n");
 
   // write data
 
@@ -2056,9 +2060,9 @@ void KdpFilt::_writeRayDataToFile()
     }
     fprintf(out,
             "%3d %3d %3d "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f"
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f"
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
             (_validForUnfold[igate]?1:0),
@@ -2088,6 +2092,8 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_regrFilt[igate], 0),
             _getPlotVal(_phidpFftFilt[igate], 0),
             _getPlotVal(_phidpFftCond[igate], 0),
+            _getPlotVal(_phidpFiltTrend[igate], 0),
+            _getPlotVal(_scBlock[igate], 0),
             _getPlotVal(_phidpSC[igate], 0)
             );
   }
@@ -2119,7 +2125,12 @@ double KdpFilt::_computeKdpFromZZdr(double dbz,
                                     double zdr)
   
 {
-  
+
+  if (dbz == _missingValue ||
+      zdr == _missingValue) {
+    return 0.0;
+  }
+
   double zzLin = pow(10.0, dbz / 10.0);
 
   if (zdr < 0.1) {
@@ -2142,10 +2153,52 @@ void KdpFilt::_loadKdpSC()
 
 {
 
+  cerr << "======================================================= az: " << _azDeg << endl;
+  
   // copy KDP array to KDP SC
   
   std::copy(_kdp_.begin(), _kdp_.end(), _kdpSC_.begin());
 
+  // loop through the valid runs
+  
+  for (size_t irun = 0; irun < _validRuns.size(); irun++) {
+    
+    const PhidpRun &validRun = _validRuns[irun];
+
+    int ibegin = validRun.ibegin;
+    int iend = ibegin;
+
+    while (ibegin <= validRun.iend) {
+
+      // cerr << "33333333333333333333 ibegin, iend: " << ibegin << ", " << validRun.iend << endl;
+    
+      // look for block starting with a positive trend, going negative
+      // and returning to a positive
+
+      int index = ibegin;
+      while (_phidpFiltTrend[index] >= 0.0 && index < validRun.iend) {
+        // cerr << "6666666666666 index, trend: " << index << ", " << _phidpFiltTrend[index] << endl;
+        index++;
+      }
+      while (_phidpFiltTrend[index] < 0.0 && index < validRun.iend) {
+        // cerr << "777777777777777 index, trend: " << index << ", " << _phidpFiltTrend[index] << endl;
+        index++;
+      }
+      iend = index;
+      // cerr << "5555555555555555555555 ibegin, iend: " << ibegin << ", " << iend << endl;
+
+      if (iend - ibegin > _nGatesStats) {
+        _loadKdpSCRun(ibegin, iend);
+      }
+
+      ibegin = iend + 1;
+
+    } // while (ibegin ...
+      
+  } // irun
+
+  #ifdef NOTNOW
+      
   // process the valid runs
   
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
@@ -2178,8 +2231,6 @@ void KdpFilt::_loadKdpSC()
 
   } // irun
 
-#ifdef NOTNOW
-      
   _.begin(), _phidpFftFilt_.end(), _phidpSC_.begin());
     if 
 
@@ -2256,8 +2307,11 @@ void KdpFilt::_loadKdpSC()
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
     const PhidpRun &validRun = _validRuns[irun];
     for (int igate = validRun.ibegin + 1; igate <= validRun.iend; igate++) {
-      double kdpSC =_kdpSC[igate - 1];
-      double deltaPhi = kdpSC * 4 * _gateSpacingKm;
+      double kdpSC = _kdpSC[igate - 1];
+      double deltaPhi = kdpSC * 2 * _gateSpacingKm;
+      if (_foldsAt90) {
+        deltaPhi *= 2;
+      }
       _phidpSC[igate] = RadarComplex::sumDeg(_phidpSC[igate - 1], deltaPhi);
     }
   }
@@ -2272,6 +2326,14 @@ void KdpFilt::_loadKdpSC()
 void KdpFilt::_loadKdpSCRun(int startGate, int endGate)
 
 {
+
+  for (int igate = startGate; igate <= endGate; igate++) {
+    _scBlock[startGate] = 0.0;
+  }
+  _scBlock[startGate] = 1.0;
+  _scBlock[endGate] = 1.0;
+
+  cerr << "11111111111111111 _loadKdpSCRun az, startGate, endGate: " << _azDeg << ", " << startGate << ", " << endGate << endl;
 
   if (endGate - startGate < 3) {
     // not enough gates for this to make sense
@@ -2302,6 +2364,8 @@ void KdpFilt::_loadKdpSCRun(int startGate, int endGate)
   for (int igate = startGate; igate <= endGate; igate++) {
     _kdpSC[igate] = _kdpZZdr[igate] * condFactor;
   }
+
+  cerr << "XXXXXXXXXXXXXXXX sumKdp, sumKdpZZdr, condFactor: " << sumKdp << ", " << sumKdpZZdr << ", " << condFactor << endl;
 
 }
 
@@ -2370,6 +2434,13 @@ void KdpFilt::_fftFilter()
     _phidpFftFilt[kk] = RadarComplex::argDeg(phiComplex[kk]);
   }
 
+  // compute trend of fft filt
+
+  _phidpFiltTrend[0] = 0.0;
+  for (int kk = 1; kk < _nGates; ++kk) {
+    _phidpFiltTrend[kk] = _phidpFftFilt[kk] - _phidpFftFilt[kk-1];
+  }
+  
 }
 
 ////////////////////////////////////////////////////////////
