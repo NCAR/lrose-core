@@ -1163,7 +1163,7 @@ void KdpFilt::_loadKdp()
     }
       
     // check SNR
-    
+
     if (_snr[ii] < _snrThreshold) {
       _kdp[ii] = _missingValue;
       _kdpZZdr[ii] = _missingValue;
@@ -1201,7 +1201,7 @@ void KdpFilt::_loadKdp()
       _kdp[ii] = 0;
     } else {
       // double dphi = _phidpCondFilt[i1] - _phidpCondFilt[i0];
-      double dphi = _phidpFftCond[i1] - _phidpFftCond[i0];
+      double dphi = _phidpFftFilt[i1] - _phidpFftFilt[i0];
       _kdp[ii] = (dphi / (_gateSpacingKm * len)) / 2.0;
     }
     
@@ -2153,7 +2153,7 @@ void KdpFilt::_loadKdpSC()
 
 {
 
-  cerr << "======================================================= az: " << _azDeg << endl;
+  // cerr << "==========================================================================>> az: " << _azDeg << endl;
   
   // copy KDP array to KDP SC
   
@@ -2333,7 +2333,7 @@ void KdpFilt::_loadKdpSCRun(int startGate, int endGate)
   _scBlock[startGate] = 1.0;
   _scBlock[endGate] = 1.0;
 
-  cerr << "11111111111111111 _loadKdpSCRun az, startGate, endGate: " << _azDeg << ", " << startGate << ", " << endGate << endl;
+  // cerr << "11111111111111111 _loadKdpSCRun az, startGate, endGate: " << _azDeg << ", " << startGate << ", " << endGate << endl;
 
   if (endGate - startGate < 3) {
     // not enough gates for this to make sense
@@ -2354,10 +2354,22 @@ void KdpFilt::_loadKdpSCRun(int startGate, int endGate)
     return;
   }
 
+  double startPhidp = _phidpFftFilt[startGate];
+  double endPhidp = _phidpFftFilt[endGate];
+  double deltaPhidp = endPhidp - startPhidp;
+
+  double sumPhidp = sumKdp * _gateSpacingKm * 2;
+  double sumPhidpZZdr = sumKdpZZdr * _gateSpacingKm * 2;
+  if (_foldsAt90) {
+    sumPhidp *= 2.0;
+    sumPhidpZZdr *= 2.0;
+  }
+  
   // compute factor to normalize the ZZdr estimate
   // from the measured estimate
 
-  double condFactor = sumKdp / sumKdpZZdr;
+  // double condFactor = sumKdp / sumKdpZZdr;
+  double condFactor = sumPhidp / sumPhidpZZdr;
 
   // load the KDP conditioned by self-consistency
 
@@ -2365,7 +2377,8 @@ void KdpFilt::_loadKdpSCRun(int startGate, int endGate)
     _kdpSC[igate] = _kdpZZdr[igate] * condFactor;
   }
 
-  cerr << "XXXXXXXXXXXXXXXX sumKdp, sumKdpZZdr, condFactor: " << sumKdp << ", " << sumKdpZZdr << ", " << condFactor << endl;
+  // cerr << "XXXXXXXXXXXXXXXX sumKdp, sumKdpZZdr, condFactor: " << sumKdp << ", " << sumKdpZZdr << ", " << condFactor << endl;
+  // cerr << "YYYYYYYYYYYYYYYY sumPhidp, sumPhidpZZdr, startPhidp, endPhidp, deltaPhidp, diff, perc: " << sumPhidp << ", " << sumPhidpZZdr << ", " << startPhidp << ", " << endPhidp << ", " << deltaPhidp << ", " << (sumPhidp - deltaPhidp) << ", ****** " << 100.0 * ((sumPhidp - deltaPhidp) / sumPhidp) << " *****" << endl;
 
 }
 

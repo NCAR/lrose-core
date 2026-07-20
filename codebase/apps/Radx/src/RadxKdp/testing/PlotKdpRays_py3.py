@@ -335,6 +335,7 @@ class KdpRayPlotter:
             self.ax1, gate_num, valid_kdp,
             color="lightgray", alpha=0.4,
         )
+        draw_block_limits(self.ax1, gate_num, self.data["scBlock"])
 
         # PLOT 2 - PHIDP processing
 
@@ -344,6 +345,7 @@ class KdpRayPlotter:
         self.ax2.plot(gate_num, plot_data["phidpCondFilt"], label="CondFilt", color="black")
         self.ax2.plot(gate_num, plot_data["phidpFftFilt"], label="FftFilt", color="magenta")
         self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="orange")
+        draw_block_limits(self.ax2, gate_num, self.data["scBlock"])
         self.ax2.set_xlabel("gateNum")
         self.ax2.set_ylabel("PHIDP")
 
@@ -364,7 +366,6 @@ class KdpRayPlotter:
         self.ax3.plot(gate_num, plot_data["kdpSC"], label="KDP_SC", color="blue")
         self.ax3.plot(gate_num, plot_data["kdpZZdr"], label="KDP_ZZDR", color="green")
         self.ax3.plot(gate_num, plot_data["phidpFiltTrend"], label="TREND", color="magenta")
-        self.ax3.plot(gate_num, plot_data["scBlock"], label="scBlock", color="black")
         self.ax3.set_xlabel("gateNum")
         self.ax3.set_ylabel("KDP, PSOB")
 
@@ -372,7 +373,8 @@ class KdpRayPlotter:
             self.ax3, gate_num, valid_kdp,
             color="lightgray", alpha=0.4,
         )
-
+        draw_block_limits(self.ax3, gate_num, self.data["scBlock"])
+                
         legend3 = self.ax3.legend(loc="upper right")
         for label in legend3.get_texts():
             label.set_fontsize("small")
@@ -384,6 +386,7 @@ class KdpRayPlotter:
         self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt")
         self.ax4.set_xlabel("gateNum")
         self.ax4.set_ylabel("PHIDP")
+        draw_block_limits(self.ax4, gate_num, self.data["scBlock"])
 
         self.ax4r.plot(
             gate_num, plot_data["zdr"],
@@ -441,6 +444,16 @@ def draw_valid_regions(ax, x, valid,
                    alpha=alpha)
         ax.axvline(start, color='black', lw=1)
         ax.axvline(end,   color='black', lw=1)
+
+#=========================================================================
+# draw block limit lines
+
+def draw_block_limits(ax, x, valid):
+    if not x or not valid:
+        return
+    for i in range(len(valid)):
+        if valid[i]:
+            ax.axvline(x[i], color='pink', lw=1)
 
 #=========================================================================
 # Run a command in a shell, wait for it to complete
