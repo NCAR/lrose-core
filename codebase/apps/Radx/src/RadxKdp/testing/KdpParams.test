@@ -207,7 +207,8 @@ KDP_ngates_for_stats = 9;
 //
 // Type: double
 
-KDP_phidp_sdev_max = 10;
+KDP_phidp_sdev_max = 20;
+// KDP_phidp_sdev_max = 100;
 
 ///////////// KDP_phidp_jitter_max ////////////////////
 //
@@ -221,7 +222,8 @@ KDP_phidp_sdev_max = 10;
 //
 // Type: double
 
-KDP_phidp_jitter_max = 15;
+KDP_phidp_jitter_max = 30;
+// KDP_phidp_jitter_max = 150;
 
 ///////////// KDP_check_rhohv /////////////////////////
 //
@@ -230,6 +232,7 @@ KDP_phidp_jitter_max = 15;
 // Type: boolean
 
 KDP_check_rhohv = TRUE;
+// KDP_check_rhohv = FALSE;
 
 ///////////// KDP_rhohv_threshold /////////////////////
 //
@@ -240,7 +243,7 @@ KDP_check_rhohv = TRUE;
 //
 // Type: double
 
-KDP_rhohv_threshold = 0.9;
+KDP_rhohv_threshold = 0.8;
 
 ///////////// KDP_check_snr ///////////////////////////
 //

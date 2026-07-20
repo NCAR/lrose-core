@@ -382,12 +382,12 @@ class KdpRayPlotter:
         # PLOT 4 - PHIDP FFT filtering
 
         self.ax4.set_title(az_str, fontsize=12)
-        self.ax4.plot(gate_num, plot_data["phidp"], label="phidp")
+        self.ax4.plot(gate_num, plot_data["phidpMean"], label="phidpMean")
         self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt")
         self.ax4.set_xlabel("gateNum")
         self.ax4.set_ylabel("PHIDP")
         draw_block_limits(self.ax4, gate_num, self.data["scBlock"])
-
+        
         self.ax4r.plot(
             gate_num, plot_data["zdr"],
             label="ZDR", color="red",

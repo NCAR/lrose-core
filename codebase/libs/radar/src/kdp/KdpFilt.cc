@@ -207,10 +207,10 @@ KdpFilt::KdpFilt()
   // initialize computation of KDP from Z and ZDR
 
   _kdpZExpon = 1.0;
-  // _kdpZdrExpon = -2.05;
-  _kdpZdrExpon = 0.0;
-  // _kdpZZdrCoeff = 3.32e-5;
-  _kdpZZdrCoeff = 5.0e-6;
+  _kdpZdrExpon = -2.05;
+  // _kdpZdrExpon = 0.0;
+  _kdpZZdrCoeff = 3.32e-5;
+  // _kdpZZdrCoeff = 5.0e-6;
   _dbzMinForSelfConsistency = 20.0;
   _kdpMinForSelfConsistency = 0.25;
   _kdpZZdrMedianLen = 5;
@@ -463,10 +463,10 @@ int KdpFilt::compute(time_t timeSecs,
   // set params for computing KDP from Z and ZDR
 
   _kdpZExpon = 1.0;
-  // _kdpZdrExpon = -2.05;
-  _kdpZdrExpon = 0.0;
-  // _kdpZZdrCoeff = 3.32e-5 * (10.0 / _wavelengthCm);
-  _kdpZZdrCoeff = 5.0e-6 * (10.0 / _wavelengthCm);
+  _kdpZdrExpon = -2.05;
+  // _kdpZdrExpon = 0.0;
+  _kdpZZdrCoeff = 3.32e-5 * (10.0 / _wavelengthCm);
+  // _kdpZZdrCoeff = 5.0e-6 * (10.0 / _wavelengthCm);
 
   // set range details
 
@@ -537,6 +537,12 @@ int KdpFilt::compute(time_t timeSecs,
 
   _loadKdpSC();
 
+  for (int igate = 0; igate < _nGates; igate++) {
+    if (_kdpSC[igate] < -10) {
+      cerr << "MMMMMMMMMMMMMMMMMMMMM az, igate, kdpSC: " << _azDeg << ", " << igate << ", " << _kdpSC[igate] << endl;
+    }
+  }
+  
   // write ray file if requested
 
   if (_writeRayFile) {
@@ -1163,12 +1169,12 @@ void KdpFilt::_loadKdp()
     }
       
     // check SNR
-
+    
     if (_snr[ii] < _snrThreshold) {
-      _kdp[ii] = _missingValue;
-      _kdpZZdr[ii] = _missingValue;
-      _kdpSC[ii] = _missingValue;
-      _psob[ii] = _missingValue;
+      _kdp[ii] = 0.0;
+      _kdpZZdr[ii] = 0.0;
+      _kdpSC[ii] = 0.0;
+      _psob[ii] = 0.0;
       continue;
     }
     
@@ -2058,6 +2064,9 @@ void KdpFilt::_writeRayDataToFile()
     } else {
       zdrCorrected = _zdr[igate];
     }
+    if (_kdpSC[igate] < -10) {
+      cerr << "LLLLLLLLLLLLLLLLLLLL az, igate, kdpSC: " << _azDeg << ", " << igate << ", " << _kdpSC[igate] << endl;
+    }
     fprintf(out,
             "%3d %3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f"
@@ -2159,6 +2168,12 @@ void KdpFilt::_loadKdpSC()
   
   std::copy(_kdp_.begin(), _kdp_.end(), _kdpSC_.begin());
 
+  for (int igate = 0; igate < _nGates; igate++) {
+    if (_kdpSC[igate] < -10) {
+      cerr << "NNNNNNNNNNNNNNNNNNNNNNNNNn az, igate, kdpSC: " << _azDeg << ", " << igate << ", " << _kdpSC[igate] << endl;
+    }
+  }
+  
   // loop through the valid runs
   
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
@@ -2197,7 +2212,7 @@ void KdpFilt::_loadKdpSC()
       
   } // irun
 
-  #ifdef NOTNOW
+#ifdef NOTNOW
       
   // process the valid runs
   
@@ -2288,7 +2303,7 @@ void KdpFilt::_loadKdpSC()
   } // igate
 
   // check for active run
-  
+           
   if (inRun) {
     _loadKdpSCRun(startGate, endGate);
   }
@@ -2375,6 +2390,9 @@ void KdpFilt::_loadKdpSCRun(int startGate, int endGate)
 
   for (int igate = startGate; igate <= endGate; igate++) {
     _kdpSC[igate] = _kdpZZdr[igate] * condFactor;
+    if (_kdpSC[igate] < -10) {
+      cerr << "KKKKKKKKKKKKKKKKKKK az, igate, kdpSC: " << _azDeg << ", " << igate << ", " << _kdpSC[igate] << endl;
+    }
   }
 
   // cerr << "XXXXXXXXXXXXXXXX sumKdp, sumKdpZZdr, condFactor: " << sumKdp << ", " << sumKdpZZdr << ", " << condFactor << endl;
