@@ -68,8 +68,12 @@ OutputFmq::OutputFmq(const string &prog_name,
   
   constructorOK = TRUE;
   _nBeamsWritten = 0;
+  _volNum = 0;
+  _sweepNum = 0;
+  
   _radxQueue = NULL;
   _sweepMode = Radx::SWEEP_MODE_NOT_SET;
+  _prevSweepMode = Radx::SWEEP_MODE_NOT_SET;
 
   // initialize the output queue
 
@@ -403,12 +407,16 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
   // create ray
   
   RadxRay ray;
-  ray.setVolumeNumber(0);
-  ray.setSweepNumber(0);
   
   ray.setTime(beam.getTimeSecs(), beam.getNanoSecs());
   ray.setScanName(opsInfo.get_scan_segment_name());
-  
+
+  RadxTime rayTime = ray.getRadxTime();
+  if (rayTime.getMin() != _prevTime.getMin()) {
+    _volNum++;
+  }
+  _prevTime = rayTime;
+
   switch (beam.getScanType()) {
     case Beam::SCAN_TYPE_POINT:
       _sweepMode = Radx::SWEEP_MODE_POINTING;
@@ -422,6 +430,14 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
       break;
   }
   ray.setSweepMode(_sweepMode);
+  if (_sweepMode != _prevSweepMode) {
+    _volNum++;
+    _sweepNum = 0;
+  }
+  _prevSweepMode = _sweepMode;
+  
+  ray.setVolumeNumber(_volNum);
+  ray.setSweepNumber(_sweepNum);
   
   iwrf_xmit_rcv_mode_t xmitRcvMode = beam.getXmitRcvMode();
   switch(xmitRcvMode) {
