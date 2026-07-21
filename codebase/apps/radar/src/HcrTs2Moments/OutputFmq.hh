@@ -41,8 +41,8 @@
 #include "Params.hh"
 #include "Beam.hh"
 #include <Fmq/DsFmq.hh>
-// #include <Fmq/DsRadarQueue.hh>
 #include <Radx/RadxField.hh>
+#include <Radx/RadxTime.hh>
 class IwrfTsInfo;
 using namespace std;
 
@@ -107,7 +107,6 @@ private:
   string _progName;
   const Params &_params;
   DsFmq *_radxQueue;
-  Radx::SweepMode_t _sweepMode;
 
   // mutex to prevent main thread and write thread from
   // accessing these functions concurrently
@@ -115,8 +114,13 @@ private:
   pthread_mutex_t _busy;
   
   // status
-  
+
   int _nBeamsWritten;
+  int _volNum;
+  int _sweepNum;
+  RadxTime _prevTime;
+  Radx::SweepMode_t _prevSweepMode;
+  Radx::SweepMode_t _sweepMode;
   
   // output field object, for computing offsets
 
