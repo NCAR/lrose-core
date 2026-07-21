@@ -1,0 +1,390 @@
+/*********************************************************
+ * parameter definitions for HcrTripleCombine
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * July 2026
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "HCR has the capability to transmit blocks of pulses with varying PRTs and pulse lengths.\n\nThe latest version supports 3 block types:\n\n\t(1) short-pulse and short-PRT\n\t(2) long-pulse and long-PRT\n\t(3) long-pulse and short-PRT.\n\nThis sequence is repeated in time.\n\nHcrTs2Moments reads this interleaved time series, and computes the relevant moments for each block. Those moments are then written, in sequence, to a single output FMQ in Radx moments format.\n\nHcrTripleCombine reads the Radx moments data stream, and combines the three blocks into a single block, naming the fields appropriately, and unfolding the velocity fields as appropriate. This allows us to unfold the velocity field using the staggered-PRT technique.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to register this process with the process mapper (procmap).";
+  p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
+} register_with_procmap;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "\n\nREALTIME: we read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: we read the moments data from CfRadial files, between the start and end times set on the command line.\n\nIn both REALTIME and ARCHIVE mode, we write the resulting moments to an output FMQ.";
+} mode;
+
+paramdef string {
+  p_default = "fmqp:://localhost::/tmp/fmq/input_short";
+  p_descr = "FMQ from which to read the short pulse moments stream.";
+  p_help = "REALTIME mode only.";
+} input_fmq_url_short;
+
+paramdef string {
+  p_default = "fmqp:://localhost::/tmp/fmq/input_long";
+  p_descr = "FMQ from which to read the long pulse moments stream.";
+  p_help = "REALTIME mode only.";
+} input_fmq_url_long;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to seek to the end of the input FMQ.";
+  p_help = "REALTIME mode only. If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+} seek_to_end_of_input_fmq;
+
+paramdef string {
+  p_default = "$(DATA_DIR)/cfradial/moments/100hz_short";
+  p_descr = "Input directory short.";
+  p_help = "ARCHIVE mode only. Directory for short pulse files.";
+} input_dir_short;
+
+paramdef string {
+  p_default = "$(DATA_DIR)/cfradial/moments/100hz_long";
+  p_descr = "Input directory long.";
+  p_help = "ARCHIVE mode only. Directory for long pulse files.";
+} input_dir_long;
+
+commentdef {
+  p_header = "OVERRIDE PLATFORM TYPE?";
+}
+
+typedef enum {
+  PLATFORM_FIXED = 1,
+  PLATFORM_VEHICLE = 2,
+  PLATFORM_SHIP = 3,
+  PLATFORM_AIRCRAFT_FORE = 5,
+  PLATFORM_AIRCRAFT_AFT = 6,
+  PLATFORM_AIRCRAFT_TAIL = 7,
+  PLATFORM_AIRCRAFT_BELLY = 8,
+  PLATFORM_AIRCRAFT_ROOF = 9,
+  PLATFORM_AIRCRAFT_NOSE = 10,
+  PLATFORM_SATELLITE_ORBIT = 11,
+  PLATFORM_SATELLITE_GEOSTAT = 12
+} platform_type_t;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override platform type on read. If true, the file will be read in, the platform type will be changed, and then any post-read processing will be performed.";
+  p_help =
+    "\tPLATFORM_FIXED  - radar is in a fixed location\n"
+    "\tPLATFORM_VEHICLE -  radar is mounted on a land vehicle\n"
+    "\tPLATFORM_SHIP - radar is mounted on a ship\n"
+    "\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA\n"
+    "\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n"
+    "\tPLATFORM_SATELLITE_ORBIT - orbiting satellite\n"
+    "\tPLATFORM_SATELLITE_GEOSTAT - geostationary satellite\n";
+} override_platform_type;
+
+paramdef enum platform_type_t {
+  p_default = PLATFORM_AIRCRAFT_FORE;
+  p_descr = "Platform type.";
+  p_help = "See override_platform_type.";
+} platform_type;
+
+commentdef {
+  p_header = "OVERRIDE PRIMARY AXIS?";
+}
+
+typedef enum {
+  PRIMARY_AXIS_Z = 0, ///< vertical
+  PRIMARY_AXIS_Y = 1, ///< longitudinal axis of platform
+  PRIMARY_AXIS_X = 2, ///< lateral axis of platform
+  PRIMARY_AXIS_Z_PRIME = 3, ///< inverted vertical
+  PRIMARY_AXIS_Y_PRIME = 4, ///< ELDORA, HRD tail
+  PRIMARY_AXIS_X_PRIME = 5  ///< translated lateral
+} primary_axis_t;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override primary axis on read. If true, the file will be read in, the primary axis will be changed, and then any post-read processing will be performed.";
+  p_help =
+    "\tPRIMARY_AXIS_Z - vertical\n"
+    "\tPRIMARY_AXIS_Y - longitudinal axis of platform\n"
+    "\tPRIMARY_AXIS_X - lateral axis of platform\n"
+    "\tPRIMARY_AXIS_Z_PRIME - inverted vertical\n"
+    "\tPRIMARY_AXIS_Y_PRIME - ELDORA, HRD tail\n"
+    "\tPRIMARY_AXIS_X_PRIME - translated lateral\n";
+} override_primary_axis;
+
+paramdef enum primary_axis_t {
+  p_default = PRIMARY_AXIS_Y_PRIME;
+  p_descr = "Platform type.";
+  p_help = "See override_primary_axis.";
+} primary_axis;
+
+commentdef {
+  p_header = "OVERRIDE SWEEP MODE?";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the sweep modes in the data.";
+  p_help = "If TRUE, the mode for all sweeps is set to sweep_mode.";
+} override_sweep_mode;
+
+typedef enum {
+  SWEEP_MODE_SECTOR = 1,
+  SWEEP_MODE_RHI = 3,
+  SWEEP_MODE_VERTICAL_POINTING = 4,
+  SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8,
+  SWEEP_MODE_ELEVATION_SURVEILLANCE = 9,
+  SWEEP_MODE_SUNSCAN = 11,
+  SWEEP_MODE_POINTING = 12,
+  SWEEP_MODE_SUNSCAN_RHI = 17,
+  SWEEP_MODE_ELECTRONIC_STEERING = 20
+} sweep_mode_t;
+
+paramdef enum sweep_mode_t {
+  p_default = SWEEP_MODE_VERTICAL_POINTING;
+  p_descr = "Sweep mode for all sweeps.";
+  p_help = "See override_sweep_mode.";
+} sweep_mode;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+commentdef {
+  p_header = "GROUND-BASED MODE";
+  p_text = "In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set fixed location in ground-based mode.";
+  p_help = "If TRUE, the program will override the metadata for latitude/longitude/altitude, and set platform velocities to 0.";
+} fixed_location_mode;
+
+typedef struct {
+  double latitudeDeg;
+  double longitudeDeg;
+  double altitudeKm;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_default = { 0.0, 0.0, 0.0 };
+  p_descr = "Radar location if override is set true.";
+  p_help = "The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in km MSL.";
+} fixed_radar_location;
+
+commentdef {
+  p_header = "COMPUTE MEAN RADAR LOCATION?";
+  p_text = "This mode will compute the mean radar location for a ground-based installation.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute the mean location of the radar from the georeference data in the rays.";
+  p_help = "Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to TRUE.";
+} compute_mean_location;
+
+commentdef {
+  p_header = "SET THE COMBINED DWELL DETAILS";
+  p_text = "Normally we combine the high-rate moments data (say at 100 hz) into lower-rate dwells, say at 10 hz.";
+}
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Specify the output dwell length (secs).";
+  p_help = "Dwells from the input data will be combined to form dwells covering the specified time.";
+} dwell_length_secs;
+
+typedef enum {
+  DWELL_STATS_MEAN = 0,
+  DWELL_STATS_MEDIAN = 1,
+  DWELL_STATS_MAXIMUM = 2,
+  DWELL_STATS_MINIMUM = 3,
+  DWELL_STATS_MIDDLE = 4,
+  DWELL_STATS_DISCRETE_MODE = 5
+} dwell_stats_method_t;
+
+paramdef enum dwell_stats_method_t {
+  p_default = DWELL_STATS_MEAN;
+  p_descr = "Method for computing stats on the dwell.";
+  p_help = "MIDDLE refers to the middle ray in the dwell sequence. The DISCRETE_MODE computes applies only to discrete (integer) fields, and returns the most common entry in a discrete data set.";
+} dwell_stats_method;
+
+paramdef double {
+  p_default = 0.25;
+  p_min = 0.0;
+  p_max = 1.0;
+  p_descr = "Specify the max fraction of the dwell that can have missing data.";
+  p_help = "We compute how much of the dwell is missing for each field. If the fraction exceeds this parameter, the combined value will be set to missing.";
+} dwell_stats_max_fraction_missing;
+
+commentdef {
+  p_header = "OPTION TO SET STATS METHOD FOR INDIVIDUAL FIELDS.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set the stats method for individual fields.";
+  p_help = "The global stats method is set by the 'dwell_stats_method' parameter. If 'set_stats_method_for_individual_fields' is true, we can set the stats method on particular fields. Fields not specified here will use the global parameter.";
+} set_stats_method_for_individual_fields;
+
+typedef struct {
+  string field_name; 
+  dwell_stats_method_t stats_method;
+} stats_method_field_t;
+
+paramdef struct stats_method_field_t {
+  p_default = {
+    { "FLAG", DWELL_STATS_MEDIAN},
+    { "ANTENNA_FLAG", DWELL_STATS_MIDDLE}
+  };
+  p_descr = "Stats methods for individual fields.";
+  p_help = "Applies if 'set_stats_method_for_individual_fields' is true. The global stats method is set by the 'dwell_stats_method' parameter. Fields not specified here will use the global parameter.";
+} stats_method_fields[];
+
+commentdef {
+  p_header = "FIELD NAMES for combination";
+  p_text = "The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to unfold the velocity field.";
+  p_help = "If false, the short vel will be copied to the unfolded field. The vel_unfolded field will be added to the output data set.";
+} perform_velocity_unfolding;
+
+paramdef string {
+  p_default = "VEL_RAW_short";
+  p_descr = "This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.";
+  p_help = "The field name must be the same for the short- and long-prt rays.";
+} input_vel_raw_field_name_short;
+
+paramdef string {
+  p_default = "VEL_RAW_long";
+  p_descr = "This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.";
+  p_help = "The field name must be the same for the short- and long-prt rays.";
+} input_vel_raw_field_name_long;
+
+paramdef string {
+  p_default = "VEL_short";
+  p_descr = "This is the name for the velocity field in the input data, corrected for platform motion.";
+  p_help = "If this field exists in the input data, it is deleted and replaced with the values computed by this application.";
+} input_vel_corr_field_name_short;
+
+paramdef string {
+  p_default = "VEL_long";
+  p_descr = "This is the name for the velocity field in the input data, corrected for platform motion.";
+  p_help = "If this field exists in the input data, it is deleted and replaced with the values computed by this application.";
+} input_vel_corr_field_name_long;
+
+// paramdef string {
+//   p_default = "_short";
+//   p_descr = "This suffix is added to the input fields for short-prt moments.";
+//   p_help = "For each incoming short-pulse field, we add this suffix to the incoming field name.";
+// } suffix_to_add_for_short_pulse_fields;
+
+// paramdef string {
+//   p_default = "_long";
+//   p_descr = "This suffix is added to the input fields for long-prt moments.";
+//   p_help = "For each incoming long-pulse field, we add this suffix to the incoming field name.";
+// } suffix_to_add_for_long_pulse_fields;
+
+paramdef string {
+  p_default = "VEL_short";
+  p_descr = "Name for the corrected velocity on output.";
+  p_help = "The name of the output fields for velocity corrected for platform motion.";
+} output_vel_corr_field_name_short;
+
+paramdef string {
+  p_default = "VEL_long";
+  p_descr = "Name for the corrected velocity on output.";
+  p_help = "The name of the output fields for velocity corrected for platform motion.";
+} output_vel_corr_field_name_long;
+
+paramdef string {
+  p_default = "VEL_unfold_short";
+  p_descr = "Name for the unfolded velocity.";
+  p_help = "This is an output field, computed by unfolding the dual-prt vel fields.";
+} output_vel_unfolded_field_name;
+
+commentdef {
+  p_header = "OUTPUT FMQ";
+}
+
+paramdef string {
+  p_default = "fmqp:://localhost::/tmp/fmq/output";
+  p_descr = "FMQ to which the combined dwells are written.";
+  p_help = "FMQ mode only.";
+} output_fmq_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compress the output fmq.";
+  p_help = "The default is for no compression.";
+} output_fmq_compress;
+
+paramdef int {
+  p_default = 5000;
+  p_descr = "Number of slots in output FMQ.";
+} output_fmq_n_slots;
+
+paramdef int {
+  p_default = 100000000;
+  p_descr = "Size of buffer in output FMQ.";
+} output_fmq_buf_size;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to block on write when the radar queue fills up.";
+  p_help = "If false, the program writes data to the output queue without regard to whether the reader is keeping up. This mode should usually be used in realtime, to avoid holding things up if a client becomes slow. If true, the program will not overwrite data in the queue which has not been read by the reader. This is recommended for ARCHIVE and FILELIST mode. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.";
+} output_fmq_write_blocking;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQs are written to. If <= 0, registration will not be performed.";
+} output_fmq_data_mapper_report_interval;
+
