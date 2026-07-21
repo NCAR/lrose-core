@@ -98,8 +98,7 @@ private:
 
   // reading input moments
 
-  IwrfMomReader *_readerShort;
-  IwrfMomReader *_readerLong;
+  IwrfMomReader *_momReader;
 
   // Radx output moments queue
 
@@ -153,8 +152,7 @@ private:
   RadxField::StatsMethod_t _globalMethod;
   vector<RadxField::NamedStatsMethod> _namedMethods;
 
-  double _meanLatShort, _meanLonShort, _meanAltShort;
-  double _meanLatLong, _meanLonLong, _meanAltLong;
+  double _meanLat, _meanLon, _meanAlt;
 
   // methods
 
@@ -181,7 +179,7 @@ private:
   
   double _correctForNyquist(double vel, double nyquist);
   
-  RadxRay *_readRayShort();
+  RadxRay *_readRayNext();
   RadxRay *_readRayLong();
   
   RadxField::StatsMethod_t

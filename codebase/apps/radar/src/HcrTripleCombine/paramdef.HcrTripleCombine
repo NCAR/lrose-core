@@ -53,16 +53,10 @@ paramdef enum mode_t {
 } mode;
 
 paramdef string {
-  p_default = "fmqp:://localhost::/tmp/fmq/input_short";
-  p_descr = "FMQ from which to read the short pulse moments stream.";
+  p_default = "fmqp:://localhost::/tmp/fmq/50hz_triple";
+  p_descr = "FMQ from which to read the block moments stream.";
   p_help = "REALTIME mode only.";
-} input_fmq_url_short;
-
-paramdef string {
-  p_default = "fmqp:://localhost::/tmp/fmq/input_long";
-  p_descr = "FMQ from which to read the long pulse moments stream.";
-  p_help = "REALTIME mode only.";
-} input_fmq_url_long;
+} input_fmq_url;
 
 paramdef boolean {
   p_default = TRUE;
@@ -71,16 +65,10 @@ paramdef boolean {
 } seek_to_end_of_input_fmq;
 
 paramdef string {
-  p_default = "$(DATA_DIR)/cfradial/moments/100hz_short";
-  p_descr = "Input directory short.";
-  p_help = "ARCHIVE mode only. Directory for short pulse files.";
-} input_dir_short;
-
-paramdef string {
-  p_default = "$(DATA_DIR)/cfradial/moments/100hz_long";
-  p_descr = "Input directory long.";
-  p_help = "ARCHIVE mode only. Directory for long pulse files.";
-} input_dir_long;
+  p_default = "$(DATA_DIR)/cfradial/moments/50hz_triple";
+  p_descr = "Input directory - 50hz moments data.";
+  p_help = "ARCHIVE mode only.";
+} input_dir;
 
 commentdef {
   p_header = "OVERRIDE PLATFORM TYPE?";

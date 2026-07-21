@@ -438,15 +438,11 @@ public:
 
   mode_t mode;
 
-  char* input_fmq_url_short;
-
-  char* input_fmq_url_long;
+  char* input_fmq_url;
 
   tdrp_bool_t seek_to_end_of_input_fmq;
 
-  char* input_dir_short;
-
-  char* input_dir_long;
+  char* input_dir;
 
   tdrp_bool_t override_platform_type;
 
@@ -516,7 +512,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[52];
+  mutable TDRPtable _table[50];
 
   const char *_className;
 

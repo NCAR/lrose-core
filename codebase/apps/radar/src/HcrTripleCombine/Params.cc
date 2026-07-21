@@ -649,28 +649,16 @@
     tt->single_val.e = REALTIME;
     tt++;
     
-    // Parameter 'input_fmq_url_short'
+    // Parameter 'input_fmq_url'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_fmq_url_short");
-    tt->descr = tdrpStrDup("FMQ from which to read the short pulse moments stream.");
+    tt->param_name = tdrpStrDup("input_fmq_url");
+    tt->descr = tdrpStrDup("FMQ from which to read the block moments stream.");
     tt->help = tdrpStrDup("REALTIME mode only.");
-    tt->val_offset = (char *) &input_fmq_url_short - &_start_;
-    tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/input_short");
-    tt++;
-    
-    // Parameter 'input_fmq_url_long'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_fmq_url_long");
-    tt->descr = tdrpStrDup("FMQ from which to read the long pulse moments stream.");
-    tt->help = tdrpStrDup("REALTIME mode only.");
-    tt->val_offset = (char *) &input_fmq_url_long - &_start_;
-    tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/input_long");
+    tt->val_offset = (char *) &input_fmq_url - &_start_;
+    tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/50hz_triple");
     tt++;
     
     // Parameter 'seek_to_end_of_input_fmq'
@@ -685,28 +673,16 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'input_dir_short'
+    // Parameter 'input_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_dir_short");
-    tt->descr = tdrpStrDup("Input directory short.");
-    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for short pulse files.");
-    tt->val_offset = (char *) &input_dir_short - &_start_;
-    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_short");
-    tt++;
-    
-    // Parameter 'input_dir_long'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_dir_long");
-    tt->descr = tdrpStrDup("Input directory long.");
-    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for long pulse files.");
-    tt->val_offset = (char *) &input_dir_long - &_start_;
-    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_long");
+    tt->param_name = tdrpStrDup("input_dir");
+    tt->descr = tdrpStrDup("Input directory - 50hz moments data.");
+    tt->help = tdrpStrDup("ARCHIVE mode only.");
+    tt->val_offset = (char *) &input_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/50hz_triple");
     tt++;
     
     // Parameter 'Comment 3'

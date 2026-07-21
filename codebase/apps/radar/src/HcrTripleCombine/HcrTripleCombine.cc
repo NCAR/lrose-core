@@ -73,8 +73,7 @@ HcrTripleCombine::HcrTripleCombine(int argc, char **argv)
 {
 
   OK = TRUE;
-  _readerShort = NULL;
-  _readerLong = NULL;
+  _momReader = NULL;
   _cacheRayShort = NULL;
   _cacheRayLong = NULL;
   _outputFmq = NULL;
@@ -148,12 +147,8 @@ HcrTripleCombine::~HcrTripleCombine()
 
 {
 
-  if (_readerShort) {
-    delete _readerShort;
-  }
-
-  if (_readerLong) {
-    delete _readerLong;
+  if (_momReader) {
+    delete _momReader;
   }
 
   if (_outputFmq) {
@@ -384,17 +379,17 @@ int HcrTripleCombine::_computeMeanLocation()
   // process short rays for the dwell
 
   if (_params.debug) {
-    cerr << "  Computing mean location for short pulse data ...." << endl;
+    cerr << "  Computing mean location for moments data ...." << endl;
   }
 
-  double sumLatShort = 0.0;
-  double sumLonShort = 0.0;
-  double sumAltShort = 0.0;
-  long nRaysShort = 0;
+  double sumLat = 0.0;
+  double sumLon = 0.0;
+  double sumAlt = 0.0;
+  long nRays = 0;
   
-  RadxRay *rayShort = _readerShort->readNextRay();
-  while (rayShort != NULL) {
-    const RadxGeoref *georef = rayShort->getGeoreference();
+  RadxRay *ray = _momReader->readNextRay();
+  while (ray != NULL) {
+    const RadxGeoref *georef = ray->getGeoreference();
     if (georef != NULL) {
       double lat = georef->getLatitude();
       double lon = georef->getLongitude();
@@ -402,82 +397,35 @@ int HcrTripleCombine::_computeMeanLocation()
       if (lat >= -90.0 && lat <= 90.0 &&
           lon >= -360.0 && lon <= 360 &&
           alt > -1.0 && alt < 25.0) {
-        sumLatShort += lat;
-        sumLonShort += lon;
-        sumAltShort += alt;
-        nRaysShort += 1.0;
+        sumLat += lat;
+        sumLon += lon;
+        sumAlt += alt;
+        nRays += 1.0;
       }
     }
-    if (nRaysShort > 0 && nRaysShort % 10000 == 0) {
+    if (nRays > 0 && nRays % 10000 == 0) {
       cerr << "  data time, n rays short processed: "
-           << rayShort->getRadxTime().asString(6) << ", "
-           << nRaysShort << endl;
+           << ray->getRadxTime().asString(6) << ", "
+           << nRays << endl;
     }
-    delete rayShort;
-    rayShort = _readerShort->readNextRay();
+    delete ray;
+    ray = _momReader->readNextRay();
   } // while
   
-  _meanLatShort = _meanLonShort = _meanAltShort = -9999.0;
-  if (nRaysShort > 0) {
-    _meanLatShort = sumLatShort / nRaysShort;
-    _meanLonShort = sumLonShort / nRaysShort;
-    _meanAltShort = sumAltShort / nRaysShort;
+  _meanLat = _meanLon = _meanAlt = -9999.0;
+  if (nRays > 0) {
+    _meanLat = sumLat / nRays;
+    _meanLon = sumLon / nRays;
+    _meanAlt = sumAlt / nRays;
   }
   
-  // process long rays for the dwell
-
-  double sumLatLong = 0.0;
-  double sumLonLong = 0.0;
-  double sumAltLong = 0.0;
-  long nRaysLong = 0;
-  
-  RadxRay *rayLong = _readerLong->readNextRay();
-  while (rayLong != NULL) {
-    const RadxGeoref *georef = rayLong->getGeoreference();
-    if (georef != NULL) {
-      double lat = georef->getLatitude();
-      double lon = georef->getLongitude();
-      double alt = georef->getAltitudeKmMsl();
-      if (lat >= -90.0 && lat <= 90.0 &&
-          lon >= -360.0 && lon <= 360 &&
-          alt > -1.0 && alt < 25.0) {
-        sumLatLong += lat;
-        sumLonLong += lon;
-        sumAltLong += alt;
-        nRaysLong += 1.0;
-      }
-    }
-    if (nRaysLong > 0 && nRaysLong % 10000 == 0) {
-      cerr << "  data time, n rays long processed: "
-           << rayLong->getRadxTime().asString(6) << ", "
-           << nRaysLong << endl;
-    }
-    delete rayLong;
-    rayLong = _readerLong->readNextRay();
-  } // while
-
-  _meanLatLong = _meanLonLong = _meanAltLong = -9999.0;
-  if (nRaysLong > 0) {
-    _meanLatLong = sumLatLong / nRaysLong;
-    _meanLonLong = sumLonLong / nRaysLong;
-    _meanAltLong = sumAltLong / nRaysLong;
-  }
-
   fprintf(stderr, "HcrTripleCombine::_computeMeanLocation()\n");
   fprintf(stderr, "\n");
-  fprintf(stderr, "  nRaysShort           : %ld\n", nRaysShort);
-  fprintf(stderr, "  meanLatShort (deg)   : %10.6f\n", _meanLatShort);
-  fprintf(stderr, "  meanLonShort (deg)   : %10.6f\n", _meanLonShort);
-  fprintf(stderr, "  meanAltShort (kmMSL) : %10.6f\n", _meanAltShort);
+  fprintf(stderr, "  nRays           : %ld\n", nRays);
+  fprintf(stderr, "  meanLat (deg)   : %10.6f\n", _meanLat);
+  fprintf(stderr, "  meanLon (deg)   : %10.6f\n", _meanLon);
+  fprintf(stderr, "  meanAlt (kmMSL) : %10.6f\n", _meanAlt);
   fprintf(stderr, "\n");
-  fprintf(stderr, "  nRaysLong            : %ld\n", nRaysLong);
-  fprintf(stderr, "  meanLatLong (deg)    : %10.6f\n", _meanLatLong);
-  fprintf(stderr, "  meanLonLong (deg)    : %10.6f\n", _meanLonLong);
-  fprintf(stderr, "  meanAltLong (kmMSL)  : %10.6f\n", _meanAltLong);
-  fprintf(stderr, "\n");
-  fprintf(stderr, "  meanLat (deg)    : %10.6f\n", (_meanLatLong + _meanLatShort) / 2.0);
-  fprintf(stderr, "  meanLon (deg)    : %10.6f\n", (_meanLonLong + _meanLonShort) / 2.0);
-  fprintf(stderr, "  meanAlt (kmMSL)  : %10.6f\n", (_meanAltLong + _meanAltShort) / 2.0);
 
   return 0;
 
@@ -492,36 +440,26 @@ int HcrTripleCombine::_openInputFmqs()
   // Instantiate and initialize the input radar queues
 
   if (_params.debug) {
-    cerr << "DEBUG - opening input fmq for short pulse: "
-         << _params.input_fmq_url_short << endl;
-    cerr << "DEBUG - opening input fmq for long  pulse: "
-         << _params.input_fmq_url_long << endl;
+    cerr << "DEBUG - opening input fmq: "
+         << _params.input_fmq_url << endl;
   }
   
-  _readerShort = new IwrfMomReaderFmq(_params.input_fmq_url_short);
-  _readerLong = new IwrfMomReaderFmq(_params.input_fmq_url_long);
+  _momReader = new IwrfMomReaderFmq(_params.input_fmq_url);
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _readerShort->setDebug(IWRF_DEBUG_NORM);
-    _readerLong->setDebug(IWRF_DEBUG_NORM);
+    _momReader->setDebug(IWRF_DEBUG_NORM);
   }
 
   // initialize reader - read one ray
 
-  RadxRay *rayShort = _readRayShort();
-  if (rayShort != NULL) {
-    delete rayShort;
+  RadxRay *ray = _readRayNext();
+  if (ray != NULL) {
+    delete ray;
   }
-  RadxRay *rayLong = _readRayLong();
-  if (rayLong != NULL) {
-    delete rayLong;
-  }
-
+  
   if (_params.seek_to_end_of_input_fmq) {
-    _readerShort->seekToEnd();
-    _readerLong->seekToEnd();
+    _momReader->seekToEnd();
   } else {
-    _readerShort->seekToStart();
-    _readerLong->seekToStart();
+    _momReader->seekToStart();
   }
 
   return 0;
@@ -573,41 +511,29 @@ int HcrTripleCombine::_openFileReader()
   // Instantiate and initialize the input radar queues
 
   if (_params.debug) {
-    cerr << "DEBUG - opening input dir for short pulse: "
-         << _params.input_dir_short << endl;
-    cerr << "DEBUG - opening input dir for long  pulse: "
-         << _params.input_dir_long << endl;
+    cerr << "DEBUG - opening input dir for moments data: "
+         << _params.input_dir << endl;
   }
 
   RadxTime startTime(_args.startTime);
   RadxTime endTime(_args.endTime);
   
-  _readerShort = new IwrfMomReaderFile(_params.input_dir_short, startTime, endTime);
-  _readerLong = new IwrfMomReaderFile(_params.input_dir_long, startTime, endTime);
-
+  _momReader = new IwrfMomReaderFile(_params.input_dir, startTime, endTime);
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _readerShort->setDebug(IWRF_DEBUG_NORM);
-    _readerLong->setDebug(IWRF_DEBUG_NORM);
+    _momReader->setDebug(IWRF_DEBUG_NORM);
   }
 
   // initialize reader - read one ray
   
-  RadxRay *rayShort = _readRayShort();
-  if (rayShort == NULL) {
-    cerr << "ERROR - HcrTripleCombine::_openFileReaders()" << endl;
-    cerr << "  Cannot read rays from short pulse dir: " << _params.input_dir_short << endl;
+  RadxRay *ray = _readRayNext();
+  if (ray == NULL) {
+    cerr << "ERROR - HcrTripleCombine::_openFileReader()" << endl;
+    cerr << "  Cannot read rays from dir: " << _params.input_dir << endl;
     cerr << "  Start time: " << startTime.asString(0) << endl;
     cerr << "  End time: " << endTime.asString(0) << endl;
   }
   
-  RadxRay *rayLong = _readRayLong();
-  if (rayLong == NULL) {
-    cerr << "ERROR - HcrTripleCombine::_openFileReaders()" << endl;
-    cerr << "  Cannot read rays from long pulse dir: " << _params.input_dir_long << endl;
-    cerr << "  Start time: " << startTime.asString(0) << endl;
-    cerr << "  End time: " << endTime.asString(0) << endl;
-  }
-
   return 0;
 
 }
@@ -625,28 +551,28 @@ int HcrTripleCombine::_prepareInputRays()
 
   {
     
-    RadxRay *rayShort = _readRayShort();
+    RadxRay *rayShort = _readRayNext();
     if (rayShort == NULL) {
       cerr << "ERROR - HcrTripleCombine::_prepareInputRays()" << endl;
       if (_params.mode == Params::REALTIME) {
-        cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
+        cerr << "  Cannot read input fmq: " << _params.input_fmq_url << endl;
       } else {
-        cerr << "  Cannot read input dir short: " << _params.input_dir_short << endl;
+        cerr << "  Cannot read input dir: " << _params.input_dir << endl;
       }
       return -1;
     }
     
-    RadxRay *longRay = _readRayLong();
-    if (longRay == NULL) {
-      cerr << "ERROR - HcrTripleCombine::_prepareInputRays()" << endl;
-      if (_params.mode == Params::REALTIME) {
-        cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
-      } else {
-        cerr << "  Cannot read input dir long: " << _params.input_dir_long << endl;
-      }
-      delete rayShort;
-      return -1;
-    }
+    // RadxRay *longRay = _readRayLong();
+    // if (longRay == NULL) {
+    //   cerr << "ERROR - HcrTripleCombine::_prepareInputRays()" << endl;
+    //   if (_params.mode == Params::REALTIME) {
+    //     cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
+    //   } else {
+    //     cerr << "  Cannot read input dir long: " << _params.input_dir_long << endl;
+    //   }
+    //   delete rayShort;
+    //   return -1;
+    // }
     
     shortTime = rayShort->getRadxTime();
     longTime = longRay->getRadxTime();
@@ -690,7 +616,7 @@ int HcrTripleCombine::_prepareInputRays()
   
   _cacheRayShort = NULL;
   while (true) {
-    RadxRay *ray = _readRayShort();
+    RadxRay *ray = _readRayNext();
     if (ray == NULL) {
       cerr << "========>> short queue done <<==========" << endl;
       return -1;
@@ -752,7 +678,7 @@ int HcrTripleCombine::_readNextDwell()
   // read in short rays for the dwell
   
   while (true) {
-    RadxRay *ray = _readRayShort();
+    RadxRay *ray = _readRayNext();
     if (_checkForTimeGap(ray)) {
       return -1;
     }
@@ -1263,12 +1189,12 @@ double HcrTripleCombine::_correctForNyquist(double vel, double nyquist)
 // Read a short ray
 // Creates ray, must be freed by caller.
 
-RadxRay *HcrTripleCombine::_readRayShort()
+RadxRay *HcrTripleCombine::_readRayNext()
 {
 
   // read next ray
   
-  RadxRay *rayShort = _readerShort->readNextRay();
+  RadxRay *rayShort = _momReader->readNextRay();
   if (rayShort == NULL) {
     return NULL;
   }
@@ -1276,9 +1202,9 @@ RadxRay *HcrTripleCombine::_readRayShort()
   
   // check for platform update
   
-  if (_readerShort->getPlatformUpdated()) {
+  if (_momReader->getPlatformUpdated()) {
 
-    RadxPlatform platform = _readerShort->getPlatform();
+    RadxPlatform platform = _momReader->getPlatform();
     _platformShort = platform;
     _setPlatformMetadata(_platformShort);
     _wavelengthM = _platformShort.getWavelengthM();
@@ -1300,17 +1226,17 @@ RadxRay *HcrTripleCombine::_readRayShort()
     if (_outputFmq) {
       if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
                                msg.assembledMsg(), msg.lengthAssembled())) {
-        cerr << "ERROR - HcrTripleCombine::_readRayShort" << endl;
+        cerr << "ERROR - HcrTripleCombine::_readRayNext" << endl;
         cerr << "  Cannot write platform to queue" << endl;
       }
     }
 
-  } // if (_readerShort->getPlatformUpdated())
+  } // if (_momReader->getPlatformUpdated())
 
   // check for calibration update
   
-  if (_readerShort->getRcalibUpdated()) {
-    const vector<RadxRcalib> &calibs = _readerShort->getRcalibs();
+  if (_momReader->getRcalibUpdated()) {
+    const vector<RadxRcalib> &calibs = _momReader->getRcalibs();
     _calibsShort = calibs;
     for (size_t ii = 0; ii < calibs.size(); ii++) {
       // create message
@@ -1321,7 +1247,7 @@ RadxRay *HcrTripleCombine::_readRayShort()
       if (_outputFmq) {
         if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
                                  msg.assembledMsg(), msg.lengthAssembled())) {
-          cerr << "ERROR - HcrTripleCombine::_readRayShort" << endl;
+          cerr << "ERROR - HcrTripleCombine::_readRayNext" << endl;
           cerr << "  Cannot write calib to queue" << endl;
         }
       }
@@ -1330,8 +1256,8 @@ RadxRay *HcrTripleCombine::_readRayShort()
 
   // check for status xml update
   
-  if (_readerShort->getStatusXmlUpdated()) {
-    const string statusXml = _readerShort->getStatusXml();
+  if (_momReader->getStatusXmlUpdated()) {
+    const string statusXml = _momReader->getStatusXml();
     _statusXmlShort = statusXml;
     // create RadxStatusXml object
     RadxStatusXml status;
@@ -1343,7 +1269,7 @@ RadxRay *HcrTripleCombine::_readRayShort()
     if (_outputFmq) {
       if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
                                msg.assembledMsg(), msg.lengthAssembled())) {
-        cerr << "ERROR - HcrTripleCombine::_readRayShort" << endl;
+        cerr << "ERROR - HcrTripleCombine::_readRayNext" << endl;
         cerr << "  Cannot write status xml to queue" << endl;
       }
     }
@@ -1351,7 +1277,7 @@ RadxRay *HcrTripleCombine::_readRayShort()
   
   // update events
   
-  _eventsShort = _readerShort->getEvents();
+  _eventsShort = _momReader->getEvents();
   for (size_t ii = 0; ii < _eventsShort.size(); ii++) {
     RadxEvent event = _eventsShort[ii];
     RadxMsg msg;
@@ -1360,7 +1286,7 @@ RadxRay *HcrTripleCombine::_readRayShort()
     if (_outputFmq) {
       if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
                                msg.assembledMsg(), msg.lengthAssembled())) {
-        cerr << "ERROR - HcrTripleCombine::_readRayShort" << endl;
+        cerr << "ERROR - HcrTripleCombine::_readRayNext" << endl;
         cerr << "  Cannot write start of vol event to queue" << endl;
       }
     }
