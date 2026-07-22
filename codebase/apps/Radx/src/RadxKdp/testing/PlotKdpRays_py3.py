@@ -33,7 +33,6 @@ REQUIRED_COLUMNS = [
     "phidpMeanUnfold",
     "phidpUnfold",
     "phidpFilt",
-    "phidpCond",
     "phidpCondFilt",
     "psob",
     "kdp",
@@ -45,7 +44,6 @@ REQUIRED_COLUMNS = [
     "zdrCorrected",
     "regrFilt",
     "phidpFftFilt",
-    "phidpFftCond",
     "phidpFiltTrend",
     "scBlock",
     "phidpSC",
@@ -382,7 +380,7 @@ class KdpRayPlotter:
         # PLOT 4 - PHIDP FFT filtering
 
         self.ax4.set_title(az_str, fontsize=12)
-        self.ax4.plot(gate_num, plot_data["phidpMean"], label="phidpMean")
+        self.ax4.plot(gate_num, plot_data["phidpMean"], label="phidpMean", color="magenta")
         self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt")
         self.ax4.set_xlabel("gateNum")
         self.ax4.set_ylabel("PHIDP")

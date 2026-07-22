@@ -147,6 +147,7 @@ min_polynomial_order = 5;
 //     HUBBERT_BRINGI_METHOD
 //     PEAK_REMOVAL_METHOD
 
+// KDP_psob_method = HUBBERT_BRINGI_METHOD;
 KDP_psob_method = PEAK_REMOVAL_METHOD;
 
 ///////////// KDP_n_filt_iterations_hubbert_bringi ////

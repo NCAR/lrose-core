@@ -689,9 +689,6 @@ private:
   vector<double> _phidpFftFilt_;
   double *_phidpFftFilt;
   
-  vector<double> _phidpFftCond_;
-  double *_phidpFftCond;
-  
   vector<double> _phidpFiltTrend_;
   double *_phidpFiltTrend;
   
@@ -764,8 +761,8 @@ private:
   int _unfoldPhidp();
 
   /// filter the unfolded phidp array and compute kdp
-  
-  void _computeKdp();
+
+  void _filterPhidpUnfolded();
 
   // compute regression-filtered phidp
   
@@ -773,18 +770,19 @@ private:
 
   // worker methods
   
+  void _applyIterativeFir(double *out, double *in, int nIterations);
+  void _applyIterativeFirCond(double *out, double *in, int nIterations);
   void _copyArray(double *out, const double *in);
-  void _copyArrayCond(double *out, const double *in,
-                      const double *original);
+  void _copyArrayCond(double *out, const double *in, const double *original);
   void _padArray(double *array);
-  void _loadKdp();
+
+  void _computeKdp();
   void _loadPhidpAccumFilt(const double *phidp, double *accum);
   void _computeAttenCorrection();
   void _applyFirFilter(double *out, const double *in);
   double _getFirFilterGain();
   void _computeDbzMax();
   void _computePhidpConditioned();
-  void _computeFftConditioned();
 
   /// Compute the folding range by inspecting the phidp data
 
