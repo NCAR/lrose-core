@@ -45,7 +45,8 @@ VOLUME_RE = re.compile(
 
 def main():
     global options, startTime, endTime, archiveMode, fileCount, thisScriptName
-
+    global tmpDir
+    
     fileCount = 0
     thisScriptName = os.path.basename(__file__)
     parseArgs()
@@ -54,8 +55,9 @@ def main():
     print(f"BEGIN: {thisScriptName} at {datetime.datetime.now()}", file=sys.stderr)
     print("=============================================", file=sys.stderr)
 
-    os.makedirs(options.tmpDir, exist_ok=True)
     os.makedirs(options.outputDir, exist_ok=True)
+    tmpDir = os.path.join(options.outputDir, "tmp")
+    os.makedirs(tmpDir, exist_ok=True)
 
     if options.realtimeMode:
         lookback = timedelta(seconds=options.lookbackSecs)
@@ -181,7 +183,7 @@ def doDownload(radarName, fileTime, key, fileName):
     radar_dir = os.path.join(options.outputDir, radarName)
     out_day_dir = os.path.join(radar_dir, date_str)
     final_path = os.path.join(out_day_dir, fileName)
-    tmp_path = os.path.join(options.tmpDir, fileName + ".part")
+    tmp_path = os.path.join(tmpDir, fileName + ".part")
 
     if options.debug or options.dryRun:
         print(f"Downloading: {url} -> {final_path}", file=sys.stderr)
@@ -189,7 +191,7 @@ def doDownload(radarName, fileTime, key, fileName):
         return
 
     os.makedirs(out_day_dir, exist_ok=True)
-    os.makedirs(options.tmpDir, exist_ok=True)
+    os.makedirs(tmpDir, exist_ok=True)
 
     request = urllib.request.Request(
         url,
@@ -282,13 +284,6 @@ def parseArgs():
         default="/tmp/aws",
         metavar="DIR",
         help="Path of output dir to which the files are written",
-    )
-    parser.add_argument(
-        "--tmpDir",
-        dest="tmpDir",
-        default="/tmp/stage",
-        metavar="DIR",
-        help="Path of tmp dir for staging data",
     )
     parser.add_argument(
         "--force",
@@ -395,7 +390,6 @@ def parseArgs():
         print("  dryRun? ", options.dryRun, file=sys.stderr)
         print("  radarName: ", options.radarName, file=sys.stderr)
         print("  outputDir: ", options.outputDir, file=sys.stderr)
-        print("  tmpDir: ", options.tmpDir, file=sys.stderr)
         print("  archiveMode? ", archiveMode, file=sys.stderr)
         print("  realtimeMode? ", options.realtimeMode, file=sys.stderr)
         print("  lookbackSecs: ", options.lookbackSecs, file=sys.stderr)
