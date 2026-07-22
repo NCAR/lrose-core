@@ -1485,6 +1485,9 @@ void RadxRay::print(ostream &out) const
   if (_rayNum != Radx::missingMetaInt) {
     out << "  rayNum: " << _rayNum << endl;
   }
+  if (_scanName.size() > 0) {
+    out << "  scanName: " << _scanName << endl;
+  }
   out << "  volNum: " << _volNum << endl;
   out << "  sweepNum: " << _sweepNum << endl;
   out << "  calibIndex: " << _calibIndex << endl;
