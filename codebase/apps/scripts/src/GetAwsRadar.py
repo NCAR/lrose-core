@@ -2,392 +2,393 @@
 
 #=====================================================================
 #
-# Download NEXRAD radar files from AWS
+# Download NEXRAD Level-II radar files from the public AWS archive.
 #
 #=====================================================================
 
-from __future__ import print_function
-
+import argparse
+import datetime
 import os
+import re
+import shutil
+import subprocess
 import sys
 import time
-import datetime
+import urllib.error
+import urllib.parse
+import urllib.request
+import xml.etree.ElementTree as ET
 from datetime import timedelta
 
-import string
-import subprocess
-from optparse import OptionParser
+BUCKET_NAME = "unidata-nexrad-level2"
 
-import urllib
-from xml.dom import minidom
-from sys import stdin
-from urllib.request import urlopen
-from subprocess import call
+
+class HelpFormatter(
+    argparse.ArgumentDefaultsHelpFormatter,
+    argparse.RawDescriptionHelpFormatter,
+):
+    """Show defaults while preserving line breaks in descriptions and examples."""
+
+BUCKET_URL = f"https://{BUCKET_NAME}.s3.amazonaws.com"
+
+# Examples:
+#   KFTG20260720_123456_V06
+#   KFTG20260720_123456_V06.gz
+# MDM metadata files and other non-volume objects do not match.
+VOLUME_RE = re.compile(
+    r"^(?P<site>[A-Z0-9]{4})"
+    r"(?P<date>\d{8})_"
+    r"(?P<time>\d{6})_"
+    r"V\d{2}(?:\.gz)?$"
+)
+
 
 def main():
-
-    global options
-    global tmpDir
-    global startTime, endTime
-    global archiveMode
-    global fileCount
-
-    # initialize file count
+    global options, startTime, endTime, archiveMode, fileCount, thisScriptName
 
     fileCount = 0
-
-    global thisScriptName
     thisScriptName = os.path.basename(__file__)
-
-    # parse the command line
-
     parseArgs()
-    
-    # initialize
-    
-    beginString = "BEGIN: " + thisScriptName
-    nowTime = datetime.datetime.now()
-    beginString += " at " + str(nowTime)
-    
+
     print("=============================================", file=sys.stderr)
-    print(beginString, file=sys.stderr)
+    print(f"BEGIN: {thisScriptName} at {datetime.datetime.now()}", file=sys.stderr)
     print("=============================================", file=sys.stderr)
 
-    # create dirs
+    os.makedirs(options.tmpDir, exist_ok=True)
+    os.makedirs(options.outputDir, exist_ok=True)
 
-    try:
-        os.makedirs(options.tmpDir)
-    except OSError as exc:
-        if (options.verbose):
-            print("WARNING: cannot make tmp dir: ", options.tmpDir, file=sys.stderr)
-            print("  ", exc, file=sys.stderr)
-            
-    try:
-        os.makedirs(options.outputDir)
-    except OSError as exc:
-        if (options.verbose):
-            print("WARNING: cannot make output dir: ", options.outputDir, file=sys.stderr)
-            print("  ", exc, file=sys.stderr)
-
-    # realtime mode - loop forever
-
-    if (options.realtimeMode):
-        lookbackSecs = timedelta(0, int(options.lookbackSecs))
-        while(True):
+    if options.realtimeMode:
+        lookback = timedelta(seconds=options.lookbackSecs)
+        while True:
             fileCount = 0
-            nowTime = time.gmtime()
-            endTime = datetime.datetime(nowTime.tm_year, nowTime.tm_mon, nowTime.tm_mday,
-                                        nowTime.tm_hour, nowTime.tm_min, nowTime.tm_sec)
-            startTime = endTime - lookbackSecs
+            # NEXRAD object times and S3 keys are UTC.
+            endTime = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+            startTime = endTime - lookback
             manageRetrieval(startTime, endTime)
-            time.sleep(int(options.sleepSecs))
-        return
+            time.sleep(options.sleepSecs)
+    else:
+        manageRetrieval(startTime, endTime)
 
-    # archive mode - one shot
-
-    manageRetrieval(startTime, endTime)
-            
-    endString = "END: " + thisScriptName
-    nowTime = datetime.datetime.now()
-    endString += " at " + str(nowTime)
-    
     print("==============================================", file=sys.stderr)
-    print(endString, file=sys.stderr)
+    print(f"END: {thisScriptName} at {datetime.datetime.now()}", file=sys.stderr)
     print("==============================================", file=sys.stderr)
 
-    sys.exit(0)
 
-########################################################################
-# Manage the retrieval
+def manageRetrieval(start_time, end_time):
+    if start_time > end_time:
+        raise ValueError("start time is later than end time")
 
-def manageRetrieval(startTime, endTime):
+    if options.debug:
+        print(f"Retrieving for times: {start_time} to {end_time} UTC", file=sys.stderr)
 
-    if (options.debug):
-        print("Retrieving for times: ", 
-              startTime, " to ", endTime, file=sys.stderr)
+    start_day = start_time.date()
+    end_day = end_time.date()
+    this_day = start_day
 
-    if (startTime.day == endTime.day):
+    while this_day <= end_day:
+        day_start = datetime.datetime.combine(this_day, datetime.time.min)
+        day_end = datetime.datetime.combine(this_day, datetime.time.max)
+        period_start = max(start_time, day_start)
+        period_end = min(end_time, day_end)
+        getForInterval(options.radarName, this_day, period_start, period_end)
+        this_day += timedelta(days=1)
 
-        # single day
-        startDay = datetime.date(startTime.year, startTime.month, startTime.day)
-        getForInterval(options.radarName, startDay, startTime, endTime)
-        print("---->> Num files downloaded: ", fileCount, file=sys.stderr)
-        return
+    print(f"---->> Num files downloaded: {fileCount}", file=sys.stderr)
 
-    # multiple days
 
-    tdiff = endTime - startTime
-    tdiffSecs = tdiff.total_seconds()
-    if (options.debug):
-        print("Proc interval in secs:  ", tdiffSecs, file=sys.stderr)
+def list_s3_keys(prefix):
+    """Yield all keys for prefix using S3 ListObjectsV2 pagination."""
+    continuation_token = None
 
-    startDay = datetime.date(startTime.year, startTime.month, startTime.day)
-    endDay = datetime.date(endTime.year, endTime.month, endTime.day)
-    thisDay = startDay
-    while (thisDay <= endDay):
+    while True:
+        params = {
+            "list-type": "2",
+            "prefix": prefix,
+            "max-keys": "1000",
+        }
+        if continuation_token:
+            params["continuation-token"] = continuation_token
 
-        if (options.debug):
-            print("===>>> processing day:  ", thisDay, file=sys.stderr)
+        list_url = f"{BUCKET_URL}/?{urllib.parse.urlencode(params)}"
+        if options.debug:
+            print(f"list URL: {list_url}", file=sys.stderr)
 
-        if (thisDay == startDay):
-            # get to end of start day
-            periodStart = startTime
-            periodEnd = datetime.datetime(thisDay.year, thisDay.month, thisDay.day,
-                                          23, 59, 59)
-            getForInterval(options.radarName, thisDay, periodStart, periodEnd)
-
-        elif (thisDay == endDay):
-            # get from start of end day
-            periodStart = datetime.datetime(thisDay.year, thisDay.month, thisDay.day,
-                                            0, 0, 0)
-            periodEnd = endTime
-            getForInterval(options.radarName, thisDay, periodStart, periodEnd)
-
-        else:
-            # get for the full day
-            periodStart = datetime.datetime(thisDay.year, thisDay.month, thisDay.day,
-                                            0, 0, 0)
-            periodEnd = datetime.datetime(thisDay.year, thisDay.month, thisDay.day,
-                                          23, 59, 59)
-            getForInterval(options.radarName, thisDay, periodStart, periodEnd)
-
-        # go to next day
-        thisDay = thisDay + timedelta(1)
-
-    print("---->> Num files downloaded: ", fileCount, file=sys.stderr)
-
-########################################################################
-# Get the data for the specified time interval
-
-def getForInterval(radarName, thisDay, startTime, endTime):
-
-    # get the local file list, i.e. files already downloaded
-
-    localFileList = getLocalFileList(thisDay, radarName)
-
-    # construct the URL
-
-    awsDateStr =  startTime.strftime("%Y/%m/%d")
-    bucketURL = "http://unidata-nexrad-level2.s3.amazonaws.com"
-    dirListURL = bucketURL+ "/?prefix=" + awsDateStr + "/" + radarName
-    if (options.debug):
-        print("dirListURL: ", dirListURL, file=sys.stderr)
-
-    # get the listing in XML
-
-    xmldoc = minidom.parse(urlopen(dirListURL))
-    itemlist = xmldoc.getElementsByTagName('Key')
-    if (options.debug):
-        print("number of keys found: ", len(itemlist), file=sys.stderr)
-
-    for x in itemlist:
-        # Only process files that look like "2012/07/02/KJAX/KJAX20120702_030836_V06.gz"
-        fileEntry = str(getNodeText(x.childNodes))
+        request = urllib.request.Request(
+            list_url,
+            headers={"User-Agent": f"{thisScriptName}/2.0"},
+        )
         try:
-            (fyear, fmonth, fday, rname, fileName) = str.split(fileEntry, '/')
-            if (options.verbose):
-                print("==>> fyear, fmonth, fday, rname, fname: ",
-                      fyear, fmonth, fday, rname, fileName, file=sys.stderr)
-            year = int(fileName[4:8]);
-            month = int(fileName[8:10]);
-            day = int(fileName[10:12]);
-            hour = int(fileName[13:15]);
-            minute = int(fileName[15:17]);
-            sec = int(fileName[17:19]);
-            fileTime = datetime.datetime(year, month, day, hour, minute, sec);
-        except:
-            if(options.verbose):
-                print("bad entry: ", fileEntry, file=sys.stderr)
+            with urllib.request.urlopen(request, timeout=options.timeoutSecs) as response:
+                root = ET.parse(response).getroot()
+        except (urllib.error.URLError, TimeoutError, ET.ParseError) as exc:
+            raise RuntimeError(f"cannot list S3 prefix {prefix}: {exc}") from exc
+
+        # S3 XML uses a default namespace. Stripping it keeps the code simple.
+        for elem in root.iter():
+            if "}" in elem.tag:
+                elem.tag = elem.tag.split("}", 1)[1]
+
+        for contents in root.findall("Contents"):
+            key = contents.findtext("Key")
+            if key:
+                yield key
+
+        is_truncated = root.findtext("IsTruncated", "false").lower() == "true"
+        if not is_truncated:
+            break
+
+        continuation_token = root.findtext("NextContinuationToken")
+        if not continuation_token:
+            raise RuntimeError("S3 response was truncated but had no continuation token")
+
+
+def getForInterval(radarName, thisDay, start_time, end_time):
+    local_files = set(getLocalFileList(thisDay, radarName))
+    prefix = f"{thisDay:%Y/%m/%d}/{radarName}/"
+
+    keys_found = 0
+    for key in list_s3_keys(prefix):
+        file_name = key.rsplit("/", 1)[-1]
+        match = VOLUME_RE.match(file_name)
+        if not match or match.group("site") != radarName:
+            if options.verbose:
+                print(f"skipping non-volume entry: {key}", file=sys.stderr)
             continue
 
-        if(options.verbose):
-            print("checking file, time: ", fileEntry, fileTime, file=sys.stderr)
+        file_time = datetime.datetime.strptime(
+            match.group("date") + match.group("time"), "%Y%m%d%H%M%S"
+        )
+        keys_found += 1
 
-        if(fileTime >= startTime and fileTime <= endTime):
-            if (options.force):
-                doDownload(radarName, fileTime, fileEntry, fileName)
-            else:
-                if (fileName not in localFileList):
-                    doDownload(radarName, fileTime, fileEntry, fileName)
-                elif (options.debug):
-                    print("file previously downloaded: ", fileName, file=sys.stderr)
-    
-########################################################################
-# Get text for nodes
+        if options.verbose:
+            print(f"checking file: {key}, time: {file_time}", file=sys.stderr)
 
-def getNodeText(nodelist):
-    rc = []
-    for node in nodelist:
-        if node.nodeType == node.TEXT_NODE:
-            rc.append(node.data)
-    return ''.join(rc)
+        if start_time <= file_time <= end_time:
+            if options.force or file_name not in local_files:
+                doDownload(radarName, file_time, key, file_name)
+            elif options.debug:
+                print(f"file previously downloaded: {file_name}", file=sys.stderr)
+
+    if options.debug:
+        print(f"valid volume keys found for {prefix}: {keys_found}", file=sys.stderr)
 
 
-########################################################################
-# Download specified file
-
-def doDownload(radarName, fileTime, fileEntry, fileName):
-
+def doDownload(radarName, fileTime, key, fileName):
     global fileCount
 
-    if (options.debug):
-        print("Downloading entry, name: ",
-              fileEntry, ", ", fileName, file=sys.stderr)
+    url = f"{BUCKET_URL}/{urllib.parse.quote(key, safe='/')}"
+    date_str = fileTime.strftime("%Y%m%d")
+    radar_dir = os.path.join(options.outputDir, radarName)
+    out_day_dir = os.path.join(radar_dir, date_str)
+    final_path = os.path.join(out_day_dir, fileName)
+    tmp_path = os.path.join(options.tmpDir, fileName + ".part")
 
-    if(options.dryRun):
-        # no download
+    if options.debug or options.dryRun:
+        print(f"Downloading: {url} -> {final_path}", file=sys.stderr)
+    if options.dryRun:
         return
 
-    # download into tmp file
+    os.makedirs(out_day_dir, exist_ok=True)
+    os.makedirs(options.tmpDir, exist_ok=True)
 
-    dataURL = "https://noaa-nexrad-level2.s3.amazonaws.com"
-    tmpPath = os.path.join(options.tmpDir, fileName)
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": f"{thisScriptName}/2.0"},
+    )
+
     try:
-        tmpFile = open(tmpPath, 'wb')
-        urlPath = os.path.join(dataURL,fileEntry);
-        myfile = urllib.request.urlopen(urlPath)
-        tmpFile.write(myfile.read())
-        tmpFile.close()
-        fileCount = fileCount + 1
-    except OSError as e:
-        print("ERROR: Got error: ", e, file=sys.stderr)
+        with urllib.request.urlopen(request, timeout=options.timeoutSecs) as response, \
+                open(tmp_path, "wb") as out:
+            shutil.copyfileobj(response, out, length=1024 * 1024)
+        os.replace(tmp_path, final_path)
+    except (urllib.error.URLError, OSError, TimeoutError) as exc:
+        try:
+            os.remove(tmp_path)
+        except FileNotFoundError:
+            pass
+        print(f"ERROR downloading {url}: {exc}", file=sys.stderr)
+        return
 
-    # create final dir
+    fileCount += 1
 
-    dateStr =  fileTime.strftime("%Y%m%d")
-    radarDir = os.path.join(options.outputDir, radarName)
-    outDayDir = os.path.join(radarDir, dateStr)
-    try:
-        os.makedirs(outDayDir)
-    except OSError as exc:
-        if (options.verbose):
-            print("WARNING: trying to create dir: ", outDayDir, file=sys.stderr)
-            print("Exception: ", exc, file=sys.stderr)
-    
-    # move to output dir
-    
-    cmd = "mv " + tmpPath + " " + outDayDir
-    runCommand(cmd)
+    time_str = fileTime.strftime("%Y%m%d%H%M%S")
+    rel_path = os.path.join(date_str, fileName)
+    runCommand([
+        "LdataWriter",
+        "-dir", radar_dir,
+        "-rpath", rel_path,
+        "-ltime", time_str,
+        "-writer", thisScriptName,
+        "-dtype", "level2",
+    ])
 
-    # write latest_data_info
-    
-    timeStr = fileTime.strftime("%Y%m%d%H%M%S")
-    relPath = os.path.join(dateStr, fileName)
-    cmd = "LdataWriter -dir " + radarDir \
-          + " -rpath " + relPath \
-          + " -ltime " + timeStr \
-          + " -writer " + thisScriptName \
-          + " -dtype level2"
-    runCommand(cmd)
-
-########################################################################
-# Get list of files already downloaded
 
 def getLocalFileList(date, radarName):
+    date_str = date.strftime("%Y%m%d")
+    day_dir = os.path.join(options.outputDir, radarName, date_str)
+    os.makedirs(day_dir, exist_ok=True)
+    return os.listdir(day_dir)
 
-    # make the target directory and go there
-    
-    dateStr = date.strftime("%Y%m%d")
-    radarDir = os.path.join(options.outputDir, radarName)
-    dayDir = os.path.join(radarDir, dateStr)
+
+def parse_utc_time(value):
     try:
-        os.makedirs(dayDir)
-    except OSError as exc:
-        if (options.verbose):
-            print("WARNING: trying to create dir: ", dayDir, file = sys.stderr)
-            print("  exception: ", exc, file = sys.stderr)
+        return datetime.datetime.strptime(value, "%Y %m %d %H %M %S")
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            'time must use format "YYYY MM DD HH MM SS" (UTC)'
+        ) from exc
 
-    # get local file list - i.e. those which have already been downloaded
-
-    # os.chdir(dayDir)
-    localFileList = os.listdir(dayDir)
-    localFileList.reverse()
-
-    if (options.verbose):
-        print("==>> localFileList: ", localFileList, file=sys.stderr)
-
-    return localFileList
-            
-########################################################################
-# Parse the command line
 
 def parseArgs():
-    
-    global options
-    global startTime, endTime
-    global archiveMode
+    global options, startTime, endTime, archiveMode
 
-    # parse the command line
+    parser = argparse.ArgumentParser(
+        description="Download NEXRAD Level-II radar files from AWS.",
+        formatter_class=HelpFormatter,
+        epilog=(
+            'Archive example:\n'
+            '  %(prog)s --radarName KFTG '
+            '--start "2026 07 20 12 00 00" '
+            '--end "2026 07 20 13 00 00"\n\n'
+            'Realtime example:\n'
+            '  %(prog)s --radarName KFTG --realtime'
+        ),
+    )
 
-    usage = "usage: %prog [options]"
-    parser = OptionParser(usage)
-    parser.add_option('--debug',
-                      dest='debug', default=False,
-                      action="store_true",
-                      help='Set debugging on')
-    parser.add_option('--verbose',
-                      dest='verbose', default=False,
-                      action="store_true",
-                      help='Set verbose debugging on')
-    parser.add_option('--radarName',
-                      dest='radarName',
-                      default='KFTG',
-                      help='4-character name for radar')
-    parser.add_option('--outputDir',
-                      dest='outputDir',
-                      default='/tmp/aws',
-                      help='Path of output dir to which the files are written')
-    parser.add_option('--tmpDir',
-                      dest='tmpDir',
-                      default='/tmp/stage',
-                      help='Path of tmp dir for staging data')
-    parser.add_option('--force',
-                      dest='force', default=False,
-                      action="store_true",
-                      help='Force transfer even if file previously downloaded')
-    parser.add_option('--dryRun',
-                      dest='dryRun', default=False,
-                      action="store_true",
-                      help='Dry run: do not download data, list what would be downloaded')
-    parser.add_option('--realtime',
-                      dest='realtimeMode', default=False,
-                      action="store_true",
-                      help='Realtime mode - check every sleepSecs, look back lookbackSecs')
-    parser.add_option('--lookbackSecs',
-                      dest='lookbackSecs',
-                      default=1800,
-                      help='Lookback secs in realtime mode')
-    parser.add_option('--sleepSecs',
-                      dest='sleepSecs',
-                      default=10,
-                      help='Sleep secs in realtime mode')
-    parser.add_option('--start',
-                      dest='startTime',
-                      default='1970 01 01 00 00 00',
-                      help='Start time for retrieval - archival mode. Format is "yyyy mm dd hh mm ss", including double quotes.')
-    parser.add_option('--end',
-                      dest='endTime',
-                      default='1970 01 01 00 00 00',
-                      help='End time for retrieval - archival mode. Format is "yyyy mm dd hh mm ss", including double quotes.')
+    parser.add_argument(
+        "--debug",
+        dest="debug",
+        default=False,
+        action="store_true",
+        help="Set debugging on",
+    )
+    parser.add_argument(
+        "--verbose",
+        dest="verbose",
+        default=False,
+        action="store_true",
+        help="Set verbose debugging on",
+    )
+    parser.add_argument(
+        "--radarName",
+        dest="radarName",
+        default="KFTG",
+        metavar="RADAR",
+        help="4-character name for radar",
+    )
+    parser.add_argument(
+        "--outputDir",
+        dest="outputDir",
+        default="/tmp/aws",
+        metavar="DIR",
+        help="Path of output dir to which the files are written",
+    )
+    parser.add_argument(
+        "--tmpDir",
+        dest="tmpDir",
+        default="/tmp/stage",
+        metavar="DIR",
+        help="Path of tmp dir for staging data",
+    )
+    parser.add_argument(
+        "--force",
+        dest="force",
+        default=False,
+        action="store_true",
+        help="Force transfer even if file previously downloaded",
+    )
+    parser.add_argument(
+        "--dryRun",
+        dest="dryRun",
+        default=False,
+        action="store_true",
+        help="Dry run: do not download data, list what would be downloaded",
+    )
+    parser.add_argument(
+        "--realtime",
+        dest="realtimeMode",
+        default=False,
+        action="store_true",
+        help="Realtime mode - check every sleepSecs, look back lookbackSecs",
+    )
+    parser.add_argument(
+        "--lookbackSecs",
+        dest="lookbackSecs",
+        type=int,
+        default=1800,
+        metavar="SECS",
+        help="Lookback secs in realtime mode",
+    )
+    parser.add_argument(
+        "--sleepSecs",
+        dest="sleepSecs",
+        type=int,
+        default=10,
+        metavar="SECS",
+        help="Sleep secs in realtime mode",
+    )
+    parser.add_argument(
+        "--timeoutSecs",
+        dest="timeoutSecs",
+        type=int,
+        default=60,
+        metavar="SECS",
+        help="Timeout secs for AWS list and download requests",
+    )
+    parser.add_argument(
+        "--start",
+        dest="startTime",
+        type=parse_utc_time,
+        metavar='"YYYY MM DD HH MM SS"',
+        help=(
+            'Start time for retrieval - archival mode. '
+            'Format is "yyyy mm dd hh mm ss", including double quotes. '
+            'Time is interpreted as UTC.'
+        ),
+    )
+    parser.add_argument(
+        "--end",
+        dest="endTime",
+        type=parse_utc_time,
+        metavar='"YYYY MM DD HH MM SS"',
+        help=(
+            'End time for retrieval - archival mode. '
+            'Format is "yyyy mm dd hh mm ss", including double quotes. '
+            'Time is interpreted as UTC.'
+        ),
+    )
 
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
+    options.radarName = options.radarName.upper()
 
-    if (options.verbose):
+    if not re.fullmatch(r"[A-Z0-9]{4}", options.radarName):
+        parser.error("--radarName must be exactly four letters/digits")
+
+    if options.lookbackSecs < 0:
+        parser.error("--lookbackSecs must be nonnegative")
+    if options.sleepSecs <= 0:
+        parser.error("--sleepSecs must be greater than zero")
+    if options.timeoutSecs <= 0:
+        parser.error("--timeoutSecs must be greater than zero")
+
+    if options.verbose:
         options.debug = True
-        
-    year, month, day, hour, minute, sec = options.startTime.split()
-    startTime = datetime.datetime(int(year), int(month), int(day),
-                                  int(hour), int(minute), int(sec))
-    
-    year, month, day, hour, minute, sec = options.endTime.split()
-    endTime = datetime.datetime(int(year), int(month), int(day),
-                                int(hour), int(minute), int(sec))
-    if (startTime.year > 1970 and endTime.year > 1970):
-        archiveMode = True
-    else:
+
+    if options.realtimeMode:
+        if options.startTime is not None or options.endTime is not None:
+            parser.error("do not specify --start or --end with --realtime")
+        startTime = endTime = None
         archiveMode = False
-    
-    if (options.debug):
+    else:
+        if options.startTime is None or options.endTime is None:
+            parser.error("archive mode requires both --start and --end")
+        if options.startTime > options.endTime:
+            parser.error("--start must not be later than --end")
+        startTime = options.startTime
+        endTime = options.endTime
+        archiveMode = True
+
+    if options.debug:
         print("Options:", file=sys.stderr)
         print("  debug? ", options.debug, file=sys.stderr)
         print("  force? ", options.force, file=sys.stderr)
@@ -399,35 +400,24 @@ def parseArgs():
         print("  realtimeMode? ", options.realtimeMode, file=sys.stderr)
         print("  lookbackSecs: ", options.lookbackSecs, file=sys.stderr)
         print("  sleepSecs: ", options.sleepSecs, file=sys.stderr)
+        print("  timeoutSecs: ", options.timeoutSecs, file=sys.stderr)
         print("  startTime: ", startTime, file=sys.stderr)
         print("  endTime: ", endTime, file=sys.stderr)
 
-    if (options.realtimeMode == True and archiveMode == True):
-        print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  For realtime mode, do not set start or end times", file=sys.stderr)
-        sys.exit(1)
 
-########################################################################
-# Run a command in a shell, wait for it to complete
-
-def runCommand(cmd):
-
-    if (options.debug):
-        print("running cmd: ", cmd, file=sys.stderr)
-    
+def runCommand(args):
+    if options.debug:
+        print("running command:", " ".join(args), file=sys.stderr)
     try:
-        retcode = subprocess.call(cmd, shell=True)
-        if retcode < 0:
-            print("Child was terminated by signal: ", -retcode, file=sys.stderr)
-        else:
-            if (options.debug):
-                print("Child returned code: ", retcode, file=sys.stderr)
-    except OSError as e:
-        print >>sys.stderr, "Execution failed:", e
+        result = subprocess.run(args, check=False)
+        if result.returncode != 0:
+            print(
+                f"WARNING: command returned status {result.returncode}: {' '.join(args)}",
+                file=sys.stderr,
+            )
+    except OSError as exc:
+        print(f"ERROR executing {' '.join(args)}: {exc}", file=sys.stderr)
 
-########################################################################
-# kick off main method
 
 if __name__ == "__main__":
-
-   main()
+    main()
