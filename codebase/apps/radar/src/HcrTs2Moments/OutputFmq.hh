@@ -24,12 +24,12 @@
 /////////////////////////////////////////////////////////////
 // OutputFmq.hh
 //
-// OutputFmq object
-//
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// May 2006
+// July 2026
+//
+// OutputFmq write moments data to the FMQ.
 //
 ///////////////////////////////////////////////////////////////
 
@@ -139,21 +139,6 @@ private:
   void _putNewScanTypeRadx(int scanType, const Beam &beam);
 
   int _openFmq();
-  int _openRadxQueue();
-
-  // Add a field to the field params message.
-
-  // inline void _addField(const string &name,
-  //                       const string &units,
-  //                       double scale,
-  //                       double bias,
-  //                       vector<DsFieldParams*> &fp)
-  // {
-  //   DsFieldParams* fparams =
-  //     new DsFieldParams(name.c_str(), units.c_str(),
-  //                       scale, bias, sizeof(ui16));
-  //   fp.push_back(fparams);
-  // }
 
   // convert double to ui16, applying scale and bias
 

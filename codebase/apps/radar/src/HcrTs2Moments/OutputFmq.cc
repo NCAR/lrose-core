@@ -26,11 +26,11 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// May 2006
+// July 2026
 //
 ///////////////////////////////////////////////////////////////
 //
-// OutputFmq puts the data out at FMQ.
+// OutputFmq write moments data to the FMQ.
 //
 ////////////////////////////////////////////////////////////////
 
@@ -829,12 +829,6 @@ void OutputFmq::_putNewScanTypeRadx(int scanType, const Beam &beam)
 // open the FMQ
 
 int OutputFmq::_openFmq()
-  
-{
-  return _openRadxQueue();
-}
-
-int OutputFmq::_openRadxQueue()
   
 {
 
