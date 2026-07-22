@@ -402,14 +402,17 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
 
 {
 
-  const IwrfTsInfo &opsInfo = beam.getOpsInfo();
-
   // create ray
   
   RadxRay ray;
   
   ray.setTime(beam.getTimeSecs(), beam.getNanoSecs());
-  ray.setScanName(opsInfo.get_scan_segment_name());
+
+  // overload ray number and scan name to store
+  // block ID and name
+  
+  ray.setRayNumber(beam.getBlockId());
+  ray.setScanName(beam.getBlockName());
 
   RadxTime rayTime = ray.getRadxTime();
   if (rayTime.getMin() != _prevTime.getMin()) {

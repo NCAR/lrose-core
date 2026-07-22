@@ -133,6 +133,8 @@ void Beam::init(int nSamples,
                 double elRate,
                 scan_type_t scanType,
                 iwrf_xmit_rcv_mode_t xmitRcvMode,
+                int blockId,
+                const string &blockName,
                 const IwrfTsInfo &opsInfo,
                 const vector<shared_ptr<IwrfTsPulse>> &pulses)
   
@@ -150,6 +152,8 @@ void Beam::init(int nSamples,
   _elRate = elRate;
   _scanType = scanType;
   _xmitRcvMode = xmitRcvMode;
+  _blockId = blockId;
+  _blockName = blockName;
   _opsInfo = opsInfo;
   _wavelengthM = _opsInfo.get_radar_wavelength_cm() / 100.0;
   _pulses = pulses;

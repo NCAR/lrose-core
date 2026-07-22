@@ -84,6 +84,8 @@ public:
             double elRate,
             scan_type_t scanType,
             iwrf_xmit_rcv_mode_t xmitRcvMode,
+            int blockId,
+            const string &blockName,
             const IwrfTsInfo &opsInfo,
             const vector<shared_ptr<IwrfTsPulse>> &pulses);
 
@@ -105,6 +107,8 @@ public:
   // get methods
 
   int getNSamples() const { return _nSamples; }
+  int getBlockId() const { return _blockId; }
+  string getBlockName() const { return _blockName; }
 
   double getEl() const { return _el; }
   double getAz() const { return _az; }
@@ -156,6 +160,11 @@ private:
   
   string _progName;
   const Params &_params;
+
+  // block identification
+
+  int _blockId;
+  string _blockName;
   
   // pulse vector
 
@@ -164,7 +173,7 @@ private:
   static pthread_mutex_t _pulseUnpackMutex;
 
   // number of samples
-
+  
   int _nSamples; // nsamples making adjustment for window
   int _nSamplesHalf;
   int _nSamplesAlloc;

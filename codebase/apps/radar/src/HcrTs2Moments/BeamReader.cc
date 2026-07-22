@@ -316,6 +316,8 @@ Beam *BeamReader::getNextBeam()
              _progressiveElRate,
              _scanType,
              xmitRcvMode,
+             _blockId,
+             _blockName,
              _pulseReader->getOpsInfo(),
              beamPulses);
 
@@ -571,6 +573,15 @@ int BeamReader::_readBlockBeam()
     }
     
   } // while
+
+  _blockId = blockId;
+  _blockName = "unknown";
+  for (int ii = 0; ii < _params.block_defs_n; ii++) {
+    if (_params._block_defs[ii].block_id == _blockId) {
+      _blockName = _params._block_defs[ii].block_name;
+      break;
+    }
+  }
 
   // set PRT (and mean PRF)
   

@@ -129,6 +129,8 @@ private:
   si64 _beamCount;
   int _midIndex, _startIndex, _endIndex;
   si64 _prevBeamPulseSeqNum; // pulse after center of beam
+  int _blockId;
+  string _blockName;
 
   // beam properties
 
