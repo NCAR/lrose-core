@@ -22,8 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //////////////////////////////////////////////////////////////////////////
+// HcrMomentsCombine.hh
 //
-// main for HcrTripleCombine
+// HcrMomentsCombine object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -46,88 +47,146 @@
 //   relevant moments for each block. Those moments are then written, in 
 //   sequence, to a single output FMQ in Radx moments format.
 //
-// HcrTripleCombine reads the Radx moments data stream, and combines the 
+// HcrMomentsCombine reads the Radx moments data stream, and combines the 
 //   three blocks into a single block, naming the fields appropriately, 
 //   and unfolding the velocity fields as appropriate. This allows us to 
 //   unfold the velocity field using the staggered-PRT technique.
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "HcrTripleCombine.hh"
-#include <signal.h>
-#include <new>
-#include <iostream>
+#ifndef HcrMomentsCombine_HH
+#define HcrMomentsCombine_HH
+
+#include "Args.hh"
+#include "Params.hh"
+#include <string>
+#include <Radx/RadxVol.hh>
+#include <Radx/RadxField.hh>
+#include <Radx/RadxTime.hh>
+#include <radar/IwrfMomReader.hh>
+class RadxFile;
+class RadxRay;
 using namespace std;
 
-// file scope
-
-static void tidy_and_exit (int sig);
-static void out_of_store();
-static HcrTripleCombine *Prog = NULL;
-
-// main
-
-int main(int argc, char **argv)
-
-{
-
-  // create program object
-
-  Prog = new HcrTripleCombine(argc, argv);
-  if (!Prog->OK) {
-    cerr << "Error: Could not create HcrTripleCombine object." << endl;
-    return(-1);
-  }
-
-  // set signal handling
+class HcrMomentsCombine {
   
-  signal(SIGINT, tidy_and_exit);
-  signal(SIGHUP, tidy_and_exit);
-  signal(SIGTERM, tidy_and_exit);
-  signal(SIGPIPE, SIG_IGN);
+public:
 
-  // set new() memory failure handler function
-
-  set_new_handler(out_of_store);
-
-  // run it
-
-  int iret = Prog->Run();
-  if (iret < 0) {
-    cerr << "ERROR - running HcrTripleCombine" << endl;
-  }
+  // constructor
   
-  // clean up
+  HcrMomentsCombine (int argc, char **argv);
 
-  tidy_and_exit(iret);
-  return (iret);
+  // destructor
   
-}
+  ~HcrMomentsCombine();
 
-// tidy up on exit
+  // run 
 
-static void tidy_and_exit(int sig)
+  int Run();
 
-{
-  if (Prog) {
-    delete Prog;
-    Prog = NULL;
-  }
-  exit(sig);
-}
+  // data members
 
-////////////////////////////////////
-// out_of_store()
-//
-// Handle out-of-memory conditions
-//
+  int OK;
 
-static void out_of_store()
+protected:
+private:
 
-{
+  string _progName;
+  char *_paramsPath;
+  Args _args;
+  Params _params;
 
-  cerr << "FATAL ERROR - program HcrTripleCombine" << endl;
-  cerr << "  Operator new failed - out of store" << endl;
-  exit(1);
+  // reading input moments
 
-}
+  IwrfMomReader *_momReader;
+
+  // Radx output moments queue
+
+  DsFmq *_outputFmq;
+
+  int _nRaysRead;
+  int _nRaysWritten;
+
+  RadxPlatform _platformShort;
+  RadxPlatform _platformLong;
+  vector<RadxRcalib> _calibsShort;
+  vector<RadxRcalib> _calibsLong;
+  string _statusXmlShort;
+  string _statusXmlLong;
+  vector<RadxEvent> _eventsShort;
+  vector<RadxEvent> _eventsLong;
+
+  double _wavelengthM;
+  double _prtShort;
+  double _prtLong;
+  double _nyquistShort;
+  double _nyquistLong;
+  double _nyquistUnfolded;
+
+  int _stagM;
+  int _stagN;
+  int _LL;
+  int _PP_[32];
+  
+  // combining
+
+  double _dwellLengthSecs;
+  double _dwellLengthSecsHalf;
+  
+  RadxTime _nextDwellStartTime;
+  RadxTime _nextDwellEndTime;
+  RadxTime _nextDwellMidTime;
+  RadxTime _thisDwellMidTime;
+
+  RadxTime _latestRayTime;
+  RadxTime _prevTimeShort;
+  
+  RadxRay *_cacheRayShort;
+  RadxRay *_cacheRayLong;
+  
+  vector<RadxRay *> _dwellRaysShort;
+  vector<RadxRay *> _dwellRaysLong;
+
+  RadxVol _dwellVolShort;
+  RadxVol _dwellVolLong;
+  RadxField::StatsMethod_t _globalMethod;
+  vector<RadxField::NamedStatsMethod> _namedMethods;
+
+  double _meanLat, _meanLon, _meanAlt;
+
+  // methods
+
+  int _runRealtime();
+  int _runArchive();
+  int _computeMeanLocation();
+
+  int _openInputFmqs();
+  int _openOutputFmq();
+  int _openFileReader();
+
+  int _prepareInputRays();
+  int _readNextDwell();
+  int _checkForTimeGap(RadxRay *latestRayShort);
+  RadxRay *_combineDwellRays();
+  void _clearDwellRays();
+
+  void _unfoldVel(RadxRay *rayCombined);
+
+  void _computeVelCorrectedForVertMotion(RadxRay *ray,
+                                         RadxField *velRawShort,
+                                         RadxField *velRawLong,
+                                         RadxField *velUnfolded);
+  
+  double _correctForNyquist(double vel, double nyquist);
+  
+  RadxRay *_readRayNext();
+  RadxRay *_readRayLong();
+  
+  RadxField::StatsMethod_t
+    _getDwellStatsMethod(Params::dwell_stats_method_t method);
+
+  void _setPlatformMetadata(RadxPlatform &platform);
+
+};
+
+#endif

@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //////////////////////////////////////////////////////////////////////////
-// HcrTripleCombine.cc
+// HcrMomentsCombine.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -45,14 +45,14 @@
 //   relevant moments for each block. Those moments are then written, in 
 //   sequence, to a single output FMQ in Radx moments format.
 //
-// HcrTripleCombine reads the Radx moments data stream, and combines the 
+// HcrMomentsCombine reads the Radx moments data stream, and combines the 
 //   three blocks into a single block, naming the fields appropriately, 
 //   and unfolding the velocity fields as appropriate. This allows us to 
 //   unfold the velocity field using the staggered-PRT technique.
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "HcrTripleCombine.hh"
+#include "HcrMomentsCombine.hh"
 #include <Radx/RadxRay.hh>
 #include <Mdv/GenericRadxFile.hh>
 #include <Radx/RadxGeoref.hh>
@@ -68,7 +68,7 @@ using namespace std;
 
 // Constructor
 
-HcrTripleCombine::HcrTripleCombine(int argc, char **argv)
+HcrMomentsCombine::HcrMomentsCombine(int argc, char **argv)
   
 {
 
@@ -90,7 +90,7 @@ HcrTripleCombine::HcrTripleCombine(int argc, char **argv)
 
   // set programe name
 
-  _progName = "HcrTripleCombine";
+  _progName = "HcrMomentsCombine";
   
   // parse command line args
   
@@ -143,7 +143,7 @@ HcrTripleCombine::HcrTripleCombine(int argc, char **argv)
 
 // destructor
 
-HcrTripleCombine::~HcrTripleCombine()
+HcrMomentsCombine::~HcrMomentsCombine()
 
 {
 
@@ -164,7 +164,7 @@ HcrTripleCombine::~HcrTripleCombine()
 //////////////////////////////////////////////////
 // Run
 
-int HcrTripleCombine::Run()
+int HcrMomentsCombine::Run()
 {
 
   if (_params.compute_mean_location) {
@@ -180,7 +180,7 @@ int HcrTripleCombine::Run()
 //////////////////////////////////////////////////
 // Run in REALTIME mode
 
-int HcrTripleCombine::_runRealtime()
+int HcrMomentsCombine::_runRealtime()
 {
 
   // Open the output fmq
@@ -244,7 +244,7 @@ int HcrTripleCombine::_runRealtime()
       if (_outputFmq) {
         if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
                                  msg.assembledMsg(), msg.lengthAssembled())) {
-          cerr << "ERROR - HcrTripleCombine::_runRealtime" << endl;
+          cerr << "ERROR - HcrMomentsCombine::_runRealtime" << endl;
           cerr << "  Cannot write ray to output queue" << endl;
           iret = -1;
         }
@@ -257,7 +257,7 @@ int HcrTripleCombine::_runRealtime()
 
     } else {
 
-      cerr << "ERROR - HcrTripleCombine::_runRealtime" << endl;
+      cerr << "ERROR - HcrMomentsCombine::_runRealtime" << endl;
       cerr << "  no combined ray created" << endl;
       iret = -1;
       
@@ -272,7 +272,7 @@ int HcrTripleCombine::_runRealtime()
 //////////////////////////////////////////////////
 // Run in archive mode
 
-int HcrTripleCombine::_runArchive()
+int HcrMomentsCombine::_runArchive()
 {
 
   // Open the output fmq
@@ -335,7 +335,7 @@ int HcrTripleCombine::_runArchive()
       if (_outputFmq) {
         if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
                                  msg.assembledMsg(), msg.lengthAssembled())) {
-          cerr << "ERROR - HcrTripleCombine::_runRealtime" << endl;
+          cerr << "ERROR - HcrMomentsCombine::_runRealtime" << endl;
           cerr << "  Cannot write ray to output queue" << endl;
           iret = -1;
         }
@@ -348,7 +348,7 @@ int HcrTripleCombine::_runArchive()
 
     } else {
 
-      cerr << "ERROR - HcrTripleCombine::_runArchive" << endl;
+      cerr << "ERROR - HcrMomentsCombine::_runArchive" << endl;
       cerr << "  no combined ray created" << endl;
       iret = -1;
       
@@ -363,11 +363,11 @@ int HcrTripleCombine::_runArchive()
 //////////////////////////////////////////////////
 // Compute mean location
 
-int HcrTripleCombine::_computeMeanLocation()
+int HcrMomentsCombine::_computeMeanLocation()
 {
 
   if (_params.debug) {
-    cerr << "HcrTripleCombine::_computeMeanLocation()" << endl;
+    cerr << "HcrMomentsCombine::_computeMeanLocation()" << endl;
   }
 
   // Instantiate and initialize the input radar queues
@@ -419,7 +419,7 @@ int HcrTripleCombine::_computeMeanLocation()
     _meanAlt = sumAlt / nRays;
   }
   
-  fprintf(stderr, "HcrTripleCombine::_computeMeanLocation()\n");
+  fprintf(stderr, "HcrMomentsCombine::_computeMeanLocation()\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "  nRays           : %ld\n", nRays);
   fprintf(stderr, "  meanLat (deg)   : %10.6f\n", _meanLat);
@@ -434,7 +434,7 @@ int HcrTripleCombine::_computeMeanLocation()
 //////////////////////////////////////////////////
 // Open input fmqs
 
-int HcrTripleCombine::_openInputFmqs()
+int HcrMomentsCombine::_openInputFmqs()
 {
 
   // Instantiate and initialize the input radar queues
@@ -469,7 +469,7 @@ int HcrTripleCombine::_openInputFmqs()
 //////////////////////////////////////////////////
 // Open output fmq
 
-int HcrTripleCombine::_openOutputFmq()
+int HcrMomentsCombine::_openOutputFmq()
 {
 
   // create the output FMQ
@@ -505,7 +505,7 @@ int HcrTripleCombine::_openOutputFmq()
 //////////////////////////////////////////////////
 // Open readers from CfRadial files
 
-int HcrTripleCombine::_openFileReader()
+int HcrMomentsCombine::_openFileReader()
 {
 
   // Instantiate and initialize the input radar queues
@@ -528,7 +528,7 @@ int HcrTripleCombine::_openFileReader()
   
   RadxRay *ray = _readRayNext();
   if (ray == NULL) {
-    cerr << "ERROR - HcrTripleCombine::_openFileReader()" << endl;
+    cerr << "ERROR - HcrMomentsCombine::_openFileReader()" << endl;
     cerr << "  Cannot read rays from dir: " << _params.input_dir << endl;
     cerr << "  Start time: " << startTime.asString(0) << endl;
     cerr << "  End time: " << endTime.asString(0) << endl;
@@ -541,7 +541,7 @@ int HcrTripleCombine::_openFileReader()
 /////////////////////////////////////////////////////////////////
 // Initialize the input rays at the start of the first output dwell
 
-int HcrTripleCombine::_prepareInputRays()
+int HcrMomentsCombine::_prepareInputRays()
 {
 
   // read a short and long ray
@@ -553,7 +553,7 @@ int HcrTripleCombine::_prepareInputRays()
     
     RadxRay *rayShort = _readRayNext();
     if (rayShort == NULL) {
-      cerr << "ERROR - HcrTripleCombine::_prepareInputRays()" << endl;
+      cerr << "ERROR - HcrMomentsCombine::_prepareInputRays()" << endl;
       if (_params.mode == Params::REALTIME) {
         cerr << "  Cannot read input fmq: " << _params.input_fmq_url << endl;
       } else {
@@ -564,7 +564,7 @@ int HcrTripleCombine::_prepareInputRays()
     
     // RadxRay *longRay = _readRayLong();
     // if (longRay == NULL) {
-    //   cerr << "ERROR - HcrTripleCombine::_prepareInputRays()" << endl;
+    //   cerr << "ERROR - HcrMomentsCombine::_prepareInputRays()" << endl;
     //   if (_params.mode == Params::REALTIME) {
     //     cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
     //   } else {
@@ -657,7 +657,7 @@ int HcrTripleCombine::_prepareInputRays()
 /////////////////////////////////////////////////////////////////
 // Read in rays for next dwell
 
-int HcrTripleCombine::_readNextDwell()
+int HcrMomentsCombine::_readNextDwell()
 {
 
   // clear the dwell vectors
@@ -683,7 +683,7 @@ int HcrTripleCombine::_readNextDwell()
       return -1;
     }
     if (ray == NULL) {
-      cerr << "ERROR - HcrTripleCombine::_readNextDwell()" << endl;
+      cerr << "ERROR - HcrMomentsCombine::_readNextDwell()" << endl;
       if (_params.mode == Params::REALTIME) {
         cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
       } else {
@@ -705,7 +705,7 @@ int HcrTripleCombine::_readNextDwell()
   while (true) {
     RadxRay *ray = _readRayLong();
     if (ray == NULL) {
-      cerr << "ERROR - HcrTripleCombine::_readNextDwell()" << endl;
+      cerr << "ERROR - HcrMomentsCombine::_readNextDwell()" << endl;
       if (_params.mode == Params::REALTIME) {
         cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
       } else {
@@ -781,7 +781,7 @@ int HcrTripleCombine::_readNextDwell()
 // check for a significant time gap
 // if found, re-initialize
 
-int HcrTripleCombine::_checkForTimeGap(RadxRay *latestRayShort)
+int HcrMomentsCombine::_checkForTimeGap(RadxRay *latestRayShort)
 
 {
 
@@ -797,7 +797,7 @@ int HcrTripleCombine::_checkForTimeGap(RadxRay *latestRayShort)
     
     if (_prepareInputRays()) {
       _prevTimeShort = latestTimeShort;
-      cerr << "HcrTripleCombine::_checkForTimeGap" << endl;
+      cerr << "HcrMomentsCombine::_checkForTimeGap" << endl;
       cerr << "  _prepareInputRays() failed" << endl;
       return -1;
     }
@@ -813,7 +813,7 @@ int HcrTripleCombine::_checkForTimeGap(RadxRay *latestRayShort)
 // combine dwell rays
 // returns pointer to combined ray - this must be freed by caller.
 
-RadxRay *HcrTripleCombine::_combineDwellRays()
+RadxRay *HcrMomentsCombine::_combineDwellRays()
 
 {
 
@@ -918,7 +918,7 @@ RadxRay *HcrTripleCombine::_combineDwellRays()
 /////////////////////////////////////////////////////////////////
 // clear the dwell rays
 
-void HcrTripleCombine::_clearDwellRays()
+void HcrMomentsCombine::_clearDwellRays()
 {
 
   for (size_t ii = 0; ii < _dwellRaysShort.size(); ii++) {
@@ -939,7 +939,7 @@ void HcrTripleCombine::_clearDwellRays()
 // the vertical platform motion.
 // The plaform motion correction is applied AFTER unfolding.
 
-void HcrTripleCombine::_unfoldVel(RadxRay *rayCombined)
+void HcrMomentsCombine::_unfoldVel(RadxRay *rayCombined)
   
 {
 
@@ -953,7 +953,7 @@ void HcrTripleCombine::_unfoldVel(RadxRay *rayCombined)
 
   if (velShort == NULL || velLong == NULL) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "WARNING - HcrTripleCombine::_unfoldVel()" << endl;
+      cerr << "WARNING - HcrMomentsCombine::_unfoldVel()" << endl;
       cerr << "Cannot find velocity fields to unfold." << endl;
     }
     return;
@@ -1062,7 +1062,7 @@ void HcrTripleCombine::_unfoldVel(RadxRay *rayCombined)
 //
 // velAngCorr=data.VEL+vr_platform;
 
-void HcrTripleCombine::_computeVelCorrectedForVertMotion(RadxRay *ray,
+void HcrMomentsCombine::_computeVelCorrectedForVertMotion(RadxRay *ray,
                                                             RadxField *velShort,
                                                             RadxField *velLong,
                                                             RadxField *velUnfolded)
@@ -1173,7 +1173,7 @@ void HcrTripleCombine::_computeVelCorrectedForVertMotion(RadxRay *ray,
 /////////////////////////////////////////////////
 // correct velocity for nyquist
   
-double HcrTripleCombine::_correctForNyquist(double vel, double nyquist)
+double HcrMomentsCombine::_correctForNyquist(double vel, double nyquist)
 
 {
   while (vel > nyquist) {
@@ -1189,7 +1189,7 @@ double HcrTripleCombine::_correctForNyquist(double vel, double nyquist)
 // Read a short ray
 // Creates ray, must be freed by caller.
 
-RadxRay *HcrTripleCombine::_readRayNext()
+RadxRay *HcrMomentsCombine::_readRayNext()
 {
 
   // read next ray
@@ -1226,7 +1226,7 @@ RadxRay *HcrTripleCombine::_readRayNext()
     if (_outputFmq) {
       if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
                                msg.assembledMsg(), msg.lengthAssembled())) {
-        cerr << "ERROR - HcrTripleCombine::_readRayNext" << endl;
+        cerr << "ERROR - HcrMomentsCombine::_readRayNext" << endl;
         cerr << "  Cannot write platform to queue" << endl;
       }
     }
@@ -1247,7 +1247,7 @@ RadxRay *HcrTripleCombine::_readRayNext()
       if (_outputFmq) {
         if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
                                  msg.assembledMsg(), msg.lengthAssembled())) {
-          cerr << "ERROR - HcrTripleCombine::_readRayNext" << endl;
+          cerr << "ERROR - HcrMomentsCombine::_readRayNext" << endl;
           cerr << "  Cannot write calib to queue" << endl;
         }
       }
@@ -1269,7 +1269,7 @@ RadxRay *HcrTripleCombine::_readRayNext()
     if (_outputFmq) {
       if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
                                msg.assembledMsg(), msg.lengthAssembled())) {
-        cerr << "ERROR - HcrTripleCombine::_readRayNext" << endl;
+        cerr << "ERROR - HcrMomentsCombine::_readRayNext" << endl;
         cerr << "  Cannot write status xml to queue" << endl;
       }
     }
@@ -1286,7 +1286,7 @@ RadxRay *HcrTripleCombine::_readRayNext()
     if (_outputFmq) {
       if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
                                msg.assembledMsg(), msg.lengthAssembled())) {
-        cerr << "ERROR - HcrTripleCombine::_readRayNext" << endl;
+        cerr << "ERROR - HcrMomentsCombine::_readRayNext" << endl;
         cerr << "  Cannot write start of vol event to queue" << endl;
       }
     }
@@ -1319,7 +1319,7 @@ RadxRay *HcrTripleCombine::_readRayNext()
 // Read a long ray
 // Creates ray, must be freed by caller.
 
-RadxRay *HcrTripleCombine::_readRayLong()
+RadxRay *HcrMomentsCombine::_readRayLong()
 {
 
   // read next ray
@@ -1361,7 +1361,7 @@ RadxRay *HcrTripleCombine::_readRayLong()
       _stagN = 5;
     } else {
       // assume 2/3
-      cerr << "WARNING - HcrTripleCombine::_readRayLong" << endl;
+      cerr << "WARNING - HcrMomentsCombine::_readRayLong" << endl;
       cerr << "  No support for prtRatio: " << prtRatio << endl;
       cerr << "  Assuming 2/3 stagger" << endl;
       _stagM = 2;
@@ -1433,7 +1433,7 @@ RadxRay *HcrTripleCombine::_readRayLong()
 // set dwell stats method from params
 
 RadxField::StatsMethod_t
-  HcrTripleCombine::_getDwellStatsMethod(Params::dwell_stats_method_t method)
+  HcrMomentsCombine::_getDwellStatsMethod(Params::dwell_stats_method_t method)
   
 {
 
@@ -1465,7 +1465,7 @@ RadxField::StatsMethod_t
 ////////////////////////////////////////////////////////
 // modify platform metadata
 
-void HcrTripleCombine::_setPlatformMetadata(RadxPlatform &platform)
+void HcrMomentsCombine::_setPlatformMetadata(RadxPlatform &platform)
   
 {
 

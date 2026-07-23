@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for HcrTripleCombine program
+# Makefile for HcrMomentsCombine program
 #
 # Mike Dixon, RAP, NCAR, Boulder, CO, 80307, USA
 #
@@ -33,7 +33,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = HcrTripleCombine
+TARGET_FILE = HcrMomentsCombine
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
@@ -52,13 +52,13 @@ LOC_CFLAGS =
 HDRS = \
 	Params.hh \
 	Args.hh \
-	HcrTripleCombine.hh
+	HcrMomentsCombine.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
 	Main.cc \
-	HcrTripleCombine.cc
+	HcrMomentsCombine.cc
 
 #
 # tdrp macros

@@ -1,5 +1,5 @@
 /*********************************************************
- * parameter definitions for HcrTripleCombine
+ * parameter definitions for HcrMomentsCombine
  *
  * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
  *
@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "HCR has the capability to transmit blocks of pulses with varying PRTs and pulse lengths.\n\nThe latest version supports 3 block types:\n\n\t(1) short-pulse and short-PRT\n\t(2) long-pulse and long-PRT\n\t(3) long-pulse and short-PRT.\n\nThis sequence is repeated in time.\n\nHcrTs2Moments reads this interleaved time series, and computes the relevant moments for each block. Those moments are then written, in sequence, to a single output FMQ in Radx moments format.\n\nHcrTripleCombine reads the Radx moments data stream, and combines the three blocks into a single block, naming the fields appropriately, and unfolding the velocity fields as appropriate. This allows us to unfold the velocity field using the staggered-PRT technique.";
+  p_header = "HCR has the capability to transmit blocks of pulses with varying PRTs and pulse lengths.\n\nThe latest version supports 3 block types:\n\n\t(1) short-pulse and short-PRT\n\t(2) long-pulse and long-PRT\n\t(3) long-pulse and short-PRT.\n\nThis sequence is repeated in time.\n\nHcrTs2Moments reads this interleaved time series, and computes the relevant moments for each block. Those moments are then written, in sequence, to a single output FMQ in Radx moments format.\n\nHcrMomentsCombine reads the Radx moments data stream, and combines the three blocks into a single block, naming the fields appropriately, and unfolding the velocity fields as appropriate. This allows us to unfold the velocity field using the staggered-PRT technique.";
 }
 
 commentdef {
