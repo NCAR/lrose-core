@@ -131,6 +131,7 @@ private:
   si64 _prevBeamPulseSeqNum; // pulse after center of beam
   int _blockId;
   string _blockName;
+  string _fieldNameSuffix;
 
   // beam properties
 

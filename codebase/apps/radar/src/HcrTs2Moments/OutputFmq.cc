@@ -553,8 +553,12 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
     int offset = offsets[ifield];
     
     // create field
-    
-    RadxField *unfiltFld = new RadxField(ofield.name, ofield.units);
+
+    string fieldName(ofield.name);
+    if (beam.getFieldNameSuffix().size() > 0) {
+      fieldName += beam.getFieldNameSuffix();
+    }
+    RadxField *unfiltFld = new RadxField(fieldName, ofield.units);
     unfiltFld->setMissingFl32(missingFl32);
     
     // add moments data

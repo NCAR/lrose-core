@@ -245,6 +245,7 @@ paramdef double {
 
 typedef struct {
   string block_name;
+  string field_name_suffix;
   int block_id;
   double pulse_width_us;
   double prt_s;
@@ -252,25 +253,28 @@ typedef struct {
 
 paramdef struct block_def_t {
   p_descr = "Specify the definitions of the blocks to be processed.";
-  p_help = "Applies to DWELL_SPECIFY_BLOCK_ID. These details are originally specified in the configuration file for hcrdrx. The dwell for each block is processed separately. In the time series pulse headers we see the block_id, as well as start and end of block flags.";
+  p_help = "Applies to DWELL_SPECIFY_BLOCK_ID. These details are originally specified in the configuration file for hcrdrx. A dwell is constructed for each specified block, and the moments are computed for that dwell. In the time series pulse headers we see the block_id, as well as start and end of block flags.";
   p_default = {
     {
       block_name = "short_short",
-      block_id = 1002,
+      field_name_suffix = "_SS",
+      block_id = 2301,
       pulse_width_us = 0.256,
       prt_s = 101.376e-6
     }
     ,
     {
       block_name = "long_long",
-      block_id = 1003,
+      field_name_suffix = "_LL",
+      block_id = 2302,
       pulse_width_us = 0.512,
       prt_s = 152.064e-6
     }
     ,
     {
       block_name = "long_short",
-      block_id = 1004,
+      field_name_suffix = "_LS",
+      block_id = 2303,
       pulse_width_us = 0.512,
       prt_s = 101.376e-6
     }

@@ -193,6 +193,7 @@ public:
 
   typedef struct {
     char* block_name;
+    char* field_name_suffix;
     int block_id;
     double pulse_width_us;
     double prt_s;
