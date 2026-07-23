@@ -581,11 +581,11 @@ int KdpFilt::computePhidpStats(int nGates,
   
   _computeFoldingRange();
   
-  // initialize the gate states - the state at each gate is
+  // initialize the gate props - the state at each gate is
   // dependent on the phidp values and the spatial relatioship
   // between them
 
-  _gateStatesInit();
+  _gatePropsInit();
   
   // compute mean and standard deviation of phidp
   // and mean angular jitter at each gate
@@ -593,10 +593,10 @@ int KdpFilt::computePhidpStats(int nGates,
   for (int ii = _nGatesStatsHalf; 
        ii < _nGates - _nGatesStatsHalf; ii++) {
     _computePhidpStats(ii);
-    _phidpJitter[ii] = _gateStates[ii].phidpJitter;
-    _phidpMean[ii] = _gateStates[ii].phidpMean;
-    _phidpMeanValid[ii] = _gateStates[ii].phidpMean;
-    _phidpSdev[ii] = _gateStates[ii].phidpSdev;
+    _phidpJitter[ii] = _gateProps[ii].phidpJitter;
+    _phidpMean[ii] = _gateProps[ii].phidpMean;
+    _phidpMeanValid[ii] = _gateProps[ii].phidpMean;
+    _phidpSdev[ii] = _gateProps[ii].phidpSdev;
   }
   
   return 0;
@@ -670,7 +670,7 @@ void KdpFilt::_initArrays(const double *snr,
   _zdrAttenCorr_.resize(_nGates); _zdrAttenCorr = _zdrAttenCorr_.data();
   _dbzCorrected_.resize(_nGates); _dbzCorrected = _dbzCorrected_.data();
   _zdrCorrected_.resize(_nGates); _zdrCorrected = _zdrCorrected_.data();
-  _gateStates_.resize(_nGates); _gateStates = _gateStates_.data();
+  _gateProps_.resize(_nGates); _gateProps = _gateProps_.data();
   _phidpFftFilt_.resize(_nGates); _phidpFftFilt = _phidpFftFilt_.data();
   _phidpFiltTrend_.resize(_nGates); _phidpFiltTrend = _phidpFiltTrend_.data();
   _scBlock_.resize(_nGates); _scBlock = _scBlock_.data();
@@ -799,12 +799,23 @@ void KdpFilt::_initArrays(const double *snr,
 int KdpFilt::_unfoldPhidp()
 
 {
+
+  // TESTING
   
-  // initialize the gate states - the state at each gate is
+  for (int igate = 0; igate < _nGates; igate++) {
+    if (_phidp[igate] != _missingValue) {
+      _phidp[igate] -= 80.0;
+      if (_phidp[igate] < -180) {
+        _phidp[igate] += 360.0;
+      }
+    }
+  }
+
+  // initialize the gate props - the state at each gate is
   // dependent on the phidp values and the spatial relatioship
   // between them
 
-  _gateStatesInit();
+  _gatePropsInit();
   
   // compute mean and standard deviation of phidp
   // and mean angular jitter at each gate
@@ -814,19 +825,21 @@ int KdpFilt::_unfoldPhidp()
        ii < _nGates - _nGatesStatsHalf; ii++) {
     _computePhidpStats(ii);
     _computeZdrSdev(ii);
-    _phidpJitter[ii] = _gateStates[ii].phidpJitter;
-    _phidpMean[ii] = _gateStates[ii].phidpMean;
-    _phidpMeanValid[ii] = _gateStates[ii].phidpMean;
-    _phidpSdev[ii] = _gateStates[ii].phidpSdev;
+    _phidpJitter[ii] = _gateProps[ii].phidpJitter;
+    _phidpMean[ii] = _gateProps[ii].phidpMean;
+    _phidpMeanValid[ii] = _gateProps[ii].phidpMean;
+    _phidpSdev[ii] = _gateProps[ii].phidpSdev;
   }
   
   // load up runs of valid phidp
+  // also identifies the gap runs
 
   if (_findValidRuns()) {
     memcpy(_phidpUnfold, _phidp, _nGates * sizeof(double));
+    memcpy(_phidpMeanUnfold, _phidp, _nGates * sizeof(double));
     return -1;
   }
-
+  
   // create a mean field only for valid points
   // fill in gaps in mean phidp using values
   // from each end of the gap
@@ -838,12 +851,12 @@ int KdpFilt::_unfoldPhidp()
     // fill in first half of gap
     for (int jj = startGap; jj < midGap; jj++) {
       _phidpMeanValid[jj] = _phidpMeanValid[startGap-1];
-      _gateStates[jj] = _gateStates[startGap-1];
+      _gateProps[jj] = _gateProps[startGap-1];
     }
     // fill in last half of gap
     for (int jj = midGap; jj <= endGap; jj++) {
       _phidpMeanValid[jj] = _phidpMeanValid[endGap+1];
-      _gateStates[jj] = _gateStates[endGap+1];
+      _gateProps[jj] = _gateProps[endGap+1];
     }
   }
 
@@ -852,12 +865,12 @@ int KdpFilt::_unfoldPhidp()
   int sumFold = 0;
   for (int ii = _firstValidGate; ii <= _lastValidGate; ii++) {
     int fold = 0;
-    GateState &statePrev = _gateStates[ii-1];
-    GateState &stateThis = _gateStates[ii];
-    if (statePrev.meanxx < 0 && stateThis.meanxx < 0) {
-      if (statePrev.meanyy < 0 && stateThis.meanyy > 0) {
+    GateProps &propsPrev = _gateProps[ii-1];
+    GateProps &propsThis = _gateProps[ii];
+    if (propsPrev.meanxx < 0 && propsThis.meanxx < 0) {
+      if (propsPrev.meanyy < 0 && propsThis.meanyy > 0) {
         fold = -1;
-      } else if (statePrev.meanyy > 0 && stateThis.meanyy < 0) {
+      } else if (propsPrev.meanyy > 0 && propsThis.meanyy < 0) {
         fold = 1;
       }
     }
@@ -1496,7 +1509,8 @@ void KdpFilt::_computeFoldingRange()
     _foldVal = 90.0;
     _foldsAt90 = true;
   }
-  _foldRange = _foldVal * 2.0;
+  // _foldRange = _foldVal * 2.0;
+  _foldRange = 360.0;
   
   // if values range from (0 -> 360), normalize to (-180 -> 180)
   
@@ -1708,45 +1722,42 @@ bool KdpFilt::_isGateValid(int igate)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// Initialize the state at each gate
+// Initialize the props at each gate
  
-void KdpFilt::_gateStatesInit()
+void KdpFilt::_gatePropsInit()
 
 {
 
   // init (x,y) representation of phidp
 
   for (int ii = 0; ii < _nGates; ii++) {
-    GateState &state = _gateStates[ii];
-    state.init(_missingValue);
+    GateProps &props = _gateProps[ii];
+    props.init(_missingValue);
     if (_phidp[ii] != _missingValue) {
-      state.missing = false;
+      props.missing = false;
       double phase = _phidp[ii];
-      state.phidp = _phidp[ii];
-      // if (_foldsAt90) {
-      //   phase *= 2.0;
-      // }
+      props.phidp = _phidp[ii];
       double sinVal, cosVal;
       ta_sincos(phase * DEG_TO_RAD, &sinVal, &cosVal);
-      state.xx = cosVal;
-      state.yy = sinVal;
+      props.xx = cosVal;
+      props.yy = sinVal;
     }
   }
 
   // init dist between phidp at successive gates
 
   for (int ii = 1; ii < _nGates; ii++) {
-    GateState &istate0 = _gateStates[ii-1];
-    GateState &istate1 = _gateStates[ii];
-    if (!istate0.missing && !istate1.missing) {
-      double xx0 = istate0.xx;
-      double yy0 = istate0.yy;
-      double xx1 = istate1.xx;
-      double yy1 = istate1.yy;
+    GateProps &iprops0 = _gateProps[ii-1];
+    GateProps &iprops1 = _gateProps[ii];
+    if (!iprops0.missing && !iprops1.missing) {
+      double xx0 = iprops0.xx;
+      double yy0 = iprops0.yy;
+      double xx1 = iprops1.xx;
+      double yy1 = iprops1.yy;
       double dx = xx1 - xx0;
       double dy = yy1 - yy0;
       double dist = sqrt(dx * dx + dy * dy);
-      _gateStates[ii].distFromPrev = dist;
+      _gateProps[ii].distFromPrev = dist;
     }
   }
   
@@ -1760,7 +1771,7 @@ void KdpFilt::_computePhidpStats(int igate)
   
 {
 
-  GateState &istate = _gateStates[igate];
+  GateProps &iprops = _gateProps[igate];
   
   double count = 0.0;
   double sumxx = 0.0;
@@ -1773,13 +1784,13 @@ void KdpFilt::_computePhidpStats(int igate)
     if (jj < 0 || jj >= _nGates) {
       continue;
     }
-    GateState &jstate = _gateStates[jj];
-    if (jstate.missing) {
+    GateProps &jprops = _gateProps[jj];
+    if (jprops.missing) {
       continue;
     }
-    double xx = jstate.xx;
-    double yy = jstate.yy;
-    double dist = jstate.distFromPrev;
+    double xx = jprops.xx;
+    double yy = jprops.yy;
+    double dist = jprops.distFromPrev;
     sumxx += xx;
     sumyy += yy;
     sumDist += dist;
@@ -1793,23 +1804,17 @@ void KdpFilt::_computePhidpStats(int igate)
 
   // mean phidp
   
-  istate.meanxx = sumxx / count;
-  istate.meanyy = sumyy / count;
+  iprops.meanxx = sumxx / count;
+  iprops.meanyy = sumyy / count;
   
-  double phase = atan2(istate.meanyy, istate.meanxx) * RAD_TO_DEG;
-  // if (_foldsAt90) {
-  //   phase *= 0.5;
-  // }
-  istate.phidpMean = phase;
+  double phaseMean = atan2(iprops.meanyy, iprops.meanxx) * RAD_TO_DEG;
+  iprops.phidpMean = phaseMean;
   
   // jitter
   
   double meanDist = sumDist / count;
   double meanAngChangePerGate = meanDist * RAD_TO_DEG;
-  // if (_foldsAt90) {
-  //   meanAngChangePerGate *= 0.5;
-  // }
-  istate.phidpJitter = meanAngChangePerGate;
+  iprops.phidpJitter = meanAngChangePerGate;
   
   // sdev of distance moved, is a proxy for sdev of phidp
   
@@ -1818,10 +1823,7 @@ void KdpFilt::_computePhidpStats(int igate)
     double term2 = meanDist * meanDist;
     if (term1 >= term2) {
       double sdev = sqrt(term1 - term2) * RAD_TO_DEG;
-      // if (_foldsAt90) {
-      //   sdev *= 0.5;
-      // }
-      istate.phidpSdev = sdev;
+      iprops.phidpSdev = sdev;
     }
   }
   

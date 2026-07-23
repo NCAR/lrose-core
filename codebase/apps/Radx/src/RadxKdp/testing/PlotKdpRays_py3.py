@@ -27,11 +27,9 @@ REQUIRED_COLUMNS = [
     "rhohv",
     "phidp",
     "phidpMean",
-    "phidpMeanValid",
     "phidpJitter",
     "phidpSdev",
     "phidpMeanUnfold",
-    "phidpUnfold",
     "phidpFilt",
     "phidpCondFilt",
     "psob",
@@ -338,11 +336,12 @@ class KdpRayPlotter:
         # PLOT 2 - PHIDP processing
 
         self.ax2.set_title(az_str, fontsize=12)
-        self.ax2.plot(gate_num, plot_data["phidpUnfold"], label="unfolded", color="green")
+        self.ax2.plot(gate_num, plot_data["phidpMeanUnfold"], label="meanUnfold", color="green")
         self.ax2.plot(gate_num, plot_data["phidpFilt"], label="Filt", color="red")
         self.ax2.plot(gate_num, plot_data["phidpCondFilt"], label="CondFilt", color="black")
         self.ax2.plot(gate_num, plot_data["phidpFftFilt"], label="FftFilt", color="magenta")
         self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="orange")
+        # self.ax2.plot(gate_num, plot_data["regrFilt"], label="regrFilt", color="blue")
         draw_block_limits(self.ax2, gate_num, self.data["scBlock"])
         self.ax2.set_xlabel("gateNum")
         self.ax2.set_ylabel("PHIDP")
@@ -381,7 +380,8 @@ class KdpRayPlotter:
 
         self.ax4.set_title(az_str, fontsize=12)
         self.ax4.plot(gate_num, plot_data["phidpMean"], label="phidpMean", color="magenta")
-        self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt")
+        self.ax4.plot(gate_num, plot_data["phidpMeanUnfold"], label="meanUnfold", color="green")
+        self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt", color="black")
         self.ax4.set_xlabel("gateNum")
         self.ax4.set_ylabel("PHIDP")
         draw_block_limits(self.ax4, gate_num, self.data["scBlock"])

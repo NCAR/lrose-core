@@ -551,7 +551,7 @@ private:
 
   // phidp state for unfolding
 
-  class GateState {
+  class GateProps {
   public:
     void init(double missingValue) {
       missing = true;
@@ -577,8 +577,8 @@ private:
     double phidpJitter;
   };
 
-  vector<GateState> _gateStates_;
-  GateState *_gateStates;
+  vector<GateProps> _gateProps_;
+  GateProps *_gateProps;
   
   bool _foldsAt90;
   double _foldVal, _foldRange;
@@ -796,9 +796,9 @@ private:
 
   bool _isGateValid(int igate);
 
-  /// Initialize the state at each gate
+  /// Initialize the properties at each gate
 
-  void _gateStatesInit();
+  void _gatePropsInit();
 
   /// To calculate the mean phidp, standard deviation, and jitter
   /// in phidp at a gate, using stats on the circle
