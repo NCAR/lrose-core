@@ -71,117 +71,6 @@ paramdef string {
 } input_dir;
 
 commentdef {
-  p_header = "OVERRIDE PLATFORM TYPE?";
-}
-
-typedef enum {
-  PLATFORM_FIXED = 1,
-  PLATFORM_VEHICLE = 2,
-  PLATFORM_SHIP = 3,
-  PLATFORM_AIRCRAFT_FORE = 5,
-  PLATFORM_AIRCRAFT_AFT = 6,
-  PLATFORM_AIRCRAFT_TAIL = 7,
-  PLATFORM_AIRCRAFT_BELLY = 8,
-  PLATFORM_AIRCRAFT_ROOF = 9,
-  PLATFORM_AIRCRAFT_NOSE = 10,
-  PLATFORM_SATELLITE_ORBIT = 11,
-  PLATFORM_SATELLITE_GEOSTAT = 12
-} platform_type_t;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override platform type on read. If true, the file will be read in, the platform type will be changed, and then any post-read processing will be performed.";
-  p_help =
-    "\tPLATFORM_FIXED  - radar is in a fixed location\n"
-    "\tPLATFORM_VEHICLE -  radar is mounted on a land vehicle\n"
-    "\tPLATFORM_SHIP - radar is mounted on a ship\n"
-    "\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n"
-    "\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n"
-    "\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA\n"
-    "\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n"
-    "\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n"
-    "\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n"
-    "\tPLATFORM_SATELLITE_ORBIT - orbiting satellite\n"
-    "\tPLATFORM_SATELLITE_GEOSTAT - geostationary satellite\n";
-} override_platform_type;
-
-paramdef enum platform_type_t {
-  p_default = PLATFORM_AIRCRAFT_FORE;
-  p_descr = "Platform type.";
-  p_help = "See override_platform_type.";
-} platform_type;
-
-commentdef {
-  p_header = "OVERRIDE PRIMARY AXIS?";
-}
-
-typedef enum {
-  PRIMARY_AXIS_Z = 0, ///< vertical
-  PRIMARY_AXIS_Y = 1, ///< longitudinal axis of platform
-  PRIMARY_AXIS_X = 2, ///< lateral axis of platform
-  PRIMARY_AXIS_Z_PRIME = 3, ///< inverted vertical
-  PRIMARY_AXIS_Y_PRIME = 4, ///< ELDORA, HRD tail
-  PRIMARY_AXIS_X_PRIME = 5  ///< translated lateral
-} primary_axis_t;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override primary axis on read. If true, the file will be read in, the primary axis will be changed, and then any post-read processing will be performed.";
-  p_help =
-    "\tPRIMARY_AXIS_Z - vertical\n"
-    "\tPRIMARY_AXIS_Y - longitudinal axis of platform\n"
-    "\tPRIMARY_AXIS_X - lateral axis of platform\n"
-    "\tPRIMARY_AXIS_Z_PRIME - inverted vertical\n"
-    "\tPRIMARY_AXIS_Y_PRIME - ELDORA, HRD tail\n"
-    "\tPRIMARY_AXIS_X_PRIME - translated lateral\n";
-} override_primary_axis;
-
-paramdef enum primary_axis_t {
-  p_default = PRIMARY_AXIS_Y_PRIME;
-  p_descr = "Platform type.";
-  p_help = "See override_primary_axis.";
-} primary_axis;
-
-commentdef {
-  p_header = "OVERRIDE SWEEP MODE?";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override the sweep modes in the data.";
-  p_help = "If TRUE, the mode for all sweeps is set to sweep_mode.";
-} override_sweep_mode;
-
-typedef enum {
-  SWEEP_MODE_SECTOR = 1,
-  SWEEP_MODE_RHI = 3,
-  SWEEP_MODE_VERTICAL_POINTING = 4,
-  SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8,
-  SWEEP_MODE_ELEVATION_SURVEILLANCE = 9,
-  SWEEP_MODE_SUNSCAN = 11,
-  SWEEP_MODE_POINTING = 12,
-  SWEEP_MODE_SUNSCAN_RHI = 17,
-  SWEEP_MODE_ELECTRONIC_STEERING = 20
-} sweep_mode_t;
-
-paramdef enum sweep_mode_t {
-  p_default = SWEEP_MODE_VERTICAL_POINTING;
-  p_descr = "Sweep mode for all sweeps.";
-  p_help = "See override_sweep_mode.";
-} sweep_mode;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set the max range for any ray.";
-} set_max_range;
-
-paramdef double {
-  p_default = 9999;
-  p_descr = "Specified maximim range - km.";
-  p_help = "Gates beyond this range are removed.";
-} max_range_km;
-
-commentdef {
   p_header = "GROUND-BASED MODE";
   p_text = "In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.";
 }
@@ -214,6 +103,17 @@ paramdef boolean {
   p_descr = "Option to compute the mean location of the radar from the georeference data in the rays.";
   p_help = "Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to TRUE.";
 } compute_mean_location;
+
+commentdef {
+  p_header = "DWELL NAMES TO BE COMBINED IN DUAL PULSE AND PRT MODE";
+  p_text = "We read in sequential dwells, with different pulse widths and PRTs, combine them and unfold the velocity fields.";
+}
+
+paramdef string {
+  p_default = { "short_short", "long_long", "long_short" };
+  p_descr = "Specify the names of the dwell to be combined.";
+  p_help = "The dual-PRT names refer to pulse width and PRT. For example, 'short_short' means short pulse and short PRT. 'long_short' will be long pulse and short PRT.";
+} dwell_names[];
 
 commentdef {
   p_header = "SET THE COMBINED DWELL DETAILS";

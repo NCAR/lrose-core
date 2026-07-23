@@ -690,193 +690,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("OVERRIDE PLATFORM TYPE?");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'override_platform_type'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_platform_type");
-    tt->descr = tdrpStrDup("Option to override platform type on read. If true, the file will be read in, the platform type will be changed, and then any post-read processing will be performed.");
-    tt->help = tdrpStrDup("\tPLATFORM_FIXED  - radar is in a fixed location\n\tPLATFORM_VEHICLE -  radar is mounted on a land vehicle\n\tPLATFORM_SHIP - radar is mounted on a ship\n\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA\n\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n\tPLATFORM_SATELLITE_ORBIT - orbiting satellite\n\tPLATFORM_SATELLITE_GEOSTAT - geostationary satellite\n");
-    tt->val_offset = (char *) &override_platform_type - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'platform_type'
-    // ctype is '_platform_type_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("platform_type");
-    tt->descr = tdrpStrDup("Platform type.");
-    tt->help = tdrpStrDup("See override_platform_type.");
-    tt->val_offset = (char *) &platform_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("platform_type_t");
-    tt->enum_def.nfields = 11;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("PLATFORM_FIXED");
-      tt->enum_def.fields[0].val = PLATFORM_FIXED;
-      tt->enum_def.fields[1].name = tdrpStrDup("PLATFORM_VEHICLE");
-      tt->enum_def.fields[1].val = PLATFORM_VEHICLE;
-      tt->enum_def.fields[2].name = tdrpStrDup("PLATFORM_SHIP");
-      tt->enum_def.fields[2].val = PLATFORM_SHIP;
-      tt->enum_def.fields[3].name = tdrpStrDup("PLATFORM_AIRCRAFT_FORE");
-      tt->enum_def.fields[3].val = PLATFORM_AIRCRAFT_FORE;
-      tt->enum_def.fields[4].name = tdrpStrDup("PLATFORM_AIRCRAFT_AFT");
-      tt->enum_def.fields[4].val = PLATFORM_AIRCRAFT_AFT;
-      tt->enum_def.fields[5].name = tdrpStrDup("PLATFORM_AIRCRAFT_TAIL");
-      tt->enum_def.fields[5].val = PLATFORM_AIRCRAFT_TAIL;
-      tt->enum_def.fields[6].name = tdrpStrDup("PLATFORM_AIRCRAFT_BELLY");
-      tt->enum_def.fields[6].val = PLATFORM_AIRCRAFT_BELLY;
-      tt->enum_def.fields[7].name = tdrpStrDup("PLATFORM_AIRCRAFT_ROOF");
-      tt->enum_def.fields[7].val = PLATFORM_AIRCRAFT_ROOF;
-      tt->enum_def.fields[8].name = tdrpStrDup("PLATFORM_AIRCRAFT_NOSE");
-      tt->enum_def.fields[8].val = PLATFORM_AIRCRAFT_NOSE;
-      tt->enum_def.fields[9].name = tdrpStrDup("PLATFORM_SATELLITE_ORBIT");
-      tt->enum_def.fields[9].val = PLATFORM_SATELLITE_ORBIT;
-      tt->enum_def.fields[10].name = tdrpStrDup("PLATFORM_SATELLITE_GEOSTAT");
-      tt->enum_def.fields[10].val = PLATFORM_SATELLITE_GEOSTAT;
-    tt->single_val.e = PLATFORM_AIRCRAFT_FORE;
-    tt++;
-    
-    // Parameter 'Comment 4'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("OVERRIDE PRIMARY AXIS?");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'override_primary_axis'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_primary_axis");
-    tt->descr = tdrpStrDup("Option to override primary axis on read. If true, the file will be read in, the primary axis will be changed, and then any post-read processing will be performed.");
-    tt->help = tdrpStrDup("\tPRIMARY_AXIS_Z - vertical\n\tPRIMARY_AXIS_Y - longitudinal axis of platform\n\tPRIMARY_AXIS_X - lateral axis of platform\n\tPRIMARY_AXIS_Z_PRIME - inverted vertical\n\tPRIMARY_AXIS_Y_PRIME - ELDORA, HRD tail\n\tPRIMARY_AXIS_X_PRIME - translated lateral\n");
-    tt->val_offset = (char *) &override_primary_axis - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'primary_axis'
-    // ctype is '_primary_axis_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("primary_axis");
-    tt->descr = tdrpStrDup("Platform type.");
-    tt->help = tdrpStrDup("See override_primary_axis.");
-    tt->val_offset = (char *) &primary_axis - &_start_;
-    tt->enum_def.name = tdrpStrDup("primary_axis_t");
-    tt->enum_def.nfields = 6;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("PRIMARY_AXIS_Z");
-      tt->enum_def.fields[0].val = PRIMARY_AXIS_Z;
-      tt->enum_def.fields[1].name = tdrpStrDup("PRIMARY_AXIS_Y");
-      tt->enum_def.fields[1].val = PRIMARY_AXIS_Y;
-      tt->enum_def.fields[2].name = tdrpStrDup("PRIMARY_AXIS_X");
-      tt->enum_def.fields[2].val = PRIMARY_AXIS_X;
-      tt->enum_def.fields[3].name = tdrpStrDup("PRIMARY_AXIS_Z_PRIME");
-      tt->enum_def.fields[3].val = PRIMARY_AXIS_Z_PRIME;
-      tt->enum_def.fields[4].name = tdrpStrDup("PRIMARY_AXIS_Y_PRIME");
-      tt->enum_def.fields[4].val = PRIMARY_AXIS_Y_PRIME;
-      tt->enum_def.fields[5].name = tdrpStrDup("PRIMARY_AXIS_X_PRIME");
-      tt->enum_def.fields[5].val = PRIMARY_AXIS_X_PRIME;
-    tt->single_val.e = PRIMARY_AXIS_Y_PRIME;
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("OVERRIDE SWEEP MODE?");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'override_sweep_mode'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_sweep_mode");
-    tt->descr = tdrpStrDup("Option to override the sweep modes in the data.");
-    tt->help = tdrpStrDup("If TRUE, the mode for all sweeps is set to sweep_mode.");
-    tt->val_offset = (char *) &override_sweep_mode - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'sweep_mode'
-    // ctype is '_sweep_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("sweep_mode");
-    tt->descr = tdrpStrDup("Sweep mode for all sweeps.");
-    tt->help = tdrpStrDup("See override_sweep_mode.");
-    tt->val_offset = (char *) &sweep_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("sweep_mode_t");
-    tt->enum_def.nfields = 9;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("SWEEP_MODE_SECTOR");
-      tt->enum_def.fields[0].val = SWEEP_MODE_SECTOR;
-      tt->enum_def.fields[1].name = tdrpStrDup("SWEEP_MODE_RHI");
-      tt->enum_def.fields[1].val = SWEEP_MODE_RHI;
-      tt->enum_def.fields[2].name = tdrpStrDup("SWEEP_MODE_VERTICAL_POINTING");
-      tt->enum_def.fields[2].val = SWEEP_MODE_VERTICAL_POINTING;
-      tt->enum_def.fields[3].name = tdrpStrDup("SWEEP_MODE_AZIMUTH_SURVEILLANCE");
-      tt->enum_def.fields[3].val = SWEEP_MODE_AZIMUTH_SURVEILLANCE;
-      tt->enum_def.fields[4].name = tdrpStrDup("SWEEP_MODE_ELEVATION_SURVEILLANCE");
-      tt->enum_def.fields[4].val = SWEEP_MODE_ELEVATION_SURVEILLANCE;
-      tt->enum_def.fields[5].name = tdrpStrDup("SWEEP_MODE_SUNSCAN");
-      tt->enum_def.fields[5].val = SWEEP_MODE_SUNSCAN;
-      tt->enum_def.fields[6].name = tdrpStrDup("SWEEP_MODE_POINTING");
-      tt->enum_def.fields[6].val = SWEEP_MODE_POINTING;
-      tt->enum_def.fields[7].name = tdrpStrDup("SWEEP_MODE_SUNSCAN_RHI");
-      tt->enum_def.fields[7].val = SWEEP_MODE_SUNSCAN_RHI;
-      tt->enum_def.fields[8].name = tdrpStrDup("SWEEP_MODE_ELECTRONIC_STEERING");
-      tt->enum_def.fields[8].val = SWEEP_MODE_ELECTRONIC_STEERING;
-    tt->single_val.e = SWEEP_MODE_VERTICAL_POINTING;
-    tt++;
-    
-    // Parameter 'set_max_range'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_max_range");
-    tt->descr = tdrpStrDup("Option to set the max range for any ray.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &set_max_range - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'max_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_range_km");
-    tt->descr = tdrpStrDup("Specified maximim range - km.");
-    tt->help = tdrpStrDup("Gates beyond this range are removed.");
-    tt->val_offset = (char *) &max_range_km - &_start_;
-    tt->single_val.d = 9999;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("GROUND-BASED MODE");
     tt->comment_text = tdrpStrDup("In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.");
     tt++;
@@ -929,11 +742,11 @@
       tt->struct_vals[2].d = 0;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("COMPUTE MEAN RADAR LOCATION?");
     tt->comment_text = tdrpStrDup("This mode will compute the mean radar location for a ground-based installation.");
     tt++;
@@ -950,11 +763,41 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("DWELL NAMES TO BE COMBINED IN DUAL PULSE AND PRT MODE");
+    tt->comment_text = tdrpStrDup("We read in sequential dwells, with different pulse widths and PRTs, combine them and unfold the velocity fields.");
+    tt++;
+    
+    // Parameter 'dwell_names'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("dwell_names");
+    tt->descr = tdrpStrDup("Specify the names of the dwell to be combined.");
+    tt->help = tdrpStrDup("The dual-PRT names refer to pulse width and PRT. For example, 'short_short' means short pulse and short PRT. 'long_short' will be long pulse and short PRT.");
+    tt->array_offset = (char *) &_dwell_names - &_start_;
+    tt->array_n_offset = (char *) &dwell_names_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 3;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("short_short");
+      tt->array_vals[1].s = tdrpStrDup("long_long");
+      tt->array_vals[2].s = tdrpStrDup("long_short");
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("SET THE COMBINED DWELL DETAILS");
     tt->comment_text = tdrpStrDup("Normally we combine the high-rate moments data (say at 100 hz) into lower-rate dwells, say at 10 hz.");
     tt++;
@@ -1015,11 +858,11 @@
     tt->single_val.d = 0.25;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OPTION TO SET STATS METHOD FOR INDIVIDUAL FIELDS.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1089,11 +932,11 @@
       tt->struct_vals[3].e = DWELL_STATS_MIDDLE;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("FIELD NAMES for combination");
     tt->comment_text = tdrpStrDup("The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.");
     tt++;
@@ -1194,11 +1037,11 @@
     tt->single_val.s = tdrpStrDup("VEL_unfold_short");
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OUTPUT FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;

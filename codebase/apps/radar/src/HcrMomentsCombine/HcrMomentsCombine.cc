@@ -562,7 +562,7 @@ int HcrMomentsCombine::_prepareInputRays()
       return -1;
     }
     
-    // RadxRay *longRay = _readRayLong();
+    RadxRay *longRay = _readRayLong();
     // if (longRay == NULL) {
     //   cerr << "ERROR - HcrMomentsCombine::_prepareInputRays()" << endl;
     //   if (_params.mode == Params::REALTIME) {
@@ -685,9 +685,9 @@ int HcrMomentsCombine::_readNextDwell()
     if (ray == NULL) {
       cerr << "ERROR - HcrMomentsCombine::_readNextDwell()" << endl;
       if (_params.mode == Params::REALTIME) {
-        cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
+        // cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
       } else {
-        cerr << "  Cannot read input dir short: " << _params.input_dir_short << endl;
+        // cerr << "  Cannot read input dir short: " << _params.input_dir_short << endl;
       }
       return -1;
     }
@@ -707,9 +707,9 @@ int HcrMomentsCombine::_readNextDwell()
     if (ray == NULL) {
       cerr << "ERROR - HcrMomentsCombine::_readNextDwell()" << endl;
       if (_params.mode == Params::REALTIME) {
-        cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
+        // cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
       } else {
-        cerr << "  Cannot read input dir long: " << _params.input_dir_long << endl;
+        // cerr << "  Cannot read input dir long: " << _params.input_dir_long << endl;
       }
       return -1;
     }
@@ -893,12 +893,6 @@ RadxRay *HcrMomentsCombine::_combineDwellRays()
   // unfold the velocity, add unfolded field to ray
 
   _unfoldVel(rayCombined);
-
-  // set sweep mode if required
-  
-  if (_params.override_sweep_mode) {
-    rayCombined->setSweepMode((Radx::SweepMode_t) _params.sweep_mode);
-  }
 
   // set the combined time
 
@@ -1206,7 +1200,6 @@ RadxRay *HcrMomentsCombine::_readRayNext()
 
     RadxPlatform platform = _momReader->getPlatform();
     _platformShort = platform;
-    _setPlatformMetadata(_platformShort);
     _wavelengthM = _platformShort.getWavelengthM();
     if (_wavelengthM < 0) {
       _wavelengthM = 0.003176;
@@ -1324,7 +1317,7 @@ RadxRay *HcrMomentsCombine::_readRayLong()
 
   // read next ray
   
-  RadxRay *rayLong = _readerLong->readNextRay();
+  RadxRay *rayLong = _momReader->readNextRay();
   if (rayLong == NULL) {
     return NULL;
   }
@@ -1332,11 +1325,10 @@ RadxRay *HcrMomentsCombine::_readRayLong()
 
   // check for platform update
   
-  if (_readerLong->getPlatformUpdated()) {
+  if (_momReader->getPlatformUpdated()) {
 
-    const RadxPlatform &platform = _readerLong->getPlatform();
+    const RadxPlatform &platform = _momReader->getPlatform();
     _platformLong = platform;
-    _setPlatformMetadata(_platformLong);
     _prtLong = rayLong->getPrtSec();
     _nyquistLong = ((_wavelengthM / _prtLong) / 4.0);
     if (_params.fixed_location_mode) {
@@ -1371,8 +1363,8 @@ RadxRay *HcrMomentsCombine::_readRayLong()
 
   // check for calibration update
   
-  if (_readerLong->getRcalibUpdated()) {
-    const vector<RadxRcalib> &calibs = _readerLong->getRcalibs();
+  if (_momReader->getRcalibUpdated()) {
+    const vector<RadxRcalib> &calibs = _momReader->getRcalibs();
     _calibsLong = calibs;
     for (size_t ii = 0; ii < calibs.size(); ii++) {
       // create message
@@ -1390,21 +1382,21 @@ RadxRay *HcrMomentsCombine::_readRayLong()
     } // ii
   }
 
-  if (_readerLong->getRcalibUpdated()) {
-    const vector<RadxRcalib> &calibs = _readerLong->getRcalibs();
+  if (_momReader->getRcalibUpdated()) {
+    const vector<RadxRcalib> &calibs = _momReader->getRcalibs();
     _calibsLong = calibs;
   }
 
   // check for status xml update
   
-  if (_readerLong->getStatusXmlUpdated()) {
-    const string statusXml = _readerLong->getStatusXml();
+  if (_momReader->getStatusXmlUpdated()) {
+    const string statusXml = _momReader->getStatusXml();
     _statusXmlLong = statusXml;
   }
 
   // update events
   
-  _eventsLong = _readerLong->getEvents();
+  _eventsLong = _momReader->getEvents();
 
   // override location as required
 
@@ -1461,22 +1453,4 @@ RadxField::StatsMethod_t
   }
 
 }
-
-////////////////////////////////////////////////////////
-// modify platform metadata
-
-void HcrMomentsCombine::_setPlatformMetadata(RadxPlatform &platform)
-  
-{
-
-  if (_params.override_platform_type) {
-    platform.setPlatformType((Radx::PlatformType_t) _params.platform_type);
-  }
-
-  if (_params.override_primary_axis) {
-    platform.setPrimaryAxis((Radx::PrimaryAxis_t) _params.primary_axis);
-  }
-
-}
-
 
