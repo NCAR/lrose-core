@@ -520,6 +520,7 @@ int BeamReader::_readBlockBeam()
   double pulseWidthUs = -9999.0;
   double prt = -9999.0;
   bool foundStartOfBlock = false;
+  _beamError = false;
   
   while (nPulsesInDwell <= _params.max_n_samples) {
 
@@ -575,6 +576,7 @@ int BeamReader::_readBlockBeam()
     
   } // while
 
+  bool blockDefFound = false;
   _blockId = blockId;
   _blockName = "unknown";
   _fieldNameSuffix = "";
@@ -582,10 +584,19 @@ int BeamReader::_readBlockBeam()
     if (_params._block_defs[ii].block_id == _blockId) {
       _blockName = _params._block_defs[ii].block_name;
       _fieldNameSuffix = _params._block_defs[ii].field_name_suffix;
+      blockDefFound = true;
       break;
     }
   }
-
+  if (!blockDefFound) {
+    // dont process this beam
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "=================>> WARNING - ignoring dwell block id: "
+           << _blockId << endl;
+    }
+    _beamError = true;
+  }
+  
   // set PRT (and mean PRF)
   
   _setPrt();
@@ -603,8 +614,6 @@ int BeamReader::_readBlockBeam()
   _el = _conditionEl(_pulseQueue[_midIndex]->getEl());
 
   _computeBeamElRate(0, _nSamples);
-
-  _beamError = false;
 
   return 0;
 

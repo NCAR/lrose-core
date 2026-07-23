@@ -244,11 +244,11 @@ paramdef double {
 } dwell_pulse_width_us;
 
 typedef struct {
-  string block_name;
-  string field_name_suffix;
   int block_id;
   double pulse_width_us;
   double prt_s;
+  string block_name;
+  string field_name_suffix;
 } block_def_t;
 
 paramdef struct block_def_t {
@@ -256,27 +256,91 @@ paramdef struct block_def_t {
   p_help = "Applies to DWELL_SPECIFY_BLOCK_ID. These details are originally specified in the configuration file for hcrdrx. A dwell is constructed for each specified block, and the moments are computed for that dwell. In the time series pulse headers we see the block_id, as well as start and end of block flags.";
   p_default = {
     {
-      block_name = "short_short",
-      field_name_suffix = "_SS",
       block_id = 2301,
       pulse_width_us = 0.256,
-      prt_s = 101.376e-6
+      prt_s = 101.376e-6,
+      block_name = "short_short_2_3",
+      field_name_suffix = "_SS"
     }
     ,
     {
-      block_name = "long_long",
-      field_name_suffix = "_LL",
       block_id = 2302,
       pulse_width_us = 0.512,
-      prt_s = 152.064e-6
+      prt_s = 152.064e-6,
+      block_name = "long_long_2_3",
+      field_name_suffix = "_LL"
     }
     ,
     {
-      block_name = "long_short",
-      field_name_suffix = "_LS",
       block_id = 2303,
       pulse_width_us = 0.512,
-      prt_s = 101.376e-6
+      prt_s = 101.376e-6,
+      block_name = "long_short_2_3",
+      field_name_suffix = "_LS"
+    }
+    ,
+    {
+      block_id = 3401,
+      pulse_width_us = 0.256,
+      prt_s = 101.376e-6,
+      block_name = "short_short_3_4",
+      field_name_suffix = "_SS"
+    }
+    ,
+    {
+      block_id = 3402,
+      pulse_width_us = 0.512,
+      prt_s = 152.064e-6,
+      block_name = "long_long_3_4",
+      field_name_suffix = "_LL"
+    }
+    ,
+    {
+      block_id = 3403,
+      pulse_width_us = 0.512,
+      prt_s = 101.376e-6,
+      block_name = "long_short_3_4",
+      field_name_suffix = "_LS"
+    }
+    ,
+    {
+      block_id = 4501,
+      pulse_width_us = 0.256,
+      prt_s = 101.376e-6,
+      block_name = "short_short_4_5",
+      field_name_suffix = "_SS"
+    }
+    ,
+    {
+      block_id = 4502,
+      pulse_width_us = 0.512,
+      prt_s = 152.064e-6,
+      block_name = "long_long_4_5",
+      field_name_suffix = "_LL"
+    }
+    ,
+    {
+      block_id = 4503,
+      pulse_width_us = 0.512,
+      prt_s = 101.376e-6,
+      block_name = "long_short_4_5",
+      field_name_suffix = "_LS"
+    }
+    ,
+    {
+      block_id = 1010,
+      pulse_width_us = 0.256,
+      prt_s = 101.376e-6,
+      block_name = "short_pulse",
+      field_name_suffix = ""
+    }
+    ,
+    {
+      block_id = 1020,
+      pulse_width_us = 0.512,
+      prt_s = 152.064e-6,
+      block_name = "long_pulse",
+      field_name_suffix = ""
     }
   };
 } block_defs[];

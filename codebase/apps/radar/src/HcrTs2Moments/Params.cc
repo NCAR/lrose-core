@@ -1014,54 +1014,94 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(block_def_t);
-    tt->array_n = 3;
+    tt->array_n = 11;
     tt->struct_def.name = tdrpStrDup("block_def_t");
     tt->struct_def.nfields = 5;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("block_name");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[0].fname = tdrpStrDup("block_id");
+      tt->struct_def.fields[0].ptype = INT_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_block_defs->block_name - (char *) _block_defs;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("field_name_suffix");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_block_defs->field_name_suffix - (char *) _block_defs;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[2].fname = tdrpStrDup("block_id");
-      tt->struct_def.fields[2].ptype = INT_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
         (char *) &_block_defs->block_id - (char *) _block_defs;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("pulse_width_us");
-      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("pulse_width_us");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
         (char *) &_block_defs->pulse_width_us - (char *) _block_defs;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("prt_s");
-      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("prt_s");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
         (char *) &_block_defs->prt_s - (char *) _block_defs;
-    tt->n_struct_vals = 15;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[3].fname = tdrpStrDup("block_name");
+      tt->struct_def.fields[3].ptype = STRING_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_block_defs->block_name - (char *) _block_defs;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[4].fname = tdrpStrDup("field_name_suffix");
+      tt->struct_def.fields[4].ptype = STRING_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_block_defs->field_name_suffix - (char *) _block_defs;
+    tt->n_struct_vals = 55;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("short_short");
-      tt->struct_vals[1].s = tdrpStrDup("_SS");
-      tt->struct_vals[2].i = 2301;
-      tt->struct_vals[3].d = 0.256;
-      tt->struct_vals[4].d = 0.000101376;
-      tt->struct_vals[5].s = tdrpStrDup("long_long");
-      tt->struct_vals[6].s = tdrpStrDup("_LL");
-      tt->struct_vals[7].i = 2302;
-      tt->struct_vals[8].d = 0.512;
-      tt->struct_vals[9].d = 0.000152064;
-      tt->struct_vals[10].s = tdrpStrDup("long_short");
-      tt->struct_vals[11].s = tdrpStrDup("_LS");
-      tt->struct_vals[12].i = 2303;
-      tt->struct_vals[13].d = 0.512;
-      tt->struct_vals[14].d = 0.000101376;
+      tt->struct_vals[0].i = 2301;
+      tt->struct_vals[1].d = 0.256;
+      tt->struct_vals[2].d = 0.000101376;
+      tt->struct_vals[3].s = tdrpStrDup("short_short_2_3");
+      tt->struct_vals[4].s = tdrpStrDup("_SS");
+      tt->struct_vals[5].i = 2302;
+      tt->struct_vals[6].d = 0.512;
+      tt->struct_vals[7].d = 0.000152064;
+      tt->struct_vals[8].s = tdrpStrDup("long_long_2_3");
+      tt->struct_vals[9].s = tdrpStrDup("_LL");
+      tt->struct_vals[10].i = 2303;
+      tt->struct_vals[11].d = 0.512;
+      tt->struct_vals[12].d = 0.000101376;
+      tt->struct_vals[13].s = tdrpStrDup("long_short_2_3");
+      tt->struct_vals[14].s = tdrpStrDup("_LS");
+      tt->struct_vals[15].i = 3401;
+      tt->struct_vals[16].d = 0.256;
+      tt->struct_vals[17].d = 0.000101376;
+      tt->struct_vals[18].s = tdrpStrDup("short_short_3_4");
+      tt->struct_vals[19].s = tdrpStrDup("_SS");
+      tt->struct_vals[20].i = 3402;
+      tt->struct_vals[21].d = 0.512;
+      tt->struct_vals[22].d = 0.000152064;
+      tt->struct_vals[23].s = tdrpStrDup("long_long_3_4");
+      tt->struct_vals[24].s = tdrpStrDup("_LL");
+      tt->struct_vals[25].i = 3403;
+      tt->struct_vals[26].d = 0.512;
+      tt->struct_vals[27].d = 0.000101376;
+      tt->struct_vals[28].s = tdrpStrDup("long_short_3_4");
+      tt->struct_vals[29].s = tdrpStrDup("_LS");
+      tt->struct_vals[30].i = 4501;
+      tt->struct_vals[31].d = 0.256;
+      tt->struct_vals[32].d = 0.000101376;
+      tt->struct_vals[33].s = tdrpStrDup("short_short_4_5");
+      tt->struct_vals[34].s = tdrpStrDup("_SS");
+      tt->struct_vals[35].i = 4502;
+      tt->struct_vals[36].d = 0.512;
+      tt->struct_vals[37].d = 0.000152064;
+      tt->struct_vals[38].s = tdrpStrDup("long_long_4_5");
+      tt->struct_vals[39].s = tdrpStrDup("_LL");
+      tt->struct_vals[40].i = 4503;
+      tt->struct_vals[41].d = 0.512;
+      tt->struct_vals[42].d = 0.000101376;
+      tt->struct_vals[43].s = tdrpStrDup("long_short_4_5");
+      tt->struct_vals[44].s = tdrpStrDup("_LS");
+      tt->struct_vals[45].i = 1010;
+      tt->struct_vals[46].d = 0.256;
+      tt->struct_vals[47].d = 0.000101376;
+      tt->struct_vals[48].s = tdrpStrDup("short_pulse");
+      tt->struct_vals[49].s = tdrpStrDup("");
+      tt->struct_vals[50].i = 1020;
+      tt->struct_vals[51].d = 0.512;
+      tt->struct_vals[52].d = 0.000152064;
+      tt->struct_vals[53].s = tdrpStrDup("long_pulse");
+      tt->struct_vals[54].s = tdrpStrDup("");
     tt++;
     
     // Parameter 'check_for_missing_pulses'
