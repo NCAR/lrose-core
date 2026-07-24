@@ -653,7 +653,6 @@ void KdpFilt::_initArrays(const double *snr,
   _phidpMeanValid_.resize(_nGates); _phidpMeanValid = _phidpMeanValid_.data();
   _phidpSdev_.resize(_nGates); _phidpSdev = _phidpSdev_.data();
   _phidpJitter_.resize(_nGates); _phidpJitter = _phidpJitter_.data();
-  _phidpMeanUnfold_.resize(_nGates); _phidpMeanUnfold = _phidpMeanUnfold_.data();
   _phidpUnfold_.resize(_nGates); _phidpUnfold = _phidpUnfold_.data();
   _phidpFilt_.resize(_nGates); _phidpFilt = _phidpFilt_.data();
   _phidpCond_.resize(_nGates); _phidpCond = _phidpCond_.data();
@@ -756,7 +755,6 @@ void KdpFilt::_initArrays(const double *snr,
     _phidpMeanValid[ii] = _missingValue;
     _phidpJitter[ii] = _missingValue;
     _phidpSdev[ii] = _missingValue;
-    _phidpMeanUnfold[ii] = _missingValue;
     _phidpUnfold[ii] = _missingValue;
     _phidpFilt[ii] = _missingValue;
     _phidpCond[ii] = _missingValue;
@@ -801,7 +799,8 @@ int KdpFilt::_unfoldPhidp()
 {
 
   // TESTING
-  
+
+#ifdef TESTING_FOLDING
   for (int igate = 0; igate < _nGates; igate++) {
     if (_phidp[igate] != _missingValue) {
       _phidp[igate] -= 80.0;
@@ -810,6 +809,7 @@ int KdpFilt::_unfoldPhidp()
       }
     }
   }
+#endif
 
   // initialize the gate props - the state at each gate is
   // dependent on the phidp values and the spatial relatioship
@@ -836,7 +836,6 @@ int KdpFilt::_unfoldPhidp()
 
   if (_findValidRuns()) {
     memcpy(_phidpUnfold, _phidp, _nGates * sizeof(double));
-    memcpy(_phidpMeanUnfold, _phidp, _nGates * sizeof(double));
     return -1;
   }
   
@@ -876,9 +875,9 @@ int KdpFilt::_unfoldPhidp()
     }
     sumFold += fold;
     if (_phidpMeanValid[ii] == _missingValue) {
-      _phidpMeanUnfold[ii] = _missingValue;
+      _phidpUnfold[ii] = _missingValue;
     } else {
-      _phidpMeanUnfold[ii] = _phidpMeanValid[ii] + (sumFold * _foldRange);
+      _phidpUnfold[ii] = _phidpMeanValid[ii] + (sumFold * _foldRange);
     }
 
   } // ii
@@ -888,42 +887,42 @@ int KdpFilt::_unfoldPhidp()
   for (size_t irun = 0; irun < _gapRuns.size(); irun++) {
     int startGap = _gapRuns[irun].ibegin;
     int endGap = _gapRuns[irun].iend;
-    double valBefore = _phidpMeanUnfold[startGap-1];
-    double valAfter = _phidpMeanUnfold[endGap+1];
+    double valBefore = _phidpUnfold[startGap-1];
+    double valAfter = _phidpUnfold[endGap+1];
     double range = valAfter - valBefore;
     double npts = endGap - startGap + 1;
     double delta = range / npts;
     double val = valBefore + delta;
     for (int jj = startGap; jj <= endGap; jj++, val += delta) {
-      _phidpMeanUnfold[jj] = val;
+      _phidpUnfold[jj] = val;
     }
   }
 
   // data before the first valid gate and after the last valid gate
 
   for (int ii = 0; ii < _firstValidGate; ii++) {
-    _phidpMeanUnfold[ii] = _phidpMeanUnfold[_firstValidGate];
+    _phidpUnfold[ii] = _phidpUnfold[_firstValidGate];
   }
 
   for (int ii = _lastValidGate + 1; ii < _nGates; ii++) {
-    _phidpMeanUnfold[ii] = _phidpMeanUnfold[_lastValidGate];
+    _phidpUnfold[ii] = _phidpUnfold[_lastValidGate];
   }
   
   // set start and end phidp values for each run
   
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
     PhidpRun &run = _validRuns[irun];
-    run.phidpBegin = _phidpMeanUnfold[run.ibegin];
-    run.phidpEnd = _phidpMeanUnfold[run.iend];
+    run.phidpBegin = _phidpUnfold[run.ibegin];
+    run.phidpEnd = _phidpUnfold[run.iend];
   }
 
   // unfold the unfiltered phidp
   
   for (int ii = _firstValidGate; ii <= _lastValidGate; ii++) {
     if (!_validForUnfold[ii] || _phidp[ii] == _missingValue) {
-      _phidpUnfold[ii] = _phidpMeanUnfold[ii];
+      _phidpUnfold[ii] = _phidpUnfold[ii];
     } else {
-      double diff = _phidpMeanUnfold[ii] - _phidp[ii];
+      double diff = _phidpUnfold[ii] - _phidp[ii];
       int fold = (int) (fabs(diff / _foldRange) + 0.5);
       if (diff < 0) {
         fold *= -1;
@@ -936,13 +935,13 @@ int KdpFilt::_unfoldPhidp()
 
   double sumAtStart = 0.0;
   for (int ii = 0; ii < _nGatesStats; ii++) {
-    sumAtStart += _phidpMeanUnfold[ii + _firstValidGate];
+    sumAtStart += _phidpUnfold[ii + _firstValidGate];
   }
   double meanAtStart = sumAtStart / _nGatesStats; 
 
   double sumAtEnd = 0.0;
   for (int ii = 0; ii < _nGatesStats; ii++) {
-    sumAtEnd += _phidpMeanUnfold[_lastValidGate - ii];
+    sumAtEnd += _phidpUnfold[_lastValidGate - ii];
   }
   double meanAtEnd = sumAtEnd / _nGatesStats; 
 
@@ -966,7 +965,7 @@ void KdpFilt::_filterPhidpUnfolded()
 
   // apply FIR filter to unfolded phidp
   
-  _applyIterativeFir(_phidpFilt, _phidpMeanUnfold, _nFiltIterUnfolded);
+  _applyIterativeFir(_phidpFilt, _phidpUnfold, _nFiltIterUnfolded);
     
   // compute conditioned phidp
   
@@ -1024,7 +1023,7 @@ void KdpFilt::_computePhidpRegrFilt()
   phiRegr_.resize(_nGatesPadded);
   double *phiRegr = phiRegr_.data() + _nGatesPad;
   for (int igate = 0; igate < _nGates; igate++) {
-    phiRegr[igate] = _phidpMeanUnfold[igate];
+    phiRegr[igate] = _phidpUnfold[igate];
   }
   for (int igate = 0; igate < _nGatesPad; igate++) {
     phiRegr[-1 - igate] = phiRegr[0];
@@ -1371,8 +1370,8 @@ void KdpFilt::_computePhidpConditioned()
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
 
     PhidpRun &run = _validRuns[irun];
-    run.phidpBegin = _phidpMeanUnfold[run.ibegin];
-    run.phidpEnd = _phidpMeanUnfold[run.iend];
+    run.phidpBegin = _phidpUnfold[run.ibegin];
+    run.phidpEnd = _phidpUnfold[run.iend];
     
     // find the regions where phidp increases and then comes down again
 
@@ -1916,7 +1915,7 @@ void KdpFilt::_writeRayDataToFile()
           "# gateNum validKdp validUnfold "
           "snr dbz zdr rhohv phidp "
           "phidpMean phidpMeanValid phidpJitter phidpSdev "
-          "phidpMeanUnfold phidpUnfold phidpFilt phidpCondFilt "
+          "phidpUnfold phidpFilt phidpCondFilt "
           "zdrSdev psob kdp kdpSC kdpZZdr "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected regrFilt "
           "phidpFftFilt phidpFiltTrend scBlock phidpSC\n");
@@ -1936,14 +1935,11 @@ void KdpFilt::_writeRayDataToFile()
     } else {
       zdrCorrected = _zdr[igate];
     }
-    if (_kdpSC[igate] < -10) {
-      cerr << "LLLLLLLLLLLLLLLLLLLL az, igate, kdpSC: " << _azDeg << ", " << igate << ", " << _kdpSC[igate] << endl;
-    }
     fprintf(out,
             "%3d %3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f "
+            "%10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f\n",
@@ -1959,7 +1955,6 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_phidpMeanValid[igate], 0),
             _getPlotVal(_phidpJitter[igate], 0),
             _getPlotVal(_phidpSdev[igate], 0),
-            _getPlotVal(_phidpMeanUnfold[igate], 0),
             _getPlotVal(_phidpUnfold[igate], 0),
             _getPlotVal(_phidpFilt[igate], 0),
             _getPlotVal(_phidpCondFilt[igate], 0),
@@ -2164,7 +2159,7 @@ void KdpFilt::_fftFilter()
   phiComplex_.resize(_nGatesPadded);
   RadarComplex_t *phiComplex = phiComplex_.data() + _nGatesPad;
   for (int igate = 0; igate < _nGates; igate++) {
-    RadarComplex::setFromDegrees(_phidpMeanUnfold[igate], phiComplex[igate]);
+    RadarComplex::setFromDegrees(_phidpUnfold[igate], phiComplex[igate]);
   }
   
   // interpolate between end-points for the padded gates

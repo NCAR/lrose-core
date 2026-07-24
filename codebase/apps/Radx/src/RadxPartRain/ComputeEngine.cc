@@ -202,7 +202,6 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
 
   const double *phidpForKdp = _kdp.getPhidp();
   const double *phidpMeanForKdp = _kdp.getPhidpMean();
-  const double *phidpMeanUnfoldForKdp = _kdp.getPhidpMeanUnfold();
   const double *phidpSdevForKdp = _kdp.getPhidpSdev();
   const double *phidpJitterForKdp = _kdp.getPhidpJitter();
   const double *phidpUnfoldForKdp = _kdp.getPhidpUnfold();
@@ -330,17 +329,14 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::PHIDP_MEAN_FOR_KDP:
           *datp = phidpMeanForKdp[igate];
           break;
-        case Params::PHIDP_MEAN_UNFOLD_FOR_KDP:
-          *datp = phidpMeanUnfoldForKdp[igate];
+        case Params::PHIDP_UNFOLD_FOR_KDP:
+          *datp = phidpUnfoldForKdp[igate];
           break;
         case Params::PHIDP_SDEV_FOR_KDP:
           *datp = phidpSdevForKdp[igate];
           break;
         case Params::PHIDP_JITTER_FOR_KDP:
           *datp = phidpJitterForKdp[igate];
-          break;
-        case Params::PHIDP_UNFOLD_FOR_KDP:
-          *datp = phidpUnfoldForKdp[igate];
           break;
         case Params::PHIDP_FILT_FOR_KDP:
           *datp = phidpFiltForKdp[igate];

@@ -367,9 +367,8 @@ public:
    * @return an array of unfolded phidp values
    */
   const double *getPhidp() const { return _phidp; }
-  const double *getPhidpUnfold() const { return _phidpUnfold; }
   const double *getPhidpMean() const { return _phidpMean; }
-  const double *getPhidpMeanUnfold() const { return _phidpMeanUnfold; }
+  const double *getPhidpUnfold() const { return _phidpUnfold; }
   const double *getPhidpSdev() const { return _phidpSdev; }
   const double *getPhidpJitter() const { return _phidpJitter; }
   const double *getPhidpFilt() const { return _phidpFilt; }
@@ -634,9 +633,6 @@ private:
   
   vector<double> _phidpSdev_;
   double *_phidpSdev;
-  
-  vector<double> _phidpMeanUnfold_;
-  double *_phidpMeanUnfold;
   
   vector<double> _phidpUnfold_;
   double *_phidpUnfold;

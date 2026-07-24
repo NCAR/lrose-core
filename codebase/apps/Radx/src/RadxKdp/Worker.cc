@@ -505,10 +505,10 @@ void Worker::_addDebugFields(RadxRay *outputRay)
             _kdp.getPhidpMean());
   
   _addField(outputRay,
-            "PHIDP_MEAN_UNFOLD", "deg",
-            "phidp_mean_unfold_for_kdp_computations",
+            "PHIDP_UNFOLD", "deg",
+            "phidp_unfold_for_kdp_computations",
             "differential_phase_hv",
-            _kdp.getPhidpMeanUnfold());
+            _kdp.getPhidpUnfold());
   
   _addField(outputRay,
             "PHIDP_SDEV", "deg",
@@ -521,12 +521,6 @@ void Worker::_addDebugFields(RadxRay *outputRay)
             "phidp_jitter_for_kdp_computations",
             "differential_phase_hv",
             _kdp.getPhidpJitter());
-  
-  _addField(outputRay,
-            "PHIDP_UNFOLD", "deg",
-            "phidp_unfold_for_kdp_computations",
-            "differential_phase_hv",
-            _kdp.getPhidpUnfold());
   
   _addField(outputRay,
             "PHIDP_FILT", "deg",
