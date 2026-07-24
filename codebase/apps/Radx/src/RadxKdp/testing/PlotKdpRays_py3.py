@@ -30,6 +30,7 @@ REQUIRED_COLUMNS = [
     "phidpJitter",
     "phidpSdev",
     "phidpUnfold",
+    "unfoldInterp",
     "phidpFilt",
     "phidpCondFilt",
     "psob",
@@ -65,7 +66,7 @@ class KdpRayPlotter:
         self.ax2 = None
         self.ax3 = None
         self.ax4 = None
-        self.ax4r = None
+        # self.ax4r = None
         self.first_valid = None
         self.last_valid = None
 
@@ -245,7 +246,7 @@ class KdpRayPlotter:
         self.ax2 = self.fig.add_subplot(2, 2, 2, xmargin=0.0)
         self.ax3 = self.fig.add_subplot(2, 2, 3, xmargin=0.0)
         self.ax4 = self.fig.add_subplot(2, 2, 4, xmargin=0.0)
-        self.ax4r = self.ax4.twinx()
+        # self.ax4r = self.ax4.twinx()
 
         self.do_plot()
         self.fig.suptitle(self.options.title)
@@ -265,7 +266,7 @@ class KdpRayPlotter:
         self.ax2.clear()
         self.ax3.clear()
         self.ax4.clear()
-        self.ax4r.clear()
+        # self.ax4r.clear()
 
         filename = self.file_list[self.file_index]
         name_parts = filename.split("_")
@@ -297,6 +298,7 @@ class KdpRayPlotter:
             return
 
         zdr_sdev10 = [value * 10.0 for value in plot_data["zdrSdev"]]
+        zdr_5 = [value * 5.0 for value in plot_data["zdr"]]
 
         # PLOT 1 - moments
 
@@ -308,6 +310,7 @@ class KdpRayPlotter:
             label="RHOHV", color="seagreen",
         )
         self.ax1.plot(gate_num, zdr_sdev10, label="ZdrSdev*10", color="blue")
+        self.ax1.plot(gate_num, zdr_5, label="Zdr*5", color="magenta")
         self.ax1.plot(gate_num, plot_data["snr"], label="SNR", color="black")
         self.ax1.plot(gate_num, plot_data["dbz"], label="DBZ", color="red")
         self.ax1.set_xlabel("gateNum")
@@ -336,8 +339,8 @@ class KdpRayPlotter:
         # PLOT 2 - PHIDP processing
 
         self.ax2.set_title(az_str, fontsize=12)
-        self.ax2.plot(gate_num, plot_data["phidpUnfold"], label="phidpUnfold", color="green")
-        self.ax2.plot(gate_num, plot_data["phidpFilt"], label="Filt", color="red")
+        self.ax2.plot(gate_num, plot_data["unfoldInterp"], label="unfoldInterp", color="green")
+        self.ax2.plot(gate_num, plot_data["phidpFilt"], label="FIR_Filt", color="red")
         self.ax2.plot(gate_num, plot_data["phidpCondFilt"], label="CondFilt", color="black")
         self.ax2.plot(gate_num, plot_data["phidpFftFilt"], label="FftFilt", color="magenta")
         self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="orange")
@@ -379,22 +382,22 @@ class KdpRayPlotter:
         # PLOT 4 - PHIDP FFT filtering
 
         self.ax4.set_title(az_str, fontsize=12)
-        self.ax4.plot(gate_num, plot_data["phidpMean"], label="phidpMean", color="magenta")
-        self.ax4.plot(gate_num, plot_data["phidpUnfold"], label="phidpUnfold", color="green")
+        # self.ax4.plot(gate_num, plot_data["phidpUnfold"], label="phidpUnfold", color="magenta")
+        self.ax4.plot(gate_num, plot_data["unfoldInterp"], label="unfoldInterp", color="green")
         self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt", color="black")
         self.ax4.set_xlabel("gateNum")
         self.ax4.set_ylabel("PHIDP")
         draw_block_limits(self.ax4, gate_num, self.data["scBlock"])
         
-        self.ax4r.plot(
-            gate_num, plot_data["zdr"],
-            label="ZDR", color="red",
-        )
-        self.ax4r.set_ylabel("ZDR", color="red")
-        self.ax4r.yaxis.set_label_position("right")
-        self.ax4r.yaxis.tick_right()
-        self.ax4r.set_ylim(-5, 10)
-        self.ax4r.tick_params(axis="y", labelcolor="red")
+        # self.ax4r.plot(
+        #     gate_num, plot_data["zdr"],
+        #     label="ZDR", color="red",
+        # )
+        # self.ax4r.set_ylabel("ZDR", color="red")
+        # self.ax4r.yaxis.set_label_position("right")
+        # self.ax4r.yaxis.tick_right()
+        # self.ax4r.set_ylim(-5, 10)
+        # self.ax4r.tick_params(axis="y", labelcolor="red")
 
         draw_valid_regions(
             self.ax4, gate_num, valid_kdp,

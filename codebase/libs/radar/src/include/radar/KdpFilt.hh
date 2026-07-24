@@ -369,6 +369,7 @@ public:
   const double *getPhidp() const { return _phidp; }
   const double *getPhidpMean() const { return _phidpMean; }
   const double *getPhidpUnfold() const { return _phidpUnfold; }
+  const double *getPhidpUnfoldInterp() const { return _phidpUnfoldInterp; }
   const double *getPhidpSdev() const { return _phidpSdev; }
   const double *getPhidpJitter() const { return _phidpJitter; }
   const double *getPhidpFilt() const { return _phidpFilt; }
@@ -432,19 +433,13 @@ public:
   public:
     int ibegin;
     int iend;
-    double phidpBegin;
-    double phidpEnd;
     PhidpRun() {
       ibegin = 0;
       iend = 0;
-      phidpBegin = 0.0;
-      phidpEnd = 0.0;
     }
     PhidpRun(int begin, int end) {
       ibegin = begin;
       iend = end;
-      phidpBegin = 0.0;
-      phidpEnd = 0.0;
     }
     int len() const { return (iend - ibegin + 1); }
     void print(int irun, ostream &out) {
@@ -637,6 +632,9 @@ private:
   vector<double> _phidpUnfold_;
   double *_phidpUnfold;
   
+  vector<double> _phidpUnfoldInterp_;
+  double *_phidpUnfoldInterp;
+  
   vector<double> _phidpFilt_;
   double *_phidpFilt;
   
@@ -763,6 +761,7 @@ private:
   // compute regression-filtered phidp
   
   void _computePhidpRegrFilt();
+  void _computePhidpRegrFilt(int runNum);
 
   // worker methods
   
@@ -826,6 +825,10 @@ private:
   /// fill phidp missing gates with noise
 
   void _fillPhidpMissingGates();
+
+  /// censor non valid kdp results
+  
+  void _censorNonValidKdp();
 
   /// pack valid run data into packed vector
 
