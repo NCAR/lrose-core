@@ -167,7 +167,7 @@ void Worker::_kdpCompute()
                _elevation,
                _azimuth,
                _wavelengthM * 100.0,
-               _nGates, 
+               _nGates,
                _startRangeKm,
                _gateSpacingKm,
                _snrArray,
@@ -179,6 +179,7 @@ void Worker::_kdpCompute()
 
   const double *kdp = _kdp.getKdp();
   const double *kdpSC = _kdp.getKdpSC();
+  const double *psob = _kdp.getPsob();
   
   // put KDP into fields objects
   
@@ -189,6 +190,7 @@ void Worker::_kdpCompute()
       _kdpArray[ii] = kdp[ii];
     }
     _kdpSCArray[ii] = kdpSC[ii];
+    _psobArray[ii] = psob[ii];
   }
 
 }
@@ -208,6 +210,7 @@ void Worker::_allocArrays()
 
   _kdpArray = _kdpArray_.alloc(_nGates);
   _kdpSCArray = _kdpSCArray_.alloc(_nGates);
+  _psobArray = _psobArray_.alloc(_nGates);
 
 }
 
@@ -376,6 +379,9 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
           break;
         case Params::KDP_SC:
           *datp = _kdpSCArray[igate];
+          break;
+        case Params::PSOB:
+          *datp = _psobArray[igate];
           break;
           
           // attenuation

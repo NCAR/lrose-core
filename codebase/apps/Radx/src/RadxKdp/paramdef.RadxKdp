@@ -177,6 +177,7 @@ typedef enum {
   
   KDP,
   KDP_SC,
+  PSOB,
 
   DBZ_ATTEN_CORRECTION,
   ZDR_ATTEN_CORRECTION,

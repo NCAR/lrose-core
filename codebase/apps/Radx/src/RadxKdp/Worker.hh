@@ -119,9 +119,11 @@ private:
 
   RadxArray<double> _kdpArray_;
   RadxArray<double> _kdpSCArray_;
+  RadxArray<double> _psobArray_;
 
   double *_kdpArray;
   double *_kdpSCArray;
+  double *_psobArray;
 
   // computing kdp
   

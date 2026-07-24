@@ -210,6 +210,8 @@ class KdpRayPlotter:
         self.set_plot_limits()
 
         if self.options.debug:
+            print(f"  first_valid: {self.first_valid}", file=sys.stderr)
+            print(f"  last_valid: {self.last_valid}", file=sys.stderr)
             print(
                 f"Plot index range: {self.first_valid} to {self.last_valid}",
                 file=sys.stderr,
@@ -327,14 +329,15 @@ class KdpRayPlotter:
         legend1 = self.ax1.legend(
             lines1 + lines2, labels1 + labels2, loc="upper right"
         )
+        
         for label in legend1.get_texts():
             label.set_fontsize("small")
 
-        draw_valid_regions(
-            self.ax1, gate_num, valid_kdp,
-            color="lightgray", alpha=0.4,
-        )
-        draw_block_limits(self.ax1, gate_num, self.data["scBlock"])
+        draw_valid_regions(self,
+                           self.ax1, gate_num, valid_kdp,
+                           color="lightgray", alpha=0.4,
+                           )
+        draw_block_limits(self, self.ax1, gate_num, self.data["scBlock"])
 
         # PLOT 2 - PHIDP processing
 
@@ -345,7 +348,7 @@ class KdpRayPlotter:
         self.ax2.plot(gate_num, plot_data["phidpFftFilt"], label="FftFilt", color="magenta")
         self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="orange")
         # self.ax2.plot(gate_num, plot_data["regrFilt"], label="regrFilt", color="blue")
-        draw_block_limits(self.ax2, gate_num, self.data["scBlock"])
+        draw_block_limits(self, self.ax2, gate_num, self.data["scBlock"])
         self.ax2.set_xlabel("gateNum")
         self.ax2.set_ylabel("PHIDP")
 
@@ -353,10 +356,10 @@ class KdpRayPlotter:
         for label in legend2.get_texts():
             label.set_fontsize("small")
 
-        draw_valid_regions(
-            self.ax2, gate_num, valid_kdp,
-            color="lightgray", alpha=0.4,
-        )
+        draw_valid_regions(self,
+                           self.ax2, gate_num, valid_kdp,
+                           color="lightgray", alpha=0.4,
+                           )
 
         # PLOT 3 - KDP and PSOB
 
@@ -369,11 +372,11 @@ class KdpRayPlotter:
         self.ax3.set_xlabel("gateNum")
         self.ax3.set_ylabel("KDP, PSOB")
 
-        draw_valid_regions(
-            self.ax3, gate_num, valid_kdp,
-            color="lightgray", alpha=0.4,
-        )
-        draw_block_limits(self.ax3, gate_num, self.data["scBlock"])
+        draw_valid_regions(self,
+                           self.ax3, gate_num, valid_kdp,
+                           color="lightgray", alpha=0.4,
+                           )
+        draw_block_limits(self, self.ax3, gate_num, self.data["scBlock"])
                 
         legend3 = self.ax3.legend(loc="upper right")
         for label in legend3.get_texts():
@@ -387,7 +390,7 @@ class KdpRayPlotter:
         self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt", color="black")
         self.ax4.set_xlabel("gateNum")
         self.ax4.set_ylabel("PHIDP")
-        draw_block_limits(self.ax4, gate_num, self.data["scBlock"])
+        draw_block_limits(self, self.ax4, gate_num, self.data["scBlock"])
         
         # self.ax4r.plot(
         #     gate_num, plot_data["zdr"],
@@ -399,10 +402,10 @@ class KdpRayPlotter:
         # self.ax4r.set_ylim(-5, 10)
         # self.ax4r.tick_params(axis="y", labelcolor="red")
 
-        draw_valid_regions(
-            self.ax4, gate_num, valid_kdp,
-            color="lightgray", alpha=0.4,
-        )
+        draw_valid_regions(self,
+                           self.ax4, gate_num, valid_kdp,
+                           color="lightgray", alpha=0.4,
+                           )
 
         legend4 = self.ax4.legend(loc="upper right")
         for label in legend4.get_texts():
@@ -412,7 +415,7 @@ class KdpRayPlotter:
 #=========================================================================
 # draw valid regions on plots
 
-def draw_valid_regions(ax, x, valid,
+def draw_valid_regions(self, ax, x, valid,
                        color='lightgray',
                        alpha=0.4):
 
@@ -421,14 +424,16 @@ def draw_valid_regions(ax, x, valid,
 
     in_run = False
 
-    for i in range(len(valid)):
+    for i in range(self.first_valid, self.last_valid):
 
-        if valid[i] and not in_run:
-            start = x[i]
+        j = i - self.first_valid
+
+        if valid[j] and not in_run:
+            start = x[j]
             in_run = True
 
-        elif not valid[i] and in_run:
-            end = x[i]
+        elif not valid[j] and in_run:
+            end = x[j]
             ax.axvspan(start, end,
                        facecolor=color,
                        edgecolor='none',
@@ -449,12 +454,13 @@ def draw_valid_regions(ax, x, valid,
 #=========================================================================
 # draw block limit lines
 
-def draw_block_limits(ax, x, valid):
+def draw_block_limits(self, ax, x, valid):
     if not x or not valid:
         return
-    for i in range(len(valid)):
+    for i in range(self.first_valid, self.last_valid):
+        j = i - self.first_valid
         if valid[i]:
-            ax.axvline(x[i], color='pink', lw=1)
+            ax.axvline(x[j], color='pink', lw=1)
 
 #=========================================================================
 # Run a command in a shell, wait for it to complete

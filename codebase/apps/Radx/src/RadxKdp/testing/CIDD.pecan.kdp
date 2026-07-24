@@ -100,7 +100,7 @@
 
 SPOL_KDP       SPOL_KDP       /tmp/cfradial/spol/kdp&KDP       kdp_sband.colors   deg/km -5 80 5 radial 1 0     
 SPOL_KDP_SC    SPOL_KDP_SC    /tmp/cfradial/spol/kdp&KDP_SC    kdp_sband.colors   deg/km -5 80 5 radial 1 0     
-SPOL_PSOB      SPOL_PSOB      /tmp/cfradial/spol/kdp&PSOB      fraction.colors    deg    -5 80 5 radial 1 0     
+SPOL_PSOB      SPOL_PSOB      /tmp/cfradial/spol/kdp&PSOB      kdp.colors         deg    -5 80 5 radial 1 0     
 SPOL_KDP_ZZDR  SPOL_KDP_ZZDR  /tmp/cfradial/spol/kdp&KDP_ZZDR  kdp_sband.colors   deg/km -5 80 5 radial 1 0     
 
 SPOL_DBZ       SPOL_DBZ       /tmp/cfradial/spol/kdp&DBZ       dbz.colors        dBZ -5 80 5 radial 1 0

@@ -338,7 +338,16 @@ output_fields = {
     long_name = "kdp_from_self_consistency_with_ZZDR",
     standard_name = "specific_differential_phase_hv",
     units = "deg/km",
-    do_write = FALSE
+    do_write = TRUE
+  }
+  ,
+  {
+    id = PSOB,
+    name = "PSOB",
+    long_name = "phase_shift_on_backscatter",
+    standard_name = "phase_shift_on_backscatter",
+    units = "deg",
+    do_write = TRUE
   }
   ,
   {
