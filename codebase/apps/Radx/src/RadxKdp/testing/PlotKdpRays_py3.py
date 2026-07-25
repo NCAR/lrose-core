@@ -387,7 +387,7 @@ class KdpRayPlotter:
         # PLOT 4 - PHIDP FFT filtering
 
         self.ax4.set_title(az_str, fontsize=12)
-        # self.ax4.plot(gate_num, plot_data["phidpUnfold"], label="phidpUnfold", color="magenta")
+        self.ax4.plot(gate_num, plot_data["phidp"], label="phidp", color="seagreen")
         self.ax4.plot(gate_num, plot_data["unfoldInterp"], label="unfoldInterp", color="green")
         self.ax4.plot(gate_num, plot_data["phidpFilt"], label="FIR_Filt", color="orange")
         self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt", color="blue")

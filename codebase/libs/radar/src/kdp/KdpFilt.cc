@@ -192,7 +192,7 @@ KdpFilt::KdpFilt()
 
   _minValidAbsKdp = 0.05;
 
-  _psobMeanThreshold = 1.0;
+  _minMeanPosb = 1.0;
 
   _useIterativeFiltering = false;
   _phidpDiffThreshold = 4.0;
@@ -489,20 +489,12 @@ int KdpFilt::compute(time_t timeSecs,
   if (_unfoldPhidp()) {
     // no good data in whole ray, fill with missing, return early
     for (int igate = 0; igate < _nGates; igate++) {
-      if (_snr[igate] < _snrThreshold) {
-        _kdp[igate] = _missingValue;
-        _kdpSC[igate] = _missingValue;
-        _phidpSC[igate] = _missingValue;
-        _kdpZZdr[igate] = _missingValue;
-        _psob[igate] = _missingValue;
-      } else {
-        _kdp[igate] = 0;
-        _kdpSC[igate] = 0;
-        _phidpSC[igate] = 0;
-        _kdpZZdr[igate] = 0;
-        _psob[igate] = 0;
-      }
-      _psobMean[igate] = 0.0;
+      _kdp[igate] = _missingValue;
+      _kdpSC[igate] = _missingValue;
+      _phidpSC[igate] = _missingValue;
+      _kdpZZdr[igate] = _missingValue;
+      _psob[igate] = _missingValue;
+      _psobMean[igate] = _missingValue;
     }
     return 0;
   }
@@ -911,21 +903,6 @@ int KdpFilt::_unfoldPhidp()
     _phidpUnfoldInterp[ii] = _phidpUnfold[_lastValidGate];
   }
   
-  // unfold the unfiltered phidp
-  
-  // for (int ii = _firstValidGate; ii <= _lastValidGate; ii++) {
-  //   if (!_validForUnfold[ii] || _phidp[ii] == _missingValue) {
-  //     _phidpUnfold[ii] = _phidpUnfold[ii];
-  //   } else {
-  //     double diff = _phidpUnfold[ii] - _phidp[ii];
-  //     int fold = (int) (fabs(diff / _foldRange) + 0.5);
-  //     if (diff < 0) {
-  //       fold *= -1;
-  //     }
-  //     _phidpUnfold[ii] = _phidp[ii] + fold * _foldRange;
-  //   }
-  // }
-
   // before and after the data, set to the mean
 
   double sumAtStart = 0.0;
@@ -1037,18 +1014,6 @@ void KdpFilt::_computePhidpRegrFilt()
       _regrFilt[ii] = _missingValue;
     }
   }
-  
-  // // initialize
-  
-  // for (int ii = 0; ii < _nGates; ii++) {
-  //   _regrFilt[ii] = _missingValue;
-  // }
-
-  // // compute regression for each valid region
-  
-  // for (size_t irun = 0; irun < _validRuns.size(); irun++) {
-  //   _computePhidpRegrFilt(irun);
-  // }
   
 }
 
@@ -1606,11 +1571,15 @@ void KdpFilt::_computeFoldingRange()
 
 int KdpFilt::_findValidRuns()
 {
+
+  _validRuns.clear();
+  _gapRuns.clear();
   
   // first pass - load up all runs
 
   vector<PhidpRun> allRuns;
   int runLen = 0;
+  int minValidRunLen = (int) (_phidpFeatureLengthKm / _gateSpacingKm) * 2 + 1;
   for (int igate = 0; igate < _nGates; igate++) {
 
     bool validGate = _isGateValid(igate);
@@ -1619,10 +1588,10 @@ int KdpFilt::_findValidRuns()
       runLen++;
     }
 
-    // save runs longer than _nGatesStats
-
+    // save runs longer than _phidpFeatureLengthKm
+    
     if (!validGate) {
-      if (runLen > _nGatesStats) {
+      if (runLen >= minValidRunLen) {
         int iend = igate - 1;
         int ibegin = iend - runLen + 1;
         PhidpRun run(ibegin, iend);
@@ -1631,7 +1600,7 @@ int KdpFilt::_findValidRuns()
       runLen = 0;
     } else if (igate == _nGates - 1) {
       // last gate in ray
-      if (runLen > _nGatesStats) {
+      if (runLen >= minValidRunLen) {
         int iend = igate;
         int ibegin = iend - runLen + 1;
         PhidpRun run(ibegin, iend);
@@ -1644,6 +1613,7 @@ int KdpFilt::_findValidRuns()
   // now combine runs with a gap between them
   // smaller than or equal to _nGatesStatsHalf
 
+  // size_t allRunsSize = allRuns.size();
   vector<PhidpRun> combRuns;
   bool done = false;
   int count = 0;
@@ -1679,7 +1649,7 @@ int KdpFilt::_findValidRuns()
       }
     } // irun
   } // while (!done)
-  
+
   // find runs longer than 2 * _nGatesStats
   // trim each end by _nGatesStats/2
   // and add to valid runs array
@@ -1697,6 +1667,14 @@ int KdpFilt::_findValidRuns()
   if (_validRuns.size() < 1) {
     // no valid runs
     return -1;
+  }
+
+  for (size_t irun = 0; irun < _validRuns.size(); irun++) {
+    const PhidpRun &validRun = _validRuns[irun];
+    for (int igate = validRun.ibegin; igate <= validRun.iend; igate++) {
+      _validForUnfold[igate] = true;
+      _validForKdp[igate] = true;
+    }
   }
 
   // save the gaps
@@ -2014,20 +1992,20 @@ void KdpFilt::_writeRayDataToFile()
             igate,
             (_validForKdp[igate]?1:0),
             (_validForUnfold[igate]?1:0),
-            _getPlotVal(_snr[igate], -10),
-            _getPlotVal(_dbz[igate], -20),
-            _getPlotVal(_zdr[igate], 0),
-            _getPlotVal(_rhohv[igate], 0),
-            _getPlotVal(_phidp[igate], 0),
+            _getPlotVal(_snr[igate], NAN),
+            _getPlotVal(_dbz[igate], NAN),
+            _getPlotVal(_zdr[igate], NAN),
+            _getPlotVal(_rhohv[igate], NAN),
+            _getPlotVal(_phidp[igate], NAN),
             _getPlotVal(_phidpMean[igate], 0),
             _getPlotVal(_phidpMeanValid[igate], 0),
-            _getPlotVal(_phidpJitter[igate], 0),
-            _getPlotVal(_phidpSdev[igate], 0),
+            _getPlotVal(_phidpJitter[igate], NAN),
+            _getPlotVal(_phidpSdev[igate], NAN),
             _getPlotVal(_phidpUnfold[igate], NAN),
             _getPlotVal(_phidpUnfoldInterp[igate], 0),
             _getPlotVal(_phidpFilt[igate], 0),
             _getPlotVal(_phidpCondFilt[igate], 0),
-            _getPlotVal(_zdrSdev[igate], 0),
+            _getPlotVal(_zdrSdev[igate], NAN),
             _getPlotVal(_psob[igate], NAN),
             _getPlotVal(_psobMean[igate], NAN),
             _getPlotVal(_kdp[igate], NAN),
@@ -2174,7 +2152,7 @@ void KdpFilt::_loadKdpSC()
 
   // set conditions on psob
   // compute mean psob for pos values only
-  // threshold using _psobMeanThreshold
+  // threshold using _minMeanPosb
   
   for (size_t ii = 0; ii < psobRuns.size(); ii++) {
     const PhidpRun &run = psobRuns[ii];
@@ -2192,7 +2170,7 @@ void KdpFilt::_loadKdpSC()
     }
     for (int igate = run.ibegin; igate <= run.iend; igate++) {
       _psobMean[igate] = psobMean;
-      if (psobMean < _psobMeanThreshold || _psob[igate] < 0) {
+      if (psobMean < _minMeanPosb || _psob[igate] < 0) {
         _psob[igate] = 0;
       }
     }

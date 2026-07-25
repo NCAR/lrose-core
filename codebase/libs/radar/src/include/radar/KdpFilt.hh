@@ -558,7 +558,7 @@ private:
 
   // threshold for psob mean
 
-  double _psobMeanThreshold;
+  double _minMeanPosb;
 
   // phidp state for unfolding
 
