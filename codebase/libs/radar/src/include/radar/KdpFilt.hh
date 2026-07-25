@@ -668,6 +668,9 @@ private:
   vector<double> _psob_;
   double *_psob;
 
+  vector<double> _psobAccum_;
+  double *_psobAccum;
+
   vector<double> _dbzAttenCorr_;
   double *_dbzAttenCorr;
 

@@ -500,6 +500,7 @@ int KdpFilt::compute(time_t timeSecs,
         _kdpZZdr[igate] = 0;
         _psob[igate] = 0;
       }
+      _psobAccum[igate] = 0.0;
     }
     return 0;
   }
@@ -523,9 +524,9 @@ int KdpFilt::compute(time_t timeSecs,
   for (int igate = 0; igate < _nGates; igate++) {
     if (_validForKdp[igate]) {
       double psob = _phidpFilt[igate] - _phidpCondFilt[igate];
-      if (psob > 0) {
-        _psob[igate] = psob;
-      }
+      // if (psob > 0) {
+      _psob[igate] = psob;
+      // }
     }
   }
 #endif
@@ -672,6 +673,7 @@ void KdpFilt::_initArrays(const double *snr,
   _kdpSC_.resize(_nGates); _kdpSC = _kdpSC_.data();
   _phidpSC_.resize(_nGates); _phidpSC = _phidpSC_.data();
   _psob_.resize(_nGates); _psob = _psob_.data();
+  _psobAccum_.resize(_nGates); _psobAccum = _psobAccum_.data();
   _dbzAttenCorr_.resize(_nGates); _dbzAttenCorr = _dbzAttenCorr_.data();
   _zdrAttenCorr_.resize(_nGates); _zdrAttenCorr = _zdrAttenCorr_.data();
   _dbzCorrected_.resize(_nGates); _dbzCorrected = _dbzCorrected_.data();
@@ -789,6 +791,7 @@ void KdpFilt::_initArrays(const double *snr,
     _phidpFftFilt[ii] = _missingValue;
     _phidpFiltTrend[ii] = _missingValue;
     _scBlock[ii] = 0;
+    _psobAccum[ii] = 0.0;
   }
   
   double xxDelta = 1.0 / (double) _nGatesPadded;
@@ -1264,6 +1267,7 @@ void KdpFilt::_computeKdp()
       _kdpZZdr[ii] = 0.0;
       _kdpSC[ii] = 0.0;
       _psob[ii] = 0.0;
+      _psobAccum[ii] = 0.0;
       continue;
     }
     
@@ -1992,7 +1996,7 @@ void KdpFilt::_writeRayDataToFile()
           "snr dbz zdr rhohv phidp "
           "phidpMean phidpMeanValid phidpJitter phidpSdev "
           "phidpUnfold unfoldInterp phidpFilt phidpCondFilt "
-          "zdrSdev psob kdp kdpSC kdpZZdr "
+          "zdrSdev psob psobAccum kdp kdpSC kdpZZdr "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected regrFilt "
           "phidpFftFilt phidpFiltTrend scBlock phidpSC\n");
 
@@ -2016,7 +2020,7 @@ void KdpFilt::_writeRayDataToFile()
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f "
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f\n",
             igate,
@@ -2037,6 +2041,7 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_phidpCondFilt[igate], 0),
             _getPlotVal(_zdrSdev[igate], 0),
             _getPlotVal(_psob[igate], NAN),
+            _getPlotVal(_psobAccum[igate], NAN),
             _getPlotVal(_kdp[igate], NAN),
             _getPlotVal(_kdpSC[igate], NAN),
             _getPlotVal(_kdpZZdr[igate], NAN),
@@ -2120,6 +2125,8 @@ void KdpFilt::_loadKdpSC()
 
   // loop through the valid runs
   
+  vector<PhidpRun> psobRuns;
+    
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
     
     const PhidpRun &validRun = _validRuns[irun];
@@ -2144,6 +2151,8 @@ void KdpFilt::_loadKdpSC()
       if (iend - ibegin > _nGatesStats) {
         _loadKdpSCRun(ibegin, iend);
       }
+
+      psobRuns.push_back(PhidpRun(ibegin, iend));
 
       ibegin = iend + 1;
 
@@ -2172,9 +2181,20 @@ void KdpFilt::_loadKdpSC()
       // compute phase shift on backscatter as the difference between
       // fft filtered value and SC phidp
       double psob = _phidpFftFilt[igate] - _phidpSC[igate];
-      if (psob > 0) {
-        _psob[igate] = psob;
-      }
+      // if (psob > 0) {
+      _psob[igate] = psob;
+      // }
+    }
+  }
+
+  // load psobAccum
+
+  for (size_t ii = 0; ii < psobRuns.size(); ii++) {
+    const PhidpRun &run = psobRuns[ii];
+    double psobAccum = 0.0;
+    for (int igate = run.ibegin; igate <= run.iend; igate++) {
+      psobAccum += _psob[igate] * (_gateSpacingKm / _phidpFeatureLengthKm);
+      _psobAccum[igate] = psobAccum;
     }
   }
 
@@ -2336,6 +2356,7 @@ void KdpFilt::_censorNonValidKdp()
       _kdp[kk] = _missingValue;
       _kdpSC[kk] = _missingValue;
       _psob[kk] = _missingValue;
+      _psobAccum[kk] = _missingValue;
     }
   }
 
