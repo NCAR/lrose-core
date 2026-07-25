@@ -537,11 +537,28 @@ private:
 
   double _phidpJitterMax; /**< Max jitter for valid phidp */
   double _phidpSdevMax; /**< Max sdev for valid phidp */
-
+  
   // min valid KDP, default 0.05
   // absolute values less than this are set to 0
 
   double _minValidAbsKdp;
+  
+  // parameters for KDP conditioned by ZZDR
+
+  double _kdpZExpon;
+  double _kdpZdrExpon;
+  double _kdpZZdrCoeff;
+  double _dbzMinForSelfConsistency;
+  double _kdpMinForSelfConsistency;
+  int _kdpZZdrMedianLen;
+
+  // nominal length of a feature in PHIDP
+  
+  double _phidpFeatureLengthKm;
+
+  // threshold for psob mean
+
+  double _psobMeanThreshold;
 
   // phidp state for unfolding
 
@@ -668,8 +685,8 @@ private:
   vector<double> _psob_;
   double *_psob;
 
-  vector<double> _psobAccum_;
-  double *_psobAccum;
+  vector<double> _psobMean_;
+  double *_psobMean;
 
   vector<double> _dbzAttenCorr_;
   double *_dbzAttenCorr;
@@ -714,19 +731,6 @@ private:
 
   bool _writeRayFile;
   string _rayFileDir;
-
-  // parameters for KDP conditioned by ZZDR
-
-  double _kdpZExpon;
-  double _kdpZdrExpon;
-  double _kdpZZdrCoeff;
-  double _dbzMinForSelfConsistency;
-  double _kdpMinForSelfConsistency;
-  int _kdpZZdrMedianLen;
-
-  // nominal length of a feature in PHIDP
-
-  double _phidpFeatureLengthKm;
 
   // FFT for filtering
   

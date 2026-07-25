@@ -34,7 +34,7 @@ REQUIRED_COLUMNS = [
     "phidpFilt",
     "phidpCondFilt",
     "psob",
-    "psobAccum",
+    "psobMean",
     "kdp",
     "kdpSC",
     "kdpZZdr",
@@ -369,7 +369,7 @@ class KdpRayPlotter:
         self.ax3.plot(gate_num, plot_data["kdpSC"], label="KDP_SC", color="blue")
         self.ax3.plot(gate_num, plot_data["kdpZZdr"], label="KDP_ZZDR", color="green")
         self.ax3.plot(gate_num, plot_data["psob"], label="PSOB", color="orange")
-        self.ax3.plot(gate_num, plot_data["psobAccum"], label="PSOB_ACCUM", color="black")
+        self.ax3.plot(gate_num, plot_data["psobMean"], label="PSOB_MEAN", color="black")
         # self.ax3.plot(gate_num, plot_data["phidpFiltTrend"], label="TREND", color="magenta")
         self.ax3.set_xlabel("gateNum")
         self.ax3.set_ylabel("KDP, PSOB")

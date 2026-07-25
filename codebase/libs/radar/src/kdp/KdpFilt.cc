@@ -192,6 +192,8 @@ KdpFilt::KdpFilt()
 
   _minValidAbsKdp = 0.05;
 
+  _psobMeanThreshold = 1.0;
+
   _useIterativeFiltering = false;
   _phidpDiffThreshold = 4.0;
 
@@ -329,7 +331,6 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
     setFIRFilterLen(KdpFilt::FIR_LENGTH_10);
   }
   setNGatesStats(params.KDP_ngates_for_stats);
-  setMinValidAbsKdp(params.KDP_min_valid_abs_kdp);
   setNFiltIterUnfolded(params.KDP_n_filt_iterations_unfolded);
   setNFiltIterCond(params.KDP_n_filt_iterations_hubbert_bringi);
   if (params.KDP_psob_method == KdpFiltParams::HUBBERT_BRINGI_METHOD) {
@@ -339,6 +340,7 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
   setPhidpSdevMax(params.KDP_phidp_sdev_max);
   setPhidpJitterMax(params.KDP_phidp_jitter_max);
   setMinValidAbsKdp(params.KDP_min_valid_abs_kdp);
+  // setPsobMeanThreshold(params.KDP_psob_mean_threshold);
   checkSnr(params.KDP_check_snr);
   setSnrThreshold(params.KDP_snr_threshold);
   checkRhohv(params.KDP_check_rhohv);
@@ -500,7 +502,7 @@ int KdpFilt::compute(time_t timeSecs,
         _kdpZZdr[igate] = 0;
         _psob[igate] = 0;
       }
-      _psobAccum[igate] = 0.0;
+      _psobMean[igate] = 0.0;
     }
     return 0;
   }
@@ -517,20 +519,6 @@ int KdpFilt::compute(time_t timeSecs,
 
   _loadPhidpAccumFilt(_phidpCondFilt, _phidpAccumFilt);
 
-#ifdef NOTNOW
-  // compute phase shift on backscatter as the difference between
-  // measured and filtered phidp
-  
-  for (int igate = 0; igate < _nGates; igate++) {
-    if (_validForKdp[igate]) {
-      double psob = _phidpFilt[igate] - _phidpCondFilt[igate];
-      // if (psob > 0) {
-      _psob[igate] = psob;
-      // }
-    }
-  }
-#endif
-  
   // load up conditional KDP from estimated kdp and kdpZZdr
 
   _loadKdpSC();
@@ -673,7 +661,7 @@ void KdpFilt::_initArrays(const double *snr,
   _kdpSC_.resize(_nGates); _kdpSC = _kdpSC_.data();
   _phidpSC_.resize(_nGates); _phidpSC = _phidpSC_.data();
   _psob_.resize(_nGates); _psob = _psob_.data();
-  _psobAccum_.resize(_nGates); _psobAccum = _psobAccum_.data();
+  _psobMean_.resize(_nGates); _psobMean = _psobMean_.data();
   _dbzAttenCorr_.resize(_nGates); _dbzAttenCorr = _dbzAttenCorr_.data();
   _zdrAttenCorr_.resize(_nGates); _zdrAttenCorr = _zdrAttenCorr_.data();
   _dbzCorrected_.resize(_nGates); _dbzCorrected = _dbzCorrected_.data();
@@ -791,7 +779,7 @@ void KdpFilt::_initArrays(const double *snr,
     _phidpFftFilt[ii] = _missingValue;
     _phidpFiltTrend[ii] = _missingValue;
     _scBlock[ii] = 0;
-    _psobAccum[ii] = 0.0;
+    _psobMean[ii] = 0.0;
   }
   
   double xxDelta = 1.0 / (double) _nGatesPadded;
@@ -1267,7 +1255,7 @@ void KdpFilt::_computeKdp()
       _kdpZZdr[ii] = 0.0;
       _kdpSC[ii] = 0.0;
       _psob[ii] = 0.0;
-      _psobAccum[ii] = 0.0;
+      _psobMean[ii] = 0.0;
       continue;
     }
     
@@ -1299,7 +1287,7 @@ void KdpFilt::_computeKdp()
     }
     int len = i1 - i0;
     if (len < 2) {
-      _kdp[ii] = 0;
+       _kdp[ii] = 0;
     } else {
       // double dphi = _phidpCondFilt[i1] - _phidpCondFilt[i0];
       if (_phidpFftFilt[i0] != _missingValue &&
@@ -1996,7 +1984,7 @@ void KdpFilt::_writeRayDataToFile()
           "snr dbz zdr rhohv phidp "
           "phidpMean phidpMeanValid phidpJitter phidpSdev "
           "phidpUnfold unfoldInterp phidpFilt phidpCondFilt "
-          "zdrSdev psob psobAccum kdp kdpSC kdpZZdr "
+          "zdrSdev psob psobMean kdp kdpSC kdpZZdr "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected regrFilt "
           "phidpFftFilt phidpFiltTrend scBlock phidpSC\n");
 
@@ -2041,7 +2029,7 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_phidpCondFilt[igate], 0),
             _getPlotVal(_zdrSdev[igate], 0),
             _getPlotVal(_psob[igate], NAN),
-            _getPlotVal(_psobAccum[igate], NAN),
+            _getPlotVal(_psobMean[igate], NAN),
             _getPlotVal(_kdp[igate], NAN),
             _getPlotVal(_kdpSC[igate], NAN),
             _getPlotVal(_kdpZZdr[igate], NAN),
@@ -2166,7 +2154,7 @@ void KdpFilt::_loadKdpSC()
   _movingMean(_kdpSC_, _nGatesStats, filtSC);
   std::copy(filtSC.begin(), filtSC.end(), _kdpSC_.begin());
 
-  // compute _phidpSC by integrating _kdpSC
+  // compute _phidpSC by integrating _kdpSC, compute psob
 
   std::copy(_phidpFftFilt_.begin(), _phidpFftFilt_.end(), _phidpSC_.begin());
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
@@ -2179,22 +2167,34 @@ void KdpFilt::_loadKdpSC()
       }
       _phidpSC[igate] = RadarComplex::sumDeg(_phidpSC[igate - 1], deltaPhi);
       // compute phase shift on backscatter as the difference between
-      // fft filtered value and SC phidp
-      double psob = _phidpFftFilt[igate] - _phidpSC[igate];
-      // if (psob > 0) {
-      _psob[igate] = psob;
-      // }
+      // filtered value and SC phidp
+      _psob[igate] = _phidpFftFilt[igate] - _phidpSC[igate];
     }
   }
 
-  // load psobAccum
-
+  // set conditions on psob
+  // compute mean psob for pos values only
+  // threshold using _psobMeanThreshold
+  
   for (size_t ii = 0; ii < psobRuns.size(); ii++) {
     const PhidpRun &run = psobRuns[ii];
-    double psobAccum = 0.0;
+    double psobSum = 0.0;
+    double count = 0.0;
     for (int igate = run.ibegin; igate <= run.iend; igate++) {
-      psobAccum += _psob[igate] * (_gateSpacingKm / _phidpFeatureLengthKm);
-      _psobAccum[igate] = psobAccum;
+      if (_psob[igate] >= 0.0) {
+        psobSum += _psob[igate];
+        count++;
+      }
+    }
+    double psobMean = 0.0;
+    if (count > 0) {
+      psobMean = psobSum / count;
+    }
+    for (int igate = run.ibegin; igate <= run.iend; igate++) {
+      _psobMean[igate] = psobMean;
+      if (psobMean < _psobMeanThreshold || _psob[igate] < 0) {
+        _psob[igate] = 0;
+      }
     }
   }
 
@@ -2356,7 +2356,13 @@ void KdpFilt::_censorNonValidKdp()
       _kdp[kk] = _missingValue;
       _kdpSC[kk] = _missingValue;
       _psob[kk] = _missingValue;
-      _psobAccum[kk] = _missingValue;
+      _psobMean[kk] = _missingValue;
+    }
+    if (fabs(_kdp[kk]) < 0.1) {
+      _kdp[kk] = 0;
+    }
+    if (fabs(_kdpSC[kk]) < 0.1) {
+      _kdpSC[kk] = 0;
     }
   }
 
