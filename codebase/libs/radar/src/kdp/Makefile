@@ -23,6 +23,7 @@ HDRS =
 
 CPPC_SRCS = \
 	KdpFiltParams.cc \
+	KdpFirFilt.cc \
 	KdpBringi.cc \
 	KdpCompute.cc \
 	KdpFilt.cc \
