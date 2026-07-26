@@ -979,6 +979,7 @@ void KdpFilt::_filterPhidpUnfolded()
 
 /////////////////////////////////////////////////
 // compute phidp filtered with regression filter
+// globally - i.e. full ray
 
 void KdpFilt::_computePhidpRegrFilt()
 
@@ -991,7 +992,6 @@ void KdpFilt::_computePhidpRegrFilt()
   if (polyOrder < 5) {
     polyOrder = 5;
   }
-  cerr << "PPPPPPPPPPPPPPPPPPPPPPPPPPPPP order: " << polyOrder << endl;
   
   // prepare for the fit
   
@@ -1029,6 +1029,7 @@ void KdpFilt::_computePhidpRegrFilt()
 /////////////////////////////////////////////////
 // compute phidp filtered with regression filter
 // for specified valid run
+// i.e. not global
 
 void KdpFilt::_computePhidpRegrFilt(int runNum)
 
@@ -1038,12 +1039,10 @@ void KdpFilt::_computePhidpRegrFilt(int runNum)
 
   PhidpRun &run = _validRuns[runNum];
   int startGate = run.ibegin - _nGatesPad;
-  // int startGate = run.ibegin;
   if (startGate < 0) {
     startGate = 0;
   }
   int endGate = run.iend + _nGatesPad + 1;
-  // int endGate = run.iend + 1;
   if (endGate > _nGates - 1) {
     endGate = _nGates - 1;
   }
