@@ -2315,7 +2315,7 @@ void KdpFilt::_quadFilter()
                                                               _gateSpacingKm,
                                                               nullptr,
                                                               featureWidth,
-                                                              featureWidth * 2);
+                                                              featureWidth);
   
   _phidpQuadFilt_ = result.phidpFitDeg;
   _kdpQuadFilt_ = result.kdpDegPerKm;
