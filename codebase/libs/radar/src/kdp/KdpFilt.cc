@@ -661,6 +661,8 @@ void KdpFilt::_initArrays(const double *snr,
   _gateProps_.resize(_nGates); _gateProps = _gateProps_.data();
   _phidpFftFilt_.resize(_nGates); _phidpFftFilt = _phidpFftFilt_.data();
   _phidpFiltTrend_.resize(_nGates); _phidpFiltTrend = _phidpFiltTrend_.data();
+  _phidpQuadFilt_.resize(_nGates); _phidpQuadFilt = _phidpQuadFilt_.data();
+  _kdpQuadFilt_.resize(_nGates); _kdpQuadFilt = _kdpQuadFilt_.data();
   _scBlock_.resize(_nGates); _scBlock = _scBlock_.data();
   _regrFilt_.resize(_nGates); _regrFilt = _regrFilt_.data();
   _xxVals_.resize(_nGatesPadded); _xxVals = _xxVals_.data();
@@ -962,6 +964,10 @@ void KdpFilt::_filterPhidpUnfolded()
   // apply fft filter to phidp unfolded
 
   _fftFilter();
+  
+  // apply quadratic filter to phidp unfolded
+
+  _quadFilter();
   
   // compute phidp filtered with regression filter
   
@@ -1964,7 +1970,8 @@ void KdpFilt::_writeRayDataToFile()
           "phidpUnfold unfoldInterp phidpFilt phidpCondFilt "
           "zdrSdev psob psobMean kdp kdpSC kdpZZdr "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected regrFilt "
-          "phidpFftFilt phidpFiltTrend scBlock phidpSC\n");
+          "phidpFftFilt phidpFiltTrend phidpQuad kdpQuad "
+          "scBlock phidpSC\n");
 
   // write data
 
@@ -1988,7 +1995,7 @@ void KdpFilt::_writeRayDataToFile()
             "%10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f\n",
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
             (_validForUnfold[igate]?1:0),
@@ -2018,6 +2025,8 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_regrFilt[igate], NAN),
             _getPlotVal(_phidpFftFilt[igate], NAN),
             _getPlotVal(_phidpFiltTrend[igate], NAN),
+            _getPlotVal(_phidpQuadFilt[igate], NAN),
+            _getPlotVal(_kdpQuadFilt[igate], NAN),
             _getPlotVal(_scBlock[igate], 0),
             _getPlotVal(_phidpSC[igate], NAN)
             );
@@ -2235,10 +2244,6 @@ void KdpFilt::_fftFilter()
 
 {
 
-  // fill missing gates with random values
-
-  // _fillPhidpMissingGates();
-
   // create complex array for phidp
   // pad out to avoid ringing at extremities
   
@@ -2292,6 +2297,28 @@ void KdpFilt::_fftFilter()
   for (int kk = 0; kk < _nGates; ++kk) {
     _phidpFftFilt[kk] = RadarComplex::argDeg(phiComplex[kk]);
   }
+
+}
+
+////////////////////////////////////////////////////////////
+/// filter phidp using quadratic fit
+
+void KdpFilt::_quadFilter()
+
+{
+
+  // perform the quadratic fit
+
+  int featureWidth = (int) (_phidpFeatureLengthKm / _gateSpacingKm) + 1;
+  
+  KdpQuadFit::FitResult result = _quadFit.computeQuadraticKdp(_phidpUnfoldInterp_,
+                                                              _gateSpacingKm,
+                                                              nullptr,
+                                                              featureWidth,
+                                                              featureWidth * 2);
+  
+  _phidpQuadFilt_ = result.phidpFitDeg;
+  _kdpQuadFilt_ = result.kdpDegPerKm;
 
 }
 

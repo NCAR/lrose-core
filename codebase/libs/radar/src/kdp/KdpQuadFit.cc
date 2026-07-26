@@ -48,6 +48,22 @@
 // Unwrap a PHIDP vector whose values are in degrees.
 // Missing values do not update the previous valid phase.
 
+// constructor
+
+KdpQuadFit::KdpQuadFit()
+  
+{
+
+}
+
+// destructor
+
+KdpQuadFit::~KdpQuadFit()
+  
+{
+
+}
+
 std::vector<double> KdpQuadFit::unwrapDegrees(const std::vector<double>& phaseDeg)
 {
   std::vector<double> result(phaseDeg.size(), missingValue());

@@ -40,6 +40,7 @@
 #define KdpFilt_hh
 
 #include <radar/KdpFiltParams.hh>
+#include <radar/KdpQuadFit.hh>
 #include <radar/RadarFft.hh>
 #include <rapmath/ForsytheFit.hh>
 #include <string>
@@ -706,6 +707,12 @@ private:
   vector<double> _phidpFiltTrend_;
   double *_phidpFiltTrend;
   
+  vector<double> _phidpQuadFilt_;
+  double *_phidpQuadFilt;
+  
+  vector<double> _kdpQuadFilt_;
+  double *_kdpQuadFilt;
+  
   vector<double> _scBlock_;
   double *_scBlock;
   
@@ -735,6 +742,10 @@ private:
   // FFT for filtering
   
   RadarFft _fft;
+
+  // quadratic filter
+  
+  KdpQuadFit _quadFit;
   
   //////////////////////////////////////////
   // methods
@@ -828,6 +839,10 @@ private:
   /// filter phidp using FFT
   
   void _fftFilter();
+    
+  /// filter phidp using quadratic fit
+  
+  void _quadFilter();
     
   /// fill phidp missing gates with noise
 

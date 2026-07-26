@@ -45,6 +45,8 @@ REQUIRED_COLUMNS = [
     "regrFilt",
     "phidpFftFilt",
     "phidpFiltTrend",
+    "phidpQuad",
+    "kdpQuad",
     "scBlock",
     "phidpSC",
 ]
@@ -371,6 +373,7 @@ class KdpRayPlotter:
         self.ax3.plot(gate_num, plot_data["psob"], label="PSOB", color="orange")
         self.ax3.plot(gate_num, plot_data["psobMean"], label="PSOB_MEAN", color="black")
         # self.ax3.plot(gate_num, plot_data["phidpFiltTrend"], label="TREND", color="magenta")
+        self.ax3.plot(gate_num, plot_data["kdpQuad"], label="KDP_QUAD", color="magenta")
         self.ax3.set_xlabel("gateNum")
         self.ax3.set_ylabel("KDP, PSOB")
 
@@ -391,6 +394,7 @@ class KdpRayPlotter:
         self.ax4.plot(gate_num, plot_data["unfoldInterp"], label="unfoldInterp", color="green")
         self.ax4.plot(gate_num, plot_data["phidpFilt"], label="FIR_Filt", color="orange")
         self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt", color="blue")
+        self.ax4.plot(gate_num, plot_data["phidpQuad"], label="phidpQuad", color="red")
         self.ax4.set_xlabel("gateNum")
         self.ax4.set_ylabel("PHIDP")
         draw_block_limits(self, self.ax4, gate_num, self.data["scBlock"])
