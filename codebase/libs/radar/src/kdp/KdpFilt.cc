@@ -971,7 +971,9 @@ void KdpFilt::_filterPhidpUnfolded()
   
   // compute phidp filtered with regression filter
   
-  _computePhidpRegrFilt();
+  for (size_t irun = 0; irun < _validRuns.size(); irun++) {
+    _computePhidpRegrFilt(irun);
+  }
 
 }
 
@@ -989,6 +991,7 @@ void KdpFilt::_computePhidpRegrFilt()
   if (polyOrder < 5) {
     polyOrder = 5;
   }
+  cerr << "PPPPPPPPPPPPPPPPPPPPPPPPPPPPP order: " << polyOrder << endl;
   
   // prepare for the fit
   
@@ -1035,10 +1038,12 @@ void KdpFilt::_computePhidpRegrFilt(int runNum)
 
   PhidpRun &run = _validRuns[runNum];
   int startGate = run.ibegin - _nGatesPad;
+  // int startGate = run.ibegin;
   if (startGate < 0) {
     startGate = 0;
   }
   int endGate = run.iend + _nGatesPad + 1;
+  // int endGate = run.iend + 1;
   if (endGate > _nGates - 1) {
     endGate = _nGates - 1;
   }
@@ -1047,7 +1052,7 @@ void KdpFilt::_computePhidpRegrFilt(int runNum)
   // compute regression order to be used
 
   double deltaRangeKm = nGatesFit * _gateSpacingKm;
-  int polyOrder = floor(deltaRangeKm / _phidpFeatureLengthKm) * 2 + 1;
+  int polyOrder = floor(deltaRangeKm / _phidpFeatureLengthKm) * 3 + 1;
   if (polyOrder < 5) {
     polyOrder = 5;
   }
@@ -1056,8 +1061,9 @@ void KdpFilt::_computePhidpRegrFilt(int runNum)
   
   ForsytheFit fit;
   vector<double> xx;
+  double xxDelta = 1.0 / (double) nGatesFit;
   for (int ii = 0; ii < nGatesFit; ii++) {
-    xx.push_back(_xxVals_[ii + startGate]);
+    xx.push_back(-0.5 + ii * xxDelta);
   }
   fit.prepareForFit(polyOrder, xx);
   
@@ -2309,16 +2315,15 @@ void KdpFilt::_quadFilter()
 
   // perform the quadratic fit
 
-  int featureWidth = (int) (_phidpFeatureLengthKm / _gateSpacingKm) + 1;
+  int nFeatureHalf = ((int) (_phidpFeatureLengthKm / _gateSpacingKm) + 1) / 2;
+
+  if (_quadFit.compute(_phidpUnfoldInterp_,
+                       _gateSpacingKm,
+                       nFeatureHalf) == 0) {
+    _phidpQuadFilt_ = _quadFit.getPhidpFitDeg();
+    _kdpQuadFilt_ = _quadFit.getKdpDegPerKm();
+  }
   
-  KdpQuadFit::FitResult result = _quadFit.computeQuadraticKdp(_phidpUnfoldInterp_,
-                                                              _gateSpacingKm,
-                                                              nullptr,
-                                                              featureWidth,
-                                                              featureWidth);
-  
-  _phidpQuadFilt_ = result.phidpFitDeg;
-  _kdpQuadFilt_ = result.kdpDegPerKm;
 
 }
 

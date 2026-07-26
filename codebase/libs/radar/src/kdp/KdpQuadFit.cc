@@ -64,8 +64,85 @@ KdpQuadFit::~KdpQuadFit()
 
 }
 
-std::vector<double> KdpQuadFit::unwrapDegrees(const std::vector<double>& phaseDeg)
+/////////////////////////////////////////////////////////////////////
+// compute KDP using quadratic
+// returns 0 on success, -1 on failure
+// call get() methods for results
+
+int KdpQuadFit::compute(const std::vector<double>& phidpDeg,
+                        double gateSpacingKm,
+                        int halfWidth,
+                        const std::vector<double>* quality /* = nullptr */)
+  
 {
+  
+  const std::size_t nGates = phidpDeg.size();
+  
+  _kdpDegPerKm.assign(nGates, missingValue());
+  _phidpFitDeg.assign(nGates, missingValue());
+  _residualStdDeg.assign(nGates, missingValue());
+  _nValid.assign(nGates, 0);
+
+  if (nGates == 0 ||
+      gateSpacingKm <= 0.0 ||
+      halfWidth < 1) {
+    cerr << "ERROR - KdpQuadFit::computeQuadraticKdp" << endl;
+    cerr << "  Invalid parameters" << endl;
+    cerr << "  phidp vector size: " << phidpDeg.size() << endl;
+    cerr << "  gateSpacingKm: " << gateSpacingKm << endl;
+    cerr << "  halfWidth: " << halfWidth << endl;
+    return -1;
+  }
+
+  if (quality != nullptr && quality->size() != nGates) {
+    cerr << "ERROR - KdpQuadFit::computeQuadraticKdp" << endl;
+    cerr << "  Quality vector size does not match phidp vector" << endl;
+    cerr << "  phidp vector size: " << phidpDeg.size() << endl;
+    cerr << "  quality vector size: " << quality->size() << endl;
+    return -1;
+  }
+
+  // unwrap in preparation
+  
+  const std::vector<double> phidpUnwrapped = _unwrapDegrees(phidpDeg);
+
+  // loop through gates
+  
+  for (std::size_t center = 0; center < nGates; ++center) {
+    
+    if (!std::isfinite(phidpUnwrapped[center])) {
+      continue;
+    }
+    
+    const LocalFit fit = _fitLocalQuadratic(phidpUnwrapped,
+                                            quality,
+                                            center,
+                                            halfWidth,
+                                            gateSpacingKm);
+
+    if (!fit.valid) {
+      continue;
+    }
+
+    // PHIDP is two-way differential phase, hence the factor 1/2.
+
+    _kdpDegPerKm[center] = 0.5 * fit.slopeDegPerKm;
+    
+    _phidpFitDeg[center] = fit.intercept;
+    
+    _residualStdDeg[center] = fit.residualStdDeg;
+
+    _nValid[center] = fit.nValid;
+    
+  } // for (std::size_t center
+
+  return 0;
+  
+}
+
+std::vector<double> KdpQuadFit::_unwrapDegrees(const std::vector<double>& phaseDeg)
+{
+
   std::vector<double> result(phaseDeg.size(), missingValue());
   
   bool havePrevious = false;
@@ -101,14 +178,17 @@ std::vector<double> KdpQuadFit::unwrapDegrees(const std::vector<double>& phaseDe
   return result;
 }
 
+///////////////////////////////////////////////////////////////////////////
 // Solve a 3-by-3 linear system using Gaussian elimination with pivoting.
+// returns 0 on success, -1 on failure
 
-bool KdpQuadFit::solve3x3(std::array<std::array<double, 3>, 3> matrix,
+int KdpQuadFit::_solve3x3(std::array<std::array<double, 3>, 3> matrix,
                           std::array<double, 3> rhs,
                           std::array<double, 3>& solution)
 {
+  
   constexpr double epsilon = 1.0e-12;
-
+  
   for (int col = 0; col < 3; ++col) {
 
     int pivot = col;
@@ -123,7 +203,7 @@ bool KdpQuadFit::solve3x3(std::array<std::array<double, 3>, 3> matrix,
     }
 
     if (pivotMagnitude < epsilon) {
-      return false;
+      return -1;
     }
 
     if (pivot != col) {
@@ -155,7 +235,9 @@ bool KdpQuadFit::solve3x3(std::array<std::array<double, 3>, 3> matrix,
   }
 
   solution = rhs;
-  return true;
+
+  return 0;
+
 }
 
 // Local weighted quadratic fit.
@@ -164,12 +246,13 @@ bool KdpQuadFit::solve3x3(std::array<std::array<double, 3>, 3> matrix,
 // improves numerical conditioning and makes coefficient[1] the derivative
 // at the center gate.
 
-KdpQuadFit::LocalFit KdpQuadFit::fitLocalQuadratic(const std::vector<double>& phidpUnwrapped,
-                                                   const std::vector<double>* quality,
-                                                   std::size_t center,
-                                                   int halfWidth,
-                                                   double gateSpacingKm)
+KdpQuadFit::LocalFit KdpQuadFit::_fitLocalQuadratic(const std::vector<double>& phidpUnwrapped,
+                                                    const std::vector<double>* quality,
+                                                    std::size_t center,
+                                                    int halfWidth,
+                                                    double gateSpacingKm)
 {
+
   const std::size_t nGates = phidpUnwrapped.size();
 
   const std::size_t first =
@@ -182,6 +265,7 @@ KdpQuadFit::LocalFit KdpQuadFit::fitLocalQuadratic(const std::vector<double>& ph
              center + static_cast<std::size_t>(halfWidth));
 
   // Weighted sums needed for the normal equations.
+
   double s0 = 0.0;
   double s1 = 0.0;
   double s2 = 0.0;
@@ -234,7 +318,7 @@ KdpQuadFit::LocalFit KdpQuadFit::fitLocalQuadratic(const std::vector<double>& ph
 
   LocalFit result;
   result.nValid = nValid;
-
+  
   if (nValid < 5 || s0 <= 0.0) {
     return result;
   }
@@ -251,7 +335,7 @@ KdpQuadFit::LocalFit KdpQuadFit::fitLocalQuadratic(const std::vector<double>& ph
 
   std::array<double, 3> coefficients{};
 
-  if (!solve3x3(normalMatrix, normalRhs, coefficients)) {
+  if (_solve3x3(normalMatrix, normalRhs, coefficients)) {
     return result;
   }
 
@@ -305,111 +389,6 @@ KdpQuadFit::LocalFit KdpQuadFit::fitLocalQuadratic(const std::vector<double>& ph
     std::sqrt(weightedSquaredError / degreesOfFreedom);
 
   return result;
-}
-
-KdpQuadFit::FitResult KdpQuadFit::computeQuadraticKdp(const std::vector<double>& phidpDeg,
-                                                      double gateSpacingKm,
-                                                      const std::vector<double>* quality /* = nullptr */,
-                                                      int minHalfWidth /* = 3 */,
-                                                      int maxHalfWidth /* = 20 */, 
-                                                      int halfWidthIncrement /* = 2 */,
-                                                      double targetResidualStdDeg /* = 3.0 */)
   
-{
-  
-  const std::size_t nGates = phidpDeg.size();
-
-  FitResult result;
-  result.kdpDegPerKm.assign(nGates, missingValue());
-  result.phidpFitDeg.assign(nGates, missingValue());
-  result.residualStdDeg.assign(nGates, missingValue());
-  result.windowHalfWidth.assign(nGates, -1);
-  result.nValid.assign(nGates, 0);
-
-  if (nGates == 0 ||
-      gateSpacingKm <= 0.0 ||
-      minHalfWidth < 1 ||
-      maxHalfWidth < minHalfWidth ||
-      halfWidthIncrement < 1) {
-    return result;
-  }
-
-  if (quality != nullptr && quality->size() != nGates) {
-    return result;
-  }
-
-  const std::vector<double> phidpUnwrapped =
-    unwrapDegrees(phidpDeg);
-
-  for (std::size_t center = 0; center < nGates; ++center) {
-
-    if (!std::isfinite(phidpUnwrapped[center])) {
-      continue;
-    }
-
-    LocalFit selectedFit;
-    int selectedHalfWidth = -1;
-
-    // Keep the best valid fit in case no candidate reaches the target
-    // residual.
-    LocalFit bestFit;
-    int bestHalfWidth = -1;
-
-    for (int halfWidth = minHalfWidth;
-         halfWidth <= maxHalfWidth;
-         halfWidth += halfWidthIncrement) {
-
-      const LocalFit fit =
-        fitLocalQuadratic(phidpUnwrapped,
-                          quality,
-                          center,
-                          halfWidth,
-                          gateSpacingKm);
-
-      if (!fit.valid) {
-        continue;
-      }
-
-      if (!bestFit.valid ||
-          fit.residualStdDeg < bestFit.residualStdDeg) {
-        bestFit = fit;
-        bestHalfWidth = halfWidth;
-      }
-
-      // Choose the smallest window that gives an acceptable fit.
-      if (fit.residualStdDeg <= targetResidualStdDeg) {
-        selectedFit = fit;
-        selectedHalfWidth = halfWidth;
-        break;
-      }
-    }
-
-    if (!selectedFit.valid) {
-      selectedFit = bestFit;
-      selectedHalfWidth = bestHalfWidth;
-    }
-
-    if (!selectedFit.valid) {
-      continue;
-    }
-
-    // PHIDP is two-way differential phase, hence the factor 1/2.
-    result.kdpDegPerKm[center] =
-      0.5 * selectedFit.slopeDegPerKm;
-
-    result.phidpFitDeg[center] =
-      selectedFit.intercept;
-
-    result.residualStdDeg[center] =
-      selectedFit.residualStdDeg;
-
-    result.windowHalfWidth[center] =
-      selectedHalfWidth;
-
-    result.nValid[center] =
-      selectedFit.nValid;
-  }
-
-  return result;
 }
 

@@ -31,7 +31,7 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Fit a local quadratic to PHIDP.
+// Fit a local quadratic to PHIDP, for each point.
 // Compute KDP as the slope at the center of the quadratic.
 //
 ///////////////////////////////////////////////////////////////
@@ -66,24 +66,42 @@ public:
 
   virtual ~KdpQuadFit();
 
+  // compute KDP using quadratic
+  // returns 0 on success, -1 on failure
+  // call get() methods for results
+  
+  int compute(const std::vector<double>& phidpDeg,
+              double gateSpacingKm,
+              int halfWidth,
+              const std::vector<double>* quality = nullptr);
+  
+  // get the results after calling compute
+  
+  const std::vector<double> &getKdpDegPerKm() const { return _kdpDegPerKm; }
+  const std::vector<double> &getPhidpFitDeg() const { return _phidpFitDeg; }
+  const std::vector<double> &getResidualStdDeg() const { return _residualStdDeg; }
+  const std::vector<int> getNValid() const { return _nValid; }
+
   // missing value
   
   static constexpr double missingValue() {
     return std::numeric_limits<double>::quiet_NaN();
   }
+  
+protected:
+  
+private:
+
+  // data
+  
+  std::vector<double> _kdpDegPerKm;
+  std::vector<double> _phidpFitDeg;
+  std::vector<double> _residualStdDeg;
+  std::vector<int> _nValid;
 
   // structs
   
-  typedef struct FitResult_t {
-    std::vector<double> kdpDegPerKm;
-    std::vector<double> phidpFitDeg;
-    std::vector<double> residualStdDeg;
-    std::vector<int> windowHalfWidth;
-    std::vector<int> nValid;
-  } FitResult;
-
-  typedef struct LocalFit_t
-  {
+  typedef struct LocalFit_t {
     bool valid = false;
     double intercept = missingValue();
     double slopeDegPerKm = missingValue();
@@ -95,40 +113,25 @@ public:
   // Unwrap a PHIDP vector whose values are in degrees.
   // Missing values do not update the previous valid phase.
 
-  std::vector<double> unwrapDegrees(const std::vector<double>& phaseDeg);
+  std::vector<double> _unwrapDegrees(const std::vector<double>& phaseDeg);
 
   // Solve a 3-by-3 linear system using Gaussian elimination with pivoting.
   
-  bool solve3x3(std::array<std::array<double, 3>, 3> matrix,
+  int _solve3x3(std::array<std::array<double, 3>, 3> matrix,
                 std::array<double, 3> rhs,
                 std::array<double, 3>& solution);
-
+  
   // Local weighted quadratic fit.
   //
   // x is measured in km relative to the center gate. Using centered x values
   // improves numerical conditioning and makes coefficient[1] the derivative
   // at the center gate.
 
-  LocalFit fitLocalQuadratic(const std::vector<double>& phidpUnwrapped,
-                             const std::vector<double>* quality,
-                             std::size_t center,
-                             int halfWidth,
-                             double gateSpacingKm);
-
-
-  // compute KDP using quadratic
-  
-  FitResult computeQuadraticKdp(const std::vector<double>& phidpDeg,
-                                double gateSpacingKm,
-                                const std::vector<double>* quality = nullptr,
-                                int minHalfWidth = 3,
-                                int maxHalfWidth = 20,
-                                int halfWidthIncrement = 2,
-                                double targetResidualStdDeg = 3.0);
-  
-protected:
-  
-private:
+  LocalFit _fitLocalQuadratic(const std::vector<double>& phidpUnwrapped,
+                              const std::vector<double>* quality,
+                              std::size_t center,
+                              int halfWidth,
+                              double gateSpacingKm);
 
 };
 
