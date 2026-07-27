@@ -1008,7 +1008,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("block_defs");
     tt->descr = tdrpStrDup("Specify the definitions of the blocks to be processed.");
-    tt->help = tdrpStrDup("Applies to DWELL_SPECIFY_BLOCK_ID. These details are originally specified in the configuration file for hcrdrx. A dwell is constructed for each specified block, and the moments are computed for that dwell. In the time series pulse headers we see the block_id, as well as start and end of block flags.");
+    tt->help = tdrpStrDup("Applies to DWELL_SPECIFY_BLOCK_ID. The following block details are originally specified in the configuration file for hcrdrx and are passed along in the metadata:\n\n\tblock_id\n\tpulse_width_us\n\tprt_s\n\nA dwell is constructed for each specified block, and the moments are computed for that dwell. In the time series pulse headers we see the block_id, as well as start and end of block flags.\n\nNOTES ON TRIPLE-DWELL SCHEME BLOCK_NAMES:\n\nThe block_names are important for downstream processing by HcrMomentsCombine. The block_name should contain the following strings:\n\n\t'short_short': short pulse length and short PRT.\n\t'long_long': long pulse length and long PRT.\n\t'long_short': long pulse length and short PRT.\n\nThere can be multiple versions of these sequences, for different PRT ratios: 2/3, 3/4 and 4/5.\n\nThe field_name_suffixes are appended to the field names for the moments from each block, to allow them to be recognized properly by HcrMomentsCombine.");
     tt->array_offset = (char *) &_block_defs - &_start_;
     tt->array_n_offset = (char *) &block_defs_n - &_start_;
     tt->is_array = TRUE;
@@ -1069,7 +1069,7 @@
       tt->struct_vals[19].s = tdrpStrDup("_SS");
       tt->struct_vals[20].i = 3402;
       tt->struct_vals[21].d = 0.512;
-      tt->struct_vals[22].d = 0.000152064;
+      tt->struct_vals[22].d = 0.000135168;
       tt->struct_vals[23].s = tdrpStrDup("long_long_3_4");
       tt->struct_vals[24].s = tdrpStrDup("_LL");
       tt->struct_vals[25].i = 3403;
@@ -1084,7 +1084,7 @@
       tt->struct_vals[34].s = tdrpStrDup("_SS");
       tt->struct_vals[35].i = 4502;
       tt->struct_vals[36].d = 0.512;
-      tt->struct_vals[37].d = 0.000152064;
+      tt->struct_vals[37].d = 0.00012672;
       tt->struct_vals[38].s = tdrpStrDup("long_long_4_5");
       tt->struct_vals[39].s = tdrpStrDup("_LL");
       tt->struct_vals[40].i = 4503;
