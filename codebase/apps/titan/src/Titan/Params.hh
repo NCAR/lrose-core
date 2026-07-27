@@ -123,13 +123,6 @@ public:
   } remap_z_grid_t;
 
   typedef struct {
-    double min_dbz;
-    double max_dbz;
-    double min_radius_km;
-    double max_radius_km;
-  } conv_radius_function_t;
-
-  typedef struct {
     double dbz_threshold;
     double min_fraction_all_parts;
     double min_fraction_each_part;
@@ -513,19 +506,9 @@ public:
 
   double convection_finder_min_valid_dbz;
 
-  double dbz_threshold_for_definite_convection;
-
-  double convection_finder_background_dbz_radius_km;
-
-  conv_radius_function_t conv_radius_function;
-
-  double convective_radius_km;
-
   double convection_finder_texture_radius_km;
 
   double convection_finder_min_valid_fraction_for_texture;
-
-  double convection_finder_min_texture_value;
 
   double convection_finder_min_convectivity_for_convective;
 
@@ -716,7 +699,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[159];
+  mutable TDRPtable _table[154];
 
   const char *_className;
 

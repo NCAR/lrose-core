@@ -553,3 +553,16 @@ void InputMdv::_applyConvectivityThreshold()
   } // iz
 
 }
+
+/////////////////////////////////////////////
+// clear the memory in the mdvx cbject
+
+void InputMdv::clear()
+
+{
+
+  mdvx.clear();
+  
+}
+
+

@@ -137,6 +137,8 @@ int ConvectionFinder::run(const DsMdvx &inMdvx,
     }
   }
 
+  _convStrat.freeArrays();
+
   return 0;
 
 }

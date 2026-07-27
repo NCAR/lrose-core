@@ -96,6 +96,9 @@ public:
   // read file for given time
   int read(time_t data_time);
 
+  // clear memory
+  void clear();
+  
 protected:
   
 private:

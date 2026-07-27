@@ -518,6 +518,10 @@ int StormIdent::_processScan(int scan_num, time_t scan_time,
     }
   }
 
+  // clear memory
+
+  _inputMdv.clear();
+
   return 0;
   
 }
