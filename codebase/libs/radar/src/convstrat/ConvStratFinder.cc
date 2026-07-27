@@ -377,6 +377,10 @@ int ConvStratFinder::computeEchoType(const fl32 *dbz,
 
   _set2DFields();
 
+  // free up
+
+  _freeClumps();
+
   return 0;
 
 }
@@ -540,6 +544,8 @@ void ConvStratFinder::freeArrays()
   
   _echoType3D.clear();
   _echoType2D.clear();
+
+  _freeClumps();
 
 }
 
