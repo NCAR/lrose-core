@@ -39,6 +39,7 @@
 #define KdpFirFilt_hh
 
 #include <radar/KdpFirFilt.hh>
+#include <limits>
 #include <vector>
 using namespace std;
 
