@@ -1,0 +1,567 @@
+/**********************************************************************
+ * TDRP params for ./HcrMomentsCombine
+ **********************************************************************/
+
+//======================================================================
+//
+// HCR transmits blocks of pulses with varying PRTs and pulse 
+//   lengths.This provides a good compromise between sensitivity, range 
+//   resolution and unambiguous Doppler velocity.
+//
+// The latest version supports 3 block types:
+//
+// 	(1) short-pulse and short-PRT
+// 	(2) long-pulse and long-PRT
+// 	(3) long-pulse and short-PRT.
+//
+// This sequence is repeated in time.
+//
+// HcrTs2Moments reads this interleaved time series, and computes the 
+//   relevant moments for each block type. Those moments are then written, 
+//   in sequence, to a single output FMQ in Radx moments format.
+//
+// HcrMomentsCombine reads the Radx moments data stream, and combines 
+//   the three blocks into a single block, naming the fields 
+//   appropriately, and unfolding the velocity fields as appropriate.  The 
+//   moments are aggregated over an output dwell length, typically 0.1s. 
+//   We unfold the Doppler velocity field using the dual-PRT technique.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+
+debug = DEBUG_OFF;
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register this process with the process mapper (procmap).
+//
+// If TRUE, every minute this process will register a heartbeat with 
+//   procmap. If the process hangs, it will be restared by the 
+//   auto_restarter.
+//
+// Type: boolean
+
+register_with_procmap = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+// Type: string
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+
+//
+// REALTIME: we read data from two moments FMQ, combine the dwells and 
+//   write to an output queue. 
+//
+// ARCHIVE: we read the moments data from CfRadial files, between the 
+//   start and end times set on the command line.
+//
+// In both REALTIME and ARCHIVE mode, we write the resulting moments to 
+//   an output FMQ.
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+
+mode = REALTIME;
+
+///////////// input_fmq_url ///////////////////////////
+//
+// FMQ from which to read the block moments stream.
+//
+// REALTIME mode only.
+//
+// Type: string
+
+input_fmq_url = "fmqp:://localhost::/tmp/fmq/50hz_triple";
+
+///////////// seek_to_end_of_input_fmq ////////////////
+//
+// Option to seek to the end of the input FMQ.
+//
+// REALTIME mode only. If TRUE, the program will seek to the end of the 
+//   fmq and only read in new data. If FALSE, it will start reading from 
+//   the beginning of the FMQ.
+//
+// Type: boolean
+
+seek_to_end_of_input_fmq = TRUE;
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory - 50hz moments data.
+//
+// ARCHIVE mode only.
+//
+// Type: string
+
+input_dir = "$(DATA_DIR)/cfradial/moments/50hz_triple";
+
+//======================================================================
+//
+// MODE TO FOR COMBINING RAY DWELLS.
+//
+// The latest HCR version allows us to take rays from 3 block types 
+//   (typically at a combined 50 Hz rate), and combine them into a single 
+//   rays, containing the moments from the original block types plus 
+//   derived fields such as unfolded Doppler velocity.
+//
+//======================================================================
+ 
+///////////// combine_mode ////////////////////////////
+//
+// Mode for processing the series of rays.
+//
+
+//
+// SINGLE_RAY_MODE: the pulse width and PRT are constant for all rays.
+//
+// DOUBLE_RAY_MODE: combine 2 ray types (short-short, long-long) into a 
+//   single dwell. Doppler velocity is unfolded using the dual short/long 
+//   PRTs. This is limited to valid SNR for the short pulse rays.
+//
+// TRIPLE_RAY_MODE: combined a sequence of 3 ray types into a single 
+//   dwell. Doppler velocity is unfolded using the long pulse rays - this 
+//   gives improved performance over the short-pulse version.
+//
+// Type: enum
+// Options:
+//     SINGLE_RAY_MODE
+//     DOUBLE_RAY_MODE
+//     TRIPLE_RAY_MODE
+
+combine_mode = TRIPLE_RAY_MODE;
+
+///////////// short_short_dwell_label /////////////////
+//
+// Label for short-pulse / short-PRT rays.
+//
+// We store the block name as the scan name for each ray (this is 
+//   therefore overloaded). We identify the relevant rays by searching for 
+//   this string in the ray scan name. Multiple ray types can match this 
+//   label, because we support dual-PRT 2/3, 3/4 and 4/5 modes.
+//
+// Type: string
+
+short_short_dwell_label = "short_short";
+
+///////////// long_long_dwell_label ///////////////////
+//
+// Label for long-pulse / long-PRT rays.
+//
+// We store the block name as the scan name for each ray (this is 
+//   therefore overloaded). We identify the relevant rays by searching for 
+//   this string in the ray scan name. Multiple ray types can match this 
+//   label, because we support dual-PRT 2/3, 3/4 and 4/5 modes.
+//
+// Type: string
+
+long_long_dwell_label = "long_long";
+
+///////////// long_short_dwell_label //////////////////
+//
+// Label for long-pulse / short-PRT rays.
+//
+// We store the block name as the scan name for each ray (this is 
+//   therefore overloaded). We identify the relevant rays by searching for 
+//   this string in the ray scan name. Multiple ray types can match this 
+//   label, because we support dual-PRT 2/3, 3/4 and 4/5 modes.
+//
+// Type: string
+
+long_short_dwell_label = "long_short";
+
+//======================================================================
+//
+// COMBINED DWELL DETAILS.
+//
+// We combine the high-rate moments data (say at 50 hz) into lower-rate 
+//   dwells, say at 10 hz.
+//
+//======================================================================
+ 
+///////////// dwell_length_secs ///////////////////////
+//
+// Specify the output dwell length (secs).
+//
+// Dwells from the input data will be combined to form dwells covering 
+//   the specified time. Multiple incoming rays, at the higher rate, will 
+//   be comined into the output ray at a lower rate.
+//
+// Type: double
+
+dwell_length_secs = 0.1;
+
+///////////// dwell_stats_method //////////////////////
+//
+// Method for computing stats on the dwell.
+//
+// MIDDLE refers to the middle ray in the dwell sequence. The 
+//   DISCRETE_MODE computes applies only to discrete (integer) fields, and 
+//   returns the most common entry in a discrete data set.
+//
+// Type: enum
+// Options:
+//     DWELL_STATS_MEAN
+//     DWELL_STATS_MEDIAN
+//     DWELL_STATS_MAXIMUM
+//     DWELL_STATS_MINIMUM
+//     DWELL_STATS_MIDDLE
+//     DWELL_STATS_DISCRETE_MODE
+
+dwell_stats_method = DWELL_STATS_MEAN;
+
+///////////// dwell_stats_max_fraction_missing ////////
+//
+// Specify the max fraction of the dwell that can have missing data.
+//
+// We compute how much of the dwell is missing for each field. If the 
+//   fraction exceeds this parameter, the combined value will be set to 
+//   missing.
+//
+// Minimum val: 0
+// Maximum val: 1
+//
+// Type: double
+
+dwell_stats_max_fraction_missing = 0.25;
+
+//======================================================================
+//
+// OPTION TO SET STATS METHOD FOR INDIVIDUAL FIELDS.
+//
+//======================================================================
+ 
+///////////// set_stats_method_for_individual_fields //
+//
+// Set the stats method for individual fields.
+//
+// The global stats method is set by the 'dwell_stats_method' parameter. 
+//   If 'set_stats_method_for_individual_fields' is true, we can set the 
+//   stats method on particular fields. Fields not specified here will use 
+//   the global parameter.
+//
+// Type: boolean
+
+set_stats_method_for_individual_fields = FALSE;
+
+///////////// stats_method_fields /////////////////////
+//
+// Stats methods for individual fields.
+//
+// Applies if 'set_stats_method_for_individual_fields' is true. The 
+//   global stats method is set by the 'dwell_stats_method' parameter. 
+//   Fields not specified here will use the global parameter.
+//
+// Type: struct
+//   typedef struct {
+//      string field_name;
+//      dwell_stats_method_t stats_method;
+//        Options:
+//          DWELL_STATS_MEAN
+//          DWELL_STATS_MEDIAN
+//          DWELL_STATS_MAXIMUM
+//          DWELL_STATS_MINIMUM
+//          DWELL_STATS_MIDDLE
+//          DWELL_STATS_DISCRETE_MODE
+//   }
+//
+// 1D array - variable length.
+
+stats_method_fields = {
+  {
+    field_name = "FLAG",
+    stats_method = DWELL_STATS_MEDIAN
+  }
+  ,
+  {
+    field_name = "ANTENNA_FLAG",
+    stats_method = DWELL_STATS_MIDDLE
+  }
+};
+
+//======================================================================
+//
+// FIELD NAMES for combination.
+//
+// The long pulse rays have a longer PRT than the short pulse rays. This 
+//   allows us to unfold the velocity field using the staggered-PRT 
+//   technique. If both long and short PRT data are present, the velocity 
+//   field is unfolded into a final velocity field.
+//
+//======================================================================
+ 
+///////////// perform_velocity_unfolding //////////////
+//
+// Option to unfold the velocity field.
+//
+// If false, the short vel will be copied to the unfolded field. The 
+//   vel_unfolded field will be added to the output data set.
+//
+// Type: boolean
+
+perform_velocity_unfolding = TRUE;
+
+///////////// input_vel_raw_field_name_short_prt //////
+//
+// This is the name for the raw velocity field in the input data. The 
+//   raw velocity has not been corrected for platform motion.
+//
+// These fields are from the long-pulse short-prt rays.
+//
+// Type: string
+
+input_vel_raw_field_name_short_prt = "VEL_RAW_LS";
+
+///////////// input_vel_raw_field_name_long_prt ///////
+//
+// This is the name for the raw velocity field in the input data. The 
+//   raw velocity has not been corrected for platform motion.
+//
+// These fields are from the long-pulse long-prt rays.
+//
+// Type: string
+
+input_vel_raw_field_name_long_prt = "VEL_RAW_LL";
+
+///////////// input_vel_corr_field_name_short_prt /////
+//
+// This is the name for the corrected velocity field in the input data. 
+//   The velocity has been corrected for platform motion.
+//
+// These fields are from the long-pulse short-prt rays.
+//
+// Type: string
+
+input_vel_corr_field_name_short_prt = "VEL_LS";
+
+///////////// input_vel_corr_field_name_long_prt //////
+//
+// This is the name for the corrected velocity field in the input data. 
+//   The velocity has been corrected for platform motion.
+//
+// These fields are from the long-pulse long-prt rays.
+//
+// Type: string
+
+input_vel_corr_field_name_long_prt = "VEL_LL";
+
+///////////// output_vel_corr_field_name_short_prt ////
+//
+// Name for the corrected velocity on output.
+//
+// The name of the output fields for velocity corrected for platform 
+//   motion.
+//
+// Type: string
+
+output_vel_corr_field_name_short_prt = "VEL_short_prt";
+
+///////////// output_vel_corr_field_name_long_prt /////
+//
+// Name for the corrected velocity on output.
+//
+// The name of the output fields for velocity corrected for platform 
+//   motion.
+//
+// Type: string
+
+output_vel_corr_field_name_long_prt = "VEL_long_prt";
+
+///////////// output_vel_unfolded_field_name_short_pulse 
+//
+// Name for the unfolded velocity.
+//
+// This is an output field for short pulse, computed by unfolding the 
+//   dual-prt vel fields.
+//
+// Type: string
+
+output_vel_unfolded_field_name_short_pulse = "VEL_unfold_short";
+
+///////////// output_vel_unfolded_field_name_long_pulse 
+//
+// Name for the unfolded velocity.
+//
+// This is an output field for long pulse, computed by unfolding the 
+//   dual-prt vel fields.
+//
+// Type: string
+
+output_vel_unfolded_field_name_long_pulse = "VEL_unfold_long";
+
+//======================================================================
+//
+// GROUND-BASED MODE - FIXED LOCATION for testing.
+//
+// In ground-based the instrument is not moving. Therefore we override 
+//   the latitude/longitude/altitude in the georeference data blocks, and 
+//   set the platform velocities to 0.
+//
+//======================================================================
+ 
+///////////// fixed_location_mode /////////////////////
+//
+// Option to set fixed location in ground-based mode.
+//
+// If TRUE, the program will override the metadata for 
+//   latitude/longitude/altitude, and set platform velocities to 0.
+//
+// Type: boolean
+
+fixed_location_mode = FALSE;
+
+///////////// fixed_radar_location ////////////////////
+//
+// Radar location if override is set true.
+//
+// The radar_location is only used if 'override_radar_location' is set 
+//   true. Otherwise the information in the input data stream is used. 
+//   Note that the altitude is in km MSL.
+//
+// Type: struct
+//   typedef struct {
+//      double latitudeDeg;
+//      double longitudeDeg;
+//      double altitudeKm;
+//   }
+//
+
+fixed_radar_location = {
+    latitudeDeg = 0,
+    longitudeDeg = 0,
+    altitudeKm = 0
+};
+
+//======================================================================
+//
+// COMPUTE MEAN RADAR LOCATION?.
+//
+// This mode allows you to compute the mean radar location for a 
+//   ground-based installation. It reads in existing time series data and 
+//   computes the mean location (lat, lon, alt) based on that data. It 
+//   then prints the mean location and then exits. You can then use those 
+//   values to set the location for fixed_location_mode - see above.
+//
+//======================================================================
+ 
+///////////// compute_mean_location ///////////////////
+//
+// Option to compute the mean location of the radar from the 
+//   georeference data in the rays.
+//
+// Applicable in archive mode only, and only applicable to ground-based 
+//   projects. It will compute the mean radar location, from the short- 
+//   and long-pulse input data, and print the mean to the terminal. The 
+//   mean values can then be used in the radar_location parameter (see 
+//   above) if override_radar_location is set to TRUE.
+//
+// Type: boolean
+
+compute_mean_location = FALSE;
+
+//======================================================================
+//
+// OUTPUT FMQ.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// FMQ to which the combined dwells are written.
+//
+// FMQ mode only.
+//
+// Type: string
+
+output_fmq_url = "fmqp:://localhost::/tmp/fmq/output";
+
+///////////// output_fmq_compress /////////////////////
+//
+// Option to compress the output fmq.
+//
+// The default is for no compression.
+//
+// Type: boolean
+
+output_fmq_compress = FALSE;
+
+///////////// output_fmq_n_slots //////////////////////
+//
+// Number of slots in output FMQ.
+//
+// Type: int
+
+output_fmq_n_slots = 5000;
+
+///////////// output_fmq_buf_size /////////////////////
+//
+// Size of buffer in output FMQ.
+//
+// Type: int
+
+output_fmq_buf_size = 100000000;
+
+///////////// output_fmq_write_blocking ///////////////
+//
+// Option to block on write when the radar queue fills up.
+//
+// If false, the program writes data to the output queue without regard 
+//   to whether the reader is keeping up. This mode should usually be used 
+//   in realtime, to avoid holding things up if a client becomes slow. If 
+//   true, the program will not overwrite data in the queue which has not 
+//   been read by the reader. This is recommended for ARCHIVE and FILELIST 
+//   mode. In this mode there should be only one reader. If you need to 
+//   service more than one reader, use Fmq2Fmq in write blocking mode with 
+//   multiple output urls to multiplex the queue.
+//
+// Type: boolean
+
+output_fmq_write_blocking = FALSE;
+
+///////////// output_fmq_data_mapper_report_interval //
+//
+// Number of seconds between reports to DataMapper.
+//
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQs are written to. If <= 0, registration will not be performed.
+//
+// Type: int
+
+output_fmq_data_mapper_report_interval = 5;
+

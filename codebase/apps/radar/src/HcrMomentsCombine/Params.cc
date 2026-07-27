@@ -1071,7 +1071,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("COMPUTE MEAN RADAR LOCATION?");
-    tt->comment_text = tdrpStrDup("This mode will compute the mean radar location for a ground-based installation.");
+    tt->comment_text = tdrpStrDup("This mode allows you to compute the mean radar location for a ground-based installation. It reads in existing time series data and computes the mean location (lat, lon, alt) based on that data. It then prints the mean location and then exits. You can then use those values to set the location for fixed_location_mode - see above.");
     tt++;
     
     // Parameter 'compute_mean_location'
