@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("HCR has the capability to transmit blocks of pulses with varying PRTs and pulse lengths.\n\nThe latest version supports 3 block types:\n\n\t(1) short-pulse and short-PRT\n\t(2) long-pulse and long-PRT\n\t(3) long-pulse and short-PRT.\n\nThis sequence is repeated in time.\n\nHcrTs2Moments reads this interleaved time series, and computes the relevant moments for each block. Those moments are then written, in sequence, to a single output FMQ in Radx moments format.\n\nHcrMomentsCombine reads the Radx moments data stream, and combines the three blocks into a single block, naming the fields appropriately, and unfolding the velocity fields as appropriate. This allows us to unfold the velocity field using the staggered-PRT technique.");
+    tt->comment_hdr = tdrpStrDup("HCR transmits blocks of pulses with varying PRTs and pulse lengths.This provides a good compromise between sensitivity, range resolution and unambiguous Doppler velocity.\n\nThe latest version supports 3 block types:\n\n\t(1) short-pulse and short-PRT\n\t(2) long-pulse and long-PRT\n\t(3) long-pulse and short-PRT.\n\nThis sequence is repeated in time.\n\nHcrTs2Moments reads this interleaved time series, and computes the relevant moments for each block type. Those moments are then written, in sequence, to a single output FMQ in Radx moments format.\n\nHcrMomentsCombine reads the Radx moments data stream, and combines the three blocks into a single block, naming the fields appropriately, and unfolding the velocity fields as appropriate.  The moments are aggregated over an output dwell length, typically 0.1s. We unfold the Doppler velocity field using the dual-PRT technique.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -690,56 +690,66 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("GROUND-BASED MODE");
-    tt->comment_text = tdrpStrDup("In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.");
+    tt->comment_hdr = tdrpStrDup("MODE TO FOR COMBINING RAY DWELLS");
+    tt->comment_text = tdrpStrDup("The latest HCR version allows us to take rays from 3 block types (typically at a combined 50 Hz rate), and combine them into a single rays, containing the moments from the original block types plus derived fields such as unfolded Doppler velocity.");
     tt++;
     
-    // Parameter 'fixed_location_mode'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'combine_mode'
+    // ctype is '_combine_mode_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("fixed_location_mode");
-    tt->descr = tdrpStrDup("Option to set fixed location in ground-based mode.");
-    tt->help = tdrpStrDup("If TRUE, the program will override the metadata for latitude/longitude/altitude, and set platform velocities to 0.");
-    tt->val_offset = (char *) &fixed_location_mode - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("combine_mode");
+    tt->descr = tdrpStrDup("Mode for processing the series of rays.");
+    tt->help = tdrpStrDup("\n\nSINGLE_RAY_MODE: the pulse width and PRT are constant for all rays.\n\nDOUBLE_RAY_MODE: combine 2 ray types (short-short, long-long) into a single dwell. Doppler velocity is unfolded using the dual short/long PRTs. This is limited to valid SNR for the short pulse rays.\n\nTRIPLE_RAY_MODE: combined a sequence of 3 ray types into a single dwell. Doppler velocity is unfolded using the long pulse rays - this gives improved performance over the short-pulse version.");
+    tt->val_offset = (char *) &combine_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("combine_mode_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("SINGLE_RAY_MODE");
+      tt->enum_def.fields[0].val = SINGLE_RAY_MODE;
+      tt->enum_def.fields[1].name = tdrpStrDup("DOUBLE_RAY_MODE");
+      tt->enum_def.fields[1].val = DOUBLE_RAY_MODE;
+      tt->enum_def.fields[2].name = tdrpStrDup("TRIPLE_RAY_MODE");
+      tt->enum_def.fields[2].val = TRIPLE_RAY_MODE;
+    tt->single_val.e = TRIPLE_RAY_MODE;
     tt++;
     
-    // Parameter 'fixed_radar_location'
-    // ctype is '_radar_location_t'
+    // Parameter 'short_short_dwell_label'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("fixed_radar_location");
-    tt->descr = tdrpStrDup("Radar location if override is set true.");
-    tt->help = tdrpStrDup("The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in km MSL.");
-    tt->val_offset = (char *) &fixed_radar_location - &_start_;
-    tt->struct_def.name = tdrpStrDup("radar_location_t");
-    tt->struct_def.nfields = 3;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("latitudeDeg");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &fixed_radar_location.latitudeDeg - (char *) &fixed_radar_location;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("longitudeDeg");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &fixed_radar_location.longitudeDeg - (char *) &fixed_radar_location;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("altitudeKm");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &fixed_radar_location.altitudeKm - (char *) &fixed_radar_location;
-    tt->n_struct_vals = 3;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 0;
-      tt->struct_vals[1].d = 0;
-      tt->struct_vals[2].d = 0;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("short_short_dwell_label");
+    tt->descr = tdrpStrDup("Label for short-pulse / short-PRT rays.");
+    tt->help = tdrpStrDup("We store the block name as the scan name for each ray (this is therefore overloaded). We identify the relevant rays by searching for this string in the ray scan name. Multiple ray types can match this label, because we support dual-PRT 2/3, 3/4 and 4/5 modes.");
+    tt->val_offset = (char *) &short_short_dwell_label - &_start_;
+    tt->single_val.s = tdrpStrDup("short_short");
+    tt++;
+    
+    // Parameter 'long_long_dwell_label'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("long_long_dwell_label");
+    tt->descr = tdrpStrDup("Label for long-pulse / long-PRT rays.");
+    tt->help = tdrpStrDup("We store the block name as the scan name for each ray (this is therefore overloaded). We identify the relevant rays by searching for this string in the ray scan name. Multiple ray types can match this label, because we support dual-PRT 2/3, 3/4 and 4/5 modes.");
+    tt->val_offset = (char *) &long_long_dwell_label - &_start_;
+    tt->single_val.s = tdrpStrDup("long_long");
+    tt++;
+    
+    // Parameter 'long_short_dwell_label'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("long_short_dwell_label");
+    tt->descr = tdrpStrDup("Label for long-pulse / short-PRT rays.");
+    tt->help = tdrpStrDup("We store the block name as the scan name for each ray (this is therefore overloaded). We identify the relevant rays by searching for this string in the ray scan name. Multiple ray types can match this label, because we support dual-PRT 2/3, 3/4 and 4/5 modes.");
+    tt->val_offset = (char *) &long_short_dwell_label - &_start_;
+    tt->single_val.s = tdrpStrDup("long_short");
     tt++;
     
     // Parameter 'Comment 4'
@@ -747,59 +757,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("COMPUTE MEAN RADAR LOCATION?");
-    tt->comment_text = tdrpStrDup("This mode will compute the mean radar location for a ground-based installation.");
-    tt++;
-    
-    // Parameter 'compute_mean_location'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_mean_location");
-    tt->descr = tdrpStrDup("Option to compute the mean location of the radar from the georeference data in the rays.");
-    tt->help = tdrpStrDup("Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to TRUE.");
-    tt->val_offset = (char *) &compute_mean_location - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("DWELL NAMES TO BE COMBINED IN DUAL PULSE AND PRT MODE");
-    tt->comment_text = tdrpStrDup("We read in sequential dwells, with different pulse widths and PRTs, combine them and unfold the velocity fields.");
-    tt++;
-    
-    // Parameter 'dwell_names'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("dwell_names");
-    tt->descr = tdrpStrDup("Specify the names of the dwell to be combined.");
-    tt->help = tdrpStrDup("The dual-PRT names refer to pulse width and PRT. For example, 'short_short' means short pulse and short PRT. 'long_short' will be long pulse and short PRT.");
-    tt->array_offset = (char *) &_dwell_names - &_start_;
-    tt->array_n_offset = (char *) &dwell_names_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 3;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("short_short");
-      tt->array_vals[1].s = tdrpStrDup("long_long");
-      tt->array_vals[2].s = tdrpStrDup("long_short");
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("SET THE COMBINED DWELL DETAILS");
-    tt->comment_text = tdrpStrDup("Normally we combine the high-rate moments data (say at 100 hz) into lower-rate dwells, say at 10 hz.");
+    tt->comment_hdr = tdrpStrDup("COMBINED DWELL DETAILS");
+    tt->comment_text = tdrpStrDup("We combine the high-rate moments data (say at 50 hz) into lower-rate dwells, say at 10 hz.");
     tt++;
     
     // Parameter 'dwell_length_secs'
@@ -809,7 +768,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("dwell_length_secs");
     tt->descr = tdrpStrDup("Specify the output dwell length (secs).");
-    tt->help = tdrpStrDup("Dwells from the input data will be combined to form dwells covering the specified time.");
+    tt->help = tdrpStrDup("Dwells from the input data will be combined to form dwells covering the specified time. Multiple incoming rays, at the higher rate, will be comined into the output ray at a lower rate.");
     tt->val_offset = (char *) &dwell_length_secs - &_start_;
     tt->single_val.d = 0.1;
     tt++;
@@ -858,11 +817,11 @@
     tt->single_val.d = 0.25;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OPTION TO SET STATS METHOD FOR INDIVIDUAL FIELDS.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -932,11 +891,11 @@
       tt->struct_vals[3].e = DWELL_STATS_MIDDLE;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("FIELD NAMES for combination");
     tt->comment_text = tdrpStrDup("The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.");
     tt++;
@@ -953,88 +912,178 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'input_vel_raw_field_name_short'
+    // Parameter 'input_vel_raw_field_name_short_prt'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_vel_raw_field_name_short");
+    tt->param_name = tdrpStrDup("input_vel_raw_field_name_short_prt");
     tt->descr = tdrpStrDup("This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.");
-    tt->help = tdrpStrDup("The field name must be the same for the short- and long-prt rays.");
-    tt->val_offset = (char *) &input_vel_raw_field_name_short - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL_RAW_short");
+    tt->help = tdrpStrDup("These fields are from the long-pulse short-prt rays.");
+    tt->val_offset = (char *) &input_vel_raw_field_name_short_prt - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_RAW_LS");
     tt++;
     
-    // Parameter 'input_vel_raw_field_name_long'
+    // Parameter 'input_vel_raw_field_name_long_prt'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_vel_raw_field_name_long");
+    tt->param_name = tdrpStrDup("input_vel_raw_field_name_long_prt");
     tt->descr = tdrpStrDup("This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.");
-    tt->help = tdrpStrDup("The field name must be the same for the short- and long-prt rays.");
-    tt->val_offset = (char *) &input_vel_raw_field_name_long - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL_RAW_long");
+    tt->help = tdrpStrDup("These fields are from the long-pulse long-prt rays.");
+    tt->val_offset = (char *) &input_vel_raw_field_name_long_prt - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_RAW_LL");
     tt++;
     
-    // Parameter 'input_vel_corr_field_name_short'
+    // Parameter 'input_vel_corr_field_name_short_prt'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_vel_corr_field_name_short");
-    tt->descr = tdrpStrDup("This is the name for the velocity field in the input data, corrected for platform motion.");
-    tt->help = tdrpStrDup("If this field exists in the input data, it is deleted and replaced with the values computed by this application.");
-    tt->val_offset = (char *) &input_vel_corr_field_name_short - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL_short");
+    tt->param_name = tdrpStrDup("input_vel_corr_field_name_short_prt");
+    tt->descr = tdrpStrDup("This is the name for the corrected velocity field in the input data. The velocity has been corrected for platform motion.");
+    tt->help = tdrpStrDup("These fields are from the long-pulse short-prt rays.");
+    tt->val_offset = (char *) &input_vel_corr_field_name_short_prt - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_LS");
     tt++;
     
-    // Parameter 'input_vel_corr_field_name_long'
+    // Parameter 'input_vel_corr_field_name_long_prt'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_vel_corr_field_name_long");
-    tt->descr = tdrpStrDup("This is the name for the velocity field in the input data, corrected for platform motion.");
-    tt->help = tdrpStrDup("If this field exists in the input data, it is deleted and replaced with the values computed by this application.");
-    tt->val_offset = (char *) &input_vel_corr_field_name_long - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL_long");
+    tt->param_name = tdrpStrDup("input_vel_corr_field_name_long_prt");
+    tt->descr = tdrpStrDup("This is the name for the corrected velocity field in the input data. The velocity has been corrected for platform motion.");
+    tt->help = tdrpStrDup("These fields are from the long-pulse long-prt rays.");
+    tt->val_offset = (char *) &input_vel_corr_field_name_long_prt - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_LL");
     tt++;
     
-    // Parameter 'output_vel_corr_field_name_short'
+    // Parameter 'output_vel_corr_field_name_short_prt'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_vel_corr_field_name_short");
+    tt->param_name = tdrpStrDup("output_vel_corr_field_name_short_prt");
     tt->descr = tdrpStrDup("Name for the corrected velocity on output.");
     tt->help = tdrpStrDup("The name of the output fields for velocity corrected for platform motion.");
-    tt->val_offset = (char *) &output_vel_corr_field_name_short - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL_short");
+    tt->val_offset = (char *) &output_vel_corr_field_name_short_prt - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_short_prt");
     tt++;
     
-    // Parameter 'output_vel_corr_field_name_long'
+    // Parameter 'output_vel_corr_field_name_long_prt'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_vel_corr_field_name_long");
+    tt->param_name = tdrpStrDup("output_vel_corr_field_name_long_prt");
     tt->descr = tdrpStrDup("Name for the corrected velocity on output.");
     tt->help = tdrpStrDup("The name of the output fields for velocity corrected for platform motion.");
-    tt->val_offset = (char *) &output_vel_corr_field_name_long - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL_long");
+    tt->val_offset = (char *) &output_vel_corr_field_name_long_prt - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_long_prt");
     tt++;
     
-    // Parameter 'output_vel_unfolded_field_name'
+    // Parameter 'output_vel_unfolded_field_name_short_pulse'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_vel_unfolded_field_name");
+    tt->param_name = tdrpStrDup("output_vel_unfolded_field_name_short_pulse");
     tt->descr = tdrpStrDup("Name for the unfolded velocity.");
-    tt->help = tdrpStrDup("This is an output field, computed by unfolding the dual-prt vel fields.");
-    tt->val_offset = (char *) &output_vel_unfolded_field_name - &_start_;
+    tt->help = tdrpStrDup("This is an output field for short pulse, computed by unfolding the dual-prt vel fields.");
+    tt->val_offset = (char *) &output_vel_unfolded_field_name_short_pulse - &_start_;
     tt->single_val.s = tdrpStrDup("VEL_unfold_short");
+    tt++;
+    
+    // Parameter 'output_vel_unfolded_field_name_long_pulse'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_vel_unfolded_field_name_long_pulse");
+    tt->descr = tdrpStrDup("Name for the unfolded velocity.");
+    tt->help = tdrpStrDup("This is an output field for long pulse, computed by unfolding the dual-prt vel fields.");
+    tt->val_offset = (char *) &output_vel_unfolded_field_name_long_pulse - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_unfold_long");
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("GROUND-BASED MODE - FIXED LOCATION for testing.");
+    tt->comment_text = tdrpStrDup("In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.");
+    tt++;
+    
+    // Parameter 'fixed_location_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("fixed_location_mode");
+    tt->descr = tdrpStrDup("Option to set fixed location in ground-based mode.");
+    tt->help = tdrpStrDup("If TRUE, the program will override the metadata for latitude/longitude/altitude, and set platform velocities to 0.");
+    tt->val_offset = (char *) &fixed_location_mode - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'fixed_radar_location'
+    // ctype is '_radar_location_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("fixed_radar_location");
+    tt->descr = tdrpStrDup("Radar location if override is set true.");
+    tt->help = tdrpStrDup("The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in km MSL.");
+    tt->val_offset = (char *) &fixed_radar_location - &_start_;
+    tt->struct_def.name = tdrpStrDup("radar_location_t");
+    tt->struct_def.nfields = 3;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("latitudeDeg");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &fixed_radar_location.latitudeDeg - (char *) &fixed_radar_location;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("longitudeDeg");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &fixed_radar_location.longitudeDeg - (char *) &fixed_radar_location;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("altitudeKm");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &fixed_radar_location.altitudeKm - (char *) &fixed_radar_location;
+    tt->n_struct_vals = 3;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 0;
+      tt->struct_vals[1].d = 0;
+      tt->struct_vals[2].d = 0;
+    tt++;
+    
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("COMPUTE MEAN RADAR LOCATION?");
+    tt->comment_text = tdrpStrDup("This mode will compute the mean radar location for a ground-based installation.");
+    tt++;
+    
+    // Parameter 'compute_mean_location'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_mean_location");
+    tt->descr = tdrpStrDup("Option to compute the mean location of the radar from the georeference data in the rays.");
+    tt->help = tdrpStrDup("Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to TRUE.");
+    tt->val_offset = (char *) &compute_mean_location - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 9'

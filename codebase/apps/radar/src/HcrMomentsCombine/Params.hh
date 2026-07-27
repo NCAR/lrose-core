@@ -80,6 +80,12 @@ public:
   } mode_t;
 
   typedef enum {
+    SINGLE_RAY_MODE = 0,
+    DOUBLE_RAY_MODE = 1,
+    TRIPLE_RAY_MODE = 2
+  } combine_mode_t;
+
+  typedef enum {
     DWELL_STATS_MEAN = 0,
     DWELL_STATS_MEDIAN = 1,
     DWELL_STATS_MAXIMUM = 2,
@@ -91,15 +97,15 @@ public:
   // struct typedefs
 
   typedef struct {
+    char* field_name;
+    dwell_stats_method_t stats_method;
+  } stats_method_field_t;
+
+  typedef struct {
     double latitudeDeg;
     double longitudeDeg;
     double altitudeKm;
   } radar_location_t;
-
-  typedef struct {
-    char* field_name;
-    dwell_stats_method_t stats_method;
-  } stats_method_field_t;
 
   ///////////////////////////
   // Member functions
@@ -409,14 +415,13 @@ public:
 
   char* input_dir;
 
-  tdrp_bool_t fixed_location_mode;
+  combine_mode_t combine_mode;
 
-  radar_location_t fixed_radar_location;
+  char* short_short_dwell_label;
 
-  tdrp_bool_t compute_mean_location;
+  char* long_long_dwell_label;
 
-  char* *_dwell_names;
-  int dwell_names_n;
+  char* long_short_dwell_label;
 
   double dwell_length_secs;
 
@@ -431,19 +436,27 @@ public:
 
   tdrp_bool_t perform_velocity_unfolding;
 
-  char* input_vel_raw_field_name_short;
+  char* input_vel_raw_field_name_short_prt;
 
-  char* input_vel_raw_field_name_long;
+  char* input_vel_raw_field_name_long_prt;
 
-  char* input_vel_corr_field_name_short;
+  char* input_vel_corr_field_name_short_prt;
 
-  char* input_vel_corr_field_name_long;
+  char* input_vel_corr_field_name_long_prt;
 
-  char* output_vel_corr_field_name_short;
+  char* output_vel_corr_field_name_short_prt;
 
-  char* output_vel_corr_field_name_long;
+  char* output_vel_corr_field_name_long_prt;
 
-  char* output_vel_unfolded_field_name;
+  char* output_vel_unfolded_field_name_short_pulse;
+
+  char* output_vel_unfolded_field_name_long_pulse;
+
+  tdrp_bool_t fixed_location_mode;
+
+  radar_location_t fixed_radar_location;
+
+  tdrp_bool_t compute_mean_location;
 
   char* output_fmq_url;
 
@@ -464,7 +477,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[41];
+  mutable TDRPtable _table[45];
 
   const char *_className;
 

@@ -727,16 +727,16 @@ int HcrMomentsCombine::_readNextDwell()
   
   for (size_t ii = 0; ii < _dwellRaysShort.size(); ii++) {
     RadxRay *ray = _dwellRaysShort[ii];
-    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name_short);
+    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name_short_prt);
     if (velCorr != NULL) {
-      ray->removeField(_params.input_vel_corr_field_name_short);
+      ray->removeField(_params.input_vel_corr_field_name_short_prt);
     }
   }
   for (size_t ii = 0; ii < _dwellRaysLong.size(); ii++) {
     RadxRay *ray = _dwellRaysLong[ii];
-    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name_long);
+    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name_long_prt);
     if (velCorr != NULL) {
-      ray->removeField(_params.input_vel_corr_field_name_long);
+      ray->removeField(_params.input_vel_corr_field_name_long_prt);
     }
   }
   
@@ -937,9 +937,9 @@ void HcrMomentsCombine::_unfoldVel(RadxRay *rayCombined)
   
 {
 
-  string velRawShortName = _params.input_vel_raw_field_name_short;
+  string velRawShortName = _params.input_vel_raw_field_name_short_prt;
   // velRawShortName += _params.suffix_to_add_for_short_pulse_fields;
-  string velRawLongName = _params.input_vel_raw_field_name_long;
+  string velRawLongName = _params.input_vel_raw_field_name_long_prt;
   // velRawLongName += _params.suffix_to_add_for_long_pulse_fields;
   
   RadxField *velShort = rayCombined->getField(velRawShortName);
@@ -957,7 +957,7 @@ void HcrMomentsCombine::_unfoldVel(RadxRay *rayCombined)
   velLong->convertToFl32();
 
   RadxField *velUnfold = new RadxField(*velShort);
-  velUnfold->setName(_params.output_vel_unfolded_field_name);
+  velUnfold->setName(_params.output_vel_unfolded_field_name_short_pulse);
 
   // compute the unfolded velocity
 
@@ -1013,9 +1013,9 @@ void HcrMomentsCombine::_unfoldVel(RadxRay *rayCombined)
 
   // rename vel fields
   
-  string velCorrShortName = _params.output_vel_corr_field_name_short;
+  string velCorrShortName = _params.output_vel_corr_field_name_short_prt;
   // velCorrShortName += _params.suffix_to_add_for_short_pulse_fields;
-  string velCorrLongName = _params.output_vel_corr_field_name_long;
+  string velCorrLongName = _params.output_vel_corr_field_name_long_prt;
   // velCorrLongName += _params.suffix_to_add_for_long_pulse_fields;
 
   velShort->setName(velCorrShortName);

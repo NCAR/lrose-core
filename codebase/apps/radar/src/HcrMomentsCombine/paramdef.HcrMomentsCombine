@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "HCR has the capability to transmit blocks of pulses with varying PRTs and pulse lengths.\n\nThe latest version supports 3 block types:\n\n\t(1) short-pulse and short-PRT\n\t(2) long-pulse and long-PRT\n\t(3) long-pulse and short-PRT.\n\nThis sequence is repeated in time.\n\nHcrTs2Moments reads this interleaved time series, and computes the relevant moments for each block. Those moments are then written, in sequence, to a single output FMQ in Radx moments format.\n\nHcrMomentsCombine reads the Radx moments data stream, and combines the three blocks into a single block, naming the fields appropriately, and unfolding the velocity fields as appropriate. This allows us to unfold the velocity field using the staggered-PRT technique.";
+  p_header = "HCR transmits blocks of pulses with varying PRTs and pulse lengths.This provides a good compromise between sensitivity, range resolution and unambiguous Doppler velocity.\n\nThe latest version supports 3 block types:\n\n\t(1) short-pulse and short-PRT\n\t(2) long-pulse and long-PRT\n\t(3) long-pulse and short-PRT.\n\nThis sequence is repeated in time.\n\nHcrTs2Moments reads this interleaved time series, and computes the relevant moments for each block type. Those moments are then written, in sequence, to a single output FMQ in Radx moments format.\n\nHcrMomentsCombine reads the Radx moments data stream, and combines the three blocks into a single block, naming the fields appropriately, and unfolding the velocity fields as appropriate.  The moments are aggregated over an output dwell length, typically 0.1s. We unfold the Doppler velocity field using the dual-PRT technique.";
 }
 
 commentdef {
@@ -71,59 +71,47 @@ paramdef string {
 } input_dir;
 
 commentdef {
-  p_header = "GROUND-BASED MODE";
-  p_text = "In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.";
+  p_header = "MODE TO FOR COMBINING RAY DWELLS";
+  p_text = "The latest HCR version allows us to take rays from 3 block types (typically at a combined 50 Hz rate), and combine them into a single rays, containing the moments from the original block types plus derived fields such as unfolded Doppler velocity.";
 }
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to set fixed location in ground-based mode.";
-  p_help = "If TRUE, the program will override the metadata for latitude/longitude/altitude, and set platform velocities to 0.";
-} fixed_location_mode;
+typedef enum {
+  SINGLE_RAY_MODE, DOUBLE_RAY_MODE, TRIPLE_RAY_MODE
+} combine_mode_t;
 
-typedef struct {
-  double latitudeDeg;
-  double longitudeDeg;
-  double altitudeKm;
-} radar_location_t;
-
-paramdef struct radar_location_t {
-  p_default = { 0.0, 0.0, 0.0 };
-  p_descr = "Radar location if override is set true.";
-  p_help = "The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in km MSL.";
-} fixed_radar_location;
-
-commentdef {
-  p_header = "COMPUTE MEAN RADAR LOCATION?";
-  p_text = "This mode will compute the mean radar location for a ground-based installation.";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to compute the mean location of the radar from the georeference data in the rays.";
-  p_help = "Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to TRUE.";
-} compute_mean_location;
-
-commentdef {
-  p_header = "DWELL NAMES TO BE COMBINED IN DUAL PULSE AND PRT MODE";
-  p_text = "We read in sequential dwells, with different pulse widths and PRTs, combine them and unfold the velocity fields.";
-}
+paramdef enum combine_mode_t {
+  p_default = TRIPLE_RAY_MODE;
+  p_descr = "Mode for processing the series of rays.";
+  p_help = "\n\nSINGLE_RAY_MODE: the pulse width and PRT are constant for all rays.\n\nDOUBLE_RAY_MODE: combine 2 ray types (short-short, long-long) into a single dwell. Doppler velocity is unfolded using the dual short/long PRTs. This is limited to valid SNR for the short pulse rays.\n\nTRIPLE_RAY_MODE: combined a sequence of 3 ray types into a single dwell. Doppler velocity is unfolded using the long pulse rays - this gives improved performance over the short-pulse version.";
+} combine_mode;
 
 paramdef string {
-  p_default = { "short_short", "long_long", "long_short" };
-  p_descr = "Specify the names of the dwell to be combined.";
-  p_help = "The dual-PRT names refer to pulse width and PRT. For example, 'short_short' means short pulse and short PRT. 'long_short' will be long pulse and short PRT.";
-} dwell_names[];
+  p_default = "short_short";
+  p_descr = "Label for short-pulse / short-PRT rays.";
+  p_help = "We store the block name as the scan name for each ray (this is therefore overloaded). We identify the relevant rays by searching for this string in the ray scan name. Multiple ray types can match this label, because we support dual-PRT 2/3, 3/4 and 4/5 modes.";
+} short_short_dwell_label;
+
+paramdef string {
+  p_default = "long_long";
+  p_descr = "Label for long-pulse / long-PRT rays.";
+  p_help = "We store the block name as the scan name for each ray (this is therefore overloaded). We identify the relevant rays by searching for this string in the ray scan name. Multiple ray types can match this label, because we support dual-PRT 2/3, 3/4 and 4/5 modes.";
+} long_long_dwell_label;
+
+paramdef string {
+  p_default = "long_short";
+  p_descr = "Label for long-pulse / short-PRT rays.";
+  p_help = "We store the block name as the scan name for each ray (this is therefore overloaded). We identify the relevant rays by searching for this string in the ray scan name. Multiple ray types can match this label, because we support dual-PRT 2/3, 3/4 and 4/5 modes.";
+} long_short_dwell_label;
 
 commentdef {
-  p_header = "SET THE COMBINED DWELL DETAILS";
-  p_text = "Normally we combine the high-rate moments data (say at 100 hz) into lower-rate dwells, say at 10 hz.";
+  p_header = "COMBINED DWELL DETAILS";
+  p_text = "We combine the high-rate moments data (say at 50 hz) into lower-rate dwells, say at 10 hz.";
 }
 
 paramdef double {
   p_default = 0.1;
   p_descr = "Specify the output dwell length (secs).";
-  p_help = "Dwells from the input data will be combined to form dwells covering the specified time.";
+  p_help = "Dwells from the input data will be combined to form dwells covering the specified time. Multiple incoming rays, at the higher rate, will be comined into the output ray at a lower rate.";
 } dwell_length_secs;
 
 typedef enum {
@@ -185,58 +173,86 @@ paramdef boolean {
 } perform_velocity_unfolding;
 
 paramdef string {
-  p_default = "VEL_RAW_short";
+  p_default = "VEL_RAW_LS";
   p_descr = "This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.";
-  p_help = "The field name must be the same for the short- and long-prt rays.";
-} input_vel_raw_field_name_short;
+  p_help = "These fields are from the long-pulse short-prt rays.";
+} input_vel_raw_field_name_short_prt;
 
 paramdef string {
-  p_default = "VEL_RAW_long";
+  p_default = "VEL_RAW_LL";
   p_descr = "This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.";
-  p_help = "The field name must be the same for the short- and long-prt rays.";
-} input_vel_raw_field_name_long;
+  p_help = "These fields are from the long-pulse long-prt rays.";
+} input_vel_raw_field_name_long_prt;
 
 paramdef string {
-  p_default = "VEL_short";
-  p_descr = "This is the name for the velocity field in the input data, corrected for platform motion.";
-  p_help = "If this field exists in the input data, it is deleted and replaced with the values computed by this application.";
-} input_vel_corr_field_name_short;
+  p_default = "VEL_LS";
+  p_descr = "This is the name for the corrected velocity field in the input data. The velocity has been corrected for platform motion.";
+  p_help = "These fields are from the long-pulse short-prt rays.";
+} input_vel_corr_field_name_short_prt;
 
 paramdef string {
-  p_default = "VEL_long";
-  p_descr = "This is the name for the velocity field in the input data, corrected for platform motion.";
-  p_help = "If this field exists in the input data, it is deleted and replaced with the values computed by this application.";
-} input_vel_corr_field_name_long;
-
-// paramdef string {
-//   p_default = "_short";
-//   p_descr = "This suffix is added to the input fields for short-prt moments.";
-//   p_help = "For each incoming short-pulse field, we add this suffix to the incoming field name.";
-// } suffix_to_add_for_short_pulse_fields;
-
-// paramdef string {
-//   p_default = "_long";
-//   p_descr = "This suffix is added to the input fields for long-prt moments.";
-//   p_help = "For each incoming long-pulse field, we add this suffix to the incoming field name.";
-// } suffix_to_add_for_long_pulse_fields;
+  p_default = "VEL_LL";
+  p_descr = "This is the name for the corrected velocity field in the input data. The velocity has been corrected for platform motion.";
+  p_help = "These fields are from the long-pulse long-prt rays.";
+} input_vel_corr_field_name_long_prt;
 
 paramdef string {
-  p_default = "VEL_short";
+  p_default = "VEL_short_prt";
   p_descr = "Name for the corrected velocity on output.";
   p_help = "The name of the output fields for velocity corrected for platform motion.";
-} output_vel_corr_field_name_short;
+} output_vel_corr_field_name_short_prt;
 
 paramdef string {
-  p_default = "VEL_long";
+  p_default = "VEL_long_prt";
   p_descr = "Name for the corrected velocity on output.";
   p_help = "The name of the output fields for velocity corrected for platform motion.";
-} output_vel_corr_field_name_long;
+} output_vel_corr_field_name_long_prt;
 
 paramdef string {
   p_default = "VEL_unfold_short";
   p_descr = "Name for the unfolded velocity.";
-  p_help = "This is an output field, computed by unfolding the dual-prt vel fields.";
-} output_vel_unfolded_field_name;
+  p_help = "This is an output field for short pulse, computed by unfolding the dual-prt vel fields.";
+} output_vel_unfolded_field_name_short_pulse;
+
+paramdef string {
+  p_default = "VEL_unfold_long";
+  p_descr = "Name for the unfolded velocity.";
+  p_help = "This is an output field for long pulse, computed by unfolding the dual-prt vel fields.";
+} output_vel_unfolded_field_name_long_pulse;
+
+commentdef {
+  p_header = "GROUND-BASED MODE - FIXED LOCATION for testing.";
+  p_text = "In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set fixed location in ground-based mode.";
+  p_help = "If TRUE, the program will override the metadata for latitude/longitude/altitude, and set platform velocities to 0.";
+} fixed_location_mode;
+
+typedef struct {
+  double latitudeDeg;
+  double longitudeDeg;
+  double altitudeKm;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_default = { 0.0, 0.0, 0.0 };
+  p_descr = "Radar location if override is set true.";
+  p_help = "The radar_location is only used if 'override_radar_location' is set true. Otherwise the information in the input data stream is used. Note that the altitude is in km MSL.";
+} fixed_radar_location;
+
+commentdef {
+  p_header = "COMPUTE MEAN RADAR LOCATION?";
+  p_text = "This mode will compute the mean radar location for a ground-based installation.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute the mean location of the radar from the georeference data in the rays.";
+  p_help = "Applicable in archive mode only, and only applicable to ground-based projects. It will compute the mean radar location, from the short- and long-pulse input data, and print the mean to the terminal. The mean values can then be used in the radar_location parameter (see above) if override_radar_location is set to TRUE.";
+} compute_mean_location;
 
 commentdef {
   p_header = "OUTPUT FMQ";
