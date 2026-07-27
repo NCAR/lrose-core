@@ -189,9 +189,15 @@ int HcrMomentsCombine::_runRealtime()
     return -1;
   }
 
-  // Instantiate and initialize the input radar queues
+  // Instantiate and initialize the input radar queue
 
-  if (_openInputFmqs()) {
+  if (_openInputFmq()) {
+    return -1;
+  }
+
+  // prepare the input rays at the start of the first output dwell
+  
+  if (_initializeInput()) {
     return -1;
   }
 
@@ -199,12 +205,6 @@ int HcrMomentsCombine::_runRealtime()
     cerr << "====>> Unfold stagM, stagN: " << _stagM << ", " << _stagN << endl;
   }
   
-  // prepare the input rays at the start of the first output dwell
-  
-  if (_prepareInputRays()) {
-    return -1;
-  }
-
   _nRaysRead = 0;
   _nRaysWritten = 0;
 
@@ -289,7 +289,7 @@ int HcrMomentsCombine::_runArchive()
   
   // prepare the input rays at the start of the first output dwell
   
-  if (_prepareInputRays()) {
+  if (_initializeInput()) {
     return -1;
   }
 
@@ -434,7 +434,7 @@ int HcrMomentsCombine::_computeMeanLocation()
 //////////////////////////////////////////////////
 // Open input fmqs
 
-int HcrMomentsCombine::_openInputFmqs()
+int HcrMomentsCombine::_openInputFmq()
 {
 
   // Instantiate and initialize the input radar queues
@@ -452,9 +452,14 @@ int HcrMomentsCombine::_openInputFmqs()
   // initialize reader - read one ray
 
   RadxRay *ray = _readRayNext();
-  if (ray != NULL) {
-    delete ray;
+  if (ray == NULL) {
+    cerr << "ERROR - _openInputFmq()" << endl;
+    cerr << "Cannot read ray from input fmq: " << _params.input_fmq_url << endl;
+    return -1;
   }
+
+  _firstRayTime = ray->getRadxTime();
+  delete ray;
   
   if (_params.seek_to_end_of_input_fmq) {
     _momReader->seekToEnd();
@@ -532,7 +537,11 @@ int HcrMomentsCombine::_openFileReader()
     cerr << "  Cannot read rays from dir: " << _params.input_dir << endl;
     cerr << "  Start time: " << startTime.asString(0) << endl;
     cerr << "  End time: " << endTime.asString(0) << endl;
+    return -1;
   }
+
+  _firstRayTime = ray->getRadxTime();
+  delete ray;
   
   return 0;
 
@@ -541,43 +550,40 @@ int HcrMomentsCombine::_openFileReader()
 /////////////////////////////////////////////////////////////////
 // Initialize the input rays at the start of the first output dwell
 
-int HcrMomentsCombine::_prepareInputRays()
+int HcrMomentsCombine::_initializeInput()
 {
 
-  // read a short and long ray
+  // read a single ray
+  
+  RadxTime rayTime;
 
-  RadxTime shortTime;
-  RadxTime longTime;
-
-  {
-    
-    RadxRay *rayShort = _readRayNext();
-    if (rayShort == NULL) {
-      cerr << "ERROR - HcrMomentsCombine::_prepareInputRays()" << endl;
-      if (_params.mode == Params::REALTIME) {
-        cerr << "  Cannot read input fmq: " << _params.input_fmq_url << endl;
-      } else {
-        cerr << "  Cannot read input dir: " << _params.input_dir << endl;
-      }
-      return -1;
+  RadxRay *rayFirst = _readRayNext();
+  if (rayFirst == NULL) {
+    cerr << "ERROR - HcrMomentsCombine::_initializeInput()" << endl;
+    if (_params.mode == Params::REALTIME) {
+      cerr << "  Cannot read input fmq: " << _params.input_fmq_url << endl;
+    } else {
+      cerr << "  Cannot read input dir: " << _params.input_dir << endl;
     }
-    
+    return -1;
+  }
+  
     RadxRay *longRay = _readRayLong();
     // if (longRay == NULL) {
-    //   cerr << "ERROR - HcrMomentsCombine::_prepareInputRays()" << endl;
+    //   cerr << "ERROR - HcrMomentsCombine::_initializeInput()" << endl;
     //   if (_params.mode == Params::REALTIME) {
     //     cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
     //   } else {
     //     cerr << "  Cannot read input dir long: " << _params.input_dir_long << endl;
     //   }
-    //   delete rayShort;
+    //   delete rayFirst;
     //   return -1;
     // }
     
-    shortTime = rayShort->getRadxTime();
+    shortTime = rayFirst->getRadxTime();
     longTime = longRay->getRadxTime();
     
-    delete rayShort;
+    delete rayFirst;
     delete longRay;
 
   }
@@ -795,10 +801,10 @@ int HcrMomentsCombine::_checkForTimeGap(RadxRay *latestRayShort)
     _cacheRayShort = NULL;
     _cacheRayLong = NULL;
     
-    if (_prepareInputRays()) {
+    if (_initializeInput()) {
       _prevTimeShort = latestTimeShort;
       cerr << "HcrMomentsCombine::_checkForTimeGap" << endl;
-      cerr << "  _prepareInputRays() failed" << endl;
+      cerr << "  _initializeInput() failed" << endl;
       return -1;
     }
     

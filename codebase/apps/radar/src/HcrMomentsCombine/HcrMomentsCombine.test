@@ -130,7 +130,8 @@ seek_to_end_of_input_fmq = TRUE;
 //
 // Type: string
 
-input_dir = "$(DATA_DIR)/cfradial/moments/50hz_triple";
+// input_dir = "$(DATA_DIR)/cfradial/moments/50hz_triple";
+input_dir = "$(HOME)/data/hcr/time_series";
 
 //======================================================================
 //

@@ -138,6 +138,7 @@ private:
   RadxTime _nextDwellMidTime;
   RadxTime _thisDwellMidTime;
 
+  RadxTime _firstRayTime;
   RadxTime _latestRayTime;
   RadxTime _prevTimeShort;
   
@@ -160,11 +161,11 @@ private:
   int _runArchive();
   int _computeMeanLocation();
 
-  int _openInputFmqs();
+  int _openInputFmq();
   int _openOutputFmq();
   int _openFileReader();
 
-  int _prepareInputRays();
+  int _initializeInput();
   int _readNextDwell();
   int _checkForTimeGap(RadxRay *latestRayShort);
   RadxRay *_combineDwellRays();
