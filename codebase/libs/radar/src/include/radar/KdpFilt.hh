@@ -40,6 +40,7 @@
 #define KdpFilt_hh
 
 #include <radar/KdpFiltParams.hh>
+#include <radar/KdpFirFilt.hh>
 #include <radar/KdpQuadFilt.hh>
 #include <radar/RadarFft.hh>
 #include <rapmath/ForsytheFit.hh>
@@ -739,14 +740,18 @@ private:
   bool _writeRayFile;
   string _rayFileDir;
 
-  // FFT for filtering
+  // FIR filter
   
-  RadarFft _fft;
-
+  KdpFirFilt _firFilt;
+  
   // quadratic filter
   
   KdpQuadFilt _quadFilt;
   
+  // FFT for filtering
+  
+  RadarFft _fft;
+
   //////////////////////////////////////////
   // methods
 

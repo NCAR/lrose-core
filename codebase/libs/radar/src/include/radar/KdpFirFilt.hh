@@ -66,15 +66,40 @@ public:
   
   void setFeatureLength(double featureLengthKm, double gateSpacingKm);
   
-  /**
-   * Set FIR filter length
-   * valid lengths are 125, 30, 20, 10
-   * the next length down will be used
-   * @param[in] len The FIR filter length
-   */
+  /////////////////////////////////////////////
+  // apply the filter, save in filt.
   
-  // FIR filter options - lengths 125, 30, 20 and 10
+  void applyFilter(const vector<double> &unfilt,
+                   vector<double> &filt,
+                   int nIterations);
+  
+  ///////////////////////////////////////////////
+  // filter array for phase shift on backscatter
+  
+  void applyPsobFilter(const vector<double> &unfilt,
+                       vector<double> &filt,
+                       int nIterations,
+                       double diffThreshold);
 
+  // get filter-specific details
+
+  int getFirLength() const { return _firLength; }
+  double getGateSpacingKm() const { return _gateSpacingKm; }
+  double getFeatureLengthKm() const { return _featureLengthKm; }
+  int getNGatesFeature() const { return _nGatesFeature; }
+
+  // missing value
+  
+  static constexpr double missingValue() {
+    return std::numeric_limits<double>::quiet_NaN();
+  }
+  
+protected:
+  
+private:
+
+  // FIR filter options - lengths 125, 30, 20 and 10
+  
   typedef enum {
     FIR_LENGTH_125,
     FIR_LENGTH_60,
@@ -83,110 +108,6 @@ public:
     FIR_LENGTH_20,
     FIR_LENGTH_10
   } fir_filter_len_t;
-  
-  void setFIRFilterLen(fir_filter_len_t len);
-
-  /**
-   * Set number of iterations over which the filter is applied
-   * default is 2
-   */
-  
-  void setNFiltIterUnfolded(int n) {
-    _nFiltIterUnfolded = n;
-  }
-  
-  /**
-   * Set number of iterations over which the filter is applied
-   * to mitigate phase shift on backscatter
-   * default is 4
-   */
-  void setNFiltIterPsob(int n) {
-    _nFiltIterPsob = n;
-  }
-  
-  /**
-   * Option to use iterative filtering method.
-   * If FALSE, the conditional filtering method will be used.
-   * Default is false.
-   * See 'setPhidpDiffThreshold'.
-   */
-  void setUseIterativeFiltering(bool val) {
-    _useIterativeFiltering = val;
-  }
-
-  /**
-   * For iterative filtering only.
-   * Set threshold for difference of phidp.
-   * We check the difference between the unfolded phidp
-   * value and the filtered phidp value.
-   * If the difference is less than this value, we use the
-   * original value instead of the filtered value.
-   * Default is 4.0
-   * @param[in] threshold The phidp difference threshold
-   */
-
-  void setPhidpDiffThreshold(double threshold) {
-    _phidpDiffThreshold = threshold;
-  }
-
-  /**
-   * Set number of gates, and padding
-   */
-
-  void setNGates(int n) {
-    _nGates = n;
-    _nGatesPadded = _nGates + 2 * _nGatesPad;
-  }
-
-  /**
-   * Initialize the object arrays for later use.
-   * Do this if you need access to the arrays, but have not yet called
-   * compute(), and do not plan to do so.
-   * For example, you may want to output missing fields that you have
-   * not computed, but the memory needs to be there.
-   */ 
-  void initializeArrays(int nGates);
-
-  /////////////////////////////////////////////
-  // filter the input PHIDP array
-  
-  void filterPhidp(const vector<double> &phidp);
-
-  // get fields after calling compute()
-  
-  /**
-   * Get range details after calling compute()
-   * @return start range and gate spacing (in km)
-   */
-
-  double getGateSpacingKm() const { return _gateSpacingKm; }
-  double getFeatureLengthKm() const { return _featureLengthKm; }
-  int getNGatesFeature() const { return _nGatesFeature; }
-
-  /**
-   * Get phidp array after calling compute()
-   * @return an array of unfolded phidp values
-   */
-  const double *getPhidp() const { return _phidp; }
-  const double *getPhidpFilt() const { return _phidpFilt; }
-  const double *getPhidpCond() const { return _phidpCond; }
-  const double *getPhidpCondFilt() const {
-    return _phidpCondFilt;
-  }
-
-  /**
-   * set debug on
-   * Debug print output will go to stderr
-   */
-  void setDebug(bool state = true) { _debug = state; }
-
-protected:
-  
-private:
-
-  double _missingValue; /**< Value for missing or bad data */
-  
-  // FIR filter options - lengths 125, 30, 20 and 10
   
   static const int FIR_LEN_125 = 125; /**< FIR filter len 125 */
   static const int FIR_LEN_60 = 60;   /**< FIR filter len 60 */
@@ -206,62 +127,41 @@ private:
   int _firLenHalf;         /**< Half the length of the current FIR array */
   const double *_firCoeff; /**< The length of the current FIR array */
   
-  int _nFiltIter;  /**< Number of times the filter is
-                    * iteratively applied to filter phidp */
-  
-  int _nFiltIterPsob;  /**< Number of times the filter is
-                        * iteratively applied to mitigate backscatter phase shift */
-  
-  bool _useIterativeFiltering; /* for phase shift on backscatter removal */
-  double _phidpDiffThreshold; /* for phase shift on backscatter removal */
-  
   int _nGates;          /**< n gates in input array */
   int _nGatesPad;       /**< padding at each end for regr and fft filters */
   int _nGatesPadded;    /**< gates including padding */
   
-  // start range and gate spacing
-
-  double _gateSpacingKm;
-
   // nominal length of a feature in PHIDP
   
   double _featureLengthKm;
+  double _gateSpacingKm;
   int _nGatesFeature;
   
-  // arrays for input and computed data
-  // and pointers to those arrays
+  // set number of gates
+  
+  void _setNGates(int n);
 
-  vector<double> _phidp_;
-  double *_phidp;
-  
-  vector<double> _phidpFilt_;
-  double *_phidpFilt;
-  
-  vector<double> _phidpCond_;
-  double *_phidpCond;
-  
-  vector<double> _phidpCondFilt_;
-  double *_phidpCondFilt;
-  
-  // debug printing
+  // Set FIR filter length
+  // valid lengths are 125, 30, 20, 10
+  // the next length down will be used
+  // FIR filter options - lengths 125, 30, 20 and 10
 
-  bool _debug;
+  void _setFilterLen(fir_filter_len_t len);
 
   // worker methods
   
-  void _applyIterativeFir(double *out, const double *in, int nIterations);
-  void _applyIterativeFirCond(double *out, const double *in, int nIterations);
+  void _initializeArray(vector<double> &vals);
+  void _applyIterativeFir(double *out, const double *in,
+                          int nIterations);
+  void _applyIterativeFirCond(double *out, const double *in,
+                              int nIterations, double diffThreshold);
   void _copyArray(double *out, const double *in);
-  void _copyArrayCond(double *out, const double *in, const double *original);
+  void _copyArrayCond(double *out, const double *in,
+                      const double *original, double diffThreshold);
   void _padArray(double *array);
-
   void _applyFirFilter(double *out, const double *in);
   double _getFirFilterGain();
 
-  /// is this gate valid?
-
-  bool _isGateValid(int igate);
-  
 };
 
 #endif

@@ -934,21 +934,22 @@ int KdpFilt::_unfoldPhidp()
 // filter the unfolded PHIDP
 
 void KdpFilt::_filterPhidpUnfolded()
-
-{
-
-  // apply FIR filter to unfolded phidp
   
-  _applyIterativeFir(_phidpFilt, _phidpUnfoldInterp, _nFiltIterUnfolded);
+{
+  
+  // apply FIR filter to unfolded phidp
+
+  _firFilt.setFeatureLength(_phidpFeatureLengthKm, _gateSpacingKm);
+  _firFilt.applyFilter(_phidpFilt_, _phidpUnfoldInterp_, _nFiltIterUnfolded);
     
   // compute conditioned phidp
   
   if (_useIterativeFiltering) {
     
     // use iterative filtering to remove phase shift on backscatter
-    
-    _applyIterativeFirCond(_phidpCondFilt, _phidpFilt, _nFiltIterCond);
-    
+
+    _firFilt.applyPsobFilter(_phidpFilt_, _phidpCondFilt_,
+                             _nFiltIterCond, _phidpDiffThreshold);
   } else {
     
     // compute phidp conditioned to remove phase shift on backscatter
@@ -957,7 +958,7 @@ void KdpFilt::_filterPhidpUnfolded()
     
     // apply the FIR filter to the conditioned phidp
 
-    _applyIterativeFir(_phidpCondFilt, _phidpCond, _nFiltIterCond);
+    _firFilt.applyFilter(_phidpCond_, _phidpCondFilt_, _nFiltIterUnfolded);
     
   }
 

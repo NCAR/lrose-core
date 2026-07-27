@@ -139,26 +139,13 @@ KdpFirFilt::KdpFirFilt()
   
 {
 
-  // FIR filter defaults to length 10
-
-  setFIRFilterLen(FIR_LENGTH_10);
-  
-  _nFiltIterUnfolded = 2;
-  _nFiltIterCond = 4;
-
-  _nGatesPad = 21;
-  setNGates(0);
-
-  _useIterativeFiltering = false;
-  _phidpDiffThreshold = 4.0;
-
   // feature len
   
   setFeatureLength(3.0, 0.25);
 
-  // debugging
+  // ngates
   
-  _debug = false;
+  _setNGates(1000);
 
 }
 
@@ -181,27 +168,79 @@ void KdpFirFilt::setFeatureLength(double featureLengthKm,
   _featureLengthKm = featureLengthKm;
   _gateSpacingKm = gateSpacingKm;
   _nGatesFeature = (int) (_featureLengthKm / _gateSpacingKm) + 1;
+  _nGatesPad = _nGatesFeature;
 
   if (_nGatesFeature < 20) {
-    setFIRFilterLen(FIR_LENGTH_10);
+    _setFilterLen(FIR_LENGTH_10);
   } else if (_nGatesFeature < 30) {
-    setFIRFilterLen(FIR_LENGTH_20);
+    _setFilterLen(FIR_LENGTH_20);
   } else if (_nGatesFeature < 40) {
-    setFIRFilterLen(FIR_LENGTH_30);
+    _setFilterLen(FIR_LENGTH_30);
   } else if (_nGatesFeature < 60) {
-    setFIRFilterLen(FIR_LENGTH_40);
+    _setFilterLen(FIR_LENGTH_40);
   } else if (_nGatesFeature < 125) {
-    setFIRFilterLen(FIR_LENGTH_60);
+    _setFilterLen(FIR_LENGTH_60);
   } else {
-    setFIRFilterLen(FIR_LENGTH_125);
+    _setFilterLen(FIR_LENGTH_125);
   }
   
 }
   
+/////////////////////////////////////////////
+// apply the filter, save in filt.
+
+void KdpFirFilt::applyFilter(const vector<double> &unfilt,
+                             vector<double> &filt,
+                             int nIterations)
+
+{
+  
+  // initialize
+  
+  _setNGates(unfilt.size());
+  _initializeArray(filt);
+
+  // apply FIR filter to phidp
+  
+  _applyIterativeFir(filt.data(), unfilt.data(), nIterations);
+
+}
+
+///////////////////////////////////////////////
+// filter array for phase shift on backscatter
+
+void KdpFirFilt::applyPsobFilter(const vector<double> &unfilt,
+                                 vector<double> &filt,
+                                 int nIterations,
+                                 double diffThreshold)
+  
+{
+  
+  // initialize
+  
+  _setNGates(unfilt.size());
+  _initializeArray(filt);
+  
+  // apply FIR filter to phidp
+  
+  _applyIterativeFirCond(filt.data(), unfilt.data(), nIterations, diffThreshold);
+
+}
+
+/////////////////////////////////////
+// set number of gates
+
+void KdpFirFilt::_setNGates(int n)
+
+{
+  _nGates = n;
+  _nGatesPadded = _nGates + (2 * _nGatesPad);
+}
+
 /////////////////////////////////////
 // set FIR filter length
 
-void KdpFirFilt::setFIRFilterLen(fir_filter_len_t len)
+void KdpFirFilt::_setFilterLen(fir_filter_len_t len)
 
 {
   
@@ -243,61 +282,12 @@ void KdpFirFilt::setFIRFilterLen(fir_filter_len_t len)
 // For example, you may want to output missing fields that you have
 // not computed, but the memory needs to be there.
 
-void KdpFirFilt::initializeArrays(int nGates)
-
+void KdpFirFilt::_initializeArray(vector<double> &vals)
 {
-  setNGates(nGates);
-
-  // allocate the arrays needed
-  // copy input arrays, leaving extra space at the beginning
-  // for negative indices and at the end for filtering as required
-
-  _phidp_.resize(_nGates); _phidp = _phidp_.data();
-  _phidpFilt_.resize(_nGates); _phidpFilt = _phidpFilt_.data();
-  _phidpCond_.resize(_nGates); _phidpCond = _phidpCond_.data();
-  _phidpCondFilt_.resize(_nGates); _phidpCondFilt = _phidpCondFilt_.data();
-  
-  // initialize computed arrays
-  
+  vals.resize(_nGates);
   for (int ii = 0; ii < _nGates; ii++) {
-    _phidpFilt[ii] = _missingValue;
-    _phidpCond[ii] = _missingValue;
-    _phidpCondFilt[ii] = _missingValue;
+    vals[ii] = missingValue();
   }
-  
-}
-
-/////////////////////////////////////////////
-// filter the input PHIDP array
-
-void KdpFirFilt::filterPhidp(const vector<double> &phidp)
-
-{
-
-  // apply FIR filter to unfolded phidp
-  
-  _applyIterativeFir(_phidpFilt, phidp.data(), _nFiltIterUnfolded);
-  
-  // compute conditioned phidp
-  
-  if (_useIterativeFiltering) {
-    
-    // use iterative filtering to remove phase shift on backscatter
-    
-    _applyIterativeFirCond(_phidpCondFilt, _phidpFilt, _nFiltIterCond);
-    
-  } else {
-    
-    // compute phidp conditioned to remove phase shift on backscatter
-    
-    // _computePhidpConditioned();
-    
-    // apply the FIR filter to the conditioned phidp
-
-    _applyIterativeFir(_phidpCondFilt, _phidpCond, _nFiltIterCond);
-    
-  }
-
 }
 
 /////////////////////////////////////////////////
@@ -342,13 +332,15 @@ void KdpFirFilt::_applyIterativeFir(double *out,
 }
 
 ///////////////////////////////////////////////////////////////////
-// apply an FIR filter, iteratively
-// condionally check each iteration against the original
+// apply an FIR filter, iteratively, to conditionally
+// remove phase shift on backscatter.
+// check each iteration against the original
 // keep the original if the diff is below the conditional threshold
 
 void KdpFirFilt::_applyIterativeFirCond(double *out,
                                         const double *in,
-                                        int nIterations)
+                                        int nIterations,
+                                        double diffThreshold)
 
 {
 
@@ -375,7 +367,7 @@ void KdpFirFilt::_applyIterativeFirCond(double *out,
     
   for (int iloop = 0; iloop < nIterations; iloop++) {
     _applyFirFilter(work1, work2);
-    _copyArrayCond(work2, work1, in);
+    _copyArrayCond(work2, work1, in, diffThreshold);
   } // iloop
   
   // save result
@@ -387,8 +379,9 @@ void KdpFirFilt::_applyIterativeFirCond(double *out,
 /////////////////////////////////////////////
 // load array ready for filter
 
-void KdpFirFilt::_copyArray(double *out, const double *in)
-
+void KdpFirFilt::_copyArray(double *out,
+                            const double *in)
+  
 {
   memcpy(out, in, _nGates * sizeof(double));
 }
@@ -396,13 +389,15 @@ void KdpFirFilt::_copyArray(double *out, const double *in)
 /////////////////////////////////////////////
 // copy array conditionally
 
-void KdpFirFilt::_copyArrayCond(double *out, const double *in,
-                             const double *original)
-
+void KdpFirFilt::_copyArrayCond(double *out,
+                                const double *in,
+                                const double *original,
+                                double diffThreshold)
+  
 {
   for (int ii = 0; ii < _nGates; ii++) {
     double diff = in[ii] - out[ii];
-    if (fabs(diff) < _phidpDiffThreshold) {
+    if (fabs(diff) < diffThreshold) {
       out[ii] = original[ii];
     } else {
       out[ii] = in[ii];
@@ -414,7 +409,7 @@ void KdpFirFilt::_copyArrayCond(double *out, const double *in,
 // Pad array ready for filter
 
 void KdpFirFilt::_padArray(double *array)
-
+  
 {
   for (int ii = -_firLength; ii < 0; ii++) {
     array[ii] = array[0];
