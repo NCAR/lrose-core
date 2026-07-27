@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// KdpQuadFit.hh
+// KdpQuadFilt.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 // with help from ChatGpt 5.
@@ -36,21 +36,18 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef KdpQuadFit_hh
-#define KdpQuadFit_hh
+#ifndef KdpQuadFilt_hh
+#define KdpQuadFilt_hh
 
-#include <string>
 #include <vector>
 #include <array>
-#include <limits>
 #include <iostream>
 using namespace std;
-class KdpQuadFitParams;
 
 ////////////////////////
 // This class
 
-class KdpQuadFit {
+class KdpQuadFilt {
   
 public:
 
@@ -58,13 +55,13 @@ public:
    * Constructor
    */
 
-  KdpQuadFit();
+  KdpQuadFilt();
   
   /**
    * Destructor
    */
 
-  virtual ~KdpQuadFit();
+  virtual ~KdpQuadFilt();
 
   // compute KDP using quadratic
   // returns 0 on success, -1 on failure

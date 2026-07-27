@@ -40,7 +40,7 @@
 #define KdpFilt_hh
 
 #include <radar/KdpFiltParams.hh>
-#include <radar/KdpQuadFit.hh>
+#include <radar/KdpQuadFilt.hh>
 #include <radar/RadarFft.hh>
 #include <rapmath/ForsytheFit.hh>
 #include <string>
@@ -745,7 +745,7 @@ private:
 
   // quadratic filter
   
-  KdpQuadFit _quadFit;
+  KdpQuadFilt _quadFilt;
   
   //////////////////////////////////////////
   // methods

@@ -2316,13 +2316,12 @@ void KdpFilt::_quadFilter()
 
   int nFeatureHalf = ((int) (_phidpFeatureLengthKm / _gateSpacingKm) + 1) / 2;
 
-  if (_quadFit.compute(_phidpUnfoldInterp_,
-                       _gateSpacingKm,
-                       nFeatureHalf) == 0) {
-    _phidpQuadFilt_ = _quadFit.getPhidpFitDeg();
-    _kdpQuadFilt_ = _quadFit.getKdpDegPerKm();
+  if (_quadFilt.compute(_phidpUnfoldInterp_,
+                        _gateSpacingKm,
+                        nFeatureHalf) == 0) {
+    _phidpQuadFilt_ = _quadFilt.getPhidpFitDeg();
+    _kdpQuadFilt_ = _quadFilt.getKdpDegPerKm();
   }
-  
 
 }
 

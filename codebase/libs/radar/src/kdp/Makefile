@@ -27,7 +27,7 @@ CPPC_SRCS = \
 	KdpBringi.cc \
 	KdpCompute.cc \
 	KdpFilt.cc \
-	KdpQuadFit.cc \
+	KdpQuadFilt.cc \
 	PhidpProc.cc
 
 #

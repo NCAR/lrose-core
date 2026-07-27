@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// KdpQuadFit.cc
+// KdpQuadFilt.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 // with help from ChatGpt 5.
@@ -36,21 +36,15 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <algorithm>
-#include <array>
 #include <cmath>
-#include <cstddef>
-#include <limits>
-#include <vector>
-
-#include <radar/KdpQuadFit.hh>
+#include <radar/KdpQuadFilt.hh>
 
 // Unwrap a PHIDP vector whose values are in degrees.
 // Missing values do not update the previous valid phase.
 
 // constructor
 
-KdpQuadFit::KdpQuadFit()
+KdpQuadFilt::KdpQuadFilt()
   
 {
 
@@ -58,7 +52,7 @@ KdpQuadFit::KdpQuadFit()
 
 // destructor
 
-KdpQuadFit::~KdpQuadFit()
+KdpQuadFilt::~KdpQuadFilt()
   
 {
 
@@ -69,10 +63,10 @@ KdpQuadFit::~KdpQuadFit()
 // returns 0 on success, -1 on failure
 // call get() methods for results
 
-int KdpQuadFit::compute(const std::vector<double>& phidpDeg,
-                        double gateSpacingKm,
-                        int halfWidth,
-                        const std::vector<double>* quality /* = nullptr */)
+int KdpQuadFilt::compute(const std::vector<double>& phidpDeg,
+                         double gateSpacingKm,
+                         int halfWidth,
+                         const std::vector<double>* quality /* = nullptr */)
   
 {
   
@@ -86,7 +80,7 @@ int KdpQuadFit::compute(const std::vector<double>& phidpDeg,
   if (nGates == 0 ||
       gateSpacingKm <= 0.0 ||
       halfWidth < 1) {
-    cerr << "ERROR - KdpQuadFit::computeQuadraticKdp" << endl;
+    cerr << "ERROR - KdpQuadFilt::computeQuadraticKdp" << endl;
     cerr << "  Invalid parameters" << endl;
     cerr << "  phidp vector size: " << phidpDeg.size() << endl;
     cerr << "  gateSpacingKm: " << gateSpacingKm << endl;
@@ -95,7 +89,7 @@ int KdpQuadFit::compute(const std::vector<double>& phidpDeg,
   }
 
   if (quality != nullptr && quality->size() != nGates) {
-    cerr << "ERROR - KdpQuadFit::computeQuadraticKdp" << endl;
+    cerr << "ERROR - KdpQuadFilt::computeQuadraticKdp" << endl;
     cerr << "  Quality vector size does not match phidp vector" << endl;
     cerr << "  phidp vector size: " << phidpDeg.size() << endl;
     cerr << "  quality vector size: " << quality->size() << endl;
@@ -140,7 +134,7 @@ int KdpQuadFit::compute(const std::vector<double>& phidpDeg,
   
 }
 
-std::vector<double> KdpQuadFit::_unwrapDegrees(const std::vector<double>& phaseDeg)
+std::vector<double> KdpQuadFilt::_unwrapDegrees(const std::vector<double>& phaseDeg)
 {
 
   std::vector<double> result(phaseDeg.size(), missingValue());
@@ -182,9 +176,9 @@ std::vector<double> KdpQuadFit::_unwrapDegrees(const std::vector<double>& phaseD
 // Solve a 3-by-3 linear system using Gaussian elimination with pivoting.
 // returns 0 on success, -1 on failure
 
-int KdpQuadFit::_solve3x3(std::array<std::array<double, 3>, 3> matrix,
-                          std::array<double, 3> rhs,
-                          std::array<double, 3>& solution)
+int KdpQuadFilt::_solve3x3(std::array<std::array<double, 3>, 3> matrix,
+                           std::array<double, 3> rhs,
+                           std::array<double, 3>& solution)
 {
   
   constexpr double epsilon = 1.0e-12;
@@ -246,11 +240,11 @@ int KdpQuadFit::_solve3x3(std::array<std::array<double, 3>, 3> matrix,
 // improves numerical conditioning and makes coefficient[1] the derivative
 // at the center gate.
 
-KdpQuadFit::LocalFit KdpQuadFit::_fitLocalQuadratic(const std::vector<double>& phidpUnwrapped,
-                                                    const std::vector<double>* quality,
-                                                    std::size_t center,
-                                                    int halfWidth,
-                                                    double gateSpacingKm)
+KdpQuadFilt::LocalFit KdpQuadFilt::_fitLocalQuadratic(const std::vector<double>& phidpUnwrapped,
+                                                      const std::vector<double>* quality,
+                                                      std::size_t center,
+                                                      int halfWidth,
+                                                      double gateSpacingKm)
 {
 
   const std::size_t nGates = phidpUnwrapped.size();
