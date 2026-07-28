@@ -331,7 +331,7 @@ paramdef struct block_def_t {
       block_id = 1010,
       pulse_width_us = 0.256,
       prt_s = 101.376e-6,
-      block_name = "short_pulse",
+      block_name = "short_fixed",
       field_name_suffix = ""
     }
     ,
@@ -339,7 +339,7 @@ paramdef struct block_def_t {
       block_id = 1020,
       pulse_width_us = 0.512,
       prt_s = 152.064e-6,
-      block_name = "long_pulse",
+      block_name = "long_fixed",
       field_name_suffix = ""
     }
   };

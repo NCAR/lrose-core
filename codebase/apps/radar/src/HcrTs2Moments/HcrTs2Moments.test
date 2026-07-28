@@ -475,7 +475,7 @@ block_defs = {
     block_id = 1010,
     pulse_width_us = 0.256,
     prt_s = 0.000101376,
-    block_name = "short_pulse",
+    block_name = "short_fixed",
     field_name_suffix = ""
   }
   ,
@@ -483,7 +483,7 @@ block_defs = {
     block_id = 1020,
     pulse_width_us = 0.512,
     prt_s = 0.000152064,
-    block_name = "long_pulse",
+    block_name = "long_fixed",
     field_name_suffix = ""
   }
 };
