@@ -951,6 +951,10 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.snrhc - start);
     case Params::SNRVC:
       return (&_flds.snrvc - start);
+    case Params::SNRHX:
+      return (&_flds.snrhx - start);
+    case Params::SNRVX:
+      return (&_flds.snrvx - start);
       
       // UNCALIBRATED POWER
       
@@ -960,6 +964,10 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.dbmhc - start);
     case Params::DBMVC:
       return (&_flds.dbmvc - start);
+    case Params::DBMHX:
+      return (&_flds.dbmhx - start);
+    case Params::DBMVX:
+      return (&_flds.dbmvx - start);
       
       // NOISE SUBTRACTED POWER
 
