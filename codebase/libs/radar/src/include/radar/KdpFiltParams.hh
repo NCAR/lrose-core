@@ -418,6 +418,8 @@ public:
 
   int KDP_median_filter_len_for_ZZDR;
 
+  double KDP_threshold_for_psob_mean;
+
   double KDP_min_valid_abs_kdp;
 
   tdrp_bool_t KDP_specify_coefficients_for_attenuation_correction;
@@ -445,7 +447,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[39];
+  mutable TDRPtable _table[40];
 
   const char *_className;
 

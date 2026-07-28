@@ -68,26 +68,6 @@ public:
   ~KdpFilt();
 
   /**
-   * Set FIR filter length
-   * valid lengths are 125, 30, 20, 10
-   * the next length down will be used
-   * @param[in] len The FIR filter length
-   */
-  
-  // FIR filter options - lengths 125, 30, 20 and 10
-
-  typedef enum {
-    FIR_LENGTH_125,
-    FIR_LENGTH_60,
-    FIR_LENGTH_40,
-    FIR_LENGTH_30,
-    FIR_LENGTH_20,
-    FIR_LENGTH_10
-  } fir_filter_len_t;
-
-  void setFIRFilterLen(fir_filter_len_t len);
-
-  /**
    * Set number of iterations over which the filter is applied
    * to unfolded PHIDP
    * default is 2
@@ -277,6 +257,15 @@ public:
   }
   
   /**
+   * Set KDP threshold for valid run when computing KDP using
+   * Z and ZDR self-consistency
+   */
+
+  void setThresholdForPsobMean(double val) {
+    _meanPsobThreshold = val;
+  }
+  
+  /**
    * Set length for Z and ZDR median filter when estimating
    * KDP from Z and ZDR
    */
@@ -403,6 +392,7 @@ public:
    */
   const double *getKdp() const { return _kdp; }
   const double *getKdpZZdr() const { return _kdpZZdr; }
+
   // self-consistency conditioned result
   const double *getKdpSC() const { return _kdpSC; }
 
@@ -458,7 +448,7 @@ public:
 protected:
   
 private:
-
+  
   double _missingValue; /**< Value for missing or bad data */
 
   // parameters
@@ -469,26 +459,6 @@ private:
 
   time_t _timeSecs;
   double _timeFractionSecs;
-
-  // FIR filter options - lengths 125, 30, 20 and 10
-  
-  static const int FIR_LEN_125 = 125; /**< FIR filter len 125 */
-  static const int FIR_LEN_60 = 60;   /**< FIR filter len 60 */
-  static const int FIR_LEN_40 = 40;   /**< FIR filter len 40 */
-  static const int FIR_LEN_30 = 30;   /**< FIR filter len 30 */
-  static const int FIR_LEN_20 = 20;   /**< FIR filter len 20 */
-  static const int FIR_LEN_10 = 10;   /**< FIR filter len 10 */
-
-  static const double firCoeff_125[FIR_LEN_125+1]; /**< FIR len 125 */
-  static const double firCoeff_60[FIR_LEN_60+1];   /**< FIR len 60 */
-  static const double firCoeff_40[FIR_LEN_40+1];   /**< FIR len 40 */
-  static const double firCoeff_30[FIR_LEN_30+1];   /**< FIR len 30 */
-  static const double firCoeff_20[FIR_LEN_20+1];   /**< FIR len 20 */
-  static const double firCoeff_10[FIR_LEN_10+1];   /**< FIR len 10 */
-  
-  int _firLength;          /**< The length of the current FIR array */
-  int _firLenHalf;         /**< Half the length of the current FIR array */
-  const double *_firCoeff; /**< The length of the current FIR array */
 
   int _nFiltIterUnfolded;  /**< Number of times the filter is
                             * iteratively applied to unfolded phidp */
@@ -560,7 +530,7 @@ private:
 
   // threshold for psob mean
 
-  double _minMeanPosb;
+  double _meanPsobThreshold;
 
   // phidp state for unfolding
 
@@ -788,17 +758,9 @@ private:
 
   // worker methods
   
-  void _applyIterativeFir(double *out, double *in, int nIterations);
-  void _applyIterativeFirCond(double *out, double *in, int nIterations);
-  void _copyArray(double *out, const double *in);
-  void _copyArrayCond(double *out, const double *in, const double *original);
-  void _padArray(double *array);
-
   void _computeKdp();
   void _loadPhidpAccumFilt(const double *phidp, double *accum);
   void _computeAttenCorrection();
-  void _applyFirFilter(double *out, const double *in);
-  double _getFirFilterGain();
   void _computeDbzMax();
   void _computePhidpConditioned();
 
@@ -857,23 +819,8 @@ private:
   
   void _censorNonValidKdp();
 
-  /// pack valid run data into packed vector
-
-  void _packValid(const vector<double> &unpacked,
-                  vector<double> &packed);
-
-  /// unpack packed vector into full
-
-  void _unpackValid(const vector<double> &packed,
-                    vector<double> &unpacked);
-
-  /// unpack packed vector and fill gaps with adjacent values
-  
-  void _unpackAndFill(const vector<double> &packed,
-                      vector<double> &unpacked);
-  
   /// get quality based on rhohv
-
+  
   double _rhohvQuality(double rhohv);
   
   /// moving mean along a vector

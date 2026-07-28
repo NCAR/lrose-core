@@ -869,6 +869,18 @@
     tt->single_val.i = 5;
     tt++;
     
+    // Parameter 'KDP_threshold_for_psob_mean'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("KDP_threshold_for_psob_mean");
+    tt->descr = tdrpStrDup("Sets the lower limit for PSOB mean for self-consistency.");
+    tt->help = tdrpStrDup("If the mean PSOB is below this threshold, then KDP is not adjusted based on self-consistency.");
+    tt->val_offset = (char *) &KDP_threshold_for_psob_mean - &_start_;
+    tt->single_val.d = 0.25;
+    tt++;
+    
     // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));

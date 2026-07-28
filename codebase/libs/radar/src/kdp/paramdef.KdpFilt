@@ -169,6 +169,12 @@ paramdef int {
   p_help = "When we compute KDP_ZZDR, we first apply a median filter to both Z and ZDR in range. This parameter is the length of that median filter, in gates.";
 } KDP_median_filter_len_for_ZZDR;
 
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Sets the lower limit for PSOB mean for self-consistency.";
+  p_help = "If the mean PSOB is below this threshold, then KDP is not adjusted based on self-consistency.";
+} KDP_threshold_for_psob_mean;
+
 commentdef {
   p_header = "SANITY CHECK ON KDP RESULTS";
   p_text = "Ignore small KDP values, which are likely just noise.";

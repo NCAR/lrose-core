@@ -49,104 +49,6 @@
 #include <radar/RadarComplex.hh>
 using namespace std;
 
-const double KdpFilt::firCoeff_125[FIR_LEN_125+1] = {
-  2.5107443e-003,2.6960328e-003,2.8834818e-003,3.0729344e-003,
-  3.2642298e-003,3.4572038e-003,3.6516884e-003,3.8475124e-003,
-  4.0445018e-003,4.2424792e-003,4.4412651e-003,4.6406770e-003,
-  4.8405305e-003,5.0406391e-003,5.2408146e-003,5.4408670e-003,
-  5.6406054e-003,5.8398373e-003,6.0383699e-003,6.2360093e-003,
-  6.4325618e-003,6.6278331e-003,6.8216293e-003,7.0137569e-003,
-  7.2040230e-003,7.3922356e-003,7.5782040e-003,7.7617385e-003,
-  7.9426516e-003,8.1207572e-003,8.2958715e-003,8.4678134e-003,
-  8.6364038e-003,8.8014671e-003,8.9628303e-003,9.1203239e-003,
-  9.2737821e-003,9.4230427e-003,9.5679474e-003,9.7083424e-003,
-  9.8440780e-003,9.9750093e-003,1.0100996e-002,1.0221904e-002,
-  1.0337601e-002,1.0447965e-002,1.0552875e-002,1.0652219e-002,
-  1.0745888e-002,1.0833782e-002,1.0915804e-002,1.0991867e-002,
-  1.1061886e-002,1.1125785e-002,1.1183495e-002,1.1234953e-002,
-  1.1280103e-002,1.1318895e-002,1.1351287e-002,1.1377243e-002,
-  1.1396735e-002,1.1409742e-002,1.1416248e-002,1.1416248e-002,
-  1.1409742e-002,1.1396735e-002,1.1377243e-002,1.1351287e-002,
-  1.1318895e-002,1.1280103e-002,1.1234953e-002,1.1183495e-002,
-  1.1125785e-002,1.1061886e-002,1.0991867e-002,1.0915804e-002,
-  1.0833782e-002,1.0745888e-002,1.0652219e-002,1.0552875e-002,
-  1.0447965e-002,1.0337601e-002,1.0221904e-002,1.0100996e-002,
-  9.9750093e-003,9.8440780e-003,9.7083424e-003,9.5679474e-003,
-  9.4230427e-003,9.2737821e-003,9.1203239e-003,8.9628303e-003,
-  8.8014671e-003,8.6364038e-003,8.4678134e-003,8.2958715e-003,
-  8.1207572e-003,7.9426516e-003,7.7617385e-003,7.5782040e-003,
-  7.3922356e-003,7.2040230e-003,7.0137569e-003,6.8216293e-003,
-  6.6278331e-003,6.4325618e-003,6.2360093e-003,6.0383699e-003,
-  5.8398373e-003,5.6406054e-003,5.4408670e-003,5.2408146e-003,
-  5.0406391e-003,4.8405305e-003,4.6406770e-003,4.4412651e-003,
-  4.2424792e-003,4.0445018e-003,3.8475124e-003,3.6516884e-003,
-  3.4572038e-003,3.2642298e-003,3.0729344e-003,2.8834818e-003,
-  2.6960328e-003,2.5107443e-003};
-
-const double KdpFilt::firCoeff_60[FIR_LEN_60+1] = {
-  0.005192387815,0.006000584633,0.006826878703,
-  0.007668199579,0.008521340618,0.009382975237,
-  0.01024967409,0.01111792308,0.0119841421,
-  0.01284470437,0.01369595621,0.01453423726,
-  0.01535590085,0.01615733448,0.01693498027,
-  0.01768535525,0.01840507134,0.01909085485,
-  0.01973956552,0.02034821473,0.02091398302,
-  0.02143423665,0.02190654305,0.02232868523,
-  0.0226986749,0.02301476423,0.02327545631,
-  0.02347951399,0.02362596732,0.02371411929,
-  0.02374355002,0.02371411929,0.02362596732,
-  0.02347951399,0.02327545631,0.02301476423,
-  0.0226986749,0.02232868523,0.02190654305,
-  0.02143423665,0.02091398302,0.02034821473,
-  0.01973956552,0.01909085485,0.01840507134,
-  0.01768535525,0.01693498027,0.01615733448,
-  0.01535590085,0.01453423726,0.01369595621,
-  0.01284470437,0.0119841421,0.01111792308,
-  0.01024967409,0.009382975237,0.008521340618,
-  0.007668199579,0.006826878703,0.006000584633,
-  0.005192387815 };
-
-const double KdpFilt::firCoeff_40[FIR_LEN_40+1] = {
-  0.007806525986, 0.009628559511, 0.01150585082,
-  0.01342243276, 0.01536143961, 0.01730530352,
-  0.0192359639, 0.02113508696, 0.02298429218,
-  0.02476538263, 0.02646057561, 0.02805273044,
-  0.02952556994, 0.03086389233, 0.03205377043,
-  0.03308273518, 0.03393994069, 0.03461630839,
-  0.03510464806, 0.0353997539, 0.03549847428,
-  0.0353997539, 0.03510464806, 0.03461630839,
-  0.03393994069, 0.03308273518, 0.03205377043,
-  0.03086389233, 0.02952556994, 0.02805273044,
-  0.02646057561, 0.02476538263, 0.02298429218,
-  0.02113508696, 0.0192359639, 0.01730530352,
-  0.01536143961, 0.01342243276, 0.01150585082,
-  0.009628559511, 0.007806525986 };
-
-const double KdpFilt::firCoeff_30[FIR_LEN_30+1] = {
-  0.01040850049,0.0136551033,0.01701931136,0.0204494327,
-  0.0238905658,0.02728575662,0.03057723021,0.03370766631,
-  0.03662148602,0.03926611662,0.04159320123,0.04355972181,
-  0.04512900539,0.04627158699,0.04696590613,0.04719881804,
-  0.04696590613,0.04627158699,0.04512900539,0.04355972181,
-  0.04159320123,0.03926611662,0.03662148602,0.03370766631,
-  0.03057723021,0.02728575662,0.0238905658,0.0204494327,
-  0.01701931136,0.0136551033,0.01040850049};
-
-const double KdpFilt::firCoeff_20[FIR_LEN_20+1] = {
-  0.016976991942, 0.023294989742, 0.030244475217,
-  0.037550056394, 0.044888313214, 0.051908191403,
-  0.058254532798, 0.063592862330, 0.067633391375,
-  0.070152221980, 0.071007947209, 0.070152221980,
-  0.067633391375, 0.063592862330, 0.058254532798,
-  0.051908191403, 0.044888313214, 0.037550056394,
-  0.030244475217, 0.023294989742, 0.016976991942
-};
-
-const double KdpFilt::firCoeff_10[FIR_LEN_10+1] = {
-  0.03064579383,0.0603038422,0.09022859603,0.1159074511,
-  0.1332367851,0.1393550634,0.1332367851,0.1159074511,
-  0.09022859603,0.0603038422,0.03064579383 };
-
 // Constructor
 
 KdpFilt::KdpFilt()
@@ -154,8 +56,6 @@ KdpFilt::KdpFilt()
 {
 
   // FIR filter defaults to length 20
-
-  setFIRFilterLen(FIR_LENGTH_20);
 
   _nFiltIterUnfolded = 2;
   _nFiltIterCond = 4;
@@ -192,7 +92,7 @@ KdpFilt::KdpFilt()
 
   _minValidAbsKdp = 0.05;
 
-  _minMeanPosb = 1.0;
+  _meanPsobThreshold = 1.0;
 
   _useIterativeFiltering = false;
   _phidpDiffThreshold = 4.0;
@@ -228,44 +128,6 @@ KdpFilt::KdpFilt()
 KdpFilt::~KdpFilt()
   
 {
-
-}
-
-/////////////////////////////////////
-// set FIR filter length
-
-void KdpFilt::setFIRFilterLen(fir_filter_len_t len)
-
-{
-  
-  switch (len) {
-    case FIR_LENGTH_125:
-      _firLength = FIR_LEN_125 + 1;
-      _firCoeff = firCoeff_125;
-      break;
-    case FIR_LENGTH_60:
-      _firLength = FIR_LEN_60 + 1;
-      _firCoeff = firCoeff_60;
-      break;
-    case FIR_LENGTH_40:
-      _firLength = FIR_LEN_40 + 1;
-      _firCoeff = firCoeff_40;
-      break;
-    case FIR_LENGTH_30:
-      _firLength = FIR_LEN_30 + 1;
-      _firCoeff = firCoeff_30;
-      break;
-    case FIR_LENGTH_20:
-      _firLength = FIR_LEN_20 + 1;
-      _firCoeff = firCoeff_20;
-      break;
-    case FIR_LENGTH_10:
-    default:
-      _firLength = FIR_LEN_10 + 1;
-      _firCoeff = firCoeff_10;
-  }
-
-  _firLenHalf = _firLength / 2;
 
 }
 
@@ -317,19 +179,6 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
 
   // initialize KDP object
 
-  if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_125) {
-    setFIRFilterLen(KdpFilt::FIR_LENGTH_125);
-  } else if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_60) {
-    setFIRFilterLen(KdpFilt::FIR_LENGTH_60);
-  } else if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_40) {
-    setFIRFilterLen(KdpFilt::FIR_LENGTH_40);
-  } else if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_30) {
-    setFIRFilterLen(KdpFilt::FIR_LENGTH_30);
-  } else if (params.KDP_fir_filter_len == KdpFiltParams::KDP_FIR_LEN_20) {
-    setFIRFilterLen(KdpFilt::FIR_LENGTH_20);
-  } else {
-    setFIRFilterLen(KdpFilt::FIR_LENGTH_10);
-  }
   setNGatesStats(params.KDP_ngates_for_stats);
   setNFiltIterUnfolded(params.KDP_n_filt_iterations_unfolded);
   setNFiltIterCond(params.KDP_n_filt_iterations_hubbert_bringi);
@@ -350,6 +199,7 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
   setZdrSdevMax(params.KDP_zdr_sdev_max);
   setKdpMinForSelfConsistency(params.KDP_minimum_for_self_consistency);
   setDbzMinForSelfConsistency(params.DBZ_minimum_for_self_consistency);
+  setThresholdForPsobMean(_params.KDP_threshold_for_psob_mean);
   setMedianFilterLenForKdpZZdr(params.KDP_median_filter_len_for_ZZDR);
 
   if (params.KDP_debug) {
@@ -1084,136 +934,6 @@ void KdpFilt::_computePhidpRegrFilt(int runNum)
   
 }
 
-/////////////////////////////////////////////////
-// apply an FIR filter, iteratively
-
-void KdpFilt::_applyIterativeFir(double *out,
-                                 double *in,
-                                 int nIterations)
-
-{
-
-  // compute required array sizes, given that we need to
-  // have space for the FIR filter on each side
-  
-  int arrayOffset = _firLength + 1;
-  if (_nGatesStats > _firLength) {
-    arrayOffset = _nGatesStats + 1;
-  }
-  int arrayLen = _nGates + 2 * arrayOffset;
-  
-  // allocate working arrays
-  
-  vector<double> work1_(arrayLen);
-  double *work1 = work1_.data() + arrayOffset;
-  
-  vector<double> work2_(arrayLen);
-  double *work2 = work2_.data() + arrayOffset;
-  
-  // initialize working array work2
-  
-  _copyArray(work2, in);
-  _padArray(work2);
-  
-  // apply FIR filter, computing work1 from work2, iterate
-    
-  for (int iloop = 0; iloop < nIterations; iloop++) {
-    _applyFirFilter(work1, work2);
-    _copyArray(work2, work1);
-  } // iloop
-  
-  // save result
-
-  _copyArray(out, work2);
-
-}
-
-///////////////////////////////////////////////////////////////////
-// apply an FIR filter, iteratively
-// condionally check each iteration against the original
-// keep the original if the diff is below the conditional threshold
-
-void KdpFilt::_applyIterativeFirCond(double *out,
-                                     double *in,
-                                     int nIterations)
-
-{
-
-  // compute required array sizes, given that we need to
-  // have space for the FIR filter on each side
-  
-  int arrayOffset = _firLength + 1;
-  if (_nGatesStats > _firLength) {
-    arrayOffset = _nGatesStats + 1;
-  }
-  int arrayLen = _nGates + 2 * arrayOffset;
-  
-  // allocate working arrays
-  
-  vector<double> work1_(arrayLen);
-  double *work1 = work1_.data() + arrayOffset;
-  
-  vector<double> work2_(arrayLen);
-  double *work2 = work2_.data() + arrayOffset;
-  
-  // initialize working array work2
-  
-  _copyArray(work2, in);
-  _padArray(work2);
-  
-  // apply FIR filter, computing work1 from work2, iterate
-    
-  for (int iloop = 0; iloop < nIterations; iloop++) {
-    _applyFirFilter(work1, work2);
-    _copyArrayCond(work2, work1, in);
-  } // iloop
-  
-  // save result
-
-  _copyArray(out, work2);
-
-}
-
-/////////////////////////////////////////////
-// load array ready for filter
-
-void KdpFilt::_copyArray(double *out, const double *in)
-
-{
-  memcpy(out, in, _nGates * sizeof(double));
-}
-
-/////////////////////////////////////////////
-// copy array conditionally
-
-void KdpFilt::_copyArrayCond(double *out, const double *in,
-                             const double *original)
-
-{
-  for (int ii = 0; ii < _nGates; ii++) {
-    double diff = in[ii] - out[ii];
-    if (fabs(diff) < _phidpDiffThreshold) {
-      out[ii] = original[ii];
-    } else {
-      out[ii] = in[ii];
-    }
-  }
-}
-
-/////////////////////////////////////////////
-// Pad array ready for filter
-
-void KdpFilt::_padArray(double *array)
-
-{
-  for (int ii = -_firLength; ii < 0; ii++) {
-    array[ii] = array[0];
-  }
-  for (int ii = _nGates; ii < _nGates + _firLength; ii++) {
-    array[ii] = array[_nGates - 1];
-  }
-}
-
 /////////////////////////////////////////////
 // Compute KDP
 
@@ -1345,37 +1065,6 @@ void KdpFilt::_computeAttenCorrection()
 }
 
 /////////////////////////////////////////////
-// Apply FIR filter
-
-void KdpFilt::_applyFirFilter(double *out, const double *in)
-
-{
-
-  for (int ii = -_firLenHalf; ii < _nGates + _firLenHalf; ii++) {
-    double acc = 0.0;
-    int kk = ii - _firLenHalf;
-    for (int jj = 0; jj < _firLength; jj++, kk++) {
-      acc = acc + _firCoeff[jj] * in[kk];
-    }
-    out[ii] = acc;
-  } // ii
-
-}
-    
-/////////////////////////////////////////////
-// Get FIR filter gain
-
-double KdpFilt::_getFirFilterGain()
-  
-{
-  double sum = 0.0;
-  for (int jj = 0; jj < _firLength; jj++) {
-    sum += _firCoeff[jj];
-  }
-  return sum;
-}
-    
-/////////////////////////////////////////////
 // Compute DBZ max for surrounding gates
 
 void KdpFilt::_computeDbzMax()
@@ -1406,7 +1095,7 @@ void KdpFilt::_computePhidpConditioned()
 
   // initialize
   
-  _copyArray(_phidpCond, _phidpFilt);
+  std::copy(_phidpFilt_.begin(), _phidpFilt_.end(), _phidpCond_.begin());
 
   bool debug = false;
 
@@ -2167,7 +1856,7 @@ void KdpFilt::_loadKdpSC()
 
   // set conditions on psob
   // compute mean psob for pos values only
-  // threshold using _minMeanPosb
+  // threshold using _meanPsobThreshold
   
   for (size_t ii = 0; ii < psobRuns.size(); ii++) {
     const PhidpRun &run = psobRuns[ii];
@@ -2185,7 +1874,7 @@ void KdpFilt::_loadKdpSC()
     }
     for (int igate = run.ibegin; igate <= run.iend; igate++) {
       _psobMean[igate] = psobMean;
-      if (psobMean < _minMeanPosb || _psob[igate] < 0) {
+      if (psobMean < _meanPsobThreshold || _psob[igate] < 0) {
         _psob[igate] = 0;
       }
     }
@@ -2377,89 +2066,6 @@ void KdpFilt::_censorNonValidKdp()
 
 }
   
-////////////////////////////////////////////////////////////
-/// pack valid run data into packed vector
-
-void KdpFilt::_packValid(const vector<double> &unpacked,
-                         vector<double> &packed)
-
-{
-
-  packed.clear();
-
-  for (size_t ii = 0; ii < _validRuns.size(); ii++) {
-    const PhidpRun &run = _validRuns[ii];
-    for (int jj = run.ibegin; jj <= run.iend; jj++) {
-      packed.push_back(unpacked[jj]);
-    }
-  } // ii
-
-}
-
-////////////////////////////////////////////////////////////
-/// unpack packed vector into full vector
-
-void KdpFilt::_unpackValid(const vector<double> &packed,
-                           vector<double> &unpacked)
-
-{
-
-  for (int jj = 0; jj < _nGates; jj++) {
-    unpacked[jj] = _missingValue;
-  }
-
-  int index = 0;
-  for (size_t ii = 0; ii < _validRuns.size(); ii++) {
-    const PhidpRun &run = _validRuns[ii];
-    for (int jj = run.ibegin; jj <= run.iend; jj++, index++) {
-      assert(index < (int) packed.size());
-      unpacked[jj] = packed[index];
-    }
-  } // ii
-
-}
-
-////////////////////////////////////////////////////////////
-/// unpack packed vector and fill gaps with adjacent values
-
-void KdpFilt::_unpackAndFill(const vector<double> &packed,
-                             vector<double> &unpacked)
-  
-{
-  
-  for (int jj = 0; jj < _nGates; jj++) {
-    unpacked[jj] = _missingValue;
-  }
-  
-  int gapStart = 0;
-  int index = 0;
-  for (size_t ii = 0; ii < _validRuns.size(); ii++) {
-    
-    const PhidpRun &run = _validRuns[ii];
-
-    // valid region
-    
-    for (int jj = run.ibegin; jj <= run.iend; jj++, index++) {
-      assert(index < (int) packed.size());
-      unpacked[jj] = packed[index];
-    } // jj
-
-    // gap before valid region
-    
-    for (int jj = gapStart; jj < run.ibegin; jj++) {
-      unpacked[jj] = unpacked[run.ibegin];
-    }
-
-  } // ii
-
-  // last gap
-  
-  for (int jj = index; jj < _nGates; jj++) {
-    unpacked[jj] = unpacked[index-1];
-  }
-
-}
-
 ////////////////////////////////////////////////////////////
 /// get quality based on rhohv
 

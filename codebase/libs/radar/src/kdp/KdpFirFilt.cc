@@ -197,8 +197,6 @@ void KdpFirFilt::applyFilter(const vector<double> &unfilt,
 
 {
 
-  cerr << "111111111111111111 _firLength: " << _firLength << endl;
-  
   // check size
   
   assert(filt.size() == unfilt.size());
@@ -224,8 +222,6 @@ void KdpFirFilt::applyPsobFilter(const vector<double> &unfilt,
                                  double diffThreshold)
   
 {
-
-  cerr << "2222222222222222222 _firLength: " << _firLength << endl;
 
   // check size
   
