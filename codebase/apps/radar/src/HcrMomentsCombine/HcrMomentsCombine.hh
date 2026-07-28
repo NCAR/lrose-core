@@ -182,6 +182,8 @@ private:
   void _printDwellRayInfo(ostream &out);
   int _readNextDwell();
   void _setDwellTimeLimits(RadxRay *ray);
+
+  int _checkDwellConstantPrt(const vector<RadxRay *> &dwellRays);
   int _checkForTimeGap(RadxRay *latestRayShort);
 
   RadxRay *_computeMeanMoments(vector<RadxRay *> &dwellRays,
@@ -189,6 +191,7 @@ private:
   
   
   RadxRay *_combineDwellTriple();
+  RadxRay *_combineDwellDual();
   RadxRay *_combineDwellFixed();
 
   RadxField *_unfoldVel(RadxField *velShortPrt,
@@ -204,6 +207,8 @@ private:
   RadxRay *_readRayNext();
   RadxRay *_readRayLong();
   
+  void _initDualPrt(double prtShort, double prtLong);
+
   RadxField::StatsMethod_t
     _getDwellStatsMethod(Params::dwell_stats_method_t method);
 

@@ -285,15 +285,23 @@ int HcrMomentsCombine::_runArchive()
 void HcrMomentsCombine::_processDwell()
 {
 
-  RadxRay *rayCombined = nullptr;
+  // check the dwells for consistent PRTs
+
   
   // combine short-short, long-long and long-short dwells
+  
+  RadxRay *rayCombined = nullptr;
   
   if (_dwellRaysSS.size() > 0 &&
       _dwellRaysLL.size() > 0 &&
       _dwellRaysLS.size() > 0) {
     
     rayCombined = _combineDwellTriple();
+
+  } else if (_dwellRaysSS.size() > 0 &&
+             _dwellRaysLL.size() > 0) {
+    
+    rayCombined = _combineDwellDual();
 
   } else if (_dwellRaysFixed.size() > 0) {
 
@@ -806,6 +814,34 @@ void HcrMomentsCombine::_setDwellTimeLimits(RadxRay *ray)
 }
 
 /////////////////////////////////////////////////////////////////
+// check moments in dwell all have the same PRT
+
+int HcrMomentsCombine::_checkDwellConstantPrt(const vector<RadxRay *> &dwellRays)
+  
+{
+
+  if (dwellRays.size() < 1) {
+    return -1;
+  }
+  
+  double prt0 = dwellRays[0]->getPrtSec();
+
+  for (size_t ii = 1; ii < dwellRays.size(); ii++) {
+    
+    double prt = dwellRays[ii]->getPrtSec();
+    double diff = fabs(prt0 - prt);
+
+    if (diff > 1.0e-9) {
+      return -1;
+    }
+    
+  } // ii
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////
 // check for a significant time gap
 // if found, re-initialize
 
@@ -879,7 +915,15 @@ RadxRay *HcrMomentsCombine::_computeMeanMoments(vector<RadxRay *> &dwellRays,
 RadxRay *HcrMomentsCombine::_combineDwellTriple()
 
 {
+
+  // check that the dwells have constant PRT
   
+  if (_checkDwellConstantPrt(_dwellRaysSS) ||
+      _checkDwellConstantPrt(_dwellRaysLL) ||
+      _checkDwellConstantPrt(_dwellRaysLS)) {
+    return nullptr;
+  }
+
   // compute the mean moments for short-pulse short-PRT
   
   RadxRay *raySS = _computeMeanMoments(_dwellRaysSS, _dwellVolSS);
@@ -915,6 +959,8 @@ RadxRay *HcrMomentsCombine::_combineDwellTriple()
   }
   
   // unfold the velocity for long pulse, add unfolded field to ray
+
+  _initDualPrt(raySS->getPrtSec(), rayLL->getPrtSec());
 
   {
     
@@ -981,6 +1027,84 @@ RadxRay *HcrMomentsCombine::_combineDwellTriple()
 }
 
 /////////////////////////////////////////////////////////////////
+// combine dwell rays from dual pulse scheme
+// returns pointer to combined ray - this must be freed by caller.
+
+RadxRay *HcrMomentsCombine::_combineDwellDual()
+
+{
+  
+  // check that the dwells have constant PRT
+  
+  if (_checkDwellConstantPrt(_dwellRaysSS) ||
+      _checkDwellConstantPrt(_dwellRaysLL)) {
+    return nullptr;
+  }
+
+  // compute the mean moments for short-pulse short-PRT
+  
+  RadxRay *raySS = _computeMeanMoments(_dwellRaysSS, _dwellVolSS);
+  if (raySS == nullptr) {
+    return nullptr;
+  }
+  
+  // compute the mean moments for long-pulse long-PRT
+  
+  RadxRay *rayLL = _computeMeanMoments(_dwellRaysLL, _dwellVolLL);
+  if (rayLL == nullptr) {
+    delete raySS;
+    return nullptr;
+  }
+  
+  // rename short fields and add to the long moments ray
+
+  vector<RadxField *> fieldsSS = raySS->getFields();
+  for (size_t ifield = 0; ifield < fieldsSS.size(); ifield++) {
+    RadxField *fld = fieldsSS[ifield];
+    string newName = fld->getName() + _params.suffix_for_short_pulse_fields;
+    fld->setName(newName);
+    rayLL->addField(fld);
+  }
+  
+  // unfold the velocity for long pulse, add unfolded field to ray
+
+  _initDualPrt(raySS->getPrtSec(), rayLL->getPrtSec());
+
+  RadxField *velShortPrt = raySS->getField(_params.input_vel_raw_field_name);
+  RadxField *velLongPrt = rayLL->getField(_params.input_vel_raw_field_name);
+    
+  if (velShortPrt != nullptr && velLongPrt != nullptr) {
+    RadxField *velUnfold = _unfoldVel(velShortPrt, velLongPrt);
+    if (velUnfold != nullptr) {
+      velUnfold->setName(_params.output_vel_unfolded_field_name_long_pulse);
+      rayLL->addField(velUnfold);
+      rayLL->setNyquistMps(_nyquistUnfolded);
+      // _computeVelCorrectedForVertMotion(rayLL, velShort, velLong, velUnfold);
+    }
+  } else {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - HcrMomentsCombine::_combineDwellTriple()" << endl;
+      cerr << "  Cannot find long pulse velocity fields to unfold." << endl;
+      cerr << "  Vel field name: " << _params.input_vel_raw_field_name << endl;
+    }
+  }
+  
+  // set the combined time
+  
+  rayLL->setTime(_thisDwellMidTime);
+  
+  // free up memory
+  
+  _clearDwellRays();
+  delete raySS;
+
+  // return combined ray
+  
+  return rayLL;
+
+}
+
+/////////////////////////////////////////////////////////////////
 // combine dwell rays from fixed PRT
 // returns pointer to combined ray - this must be freed by caller.
 
@@ -988,7 +1112,28 @@ RadxRay *HcrMomentsCombine::_combineDwellFixed()
 
 {
 
-  return nullptr;
+  // check that the dwell has constant PRT
+  
+  if (_checkDwellConstantPrt(_dwellRaysFixed)) {
+    return nullptr;
+  }
+
+  // compute the mean moments for the fixed PRT dwell
+  
+  RadxRay *rayFixed = _computeMeanMoments(_dwellRaysFixed, _dwellVolFixed);
+  if (rayFixed == nullptr) {
+    return nullptr;
+  }
+  
+  // set the combined time
+  
+  rayFixed->setTime(_thisDwellMidTime);
+  
+  // free up memory
+
+  _clearDwellRays();
+
+  return rayFixed;
 
 }
 
@@ -1055,13 +1200,13 @@ RadxField *HcrMomentsCombine::_unfoldVel(RadxField *velShortPrt,
     }
     double unfoldedVel = dataShort[ii] + PP[ll] * _nyquistShort * 2;
     dataUnfold[ii] = unfoldedVel;
-
+    
   } // ii
 
   // correct vel for vertical motion
   
   _nyquistUnfolded = _nyquistShort * _LL;
-
+  
 #ifdef JUNK
   
   // rename vel fields
@@ -1114,9 +1259,9 @@ RadxField *HcrMomentsCombine::_unfoldVel(RadxField *velShortPrt,
 // velAngCorr=data.VEL+vr_platform;
 
 void HcrMomentsCombine::_computeVelCorrectedForVertMotion(RadxRay *ray,
-                                                            RadxField *velShort,
-                                                            RadxField *velLong,
-                                                            RadxField *velUnfolded)
+                                                          RadxField *velShort,
+                                                          RadxField *velLong,
+                                                          RadxField *velUnfolded)
   
 {
 
@@ -1245,8 +1390,8 @@ RadxRay *HcrMomentsCombine::_readRayNext()
 
   // read next ray
   
-  RadxRay *rayShort = _momReader->readNextRay();
-  if (rayShort == nullptr) {
+  RadxRay *ray = _momReader->readNextRay();
+  if (ray == nullptr) {
     return nullptr;
   }
   _nRaysRead++;
@@ -1261,7 +1406,7 @@ RadxRay *HcrMomentsCombine::_readRayNext()
     if (_wavelengthM < 0) {
       _wavelengthM = 0.003176;
     }
-    _prtShort = rayShort->getPrtSec();
+    _prtShort = ray->getPrtSec();
     _nyquistShort = ((_wavelengthM / _prtShort) / 4.0);
     if (_params.fixed_location_mode) {
       _platformShort.setLatitudeDeg(_params.fixed_radar_location.latitudeDeg);
@@ -1345,7 +1490,7 @@ RadxRay *HcrMomentsCombine::_readRayNext()
   // override location as required
 
   if (_params.fixed_location_mode) {
-    RadxGeoref *georef = rayShort->getGeoreference();
+    RadxGeoref *georef = ray->getGeoreference();
     if (georef != nullptr) {
       georef->setLatitude(_params.fixed_radar_location.latitudeDeg);
       georef->setLongitude(_params.fixed_radar_location.longitudeDeg);
@@ -1361,7 +1506,7 @@ RadxRay *HcrMomentsCombine::_readRayNext()
     }
   }
   
-  return rayShort;
+  return ray;
 
 }
 
@@ -1510,4 +1655,50 @@ RadxField::StatsMethod_t
   }
 
 }
+
+///////////////////////////////////
+// initialize dual PRT mode
+
+void HcrMomentsCombine::_initDualPrt(double prtShort,
+                                     double prtLong)
+
+{
+  
+  _prtShort = prtShort;
+  _prtLong = prtLong;
+  
+  double prtRatio = _prtShort / _prtLong;
+  int ratio60 = (int) (prtRatio * 60.0 + 0.5);
+  if (ratio60 == 40) {
+    // 2/3
+    _stagM = 2;
+    _stagN = 3;
+  } else if (ratio60 == 45) {
+    // 3/4
+    _stagM = 3;
+    _stagN = 4;
+  } else if (ratio60 == 48) {
+    // 4/5
+    _stagM = 4;
+    _stagN = 5;
+  } else {
+    // assume 2/3
+    cerr << "WARNING - HcrMomentsCombine::_initDualPrtq2Dsr" << endl;
+    cerr << "  No support for prtRatio: " << prtRatio << endl;
+    cerr << "  Assuming 2/3 stagger" << endl;
+    _stagM = 2;
+    _stagN = 3;
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "===>> staggered PRT, ratio: "
+         << _stagM << "/" << _stagN << " <<===" << endl;
+  }
+  
+  _nyquistShort = ((_wavelengthM / _prtShort) / 4.0);
+  _nyquistLong = ((_wavelengthM / _prtLong) / 4.0);
+  _nyquistUnfolded = _nyquistShort * _stagM;
+
+}
+
 
