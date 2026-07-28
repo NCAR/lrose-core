@@ -959,21 +959,22 @@ RadxRay *HcrMomentsCombine::_combineDwellTriple()
   }
   
   // unfold the velocity for long pulse, add unfolded field to ray
+  // correct the velocity for platform motion
 
   _initDualPrt(raySS->getPrtSec(), rayLL->getPrtSec());
 
   {
     
-    RadxField *velShortPrt = rayLS->getField(_params.input_vel_raw_field_name);
-    RadxField *velLongPrt = rayLL->getField(_params.input_vel_raw_field_name);
+    RadxField *velShort = rayLS->getField(_params.input_vel_raw_field_name);
+    RadxField *velLong = rayLL->getField(_params.input_vel_raw_field_name);
     
-    if (velShortPrt != nullptr && velLongPrt != nullptr) {
-      RadxField *velUnfold = _unfoldVel(velShortPrt, velLongPrt);
+    if (velShort != nullptr && velLong != nullptr) {
+      RadxField *velUnfold = _unfoldVel(velShort, velLong);
       if (velUnfold != nullptr) {
         velUnfold->setName(_params.output_vel_unfolded_field_name_long_pulse);
         rayLL->addField(velUnfold);
         rayLL->setNyquistMps(_nyquistUnfolded);
-        // _computeVelCorrectedForVertMotion(rayLL, velShort, velLong, velUnfold);
+        _computeVelCorrectedForVertMotion(rayLL, velShort, velLong, velUnfold);
       }
     } else {
       if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -986,19 +987,20 @@ RadxRay *HcrMomentsCombine::_combineDwellTriple()
   }
   
   // unfold the velocity for short pulse, add unfolded field to ray
+  // correct the velocity for platform motion
   
   {
     
-    RadxField *velShortPrt = raySS->getField(_params.input_vel_raw_field_name);
-    RadxField *velLongPrt = rayLL->getField(_params.input_vel_raw_field_name);
+    RadxField *velShort = raySS->getField(_params.input_vel_raw_field_name);
+    RadxField *velLong = rayLL->getField(_params.input_vel_raw_field_name);
     
-    if (velShortPrt != nullptr && velLongPrt != nullptr) {
-      RadxField *velUnfold = _unfoldVel(velShortPrt, velLongPrt);
+    if (velShort != nullptr && velLong != nullptr) {
+      RadxField *velUnfold = _unfoldVel(velShort, velLong);
       if (velUnfold != nullptr) {
         velUnfold->setName(_params.output_vel_unfolded_field_name_short_pulse);
         rayLL->addField(velUnfold);
         rayLL->setNyquistMps(_nyquistUnfolded);
-        // _computeVelCorrectedForVertMotion(rayLL, velShort, velLong, velUnfold);
+        _computeVelCorrectedForVertMotion(rayLL, velShort, nullptr, velUnfold);
       }
     } else {
       if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -1067,19 +1069,20 @@ RadxRay *HcrMomentsCombine::_combineDwellDual()
   }
   
   // unfold the velocity for long pulse, add unfolded field to ray
+  // correct the velocity for platform motion
 
   _initDualPrt(raySS->getPrtSec(), rayLL->getPrtSec());
 
-  RadxField *velShortPrt = raySS->getField(_params.input_vel_raw_field_name);
-  RadxField *velLongPrt = rayLL->getField(_params.input_vel_raw_field_name);
+  RadxField *velShort = raySS->getField(_params.input_vel_raw_field_name);
+  RadxField *velLong = rayLL->getField(_params.input_vel_raw_field_name);
     
-  if (velShortPrt != nullptr && velLongPrt != nullptr) {
-    RadxField *velUnfold = _unfoldVel(velShortPrt, velLongPrt);
+  if (velShort != nullptr && velLong != nullptr) {
+    RadxField *velUnfold = _unfoldVel(velShort, velLong);
     if (velUnfold != nullptr) {
       velUnfold->setName(_params.output_vel_unfolded_field_name_long_pulse);
       rayLL->addField(velUnfold);
       rayLL->setNyquistMps(_nyquistUnfolded);
-      // _computeVelCorrectedForVertMotion(rayLL, velShort, velLong, velUnfold);
+      _computeVelCorrectedForVertMotion(rayLL, velShort, velLong, velUnfold);
     }
   } else {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -1097,7 +1100,7 @@ RadxRay *HcrMomentsCombine::_combineDwellDual()
   
   _clearDwellRays();
   delete raySS;
-
+  
   // return combined ray
   
   return rayLL;
@@ -1123,6 +1126,14 @@ RadxRay *HcrMomentsCombine::_combineDwellFixed()
   RadxRay *rayFixed = _computeMeanMoments(_dwellRaysFixed, _dwellVolFixed);
   if (rayFixed == nullptr) {
     return nullptr;
+  }
+  
+  // correct the velocity for platform motion
+
+  RadxField *velFixedPrt = rayFixed->getField(_params.input_vel_raw_field_name);
+    
+  if (velFixedPrt != nullptr) {
+    _computeVelCorrectedForVertMotion(rayFixed, velFixedPrt, nullptr, nullptr);
   }
   
   // set the combined time
@@ -1334,36 +1345,57 @@ void HcrMomentsCombine::_computeVelCorrectedForVertMotion(RadxRay *ray,
     return;
   }
 
-  Radx::fl32 missShort = velShort->getMissingFl32();
-  Radx::fl32 missLong = velLong->getMissingFl32();
-  Radx::fl32 missUnfolded = velUnfolded->getMissingFl32();
-  
-  Radx::fl32 *dataShort = velShort->getDataFl32();
-  Radx::fl32 *dataLong = velLong->getDataFl32();
-  Radx::fl32 *dataUnfolded = velUnfolded->getDataFl32();
-  
-  for (size_t ii = 0; ii < ray->getNGates(); ii++) {
-    
-    double valShort = dataShort[ii];
-    if (valShort != missShort) {
-      double shortCorrected = _correctForNyquist(valShort + vertCorr, _nyquistShort);
-      dataShort[ii] = shortCorrected;
-    }
-    
-    double valLong = dataLong[ii];
-    if (valLong != missLong) {
-      double longCorrected = _correctForNyquist(valLong + vertCorr, _nyquistLong);
-      dataLong[ii] = longCorrected;
-    }
-    
-    double valUnfolded = dataUnfolded[ii];
-    if (valUnfolded != missUnfolded) {
-      double unfoldedCorrected = _correctForNyquist(valUnfolded + vertCorr, _nyquistUnfolded);
-      dataUnfolded[ii] = unfoldedCorrected;
-    }
-    
-  } // ii
+  if (velShort != nullptr) {
 
+    Radx::fl32 missShort = velShort->getMissingFl32();
+    Radx::fl32 *dataShort = velShort->getDataFl32();
+    
+    for (size_t ii = 0; ii < ray->getNGates(); ii++) {
+      
+      double valShort = dataShort[ii];
+      if (valShort != missShort) {
+        double shortCorrected = _correctForNyquist(valShort + vertCorr, _nyquistShort);
+        dataShort[ii] = shortCorrected;
+      }
+      
+    } // ii
+    
+  } // if (velShort != nullptr)
+  
+  if (velLong != nullptr) {
+
+    Radx::fl32 missLong = velLong->getMissingFl32();
+    Radx::fl32 *dataLong = velLong->getDataFl32();
+    
+    for (size_t ii = 0; ii < ray->getNGates(); ii++) {
+      
+      double valLong = dataLong[ii];
+      if (valLong != missLong) {
+        double longCorrected = _correctForNyquist(valLong + vertCorr, _nyquistLong);
+        dataLong[ii] = longCorrected;
+      }
+      
+    } // ii
+    
+  } // if (velLong != nullptr)
+  
+  if (velUnfolded != nullptr) {
+
+    Radx::fl32 missUnfolded = velUnfolded->getMissingFl32();
+    Radx::fl32 *dataUnfolded = velUnfolded->getDataFl32();
+    
+    for (size_t ii = 0; ii < ray->getNGates(); ii++) {
+      
+      double valUnfolded = dataUnfolded[ii];
+      if (valUnfolded != missUnfolded) {
+        double unfoldedCorrected = _correctForNyquist(valUnfolded + vertCorr, _nyquistUnfolded);
+        dataUnfolded[ii] = unfoldedCorrected;
+      }
+      
+    } // ii
+    
+  } // if (velUnfolded != nullptr)
+  
 }
 
 /////////////////////////////////////////////////
