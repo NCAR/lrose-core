@@ -752,6 +752,30 @@
     tt->single_val.s = tdrpStrDup("long_short");
     tt++;
     
+    // Parameter 'short_fixed_dwell_label'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("short_fixed_dwell_label");
+    tt->descr = tdrpStrDup("Label for short-pulse fixed PRT.");
+    tt->help = tdrpStrDup("We store the block name as the scan name for each ray (this is therefore overloaded). We identify the relevant rays by searching for this string in the ray scan name.");
+    tt->val_offset = (char *) &short_fixed_dwell_label - &_start_;
+    tt->single_val.s = tdrpStrDup("short_fixed");
+    tt++;
+    
+    // Parameter 'long_fixed_dwell_label'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("long_fixed_dwell_label");
+    tt->descr = tdrpStrDup("Label for long-pulse fixed PRT.");
+    tt->help = tdrpStrDup("We store the block name as the scan name for each ray (this is therefore overloaded). We identify the relevant rays by searching for this string in the ray scan name.");
+    tt->val_offset = (char *) &long_fixed_dwell_label - &_start_;
+    tt->single_val.s = tdrpStrDup("long_fixed");
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -936,28 +960,16 @@
     tt->single_val.s = tdrpStrDup("VEL_RAW_LL");
     tt++;
     
-    // Parameter 'input_vel_corr_field_name_short_prt'
+    // Parameter 'input_vel_corr_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_vel_corr_field_name_short_prt");
+    tt->param_name = tdrpStrDup("input_vel_corr_field_name");
     tt->descr = tdrpStrDup("This is the name for the corrected velocity field in the input data. The velocity has been corrected for platform motion.");
-    tt->help = tdrpStrDup("These fields are from the long-pulse short-prt rays.");
-    tt->val_offset = (char *) &input_vel_corr_field_name_short_prt - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL_LS");
-    tt++;
-    
-    // Parameter 'input_vel_corr_field_name_long_prt'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_vel_corr_field_name_long_prt");
-    tt->descr = tdrpStrDup("This is the name for the corrected velocity field in the input data. The velocity has been corrected for platform motion.");
-    tt->help = tdrpStrDup("These fields are from the long-pulse long-prt rays.");
-    tt->val_offset = (char *) &input_vel_corr_field_name_long_prt - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL_LL");
+    tt->help = tdrpStrDup("This field will be removed and replaced by a field computed in this app.");
+    tt->val_offset = (char *) &input_vel_corr_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_CORR");
     tt++;
     
     // Parameter 'output_vel_corr_field_name_short_prt'

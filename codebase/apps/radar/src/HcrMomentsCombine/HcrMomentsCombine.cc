@@ -73,10 +73,9 @@ HcrMomentsCombine::HcrMomentsCombine(int argc, char **argv)
 {
 
   OK = TRUE;
-  _momReader = NULL;
-  _cacheRayShort = NULL;
-  _cacheRayLong = NULL;
-  _outputFmq = NULL;
+  _momReader = nullptr;
+  _outputFmq = nullptr;
+  _cachedRay = nullptr;
 
   // init staggered prt
   
@@ -224,7 +223,7 @@ int HcrMomentsCombine::_runRealtime()
 
     RadxRay *rayCombined = _combineDwellRays();
     
-    if (rayCombined != NULL) {
+    if (rayCombined != nullptr) {
 
       // create output message from combined ray
       
@@ -315,7 +314,7 @@ int HcrMomentsCombine::_runArchive()
 
     RadxRay *rayCombined = _combineDwellRays();
     
-    if (rayCombined != NULL) {
+    if (rayCombined != nullptr) {
 
       // create output message from combined ray
       
@@ -388,9 +387,9 @@ int HcrMomentsCombine::_computeMeanLocation()
   long nRays = 0;
   
   RadxRay *ray = _momReader->readNextRay();
-  while (ray != NULL) {
+  while (ray != nullptr) {
     const RadxGeoref *georef = ray->getGeoreference();
-    if (georef != NULL) {
+    if (georef != nullptr) {
       double lat = georef->getLatitude();
       double lon = georef->getLongitude();
       double alt = georef->getAltitudeKmMsl();
@@ -452,14 +451,17 @@ int HcrMomentsCombine::_openInputFmq()
   // initialize reader - read one ray
 
   RadxRay *ray = _readRayNext();
-  if (ray == NULL) {
+  if (ray == nullptr) {
     cerr << "ERROR - _openInputFmq()" << endl;
     cerr << "Cannot read ray from input fmq: " << _params.input_fmq_url << endl;
     return -1;
   }
 
-  _firstRayTime = ray->getRadxTime();
+  // free memory
+  
   delete ray;
+
+  // position in queue
   
   if (_params.seek_to_end_of_input_fmq) {
     _momReader->seekToEnd();
@@ -467,6 +469,47 @@ int HcrMomentsCombine::_openInputFmq()
     _momReader->seekToStart();
   }
 
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Open readers from CfRadial files
+
+int HcrMomentsCombine::_openFileReader()
+{
+
+  // Instantiate and initialize the input radar queues
+
+  if (_params.debug) {
+    cerr << "DEBUG - opening input dir for moments data: "
+         << _params.input_dir << endl;
+  }
+
+  RadxTime startTime(_args.startTime);
+  RadxTime endTime(_args.endTime);
+  
+  _momReader = new IwrfMomReaderFile(_params.input_dir, startTime, endTime);
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _momReader->setDebug(IWRF_DEBUG_NORM);
+  }
+
+  // initialize reader - read one ray
+  
+  RadxRay *ray = _readRayNext();
+  if (ray == nullptr) {
+    cerr << "ERROR - HcrMomentsCombine::_openFileReader()" << endl;
+    cerr << "  Cannot read rays from dir: " << _params.input_dir << endl;
+    cerr << "  Start time: " << startTime.asString(0) << endl;
+    cerr << "  End time: " << endTime.asString(0) << endl;
+    return -1;
+  }
+
+  // free memory
+  
+  delete ray;
+  
   return 0;
 
 }
@@ -507,46 +550,6 @@ int HcrMomentsCombine::_openOutputFmq()
 
 }
 
-//////////////////////////////////////////////////
-// Open readers from CfRadial files
-
-int HcrMomentsCombine::_openFileReader()
-{
-
-  // Instantiate and initialize the input radar queues
-
-  if (_params.debug) {
-    cerr << "DEBUG - opening input dir for moments data: "
-         << _params.input_dir << endl;
-  }
-
-  RadxTime startTime(_args.startTime);
-  RadxTime endTime(_args.endTime);
-  
-  _momReader = new IwrfMomReaderFile(_params.input_dir, startTime, endTime);
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _momReader->setDebug(IWRF_DEBUG_NORM);
-  }
-
-  // initialize reader - read one ray
-  
-  RadxRay *ray = _readRayNext();
-  if (ray == NULL) {
-    cerr << "ERROR - HcrMomentsCombine::_openFileReader()" << endl;
-    cerr << "  Cannot read rays from dir: " << _params.input_dir << endl;
-    cerr << "  Start time: " << startTime.asString(0) << endl;
-    cerr << "  End time: " << endTime.asString(0) << endl;
-    return -1;
-  }
-
-  _firstRayTime = ray->getRadxTime();
-  delete ray;
-  
-  return 0;
-
-}
-
 /////////////////////////////////////////////////////////////////
 // Initialize the input rays at the start of the first output dwell
 
@@ -555,10 +558,8 @@ int HcrMomentsCombine::_initializeInput()
 
   // read a single ray
   
-  RadxTime rayTime;
-
   RadxRay *rayFirst = _readRayNext();
-  if (rayFirst == NULL) {
+  if (rayFirst == nullptr) {
     cerr << "ERROR - HcrMomentsCombine::_initializeInput()" << endl;
     if (_params.mode == Params::REALTIME) {
       cerr << "  Cannot read input fmq: " << _params.input_fmq_url << endl;
@@ -567,96 +568,138 @@ int HcrMomentsCombine::_initializeInput()
     }
     return -1;
   }
+
+  // initial time
   
-    RadxRay *longRay = _readRayLong();
-    // if (longRay == NULL) {
-    //   cerr << "ERROR - HcrMomentsCombine::_initializeInput()" << endl;
-    //   if (_params.mode == Params::REALTIME) {
-    //     cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
-    //   } else {
-    //     cerr << "  Cannot read input dir long: " << _params.input_dir_long << endl;
-    //   }
-    //   delete rayFirst;
-    //   return -1;
-    // }
-    
-    shortTime = rayFirst->getRadxTime();
-    longTime = longRay->getRadxTime();
-    
-    delete rayFirst;
-    delete longRay;
-
-  }
-
+  _firstRayTime = rayFirst->getRadxTime();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=======>> first short ray read, time: " << shortTime.asString(6) << endl;
-    cerr << "=======>> first long  ray read, time: " << longTime.asString(6) << endl;
+    cerr << "=======>> first ray read, time: " << _firstRayTime.asString(6) << endl;
   }
   
-  // compute the latest time
+  // set initial dwell limits
   
-  RadxTime latestTime = shortTime;
-  _prevTimeShort = shortTime;
-  if (longTime > latestTime) {
-    latestTime = longTime;
-  }
-  double latestSecs = latestTime.asDouble();
+  _setDwellTimeLimits(rayFirst);
+  delete rayFirst;
   
-  // compute the next dwell limits
+  // read rays, prepare for first dwell
   
-  double dwellMidSecs = (floor(latestSecs / _dwellLengthSecs) + 1.0) * _dwellLengthSecs;
-  
-  _nextDwellMidTime.setFromDouble(dwellMidSecs);
-  _nextDwellStartTime = _nextDwellMidTime - _dwellLengthSecsHalf;
-  _nextDwellEndTime = _nextDwellMidTime + _dwellLengthSecsHalf;
-  _thisDwellMidTime = _nextDwellMidTime - _dwellLengthSecs;
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> thisDwellMidTime  : " << _thisDwellMidTime.asString(6) << endl;
-    cerr << "====>> nextDwellStartTime: " << _nextDwellStartTime.asString(6) << endl;
-    cerr << "====>> nextDwellMidTime  : " << _nextDwellMidTime.asString(6) << endl;
-    cerr << "====>> nextDwellEndTime  : " << _nextDwellEndTime.asString(6) << endl;
-  }
-
-  // read short rays, prepare for first dwell
-  
-  _cacheRayShort = NULL;
+  _cachedRay = nullptr;
   while (true) {
     RadxRay *ray = _readRayNext();
-    if (ray == NULL) {
-      cerr << "========>> short queue done <<==========" << endl;
+    if (ray == nullptr) {
+      cerr << "========>> input queue done <<==========" << endl;
       return -1;
     }
     if (ray->getRadxTime() >= _nextDwellStartTime) {
       // save for next dwell
-      _cacheRayShort = ray;
+      _cachedRay = ray;
       break;
     } else {
       // read ahead
       delete ray;
     }
   }
-
-  // read long rays, prepare for first dwell
   
-  _cacheRayLong = NULL;
-  while (true) {
-    RadxRay *ray = _readRayLong();
-    if (ray == NULL) {
-      cerr << "========>> long queue done <<==========" << endl;
-      return -1;
-    }
-    if (ray->getRadxTime() >= _nextDwellStartTime) {
-      // save for next dwell
-      _cacheRayLong = ray;
-      break;
-    } else {
-      // read ahead
-      delete ray;
-    }
-  }
-
   return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// add ray to dwell vector
+
+void HcrMomentsCombine::_addDwellRay(RadxRay *ray)
+{
+  
+  _dwellRays.push_back(ray);
+  
+  string dwellLabel = ray->getScanName();
+  
+  if (dwellLabel.find(_params.short_short_dwell_label) != string::npos) {
+    _dwellRaysSS.push_back(ray);
+    return;
+  }
+  
+  if (dwellLabel.find(_params.long_long_dwell_label) != string::npos) {
+    _dwellRaysLL.push_back(ray);
+    return;
+  }
+  
+  if (dwellLabel.find(_params.long_short_dwell_label) != string::npos) {
+    _dwellRaysLS.push_back(ray);
+    return;
+  }
+  
+  if (dwellLabel.find(_params.short_fixed_dwell_label) != string::npos) {
+    _dwellRaysFixed.push_back(ray);
+    return;
+  }
+  
+  if (dwellLabel.find(_params.long_fixed_dwell_label) != string::npos) {
+    _dwellRaysFixed.push_back(ray);
+    return;
+  }
+  
+}
+
+/////////////////////////////////////////////////////////////////
+// clear the dwell rays
+
+void HcrMomentsCombine::_clearDwellRays()
+{
+
+  for (size_t ii = 0; ii < _dwellRays.size(); ii++) {
+    delete _dwellRays[ii];
+  }
+  _dwellRays.clear();
+  _dwellRaysSS.clear();
+  _dwellRaysLL.clear();
+  _dwellRaysLS.clear();
+  _dwellRaysFixed.clear();
+
+}
+
+/////////////////////////////////////////////////////////////////
+// print dwell ray info
+
+void HcrMomentsCombine::_printDwellRayInfo(ostream &out)
+{
+
+  if (_dwellRaysSS.size() > 0) {
+    cerr << "=================>> short short ray count: " << _dwellRaysSS.size() << endl;
+    for (size_t ii = 0; ii < _dwellRaysSS.size(); ii++) {
+      cerr << "  short short ray time: "
+           << _dwellRaysSS[ii]->getRadxTime().asString(6) << ", "
+           <<  _dwellRaysSS[ii] << endl;
+    }
+    cerr << "========================================" << endl;
+  }
+  if (_dwellRaysLL.size() > 0) {
+    cerr << "=================>> long long ray count: " << _dwellRaysLL.size() << endl;
+    for (size_t ii = 0; ii < _dwellRaysLL.size(); ii++) {
+      cerr << "  long long ray time: "
+           << _dwellRaysLL[ii]->getRadxTime().asString(6) << ", "
+           <<  _dwellRaysLL[ii] << endl;
+    }
+    cerr << "========================================" << endl;
+  }
+  if (_dwellRaysLS.size() > 0) {
+    cerr << "=================>> long short ray count: " << _dwellRaysLS.size() << endl;
+    for (size_t ii = 0; ii < _dwellRaysLS.size(); ii++) {
+      cerr << "  long short ray time: "
+           << _dwellRaysLS[ii]->getRadxTime().asString(6) << ", "
+           <<  _dwellRaysLS[ii] << endl;
+    }
+    cerr << "========================================" << endl;
+  }
+  if (_dwellRaysFixed.size() > 0) {
+    cerr << "=================>> fixed PRT ray count: " << _dwellRaysFixed.size() << endl;
+    for (size_t ii = 0; ii < _dwellRaysFixed.size(); ii++) {
+      cerr << "  long short ray time: "
+           << _dwellRaysFixed[ii]->getRadxTime().asString(6) << ", "
+           <<  _dwellRaysFixed[ii] << endl;
+    }
+    cerr << "========================================" << endl;
+  }
 
 }
 
@@ -670,17 +713,13 @@ int HcrMomentsCombine::_readNextDwell()
 
   _clearDwellRays();
   
-  // add in the cached rays already read in
+  // add cached ray if applicable
 
-  if (_cacheRayShort != NULL) {
-    _dwellRaysShort.push_back(_cacheRayShort);
-    _cacheRayShort = NULL;
-  }
-  if (_cacheRayLong != NULL) {
-    _dwellRaysLong.push_back(_cacheRayLong);
-    _cacheRayLong = NULL;
-  }
-
+  if (_cachedRay != nullptr) {
+    _addDwellRay(_cachedRay);
+    _cachedRay = nullptr;
+  }    
+  
   // read in short rays for the dwell
   
   while (true) {
@@ -688,81 +727,40 @@ int HcrMomentsCombine::_readNextDwell()
     if (_checkForTimeGap(ray)) {
       return -1;
     }
-    if (ray == NULL) {
+    if (ray == nullptr) {
       cerr << "ERROR - HcrMomentsCombine::_readNextDwell()" << endl;
       if (_params.mode == Params::REALTIME) {
-        // cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
+        cerr << "  Cannot read input fmq: " << _params.input_fmq_url << endl;
       } else {
-        // cerr << "  Cannot read input dir short: " << _params.input_dir_short << endl;
+        cerr << "  Cannot read input dir: " << _params.input_dir << endl;
       }
       return -1;
     }
     if (ray->getRadxTime() >= _nextDwellEndTime) {
       // save for start of next dwell
-      _cacheRayShort = ray;
+      _cachedRay = ray;
+      // we have a full dwell
       break;
     } else {
-      _dwellRaysShort.push_back(ray);
+      _addDwellRay(ray);
     }
   }
-
-  // read in long rays for the dwell
   
-  while (true) {
-    RadxRay *ray = _readRayLong();
-    if (ray == NULL) {
-      cerr << "ERROR - HcrMomentsCombine::_readNextDwell()" << endl;
-      if (_params.mode == Params::REALTIME) {
-        // cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
-      } else {
-        // cerr << "  Cannot read input dir long: " << _params.input_dir_long << endl;
-      }
-      return -1;
-    }
-    if (ray->getRadxTime() >= _nextDwellEndTime) {
-      // save for start of next dwell
-      _cacheRayLong = ray;
-      break;
-    } else {
-      _dwellRaysLong.push_back(ray);
-    }
-  }
-
   // remove the corrected velocity field if it exists, since it will
   // be replaced by values computed in this app
   
-  for (size_t ii = 0; ii < _dwellRaysShort.size(); ii++) {
-    RadxRay *ray = _dwellRaysShort[ii];
-    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name_short_prt);
-    if (velCorr != NULL) {
-      ray->removeField(_params.input_vel_corr_field_name_short_prt);
-    }
-  }
-  for (size_t ii = 0; ii < _dwellRaysLong.size(); ii++) {
-    RadxRay *ray = _dwellRaysLong[ii];
-    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name_long_prt);
-    if (velCorr != NULL) {
-      ray->removeField(_params.input_vel_corr_field_name_long_prt);
+  for (size_t ii = 0; ii < _dwellRays.size(); ii++) {
+    RadxRay *ray = _dwellRays[ii];
+    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name);
+    if (velCorr != nullptr) {
+      ray->removeField(_params.input_vel_corr_field_name);
     }
   }
   
   // debug prints
-
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=================>> short ray count: " << _dwellRaysShort.size() << endl;
-    for (size_t ii = 0; ii < _dwellRaysShort.size(); ii++) {
-      cerr << "  short ray time: "
-           << _dwellRaysShort[ii]->getRadxTime().asString(6) << ", "
-           <<  _dwellRaysShort[ii] << endl;
-    }
-    cerr << "========================================" << endl;
-    cerr << "=================>> long ray count: " << _dwellRaysLong.size() << endl;
-    for (size_t ii = 0; ii < _dwellRaysLong.size(); ii++) {
-      cerr << "  long ray time: "
-           << _dwellRaysLong[ii]->getRadxTime().asString(6) << ", "
-           <<  _dwellRaysLong[ii] << endl;
-    }
-    cerr << "========================================" << endl;
+    _printDwellRayInfo(cerr);
   }
 
   // set to advance to next dwell
@@ -784,6 +782,36 @@ int HcrMomentsCombine::_readNextDwell()
 }
 
 /////////////////////////////////////////////////////////////////
+// set dwell time limits
+
+void HcrMomentsCombine::_setDwellTimeLimits(RadxRay *ray)
+
+{
+
+  // get the ray time
+  
+  RadxTime rayTime = ray->getRadxTime();
+  double raySecs = rayTime.asDouble();
+  
+  // compute the dwell limits
+  
+  double dwellMidSecs = (floor(raySecs / _dwellLengthSecs) + 1.0) * _dwellLengthSecs;
+  
+  _nextDwellMidTime.setFromDouble(dwellMidSecs);
+  _nextDwellStartTime = _nextDwellMidTime - _dwellLengthSecsHalf;
+  _nextDwellEndTime = _nextDwellMidTime + _dwellLengthSecsHalf;
+  _thisDwellMidTime = _nextDwellMidTime - _dwellLengthSecs;
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "====>> thisDwellMidTime  : " << _thisDwellMidTime.asString(6) << endl;
+    cerr << "====>> nextDwellStartTime: " << _nextDwellStartTime.asString(6) << endl;
+    cerr << "====>> nextDwellMidTime  : " << _nextDwellMidTime.asString(6) << endl;
+    cerr << "====>> nextDwellEndTime  : " << _nextDwellEndTime.asString(6) << endl;
+  }
+
+}
+
+/////////////////////////////////////////////////////////////////
 // check for a significant time gap
 // if found, re-initialize
 
@@ -798,8 +826,7 @@ int HcrMomentsCombine::_checkForTimeGap(RadxRay *latestRayShort)
 
     // start again
     _clearDwellRays();
-    _cacheRayShort = NULL;
-    _cacheRayLong = NULL;
+    _cachedRay = nullptr;
     
     if (_initializeInput()) {
       _prevTimeShort = latestTimeShort;
@@ -828,7 +855,7 @@ RadxRay *HcrMomentsCombine::_combineDwellRays()
   
   size_t nRaysShort = _dwellRaysShort.size();
   if (nRaysShort < 1) {
-    return NULL;
+    return nullptr;
   }
 
   // add short rays to vol
@@ -855,7 +882,7 @@ RadxRay *HcrMomentsCombine::_combineDwellRays()
   size_t nRaysLong = _dwellRaysLong.size();
   if (nRaysLong < 1) {
     delete rayCombined;
-    return NULL;
+    return nullptr;
   }
 
   // add long rays to vol
@@ -915,24 +942,6 @@ RadxRay *HcrMomentsCombine::_combineDwellRays()
 
 }
 
-/////////////////////////////////////////////////////////////////
-// clear the dwell rays
-
-void HcrMomentsCombine::_clearDwellRays()
-{
-
-  for (size_t ii = 0; ii < _dwellRaysShort.size(); ii++) {
-    delete _dwellRaysShort[ii];
-  }
-  _dwellRaysShort.clear();
-
-  for (size_t ii = 0; ii < _dwellRaysLong.size(); ii++) {
-    delete _dwellRaysLong[ii];
-  }
-  _dwellRaysLong.clear();
-
-}
-
 ////////////////////////////////////////////////////////////////
 // Unfold the velocity, add unfolded field to ray.
 // We need to use the raw velocity - i.e. not corrected for
@@ -951,7 +960,7 @@ void HcrMomentsCombine::_unfoldVel(RadxRay *rayCombined)
   RadxField *velShort = rayCombined->getField(velRawShortName);
   RadxField *velLong = rayCombined->getField(velRawLongName);
 
-  if (velShort == NULL || velLong == NULL) {
+  if (velShort == nullptr || velLong == nullptr) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "WARNING - HcrMomentsCombine::_unfoldVel()" << endl;
       cerr << "Cannot find velocity fields to unfold." << endl;
@@ -1072,7 +1081,7 @@ void HcrMomentsCombine::_computeVelCorrectedForVertMotion(RadxRay *ray,
   // no good if no georeference available
   
   const RadxGeoref *georef = ray->getGeoreference();
-  if (georef == NULL) {
+  if (georef == nullptr) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "WARNING - _computeVelCorrectedForVertMotion" << endl;
       cerr << "  No georef information found" << endl;
@@ -1195,8 +1204,8 @@ RadxRay *HcrMomentsCombine::_readRayNext()
   // read next ray
   
   RadxRay *rayShort = _momReader->readNextRay();
-  if (rayShort == NULL) {
-    return NULL;
+  if (rayShort == nullptr) {
+    return nullptr;
   }
   _nRaysRead++;
   
@@ -1295,7 +1304,7 @@ RadxRay *HcrMomentsCombine::_readRayNext()
 
   if (_params.fixed_location_mode) {
     RadxGeoref *georef = rayShort->getGeoreference();
-    if (georef != NULL) {
+    if (georef != nullptr) {
       georef->setLatitude(_params.fixed_radar_location.latitudeDeg);
       georef->setLongitude(_params.fixed_radar_location.longitudeDeg);
       georef->setAltitudeKmMsl(_params.fixed_radar_location.altitudeKm);
@@ -1324,8 +1333,8 @@ RadxRay *HcrMomentsCombine::_readRayLong()
   // read next ray
   
   RadxRay *rayLong = _momReader->readNextRay();
-  if (rayLong == NULL) {
-    return NULL;
+  if (rayLong == nullptr) {
+    return nullptr;
   }
   _nRaysRead++;
 
@@ -1408,7 +1417,7 @@ RadxRay *HcrMomentsCombine::_readRayLong()
 
   if (_params.fixed_location_mode) {
     RadxGeoref *georef = rayLong->getGeoreference();
-    if (georef != NULL) {
+    if (georef != nullptr) {
       georef->setLatitude(_params.fixed_radar_location.latitudeDeg);
       georef->setLongitude(_params.fixed_radar_location.longitudeDeg);
       georef->setAltitudeKmMsl(_params.fixed_radar_location.altitudeKm);

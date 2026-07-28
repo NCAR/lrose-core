@@ -423,6 +423,10 @@ public:
 
   char* long_short_dwell_label;
 
+  char* short_fixed_dwell_label;
+
+  char* long_fixed_dwell_label;
+
   double dwell_length_secs;
 
   dwell_stats_method_t dwell_stats_method;
@@ -440,9 +444,7 @@ public:
 
   char* input_vel_raw_field_name_long_prt;
 
-  char* input_vel_corr_field_name_short_prt;
-
-  char* input_vel_corr_field_name_long_prt;
+  char* input_vel_corr_field_name;
 
   char* output_vel_corr_field_name_short_prt;
 
@@ -477,7 +479,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[45];
+  mutable TDRPtable _table[46];
 
   const char *_className;
 

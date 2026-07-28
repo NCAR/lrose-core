@@ -99,14 +99,16 @@ private:
   // reading input moments
 
   IwrfMomReader *_momReader;
-
+  int _nRaysRead;
+  RadxRay *_cachedRay;
+  
   // Radx output moments queue
 
   DsFmq *_outputFmq;
-
-  int _nRaysRead;
   int _nRaysWritten;
 
+  // moments and metadata
+  
   RadxPlatform _platformShort;
   RadxPlatform _platformLong;
   vector<RadxRcalib> _calibsShort;
@@ -116,6 +118,8 @@ private:
   vector<RadxEvent> _eventsShort;
   vector<RadxEvent> _eventsLong;
 
+  // velocity unfolding
+  
   double _wavelengthM;
   double _prtShort;
   double _prtLong;
@@ -127,33 +131,38 @@ private:
   int _stagN;
   int _LL;
   int _PP_[32];
+
+  // location
   
-  // combining
+  double _meanLat, _meanLon, _meanAlt;
+
+  // combining dwells
 
   double _dwellLengthSecs;
   double _dwellLengthSecsHalf;
+  
+  RadxTime _firstRayTime;
+  RadxTime _latestRayTime;
+  RadxTime _prevTimeShort;
   
   RadxTime _nextDwellStartTime;
   RadxTime _nextDwellEndTime;
   RadxTime _nextDwellMidTime;
   RadxTime _thisDwellMidTime;
 
-  RadxTime _firstRayTime;
-  RadxTime _latestRayTime;
-  RadxTime _prevTimeShort;
-  
-  RadxRay *_cacheRayShort;
-  RadxRay *_cacheRayLong;
-  
-  vector<RadxRay *> _dwellRaysShort;
-  vector<RadxRay *> _dwellRaysLong;
+  vector<RadxRay *> _dwellRays;      // all rays
+  vector<RadxRay *> _dwellRaysSS;    // short pulse, short PRT
+  vector<RadxRay *> _dwellRaysLL;    // long pulse, long PRT
+  vector<RadxRay *> _dwellRaysLS;    // long pulse, short PRT
+  vector<RadxRay *> _dwellRaysFixed; // fixed PRT
 
-  RadxVol _dwellVolShort;
-  RadxVol _dwellVolLong;
+  RadxVol _dwellVolSS;
+  RadxVol _dwellVolLL;
+  RadxVol _dwellVolLS;
+  RadxVol _dwellVolFixed;
+  
   RadxField::StatsMethod_t _globalMethod;
   vector<RadxField::NamedStatsMethod> _namedMethods;
-
-  double _meanLat, _meanLon, _meanAlt;
 
   // methods
 
@@ -162,14 +171,21 @@ private:
   int _computeMeanLocation();
 
   int _openInputFmq();
-  int _openOutputFmq();
   int _openFileReader();
+  int _openOutputFmq();
 
   int _initializeInput();
+
+  void _addDwellRay(RadxRay *ray);
+  void _clearDwellRays();
+  void _printDwellRayInfo(ostream &out);
+
   int _readNextDwell();
+
+  void _setDwellTimeLimits(RadxRay *ray);
+
   int _checkForTimeGap(RadxRay *latestRayShort);
   RadxRay *_combineDwellRays();
-  void _clearDwellRays();
 
   void _unfoldVel(RadxRay *rayCombined);
 

@@ -103,6 +103,18 @@ paramdef string {
   p_help = "We store the block name as the scan name for each ray (this is therefore overloaded). We identify the relevant rays by searching for this string in the ray scan name. Multiple ray types can match this label, because we support dual-PRT 2/3, 3/4 and 4/5 modes.";
 } long_short_dwell_label;
 
+paramdef string {
+  p_default = "short_fixed";
+  p_descr = "Label for short-pulse fixed PRT.";
+  p_help = "We store the block name as the scan name for each ray (this is therefore overloaded). We identify the relevant rays by searching for this string in the ray scan name.";
+} short_fixed_dwell_label;
+
+paramdef string {
+  p_default = "long_fixed";
+  p_descr = "Label for long-pulse fixed PRT.";
+  p_help = "We store the block name as the scan name for each ray (this is therefore overloaded). We identify the relevant rays by searching for this string in the ray scan name.";
+} long_fixed_dwell_label;
+
 commentdef {
   p_header = "COMBINED DWELL DETAILS";
   p_text = "We combine the high-rate moments data (say at 50 hz) into lower-rate dwells, say at 10 hz.";
@@ -185,16 +197,10 @@ paramdef string {
 } input_vel_raw_field_name_long_prt;
 
 paramdef string {
-  p_default = "VEL_LS";
+  p_default = "VEL_CORR";
   p_descr = "This is the name for the corrected velocity field in the input data. The velocity has been corrected for platform motion.";
-  p_help = "These fields are from the long-pulse short-prt rays.";
-} input_vel_corr_field_name_short_prt;
-
-paramdef string {
-  p_default = "VEL_LL";
-  p_descr = "This is the name for the corrected velocity field in the input data. The velocity has been corrected for platform motion.";
-  p_help = "These fields are from the long-pulse long-prt rays.";
-} input_vel_corr_field_name_long_prt;
+  p_help = "This field will be removed and replaced by a field computed in this app.";
+} input_vel_corr_field_name;
 
 paramdef string {
   p_default = "VEL_short_prt";
