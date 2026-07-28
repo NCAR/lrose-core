@@ -208,7 +208,7 @@ void KdpFirFilt::applyFilter(const vector<double> &unfilt,
 
   // apply FIR filter to phidp
   
-  _applyIterativeFir(filt.data(), unfilt.data(), nIterations);
+  _applyIterativeFir(unfilt.data(), filt.data(), nIterations);
 
 }
 
@@ -234,7 +234,7 @@ void KdpFirFilt::applyPsobFilter(const vector<double> &unfilt,
   
   // apply FIR filter to phidp
   
-  _applyIterativeFirCond(filt.data(), unfilt.data(), nIterations, diffThreshold);
+  _applyIterativeFirCond(unfilt.data(), filt.data(), nIterations, diffThreshold);
 
 }
 
@@ -303,8 +303,8 @@ void KdpFirFilt::_initializeArray(vector<double> &vals)
 /////////////////////////////////////////////////
 // apply an FIR filter, iteratively
 
-void KdpFirFilt::_applyIterativeFir(double *out,
-                                    const double *in,
+void KdpFirFilt::_applyIterativeFir(const double *in,
+                                    double *out,
                                     int nIterations)
 
 {
@@ -325,19 +325,19 @@ void KdpFirFilt::_applyIterativeFir(double *out,
   
   // initialize working array work2
   
-  _copyArray(work2, in);
+  _copyArray(in, work2);
   _padArray(work2);
   
   // apply FIR filter, computing work1 from work2, iterate
     
   for (int iloop = 0; iloop < nIterations; iloop++) {
-    _applyFirFilter(work1, work2);
-    _copyArray(work2, work1);
+    _applyFirFilter(work2, work1);
+    _copyArray(work1, work2);
   } // iloop
   
   // save result
 
-  _copyArray(out, work2);
+  _copyArray(work2, out);
 
 }
 
@@ -347,8 +347,8 @@ void KdpFirFilt::_applyIterativeFir(double *out,
 // check each iteration against the original
 // keep the original if the diff is below the conditional threshold
 
-void KdpFirFilt::_applyIterativeFirCond(double *out,
-                                        const double *in,
+void KdpFirFilt::_applyIterativeFirCond(const double *in,
+                                        double *out,
                                         int nIterations,
                                         double diffThreshold)
 
@@ -370,27 +370,27 @@ void KdpFirFilt::_applyIterativeFirCond(double *out,
   
   // initialize working array work2
   
-  _copyArray(work2, in);
+  _copyArray(in, work2);
   _padArray(work2);
   
   // apply FIR filter, computing work1 from work2, iterate
     
   for (int iloop = 0; iloop < nIterations; iloop++) {
-    _applyFirFilter(work1, work2);
-    _copyArrayCond(work2, work1, in, diffThreshold);
+    _applyFirFilter(work2, work1);
+    _copyArrayCond(work1, work2, in, diffThreshold);
   } // iloop
   
   // save result
 
-  _copyArray(out, work2);
+  _copyArray(work2, out);
 
 }
 
 /////////////////////////////////////////////
 // load array ready for filter
 
-void KdpFirFilt::_copyArray(double *out,
-                            const double *in)
+void KdpFirFilt::_copyArray(const double *in,
+                            double *out)
   
 {
   memcpy(out, in, _nGates * sizeof(double));
@@ -399,8 +399,8 @@ void KdpFirFilt::_copyArray(double *out,
 /////////////////////////////////////////////
 // copy array conditionally
 
-void KdpFirFilt::_copyArrayCond(double *out,
-                                const double *in,
+void KdpFirFilt::_copyArrayCond(const double *in,
+                                double *out,
                                 const double *original,
                                 double diffThreshold)
   
@@ -432,7 +432,7 @@ void KdpFirFilt::_padArray(double *array)
 /////////////////////////////////////////////
 // Apply FIR filter
 
-void KdpFirFilt::_applyFirFilter(double *out, const double *in)
+void KdpFirFilt::_applyFirFilter(const double *in, double *out)
 
 {
 

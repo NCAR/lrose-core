@@ -170,7 +170,7 @@ paramdef int {
 } KDP_median_filter_len_for_ZZDR;
 
 paramdef double {
-  p_default = 0.25;
+  p_default = 1.0;
   p_descr = "Sets the lower limit for PSOB mean for self-consistency.";
   p_help = "If the mean PSOB is below this threshold, then KDP is not adjusted based on self-consistency.";
 } KDP_threshold_for_psob_mean;

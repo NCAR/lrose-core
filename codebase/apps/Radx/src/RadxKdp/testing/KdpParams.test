@@ -147,7 +147,6 @@ min_polynomial_order = 5;
 //     HUBBERT_BRINGI_METHOD
 //     PEAK_REMOVAL_METHOD
 
-// KDP_psob_method = HUBBERT_BRINGI_METHOD;
 KDP_psob_method = PEAK_REMOVAL_METHOD;
 
 ///////////// KDP_n_filt_iterations_hubbert_bringi ////
@@ -209,7 +208,6 @@ KDP_ngates_for_stats = 9;
 // Type: double
 
 KDP_phidp_sdev_max = 20;
-// KDP_phidp_sdev_max = 100;
 
 ///////////// KDP_phidp_jitter_max ////////////////////
 //
@@ -224,7 +222,6 @@ KDP_phidp_sdev_max = 20;
 // Type: double
 
 KDP_phidp_jitter_max = 30;
-// KDP_phidp_jitter_max = 150;
 
 ///////////// KDP_check_rhohv /////////////////////////
 //
@@ -233,7 +230,6 @@ KDP_phidp_jitter_max = 30;
 // Type: boolean
 
 KDP_check_rhohv = TRUE;
-// KDP_check_rhohv = FALSE;
 
 ///////////// KDP_rhohv_threshold /////////////////////
 //
@@ -286,7 +282,7 @@ KDP_zdr_sdev_max = 2;
 
 //======================================================================
 //
-// COMPUTING KDP FROM Z and ZDR.
+// COMPUTING self-consistency KDP FROM Z and ZDR.
 //
 // Using the self-consistency approach, we can estimate KDP from Z and 
 //   ZDR - we call this KDP_ZZDR. We can then compute KDP conditioned 
@@ -294,6 +290,17 @@ KDP_zdr_sdev_max = 2;
 //
 //======================================================================
  
+///////////// DBZ_minimum_for_self_consistency ////////
+//
+// Sets the lower limit of DBZ for computing KDP conditioned by 
+//   self-consistency.
+//
+// DBZ values lower that this will signify a gap in self-consistent KDP.
+//
+// Type: double
+
+DBZ_minimum_for_self_consistency = 20;
+
 ///////////// KDP_minimum_for_self_consistency ////////
 //
 // Sets the lower limit of KDP for computing KDP conditioned by 
@@ -322,6 +329,17 @@ KDP_minimum_for_self_consistency = 0.25;
 // Type: int
 
 KDP_median_filter_len_for_ZZDR = 5;
+
+///////////// KDP_threshold_for_psob_mean /////////////
+//
+// Sets the lower limit for PSOB mean for self-consistency.
+//
+// If the mean PSOB is below this threshold, then KDP is not adjusted 
+//   based on self-consistency.
+//
+// Type: double
+
+KDP_threshold_for_psob_mean = 1;
 
 //======================================================================
 //
@@ -414,11 +432,19 @@ KDP_zdr_attenuation_exponent = 1.05;
  
 ///////////// KDP_debug ///////////////////////////////
 //
-// Option to print debug messages in KDP computation.
+// Option to print concise debug messages in KDP computation.
 //
 // Type: boolean
 
 KDP_debug = TRUE;
+
+///////////// KDP_verbose /////////////////////////////
+//
+// Option to print verbose debug messages in KDP computation.
+//
+// Type: boolean
+
+KDP_verbose = FALSE;
 
 ///////////// KDP_write_ray_files /////////////////////
 //

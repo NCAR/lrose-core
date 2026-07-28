@@ -155,15 +155,15 @@ private:
   // worker methods
   
   void _initializeArray(vector<double> &vals);
-  void _applyIterativeFir(double *out, const double *in,
+  void _applyIterativeFir(const double *in, double *out,
                           int nIterations);
-  void _applyIterativeFirCond(double *out, const double *in,
+  void _applyIterativeFirCond(const double *in, double *out,
                               int nIterations, double diffThreshold);
-  void _copyArray(double *out, const double *in);
-  void _copyArrayCond(double *out, const double *in,
+  void _copyArray(const double *in, double *out);
+  void _copyArrayCond(const double *in, double *out,
                       const double *original, double diffThreshold);
   void _padArray(double *array);
-  void _applyFirFilter(double *out, const double *in);
+  void _applyFirFilter(const double *in, double *out);
   double _getFirFilterGain();
 
 };
