@@ -561,66 +561,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'KDP_fir_filter_len'
-    // ctype is '_KDP_fir_filter_len_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("KDP_fir_filter_len");
-    tt->descr = tdrpStrDup("Filter length for the FIR filter for PHIDP (gates)");
-    tt->help = tdrpStrDup("When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.");
-    tt->val_offset = (char *) &KDP_fir_filter_len - &_start_;
-    tt->enum_def.name = tdrpStrDup("KDP_fir_filter_len_t");
-    tt->enum_def.nfields = 6;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("KDP_FIR_LEN_125");
-      tt->enum_def.fields[0].val = KDP_FIR_LEN_125;
-      tt->enum_def.fields[1].name = tdrpStrDup("KDP_FIR_LEN_60");
-      tt->enum_def.fields[1].val = KDP_FIR_LEN_60;
-      tt->enum_def.fields[2].name = tdrpStrDup("KDP_FIR_LEN_40");
-      tt->enum_def.fields[2].val = KDP_FIR_LEN_40;
-      tt->enum_def.fields[3].name = tdrpStrDup("KDP_FIR_LEN_30");
-      tt->enum_def.fields[3].val = KDP_FIR_LEN_30;
-      tt->enum_def.fields[4].name = tdrpStrDup("KDP_FIR_LEN_20");
-      tt->enum_def.fields[4].val = KDP_FIR_LEN_20;
-      tt->enum_def.fields[5].name = tdrpStrDup("KDP_FIR_LEN_10");
-      tt->enum_def.fields[5].val = KDP_FIR_LEN_10;
-    tt->single_val.e = KDP_FIR_LEN_10;
-    tt++;
-    
-    // Parameter 'KDP_n_filt_iterations_unfolded'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_n_filt_iterations_unfolded");
-    tt->descr = tdrpStrDup("Sets the number of iterations for the initial FIR filter for unfolded PHIDP.");
-    tt->help = tdrpStrDup("After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a set number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
-    tt->val_offset = (char *) &KDP_n_filt_iterations_unfolded - &_start_;
-    tt->single_val.i = 2;
-    tt++;
-    
-    // Parameter 'range_filter_method'
-    // ctype is '_range_filter_method_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("range_filter_method");
-    tt->descr = tdrpStrDup("Method for filtering PHIDP in range.");
-    tt->help = tdrpStrDup("Traditionally the Hubbert/Bringi approach used an FIR filter. More recently we have added the option to use the REGRESSION filter approach.");
-    tt->val_offset = (char *) &range_filter_method - &_start_;
-    tt->enum_def.name = tdrpStrDup("range_filter_method_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FIR_FILTER");
-      tt->enum_def.fields[0].val = FIR_FILTER;
-      tt->enum_def.fields[1].name = tdrpStrDup("REGRESSION_FILTER");
-      tt->enum_def.fields[1].val = REGRESSION_FILTER;
-    tt->single_val.e = FIR_FILTER;
-    tt++;
-    
     // Parameter 'phidp_feature_length_km'
     // ctype is 'double'
     
@@ -633,16 +573,40 @@
     tt->single_val.d = 5;
     tt++;
     
-    // Parameter 'min_polynomial_order'
+    // Parameter 'phidp_filter_method'
+    // ctype is '_phidp_filter_method_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("phidp_filter_method");
+    tt->descr = tdrpStrDup("Method for filtering PHIDP in range.");
+    tt->help = tdrpStrDup("Traditionally the Hubbert/Bringi approach used an FIR filter. More recently we have added the option to use the REGRESSION filter approach.");
+    tt->val_offset = (char *) &phidp_filter_method - &_start_;
+    tt->enum_def.name = tdrpStrDup("phidp_filter_method_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("FIR_FILTER");
+      tt->enum_def.fields[0].val = FIR_FILTER;
+      tt->enum_def.fields[1].name = tdrpStrDup("QUADRATIC_FILTER");
+      tt->enum_def.fields[1].val = QUADRATIC_FILTER;
+      tt->enum_def.fields[2].name = tdrpStrDup("REGRESSION_FILTER");
+      tt->enum_def.fields[2].val = REGRESSION_FILTER;
+      tt->enum_def.fields[3].name = tdrpStrDup("FFT_FILTER");
+      tt->enum_def.fields[3].val = FFT_FILTER;
+    tt->single_val.e = FIR_FILTER;
+    tt++;
+    
+    // Parameter 'KDP_n_filt_iterations_unfolded'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("min_polynomial_order");
-    tt->descr = tdrpStrDup("Minimum order for polynomial used in regression filter.");
-    tt->help = tdrpStrDup("See 'phidp_feature_length_km' above.");
-    tt->val_offset = (char *) &min_polynomial_order - &_start_;
-    tt->single_val.i = 5;
+    tt->param_name = tdrpStrDup("KDP_n_filt_iterations_unfolded");
+    tt->descr = tdrpStrDup("Sets the number of iterations for the initial FIR filter for unfolded PHIDP.");
+    tt->help = tdrpStrDup("After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a set number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
+    tt->val_offset = (char *) &KDP_n_filt_iterations_unfolded - &_start_;
+    tt->single_val.i = 2;
     tt++;
     
     // Parameter 'Comment 1'

@@ -66,18 +66,11 @@ public:
   // enum typedefs
 
   typedef enum {
-    KDP_FIR_LEN_125 = 0,
-    KDP_FIR_LEN_60 = 1,
-    KDP_FIR_LEN_40 = 2,
-    KDP_FIR_LEN_30 = 3,
-    KDP_FIR_LEN_20 = 4,
-    KDP_FIR_LEN_10 = 5
-  } KDP_fir_filter_len_t;
-
-  typedef enum {
     FIR_FILTER = 0,
-    REGRESSION_FILTER = 1
-  } range_filter_method_t;
+    QUADRATIC_FILTER = 1,
+    REGRESSION_FILTER = 2,
+    FFT_FILTER = 3
+  } phidp_filter_method_t;
 
   typedef enum {
     HUBBERT_BRINGI_METHOD = 0,
@@ -378,15 +371,11 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  KDP_fir_filter_len_t KDP_fir_filter_len;
-
-  int KDP_n_filt_iterations_unfolded;
-
-  range_filter_method_t range_filter_method;
-
   double phidp_feature_length_km;
 
-  int min_polynomial_order;
+  phidp_filter_method_t phidp_filter_method;
+
+  int KDP_n_filt_iterations_unfolded;
 
   psob_method_t KDP_psob_method;
 
@@ -447,7 +436,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[40];
+  mutable TDRPtable _table[38];
 
   const char *_className;
 

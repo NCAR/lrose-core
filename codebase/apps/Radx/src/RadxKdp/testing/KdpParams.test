@@ -33,52 +33,6 @@
 //
 //======================================================================
  
-///////////// KDP_fir_filter_len //////////////////////
-//
-// Filter length for the FIR filter for PHIDP (gates).
-//
-// When computing KDP, an FIR filter is first applied to PHIDP to smooth 
-//   it. This is the length of that filter, in gates.
-//
-// Type: enum
-// Options:
-//     KDP_FIR_LEN_125
-//     KDP_FIR_LEN_60
-//     KDP_FIR_LEN_40
-//     KDP_FIR_LEN_30
-//     KDP_FIR_LEN_20
-//     KDP_FIR_LEN_10
-
-KDP_fir_filter_len = KDP_FIR_LEN_10;
-
-///////////// KDP_n_filt_iterations_unfolded //////////
-//
-// Sets the number of iterations for the initial FIR filter for unfolded 
-//   PHIDP.
-//
-// After unfolding PHIDP, the FIR filter is applied to the unfolded 
-//   phidp, a set number of times, to smooth it. The effect of the filter 
-//   is a combination of the filter length and the number of iterations.
-//
-// Type: int
-
-KDP_n_filt_iterations_unfolded = 2;
-
-///////////// range_filter_method /////////////////////
-//
-// Method for filtering PHIDP in range.
-//
-// Traditionally the Hubbert/Bringi approach used an FIR filter. More 
-//   recently we have added the option to use the REGRESSION filter 
-//   approach.
-//
-// Type: enum
-// Options:
-//     FIR_FILTER
-//     REGRESSION_FILTER
-
-range_filter_method = FIR_FILTER;
-
 ///////////// phidp_feature_length_km /////////////////
 //
 // Applies to the regression filter only.
@@ -96,15 +50,35 @@ range_filter_method = FIR_FILTER;
 
 phidp_feature_length_km = 3;
 
-///////////// min_polynomial_order ////////////////////
+///////////// phidp_filter_method /////////////////////
 //
-// Minimum order for polynomial used in regression filter.
+// Method for filtering PHIDP in range.
 //
-// See 'phidp_feature_length_km' above.
+// Traditionally the Hubbert/Bringi approach used an FIR filter. More 
+//   recently we have added the option to use the REGRESSION filter 
+//   approach.
+//
+// Type: enum
+// Options:
+//     FIR_FILTER
+//     QUADRATIC_FILTER
+//     REGRESSION_FILTER
+//     FFT_FILTER
+
+phidp_filter_method = FIR_FILTER;
+
+///////////// KDP_n_filt_iterations_unfolded //////////
+//
+// Sets the number of iterations for the initial FIR filter for unfolded 
+//   PHIDP.
+//
+// After unfolding PHIDP, the FIR filter is applied to the unfolded 
+//   phidp, a set number of times, to smooth it. The effect of the filter 
+//   is a combination of the filter length and the number of iterations.
 //
 // Type: int
 
-min_polynomial_order = 5;
+KDP_n_filt_iterations_unfolded = 2;
 
 //======================================================================
 //
