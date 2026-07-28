@@ -168,6 +168,7 @@ private:
 
   int _runRealtime();
   int _runArchive();
+  void _processDwell();
   int _computeMeanLocation();
 
   int _openInputFmq();
@@ -179,15 +180,19 @@ private:
   void _addDwellRay(RadxRay *ray);
   void _clearDwellRays();
   void _printDwellRayInfo(ostream &out);
-
   int _readNextDwell();
-
   void _setDwellTimeLimits(RadxRay *ray);
-
   int _checkForTimeGap(RadxRay *latestRayShort);
-  RadxRay *_combineDwellRays();
 
-  void _unfoldVel(RadxRay *rayCombined);
+  RadxRay *_computeMeanMoments(vector<RadxRay *> &dwellRays,
+                               RadxVol &dwellVol);
+  
+  
+  RadxRay *_combineDwellTriple();
+  RadxRay *_combineDwellFixed();
+
+  RadxField *_unfoldVel(RadxField *velShortPrt,
+                        RadxField *velLongPrt);
 
   void _computeVelCorrectedForVertMotion(RadxRay *ray,
                                          RadxField *velRawShort,

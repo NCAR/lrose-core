@@ -920,7 +920,28 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("FIELD NAMES for combination");
+    tt->comment_hdr = tdrpStrDup("Combined field name");
+    tt->comment_text = tdrpStrDup("The long pulse fields have a higher SNR, and are therefore somewhat better moments than the short pulse fields. We leave the long pulse field names unchanged, since they are the reference moments. We append a suffix to the short pulse fields - these have poorer coverage because of lower SNR, but they have better spatial resolution.");
+    tt++;
+    
+    // Parameter 'suffix_for_short_pulse_fields'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("suffix_for_short_pulse_fields");
+    tt->descr = tdrpStrDup("This suffix will be appended to the short-short moments fields.");
+    tt->help = tdrpStrDup("We leThese fields are from the long-pulse short-prt rays.");
+    tt->val_offset = (char *) &suffix_for_short_pulse_fields - &_start_;
+    tt->single_val.s = tdrpStrDup("_short");
+    tt++;
+    
+    // Parameter 'Comment 7'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("VELOCITY UNFOLDING");
     tt->comment_text = tdrpStrDup("The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.");
     tt++;
     
@@ -936,28 +957,16 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'input_vel_raw_field_name_short_prt'
+    // Parameter 'input_vel_raw_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_vel_raw_field_name_short_prt");
+    tt->param_name = tdrpStrDup("input_vel_raw_field_name");
     tt->descr = tdrpStrDup("This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.");
-    tt->help = tdrpStrDup("These fields are from the long-pulse short-prt rays.");
-    tt->val_offset = (char *) &input_vel_raw_field_name_short_prt - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL_RAW_LS");
-    tt++;
-    
-    // Parameter 'input_vel_raw_field_name_long_prt'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_vel_raw_field_name_long_prt");
-    tt->descr = tdrpStrDup("This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.");
-    tt->help = tdrpStrDup("These fields are from the long-pulse long-prt rays.");
-    tt->val_offset = (char *) &input_vel_raw_field_name_long_prt - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL_RAW_LL");
+    tt->help = tdrpStrDup("These fields exist in all input rays.");
+    tt->val_offset = (char *) &input_vel_raw_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL_RAW");
     tt++;
     
     // Parameter 'input_vel_corr_field_name'
@@ -1020,11 +1029,11 @@
     tt->single_val.s = tdrpStrDup("VEL_unfold_long");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("GROUND-BASED MODE - FIXED LOCATION for testing.");
     tt->comment_text = tdrpStrDup("In ground-based the instrument is not moving. Therefore we override the latitude/longitude/altitude in the georeference data blocks, and set the platform velocities to 0.");
     tt++;
@@ -1077,11 +1086,11 @@
       tt->struct_vals[2].d = 0;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("COMPUTE MEAN RADAR LOCATION?");
     tt->comment_text = tdrpStrDup("This mode allows you to compute the mean radar location for a ground-based installation. It reads in existing time series data and computes the mean location (lat, lon, alt) based on that data. It then prints the mean location and then exits. You can then use those values to set the location for fixed_location_mode - see above.");
     tt++;
@@ -1098,11 +1107,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;

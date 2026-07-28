@@ -438,11 +438,11 @@ public:
   stats_method_field_t *_stats_method_fields;
   int stats_method_fields_n;
 
+  char* suffix_for_short_pulse_fields;
+
   tdrp_bool_t perform_velocity_unfolding;
 
-  char* input_vel_raw_field_name_short_prt;
-
-  char* input_vel_raw_field_name_long_prt;
+  char* input_vel_raw_field_name;
 
   char* input_vel_corr_field_name;
 
@@ -479,7 +479,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[46];
+  mutable TDRPtable _table[47];
 
   const char *_className;
 

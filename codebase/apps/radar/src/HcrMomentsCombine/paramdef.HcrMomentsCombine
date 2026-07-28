@@ -174,7 +174,18 @@ paramdef struct stats_method_field_t {
 } stats_method_fields[];
 
 commentdef {
-  p_header = "FIELD NAMES for combination";
+  p_header = "Combined field name";
+  p_text = "The long pulse fields have a higher SNR, and are therefore somewhat better moments than the short pulse fields. We leave the long pulse field names unchanged, since they are the reference moments. We append a suffix to the short pulse fields - these have poorer coverage because of lower SNR, but they have better spatial resolution.";
+}
+
+paramdef string {
+  p_default = "_short";
+  p_descr = "This suffix will be appended to the short-short moments fields.";
+  p_help = "We leThese fields are from the long-pulse short-prt rays.";
+} suffix_for_short_pulse_fields;
+
+commentdef {
+  p_header = "VELOCITY UNFOLDING";
   p_text = "The long pulse rays have a longer PRT than the short pulse rays. This allows us to unfold the velocity field using the staggered-PRT technique. If both long and short PRT data are present, the velocity field is unfolded into a final velocity field.";
 }
 
@@ -185,16 +196,10 @@ paramdef boolean {
 } perform_velocity_unfolding;
 
 paramdef string {
-  p_default = "VEL_RAW_LS";
+  p_default = "VEL_RAW";
   p_descr = "This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.";
-  p_help = "These fields are from the long-pulse short-prt rays.";
-} input_vel_raw_field_name_short_prt;
-
-paramdef string {
-  p_default = "VEL_RAW_LL";
-  p_descr = "This is the name for the raw velocity field in the input data. The raw velocity has not been corrected for platform motion.";
-  p_help = "These fields are from the long-pulse long-prt rays.";
-} input_vel_raw_field_name_long_prt;
+  p_help = "These fields exist in all input rays.";
+} input_vel_raw_field_name;
 
 paramdef string {
   p_default = "VEL_CORR";
