@@ -41,6 +41,7 @@
 #include <radar/KdpFirFilt.hh>
 #include <limits>
 #include <vector>
+#include <cassert>
 using namespace std;
 
 ////////////////////////
@@ -69,6 +70,7 @@ public:
   
   /////////////////////////////////////////////
   // apply the filter, save in filt.
+  // filt must have the same size as unfilt.
   
   void applyFilter(const vector<double> &unfilt,
                    vector<double> &filt,
@@ -76,6 +78,7 @@ public:
   
   ///////////////////////////////////////////////
   // filter array for phase shift on backscatter
+  // filt must have the same size as unfilt.
   
   void applyPsobFilter(const vector<double> &unfilt,
                        vector<double> &filt,

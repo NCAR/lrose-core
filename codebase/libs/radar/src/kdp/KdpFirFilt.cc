@@ -32,6 +32,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <iostream>
 #include <radar/KdpFirFilt.hh>
 using namespace std;
 
@@ -145,7 +146,7 @@ KdpFirFilt::KdpFirFilt()
 
   // ngates
   
-  _setNGates(1000);
+  _setNGates(0);
 
 }
 
@@ -170,15 +171,15 @@ void KdpFirFilt::setFeatureLength(double featureLengthKm,
   _nGatesFeature = (int) (_featureLengthKm / _gateSpacingKm) + 1;
   _nGatesPad = _nGatesFeature;
 
-  if (_nGatesFeature < 20) {
+  if (_nGatesFeature < 30) {
     _setFilterLen(FIR_LENGTH_10);
-  } else if (_nGatesFeature < 30) {
+  } else if (_nGatesFeature < 35) {
     _setFilterLen(FIR_LENGTH_20);
-  } else if (_nGatesFeature < 40) {
+  } else if (_nGatesFeature < 50) {
     _setFilterLen(FIR_LENGTH_30);
-  } else if (_nGatesFeature < 60) {
+  } else if (_nGatesFeature < 70) {
     _setFilterLen(FIR_LENGTH_40);
-  } else if (_nGatesFeature < 125) {
+  } else if (_nGatesFeature < 90) {
     _setFilterLen(FIR_LENGTH_60);
   } else {
     _setFilterLen(FIR_LENGTH_125);
@@ -188,12 +189,19 @@ void KdpFirFilt::setFeatureLength(double featureLengthKm,
   
 /////////////////////////////////////////////
 // apply the filter, save in filt.
+// filt must have the same size as unfilt.
 
 void KdpFirFilt::applyFilter(const vector<double> &unfilt,
                              vector<double> &filt,
                              int nIterations)
 
 {
+
+  cerr << "111111111111111111 _firLength: " << _firLength << endl;
+  
+  // check size
+  
+  assert(filt.size() == unfilt.size());
   
   // initialize
   
@@ -208,6 +216,7 @@ void KdpFirFilt::applyFilter(const vector<double> &unfilt,
 
 ///////////////////////////////////////////////
 // filter array for phase shift on backscatter
+// filt must have the same size as unfilt.
 
 void KdpFirFilt::applyPsobFilter(const vector<double> &unfilt,
                                  vector<double> &filt,
@@ -215,6 +224,12 @@ void KdpFirFilt::applyPsobFilter(const vector<double> &unfilt,
                                  double diffThreshold)
   
 {
+
+  cerr << "2222222222222222222 _firLength: " << _firLength << endl;
+
+  // check size
+  
+  assert(filt.size() == unfilt.size());
   
   // initialize
   
@@ -284,7 +299,6 @@ void KdpFirFilt::_setFilterLen(fir_filter_len_t len)
 
 void KdpFirFilt::_initializeArray(vector<double> &vals)
 {
-  vals.resize(_nGates);
   for (int ii = 0; ii < _nGates; ii++) {
     vals[ii] = missingValue();
   }

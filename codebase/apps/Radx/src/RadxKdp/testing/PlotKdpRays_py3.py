@@ -390,11 +390,11 @@ class KdpRayPlotter:
 
         self.ax4.set_title(az_str, fontsize=12)
         self.ax4.plot(gate_num, plot_data["phidp"], label="phidp", color="seagreen")
-        self.ax4.plot(gate_num, plot_data["unfoldInterp"], label="unfoldInterp", color="green")
+        # self.ax4.plot(gate_num, plot_data["unfoldInterp"], label="unfoldInterp", color="magenta")
         self.ax4.plot(gate_num, plot_data["phidpFilt"], label="FIR_Filt", color="orange")
-        self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt", color="blue")
         self.ax4.plot(gate_num, plot_data["regrFilt"], label="regrFilt", color="red")
         self.ax4.plot(gate_num, plot_data["phidpQuad"], label="phidpQuad", color="black")
+        self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt", color="blue")
         self.ax4.set_xlabel("gateNum")
         self.ax4.set_ylabel("PHIDP")
         draw_block_limits(self, self.ax4, gate_num, self.data["scBlock"])
@@ -423,40 +423,55 @@ class KdpRayPlotter:
 # draw valid regions on plots
 
 def draw_valid_regions(self, ax, x, valid,
-                       color='lightgray',
+                       color="lightgray",
                        alpha=0.4):
 
     if not x or not valid:
         return
 
+    if len(x) != len(valid):
+        raise ValueError(
+            f"x and valid lengths differ: {len(x)} versus {len(valid)}"
+        )
+
     in_run = False
+    x_start = None
 
-    for i in range(self.first_valid, self.last_valid):
+    for i, value in enumerate(valid):
 
-        j = i - self.first_valid
-
-        if valid[j] and not in_run:
-            start = x[j]
+        if value > 0.5 and not in_run:
+            x_start = x[i]
             in_run = True
 
-        elif not valid[j] and in_run:
-            end = x[j]
-            ax.axvspan(start, end,
-                       facecolor=color,
-                       edgecolor='none',
-                       alpha=alpha)
-            ax.axvline(start, color='black', lw=1)
-            ax.axvline(end,   color='black', lw=1)
+        elif value <= 0.5 and in_run:
+            x_end = x[i]
+
+            ax.axvspan(
+                x_start,
+                x_end,
+                facecolor=color,
+                edgecolor="none",
+                alpha=alpha,
+            )
+            ax.axvline(x_start, color="black", linewidth=1)
+            ax.axvline(x_end, color="black", linewidth=1)
+
             in_run = False
 
-    # Final run reaches end of data
+    # The final valid run reaches the end of the data.
     if in_run:
-        ax.axvspan(start, x[-1],
-                   facecolor=color,
-                   edgecolor='none',
-                   alpha=alpha)
-        ax.axvline(start, color='black', lw=1)
-        ax.axvline(end,   color='black', lw=1)
+        x_end = x[-1]
+
+        ax.axvspan(
+            x_start,
+            x_end,
+            facecolor=color,
+            edgecolor="none",
+            alpha=alpha,
+        )
+        ax.axvline(x_start, color="black", linewidth=1)
+        ax.axvline(x_end, color="black", linewidth=1)
+
 
 #=========================================================================
 # draw block limit lines

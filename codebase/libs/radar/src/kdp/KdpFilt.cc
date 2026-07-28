@@ -340,7 +340,6 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
   setPhidpSdevMax(params.KDP_phidp_sdev_max);
   setPhidpJitterMax(params.KDP_phidp_jitter_max);
   setMinValidAbsKdp(params.KDP_min_valid_abs_kdp);
-  // setPsobMeanThreshold(params.KDP_psob_mean_threshold);
   checkSnr(params.KDP_check_snr);
   setSnrThreshold(params.KDP_snr_threshold);
   checkRhohv(params.KDP_check_rhohv);
@@ -941,7 +940,6 @@ void KdpFilt::_filterPhidpUnfolded()
 
   _firFilt.setFeatureLength(_phidpFeatureLengthKm, _gateSpacingKm);
   _firFilt.applyFilter(_phidpUnfoldInterp_, _phidpFilt_, _nFiltIterUnfolded);
-  _phidpFilt = _phidpFilt_.data();
     
   // compute conditioned phidp
   
@@ -951,7 +949,6 @@ void KdpFilt::_filterPhidpUnfolded()
     
     _firFilt.applyPsobFilter(_phidpFilt_, _phidpCondFilt_,
                              _nFiltIterCond, _phidpDiffThreshold);
-    _phidpCondFilt = _phidpCondFilt_.data();
 
   } else {
     
@@ -962,7 +959,6 @@ void KdpFilt::_filterPhidpUnfolded()
     // apply the FIR filter to the conditioned phidp
 
     _firFilt.applyFilter(_phidpCond_, _phidpCondFilt_, _nFiltIterUnfolded);
-    _phidpCondFilt = _phidpCondFilt_.data();
     
   }
 
