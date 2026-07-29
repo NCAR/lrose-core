@@ -2117,7 +2117,19 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP");
-    tt->comment_text = tdrpStrDup("Parameters for computing KDP. KDP will be computed if KDP_available is FALSE.");
+    tt->comment_text = tdrpStrDup("Parameters for computing KDP. KDP will be computed if KDP_available is FALSE. The parameters for KDP computations are contained in a separate file. An example default file can be generated using the -print_params_kdp command line argument.");
+    tt++;
+    
+    // Parameter 'KDP_params_file_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("KDP_params_file_path");
+    tt->descr = tdrpStrDup("Path for parameters for KDP computations.");
+    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
+    tt->val_offset = (char *) &KDP_params_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("use-defaults");
     tt++;
     
     // Parameter 'KDP_fir_filter_len'
@@ -2167,7 +2179,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("KDP_n_filt_iterations_conditioned");
     tt->descr = tdrpStrDup("Sets the number of iterations for the final FIR filter for conditioned PHIDP.");
-    tt->help = tdrpStrDup("In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
+    tt->help = tdrpStrDup("In order to identify phase shift on backscatter (DELTA), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
     tt->val_offset = (char *) &KDP_n_filt_iterations_conditioned - &_start_;
     tt->single_val.i = 3;
     tt++;
@@ -2491,8 +2503,8 @@
         tt->struct_def.fields[0].enum_def.fields[39].val = PHIDP_COND;
         tt->struct_def.fields[0].enum_def.fields[40].name = tdrpStrDup("KDP");
         tt->struct_def.fields[0].enum_def.fields[40].val = KDP;
-        tt->struct_def.fields[0].enum_def.fields[41].name = tdrpStrDup("PSOB");
-        tt->struct_def.fields[0].enum_def.fields[41].val = PSOB;
+        tt->struct_def.fields[0].enum_def.fields[41].name = tdrpStrDup("DELTA");
+        tt->struct_def.fields[0].enum_def.fields[41].val = DELTA;
         tt->struct_def.fields[0].enum_def.fields[42].name = tdrpStrDup("SNR");
         tt->struct_def.fields[0].enum_def.fields[42].val = SNR;
         tt->struct_def.fields[0].enum_def.fields[43].name = tdrpStrDup("SNRHC");
@@ -2759,8 +2771,8 @@
       tt->struct_vals[114].e = OUTPUT_SCALING_DYNAMIC;
       tt->struct_vals[115].d = 0.001;
       tt->struct_vals[116].d = 0;
-      tt->struct_vals[117].e = PSOB;
-      tt->struct_vals[118].s = tdrpStrDup("PSOB");
+      tt->struct_vals[117].e = DELTA;
+      tt->struct_vals[118].s = tdrpStrDup("DELTA");
       tt->struct_vals[119].s = tdrpStrDup("phase_shift_on_backscatter");
       tt->struct_vals[120].s = tdrpStrDup("phase_shift_on_backscatter");
       tt->struct_vals[121].s = tdrpStrDup("deg");

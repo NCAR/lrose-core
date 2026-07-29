@@ -76,14 +76,14 @@ public:
                    vector<double> &filt,
                    int nIterations);
   
-  ///////////////////////////////////////////////
-  // filter array for phase shift on backscatter
+  /////////////////////////////////////////////////////////
+  // filter array for phase shift on backscatter (delta)
   // filt must have the same size as unfilt.
   
-  void applyPsobFilter(const vector<double> &unfilt,
-                       vector<double> &filt,
-                       int nIterations,
-                       double diffThreshold);
+  void applyDeltaFilter(const vector<double> &unfilt,
+                        vector<double> &filt,
+                        int nIterations,
+                        double diffThreshold);
 
   // get filter-specific details
 

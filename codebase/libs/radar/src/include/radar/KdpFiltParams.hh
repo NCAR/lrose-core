@@ -73,9 +73,9 @@ public:
   } phidp_filter_method_t;
 
   typedef enum {
-    HUBBERT_BRINGI_METHOD = 0,
-    PEAK_REMOVAL_METHOD = 1
-  } psob_method_t;
+    SELF_CONSISTENCY = 0,
+    CONDITIONAL_FIR = 1
+  } delta_estimation_method_t;
 
   ///////////////////////////
   // Member functions
@@ -371,18 +371,6 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  double phidp_feature_length_km;
-
-  phidp_filter_method_t phidp_filter_method;
-
-  int KDP_n_filt_iterations_unfolded;
-
-  psob_method_t KDP_psob_method;
-
-  int KDP_n_filt_iterations_hubbert_bringi;
-
-  double KDP_phidp_difference_threshold_hubbert_bringi;
-
   int KDP_ngates_for_stats;
 
   double KDP_phidp_sdev_max;
@@ -401,15 +389,27 @@ public:
 
   double KDP_zdr_sdev_max;
 
-  double DBZ_minimum_for_self_consistency;
+  double phidp_feature_length_km;
 
-  double KDP_minimum_for_self_consistency;
+  phidp_filter_method_t phidp_filter_method;
+
+  int fir_n_iterations;
 
   int KDP_median_filter_len_for_ZZDR;
 
-  double KDP_threshold_for_psob_mean;
+  delta_estimation_method_t delta_estimation_method;
 
-  double KDP_min_valid_abs_kdp;
+  double self_con_mean_delta_threshold;
+
+  double self_con_Z_expon;
+
+  double self_con_ZDR_expon;
+
+  double self_con_Z_coeff_10cm;
+
+  int conditional_fir_n_iterations;
+
+  double conditional_phidp_diff_threshold;
 
   tdrp_bool_t KDP_specify_coefficients_for_attenuation_correction;
 
@@ -420,10 +420,6 @@ public:
   double KDP_zdr_attenuation_coefficient;
 
   double KDP_zdr_attenuation_exponent;
-
-  tdrp_bool_t KDP_debug;
-
-  tdrp_bool_t KDP_verbose;
 
   tdrp_bool_t KDP_write_ray_files;
 
@@ -436,7 +432,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[38];
+  mutable TDRPtable _table[36];
 
   const char *_className;
 

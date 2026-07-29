@@ -158,7 +158,7 @@ void MomentsFields::init()
   phidp_jitter_4kdp = missingDouble;
   zdr_sdev_4kdp = missingDouble;
   kdp = missingDouble;
-  psob = missingDouble;
+  delta = missingDouble;
   kdp_hb = missingDouble;
 
   // co-cross correlations
@@ -514,7 +514,7 @@ void MomentsFields::initToZero()
   phidp_jitter_4kdp = 0.0;
   zdr_sdev_4kdp = 0.0;
   kdp = 0.0;
-  psob = 0.0;
+  delta = 0.0;
   kdp_hb = 0.0;
 
   // co-cross correlations

@@ -160,12 +160,8 @@ void ScalarsCompute::_kdpInit()
 
   // initialize KDP object
 
-  _kdp.setFromParams(_kdpFiltParams);
+  _kdp.setParams(_kdpFiltParams);
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    _kdp.setDebug(true);
-  }
-
 }
 
 ////////////////////////////////////////////////

@@ -551,7 +551,7 @@ int RadxPid::_processFile(const string &filePath)
   
   if (_compute()) {
     cerr << "ERROR - RadxPid::Run" << endl;
-    cerr << "  Cannot compute KDP and attenuation" << endl;
+    cerr << "  Cannot compute PID" << endl;
     return -1;
   }
   

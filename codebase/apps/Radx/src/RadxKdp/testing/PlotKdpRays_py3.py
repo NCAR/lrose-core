@@ -33,8 +33,8 @@ REQUIRED_COLUMNS = [
     "unfoldInterp",
     "phidpFilt",
     "phidpCondFilt",
-    "psob",
-    "psobMean",
+    "delta",
+    "deltaMean",
     "kdp",
     "kdpSC",
     "kdpZZdr",
@@ -363,18 +363,18 @@ class KdpRayPlotter:
                            color="lightgray", alpha=0.4,
                            )
 
-        # PLOT 3 - KDP and PSOB
+        # PLOT 3 - KDP and DELTA
 
         self.ax3.set_title(el_str, fontsize=12)
         self.ax3.plot(gate_num, plot_data["kdp"], label="KDP", color="red")
         self.ax3.plot(gate_num, plot_data["kdpSC"], label="KDP_SC", color="blue")
         self.ax3.plot(gate_num, plot_data["kdpZZdr"], label="KDP_ZZDR", color="green")
-        self.ax3.plot(gate_num, plot_data["psob"], label="PSOB", color="orange")
-        self.ax3.plot(gate_num, plot_data["psobMean"], label="PSOB_MEAN", color="black")
+        self.ax3.plot(gate_num, plot_data["delta"], label="DELTA", color="orange")
+        self.ax3.plot(gate_num, plot_data["deltaMean"], label="DELTA_MEAN", color="black")
         # self.ax3.plot(gate_num, plot_data["phidpFiltTrend"], label="TREND", color="magenta")
         self.ax3.plot(gate_num, plot_data["kdpQuad"], label="KDP_QUAD", color="magenta")
         self.ax3.set_xlabel("gateNum")
-        self.ax3.set_ylabel("KDP, PSOB")
+        self.ax3.set_ylabel("KDP, DELTA")
 
         draw_valid_regions(self,
                            self.ax3, gate_num, valid_kdp,

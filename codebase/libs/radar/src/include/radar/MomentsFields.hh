@@ -165,7 +165,7 @@ public:
   double phidp_jitter_4kdp; // phidp jitter when computing kdp
   double zdr_sdev_4kdp; // ZDR standard deviation when computing kdp
   double kdp;
-  double psob; // phase shift on backscatter
+  double delta; // phase shift on backscatter
   double kdp_hb; // kdp from hubbert bringi method
 
   // co-cross correlations

@@ -921,8 +921,8 @@
         tt->struct_def.fields[0].enum_def.fields[0].val = KDP;
         tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("KDP_SC");
         tt->struct_def.fields[0].enum_def.fields[1].val = KDP_SC;
-        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("PSOB");
-        tt->struct_def.fields[0].enum_def.fields[2].val = PSOB;
+        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("DELTA");
+        tt->struct_def.fields[0].enum_def.fields[2].val = DELTA;
         tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
         tt->struct_def.fields[0].enum_def.fields[3].val = DBZ_ATTEN_CORRECTION;
         tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");

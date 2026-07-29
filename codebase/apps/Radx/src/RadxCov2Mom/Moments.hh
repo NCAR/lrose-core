@@ -46,6 +46,7 @@
 #include <radar/KdpFilt.hh>
 #include <radar/AtmosAtten.hh>
 #include <radar/IwrfCalib.hh>
+#include <radar/KdpFiltParams.hh>
 #include <toolsa/TaArray.hh>
 class RadxRay;
 class RadxField;
@@ -58,7 +59,8 @@ public:
 
   // constructor
   
-  Moments(const Params &params);
+  Moments(const Params &params,
+          const KdpFiltParams &kdpFiltParams);
 
   // destructor
   
@@ -112,6 +114,7 @@ protected:
 private:
 
   const Params &_params;
+  KdpFiltParams _kdpFiltParams;
 
   // current ray properties
   

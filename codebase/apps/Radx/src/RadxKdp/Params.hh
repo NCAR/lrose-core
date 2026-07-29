@@ -83,7 +83,7 @@ public:
   typedef enum {
     KDP = 0,
     KDP_SC = 1,
-    PSOB = 2,
+    DELTA = 2,
     DBZ_ATTEN_CORRECTION = 3,
     ZDR_ATTEN_CORRECTION = 4,
     DBZ_ATTEN_CORRECTED = 5,

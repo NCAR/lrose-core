@@ -57,12 +57,12 @@ KdpFilt::KdpFilt()
 
   // FIR filter defaults to length 20
 
-  _nFiltIterUnfolded = 2;
-  _nFiltIterCond = 4;
+  // _params.KDP_n_filt_iterations_unfolded = 2;
+  // _params.KDP_n_filt_iterations_hubbert_bringi = 4;
 
   _nGatesPad = 21;
-  setNGates(0);
-  setNGatesStats(9);
+  _setNGates(0);
+  _setNGatesStats(9);
 
   _limitMaxRange = false;
   _maxRangeKm = 0.0;
@@ -75,27 +75,27 @@ KdpFilt::KdpFilt()
   _elevDeg = -9999;
   _azDeg = -9999;
 
-  _checkSnr = false;
-  _snrThreshold = -6.0;
-  _snrAvailable = false;
+  // _checkSnr = false;
+  // _snrThreshold = -6.0;
+  // _snrAvailable = false;
 
-  _checkRhohv = false;
-  _rhohvThreshold = 0.7;
-  _rhohvAvailable = false;
+  // _checkRhohv = false;
+  // _rhohvThreshold = 0.7;
+  // _rhohvAvailable = false;
 
-  _checkZdrSdev = false;
-  _zdrSdevMax = 2.0;
-  _zdrAvailable = false;
+  // _checkZdrSdev = false;
+  // _zdrSdevMax = 2.0;
+  // _zdrAvailable = false;
 
-  _phidpJitterMax = 30.0;
-  _phidpSdevMax = 20.0;
+  // _phidpJitterMax = 30.0;
+  // _phidpSdevMax = 20.0;
 
-  _minValidAbsKdp = 0.05;
+  // _minValidAbsKdp = 0.05;
 
-  _meanPsobThreshold = 1.0;
+  // _meanDeltaThreshold = 1.0;
 
-  _useIterativeFiltering = false;
-  _phidpDiffThreshold = 4.0;
+  // _useIterativeFiltering = false;
+  // _phidpDiffThreshold = 4.0;
 
   // initialize attenuation correction for Sband
 
@@ -103,7 +103,7 @@ KdpFilt::KdpFilt()
   _dbzAttenExpon = 0.84;
   _zdrAttenCoeff = 0.003;
   _zdrAttenExpon = 1.05;
-  _doComputeAttenCorr = false;
+  // _doComputeAttenCorr = false;
   _attenCoeffsSpecified = false;
 
   // initialize computation of KDP from Z and ZDR
@@ -111,14 +111,14 @@ KdpFilt::KdpFilt()
   _kdpZExpon = 1.0;
   _kdpZdrExpon = -2.05;
   _kdpZZdrCoeff = 3.32e-5;
-  _dbzMinForSelfConsistency = 20.0;
-  _kdpMinForSelfConsistency = 0.25;
+  // _dbzMinForSelfConsistency = 20.0;
+  // _kdpMinForSelfConsistency = 0.25;
   _kdpZZdrMedianLen = 5;
 
   // debugging
 
-  _debug = false;
-  _verbose = false;
+  // _debug = false;
+  // _verbose = false;
   _writeRayFile = false;
 
 }
@@ -146,11 +146,11 @@ void KdpFilt::setWriteRayFile(bool state /* = true */,
 // Set flag to indicate we should compute corrections.
 // Uses default coefficients.
 
-void KdpFilt::setComputeAttenCorr(bool val)
+// void KdpFilt::setComputeAttenCorr(bool val)
 
-{
-  _doComputeAttenCorr = true;
-}
+// {
+//   _doComputeAttenCorr = true;
+// }
   
 //////////////////////////////////////////
 // Set attenuation coefficients
@@ -164,7 +164,7 @@ void KdpFilt::setAttenCoeffs(double dbzCoeff, double dbzExpon,
   _dbzAttenExpon = dbzExpon;
   _zdrAttenCoeff = zdrCoeff;
   _zdrAttenExpon = zdrExpon;
-  _doComputeAttenCorr = true;
+  // _doComputeAttenCorr = true;
   _attenCoeffsSpecified = true;
 
 }
@@ -172,17 +172,26 @@ void KdpFilt::setAttenCoeffs(double dbzCoeff, double dbzExpon,
 ////////////////////////////////////////////
 // Set processing options from params object
 
-void KdpFilt::setFromParams(const KdpFiltParams &params)
+void KdpFilt::setParams(const KdpFiltParams &params)
 {
 
   _params = params;
 
+  if (params.KDP_specify_coefficients_for_attenuation_correction) {
+    setAttenCoeffs(params.KDP_dbz_attenuation_coefficient,
+                   params.KDP_dbz_attenuation_exponent,
+                   params.KDP_zdr_attenuation_coefficient,
+                   params.KDP_zdr_attenuation_exponent);
+  }
+
   // initialize KDP object
 
-  setNGatesStats(params.KDP_ngates_for_stats);
+  _setNGatesStats(_params.KDP_ngates_for_stats);
+
+#ifdef NOTNOW
   setNFiltIterUnfolded(params.KDP_n_filt_iterations_unfolded);
   setNFiltIterCond(params.KDP_n_filt_iterations_hubbert_bringi);
-  if (params.KDP_psob_method == KdpFiltParams::HUBBERT_BRINGI_METHOD) {
+  if (params.KDP_delta_method == KdpFiltParams::HUBBERT_BRINGI_METHOD) {
     setUseIterativeFiltering(true);
     setPhidpDiffThreshold(params.KDP_phidp_difference_threshold_hubbert_bringi);
   }
@@ -199,7 +208,7 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
   setZdrSdevMax(params.KDP_zdr_sdev_max);
   setKdpMinForSelfConsistency(params.KDP_minimum_for_self_consistency);
   setDbzMinForSelfConsistency(params.DBZ_minimum_for_self_consistency);
-  setThresholdForPsobMean(_params.KDP_threshold_for_psob_mean);
+  setThresholdForDeltaMean(_params.KDP_threshold_for_delta_mean);
   setMedianFilterLenForKdpZZdr(params.KDP_median_filter_len_for_ZZDR);
 
   if (params.KDP_debug) {
@@ -213,14 +222,9 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
     setWriteRayFile(true, params.KDP_ray_files_dir);
   }
 
-  if (params.KDP_specify_coefficients_for_attenuation_correction) {
-    setAttenCoeffs(params.KDP_dbz_attenuation_coefficient,
-                   params.KDP_dbz_attenuation_exponent,
-                   params.KDP_zdr_attenuation_coefficient,
-                   params.KDP_zdr_attenuation_exponent);
-  }
   setComputeAttenCorr(true);
   setPhidpFeatureLengthKm(params.phidp_feature_length_km);
+#endif
 
 }
 
@@ -234,7 +238,7 @@ void KdpFilt::setFromParams(const KdpFiltParams &params)
 void KdpFilt::initializeArrays(int nGates)
 
 {
-  setNGates(nGates);
+  _setNGates(nGates);
   _initArrays(NULL, NULL, NULL, NULL, NULL, _nGates);
 }
 
@@ -298,22 +302,22 @@ int KdpFilt::compute(time_t timeSecs,
     }
   }
 
-  if (_verbose) {
-    if (_doComputeAttenCorr) {
-      cerr << "DEBUG - KdpFilt::compute" << endl;
-      cerr << "  Performing attenuation correction from KDP" << endl;
-      cerr << "    dbzAttenCoeff: " << _dbzAttenCoeff << endl;
-      cerr << "    dbzAttenExpon: " << _dbzAttenExpon << endl;
-      cerr << "    zdrAttenCoeff: " << _zdrAttenCoeff << endl;
-      cerr << "    zdrAttenExpon: " << _zdrAttenExpon << endl;
-    }
-  }
+  // if (_verbose) {
+  //   if (_doComputeAttenCorr) {
+  //     cerr << "DEBUG - KdpFilt::compute" << endl;
+  //     cerr << "  Computing attenuation correction from KDP" << endl;
+  //     cerr << "    dbzAttenCoeff: " << _dbzAttenCoeff << endl;
+  //     cerr << "    dbzAttenExpon: " << _dbzAttenExpon << endl;
+  //     cerr << "    zdrAttenCoeff: " << _zdrAttenCoeff << endl;
+  //     cerr << "    zdrAttenExpon: " << _zdrAttenExpon << endl;
+  //   }
+  // }
 
   // set params for computing KDP from Z and ZDR
 
-  _kdpZExpon = 1.0;
-  _kdpZdrExpon = -2.05;
-  _kdpZZdrCoeff = 3.32e-5 * (10.0 / _wavelengthCm);
+  _kdpZExpon = _params.self_con_Z_expon;
+  _kdpZdrExpon = _params.self_con_ZDR_expon;
+  _kdpZZdrCoeff = _params.self_con_Z_coeff_10cm * (10.0 / _wavelengthCm);
 
   // set range details
 
@@ -322,7 +326,7 @@ int KdpFilt::compute(time_t timeSecs,
 
   // set number of gates
 
-  setNGates(nGates);
+  _setNGates(nGates);
 
   // initialize the data arrays
   
@@ -342,15 +346,15 @@ int KdpFilt::compute(time_t timeSecs,
       _kdpSC[igate] = _missingValue;
       _phidpSC[igate] = _missingValue;
       _kdpZZdr[igate] = _missingValue;
-      _psob[igate] = _missingValue;
-      _psobMean[igate] = _missingValue;
+      _delta[igate] = _missingValue;
+      _deltaMean[igate] = _missingValue;
     }
     return 0;
   }
 
   // filter unfolded PHIDP
   
-  _filterPhidpUnfolded();
+  _filterPhidp();
   
   // compute kdp from the filtered data
   
@@ -376,9 +380,9 @@ int KdpFilt::compute(time_t timeSecs,
     
   // compute attenuation corrections
 
-  if (_doComputeAttenCorr) {
-    _computeAttenCorrection();
-  }
+  // if (_doComputeAttenCorr) {
+  _computeAttenCorrection();
+  //}
 
   return 0;
 
@@ -406,7 +410,7 @@ int KdpFilt::computePhidpStats(int nGates,
 
   // set number of gates
 
-  setNGates(nGates);
+  _setNGates(nGates);
 
   // initialize the data arrays
   
@@ -501,8 +505,8 @@ void KdpFilt::_initArrays(const double *snr,
   _kdpZZdr_.resize(_nGates); _kdpZZdr = _kdpZZdr_.data();
   _kdpSC_.resize(_nGates); _kdpSC = _kdpSC_.data();
   _phidpSC_.resize(_nGates); _phidpSC = _phidpSC_.data();
-  _psob_.resize(_nGates); _psob = _psob_.data();
-  _psobMean_.resize(_nGates); _psobMean = _psobMean_.data();
+  _delta_.resize(_nGates); _delta = _delta_.data();
+  _deltaMean_.resize(_nGates); _deltaMean = _deltaMean_.data();
   _dbzAttenCorr_.resize(_nGates); _dbzAttenCorr = _dbzAttenCorr_.data();
   _zdrAttenCorr_.resize(_nGates); _zdrAttenCorr = _zdrAttenCorr_.data();
   _dbzCorrected_.resize(_nGates); _dbzCorrected = _dbzCorrected_.data();
@@ -603,18 +607,18 @@ void KdpFilt::_initArrays(const double *snr,
     _phidpAccumFilt[ii] = _missingValue;
     _validForKdp[ii] = false;
     _validForUnfold[ii] = false;
-    if (_snr[ii] < _snrThreshold) {
+    if (_snr[ii] < _params.KDP_snr_threshold) {
       _kdp[ii] = _missingValue;
       _kdpSC[ii] = _missingValue;
       _phidpSC[ii] = _missingValue;
       _kdpZZdr[ii] = _missingValue;
-      _psob[ii] = _missingValue;
+      _delta[ii] = _missingValue;
     } else {
       _kdp[ii] = 0;
       _kdpSC[ii] = 0;
       _phidpSC[ii] = 0;
       _kdpZZdr[ii] = 0;
-      _psob[ii] = 0;
+      _delta[ii] = 0;
     }
     _dbzAttenCorr[ii] = 0;
     _zdrAttenCorr[ii] = 0;
@@ -622,7 +626,7 @@ void KdpFilt::_initArrays(const double *snr,
     _phidpFftFilt[ii] = _missingValue;
     _phidpFiltTrend[ii] = _missingValue;
     _scBlock[ii] = 0;
-    _psobMean[ii] = 0.0;
+    _deltaMean[ii] = 0.0;
   }
   
   double xxDelta = 1.0 / (double) _nGatesPadded;
@@ -782,35 +786,35 @@ int KdpFilt::_unfoldPhidp()
 /////////////////////////////////////////////
 // filter the unfolded PHIDP
 
-void KdpFilt::_filterPhidpUnfolded()
+void KdpFilt::_filterPhidp()
   
 {
   
   // apply FIR filter to unfolded phidp
 
-  _firFilt.setFeatureLength(_phidpFeatureLengthKm, _gateSpacingKm);
-  _firFilt.applyFilter(_phidpUnfoldInterp_, _phidpFilt_, _nFiltIterUnfolded);
+  _firFilt.setFeatureLength(_params.phidp_feature_length_km, _gateSpacingKm);
+  _firFilt.applyFilter(_phidpUnfoldInterp_, _phidpFilt_, _params.fir_n_iterations);
     
   // compute conditioned phidp
   
-  if (_useIterativeFiltering) {
+  // if (_useIterativeFiltering) {
     
-    // use iterative filtering to remove phase shift on backscatter
+  //   // use iterative filtering to remove phase shift on backscatter
     
-    _firFilt.applyPsobFilter(_phidpFilt_, _phidpCondFilt_,
-                             _nFiltIterCond, _phidpDiffThreshold);
+  //   _firFilt.applyDeltaFilter(_phidpFilt_, _phidpCondFilt_,
+  //                            _params.KDP_n_filt_iterations_hubbert_bringi, _phidpDiffThreshold);
 
-  } else {
+  // } else {
     
-    // compute phidp conditioned to remove phase shift on backscatter
+  // compute phidp conditioned to remove phase shift on backscatter
+  
+  // _computePhidpConditioned();
+  
+  // apply the FIR filter to the conditioned phidp
+  
+  // _firFilt.applyFilter(_phidpCond_, _phidpCondFilt_, _params.KDP_n_filt_iterations_unfolded);
     
-    _computePhidpConditioned();
-    
-    // apply the FIR filter to the conditioned phidp
-
-    _firFilt.applyFilter(_phidpCond_, _phidpCondFilt_, _nFiltIterUnfolded);
-    
-  }
+  //}
 
   // apply fft filter to phidp unfolded
 
@@ -839,7 +843,7 @@ void KdpFilt::_computePhidpRegrFilt()
   // compute regression order to be used
   
   double deltaRangeKm = _nGatesPadded * _gateSpacingKm;
-  int polyOrder = floor(deltaRangeKm / _phidpFeatureLengthKm) * 2 + 1;
+  int polyOrder = floor(deltaRangeKm / _params.phidp_feature_length_km) * 2 + 1;
   if (polyOrder < 5) {
     polyOrder = 5;
   }
@@ -902,7 +906,7 @@ void KdpFilt::_computePhidpRegrFilt(int runNum)
   // compute regression order to be used
 
   double deltaRangeKm = nGatesFit * _gateSpacingKm;
-  int polyOrder = floor(deltaRangeKm / _phidpFeatureLengthKm) * 3 + 1;
+  int polyOrder = floor(deltaRangeKm / _params.phidp_feature_length_km) * 3 + 1;
   if (polyOrder < 5) {
     polyOrder = 5;
   }
@@ -947,12 +951,12 @@ void KdpFilt::_computeKdp()
 
     // check validity
     
-    if (!_validForKdp[ii] || _snr[ii] < _snrThreshold) {
+    if (!_validForKdp[ii] || _snr[ii] < _params.KDP_snr_threshold) {
       _kdp[ii] = 0.0;
       _kdpZZdr[ii] = 0.0;
       _kdpSC[ii] = 0.0;
-      _psob[ii] = 0.0;
-      _psobMean[ii] = 0.0;
+      _delta[ii] = 0.0;
+      _deltaMean[ii] = 0.0;
       continue;
     }
     
@@ -1089,15 +1093,13 @@ void KdpFilt::_computeDbzMax()
 ////////////////////////////////////////////////////////////////////
 // compute phidp conditioned to remove phase shift on backscatter
 
-void KdpFilt::_computePhidpConditioned()
+void KdpFilt::_computePhidpCond()
 
 {
 
   // initialize
   
   std::copy(_phidpFilt_.begin(), _phidpFilt_.end(), _phidpCond_.begin());
-
-  bool debug = false;
 
   // loop through the valid runs
 
@@ -1157,24 +1159,15 @@ void KdpFilt::_computePhidpConditioned()
     int prevBotIndex = 0;
     for (size_t ii = 0; ii < botIndices.size(); ii++) {
       
-      if (debug)
-        cerr << "----------------------------------------" << endl;
-      
       // look back for the point where the phidp value
       // drops below the bottom value
       int botIndex = botIndices[ii];
       double botVal = _phidpFilt[botIndex];
       bool matchFound = false;
       
-      if (debug)
-        cerr << "DDDDDDD prevBotIndex, botIndex, botVal: "
-             << prevBotIndex << ", " << botIndex << ", " << botVal << endl;
-      
       for (int igate = topIndices[ii]; igate >= prevBotIndex; igate--) {
         double val = _phidpFilt[igate];
         if (val < botVal) {
-          if (debug)
-            cerr << "CCCCCCC val, igate: " << val << ", " << igate << endl;
           for (int jgate = igate + 1; jgate < botIndices[ii]; jgate++) {
             _phidpCond[jgate] = botVal;
           } // jgate
@@ -1183,21 +1176,13 @@ void KdpFilt::_computePhidpConditioned()
         }
       } // igate
       
-      if (debug)
-        cerr << "FFFFFFF matchFound: " << matchFound << endl;
-      
       if (!matchFound && prevBotIndex > 0) {
         // did not find a value below the bottom value
         // so move forward instead
         double prevBotVal = _phidpFilt[prevBotIndex];
-        if (debug)
-          cerr << "HHHHHHH prevBotIndex, prevBotVal: "
-               << prevBotIndex << ", " << prevBotVal << endl;
         for (int igate = prevBotIndex + 1; igate <= botIndex; igate++) {
           double val = _phidpFilt[igate];
           if (val <= prevBotVal) {
-            if (debug)
-              cerr << "EEEEEE val, igate: " << val << ", " << igate << endl;
             for (int jgate = prevBotIndex + 1; jgate < igate; jgate++) {
               _phidpCond[jgate] = prevBotVal;
             } // jgate
@@ -1280,7 +1265,7 @@ int KdpFilt::_findValidRuns()
 
   vector<PhidpRun> allRuns;
   int runLen = 0;
-  int minValidRunLen = (int) (_phidpFeatureLengthKm / _gateSpacingKm) * 2 + 1;
+  int minValidRunLen = (int) (_params.phidp_feature_length_km / _gateSpacingKm) * 2 + 1;
   for (int igate = 0; igate < _nGates; igate++) {
 
     bool validGate = _isGateValid(igate);
@@ -1289,7 +1274,7 @@ int KdpFilt::_findValidRuns()
       runLen++;
     }
 
-    // save runs longer than _phidpFeatureLengthKm
+    // save runs longer than _params.phidp_feature_length_km
     
     if (!validGate) {
       if (runLen >= minValidRunLen) {
@@ -1438,27 +1423,27 @@ bool KdpFilt::_isGateValid(int igate)
 
   // check SNR
   
-  if (_checkSnr && _snrAvailable) {
-    if ((_snr[igate] == _missingValue) || (_snr[igate] < _snrThreshold)) {
+  if (_params.KDP_check_snr && _snrAvailable) {
+    if ((_snr[igate] == _missingValue) || (_snr[igate] < _params.KDP_snr_threshold)) {
       return false;
     }
   }
 
   // check for clutter effects
 
-  if (_phidpSdev[igate] > _phidpSdevMax) {
+  if (_phidpSdev[igate] > _params.KDP_phidp_sdev_max) {
     return false;
   }
-  if (_phidpJitter[igate] > _phidpJitterMax) {
+  if (_phidpJitter[igate] > _params.KDP_phidp_jitter_max) {
     return false;
   }
-  if (_checkZdrSdev) {
-    if (_zdrSdev[igate] > _zdrSdevMax) {
+  if (_params.KDP_check_zdr_sdev) {
+    if (_zdrSdev[igate] > _params.KDP_zdr_sdev_max) {
       return false;
     }
   }
-  if (_checkRhohv) {
-    if ((_rhohv[igate] != _missingValue) && (_rhohv[igate] < _rhohvThreshold)) {
+  if (_params.KDP_check_rhohv) {
+    if ((_rhohv[igate] != _missingValue) && (_rhohv[igate] < _params.KDP_rhohv_threshold)) {
       return false;
     }
   }
@@ -1663,7 +1648,7 @@ void KdpFilt::_writeRayDataToFile()
           "snr dbz zdr rhohv phidp "
           "phidpMean phidpMeanValid phidpJitter phidpSdev "
           "phidpUnfold unfoldInterp phidpFilt phidpCondFilt "
-          "zdrSdev psob psobMean kdp kdpSC kdpZZdr "
+          "zdrSdev delta deltaMean kdp kdpSC kdpZZdr "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected regrFilt "
           "phidpFftFilt phidpFiltTrend phidpQuad kdpQuad "
           "scBlock phidpSC\n");
@@ -1708,8 +1693,8 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_phidpFilt[igate], 0),
             _getPlotVal(_phidpCondFilt[igate], 0),
             _getPlotVal(_zdrSdev[igate], NAN),
-            _getPlotVal(_psob[igate], NAN),
-            _getPlotVal(_psobMean[igate], NAN),
+            _getPlotVal(_delta[igate], NAN),
+            _getPlotVal(_deltaMean[igate], NAN),
             _getPlotVal(_kdp[igate], NAN),
             _getPlotVal(_kdpSC[igate], NAN),
             _getPlotVal(_kdpZZdr[igate], NAN),
@@ -1775,6 +1760,22 @@ double KdpFilt::_computeKdpFromZZdr(double dbz,
   
 }
 
+/////////////////////////////////////////////////////
+// load the conditioned PHIDP for estimating
+// delta using Hubbert-Bringi method iterative method
+
+void KdpFilt::_loadPhidpCond()
+  
+{
+  
+  // use iterative filtering to remove phase shift on backscatter
+  
+  _firFilt.applyDeltaFilter(_phidpFilt_, _phidpCondFilt_,
+                            _params.conditional_fir_n_iterations,
+                            _params.conditional_phidp_diff_threshold);
+
+}
+
 ////////////////////////////////////////////////////////////
 /// load up kdp conditioned using ZZDR self-consistency
 
@@ -1795,7 +1796,7 @@ void KdpFilt::_loadKdpSC()
 
   // loop through the valid runs
   
-  vector<PhidpRun> psobRuns;
+  vector<PhidpRun> deltaRuns;
     
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
     
@@ -1822,7 +1823,7 @@ void KdpFilt::_loadKdpSC()
         _loadKdpSCRun(ibegin, iend);
       }
 
-      psobRuns.push_back(PhidpRun(ibegin, iend));
+      deltaRuns.push_back(PhidpRun(ibegin, iend));
 
       ibegin = iend + 1;
 
@@ -1836,7 +1837,7 @@ void KdpFilt::_loadKdpSC()
   _movingMean(_kdpSC_, _nGatesStats, filtSC);
   std::copy(filtSC.begin(), filtSC.end(), _kdpSC_.begin());
 
-  // compute _phidpSC by integrating _kdpSC, compute psob
+  // compute _phidpSC by integrating _kdpSC, compute delta
 
   std::copy(_phidpFftFilt_.begin(), _phidpFftFilt_.end(), _phidpSC_.begin());
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
@@ -1850,32 +1851,32 @@ void KdpFilt::_loadKdpSC()
       _phidpSC[igate] = RadarComplex::sumDeg(_phidpSC[igate - 1], deltaPhi);
       // compute phase shift on backscatter as the difference between
       // filtered value and SC phidp
-      _psob[igate] = _phidpFftFilt[igate] - _phidpSC[igate];
+      _delta[igate] = _phidpFftFilt[igate] - _phidpSC[igate];
     }
   }
 
-  // set conditions on psob
-  // compute mean psob for pos values only
-  // threshold using _meanPsobThreshold
+  // set conditions on delta
+  // compute mean delta for pos values only
+  // threshold using _meanDeltaThreshold
   
-  for (size_t ii = 0; ii < psobRuns.size(); ii++) {
-    const PhidpRun &run = psobRuns[ii];
-    double psobSum = 0.0;
+  for (size_t ii = 0; ii < deltaRuns.size(); ii++) {
+    const PhidpRun &run = deltaRuns[ii];
+    double deltaSum = 0.0;
     double count = 0.0;
     for (int igate = run.ibegin; igate <= run.iend; igate++) {
-      if (_psob[igate] >= 0.0) {
-        psobSum += _psob[igate];
+      if (_delta[igate] >= 0.0) {
+        deltaSum += _delta[igate];
         count++;
       }
     }
-    double psobMean = 0.0;
+    double deltaMean = 0.0;
     if (count > 0) {
-      psobMean = psobSum / count;
+      deltaMean = deltaSum / count;
     }
     for (int igate = run.ibegin; igate <= run.iend; igate++) {
-      _psobMean[igate] = psobMean;
-      if (psobMean < _meanPsobThreshold || _psob[igate] < 0) {
-        _psob[igate] = 0;
+      _deltaMean[igate] = deltaMean;
+      if (deltaMean < _params.self_con_mean_delta_threshold || _delta[igate] < 0) {
+        _delta[igate] = 0;
       }
     }
   }
@@ -1969,7 +1970,7 @@ void KdpFilt::_fftFilter()
   
   // determine cutoff
   
-  const double f_cut = 1.0 / _phidpFeatureLengthKm;  // cycles/km
+  const double f_cut = 1.0 / _params.phidp_feature_length_km;  // cycles/km
 
   // apply filter
   
@@ -2004,7 +2005,7 @@ void KdpFilt::_quadFilter()
 
   // perform the quadratic fit
 
-  int nFeatureHalf = ((int) (_phidpFeatureLengthKm / _gateSpacingKm) + 1) / 2;
+  int nFeatureHalf = ((int) (_params.phidp_feature_length_km / _gateSpacingKm) + 1) / 2;
 
   if (_quadFilt.compute(_phidpUnfoldInterp_,
                         _gateSpacingKm,
@@ -2053,8 +2054,8 @@ void KdpFilt::_censorNonValidKdp()
       _phidpSC[kk] = _missingValue;
       _kdp[kk] = _missingValue;
       _kdpSC[kk] = _missingValue;
-      _psob[kk] = _missingValue;
-      _psobMean[kk] = _missingValue;
+      _delta[kk] = _missingValue;
+      _deltaMean[kk] = _missingValue;
     }
     if (fabs(_kdp[kk]) < 0.1) {
       _kdp[kk] = 0;

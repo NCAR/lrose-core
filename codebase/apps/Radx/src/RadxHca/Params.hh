@@ -123,7 +123,7 @@ public:
     PHIDP = 8,
     KDP = 9,
     KDP_COND = 10,
-    PSOB = 11,
+    DELTA = 11,
     DBZ_ATTEN_CORRECTION = 12,
     ZDR_ATTEN_CORRECTION = 13,
     DBZ_ATTEN_CORRECTED = 14,

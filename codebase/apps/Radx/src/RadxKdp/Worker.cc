@@ -136,12 +136,8 @@ void Worker::_kdpInit()
 
   // initialize KDP object
 
-  _kdp.setFromParams(_kdpFiltParams);
+  _kdp.setParams(_kdpFiltParams);
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _kdp.setDebug(true);
-  }
-
 }
 
 ////////////////////////////////////////////////
@@ -179,7 +175,7 @@ void Worker::_kdpCompute()
 
   const double *kdp = _kdp.getKdp();
   const double *kdpSC = _kdp.getKdpSC();
-  const double *psob = _kdp.getPsob();
+  const double *delta = _kdp.getDelta();
   
   // put KDP into fields objects
   
@@ -190,7 +186,7 @@ void Worker::_kdpCompute()
       _kdpArray[ii] = kdp[ii];
     }
     _kdpSCArray[ii] = kdpSC[ii];
-    _psobArray[ii] = psob[ii];
+    _deltaArray[ii] = delta[ii];
   }
 
 }
@@ -210,7 +206,7 @@ void Worker::_allocArrays()
 
   _kdpArray = _kdpArray_.alloc(_nGates);
   _kdpSCArray = _kdpSCArray_.alloc(_nGates);
-  _psobArray = _psobArray_.alloc(_nGates);
+  _deltaArray = _deltaArray_.alloc(_nGates);
 
 }
 
@@ -380,8 +376,8 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
         case Params::KDP_SC:
           *datp = _kdpSCArray[igate];
           break;
-        case Params::PSOB:
-          *datp = _psobArray[igate];
+        case Params::DELTA:
+          *datp = _deltaArray[igate];
           break;
           
           // attenuation
@@ -457,10 +453,10 @@ void Worker::_addDebugFields(RadxRay *outputRay)
             _kdp.getKdpZZdr());
   
   _addField(outputRay,
-            "PSOB", "deg",
+            "DELTA", "deg",
             "phase_shift_on_backscatter",
             "phase_shift_on_backscatter",
-            _kdp.getPsob());
+            _kdp.getDelta());
   
   _addField(outputRay,
             "DBZ_FOR_KDP", "dBZ",

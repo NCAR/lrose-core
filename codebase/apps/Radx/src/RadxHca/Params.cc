@@ -1165,7 +1165,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("KDP_n_filt_iterations_conditioned");
     tt->descr = tdrpStrDup("Sets the number of iterations for the final FIR filter for conditioned PHIDP.");
-    tt->help = tdrpStrDup("In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
+    tt->help = tdrpStrDup("In order to identify phase shift on backscatter (DELTA), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
     tt->val_offset = (char *) &KDP_n_filt_iterations_conditioned - &_start_;
     tt->single_val.i = 3;
     tt++;
@@ -3124,8 +3124,8 @@
         tt->struct_def.fields[0].enum_def.fields[9].val = KDP;
         tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("KDP_COND");
         tt->struct_def.fields[0].enum_def.fields[10].val = KDP_COND;
-        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("PSOB");
-        tt->struct_def.fields[0].enum_def.fields[11].val = PSOB;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("DELTA");
+        tt->struct_def.fields[0].enum_def.fields[11].val = DELTA;
         tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
         tt->struct_def.fields[0].enum_def.fields[12].val = DBZ_ATTEN_CORRECTION;
         tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
@@ -3367,8 +3367,8 @@
       tt->struct_vals[51].e = OUTPUT_SCALING_DYNAMIC;
       tt->struct_vals[52].d = 0.001;
       tt->struct_vals[53].d = 0;
-      tt->struct_vals[54].e = PSOB;
-      tt->struct_vals[55].s = tdrpStrDup("PSOB");
+      tt->struct_vals[54].e = DELTA;
+      tt->struct_vals[55].s = tdrpStrDup("DELTA");
       tt->struct_vals[56].s = tdrpStrDup("phase_shift_on_backscatter");
       tt->struct_vals[57].s = tdrpStrDup("phase_shift_on_backscatter");
       tt->struct_vals[58].s = tdrpStrDup("deg");

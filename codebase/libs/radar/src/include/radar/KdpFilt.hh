@@ -67,76 +67,6 @@ public:
    */
   ~KdpFilt();
 
-  /**
-   * Set number of iterations over which the filter is applied
-   * to unfolded PHIDP
-   * default is 2
-   */
-  void setNFiltIterUnfolded(int n) {
-    _nFiltIterUnfolded = n;
-  }
-  
-  /**
-   * Set number of iterations over which the filter is applied
-   * to constrained PHIDP
-   * default is 4
-   */
-  void setNFiltIterCond(int n) {
-    _nFiltIterCond = n;
-  }
-  
-  /**
-   * Option to use iterative filtering method.
-   * If FALSE, the conditional filtering method will be used.
-   * Default is false.
-   * See 'setPhidpDiffThreshold'.
-   */
-  void setUseIterativeFiltering(bool val) {
-    _useIterativeFiltering = val;
-  }
-
-  /**
-   * For iterative filtering only.
-   * Set threshold for difference of phidp.
-   * We check the difference between the unfolded phidp
-   * value and the filtered phidp value.
-   * If the difference is less than this value, we use the
-   * original value instead of the filtered value.
-   * Default is 4.0
-   * @param[in] threshold The phidp difference threshold
-   */
-
-  void setPhidpDiffThreshold(double threshold) {
-    _phidpDiffThreshold = threshold;
-  }
-
-  /**
-   * Set number of gates, and padding
-   */
-
-  void setNGates(int n) {
-    _nGates = n;
-    _nGatesPadded = _nGates + 2 * _nGatesPad;
-  }
-
-  /**
-   * Set number of gates for computing phidp stats
-   * default is 9
-   * @param[in] number of gates for stats
-   */
-  void setNGatesStats(int n) {
-    _nGatesStats = n;
-    _nGatesStatsHalf = n / 2 + 1;
-  }
-
-  /** 
-   * Apply a max range limit in km
-   * if true, limit computations to _maxRangeKm
-   * useful for avoiding test pulse
-   * default is false
-   * @param[in] state If true, limit computations to max range
-   */
-
   // option to limit max range
   // can be useful to avoid including the test pulse
 
@@ -144,143 +74,20 @@ public:
     _limitMaxRange = state;
     _maxRangeKm = maxRangeKm;
   }
-
-  /**
-   * Check the SNR value in deciding
-   * whether PHIDP is valid at a gate.
-   * Default is false.
-   */
-  void checkSnr(bool val) {
-    _checkSnr = val;
-  }
-
-  /**
-   * Set SNR threshold - default is -6
-   */
-  void setSnrThreshold(double val) {
-    _snrThreshold = val;
-  }
-
-  /**
-   * Check the RHOHV value in deciding
-   * whether PHIDP is valid at a gate.
-   * Default is false.
-   */
-  void checkRhohv(bool val) {
-    _checkRhohv = val;
-  }
-
-  /**
-   * Set RHOHV threshold - default is 0.7
-   */
-  void setRhohvThreshold(double val) {
-    _rhohvThreshold = val;
-  }
-
-  /**
-   * Set max allowable sdev for phidp (deg)
-   * sdev is standard deviation of phidp gate-to-gate
-   * default is 20
-   */
-  void setPhidpSdevMax(double val) {
-    _phidpSdevMax = val;
-  }
-
-  /**
-   * Set max allowable jitter for phidp (deg)
-   * Jitter is mean absolute change in phidp gate-to-gate
-   * default is 30
-   */
-  void setPhidpJitterMax(double val) {
-    _phidpJitterMax = val;
-  }
-  
-  /**
-   * Check the standard deviation of ZDR in deciding
-   * whether PHIDP is valid at a gate.
-   * Default is false.
-   */
-  void checkZdrSdev(bool val) {
-    _checkZdrSdev = val;
-  }
-
-  /**
-   * Set threshold for standard deviation of zdr
-   * default is 2.5
-   * @param[in] threshold The zdr std deviation threshold
-   */
-  void setZdrSdevMax(double val) {
-    _zdrSdevMax = val;
-  }
-
-  /**
-   * Set minimum valid absolute KDP value
-   * default is 0.01
-   * If absolute computed value is less than this, it is set to 0.
-   * @param[in] val The KDP threshold
-   */
-  void setMinValidAbsKdp(double val) {
-    _minValidAbsKdp = val;
-  }
-
-  /**
-   * Set flag to indicate we should compute corrections.
-   * Uses default coefficients.
-   */
-  void setComputeAttenCorr(bool val);
-  
-  /**
-   * Set attenuation coefficients
-   * also sets flag to indicate we should compute corrections
-   */
-
-  void setAttenCoeffs(double dbzCoeff, double dbzExpon,
-                      double zdrCoeff, double zdrExpon);
-
-
-  /**
-   * Set DBZ threshold for valid run when computing KDP using
-   * Z and ZDR self-consistency
-   */
-
-  void setDbzMinForSelfConsistency(double val) {
-    _dbzMinForSelfConsistency = val;
-  }
-  
-  /**
-   * Set KDP threshold for valid run when computing KDP using
-   * Z and ZDR self-consistency
-   */
-
-  void setKdpMinForSelfConsistency(double val) {
-    _kdpMinForSelfConsistency = val;
-  }
-  
-  /**
-   * Set KDP threshold for valid run when computing KDP using
-   * Z and ZDR self-consistency
-   */
-
-  void setThresholdForPsobMean(double val) {
-    _meanPsobThreshold = val;
-  }
-  
-  /**
-   * Set length for Z and ZDR median filter when estimating
-   * KDP from Z and ZDR
-   */
-
-  void setMedianFilterLenForKdpZZdr(int val) { _kdpZZdrMedianLen = val; }
-  
-  // phidp feature length for computing regression polynomial order
-
-  void setPhidpFeatureLengthKm(double val) { _phidpFeatureLengthKm = val; }
   
   /**
    * Set parameters from KdpFiltParams object
    */
 
-  void setFromParams(const KdpFiltParams &params);
+  void setParams(const KdpFiltParams &params);
+
+  /**
+   * Set attenuation coefficients
+   * Overrides what was set from the params file.
+   */
+  
+  void setAttenCoeffs(double dbzCoeff, double dbzExpon,
+                      double zdrCoeff, double zdrExpon);
 
   /**
    * Initialize the object arrays for later use.
@@ -340,6 +147,7 @@ public:
    * Get range details after calling compute()
    * @return start range and gate spacing (in km)
    */
+
   double getStartRangeKm() const { return _startRangeKm; }
   double getGateSpacingKm() const { return _gateSpacingKm; }
 
@@ -382,9 +190,9 @@ public:
   
   /**
    * Get phase shift on backscatter (deg) after calling compute()
-   * @return an array of psob values
+   * @return an array of delta values
    */
-  const double *getPsob() const { return _psob; }
+  const double *getDelta() const { return _delta; }
 
   /**
    * Get kdp array after calling compute()
@@ -409,8 +217,9 @@ public:
    * set debug on
    * Debug print output will go to stderr
    */
-  void setDebug(bool state = true) { _debug = state; }
-  void setVerbose(bool state = true) { _verbose = state; }
+
+  // void setDebug(bool state = true) { _debug = state; }
+  // void setVerbose(bool state = true) { _verbose = state; }
 
   /**
    * set writing of ray file
@@ -460,15 +269,6 @@ private:
   time_t _timeSecs;
   double _timeFractionSecs;
 
-  int _nFiltIterUnfolded;  /**< Number of times the filter is
-                            * iteratively applied to unfolded phidp */
-  
-  int _nFiltIterCond;  /**< Number of times the filter is
-                        * iteratively applied to filtered constrained */
-  
-  bool _useIterativeFiltering; /* for phase shift on backscatter removal */
-  double _phidpDiffThreshold; /* for phase shift on backscatter removal */
-
   int _nGates;          /**< n gates in input array */
   int _nGatesStats;     /**< n gates for computing phidp stats
                          * default is 9 */
@@ -498,40 +298,40 @@ private:
 
   // thresholds for filtering
 
-  bool _checkSnr; /**< should we check SNR? */
-  double _snrThreshold;
+  // bool _checkSnr; /**< should we check SNR? */
+  // double _snrThreshold;
 
-  bool _checkRhohv; /**< should we check RHOHV? */
-  double _rhohvThreshold;
+  // bool _checkRhohv; /**< should we check RHOHV? */
+  // double _rhohvThreshold;
 
-  bool _checkZdrSdev; /**< should we check SDEV of ZDR? */
-  double _zdrSdevMax;  /**< Max sdev of zdr for valid phidp */
+  // bool _checkZdrSdev; /**< should we check SDEV of ZDR? */
+  // double _zdrSdevMax;  /**< Max sdev of zdr for valid phidp */
 
-  double _phidpJitterMax; /**< Max jitter for valid phidp */
-  double _phidpSdevMax; /**< Max sdev for valid phidp */
+  // double _phidpJitterMax; /**< Max jitter for valid phidp */
+  // double _phidpSdevMax; /**< Max sdev for valid phidp */
   
   // min valid KDP, default 0.05
   // absolute values less than this are set to 0
 
-  double _minValidAbsKdp;
+  // double _minValidAbsKdp;
   
   // parameters for KDP conditioned by ZZDR
 
   double _kdpZExpon;
   double _kdpZdrExpon;
   double _kdpZZdrCoeff;
-  double _dbzMinForSelfConsistency;
-  double _kdpMinForSelfConsistency;
+  // double _dbzMinForSelfConsistency;
+  // double _kdpMinForSelfConsistency;
   int _kdpZZdrMedianLen;
 
   // nominal length of a feature in PHIDP
   
-  double _phidpFeatureLengthKm;
+  // double _phidpFeatureLengthKm;
 
-  // threshold for psob mean
+  // threshold for delta mean
 
-  double _meanPsobThreshold;
-
+  // double _meanDeltaThreshold;
+  
   // phidp state for unfolding
 
   class GateProps {
@@ -654,11 +454,11 @@ private:
   vector<double> _phidpSC_;
   double *_phidpSC;
 
-  vector<double> _psob_;
-  double *_psob;
+  vector<double> _delta_;
+  double *_delta;
 
-  vector<double> _psobMean_;
-  double *_psobMean;
+  vector<double> _deltaMean_;
+  double *_deltaMean;
 
   vector<double> _dbzAttenCorr_;
   double *_dbzAttenCorr;
@@ -695,7 +495,7 @@ private:
   
   // Z and ZDR attenuation correction
 
-  bool _doComputeAttenCorr;
+  // bool _doComputeAttenCorr;
   bool _attenCoeffsSpecified;
   double _dbzAttenCoeff;
   double _dbzAttenExpon;
@@ -704,9 +504,9 @@ private:
   
   // debug printing and writing ray files
 
-  bool _debug;
-  bool _verbose;
-
+  // bool _debug;
+  // bool _verbose;
+  
   bool _writeRayFile;
   string _rayFileDir;
 
@@ -724,6 +524,20 @@ private:
 
   //////////////////////////////////////////
   // methods
+
+  // Set number of gates, and padding
+
+  void _setNGates(int n) {
+    _nGates = n;
+    _nGatesPadded = _nGates + 2 * _nGatesPad;
+  }
+
+  // Set number of gates for computing phidp stats
+  
+  void _setNGatesStats(int n) {
+    _nGatesStats = n;
+    _nGatesStatsHalf = n / 2 + 1;
+  }
 
   // get max number of valid gates
   
@@ -749,7 +563,7 @@ private:
 
   /// filter the unfolded phidp array and compute kdp
 
-  void _filterPhidpUnfolded();
+  void _filterPhidp();
 
   // compute regression-filtered phidp
   
@@ -762,7 +576,7 @@ private:
   void _loadPhidpAccumFilt(const double *phidp, double *accum);
   void _computeAttenCorrection();
   void _computeDbzMax();
-  void _computePhidpConditioned();
+  void _computePhidpCond();
 
   /// Compute the folding range by inspecting the phidp data
 
@@ -800,6 +614,7 @@ private:
 
   /// load up conditional kdp from computed kdp and kdpZZdr
 
+  void _loadPhidpCond();
   void _loadKdpSC();
   void _loadKdpSCRun(int startGate, int endGate);
 
@@ -833,4 +648,197 @@ private:
 };
 
 #endif
+
+
+#ifdef NOTANYMORE
+
+public:
+  
+  /**
+   * Set number of iterations over which the filter is applied
+   * to unfolded PHIDP
+   * default is 2
+   */
+  void setNFiltIterUnfolded(int n) {
+    _nFiltIterUnfolded = n;
+  }
+  
+  /**
+   * Set number of iterations over which the filter is applied
+   * to constrained PHIDP
+   * default is 4
+   */
+  void setNFiltIterCond(int n) {
+    _nFiltIterCond = n;
+  }
+  
+  /**
+   * Option to use iterative filtering method.
+   * If FALSE, the conditional filtering method will be used.
+   * Default is false.
+   * See 'setPhidpDiffThreshold'.
+   */
+  void setUseIterativeFiltering(bool val) {
+    _useIterativeFiltering = val;
+  }
+
+  /**
+   * For iterative filtering only.
+   * Set threshold for difference of phidp.
+   * We check the difference between the unfolded phidp
+   * value and the filtered phidp value.
+   * If the difference is less than this value, we use the
+   * original value instead of the filtered value.
+   * Default is 4.0
+   * @param[in] threshold The phidp difference threshold
+   */
+
+  void setPhidpDiffThreshold(double threshold) {
+    _phidpDiffThreshold = threshold;
+  }
+
+  /** 
+   * Apply a max range limit in km
+   * if true, limit computations to _maxRangeKm
+   * useful for avoiding test pulse
+   * default is false
+   * @param[in] state If true, limit computations to max range
+   */
+
+  /**
+   * Check the SNR value in deciding
+   * whether PHIDP is valid at a gate.
+   * Default is false.
+   */
+  void checkSnr(bool val) {
+    _checkSnr = val;
+  }
+
+  /**
+   * Set SNR threshold - default is -6
+   */
+  void setSnrThreshold(double val) {
+    _snrThreshold = val;
+  }
+
+  /**
+   * Check the RHOHV value in deciding
+   * whether PHIDP is valid at a gate.
+   * Default is false.
+   */
+  void checkRhohv(bool val) {
+    _checkRhohv = val;
+  }
+
+  /**
+   * Set RHOHV threshold - default is 0.7
+   */
+  void setRhohvThreshold(double val) {
+    _rhohvThreshold = val;
+  }
+
+  /**
+   * Set max allowable sdev for phidp (deg)
+   * sdev is standard deviation of phidp gate-to-gate
+   * default is 20
+   */
+  void setPhidpSdevMax(double val) {
+    _phidpSdevMax = val;
+  }
+
+  /**
+   * Set max allowable jitter for phidp (deg)
+   * Jitter is mean absolute change in phidp gate-to-gate
+   * default is 30
+   */
+  void setPhidpJitterMax(double val) {
+    _phidpJitterMax = val;
+  }
+  
+  /**
+   * Check the standard deviation of ZDR in deciding
+   * whether PHIDP is valid at a gate.
+   * Default is false.
+   */
+  void checkZdrSdev(bool val) {
+    _checkZdrSdev = val;
+  }
+
+  /**
+   * Set threshold for standard deviation of zdr
+   * default is 2.5
+   * @param[in] threshold The zdr std deviation threshold
+   */
+  void setZdrSdevMax(double val) {
+    _zdrSdevMax = val;
+  }
+
+  /**
+   * Set minimum valid absolute KDP value
+   * default is 0.01
+   * If absolute computed value is less than this, it is set to 0.
+   * @param[in] val The KDP threshold
+   */
+  void setMinValidAbsKdp(double val) {
+    _minValidAbsKdp = val;
+  }
+
+  /**
+   * Set flag to indicate we should compute corrections.
+   * Uses default coefficients.
+   */
+  void setComputeAttenCorr(bool val);
+  
+
+  /**
+   * Set DBZ threshold for valid run when computing KDP using
+   * Z and ZDR self-consistency
+   */
+
+  void setDbzMinForSelfConsistency(double val) {
+    _dbzMinForSelfConsistency = val;
+  }
+  
+  /**
+   * Set KDP threshold for valid run when computing KDP using
+   * Z and ZDR self-consistency
+   */
+
+  void setKdpMinForSelfConsistency(double val) {
+    _kdpMinForSelfConsistency = val;
+  }
+  
+  /**
+   * Set KDP threshold for valid run when computing KDP using
+   * Z and ZDR self-consistency
+   */
+
+  void setThresholdForDeltaMean(double val) {
+    _meanDeltaThreshold = val;
+  }
+  
+  /**
+   * Set length for Z and ZDR median filter when estimating
+   * KDP from Z and ZDR
+   */
+
+  void setMedianFilterLenForKdpZZdr(int val) { _kdpZZdrMedianLen = val; }
+  
+  // phidp feature length for computing regression polynomial order
+
+  void setPhidpFeatureLengthKm(double val) { _phidpFeatureLengthKm = val; }
+
+private:
+
+  int _nFiltIterUnfolded;  /**< Number of times the filter is
+                            * iteratively applied to unfolded phidp */
+  
+  int _nFiltIterCond;  /**< Number of times the filter is
+                        * iteratively applied to filtered constrained */
+  
+  bool _useIterativeFiltering; /* for phase shift on backscatter removal */
+  double _phidpDiffThreshold; /* for phase shift on backscatter removal */
+
+#endif  
+
 

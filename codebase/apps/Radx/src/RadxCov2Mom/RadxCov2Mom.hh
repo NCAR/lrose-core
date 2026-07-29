@@ -54,6 +54,7 @@
 #include <radar/NoiseLocator.hh>
 #include <radar/IwrfCalib.hh>
 #include <radar/KdpBringi.hh>
+#include <radar/KdpFiltParams.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxRcalib.hh>
 class RadxVol;
@@ -97,6 +98,7 @@ private:
   Args _args;
   Params _params;
   vector<string> _readPaths;
+  KdpFiltParams _kdpFiltParams;
 
   // radar parameters
 
@@ -155,7 +157,7 @@ private:
   {  
   public:
     // constructor
-    ComputeThread(RadxCov2Mom *obj, const Params &params);
+    ComputeThread(RadxCov2Mom *obj, const Params &params, const KdpFiltParams &kdpFiltParams);
     // destructor
     virtual ~ComputeThread();
     // moments object
@@ -175,6 +177,7 @@ private:
     RadxCov2Mom *_this;
     // params
     const Params &_params;
+    const KdpFiltParams &_kdpFiltParams;
     // computation context
     Moments *_moments;
     const RadxRay *_covRay;

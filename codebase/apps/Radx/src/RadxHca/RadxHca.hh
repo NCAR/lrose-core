@@ -59,6 +59,7 @@
 #include <toolsa/TaThreadPool.hh>
 #include <radar/TempProfile.hh>
 #include <radar/BeamHeight.hh>
+#include <radar/KdpFiltParams.hh>
 #include <Radx/RadxArray.hh>
 class RadxVol;
 class RadxFile;
@@ -97,6 +98,7 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+  KdpFiltParams _kdpFiltParams;
   vector<string> _readPaths;
 
   // computations object

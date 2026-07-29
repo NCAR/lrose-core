@@ -185,7 +185,7 @@ public:
     PHIDP_FILT = 38,
     PHIDP_COND = 39,
     KDP = 40,
-    PSOB = 41,
+    DELTA = 41,
     SNR = 42,
     SNRHC = 43,
     SNRHX = 44,
@@ -799,6 +799,8 @@ public:
 
   double zdr_attenuation_exponent;
 
+  char* KDP_params_file_path;
+
   fir_filter_len_t KDP_fir_filter_len;
 
   int KDP_n_filt_iterations_unfolded;
@@ -927,7 +929,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[176];
+  mutable TDRPtable _table[177];
 
   const char *_className;
 
