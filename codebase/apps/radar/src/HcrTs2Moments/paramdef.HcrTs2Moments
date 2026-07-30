@@ -7,13 +7,9 @@
 // Dec 2024
 //
 //////////////////////////////////////////////////////////////////////
-//
-// Copied from Iq2Dsr, and cleaned up.
-//
-//////////////////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "HcrTs2Moments reads raw time-series data, computes the moments and writes the contents into a moments FMQ.";
+  p_header = "HcrTs2Moments reads raw time-series data from the HCR radar, computes the moments and writes the contents into a moments FMQ. The time series is in the new block-oriented format developed for HCR.";
 }
 
 commentdef {
@@ -248,7 +244,6 @@ typedef struct {
   double pulse_width_us;
   double prt_s;
   string block_name;
-  string field_name_suffix;
 } block_def_t;
 
 paramdef struct block_def_t {
@@ -259,88 +254,77 @@ paramdef struct block_def_t {
       block_id = 2301,
       pulse_width_us = 0.256,
       prt_s = 101.376e-6,
-      block_name = "short_short_2_3",
-      field_name_suffix = "_SS"
+      block_name = "short_short_2_3"
     }
     ,
     {
       block_id = 2302,
       pulse_width_us = 0.512,
       prt_s = 152.064e-6,
-      block_name = "long_long_2_3",
-      field_name_suffix = "_LL"
+      block_name = "long_long_2_3"
     }
     ,
     {
       block_id = 2303,
       pulse_width_us = 0.512,
       prt_s = 101.376e-6,
-      block_name = "long_short_2_3",
-      field_name_suffix = "_LS"
+      block_name = "long_short_2_3"
     }
     ,
     {
       block_id = 3401,
       pulse_width_us = 0.256,
       prt_s = 101.376e-6,
-      block_name = "short_short_3_4",
-      field_name_suffix = "_SS"
+      block_name = "short_short_3_4"
     }
     ,
     {
       block_id = 3402,
       pulse_width_us = 0.512,
       prt_s = 135.168e-6,
-      block_name = "long_long_3_4",
-      field_name_suffix = "_LL"
+      block_name = "long_long_3_4"
     }
     ,
     {
       block_id = 3403,
       pulse_width_us = 0.512,
       prt_s = 101.376e-6,
-      block_name = "long_short_3_4",
-      field_name_suffix = "_LS"
+      block_name = "long_short_3_4"
     }
     ,
     {
       block_id = 4501,
       pulse_width_us = 0.256,
       prt_s = 101.376e-6,
-      block_name = "short_short_4_5",
-      field_name_suffix = "_SS"
+      block_name = "short_short_4_5"
     }
     ,
     {
       block_id = 4502,
       pulse_width_us = 0.512,
       prt_s = 126.720e-6,
-      block_name = "long_long_4_5",
-      field_name_suffix = "_LL"
+      block_name = "long_long_4_5"
     }
     ,
     {
       block_id = 4503,
       pulse_width_us = 0.512,
       prt_s = 101.376e-6,
-      block_name = "long_short_4_5",
-      field_name_suffix = "_LS"
+      block_name = "long_short_4_5"
     }
     ,
     {
       block_id = 1010,
       pulse_width_us = 0.256,
       prt_s = 101.376e-6,
-      block_name = "short_fixed",
-      field_name_suffix = ""
+      block_name = "short_fixed"
     }
     ,
     {
       block_id = 1020,
       pulse_width_us = 0.512,
       prt_s = 152.064e-6,
-      block_name = "long_fixed",
-      field_name_suffix = ""
+      block_name = "long_fixed"
     }
   };
 } block_defs[];

@@ -200,7 +200,6 @@ public:
     double pulse_width_us;
     double prt_s;
     char* block_name;
-    char* field_name_suffix;
   } block_def_t;
 
   typedef struct {

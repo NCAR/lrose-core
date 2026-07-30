@@ -318,7 +318,6 @@ Beam *BeamReader::getNextBeam()
              xmitRcvMode,
              _blockId,
              _blockName,
-             _fieldNameSuffix,
              _pulseReader->getOpsInfo(),
              beamPulses);
 
@@ -579,11 +578,9 @@ int BeamReader::_readBlockBeam()
   bool blockDefFound = false;
   _blockId = blockId;
   _blockName = "unknown";
-  _fieldNameSuffix = "";
   for (int ii = 0; ii < _params.block_defs_n; ii++) {
     if (_params._block_defs[ii].block_id == _blockId) {
       _blockName = _params._block_defs[ii].block_name;
-      _fieldNameSuffix = _params._block_defs[ii].field_name_suffix;
       blockDefFound = true;
       break;
     }

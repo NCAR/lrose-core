@@ -86,7 +86,6 @@ public:
             iwrf_xmit_rcv_mode_t xmitRcvMode,
             int blockId,
             const string &blockName,
-            const string &fieldNameSuffix,
             const IwrfTsInfo &opsInfo,
             const vector<shared_ptr<IwrfTsPulse>> &pulses);
 
@@ -110,7 +109,6 @@ public:
   int getNSamples() const { return _nSamples; }
   int getBlockId() const { return _blockId; }
   string getBlockName() const { return _blockName; }
-  string getFieldNameSuffix() const { return _fieldNameSuffix; }
 
   double getEl() const { return _el; }
   double getAz() const { return _az; }
@@ -167,7 +165,6 @@ private:
 
   int _blockId;
   string _blockName;
-  string _fieldNameSuffix;
   
   // pulse vector
 

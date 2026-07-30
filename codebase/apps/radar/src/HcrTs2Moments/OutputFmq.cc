@@ -554,11 +554,7 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
     
     // create field
 
-    string fieldName(ofield.name);
-    if (beam.getFieldNameSuffix().size() > 0) {
-      fieldName += beam.getFieldNameSuffix();
-    }
-    RadxField *unfiltFld = new RadxField(fieldName, ofield.units);
+    RadxField *unfiltFld = new RadxField(ofield.name, ofield.units);
     unfiltFld->setMissingFl32(missingFl32);
     
     // add moments data
