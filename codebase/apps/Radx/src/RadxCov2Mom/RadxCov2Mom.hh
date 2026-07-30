@@ -190,6 +190,7 @@ private:
 
   // private methods
   
+  void _printParamsKdp();
   int _runFilelist();
   int _runArchive();
   int _runRealtime();

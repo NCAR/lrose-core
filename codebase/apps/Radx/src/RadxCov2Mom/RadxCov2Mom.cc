@@ -92,19 +92,11 @@ RadxCov2Mom::RadxCov2Mom(int argc, char **argv)
     return;
   }
 
-  // check on overriding radar location
+  // print params for KDP then exit
 
-  if (_params.override_radar_location) {
-    if (_params.radar_latitude_deg < -900 ||
-        _params.radar_longitude_deg < -900 ||
-        _params.radar_altitude_meters < -900) {
-      cerr << "ERROR: " << _progName << endl;
-      cerr << "  Problem with command line or TDRP parameters." << endl;
-      cerr << "  You have chosen to override radar location" << endl;
-      cerr << "  You must override latitude, longitude and altitude" << endl;
-      cerr << "  You must override all 3 values." << endl;
-      OK = FALSE;
-    }
+  if (_args.printParamsKdp) {
+    _printParamsKdp();
+    exit(0);
   }
 
   // read params for KdpFilt
@@ -118,6 +110,21 @@ RadxCov2Mom::RadxCov2Mom(int argc, char **argv)
            << _params.KDP_params_file_path << endl;
       OK = FALSE;
       return;
+    }
+  }
+
+  // check on overriding radar location
+
+  if (_params.override_radar_location) {
+    if (_params.radar_latitude_deg < -900 ||
+        _params.radar_longitude_deg < -900 ||
+        _params.radar_altitude_meters < -900) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Problem with command line or TDRP parameters." << endl;
+      cerr << "  You have chosen to override radar location" << endl;
+      cerr << "  You must override latitude, longitude and altitude" << endl;
+      cerr << "  You must override all 3 values." << endl;
+      OK = FALSE;
     }
   }
 
@@ -190,6 +197,54 @@ RadxCov2Mom::~RadxCov2Mom()
   // unregister process
 
   PMU_auto_unregister();
+
+}
+
+//////////////////////////////////////////////////
+// Print params for KDP
+
+void RadxCov2Mom::_printParamsKdp()
+{
+
+  if (_params.debug) {
+    cerr << "Reading KDP params from file: " << _params.KDP_params_file_path << endl;
+  }
+
+  // do we need to expand environment variables?
+
+  bool expandEnvVars = false;
+  if (_args.printParamsKdpMode.find("expand") != string::npos) {
+    expandEnvVars = true;
+  }
+
+  // read in KDP params if applicable
+
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpFiltParams.load(_params.KDP_params_file_path,
+                            NULL, expandEnvVars, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // set print mode
+
+  tdrp_print_mode_t printMode = PRINT_LONG;
+  if (_args.printParamsKdpMode.find("short") == 0) {
+    printMode = PRINT_SHORT;
+  } else if (_args.printParamsKdpMode.find("norm") == 0) {
+    printMode = PRINT_NORM;
+  } else if (_args.printParamsKdpMode.find("verbose") == 0) {
+    printMode = PRINT_VERBOSE;
+  }
+
+  // do the print to stdout
+
+  _kdpFiltParams.print(stdout, printMode);
 
 }
 
