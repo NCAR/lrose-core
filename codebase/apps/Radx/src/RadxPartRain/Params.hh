@@ -81,15 +81,6 @@ public:
   } mode_t;
 
   typedef enum {
-    FIR_LEN_125 = 0,
-    FIR_LEN_60 = 1,
-    FIR_LEN_40 = 2,
-    FIR_LEN_30 = 3,
-    FIR_LEN_20 = 4,
-    FIR_LEN_10 = 5
-  } fir_filter_len_t;
-
-  typedef enum {
     SELF_CON_ZDR_POWER_LAW_METHOD = 0,
     SELF_CON_ZDR_POLYNOMIAL_METHOD = 1
   } self_con_method_t;
@@ -108,7 +99,7 @@ public:
     KDP_ZZDR = 10,
     KDP_COND = 11,
     KDP_BRINGI = 12,
-    PSOB = 13,
+    DELTA = 13,
     ZDP = 14,
     PRECIP_RATE_ZH = 15,
     PRECIP_RATE_ZH_SNOW = 16,
@@ -605,61 +596,7 @@ public:
 
   char* RHO_VXHX_field_name;
 
-  fir_filter_len_t KDP_fir_filter_len;
-
-  int KDP_n_filt_iterations_unfolded;
-
-  int KDP_n_filt_iterations_conditioned;
-
-  tdrp_bool_t KDP_use_iterative_filtering;
-
-  double KDP_phidp_difference_threshold;
-
-  int KDP_ngates_for_stats;
-
-  double KDP_phidp_sdev_max;
-
-  double KDP_phidp_jitter_max;
-
-  double KDP_min_valid_abs_kdp;
-
-  tdrp_bool_t KDP_check_snr;
-
-  double KDP_snr_threshold;
-
-  tdrp_bool_t KDP_check_rhohv;
-
-  double KDP_rhohv_threshold;
-
-  tdrp_bool_t KDP_check_zdr_sdev;
-
-  double KDP_zdr_sdev_max;
-
-  double KDP_minimum_for_self_consistency;
-
-  int KDP_median_filter_len_for_ZZDR;
-
-  tdrp_bool_t KDP_debug;
-
-  tdrp_bool_t KDP_write_ray_files;
-
-  char* KDP_ray_files_dir;
-
-  tdrp_bool_t compute_kdp_bringi;
-
-  fir_filter_len_t KDP_BRINGI_fir_filter_len;
-
-  double KDP_BRINGI_phidp_difference_threshold;
-
-  double KDP_BRINGI_phidp_sdev_threshold;
-
-  double KDP_BRINGI_zdr_sdev_threshold;
-
-  double KDP_BRINGI_rhohv_threshold;
-
-  tdrp_bool_t KDP_BRINGI_apply_median_filter_to_PHIDP;
-
-  int KDP_BRINGI_median_filter_len;
+  char* KDP_params_file_path;
 
   tdrp_bool_t apply_precip_attenuation_correction;
 
@@ -1019,7 +956,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[279];
+  mutable TDRPtable _table[252];
 
   const char *_className;
 
