@@ -918,7 +918,7 @@ typedef struct {
 paramdef struct output_field_t {
   p_default = {
     { DBZ, "DBZ", "dBZ", 0.01, -320 },
-    { VEL, "VEL", "m/s", 0.01, -320 },
+    { VEL, "VEL_RAW", "m/s", 0.01, -320 },
     { VEL_CORR_VERT, "VEL_CORR_VERT", "m/s", 0.01, -320 },
     { VEL_CORR_MOTION, "VEL_CORR_MOTION", "m/s", 0.01, -320 },
     { WIDTH, "WIDTH", "m/s", 0.001, -0.01 },

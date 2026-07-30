@@ -4,8 +4,9 @@
 
 //======================================================================
 //
-// HcrTs2Moments reads raw time-series data, computes the moments and 
-//   writes the contents into a moments FMQ.
+// HcrTs2Moments reads raw time-series data from the HCR radar, computes 
+//   the moments and writes the contents into a moments FMQ. The time 
+//   series is in the new block-oriented format developed for HCR.
 //
 //======================================================================
  
@@ -381,11 +382,34 @@ dwell_pulse_width_us = 0.256;
 //
 // Specify the definitions of the blocks to be processed.
 //
-// Applies to DWELL_SPECIFY_BLOCK_ID. These details are originally 
-//   specified in the configuration file for hcrdrx. A dwell is 
-//   constructed for each specified block, and the moments are computed 
-//   for that dwell. In the time series pulse headers we see the block_id, 
-//   as well as start and end of block flags.
+// Applies to DWELL_SPECIFY_BLOCK_ID. The following block details are 
+//   originally specified in the configuration file for hcrdrx and are 
+//   passed along in the metadata:
+//
+// 	block_id
+// 	pulse_width_us
+// 	prt_s
+//
+// A dwell is constructed for each specified block, and the moments are 
+//   computed for that dwell. In the time series pulse headers we see the 
+//   block_id, as well as start and end of block flags.
+//
+// NOTES ON TRIPLE-DWELL SCHEME BLOCK_NAMES:
+//
+// The block_names are important for downstream processing by 
+//   HcrMomentsCombine. The block_name should contain the following 
+//   strings:
+//
+// 	'short_short': short pulse length and short PRT.
+// 	'long_long': long pulse length and long PRT.
+// 	'long_short': long pulse length and short PRT.
+//
+// There can be multiple versions of these sequences, for different PRT 
+//   ratios: 2/3, 3/4 and 4/5.
+//
+// The field_name_suffixes are appended to the field names for the 
+//   moments from each block, to allow them to be recognized properly by 
+//   HcrMomentsCombine.
 //
 // Type: struct
 //   typedef struct {
@@ -393,7 +417,6 @@ dwell_pulse_width_us = 0.256;
 //      double pulse_width_us;
 //      double prt_s;
 //      string block_name;
-//      string field_name_suffix;
 //   }
 //
 // 1D array - variable length.
@@ -403,88 +426,77 @@ block_defs = {
     block_id = 2301,
     pulse_width_us = 0.256,
     prt_s = 0.000101376,
-    block_name = "short_short_2_3",
-    field_name_suffix = "_SS"
+    block_name = "short_short_2_3"
   }
   ,
   {
     block_id = 2302,
     pulse_width_us = 0.512,
     prt_s = 0.000152064,
-    block_name = "long_long_2_3",
-    field_name_suffix = "_LL"
+    block_name = "long_long_2_3"
   }
   ,
   {
     block_id = 2303,
     pulse_width_us = 0.512,
     prt_s = 0.000101376,
-    block_name = "long_short_2_3",
-    field_name_suffix = "_LS"
+    block_name = "long_short_2_3"
   }
   ,
   {
     block_id = 3401,
     pulse_width_us = 0.256,
     prt_s = 0.000101376,
-    block_name = "short_short_3_4",
-    field_name_suffix = "_SS"
+    block_name = "short_short_3_4"
   }
   ,
   {
     block_id = 3402,
     pulse_width_us = 0.512,
-    prt_s = 0.000152064,
-    block_name = "long_long_3_4",
-    field_name_suffix = "_LL"
+    prt_s = 0.000135168,
+    block_name = "long_long_3_4"
   }
   ,
   {
     block_id = 3403,
     pulse_width_us = 0.512,
     prt_s = 0.000101376,
-    block_name = "long_short_3_4",
-    field_name_suffix = "_LS"
+    block_name = "long_short_3_4"
   }
   ,
   {
     block_id = 4501,
     pulse_width_us = 0.256,
     prt_s = 0.000101376,
-    block_name = "short_short_4_5",
-    field_name_suffix = "_SS"
+    block_name = "short_short_4_5"
   }
   ,
   {
     block_id = 4502,
     pulse_width_us = 0.512,
-    prt_s = 0.000152064,
-    block_name = "long_long_4_5",
-    field_name_suffix = "_LL"
+    prt_s = 0.00012672,
+    block_name = "long_long_4_5"
   }
   ,
   {
     block_id = 4503,
     pulse_width_us = 0.512,
     prt_s = 0.000101376,
-    block_name = "long_short_4_5",
-    field_name_suffix = "_LS"
+    block_name = "long_short_4_5"
   }
   ,
   {
     block_id = 1010,
     pulse_width_us = 0.256,
     prt_s = 0.000101376,
-    block_name = "short_fixed",
-    field_name_suffix = ""
+    block_name = "short_fixed"
   }
   ,
   {
     block_id = 1020,
     pulse_width_us = 0.512,
     prt_s = 0.000152064,
-    block_name = "long_fixed",
-    field_name_suffix = ""
+    block_name = "long_fixed"
   }
 };
 
@@ -1447,9 +1459,13 @@ censoring_min_valid_run = 3;
 //          SNR
 //          SNRHC
 //          SNRVC
+//          SNRHX
+//          SNRVX
 //          DBM
 //          DBMHC
 //          DBMVC
+//          DBMHX
+//          DBMVX
 //          DBMHC_NS
 //          DBMVC_NS
 //          LDR

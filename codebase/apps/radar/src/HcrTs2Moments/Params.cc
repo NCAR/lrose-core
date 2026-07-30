@@ -2308,7 +2308,7 @@
       tt->struct_vals[3].d = 0.01;
       tt->struct_vals[4].d = -320;
       tt->struct_vals[5].e = VEL;
-      tt->struct_vals[6].s = tdrpStrDup("VEL");
+      tt->struct_vals[6].s = tdrpStrDup("VEL_RAW");
       tt->struct_vals[7].s = tdrpStrDup("m/s");
       tt->struct_vals[8].d = 0.01;
       tt->struct_vals[9].d = -320;
