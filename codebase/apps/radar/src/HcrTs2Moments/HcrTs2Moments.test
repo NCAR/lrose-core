@@ -498,6 +498,20 @@ block_defs = {
     prt_s = 0.000152064,
     block_name = "long_fixed"
   }
+  ,
+  {
+    block_id = 6010,
+    pulse_width_us = 0.256,
+    prt_s = 0.000101376,
+    block_name = "short_dual"
+  }
+  ,
+  {
+    block_id = 6020,
+    pulse_width_us = 0.512,
+    prt_s = 0.000152064,
+    block_name = "long_dual"
+  }
 };
 
 ///////////// check_for_missing_pulses ////////////////
