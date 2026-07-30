@@ -553,18 +553,27 @@ int BeamReader::_readBlockBeam()
     // check for in-block consistency
 
     if (blockId != pulse->getBlockId()) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "WARNING - change in block id, old, new: "
+             << blockId << ", " << pulse->getBlockId() << endl;
+      }
       _beamError = true;
-      return -1;
     }
 
-    if (fabs(pulseWidthUs -pulse->getPulseWidthUs()) > 1.0e-6) {
+    if (fabs(pulseWidthUs - pulse->getPulseWidthUs()) > 1.0e-6) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "WARNING - change in pulse width, old, new: "
+             << pulseWidthUs << ", " << pulse->getPulseWidthUs() << endl;
+      }
       _beamError = true;
-      return -1;
     }
 
     if (fabs(prt - pulse->getPrt()) > 1.0e-6) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "WARNING - change in PRT, old, new: "
+             << prt << ", " << pulse->getPrt() << endl;
+      }
       _beamError = true;
-      return -1;
     }
 
     // check for end of block
@@ -588,8 +597,10 @@ int BeamReader::_readBlockBeam()
   if (!blockDefFound) {
     // dont process this beam
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "=================>> WARNING - ignoring dwell block id: "
-           << _blockId << endl;
+      if (_params.debug) {
+        cerr << "=================>> WARNING - ignoring dwell block id: "
+             << _blockId << endl;
+      }
     }
     _beamError = true;
   }
@@ -612,6 +623,7 @@ int BeamReader::_readBlockBeam()
 
   _computeBeamElRate(0, _nSamples);
 
+  _beamError = false;
   return 0;
 
 }

@@ -2347,7 +2347,7 @@
       tt->struct_vals[42].s = tdrpStrDup("dB");
       tt->struct_vals[43].d = 0.01;
       tt->struct_vals[44].d = -320;
-      tt->struct_vals[45].e = SNRHC;
+      tt->struct_vals[45].e = SNRHX;
       tt->struct_vals[46].s = tdrpStrDup("SNRHX");
       tt->struct_vals[47].s = tdrpStrDup("dB");
       tt->struct_vals[48].d = 0.01;
