@@ -98,6 +98,27 @@ RadxHca::RadxHca(int argc, char **argv)
     return;
   }
 
+  // read params for KdpFilt
+  
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpFiltParams.load(_params.KDP_params_file_path,
+                            NULL, true, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // print params for KDP then exit
+
+  if (_args.printParamsKdp) {
+    _printParamsKdp();
+    exit(0);
+  }
+
   // check on overriding radar location
 
   if (_params.override_radar_location) {
@@ -123,6 +144,7 @@ RadxHca::RadxHca(int argc, char **argv)
     
     for (int ii = 0; ii < _params.n_compute_threads; ii++) {
       ComputeThread *thread = new ComputeThread(this, _params,
+                                                _kdpFiltParams,
                                                 _tempProfile, ii);
       if (!thread->OK) {
         delete thread;
@@ -136,7 +158,7 @@ RadxHca::RadxHca(int argc, char **argv)
     
     // single threaded
     
-    _engineSingle = new ComputeEngine(_params, 0, _tempProfile);
+    _engineSingle = new ComputeEngine(_params, _kdpFiltParams, 0, _tempProfile);
     if (!_engineSingle->OK) {
       OK = FALSE;
     }
@@ -1408,10 +1430,12 @@ void RadxHca::_printRunTime(const string& str)
 
 RadxHca::ComputeThread::ComputeThread(RadxHca *obj,
                                       const Params &params,
+                                      const KdpFiltParams &kdpFiltParams,
                                       TempProfile &tempProfile,
                                       int threadNum) :
         _this(obj),
         _params(params),
+        _kdpFiltParams(kdpFiltParams),
         _tempProfile(tempProfile),
         _threadNum(threadNum)
 {
@@ -1422,7 +1446,7 @@ RadxHca::ComputeThread::ComputeThread(RadxHca *obj,
 
   // create compute engine object
   
-  _engine = new ComputeEngine(params, threadNum, tempProfile);
+  _engine = new ComputeEngine(_params, _kdpFiltParams, threadNum, tempProfile);
   if (!_engine->OK) {
     delete _engine;
     OK = FALSE;
@@ -1461,3 +1485,52 @@ void RadxHca::ComputeThread::run()
   _derivedRay = _engine->compute(_inputRay);
 
 }
+
+//////////////////////////////////////////////////
+// Print params for KDP
+
+void RadxHca::_printParamsKdp()
+{
+
+  if (_params.debug) {
+    cerr << "Reading KDP params from file: " << _params.KDP_params_file_path << endl;
+  }
+
+  // do we need to expand environment variables?
+
+  bool expandEnvVars = false;
+  if (_args.printParamsKdpMode.find("expand") != string::npos) {
+    expandEnvVars = true;
+  }
+
+  // read in KDP params if applicable
+
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpFiltParams.load(_params.KDP_params_file_path,
+                            NULL, expandEnvVars, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // set print mode
+
+  tdrp_print_mode_t printMode = PRINT_LONG;
+  if (_args.printParamsKdpMode.find("short") == 0) {
+    printMode = PRINT_SHORT;
+  } else if (_args.printParamsKdpMode.find("norm") == 0) {
+    printMode = PRINT_NORM;
+  } else if (_args.printParamsKdpMode.find("verbose") == 0) {
+    printMode = PRINT_VERBOSE;
+  }
+
+  // do the print to stdout
+
+  _kdpFiltParams.print(stdout, printMode);
+
+}
+

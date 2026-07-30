@@ -143,6 +143,7 @@ private:
   public:
     // constructor
     ComputeThread(RadxHca *obj, const Params &params,
+                  const KdpFiltParams &kdpFiltParams,
                   TempProfile &tempProfile, int threadNum);
     // destructor
     virtual ~ComputeThread();
@@ -161,6 +162,7 @@ private:
     RadxHca *_this;
     // params
     const Params &_params;
+    const KdpFiltParams &_kdpFiltParams;
     // temperature profile
     TempProfile &_tempProfile;
     // thread number
@@ -203,6 +205,7 @@ private:
   int _computeDbzGradient(RadxRay &lowerRay, RadxRay &upperRay);
   void _copyDbzGradient(const RadxRay &lowerRay, RadxRay &upperRay);
   void _printRunTime(const string& str);
+  void _printParamsKdp();
 
 };
 

@@ -81,15 +81,6 @@ public:
   } mode_t;
 
   typedef enum {
-    FIR_LEN_125 = 0,
-    FIR_LEN_60 = 1,
-    FIR_LEN_40 = 2,
-    FIR_LEN_30 = 3,
-    FIR_LEN_20 = 4,
-    FIR_LEN_10 = 5
-  } fir_filter_len_t;
-
-  typedef enum {
     CLASS_GC = 0,
     CLASS_BS = 1,
     CLASS_DS = 2,
@@ -629,45 +620,7 @@ public:
 
   char* LDR_field_name;
 
-  fir_filter_len_t KDP_fir_filter_len;
-
-  int KDP_n_filt_iterations_unfolded;
-
-  int KDP_n_filt_iterations_conditioned;
-
-  tdrp_bool_t KDP_use_iterative_filtering;
-
-  double KDP_phidp_difference_threshold;
-
-  int KDP_ngates_for_stats;
-
-  double KDP_phidp_sdev_max;
-
-  double KDP_phidp_jitter_max;
-
-  double KDP_min_valid_abs_kdp;
-
-  tdrp_bool_t KDP_check_snr;
-
-  double KDP_snr_threshold;
-
-  tdrp_bool_t KDP_check_rhohv;
-
-  double KDP_rhohv_threshold;
-
-  tdrp_bool_t KDP_check_zdr_sdev;
-
-  double KDP_zdr_sdev_max;
-
-  double KDP_minimum_for_self_consistency;
-
-  int KDP_median_filter_len_for_ZZDR;
-
-  tdrp_bool_t KDP_debug;
-
-  tdrp_bool_t KDP_write_ray_files;
-
-  char* KDP_ray_files_dir;
+  char* KDP_params_file_path;
 
   tdrp_bool_t apply_precip_attenuation_correction;
 
@@ -868,7 +821,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[175];
+  mutable TDRPtable _table[156];
 
   const char *_className;
 

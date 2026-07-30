@@ -232,6 +232,8 @@ void Args::_usage(ostream &out)
       << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "           Sets mode to ARCHIVE\n"
       << "\n"
+      << "  [ -tdrp_debug ] print tdrp debug messages\n"
+      << "\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "\n"
       << "  [ -vv, -extra ] print extra verbose debug messages\n"
@@ -239,5 +241,13 @@ void Args::_usage(ostream &out)
       << endl;
   
   Params::usage(out);
+  
+  out << endl;
+  out << "KDP-specific parameters:" << endl;
+  out << "   [ -params_kdp ] specify KDP params file path" << endl;
+  out << "     otherwise it is set in the main params file" << endl;
+  out << "   [ -print_params_kdp [mode]] print KDP params" << endl;
+  out << "     see modes from -print_params above" << endl;
+  out << endl;
   
 }

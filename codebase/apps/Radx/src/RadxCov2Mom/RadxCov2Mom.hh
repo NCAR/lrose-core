@@ -97,8 +97,8 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  vector<string> _readPaths;
   KdpFiltParams _kdpFiltParams;
+  vector<string> _readPaths;
 
   // radar parameters
 
@@ -190,7 +190,6 @@ private:
 
   // private methods
   
-  void _printParamsKdp();
   int _runFilelist();
   int _runArchive();
   int _runRealtime();
@@ -235,6 +234,8 @@ private:
 
   void _handleDoneThread(ComputeThread *thread,
                          vector <RadxRay *> &momRays);
+
+  void _printParamsKdp();
 
 };
 
