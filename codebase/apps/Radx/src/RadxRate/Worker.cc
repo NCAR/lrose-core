@@ -198,12 +198,8 @@ void Worker::_kdpInit()
 
   // initialize KDP object
 
-  _kdp.setFromParams(_kdpFiltParams);
+  _kdp.setParams(_kdpFiltParams);
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _kdp.setDebug(true);
-  }
-
 }
 
 ////////////////////////////////////////////////
@@ -912,10 +908,10 @@ void Worker::_addKdpDebugFields(RadxRay *outputRay)
             _kdp.getKdpZZdr());
   
   _addField(outputRay,
-            "PSOB", "deg",
+            "DELTA", "deg",
             "phase_shift_on_backscatter",
             "phase_shift_on_backscatter",
-            _kdp.getPsob());
+            _kdp.getDelta());
   
   _addField(outputRay,
             "DBZ_FOR_KDP", "dBZ",
