@@ -15,9 +15,6 @@
 #include <rapmath/SFuzzyF.hh>
 #include <rapmath/FuzzyF.hh>
 #include <rapmath/UnaryNode.hh>
-#include <radar/NcarParticleId.hh>
-#include <radar/KdpBringi.hh>
-#include <radar/KdpFilt.hh>
 #include <toolsa/LogStream.hh>
 #include <cmath>
 #include <algorithm>
@@ -1248,7 +1245,7 @@ bool VirtVolSweep::_processPercentOfAbsMax(std::vector<ProcessingNode *> &args)
   
   const GriddedData *input = (const GriddedData *)data;
   // loop through data to get max abs value, which we might use as nyquist
-  double max;
+  double max = -1.0e99;
   bool first;
   
   for (int i=0; i<input->getNdata(); ++i)
