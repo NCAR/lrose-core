@@ -926,7 +926,7 @@ paramdef struct output_field_t {
     { NCP, "NCP", "", 0.0001, -0.01 },
     { SNR, "SNR", "dB", 0.01, -320 },
     { SNRVC, "SNRVC", "dB", 0.01, -320 },
-    { SNRHC, "SNRHX", "dB", 0.01, -320 },
+    { SNRHX, "SNRHX", "dB", 0.01, -320 },
     { DBM, "DBM", "dBm", 0.01, -320 },
     { LDR, "LDR", "dB", 0.01, -320 },
     { LDRH, "LDRH", "dB", 0.01, -320 },
