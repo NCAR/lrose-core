@@ -29,7 +29,10 @@ SUB_DIRS = \
 	EccoStats \
 	HawkEye \
 	HawkEdit \
+	HcrMomentsCombine \
+	HcrShortLongCombine \
 	HcrTempRxGain \
+	HcrTs2Moments \
 	HcrVelCorrect \
 	Hsrl2Radx \
 	IntfRemove \

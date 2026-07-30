@@ -18,11 +18,10 @@ set (SRCS
       Args.cc
       Beam.cc
       BeamReader.cc
+      CalibMgr.cc
       Calibration.cc
-      Cmd.cc
       EgmCorrection.cc
       HcrTs2Moments.cc
-      MomentsMgr.cc
       Main.cc
       OutputFmq.cc
       PulseQueue.cc

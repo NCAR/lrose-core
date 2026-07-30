@@ -2,14 +2,14 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: HcrShortLongCombine
+# app name: HcrMomentsCombine
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/radar/src/HcrShortLongCombine
+# dir: lrose-core/codebase/apps/radar/src/HcrMomentsCombine
 ###############################################################
 
-project (HcrShortLongCombine)
+project (HcrMomentsCombine)
 
 # source files
 
@@ -17,7 +17,7 @@ set (SRCS
       Params.cc
       Args.cc
       Main.cc
-      HcrShortLongCombine.cc
+      HcrMomentsCombine.cc
     )
 
 # include directories
@@ -144,7 +144,7 @@ makeTdrpParams()
 
 # application
 
-add_executable (HcrShortLongCombine ${SRCS})
+add_executable (HcrMomentsCombine ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)

@@ -23,18 +23,17 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for HcrTs2Moments program
+# Makefile for HcrMomentsCombine program
 #
-# Mike Dixon, RAP, NCAR
-# POBox 3000, Boulder, CO, 80307, USA
+# Mike Dixon, RAP, NCAR, Boulder, CO, 80307, USA
 #
-# May 2006
+# Dec 2014
 #
 ###########################################################################
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = HcrTs2Moments
+TARGET_FILE = HcrMomentsCombine
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
@@ -48,35 +47,18 @@ LOC_LIBS = \
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
-LOC_CPPC_CFLAGS =
-
+LOC_CFLAGS =
 
 HDRS = \
-	$(PARAMS_HH) \
+	Params.hh \
 	Args.hh \
-	Beam.hh \
-	BeamReader.hh \
-	CalibMgr.hh \
-	Calibration.hh \
-	EgmCorrection.hh \
-	HcrTs2Moments.hh \
-	OutputFmq.hh \
-	PulseQueue.hh \
-	Threads.hh
+	HcrMomentsCombine.hh
 
 CPPC_SRCS = \
-	$(PARAMS_CC) \
+	Params.cc \
 	Args.cc \
-	Beam.cc \
-	BeamReader.cc \
-	CalibMgr.cc \
-	Calibration.cc \
-	EgmCorrection.cc \
-	HcrTs2Moments.cc \
 	Main.cc \
-	OutputFmq.cc \
-	PulseQueue.cc \
-	Threads.cc
+	HcrMomentsCombine.cc
 
 #
 # tdrp macros
@@ -85,7 +67,7 @@ CPPC_SRCS = \
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
-# standard C++ targets
+# C++ targets
 #
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
@@ -99,6 +81,8 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 # local targets
 #
+
+depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
