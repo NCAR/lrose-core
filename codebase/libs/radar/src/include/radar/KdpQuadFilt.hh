@@ -80,7 +80,7 @@ public:
   const std::vector<double> &getPhidpFitDeg() const { return _phidpFitDeg; }
   const std::vector<double> &getResidualStdDeg() const { return _residualStdDeg; }
   const std::vector<int> getNValid() const { return _nValid; }
-
+  
 protected:
   
 private:

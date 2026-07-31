@@ -284,7 +284,7 @@ int KdpFilt::compute(time_t timeSecs,
 
   // load up accumulated filtered phidp along range
 
-  _loadPhidpAccumFilt(_phidpFilt, _phidpAccumFilt);
+  _loadPhidpAccumFilt(_phidpFilt, _phidpFiltAccum);
 
   // load up conditional KDP from estimated kdp and kdpZZdr
 
@@ -355,7 +355,7 @@ int KdpFilt::computePhidpStats(int nGates,
     _computePhidpStats(ii);
     _phidpJitter[ii] = _gateProps[ii].phidpJitter;
     _phidpMean[ii] = _gateProps[ii].phidpMean;
-    _phidpMeanValid[ii] = _gateProps[ii].phidpMean;
+    _phidpMeanFilled[ii] = _gateProps[ii].phidpMean;
     _phidpSdev[ii] = _gateProps[ii].phidpSdev;
   }
   
@@ -401,40 +401,55 @@ void KdpFilt::_initArrays(const double *snr,
   // for negative indices and at the end for filtering as required
 
   _gateProps.resize(_nGates);
+
+  _validRuns.clear();
+  _gapRuns.clear();
+
+  _validForKdp.resize(_nGates);
+  _validForUnfold.resize(_nGates);
+
   _snr.resize(_nGates);
+
   _dbz.resize(_nGates);
   _dbzMax.resize(_nGates);
   _dbzMedian.resize(_nGates);
+
   _rhohv.resize(_nGates);
+
   _zdr.resize(_nGates);
   _zdrSdev.resize(_nGates);
   _zdrMedian.resize(_nGates);
+
   _phidp.resize(_nGates);
   _phidpMean.resize(_nGates);
-  _phidpMeanValid.resize(_nGates);
+  _phidpMeanFilled.resize(_nGates);
   _phidpJitter.resize(_nGates);
   _phidpSdev.resize(_nGates);
   _phidpUnfold.resize(_nGates);
-  _phidpUnfoldInterp.resize(_nGates);
-  _validForKdp.resize(_nGates);
-  _validForUnfold.resize(_nGates);
-  _kdp.resize(_nGates);
-  _kdpZZdr.resize(_nGates);
-  _kdpSC.resize(_nGates);
-  _phidpSC.resize(_nGates);
-  _delta.resize(_nGates);
-  _deltaMean.resize(_nGates);
-  _dbzAttenCorr.resize(_nGates);
-  _zdrAttenCorr.resize(_nGates);
-  _dbzCorrected.resize(_nGates);
-  _zdrCorrected.resize(_nGates);
+  _phidpUnfoldFilled.resize(_nGates);
+  
   _phidpFilt.resize(_nGates);
   _phidpFiltTrend.resize(_nGates);
-  _phidpAccumFilt.resize(_nGates);
+  _phidpFiltAccum.resize(_nGates);
+  _phidpFirFilt.resize(_nGates);
   _phidpQuadFilt.resize(_nGates);
   _kdpQuadFilt.resize(_nGates);
   _phidpFftFilt.resize(_nGates);
   _phidpRegrFilt.resize(_nGates);
+
+  _kdp.resize(_nGates);
+  _kdpZZdr.resize(_nGates);
+  _kdpSC.resize(_nGates);
+  _phidpSC.resize(_nGates);
+
+  _delta.resize(_nGates);
+  _deltaMean.resize(_nGates);
+
+  _dbzAttenCorr.resize(_nGates);
+  _zdrAttenCorr.resize(_nGates);
+  _dbzCorrected.resize(_nGates);
+  _zdrCorrected.resize(_nGates);
+
   _xxVals.resize(_nGatesPadded);
   _scBlock.resize(_nGates);
   
@@ -463,11 +478,24 @@ void KdpFilt::_initArrays(const double *snr,
   }
   for (int ii = 0; ii < _nGates; ii++) {
     _dbzMedian[ii] = _dbz[ii];
+    _dbzMax[ii] = _dbz[ii];
   }
   FilterUtils::applyMedianFilter(_dbzMedian.data(), _nGates,
                                  _kdpZZdrMedianLen, _missingValue);
 
   std::copy(_dbz.begin(), _dbz.end(), _dbzCorrected.begin());
+  
+  if (rhohv != NULL) {
+    for (int ii = 0; ii < _nGates; ii++) {
+      _rhohv[ii] = rhohv[ii];
+    }
+    _rhohvAvailable = true;
+  } else {
+    for (int ii = 0; ii < _nGates; ii++) {
+      _rhohv[ii] = _missingValue;
+    }
+    _rhohvAvailable = false;
+  }
   
   if (zdr != NULL) {
     for (int ii = 0; ii < _nGates; ii++) {
@@ -481,21 +509,11 @@ void KdpFilt::_initArrays(const double *snr,
     _zdrAvailable = false;
   }
   std::copy(_zdr.begin(), _zdr.end(), _zdrMedian.begin());
+  std::copy(_zdr.begin(), _zdr.end(), _zdrCorrected.begin());
+  
   FilterUtils::applyMedianFilter(_zdrMedian.data(), _nGates,
                                  _kdpZZdrMedianLen, _missingValue);
   std::copy(_zdr.begin(), _zdr.end(), _zdrCorrected.begin());
-  
-  if (rhohv != NULL) {
-    for (int ii = 0; ii < _nGates; ii++) {
-      _rhohv[ii] = rhohv[ii];
-    }
-    _rhohvAvailable = true;
-  } else {
-    for (int ii = 0; ii < _nGates; ii++) {
-      _rhohv[ii] = _missingValue;
-    }
-    _rhohvAvailable = false;
-  }
   
   if (phidp != NULL) {
     for (int ii = 0; ii < _nGates; ii++) {
@@ -524,39 +542,43 @@ void KdpFilt::_initArrays(const double *snr,
   // initialize computed arrays
 
   for (int ii = 0; ii < _nGates; ii++) {
+
+    _validForKdp[ii] = false;
+    _validForUnfold[ii] = false;
+
     _zdrSdev[ii] = _missingValue;
+    _zdrMedian[ii] = _missingValue;
+
     _phidpMean[ii] = _missingValue;
-    _phidpMeanValid[ii] = _missingValue;
+    _phidpMeanFilled[ii] = _missingValue;
     _phidpJitter[ii] = _missingValue;
     _phidpSdev[ii] = _missingValue;
     _phidpUnfold[ii] = _missingValue;
-    _phidpUnfoldInterp[ii] = _missingValue;
+    _phidpUnfoldFilled[ii] = _missingValue;
+
     _phidpFilt[ii] = _missingValue;
-    // _phidpCond[ii] = _missingValue;
-    // _phidpCondFilt[ii] = _missingValue;
-    _phidpAccumFilt[ii] = _missingValue;
-    _validForKdp[ii] = false;
-    _validForUnfold[ii] = false;
-    if (_snr[ii] < _params.KDP_snr_threshold) {
-      _kdp[ii] = _missingValue;
-      _kdpSC[ii] = _missingValue;
-      _phidpSC[ii] = _missingValue;
-      _kdpZZdr[ii] = _missingValue;
-      _delta[ii] = _missingValue;
-    } else {
-      _kdp[ii] = 0;
-      _kdpSC[ii] = 0;
-      _phidpSC[ii] = 0;
-      _kdpZZdr[ii] = 0;
-      _delta[ii] = 0;
-    }
-    _dbzAttenCorr[ii] = 0;
-    _zdrAttenCorr[ii] = 0;
+    _phidpFiltTrend[ii] = _missingValue;
+    _phidpFiltAccum[ii] = _missingValue;
+    _phidpFirFilt[ii] = _missingValue;
+    _phidpQuadFilt[ii] = _missingValue;
+    _kdpQuadFilt[ii] = _missingValue;
     _phidpRegrFilt[ii] = _missingValue;
     _phidpFftFilt[ii] = _missingValue;
-    _phidpFiltTrend[ii] = _missingValue;
+    
+    _kdp[ii] = _missingValue;
+    _kdpZZdr[ii] = _missingValue;
+    _kdpSC[ii] = _missingValue;
+    _phidpSC[ii] = _missingValue;
+
+    _delta[ii] = _missingValue;
+    _deltaMean[ii] = _missingValue;
+
+    _dbzAttenCorr[ii] = 0;
+    _zdrAttenCorr[ii] = 0;
+
     _scBlock[ii] = 0;
     _deltaMean[ii] = 0.0;
+
   }
   
   double xxDelta = 1.0 / (double) _nGatesPadded;
@@ -603,7 +625,7 @@ int KdpFilt::_unfoldPhidp()
     _computeZdrSdev(ii);
     _phidpJitter[ii] = _gateProps[ii].phidpJitter;
     _phidpMean[ii] = _gateProps[ii].phidpMean;
-    _phidpMeanValid[ii] = _gateProps[ii].phidpMean;
+    _phidpMeanFilled[ii] = _gateProps[ii].phidpMean;
     _phidpSdev[ii] = _gateProps[ii].phidpSdev;
   }
   
@@ -625,12 +647,12 @@ int KdpFilt::_unfoldPhidp()
     int midGap = (startGap + endGap) / 2;
     // fill in first half of gap
     for (int jj = startGap; jj < midGap; jj++) {
-      _phidpMeanValid[jj] = _phidpMeanValid[startGap-1];
+      _phidpMeanFilled[jj] = _phidpMeanFilled[startGap-1];
       _gateProps[jj] = _gateProps[startGap-1];
     }
     // fill in last half of gap
     for (int jj = midGap; jj <= endGap; jj++) {
-      _phidpMeanValid[jj] = _phidpMeanValid[endGap+1];
+      _phidpMeanFilled[jj] = _phidpMeanFilled[endGap+1];
       _gateProps[jj] = _gateProps[endGap+1];
     }
   }
@@ -650,10 +672,10 @@ int KdpFilt::_unfoldPhidp()
       }
     }
     sumFold += fold;
-    if (_phidpMeanValid[ii] == _missingValue) {
+    if (_phidpMeanFilled[ii] == _missingValue) {
       _phidpUnfold[ii] = _missingValue;
     } else {
-      _phidpUnfold[ii] = _phidpMeanValid[ii] + (sumFold * _foldRange);
+      _phidpUnfold[ii] = _phidpMeanFilled[ii] + (sumFold * _foldRange);
     }
 
   } // ii
@@ -661,7 +683,7 @@ int KdpFilt::_unfoldPhidp()
   // interpolate unfolded mean through the gaps
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _phidpUnfoldInterp[igate] = _phidpUnfold[igate];
+    _phidpUnfoldFilled[igate] = _phidpUnfold[igate];
   }
 
   for (size_t irun = 0; irun < _gapRuns.size(); irun++) {
@@ -674,18 +696,18 @@ int KdpFilt::_unfoldPhidp()
     double delta = range / npts;
     double val = valBefore + delta;
     for (int jj = startGap; jj <= endGap; jj++, val += delta) {
-      _phidpUnfoldInterp[jj] = val;
+      _phidpUnfoldFilled[jj] = val;
     }
   }
 
   // data before the first valid gate and after the last valid gate
 
   for (int ii = 0; ii < _firstValidGate; ii++) {
-    _phidpUnfoldInterp[ii] = _phidpUnfold[_firstValidGate];
+    _phidpUnfoldFilled[ii] = _phidpUnfold[_firstValidGate];
   }
 
   for (int ii = _lastValidGate + 1; ii < _nGates; ii++) {
-    _phidpUnfoldInterp[ii] = _phidpUnfold[_lastValidGate];
+    _phidpUnfoldFilled[ii] = _phidpUnfold[_lastValidGate];
   }
   
   // before and after the data, set to the mean
@@ -703,10 +725,10 @@ int KdpFilt::_unfoldPhidp()
   double meanAtEnd = sumAtEnd / _nGatesStats; 
 
   for (int ii = 0; ii < _firstValidGate; ii++) {
-    _phidpUnfoldInterp[ii] = meanAtStart;
+    _phidpUnfoldFilled[ii] = meanAtStart;
   }
   for (int ii = _lastValidGate + 1; ii < _nGates; ii++) {
-    _phidpUnfoldInterp[ii] = meanAtEnd;
+    _phidpUnfoldFilled[ii] = meanAtEnd;
   }
 
   return 0;
@@ -722,20 +744,44 @@ void KdpFilt::_filterPhidp()
   
   // apply FIR filter to unfolded phidp
 
-  _applyFirFilter();
+  if (_params.phidp_filter_method == KdpFiltParams::FIR_FILTER ||
+      _params.KDP_compute_all_filters) {
+    _applyFirFilter();
+  }
   
   // apply quadratic filter to phidp unfolded
 
-  _applyQuadFilter();
+  if (_params.phidp_filter_method == KdpFiltParams::QUADRATIC_FILTER ||
+      _params.KDP_compute_all_filters) {
+    _applyQuadFilter();
+  }
   
   // apply fft filter to phidp unfolded
 
-  _applyFftFilter();
+  if (_params.phidp_filter_method == KdpFiltParams::FFT_FILTER ||
+      _params.KDP_compute_all_filters) {
+    _applyFftFilter();
+  }
   
   // compute phidp filtered with regression filter
 
-  _applyRegrFilter();
+  if (_params.phidp_filter_method == KdpFiltParams::REGRESSION_FILTER ||
+      _params.KDP_compute_all_filters) {
+    _applyRegrFilter();
+  }
+
+  // copy the relevant filtered data into _phidpFilt
   
+  if (_params.phidp_filter_method == KdpFiltParams::FIR_FILTER) {
+    std::copy(_phidpFirFilt.begin(), _phidpFirFilt.end(), _phidpFilt.begin());
+  } else if (_params.phidp_filter_method == KdpFiltParams::QUADRATIC_FILTER) {
+    std::copy(_phidpQuadFilt.begin(), _phidpQuadFilt.end(), _phidpFilt.begin());
+  } else if (_params.phidp_filter_method == KdpFiltParams::FFT_FILTER) {
+    std::copy(_phidpFftFilt.begin(), _phidpFftFilt.end(), _phidpFilt.begin());
+  } else if (_params.phidp_filter_method == KdpFiltParams::REGRESSION_FILTER) {
+    std::copy(_phidpRegrFilt.begin(), _phidpRegrFilt.end(), _phidpFilt.begin());
+  }
+
 }
 
 /////////////////////////////////////////////
@@ -1491,11 +1537,11 @@ void KdpFilt::_applyFftFilter()
   phiComplex_.resize(_nGatesPadded);
   RadarComplex_t *phiComplex = phiComplex_.data() + _nGatesPad;
   for (int igate = 0; igate < _nGates; igate++) {
-    RadarComplex::setFromDegrees(_phidpUnfoldInterp[igate], phiComplex[igate]);
+    RadarComplex::setFromDegrees(_phidpUnfoldFilled[igate], phiComplex[igate]);
   }
   
   // interpolate between end-points for the padded gates
-
+  
   RadarComplex_t angleStart = phiComplex[0];
   RadarComplex_t angleEnd = phiComplex[_nGates - 1];
   vector<RadarComplex_t> interpVec;
@@ -1544,12 +1590,12 @@ void KdpFilt::_applyFftFilter()
 /// filter phidp using fir
 
 void KdpFilt::_applyFirFilter()
-
+  
 {
-
+  
   _firFilt.setFeatureLength(_params.phidp_feature_length_km,
                             _gateSpacingKm);
-  _firFilt.applyFilter(_phidpUnfoldInterp, _phidpFilt,
+  _firFilt.applyFilter(_phidpUnfoldFilled, _phidpFirFilt,
                        _params.fir_n_iterations, _missingValue);
 
 }
@@ -1565,7 +1611,7 @@ void KdpFilt::_applyQuadFilter()
 
   int nFeatureHalf = ((int) (_params.phidp_feature_length_km / _gateSpacingKm) + 1) / 2;
 
-  if (_quadFilt.compute(_phidpUnfoldInterp,
+  if (_quadFilt.compute(_phidpUnfoldFilled,
                         _gateSpacingKm,
                         nFeatureHalf,
                         _missingValue) == 0) {
@@ -1634,7 +1680,7 @@ void KdpFilt::_applyPhidpRegrFilt(int runNum)
   phiRegr_.resize(nGatesFit);
   double *phiRegr = phiRegr_.data();
   for (int igate = 0; igate < nGatesFit; igate++) {
-    phiRegr[igate] = _phidpUnfoldInterp[igate + startGate];
+    phiRegr[igate] = _phidpUnfoldFilled[igate + startGate];
   }
   
   fit.performFit(phiRegr_);
@@ -1672,7 +1718,7 @@ void KdpFilt::_applyPhidpRegrFiltGlobal()
   phiRegr_.resize(_nGatesPadded);
   double *phiRegr = phiRegr_.data() + _nGatesPad;
   for (int igate = 0; igate < _nGates; igate++) {
-    phiRegr[igate] = _phidpUnfoldInterp[igate];
+    phiRegr[igate] = _phidpUnfoldFilled[igate];
   }
   for (int igate = 0; igate < _nGatesPad; igate++) {
     phiRegr[-1 - igate] = phiRegr[0];
@@ -1848,8 +1894,8 @@ void KdpFilt::_writeRayDataToFile()
   fprintf(out,
           "# gateNum validKdp validUnfold "
           "snr dbz zdr rhohv phidp "
-          "phidpMean phidpMeanValid phidpJitter phidpSdev "
-          "phidpUnfold unfoldInterp phidpFilt "
+          "phidpMean phidpMeanFilled phidpJitter phidpSdev "
+          "phidpUnfold phidpUnfoldFilled phidpFilt "
           "zdrSdev delta deltaMean kdp kdpSC kdpZZdr "
           "dbzAtten zdrAtten dbzCorrected zdrCorrected regrFilt "
           "phidpFftFilt phidpFiltTrend phidpQuad kdpQuad "
@@ -1887,11 +1933,11 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_rhohv[igate], NAN),
             _getPlotVal(_phidp[igate], NAN),
             _getPlotVal(_phidpMean[igate], 0),
-            _getPlotVal(_phidpMeanValid[igate], 0),
+            _getPlotVal(_phidpMeanFilled[igate], 0),
             _getPlotVal(_phidpJitter[igate], NAN),
             _getPlotVal(_phidpSdev[igate], NAN),
             _getPlotVal(_phidpUnfold[igate], NAN),
-            _getPlotVal(_phidpUnfoldInterp[igate], 0),
+            _getPlotVal(_phidpUnfoldFilled[igate], 0),
             _getPlotVal(_phidpFilt[igate], 0),
             _getPlotVal(_zdrSdev[igate], NAN),
             _getPlotVal(_delta[igate], NAN),
