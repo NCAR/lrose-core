@@ -19,7 +19,6 @@ import matplotlib.pyplot as plt
 REQUIRED_COLUMNS = [
     "gateNum",
     "validKdp",
-    "validUnfold",
     "snr",
     "dbz",
     "zdr",

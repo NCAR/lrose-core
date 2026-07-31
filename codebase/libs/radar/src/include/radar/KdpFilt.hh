@@ -182,7 +182,6 @@ public:
    * @return an array of flag values
    */
   const int *getValidForKdp() const { return _validForKdp.data(); }
-  const int *getValidForUnfold() const { return _validForUnfold.data(); }
   
   /**
    * Get phase shift on backscatter (deg) after calling compute()
@@ -335,7 +334,6 @@ private:
   // and pointers to those arrays
 
   vector<int> _validForKdp;
-  vector<int> _validForUnfold;
   
   bool _snrAvailable;
   vector<double> _snr;

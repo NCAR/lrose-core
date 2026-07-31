@@ -406,7 +406,6 @@ void KdpFilt::_initArrays(const double *snr,
   _gapRuns.clear();
 
   _validForKdp.resize(_nGates);
-  _validForUnfold.resize(_nGates);
 
   _snr.resize(_nGates);
 
@@ -544,7 +543,6 @@ void KdpFilt::_initArrays(const double *snr,
   for (int ii = 0; ii < _nGates; ii++) {
 
     _validForKdp[ii] = false;
-    _validForUnfold[ii] = false;
 
     _zdrSdev[ii] = _missingValue;
     _zdrMedian[ii] = _missingValue;
@@ -1030,13 +1028,12 @@ int KdpFilt::_findValidRuns()
         allRuns.push_back(run);
       }
     }
-
+    
   } // igate
-  
+
   // now combine runs with a gap between them
   // smaller than or equal to _nGatesStatsHalf
 
-  // size_t allRunsSize = allRuns.size();
   vector<PhidpRun> combRuns;
   bool done = false;
   int count = 0;
@@ -1073,29 +1070,18 @@ int KdpFilt::_findValidRuns()
     } // irun
   } // while (!done)
 
-  // find runs longer than 2 * _nGatesStats
-  // trim each end by _nGatesStats/2
-  // and add to valid runs array
-  
-  _validRuns.clear();
-  for (size_t irun = 0; irun < combRuns.size(); irun++) {
-    PhidpRun run = combRuns[irun];
-    if (run.len() >= _nGatesStats * 2) {
-      run.ibegin += _nGatesStatsHalf;
-      run.iend -= _nGatesStatsHalf;
-      _validRuns.push_back(run);
-    }
-  }
+  _validRuns = combRuns;
 
   if (_validRuns.size() < 1) {
     // no valid runs
     return -1;
   }
 
+  // set valid flags
+  
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
     const PhidpRun &validRun = _validRuns[irun];
     for (int igate = validRun.ibegin; igate <= validRun.iend; igate++) {
-      _validForUnfold[igate] = true;
       _validForKdp[igate] = true;
     }
   }
@@ -1115,20 +1101,11 @@ int KdpFilt::_findValidRuns()
   _firstValidGate = _validRuns[0].ibegin + 2;
   _lastValidGate = _validRuns[_validRuns.size()-1].iend - 2;
 
-  // set valid flags for valid runs
-  
-  for (size_t irun = 0; irun < _validRuns.size(); irun++) {
-    const PhidpRun &validRun = _validRuns[irun];
-    for (int igate = validRun.ibegin; igate <= validRun.iend; igate++) {
-      _validForUnfold[igate] = true;
-      _validForKdp[igate] = true;
-    }
-  }
+#ifdef NOTNOW
 
   // if gap is smaller than the surrounding valid runs,
   // flag as OK for KDP
 
-#ifdef NOTNOW
   for (size_t igap = 0; igap < _gapRuns.size(); igap++) {
     const PhidpRun &gap = _gapRuns[igap];
     const PhidpRun &prevValid = _validRuns[igap];
@@ -1892,7 +1869,7 @@ void KdpFilt::_writeRayDataToFile()
   // write header line
 
   fprintf(out,
-          "# gateNum validKdp validUnfold "
+          "# gateNum validKdp "
           "snr dbz zdr rhohv phidp "
           "phidpMean phidpMeanFilled phidpJitter phidpSdev "
           "phidpUnfold phidpUnfoldFilled phidpFilt "
@@ -1917,7 +1894,7 @@ void KdpFilt::_writeRayDataToFile()
       zdrCorrected = _zdr[igate];
     }
     fprintf(out,
-            "%3d %3d %3d "
+            "%3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f "
@@ -1926,7 +1903,6 @@ void KdpFilt::_writeRayDataToFile()
             "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
-            (_validForUnfold[igate]?1:0),
             _getPlotVal(_snr[igate], NAN),
             _getPlotVal(_dbz[igate], NAN),
             _getPlotVal(_zdr[igate], NAN),
