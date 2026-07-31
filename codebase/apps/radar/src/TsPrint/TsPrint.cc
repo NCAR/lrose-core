@@ -432,7 +432,7 @@ int TsPrint::_printPrtDetails()
 {
 
   while (true) {
-    
+
     // read next pulse
     
     IwrfTsPulse *pulse = _getNextPulse();
@@ -450,8 +450,8 @@ int TsPrint::_printPrtDetails()
 
     // all headers and data?
 
-    _pulseReader->getOpsInfo().printMetaQueue(stdout, true);
-
+    // _pulseReader->getOpsInfo().printMetaQueue(stdout, true);
+    
     if (_pulseReader->getBurst().getPulseSeqNum() > 0 ||
         _pulseReader->getBurst().getNSamples() > 0) {
 
@@ -466,14 +466,14 @@ int TsPrint::_printPrtDetails()
     if (_params.print_all_headers) {
       pulse->printHeader(stdout);
     }
-    
+  
     // ops info when it changes
     
     _infoChanged = _checkInfoChanged(*pulse);
     if (_infoChanged) {
       _printOpsInfo(cout, pulse);
       if (_params.print_info_on_change) {
-	_pulseReader->getOpsInfo().print(stdout);
+        _pulseReader->getOpsInfo().print(stdout);
       }
     }
     
@@ -506,13 +506,13 @@ int TsPrint::_printPrtDetails()
             pulseHdr.prt,
             pulseHdr.prt_next);
 
-    if (_params.print_all_pulses) {
-      if ((_printCount % _params.label_interval) == 0) {
-        _printPulseLabels(cout);
-      }
-      _printCount++;
-      cout << _pulseString(*pulse) << endl;
-    }
+    // if (_params.print_all_pulses) {
+    //   if ((_printCount % _params.label_interval) == 0) {
+    //     _printPulseLabels(cout);
+    //   }
+    //   _printCount++;
+    //   cout << _pulseString(*pulse) << endl;
+    // }
     
     _pulseCount++;
     _totalPulseCount++;
