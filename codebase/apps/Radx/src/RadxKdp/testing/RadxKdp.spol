@@ -342,8 +342,8 @@ output_fields = {
   }
   ,
   {
-    id = PSOB,
-    name = "PSOB",
+    id = DELTA,
+    name = "DELTA",
     long_name = "phase_shift_on_backscatter",
     standard_name = "phase_shift_on_backscatter",
     units = "deg",

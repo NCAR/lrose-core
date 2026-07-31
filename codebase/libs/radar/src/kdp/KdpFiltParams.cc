@@ -557,7 +557,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("KdpFilt computes KDP from PHIDP.\n\nKDP is defined as half the change in PHIDP per km in range.\n\nRegions with valid PHIDP are determined by examining the quality of the PHIDP data, from RHOHV, and optionally from SNR and the variance of ZDR.\n\nPHIPD folds, so unfolding is the first step in the processing. After unfolding, filtering is applied to smooth PHIDP in range. This is followed by a step to identify regions with phase shift on backscatter.\n\nKDP is then computed as the PHIDP slope between range gates. For DBZ values < 20, 8 gates are used; for DBZ between 20 and 35, 4 gates are used; and if the DBZ exceeds 35, 2 adjacent gates are used.\n\nThe various filtering steps smeer out the KDP in range, which means that the high KDP values are not always located in the core of the precip. To help correct for this effect, we can make use of the self-consistency approach. This allows us to theoretically determine KDP from Z and ZDR - we can call this KDP_ZZDR. We can then use these self-consistent KDP_ZZDR values to compute a conditioned KDP field, by constraining the estimated KDP values to the relevant gates. This reduces the smeering effect. We refer to this KDP field, conditioned using self-consistency, as KDP_SC.");
+    tt->comment_hdr = tdrpStrDup("KdpFilt computes KDP from PHIDP.\n\nKDP is defined as half the change in PHIDP per km in range.\n\nRegions with valid PHIDP are determined by examining the quality of the PHIDP data, from RHOHV, and optionally from SNR and the variance of ZDR.\n\nPHIPD folds, so unfolding is the first step in the processing.\n\tFor simultaneous-mode radars PHIDP folds at -180 and +180.\n\tFor alternating mode radars, this is -90 to +90.\n\nAfter unfolding, filtering is applied to smooth PHIDP in range. 4 filtering methods are available.\n\nKDP is then computed as the PHIDP slope of the filtered PHIDP.\n\nThis is followed by a step to identify regions with phase shift on backscatter (delta).The various filtering steps smeer out the KDP in range, which means that the high KDP values are not located in the core of the precip echoes. To help correct for this, we make use of the self-consistency approach. This allows us to theoretically determine KDP from Z and ZDR - we can call this KDP_ZZDR. We can then use these self-consistent KDP_ZZDR values to compute a conditioned KDP field, by constraining the estimated KDP values to the relevant gates. This reduces the smeering effect. We refer to this KDP field, conditioned using self-consistency, as KDP_SC.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -603,7 +603,7 @@
     tt->descr = tdrpStrDup("Sets the threshold for the jitter of phidp in range.");
     tt->help = tdrpStrDup("The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, we conclude we are in weather echo, the PHIDP is valid and KDP should be computed at this gate.");
     tt->val_offset = (char *) &KDP_phidp_jitter_max - &_start_;
-    tt->single_val.d = 25;
+    tt->single_val.d = 30;
     tt++;
     
     // Parameter 'KDP_check_rhohv'
@@ -627,7 +627,7 @@
     tt->descr = tdrpStrDup("Sets the threshold for checking RHOHV.");
     tt->help = tdrpStrDup("If the RHOHV drops below this value, KDP will not be computed at this gate.");
     tt->val_offset = (char *) &KDP_rhohv_threshold - &_start_;
-    tt->single_val.d = 0.95;
+    tt->single_val.d = 0.8;
     tt++;
     
     // Parameter 'KDP_check_snr'
@@ -683,29 +683,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("PHIDP FEATURE LENGTH");
-    tt->comment_text = tdrpStrDup("When we filter PHIDP, we need to set the filter appropriately to capture the typical features we want to preserve, and to remove shorter-range (higher-frequency) features.");
-    tt++;
-    
-    // Parameter 'phidp_feature_length_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("phidp_feature_length_km");
-    tt->descr = tdrpStrDup("Applies to the regression filter only.");
-    tt->help = tdrpStrDup("For the regression filter we need to determine the polynomial order. We divide the ray into valid segments in range - i.e. segments with valid signal as opposed to range gates with no valid signal. For the regression filter we fit a polynomial to the phidp values in the valid segment. The longer the segment the higher the polynomial order required to fit the likely features in that segment. The order is computed as (segment-range/feature_length + 1). A minimum order is also applied - see 'min_polynomial_order' below.");
-    tt->val_offset = (char *) &phidp_feature_length_km - &_start_;
-    tt->single_val.d = 5;
-    tt++;
-    
-    // Parameter 'Comment 3'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("PHIDP FILTER METHOD");
-    tt->comment_text = tdrpStrDup("\tFIR_FILTER: used in the Hubbert-Bringi method.\n\tQUADRATIC_METHOD: When we filter PHIDP, we need to set the filter appropriately to capture the typical features we want to preserve, and to remove shorter-range (higher-frequency) features.");
+    tt->comment_text = tdrpStrDup("\tFIR_FILTER: used in the Hubbert-Bringi method.\n\tQUADRATIC_METHOD: When we filter PHIDP, we need to set the filter appropriately to capture the typical features we want to preserve, and to remove shorter-range (higher-frequency) features. If KDP_compute_all_filters is true, all of the filters are computed for debugging and comparison purposes.");
     tt++;
     
     // Parameter 'phidp_filter_method'
@@ -715,7 +694,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("phidp_filter_method");
     tt->descr = tdrpStrDup("Method for filtering PHIDP in range.");
-    tt->help = tdrpStrDup("Traditionally the Hubbert/Bringi approach used an FIR filter. More recently we have added the option to use the REGRESSION filter approach.");
+    tt->help = tdrpStrDup("FIR: the Hubbert/Bringi approach used an FIR filter. QUADRATIC: local per-gate quadratic fit. REGRESSION: polynomial regression per valid phidp region. FFT: global fft low-pass filter for the entire ray.");
     tt->val_offset = (char *) &phidp_filter_method - &_start_;
     tt->enum_def.name = tdrpStrDup("phidp_filter_method_t");
     tt->enum_def.nfields = 4;
@@ -729,7 +708,19 @@
       tt->enum_def.fields[2].val = REGRESSION_FILTER;
       tt->enum_def.fields[3].name = tdrpStrDup("FFT_FILTER");
       tt->enum_def.fields[3].val = FFT_FILTER;
-    tt->single_val.e = FIR_FILTER;
+    tt->single_val.e = QUADRATIC_FILTER;
+    tt++;
+    
+    // Parameter 'phidp_feature_length_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("phidp_feature_length_km");
+    tt->descr = tdrpStrDup("When we filter PHIDP, we need to set the filter appropriately to capture the typical features we want to preserve, and to remove shorter-range (higher-frequency) features.");
+    tt->help = tdrpStrDup("We use the feature length to set the parameters for the filters.\n\nFIR_FILTER: we determine the length of the FIR filter kernel.\n\nQUADRATIC FILTER: we use gates that cover this distance on either side of the local gate.\n\nREGRESSION_FILTER: we need to determine the polynomial order. We divide the ray into valid segments in range - i.e. segments with valid phidp. Then we compute\n\norder = (length of valid region / feature_length) * 2 + 1\n\nWe are fitting a polynomial to the phidp values in the valid segment. The longer the segment the higher the polynomial order required to fit the target features in that segment.\n\nFIR_FILTER: the feature length giverns the tuning of the low-pass filter.");
+    tt->val_offset = (char *) &phidp_feature_length_km - &_start_;
+    tt->single_val.d = 3;
     tt++;
     
     // Parameter 'fir_n_iterations'
@@ -744,133 +735,80 @@
     tt->single_val.i = 2;
     tt++;
     
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("ESTIMATING DELTA from KDP_ZZDR");
+    tt->comment_text = tdrpStrDup("We estimate delta (backscatter differential phase) using the self-consistency method of Bringi.  Using the self-consistency approach, we can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute KDP conditioned using self-consistenty. We call this KDP_SC.");
+    tt++;
+    
+    // Parameter 'KDP_self_con_median_filter_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("KDP_self_con_median_filter_len");
+    tt->descr = tdrpStrDup("Sets the length of the median filter when computing KDP_ZZDR.");
+    tt->help = tdrpStrDup("When we compute KDP_ZZDR, we first apply a median filter to both Z and ZDR in range. This parameter is the length of that median filter, in gates.");
+    tt->val_offset = (char *) &KDP_self_con_median_filter_len - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'KDP_self_con_mean_delta_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("KDP_self_con_mean_delta_threshold");
+    tt->descr = tdrpStrDup("Threshold of delta mean when estimating delta (deg).");
+    tt->help = tdrpStrDup("When identifying and estimating delta using self-consistency, we need to ignore minor cases. We compute the mean delta, and if it exceeds this threshold we make the estimate.");
+    tt->val_offset = (char *) &KDP_self_con_mean_delta_threshold - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'KDP_self_con_Z_expon'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("KDP_self_con_Z_expon");
+    tt->descr = tdrpStrDup("Exponent for Z in estimating KDP from Z/ZDR.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &KDP_self_con_Z_expon - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'KDP_self_con_ZDR_expon'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("KDP_self_con_ZDR_expon");
+    tt->descr = tdrpStrDup("Exponent for ZDR in estimating KDP from Z/ZDR.");
+    tt->help = tdrpStrDup("Set this to 0.0 to use only Z for estimation. This is useful if the calibration of ZDR is not trusted.");
+    tt->val_offset = (char *) &KDP_self_con_ZDR_expon - &_start_;
+    tt->single_val.d = -2.05;
+    tt++;
+    
+    // Parameter 'KDP_self_con_Z_coeff_10cm'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("KDP_self_con_Z_coeff_10cm");
+    tt->descr = tdrpStrDup("Exponent for Z in estimating KDP from Z/ZDR.");
+    tt->help = tdrpStrDup("This is the value for a 10cm wavelength. It is scaled for wavelength in the code.");
+    tt->val_offset = (char *) &KDP_self_con_Z_coeff_10cm - &_start_;
+    tt->single_val.d = 3.32e-05;
+    tt++;
+    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("COMPUTING self-consistency KDP FROM Z and ZDR");
-    tt->comment_text = tdrpStrDup("Using the self-consistency approach, we can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute KDP conditioned using self-consistenty. We call this KDP_SC.");
-    tt++;
-    
-    // Parameter 'KDP_median_filter_len_for_ZZDR'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_median_filter_len_for_ZZDR");
-    tt->descr = tdrpStrDup("Sets the length of the median filter when computing KDP_ZZDR.");
-    tt->help = tdrpStrDup("When we compute KDP_ZZDR, we first apply a median filter to both Z and ZDR in range. This parameter is the length of that median filter, in gates.");
-    tt->val_offset = (char *) &KDP_median_filter_len_for_ZZDR - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("ESTIMATING DELTA");
-    tt->comment_text = tdrpStrDup("We estimate delta (backscatter differential phase) using the self-consistency method of Bringi.");
-    tt++;
-    
-    // Parameter 'delta_estimation_method'
-    // ctype is '_delta_estimation_method_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("delta_estimation_method");
-    tt->descr = tdrpStrDup("Method for estimating delta after smoothing PHIDP.");
-    tt->help = tdrpStrDup("SELF_CONSISTENCY: apply Z/ZDR self-consistency method to estimate KDP.\n\nCONDITIONAL_FIR: use iterative application of conditional FIR filter (Hubbert and Bringi).");
-    tt->val_offset = (char *) &delta_estimation_method - &_start_;
-    tt->enum_def.name = tdrpStrDup("delta_estimation_method_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("SELF_CONSISTENCY");
-      tt->enum_def.fields[0].val = SELF_CONSISTENCY;
-      tt->enum_def.fields[1].name = tdrpStrDup("CONDITIONAL_FIR");
-      tt->enum_def.fields[1].val = CONDITIONAL_FIR;
-    tt->single_val.e = SELF_CONSISTENCY;
-    tt++;
-    
-    // Parameter 'self_con_mean_delta_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_con_mean_delta_threshold");
-    tt->descr = tdrpStrDup("Threshold of delta mean when estimating delta (deg).");
-    tt->help = tdrpStrDup("When identifying and estimating delta using self-consistency, we need to ignore minor cases. We compute the mean delta, and if it exceeds this threshold we make the estimate.");
-    tt->val_offset = (char *) &self_con_mean_delta_threshold - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'self_con_Z_expon'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_con_Z_expon");
-    tt->descr = tdrpStrDup("Exponent for Z in estimating KDP from Z/ZDR.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &self_con_Z_expon - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'self_con_ZDR_expon'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_con_ZDR_expon");
-    tt->descr = tdrpStrDup("Exponent for ZDR in estimating KDP from Z/ZDR.");
-    tt->help = tdrpStrDup("Set this to 0.0 to use only Z for estimation. This is useful if the calibration of ZDR is not trusted.");
-    tt->val_offset = (char *) &self_con_ZDR_expon - &_start_;
-    tt->single_val.d = -2.05;
-    tt++;
-    
-    // Parameter 'self_con_Z_coeff_10cm'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("self_con_Z_coeff_10cm");
-    tt->descr = tdrpStrDup("Exponent for Z in estimating KDP from Z/ZDR.");
-    tt->help = tdrpStrDup("This is the value for a 10cm wavelength. It is scaled for wavelength in the code.");
-    tt->val_offset = (char *) &self_con_Z_coeff_10cm - &_start_;
-    tt->single_val.d = 3.32e-05;
-    tt++;
-    
-    // Parameter 'conditional_fir_n_iterations'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("conditional_fir_n_iterations");
-    tt->descr = tdrpStrDup("Sets the number of iterations for the initial FIR filter for unfolded PHIDP.");
-    tt->help = tdrpStrDup("After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a set number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
-    tt->val_offset = (char *) &conditional_fir_n_iterations - &_start_;
-    tt->single_val.i = 4;
-    tt++;
-    
-    // Parameter 'conditional_phidp_diff_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("conditional_phidp_diff_threshold");
-    tt->descr = tdrpStrDup("Difference threshold for phidp for the iterative conditional FIR method (deg).");
-    tt->help = tdrpStrDup("After each iteration of the filter, the result is checked against the original. If the difference is less than the diff threshold, the original value is retained. If the difference exceeds this parameter, the new filtered value is retained.");
-    tt->val_offset = (char *) &conditional_phidp_diff_threshold - &_start_;
-    tt->single_val.d = 4;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("ESTIMATING ATTENUATION CORRECTION FOR DBZ AND ZDR");
     tt->comment_text = tdrpStrDup("Received power attenuation, and differential attenuation, occur whenever scattering occurs, but is of most importance at shorter wavelengths or in reqions of heavy precipition. We use the reference text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, Table 7.1, page 494, to provide the default coefficients from which to estimate the attenuation correction. You may also choose to specify these coefficients in this section.");
     tt++;
@@ -935,13 +873,25 @@
     tt->single_val.d = 1.05;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("DEBUGGING");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'KDP_compute_all_filters'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("KDP_compute_all_filters");
+    tt->descr = tdrpStrDup("Option to compute all of the filtered methods.");
+    tt->help = tdrpStrDup("This is useful for debugging and comparing the filter results. This is forced to true if KDP_write_ray_files is true.");
+    tt->val_offset = (char *) &KDP_compute_all_filters - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'KDP_write_ray_files'

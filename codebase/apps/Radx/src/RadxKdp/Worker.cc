@@ -530,11 +530,11 @@ void Worker::_addDebugFields(RadxRay *outputRay)
             "differential_phase_hv",
             _kdp.getPhidpFilt());
   
-  _addField(outputRay,
-            "PHIDP_COND", "deg",
-            "phidp_cond_for_kdp_computations",
-            "differential_phase_hv",
-            _kdp.getPhidpCond());
+  // _addField(outputRay,
+  //           "PHIDP_COND", "deg",
+  //           "phidp_cond_for_kdp_computations",
+  //           "differential_phase_hv",
+  //           _kdp.getPhidpCond());
   
 }
   

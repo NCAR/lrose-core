@@ -72,11 +72,6 @@ public:
     FFT_FILTER = 3
   } phidp_filter_method_t;
 
-  typedef enum {
-    SELF_CONSISTENCY = 0,
-    CONDITIONAL_FIR = 1
-  } delta_estimation_method_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -389,27 +384,21 @@ public:
 
   double KDP_zdr_sdev_max;
 
-  double phidp_feature_length_km;
-
   phidp_filter_method_t phidp_filter_method;
+
+  double phidp_feature_length_km;
 
   int fir_n_iterations;
 
-  int KDP_median_filter_len_for_ZZDR;
+  int KDP_self_con_median_filter_len;
 
-  delta_estimation_method_t delta_estimation_method;
+  double KDP_self_con_mean_delta_threshold;
 
-  double self_con_mean_delta_threshold;
+  double KDP_self_con_Z_expon;
 
-  double self_con_Z_expon;
+  double KDP_self_con_ZDR_expon;
 
-  double self_con_ZDR_expon;
-
-  double self_con_Z_coeff_10cm;
-
-  int conditional_fir_n_iterations;
-
-  double conditional_phidp_diff_threshold;
+  double KDP_self_con_Z_coeff_10cm;
 
   tdrp_bool_t KDP_specify_coefficients_for_attenuation_correction;
 
@@ -420,6 +409,8 @@ public:
   double KDP_zdr_attenuation_coefficient;
 
   double KDP_zdr_attenuation_exponent;
+
+  tdrp_bool_t KDP_compute_all_filters;
 
   tdrp_bool_t KDP_write_ray_files;
 
@@ -432,7 +423,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[36];
+  mutable TDRPtable _table[32];
 
   const char *_className;
 

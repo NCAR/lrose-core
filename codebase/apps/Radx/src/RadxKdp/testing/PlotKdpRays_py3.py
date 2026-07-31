@@ -32,7 +32,6 @@ REQUIRED_COLUMNS = [
     "phidpUnfold",
     "unfoldInterp",
     "phidpFilt",
-    "phidpCondFilt",
     "delta",
     "deltaMean",
     "kdp",
@@ -347,7 +346,6 @@ class KdpRayPlotter:
         self.ax2.set_title(az_str, fontsize=12)
         self.ax2.plot(gate_num, plot_data["unfoldInterp"], label="unfoldInterp", color="green")
         #self.ax2.plot(gate_num, plot_data["phidpFilt"], label="FIR_Filt", color="orange")
-        #self.ax2.plot(gate_num, plot_data["phidpCondFilt"], label="CondFilt", color="black")
         self.ax2.plot(gate_num, plot_data["phidpFftFilt"], label="FftFilt", color="blue")
         self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="red")
         draw_block_limits(self, self.ax2, gate_num, self.data["scBlock"])

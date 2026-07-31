@@ -172,10 +172,10 @@ public:
   const double *getPhidpSdev() const { return _phidpSdev; }
   const double *getPhidpJitter() const { return _phidpJitter; }
   const double *getPhidpFilt() const { return _phidpFilt; }
-  const double *getPhidpCond() const { return _phidpCond; }
-  const double *getPhidpCondFilt() const {
-    return _phidpCondFilt;
-  }
+  // const double *getPhidpCond() const { return _phidpCond; }
+  // const double *getPhidpCondFilt() const {
+  //   return _phidpCondFilt;
+  // }
   const double *getPhidpAccumFilt() const {
     return _phidpAccumFilt;
   }
@@ -296,42 +296,13 @@ private:
   double _elevDeg;         /**< The current beam elevation */
   double _azDeg;           /**< The current beam azimuth */
 
-  // thresholds for filtering
-
-  // bool _checkSnr; /**< should we check SNR? */
-  // double _snrThreshold;
-
-  // bool _checkRhohv; /**< should we check RHOHV? */
-  // double _rhohvThreshold;
-
-  // bool _checkZdrSdev; /**< should we check SDEV of ZDR? */
-  // double _zdrSdevMax;  /**< Max sdev of zdr for valid phidp */
-
-  // double _phidpJitterMax; /**< Max jitter for valid phidp */
-  // double _phidpSdevMax; /**< Max sdev for valid phidp */
-  
-  // min valid KDP, default 0.05
-  // absolute values less than this are set to 0
-
-  // double _minValidAbsKdp;
-  
   // parameters for KDP conditioned by ZZDR
 
   double _kdpZExpon;
   double _kdpZdrExpon;
   double _kdpZZdrCoeff;
-  // double _dbzMinForSelfConsistency;
-  // double _kdpMinForSelfConsistency;
   int _kdpZZdrMedianLen;
 
-  // nominal length of a feature in PHIDP
-  
-  // double _phidpFeatureLengthKm;
-
-  // threshold for delta mean
-
-  // double _meanDeltaThreshold;
-  
   // phidp state for unfolding
 
   class GateProps {
@@ -383,12 +354,12 @@ private:
   vector<double> _dbz_;
   double *_dbz;
 
-  vector<double> _dbzMedian_;
-  double *_dbzMedian;
-
   vector<double> _dbzMax_;
   double *_dbzMax;
   
+  vector<double> _dbzMedian_;
+  double *_dbzMedian;
+
   bool _rhohvAvailable;
   vector<double> _rhohv_;
   double *_rhohv;
@@ -423,18 +394,6 @@ private:
   
   vector<double> _phidpUnfoldInterp_;
   double *_phidpUnfoldInterp;
-  
-  vector<double> _phidpFilt_;
-  double *_phidpFilt;
-  
-  vector<double> _phidpCond_;
-  double *_phidpCond;
-  
-  vector<double> _phidpCondFilt_;
-  double *_phidpCondFilt;
-  
-  vector<double> _phidpAccumFilt_;
-  double *_phidpAccumFilt;
   
   vector<int> _validForKdp_;
   int *_validForKdp;
@@ -472,11 +431,14 @@ private:
   vector<double> _zdrCorrected_;
   double *_zdrCorrected;
 
-  vector<double> _phidpFftFilt_;
-  double *_phidpFftFilt;
+  vector<double> _phidpFilt_;
+  double *_phidpFilt;
   
   vector<double> _phidpFiltTrend_;
   double *_phidpFiltTrend;
+  
+  vector<double> _phidpAccumFilt_;
+  double *_phidpAccumFilt;
   
   vector<double> _phidpQuadFilt_;
   double *_phidpQuadFilt;
@@ -484,14 +446,23 @@ private:
   vector<double> _kdpQuadFilt_;
   double *_kdpQuadFilt;
   
+  vector<double> _phidpFftFilt_;
+  double *_phidpFftFilt;
+  
+  vector<double> _phidpRegrFilt_;
+  double *_phidpRegrFilt;
+
+  vector<double> _xxVals_;
+  double *_xxVals;
+  
   vector<double> _scBlock_;
   double *_scBlock;
   
-  vector<double> _regrFilt_;
-  double *_regrFilt;
+  // vector<double> _phidpCond_;
+  // double *_phidpCond;
   
-  vector<double> _xxVals_;
-  double *_xxVals;
+  // vector<double> _phidpCondFilt_;
+  // double *_phidpCondFilt;
   
   // Z and ZDR attenuation correction
 
@@ -565,18 +536,12 @@ private:
 
   void _filterPhidp();
 
-  // compute regression-filtered phidp
-  
-  void _computePhidpRegrFilt();
-  void _computePhidpRegrFilt(int runNum);
-
   // worker methods
   
   void _computeKdp();
   void _loadPhidpAccumFilt(const double *phidp, double *accum);
   void _computeAttenCorrection();
   void _computeDbzMax();
-  void _computePhidpCond();
 
   /// Compute the folding range by inspecting the phidp data
 
@@ -614,17 +579,26 @@ private:
 
   /// load up conditional kdp from computed kdp and kdpZZdr
 
-  void _loadPhidpCond();
   void _loadKdpSC();
   void _loadKdpSCRun(int startGate, int endGate);
-
-  /// filter phidp using FFT
   
-  void _fftFilter();
+  /// apply FIR filter
+  
+  void _applyFirFilter();
     
   /// filter phidp using quadratic fit
   
-  void _quadFilter();
+  void _applyQuadFilter();
+    
+  /// filter phidp using FFT
+  
+  void _applyFftFilter();
+    
+  /// filter phidp using regression polynomial
+  
+  void _applyRegrFilter();
+  void _applyPhidpRegrFilt(int runNum);
+  void _applyPhidpRegrFiltGlobal();
     
   /// fill phidp missing gates with noise
 
