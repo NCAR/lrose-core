@@ -170,7 +170,10 @@ KDP_zdr_sdev_max = 2;
 //     REGRESSION_FILTER
 //     FFT_FILTER
 
-phidp_filter_method = QUADRATIC_FILTER;
+// phidp_filter_method = QUADRATIC_FILTER;
+// phidp_filter_method = FFT_FILTER;
+phidp_filter_method = REGRESSION_FILTER;
+// phidp_filter_method = FIR_FILTER;
 
 ///////////// phidp_feature_length_km /////////////////
 //

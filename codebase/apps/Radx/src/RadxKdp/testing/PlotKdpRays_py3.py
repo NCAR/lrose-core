@@ -31,22 +31,19 @@ REQUIRED_COLUMNS = [
     "phidpUnfold",
     "phidpUnfoldFilled",
     "phidpFilt",
+    "phidpFiltTrend",
+    "phidpFirFilt",
+    "phidpFftFilt",
+    "phidpRegrFilt",
+    "phidpQuadFilt",
+    "kdpQuadFilt",
     "delta",
     "deltaMean",
     "kdp",
     "kdpSC",
     "kdpZZdr",
-    "dbzAtten",
-    "zdrAtten",
-    "dbzCorrected",
-    "zdrCorrected",
-    "regrFilt",
-    "phidpFftFilt",
-    "phidpFiltTrend",
-    "phidpQuad",
-    "kdpQuad",
-    "scBlock",
     "phidpSC",
+    "scBlock",
 ]
 
 ############################################################################
@@ -335,8 +332,7 @@ class KdpRayPlotter:
             label.set_fontsize("small")
 
         draw_valid_regions(self,
-                           self.ax1, gate_num, valid_kdp,
-                           color="lightgray", alpha=0.4,
+                           self.ax1, gate_num, valid_kdp
                            )
         draw_block_limits(self, self.ax1, gate_num, self.data["scBlock"])
 
@@ -345,8 +341,8 @@ class KdpRayPlotter:
         self.ax2.set_title(az_str, fontsize=12)
         self.ax2.plot(gate_num, plot_data["phidpUnfoldFilled"], label="phidpUnfoldFilled", color="green")
         #self.ax2.plot(gate_num, plot_data["phidpFilt"], label="FIR_Filt", color="orange")
-        self.ax2.plot(gate_num, plot_data["phidpFftFilt"], label="FftFilt", color="blue")
-        self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="red")
+        self.ax2.plot(gate_num, plot_data["phidpFilt"], label="PhidpFilt", color="black")
+        self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="yellow")
         draw_block_limits(self, self.ax2, gate_num, self.data["scBlock"])
         self.ax2.set_xlabel("gateNum")
         self.ax2.set_ylabel("PHIDP")
@@ -356,8 +352,7 @@ class KdpRayPlotter:
             label.set_fontsize("small")
 
         draw_valid_regions(self,
-                           self.ax2, gate_num, valid_kdp,
-                           color="lightgray", alpha=0.4,
+                           self.ax2, gate_num, valid_kdp
                            )
 
         # PLOT 3 - KDP and DELTA
@@ -369,13 +364,12 @@ class KdpRayPlotter:
         self.ax3.plot(gate_num, plot_data["delta"], label="DELTA", color="orange")
         self.ax3.plot(gate_num, plot_data["deltaMean"], label="DELTA_MEAN", color="black")
         # self.ax3.plot(gate_num, plot_data["phidpFiltTrend"], label="TREND", color="magenta")
-        self.ax3.plot(gate_num, plot_data["kdpQuad"], label="KDP_QUAD", color="magenta")
+        self.ax3.plot(gate_num, plot_data["kdpQuadFilt"], label="KDP_QUAD_FILT", color="magenta")
         self.ax3.set_xlabel("gateNum")
         self.ax3.set_ylabel("KDP, DELTA")
 
         draw_valid_regions(self,
-                           self.ax3, gate_num, valid_kdp,
-                           color="lightgray", alpha=0.4,
+                           self.ax3, gate_num, valid_kdp
                            )
         draw_block_limits(self, self.ax3, gate_num, self.data["scBlock"])
                 
@@ -386,11 +380,11 @@ class KdpRayPlotter:
         # PLOT 4 - PHIDP FFT filtering
 
         self.ax4.set_title(az_str, fontsize=12)
-        self.ax4.plot(gate_num, plot_data["phidp"], label="phidp", color="seagreen")
-        self.ax4.plot(gate_num, plot_data["phidpFilt"], label="FIR_Filt", color="orange")
-        self.ax4.plot(gate_num, plot_data["regrFilt"], label="regrFilt", color="red")
-        self.ax4.plot(gate_num, plot_data["phidpQuad"], label="phidpQuad", color="black")
-        self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt", color="blue")
+        self.ax4.plot(gate_num, plot_data["phidpUnfoldFilled"], label="phidpUnfoldFilled", color="seagreen")
+        self.ax4.plot(gate_num, plot_data["phidpRegrFilt"], label="Regr-Filt", color="orange")
+        self.ax4.plot(gate_num, plot_data["phidpFirFilt"], label="Fir-Filt", color="black")
+        self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="Fft-Filt", color="magenta")
+        self.ax4.plot(gate_num, plot_data["phidpQuadFilt"], label="Quad-Filt", color="blue")
         self.ax4.set_xlabel("gateNum")
         self.ax4.set_ylabel("PHIDP")
         draw_block_limits(self, self.ax4, gate_num, self.data["scBlock"])
@@ -406,8 +400,7 @@ class KdpRayPlotter:
         # self.ax4r.tick_params(axis="y", labelcolor="red")
 
         draw_valid_regions(self,
-                           self.ax4, gate_num, valid_kdp,
-                           color="lightgray", alpha=0.4,
+                           self.ax4, gate_num, valid_kdp
                            )
 
         legend4 = self.ax4.legend(loc="upper right")
@@ -419,7 +412,7 @@ class KdpRayPlotter:
 # draw valid regions on plots
 
 def draw_valid_regions(self, ax, x, valid,
-                       color="lightgray",
+                       color="#505050",
                        alpha=0.4):
 
     if not x or not valid:

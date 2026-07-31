@@ -172,9 +172,6 @@ public:
   const double *getPhidpSdev() const { return _phidpSdev.data(); }
   const double *getPhidpJitter() const { return _phidpJitter.data(); }
   const double *getPhidpFilt() const { return _phidpFilt.data(); }
-  const double *getPhidpFiltAccum() const {
-    return _phidpFiltAccum.data();
-  }
   const double *getZdrSdev() const { return _zdrSdev.data(); }
 
   /**
@@ -360,7 +357,6 @@ private:
   
   vector<double> _phidpFilt;
   vector<double> _phidpFiltTrend;
-  vector<double> _phidpFiltAccum;
   vector<double> _phidpFirFilt;
   vector<double> _phidpQuadFilt;
   vector<double> _kdpQuadFilt;
@@ -454,7 +450,6 @@ private:
   // worker methods
   
   void _computeKdp();
-  void _loadPhidpAccumFilt(const vector<double> &phidp, vector<double> &accum);
   void _computeAttenCorrection();
   void _computeDbzMax();
 
