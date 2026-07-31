@@ -74,7 +74,8 @@ public:
   
   void applyFilter(const vector<double> &unfilt,
                    vector<double> &filt,
-                   int nIterations);
+                   int nIterations,
+                   double missingValue);
   
   /////////////////////////////////////////////////////////
   // filter array for phase shift on backscatter (delta)
@@ -83,7 +84,8 @@ public:
   void applyDeltaFilter(const vector<double> &unfilt,
                         vector<double> &filt,
                         int nIterations,
-                        double diffThreshold);
+                        double diffThreshold,
+                        double missingValue);
 
   // get filter-specific details
 
@@ -92,12 +94,6 @@ public:
   double getFeatureLengthKm() const { return _featureLengthKm; }
   int getNGatesFeature() const { return _nGatesFeature; }
 
-  // missing value
-  
-  static constexpr double missingValue() {
-    return std::numeric_limits<double>::quiet_NaN();
-  }
-  
 protected:
   
 private:
@@ -126,6 +122,8 @@ private:
   static const double firCoeff_30[FIR_LEN_30+1];   /**< FIR len 30 */
   static const double firCoeff_20[FIR_LEN_20+1];   /**< FIR len 20 */
   static const double firCoeff_10[FIR_LEN_10+1];   /**< FIR len 10 */
+
+  double _missingValue;
   
   int _firLength;          /**< The length of the current FIR array */
   int _firLenHalf;         /**< Half the length of the current FIR array */

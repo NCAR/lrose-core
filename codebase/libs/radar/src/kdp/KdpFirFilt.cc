@@ -193,10 +193,13 @@ void KdpFirFilt::setFeatureLength(double featureLengthKm,
 
 void KdpFirFilt::applyFilter(const vector<double> &unfilt,
                              vector<double> &filt,
-                             int nIterations)
+                             int nIterations,
+                             double missingValue)
 
 {
 
+  _missingValue = missingValue;
+  
   // check size
   
   assert(filt.size() == unfilt.size());
@@ -219,10 +222,13 @@ void KdpFirFilt::applyFilter(const vector<double> &unfilt,
 void KdpFirFilt::applyDeltaFilter(const vector<double> &unfilt,
                                   vector<double> &filt,
                                   int nIterations,
-                                  double diffThreshold)
+                                  double diffThreshold,
+                                  double missingValue)
   
 {
 
+  _missingValue = missingValue;
+  
   // check size
   
   assert(filt.size() == unfilt.size());
@@ -296,7 +302,7 @@ void KdpFirFilt::_setFilterLen(fir_filter_len_t len)
 void KdpFirFilt::_initializeArray(vector<double> &vals)
 {
   for (int ii = 0; ii < _nGates; ii++) {
-    vals[ii] = missingValue();
+    vals[ii] = _missingValue;
   }
 }
 

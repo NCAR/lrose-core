@@ -156,70 +156,58 @@ public:
    * @return an array of values
    */
 
-  const double *getSnr() const { return _snr; }
-  const double *getDbz() const { return _dbz; }
-  const double *getZdr() const { return _zdr; }
-  const double *getRhohv() const { return _rhohv; }
+  const double *getSnr() const { return _snr.data(); }
+  const double *getDbz() const { return _dbz.data(); }
+  const double *getZdr() const { return _zdr.data(); }
+  const double *getRhohv() const { return _rhohv.data(); }
   
   /**
    * Get phidp array after calling compute()
    * @return an array of unfolded phidp values
    */
-  const double *getPhidp() const { return _phidp; }
-  const double *getPhidpMean() const { return _phidpMean; }
-  const double *getPhidpUnfold() const { return _phidpUnfold; }
-  const double *getPhidpUnfoldInterp() const { return _phidpUnfoldInterp; }
-  const double *getPhidpSdev() const { return _phidpSdev; }
-  const double *getPhidpJitter() const { return _phidpJitter; }
-  const double *getPhidpFilt() const { return _phidpFilt; }
-  // const double *getPhidpCond() const { return _phidpCond; }
-  // const double *getPhidpCondFilt() const {
-  //   return _phidpCondFilt;
-  // }
+  const double *getPhidp() const { return _phidp.data(); }
+  const double *getPhidpMean() const { return _phidpMean.data(); }
+  const double *getPhidpUnfold() const { return _phidpUnfold.data(); }
+  const double *getPhidpUnfoldInterp() const { return _phidpUnfoldInterp.data(); }
+  const double *getPhidpSdev() const { return _phidpSdev.data(); }
+  const double *getPhidpJitter() const { return _phidpJitter.data(); }
+  const double *getPhidpFilt() const { return _phidpFilt.data(); }
   const double *getPhidpAccumFilt() const {
-    return _phidpAccumFilt;
+    return _phidpAccumFilt.data();
   }
-  const double *getZdrSdev() const { return _zdrSdev; }
+  const double *getZdrSdev() const { return _zdrSdev.data(); }
 
   /**
    * Get flag of valid gates after calling compute()
    * @return an array of flag values
    */
-  const int *getValidForKdp() const { return _validForKdp; }
-  const int *getValidForUnfold() const { return _validForUnfold; }
+  const int *getValidForKdp() const { return _validForKdp.data(); }
+  const int *getValidForUnfold() const { return _validForUnfold.data(); }
   
   /**
    * Get phase shift on backscatter (deg) after calling compute()
    * @return an array of delta values
    */
-  const double *getDelta() const { return _delta; }
+  const double *getDelta() const { return _delta.data(); }
 
   /**
    * Get kdp array after calling compute()
    * @return an array of kdp values
    */
-  const double *getKdp() const { return _kdp; }
-  const double *getKdpZZdr() const { return _kdpZZdr; }
+  const double *getKdp() const { return _kdp.data(); }
+  const double *getKdpZZdr() const { return _kdpZZdr.data(); }
 
   // self-consistency conditioned result
-  const double *getKdpSC() const { return _kdpSC; }
+  const double *getKdpSC() const { return _kdpSC.data(); }
 
   /**
    * Get attenuation correction after calling compute()
    * @return an array of correction values
    */
-  const double *getDbzAttenCorr() const { return _dbzAttenCorr; }
-  const double *getZdrAttenCorr() const { return _zdrAttenCorr; }
-  const double *getDbzCorrected() const { return _dbzCorrected; }
-  const double *getZdrCorrected() const { return _zdrCorrected; }
-
-  /**
-   * set debug on
-   * Debug print output will go to stderr
-   */
-
-  // void setDebug(bool state = true) { _debug = state; }
-  // void setVerbose(bool state = true) { _verbose = state; }
+  const double *getDbzAttenCorr() const { return _dbzAttenCorr.data(); }
+  const double *getZdrAttenCorr() const { return _zdrAttenCorr.data(); }
+  const double *getDbzCorrected() const { return _dbzCorrected.data(); }
+  const double *getZdrCorrected() const { return _zdrCorrected.data(); }
 
   /**
    * set writing of ray file
@@ -331,8 +319,7 @@ private:
     double phidpJitter;
   };
 
-  vector<GateProps> _gateProps_;
-  GateProps *_gateProps;
+  vector<GateProps> _gateProps;
   
   bool _foldsAt90;
   double _foldVal, _foldRange;
@@ -348,125 +335,53 @@ private:
   // and pointers to those arrays
 
   bool _snrAvailable;
-  vector<double> _snr_;
-  double *_snr;
+  vector<double> _snr;
   
-  vector<double> _dbz_;
-  double *_dbz;
-
-  vector<double> _dbzMax_;
-  double *_dbzMax;
-  
-  vector<double> _dbzMedian_;
-  double *_dbzMedian;
+  vector<double> _dbz;
+  vector<double> _dbzMax;
+  vector<double> _dbzMedian;
 
   bool _rhohvAvailable;
-  vector<double> _rhohv_;
-  double *_rhohv;
+  vector<double> _rhohv;
 
   bool _zdrAvailable;
-  vector<double> _zdr_;
-  double *_zdr;
+  vector<double> _zdr;
+  vector<double> _zdrSdev;
+  vector<double> _zdrMedian;
 
-  vector<double> _zdrSdev_;
-  double *_zdrSdev;
-
-  vector<double> _zdrMedian_;
-  double *_zdrMedian;
-
-  vector<double> _phidp_;
-  double *_phidp;
+  vector<double> _phidp;
+  vector<double> _phidpMean;
+  vector<double> _phidpMeanValid;
+  vector<double> _phidpJitter;
+  vector<double> _phidpSdev;
+  vector<double> _phidpUnfold;
+  vector<double> _phidpUnfoldInterp;
   
-  vector<double> _phidpMean_;
-  double *_phidpMean;
+  vector<int> _validForKdp;
+  vector<int> _validForUnfold;
   
-  vector<double> _phidpMeanValid_;
-  double *_phidpMeanValid;
-  
-  vector<double> _phidpJitter_;
-  double *_phidpJitter;
-  
-  vector<double> _phidpSdev_;
-  double *_phidpSdev;
-  
-  vector<double> _phidpUnfold_;
-  double *_phidpUnfold;
-  
-  vector<double> _phidpUnfoldInterp_;
-  double *_phidpUnfoldInterp;
-  
-  vector<int> _validForKdp_;
-  int *_validForKdp;
-  
-  vector<int> _validForUnfold_;
-  int *_validForUnfold;
-  
-  vector<double> _kdp_;
-  double *_kdp;
-
-  vector<double> _kdpZZdr_;
-  double *_kdpZZdr;
-
-  vector<double> _kdpSC_;
-  double *_kdpSC;
-
-  vector<double> _phidpSC_;
-  double *_phidpSC;
-
-  vector<double> _delta_;
-  double *_delta;
-
-  vector<double> _deltaMean_;
-  double *_deltaMean;
-
-  vector<double> _dbzAttenCorr_;
-  double *_dbzAttenCorr;
-
-  vector<double> _zdrAttenCorr_;
-  double *_zdrAttenCorr;
-
-  vector<double> _dbzCorrected_;
-  double *_dbzCorrected;
-
-  vector<double> _zdrCorrected_;
-  double *_zdrCorrected;
-
-  vector<double> _phidpFilt_;
-  double *_phidpFilt;
-  
-  vector<double> _phidpFiltTrend_;
-  double *_phidpFiltTrend;
-  
-  vector<double> _phidpAccumFilt_;
-  double *_phidpAccumFilt;
-  
-  vector<double> _phidpQuadFilt_;
-  double *_phidpQuadFilt;
-  
-  vector<double> _kdpQuadFilt_;
-  double *_kdpQuadFilt;
-  
-  vector<double> _phidpFftFilt_;
-  double *_phidpFftFilt;
-  
-  vector<double> _phidpRegrFilt_;
-  double *_phidpRegrFilt;
-
-  vector<double> _xxVals_;
-  double *_xxVals;
-  
-  vector<double> _scBlock_;
-  double *_scBlock;
-  
-  // vector<double> _phidpCond_;
-  // double *_phidpCond;
-  
-  // vector<double> _phidpCondFilt_;
-  // double *_phidpCondFilt;
+  vector<double> _kdp;
+  vector<double> _kdpZZdr;
+  vector<double> _kdpSC;
+  vector<double> _phidpSC;
+  vector<double> _delta;
+  vector<double> _deltaMean;
+  vector<double> _dbzAttenCorr;
+  vector<double> _zdrAttenCorr;
+  vector<double> _dbzCorrected;
+  vector<double> _zdrCorrected;
+  vector<double> _phidpFilt;
+  vector<double> _phidpFiltTrend;
+  vector<double> _phidpAccumFilt;
+  vector<double> _phidpQuadFilt;
+  vector<double> _kdpQuadFilt;
+  vector<double> _phidpFftFilt;
+  vector<double> _phidpRegrFilt;
+  vector<double> _xxVals;
+  vector<double> _scBlock;
   
   // Z and ZDR attenuation correction
-
-  // bool _doComputeAttenCorr;
+  
   bool _attenCoeffsSpecified;
   double _dbzAttenCoeff;
   double _dbzAttenExpon;
@@ -475,9 +390,6 @@ private:
   
   // debug printing and writing ray files
 
-  // bool _debug;
-  // bool _verbose;
-  
   bool _writeRayFile;
   string _rayFileDir;
 
@@ -510,10 +422,10 @@ private:
     _nGatesStatsHalf = n / 2 + 1;
   }
 
-  // get max number of valid gates
+  // get number of valid gates
   
   int _getNGatesMaxValid();
-  
+    
   /**
    * Initialize local arrays and copy input data for filtering,
    * manipulation, etc.
@@ -539,7 +451,7 @@ private:
   // worker methods
   
   void _computeKdp();
-  void _loadPhidpAccumFilt(const double *phidp, double *accum);
+  void _loadPhidpAccumFilt(const vector<double> &phidp, vector<double> &accum);
   void _computeAttenCorrection();
   void _computeDbzMax();
 
@@ -567,11 +479,6 @@ private:
   // compute sdev of zdr
 
   void _computeZdrSdev(int igate);
-
-  /// Write ray data to a file
-  
-  void _writeRayDataToFile();
-  double _getPlotVal(double val, double valIfMissing);
 
   /// Compute estimated kdp from Z and ZDR using power law
 
@@ -619,6 +526,11 @@ private:
                    std::vector<double>& filt);
   
   
+  /// Write ray data to a file
+  
+  void _writeRayDataToFile();
+  double _getPlotVal(double val, double valIfMissing);
+
 };
 
 #endif

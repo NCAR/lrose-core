@@ -66,15 +66,17 @@ KdpQuadFilt::~KdpQuadFilt()
 int KdpQuadFilt::compute(const std::vector<double>& phidpDeg,
                          double gateSpacingKm,
                          int halfWidth,
+                         double missingValue,
                          const std::vector<double>* quality /* = nullptr */)
   
 {
   
   const std::size_t nGates = phidpDeg.size();
-  
-  _kdpDegPerKm.assign(nGates, missingValue());
-  _phidpFitDeg.assign(nGates, missingValue());
-  _residualStdDeg.assign(nGates, missingValue());
+
+  _missingValue = missingValue;
+  _kdpDegPerKm.assign(nGates, _missingValue);
+  _phidpFitDeg.assign(nGates, _missingValue);
+  _residualStdDeg.assign(nGates, _missingValue);
   _nValid.assign(nGates, 0);
 
   if (nGates == 0 ||
@@ -137,7 +139,7 @@ int KdpQuadFilt::compute(const std::vector<double>& phidpDeg,
 std::vector<double> KdpQuadFilt::_unwrapDegrees(const std::vector<double>& phaseDeg)
 {
 
-  std::vector<double> result(phaseDeg.size(), missingValue());
+  std::vector<double> result(phaseDeg.size(), _missingValue);
   
   bool havePrevious = false;
   double previousRaw = 0.0;
@@ -310,7 +312,7 @@ KdpQuadFilt::LocalFit KdpQuadFilt::_fitLocalQuadratic(const std::vector<double>&
     ++nValid;
   }
 
-  LocalFit result;
+  LocalFit result(_missingValue);
   result.nValid = nValid;
   
   if (nValid < 5 || s0 <= 0.0) {

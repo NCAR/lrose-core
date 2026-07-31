@@ -71,6 +71,7 @@ public:
   int compute(const std::vector<double>& phidpDeg,
               double gateSpacingKm,
               int halfWidth,
+              double missingValue,
               const std::vector<double>* quality = nullptr);
   
   // get the results after calling compute
@@ -80,18 +81,13 @@ public:
   const std::vector<double> &getResidualStdDeg() const { return _residualStdDeg; }
   const std::vector<int> getNValid() const { return _nValid; }
 
-  // missing value
-  
-  static constexpr double missingValue() {
-    return std::numeric_limits<double>::quiet_NaN();
-  }
-  
 protected:
   
 private:
 
   // data
-  
+
+  double _missingValue;
   std::vector<double> _kdpDegPerKm;
   std::vector<double> _phidpFitDeg;
   std::vector<double> _residualStdDeg;
@@ -99,14 +95,23 @@ private:
 
   // structs
   
-  typedef struct LocalFit_t {
+  class LocalFit {
+  public:
     bool valid = false;
-    double intercept = missingValue();
-    double slopeDegPerKm = missingValue();
-    double curvature = missingValue();
-    double residualStdDeg = missingValue();
-    int nValid = 0;
-  } LocalFit;
+    double intercept;
+    double slopeDegPerKm;
+    double curvature;
+    double residualStdDeg;
+    int nValid;
+    LocalFit(double missingValue) {
+      valid = false;
+      intercept = missingValue;
+      slopeDegPerKm = missingValue;
+      curvature = missingValue;
+      residualStdDeg = missingValue;
+      nValid = 0;
+    }
+  };
 
   // Unwrap a PHIDP vector whose values are in degrees.
   // Missing values do not update the previous valid phase.

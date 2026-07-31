@@ -400,51 +400,50 @@ void KdpFilt::_initArrays(const double *snr,
   // copy input arrays, leaving extra space at the beginning
   // for negative indices and at the end for filtering as required
 
-  _gateProps_.resize(_nGates); _gateProps = _gateProps_.data();
-  _snr_.resize(_nGates); _snr = _snr_.data();
-  _dbz_.resize(_nGates); _dbz = _dbz_.data();
-  _dbzMax_.resize(_nGates); _dbzMax = _dbzMax_.data();
-  _dbzMedian_.resize(_nGates); _dbzMedian = _dbzMedian_.data();
-  _rhohv_.resize(_nGates); _rhohv = _rhohv_.data();
-  _zdr_.resize(_nGates); _zdr = _zdr_.data();
-  _zdrSdev_.resize(_nGates); _zdrSdev = _zdrSdev_.data();
-  _zdrMedian_.resize(_nGates); _zdrMedian = _zdrMedian_.data();
-  _phidp_.resize(_nGates); _phidp = _phidp_.data();
-  _phidpMean_.resize(_nGates); _phidpMean = _phidpMean_.data();
-  _phidpMeanValid_.resize(_nGates); _phidpMeanValid = _phidpMeanValid_.data();
-  _phidpJitter_.resize(_nGates); _phidpJitter = _phidpJitter_.data();
-  _phidpSdev_.resize(_nGates); _phidpSdev = _phidpSdev_.data();
-  _phidpUnfold_.resize(_nGates); _phidpUnfold = _phidpUnfold_.data();
-  _phidpUnfoldInterp_.resize(_nGates); _phidpUnfoldInterp = _phidpUnfoldInterp_.data();
-  _validForKdp_.resize(_nGates); _validForKdp = _validForKdp_.data();
-  _validForUnfold_.resize(_nGates); _validForUnfold = _validForUnfold_.data();
-  _kdp_.resize(_nGates); _kdp = _kdp_.data();
-  _kdpZZdr_.resize(_nGates); _kdpZZdr = _kdpZZdr_.data();
-  _kdpSC_.resize(_nGates); _kdpSC = _kdpSC_.data();
-  _phidpSC_.resize(_nGates); _phidpSC = _phidpSC_.data();
-  _delta_.resize(_nGates); _delta = _delta_.data();
-  _deltaMean_.resize(_nGates); _deltaMean = _deltaMean_.data();
-  _dbzAttenCorr_.resize(_nGates); _dbzAttenCorr = _dbzAttenCorr_.data();
-  _zdrAttenCorr_.resize(_nGates); _zdrAttenCorr = _zdrAttenCorr_.data();
-  _dbzCorrected_.resize(_nGates); _dbzCorrected = _dbzCorrected_.data();
-  _zdrCorrected_.resize(_nGates); _zdrCorrected = _zdrCorrected_.data();
-  _phidpFilt_.resize(_nGates); _phidpFilt = _phidpFilt_.data();
-  _phidpFiltTrend_.resize(_nGates); _phidpFiltTrend = _phidpFiltTrend_.data();
-  _phidpAccumFilt_.resize(_nGates); _phidpAccumFilt = _phidpAccumFilt_.data();
-  _phidpQuadFilt_.resize(_nGates); _phidpQuadFilt = _phidpQuadFilt_.data();
-  _kdpQuadFilt_.resize(_nGates); _kdpQuadFilt = _kdpQuadFilt_.data();
-  _phidpFftFilt_.resize(_nGates); _phidpFftFilt = _phidpFftFilt_.data();
-  _phidpRegrFilt_.resize(_nGates); _phidpRegrFilt = _phidpRegrFilt_.data();
-  _xxVals_.resize(_nGatesPadded); _xxVals = _xxVals_.data();
-  _scBlock_.resize(_nGates); _scBlock = _scBlock_.data();
+  _gateProps.resize(_nGates);
+  _snr.resize(_nGates);
+  _dbz.resize(_nGates);
+  _dbzMax.resize(_nGates);
+  _dbzMedian.resize(_nGates);
+  _rhohv.resize(_nGates);
+  _zdr.resize(_nGates);
+  _zdrSdev.resize(_nGates);
+  _zdrMedian.resize(_nGates);
+  _phidp.resize(_nGates);
+  _phidpMean.resize(_nGates);
+  _phidpMeanValid.resize(_nGates);
+  _phidpJitter.resize(_nGates);
+  _phidpSdev.resize(_nGates);
+  _phidpUnfold.resize(_nGates);
+  _phidpUnfoldInterp.resize(_nGates);
+  _validForKdp.resize(_nGates);
+  _validForUnfold.resize(_nGates);
+  _kdp.resize(_nGates);
+  _kdpZZdr.resize(_nGates);
+  _kdpSC.resize(_nGates);
+  _phidpSC.resize(_nGates);
+  _delta.resize(_nGates);
+  _deltaMean.resize(_nGates);
+  _dbzAttenCorr.resize(_nGates);
+  _zdrAttenCorr.resize(_nGates);
+  _dbzCorrected.resize(_nGates);
+  _zdrCorrected.resize(_nGates);
+  _phidpFilt.resize(_nGates);
+  _phidpFiltTrend.resize(_nGates);
+  _phidpAccumFilt.resize(_nGates);
+  _phidpQuadFilt.resize(_nGates);
+  _kdpQuadFilt.resize(_nGates);
+  _phidpFftFilt.resize(_nGates);
+  _phidpRegrFilt.resize(_nGates);
+  _xxVals.resize(_nGatesPadded);
+  _scBlock.resize(_nGates);
   
-  // _phidpCond_.resize(_nGates); _phidpCond = _phidpCond_.data();
-  // _phidpCondFilt_.resize(_nGates); _phidpCondFilt = _phidpCondFilt_.data();
-
   // copy data to working arrays
 
   if (snr != NULL) {
-    memcpy(_snr, snr, _nGates * sizeof(double));
+    for (int ii = 0; ii < _nGates; ii++) {
+      _snr[ii] = snr[ii];
+    }
     _snrAvailable = true;
   } else {
     for (int ii = 0; ii < _nGates; ii++) {
@@ -454,20 +453,26 @@ void KdpFilt::_initArrays(const double *snr,
   }
   
   if (dbz != NULL) {
-    memcpy(_dbz, dbz, _nGates * sizeof(double));
+    for (int ii = 0; ii < _nGates; ii++) {
+      _dbz[ii] = dbz[ii];
+    }
   } else {
     for (int ii = 0; ii < _nGates; ii++) {
       _dbz[ii] = _missingValue;
     }
   }
-  memcpy(_dbzMedian, _dbz, _nGates * sizeof(double));
-  FilterUtils::applyMedianFilter(_dbzMedian, _nGates,
+  for (int ii = 0; ii < _nGates; ii++) {
+    _dbzMedian[ii] = _dbz[ii];
+  }
+  FilterUtils::applyMedianFilter(_dbzMedian.data(), _nGates,
                                  _kdpZZdrMedianLen, _missingValue);
 
-  memcpy(_dbzCorrected, _dbz, _nGates * sizeof(double));
-
+  std::copy(_dbz.begin(), _dbz.end(), _dbzCorrected.begin());
+  
   if (zdr != NULL) {
-    memcpy(_zdr, zdr, _nGates * sizeof(double));
+    for (int ii = 0; ii < _nGates; ii++) {
+      _zdr[ii] = zdr[ii];
+    }
     _zdrAvailable = true;
   } else {
     for (int ii = 0; ii < _nGates; ii++) {
@@ -475,13 +480,15 @@ void KdpFilt::_initArrays(const double *snr,
     }
     _zdrAvailable = false;
   }
-  memcpy(_zdrMedian, _zdr, _nGates * sizeof(double));
-  FilterUtils::applyMedianFilter(_zdrMedian, _nGates,
+  std::copy(_zdr.begin(), _zdr.end(), _zdrMedian.begin());
+  FilterUtils::applyMedianFilter(_zdrMedian.data(), _nGates,
                                  _kdpZZdrMedianLen, _missingValue);
-  memcpy(_zdrCorrected, _zdr, _nGates * sizeof(double));
-
+  std::copy(_zdr.begin(), _zdr.end(), _zdrCorrected.begin());
+  
   if (rhohv != NULL) {
-    memcpy(_rhohv, rhohv, _nGates * sizeof(double));
+    for (int ii = 0; ii < _nGates; ii++) {
+      _rhohv[ii] = rhohv[ii];
+    }
     _rhohvAvailable = true;
   } else {
     for (int ii = 0; ii < _nGates; ii++) {
@@ -489,9 +496,11 @@ void KdpFilt::_initArrays(const double *snr,
     }
     _rhohvAvailable = false;
   }
-
+  
   if (phidp != NULL) {
-    memcpy(_phidp, phidp, _nGates * sizeof(double));
+    for (int ii = 0; ii < _nGates; ii++) {
+      _phidp[ii] = phidp[ii];
+    }
   } else {
     for (int ii = 0; ii < _nGates; ii++) {
       _phidp[ii] = _missingValue;
@@ -602,7 +611,7 @@ int KdpFilt::_unfoldPhidp()
   // also identifies the gap runs
 
   if (_findValidRuns()) {
-    memcpy(_phidpUnfold, _phidp, _nGates * sizeof(double));
+    std::copy(_phidp.begin(), _phidp.end(), _phidpUnfold.begin());
     return -1;
   }
   
@@ -803,7 +812,7 @@ void KdpFilt::_computeKdp()
 /////////////////////////////////////////////
 // Load up filtered phidp accumulation array
 
-void KdpFilt::_loadPhidpAccumFilt(const double *phidp, double *accum)
+void KdpFilt::_loadPhidpAccumFilt(const vector<double> &phidp, vector<double> &accum)
 
 {
 
@@ -1283,136 +1292,6 @@ void KdpFilt::_computeZdrSdev(int igate)
   
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Write the ray data to a text file
-
-void KdpFilt::_writeRayDataToFile()
-  
-{
-
-  // make sure output dir exists
-
-  if (ta_makedir_recurse(_rayFileDir.c_str())) {
-    int errNum = errno;
-    cerr << "ERROR - KdpFilt::_writeRayDataToFile()" << endl;
-    cerr << "  Cannot create dir: " << _rayFileDir << endl;
-    cerr << "  " << strerror(errNum) << endl;
-    return;
-  }
-
-  // create file name
-
-  char filePath[MAX_PATH_LEN];
-  DateTime rtime(_timeSecs);
-  int msecs = (int) (_timeFractionSecs * 1000.0 + 0.5);
-  sprintf(filePath,
-          "%s%skdpray_%.4d%.2d%.2d-%.2d%.2d%.2d.%.3d_el-%06.2f_az-%06.2f_.txt",
-          _rayFileDir.c_str(), PATH_DELIM,
-          rtime.getYear(), rtime.getMonth(), rtime.getDay(),
-          rtime.getHour(), rtime.getMin(), rtime.getSec(), msecs,
-          _elevDeg, _azDeg);
-
-  // open file
-
-  FILE *out = fopen(filePath, "w");
-  if (out == NULL) {
-    int errNum = errno;
-    cerr << "ERROR - KdpFilt::_writeRayDataToFile()" << endl;
-    cerr << "  Cannot open file: " << filePath << endl;
-    cerr << "  " << strerror(errNum) << endl;
-    return;
-  }
-
-  // write header line
-
-  fprintf(out,
-          "# gateNum validKdp validUnfold "
-          "snr dbz zdr rhohv phidp "
-          "phidpMean phidpMeanValid phidpJitter phidpSdev "
-          "phidpUnfold unfoldInterp phidpFilt "
-          "zdrSdev delta deltaMean kdp kdpSC kdpZZdr "
-          "dbzAtten zdrAtten dbzCorrected zdrCorrected regrFilt "
-          "phidpFftFilt phidpFiltTrend phidpQuad kdpQuad "
-          "scBlock phidpSC\n");
-
-  // write data
-
-  for (int igate = 0; igate < _nGates; igate++) {
-    double dbzCorrected = 0;
-    double zdrCorrected = 0;
-    if (_dbz[igate] > -9990 && _dbzAttenCorr[igate] > -9990) {
-      dbzCorrected = _dbz[igate] + _dbzAttenCorr[igate];
-    } else {
-      dbzCorrected = _dbz[igate];
-    }
-    if (_zdr[igate] > -9990 && _zdrAttenCorr[igate] > -9990) {
-      zdrCorrected = _zdr[igate] + _zdrAttenCorr[igate];
-    } else {
-      zdrCorrected = _zdr[igate];
-    }
-    fprintf(out,
-            "%3d %3d %3d "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
-            igate,
-            (_validForKdp[igate]?1:0),
-            (_validForUnfold[igate]?1:0),
-            _getPlotVal(_snr[igate], NAN),
-            _getPlotVal(_dbz[igate], NAN),
-            _getPlotVal(_zdr[igate], NAN),
-            _getPlotVal(_rhohv[igate], NAN),
-            _getPlotVal(_phidp[igate], NAN),
-            _getPlotVal(_phidpMean[igate], 0),
-            _getPlotVal(_phidpMeanValid[igate], 0),
-            _getPlotVal(_phidpJitter[igate], NAN),
-            _getPlotVal(_phidpSdev[igate], NAN),
-            _getPlotVal(_phidpUnfold[igate], NAN),
-            _getPlotVal(_phidpUnfoldInterp[igate], 0),
-            _getPlotVal(_phidpFilt[igate], 0),
-            _getPlotVal(_zdrSdev[igate], NAN),
-            _getPlotVal(_delta[igate], NAN),
-            _getPlotVal(_deltaMean[igate], NAN),
-            _getPlotVal(_kdp[igate], NAN),
-            _getPlotVal(_kdpSC[igate], NAN),
-            _getPlotVal(_kdpZZdr[igate], NAN),
-            _getPlotVal(_dbzAttenCorr[igate], 0),
-            _getPlotVal(_zdrAttenCorr[igate], 0),
-            _getPlotVal(dbzCorrected, 0),
-            _getPlotVal(zdrCorrected, 0),
-            _getPlotVal(_phidpRegrFilt[igate], NAN),
-            _getPlotVal(_phidpFftFilt[igate], NAN),
-            _getPlotVal(_phidpFiltTrend[igate], NAN),
-            _getPlotVal(_phidpQuadFilt[igate], NAN),
-            _getPlotVal(_kdpQuadFilt[igate], NAN),
-            _getPlotVal(_scBlock[igate], 0),
-            _getPlotVal(_phidpSC[igate], NAN)
-            );
-  }
-  
-  // close file
-
-  fclose(out);
-
-}
-
-//////////////////////////////////////////////////////////////////////////
-// Get a value suitable for plotting
-// i.e. interpret missing data reasonably
-
-double KdpFilt::_getPlotVal(double val, double valIfMissing)
-  
-{
-  if (val < -9990) {
-    return valIfMissing;
-  } else {
-    return val;
-  }
-}
-
 ////////////////////////////////////////////////////////////
 // Compute estimated kdp from Z and ZDR using power law
 
@@ -1457,7 +1336,7 @@ void KdpFilt::_loadKdpSC()
 
   // copy KDP array to KDP SC
   
-  std::copy(_kdp_.begin(), _kdp_.end(), _kdpSC_.begin());
+  std::copy(_kdp.begin(), _kdp.end(), _kdpSC.begin());
 
   // loop through the valid runs
   
@@ -1499,12 +1378,12 @@ void KdpFilt::_loadKdpSC()
   // moving mean on _kdpSC
   
   vector<double> filtSC;
-  _movingMean(_kdpSC_, _nGatesStats, filtSC);
-  std::copy(filtSC.begin(), filtSC.end(), _kdpSC_.begin());
+  _movingMean(_kdpSC, _nGatesStats, filtSC);
+  std::copy(filtSC.begin(), filtSC.end(), _kdpSC.begin());
 
   // compute _phidpSC by integrating _kdpSC, compute delta
 
-  std::copy(_phidpFftFilt_.begin(), _phidpFftFilt_.end(), _phidpSC_.begin());
+  std::copy(_phidpFftFilt.begin(), _phidpFftFilt.end(), _phidpSC.begin());
   for (size_t irun = 0; irun < _validRuns.size(); irun++) {
     const PhidpRun &validRun = _validRuns[irun];
     for (int igate = validRun.ibegin + 1; igate <= validRun.iend; igate++) {
@@ -1668,8 +1547,10 @@ void KdpFilt::_applyFirFilter()
 
 {
 
-  _firFilt.setFeatureLength(_params.phidp_feature_length_km, _gateSpacingKm);
-  _firFilt.applyFilter(_phidpUnfoldInterp_, _phidpFilt_, _params.fir_n_iterations);
+  _firFilt.setFeatureLength(_params.phidp_feature_length_km,
+                            _gateSpacingKm);
+  _firFilt.applyFilter(_phidpUnfoldInterp, _phidpFilt,
+                       _params.fir_n_iterations, _missingValue);
 
 }
     
@@ -1684,11 +1565,12 @@ void KdpFilt::_applyQuadFilter()
 
   int nFeatureHalf = ((int) (_params.phidp_feature_length_km / _gateSpacingKm) + 1) / 2;
 
-  if (_quadFilt.compute(_phidpUnfoldInterp_,
+  if (_quadFilt.compute(_phidpUnfoldInterp,
                         _gateSpacingKm,
-                        nFeatureHalf) == 0) {
-    _phidpQuadFilt_ = _quadFilt.getPhidpFitDeg();
-    _kdpQuadFilt_ = _quadFilt.getKdpDegPerKm();
+                        nFeatureHalf,
+                        _missingValue) == 0) {
+    _phidpQuadFilt = _quadFilt.getPhidpFitDeg();
+    _kdpQuadFilt = _quadFilt.getKdpDegPerKm();
   }
 
 }
@@ -1782,7 +1664,7 @@ void KdpFilt::_applyPhidpRegrFiltGlobal()
   // prepare for the fit
   
   ForsytheFit fit;
-  fit.prepareForFit(polyOrder, _xxVals_);
+  fit.prepareForFit(polyOrder, _xxVals);
   
   // perform the polynomial fit on unfolded phidp
 
@@ -1920,3 +1802,134 @@ void KdpFilt::_movingMean(const std::vector<double>& xx,
   }
   
 }
+
+//////////////////////////////////////////////////////////////////////////
+// Write the ray data to a text file
+
+void KdpFilt::_writeRayDataToFile()
+  
+{
+
+  // make sure output dir exists
+
+  if (ta_makedir_recurse(_rayFileDir.c_str())) {
+    int errNum = errno;
+    cerr << "ERROR - KdpFilt::_writeRayDataToFile()" << endl;
+    cerr << "  Cannot create dir: " << _rayFileDir << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+
+  // create file name
+
+  char filePath[MAX_PATH_LEN];
+  DateTime rtime(_timeSecs);
+  int msecs = (int) (_timeFractionSecs * 1000.0 + 0.5);
+  sprintf(filePath,
+          "%s%skdpray_%.4d%.2d%.2d-%.2d%.2d%.2d.%.3d_el-%06.2f_az-%06.2f_.txt",
+          _rayFileDir.c_str(), PATH_DELIM,
+          rtime.getYear(), rtime.getMonth(), rtime.getDay(),
+          rtime.getHour(), rtime.getMin(), rtime.getSec(), msecs,
+          _elevDeg, _azDeg);
+
+  // open file
+
+  FILE *out = fopen(filePath, "w");
+  if (out == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - KdpFilt::_writeRayDataToFile()" << endl;
+    cerr << "  Cannot open file: " << filePath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return;
+  }
+
+  // write header line
+
+  fprintf(out,
+          "# gateNum validKdp validUnfold "
+          "snr dbz zdr rhohv phidp "
+          "phidpMean phidpMeanValid phidpJitter phidpSdev "
+          "phidpUnfold unfoldInterp phidpFilt "
+          "zdrSdev delta deltaMean kdp kdpSC kdpZZdr "
+          "dbzAtten zdrAtten dbzCorrected zdrCorrected regrFilt "
+          "phidpFftFilt phidpFiltTrend phidpQuad kdpQuad "
+          "scBlock phidpSC\n");
+
+  // write data
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    double dbzCorrected = 0;
+    double zdrCorrected = 0;
+    if (_dbz[igate] > -9990 && _dbzAttenCorr[igate] > -9990) {
+      dbzCorrected = _dbz[igate] + _dbzAttenCorr[igate];
+    } else {
+      dbzCorrected = _dbz[igate];
+    }
+    if (_zdr[igate] > -9990 && _zdrAttenCorr[igate] > -9990) {
+      zdrCorrected = _zdr[igate] + _zdrAttenCorr[igate];
+    } else {
+      zdrCorrected = _zdr[igate];
+    }
+    fprintf(out,
+            "%3d %3d %3d "
+            "%10.3f %10.3f %10.3f %10.3f %10.3f "
+            "%10.3f %10.3f %10.3f %10.3f "
+            "%10.3f %10.3f %10.3f "
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f "
+            "%10.3f %10.3f %10.3f %10.3f %10.3f "
+            "%10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
+            igate,
+            (_validForKdp[igate]?1:0),
+            (_validForUnfold[igate]?1:0),
+            _getPlotVal(_snr[igate], NAN),
+            _getPlotVal(_dbz[igate], NAN),
+            _getPlotVal(_zdr[igate], NAN),
+            _getPlotVal(_rhohv[igate], NAN),
+            _getPlotVal(_phidp[igate], NAN),
+            _getPlotVal(_phidpMean[igate], 0),
+            _getPlotVal(_phidpMeanValid[igate], 0),
+            _getPlotVal(_phidpJitter[igate], NAN),
+            _getPlotVal(_phidpSdev[igate], NAN),
+            _getPlotVal(_phidpUnfold[igate], NAN),
+            _getPlotVal(_phidpUnfoldInterp[igate], 0),
+            _getPlotVal(_phidpFilt[igate], 0),
+            _getPlotVal(_zdrSdev[igate], NAN),
+            _getPlotVal(_delta[igate], NAN),
+            _getPlotVal(_deltaMean[igate], NAN),
+            _getPlotVal(_kdp[igate], NAN),
+            _getPlotVal(_kdpSC[igate], NAN),
+            _getPlotVal(_kdpZZdr[igate], NAN),
+            _getPlotVal(_dbzAttenCorr[igate], 0),
+            _getPlotVal(_zdrAttenCorr[igate], 0),
+            _getPlotVal(dbzCorrected, 0),
+            _getPlotVal(zdrCorrected, 0),
+            _getPlotVal(_phidpRegrFilt[igate], NAN),
+            _getPlotVal(_phidpFftFilt[igate], NAN),
+            _getPlotVal(_phidpFiltTrend[igate], NAN),
+            _getPlotVal(_phidpQuadFilt[igate], NAN),
+            _getPlotVal(_kdpQuadFilt[igate], NAN),
+            _getPlotVal(_scBlock[igate], 0),
+            _getPlotVal(_phidpSC[igate], NAN)
+            );
+  }
+  
+  // close file
+
+  fclose(out);
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Get a value suitable for plotting
+// i.e. interpret missing data reasonably
+
+double KdpFilt::_getPlotVal(double val, double valIfMissing)
+  
+{
+  if (val < -9990) {
+    return valIfMissing;
+  } else {
+    return val;
+  }
+}
+
