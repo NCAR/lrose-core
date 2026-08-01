@@ -278,7 +278,7 @@ RHOHV_field_name = "RHOHV";
 //
 // Type: string
 
-KDP_params_file_path = "./testing/KdpParams.cband";
+KDP_params_file_path = "./testing/KdpParams.cow2";
 
 //======================================================================
 //
@@ -570,7 +570,7 @@ output_format = OUTPUT_FORMAT_CFRADIAL;
 //
 // Type: string
 
-instance = "spol";
+instance = "cow2";
 
 ///////////// procmap_register_interval ///////////////
 //

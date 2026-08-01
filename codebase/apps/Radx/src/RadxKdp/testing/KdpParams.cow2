@@ -123,25 +123,6 @@ KDP_check_snr = TRUE;
 
 KDP_snr_threshold = 0;
 
-///////////// KDP_check_zdr_sdev //////////////////////
-//
-// Check the standard deviation of ZDR in range?.
-//
-// Type: boolean
-
-KDP_check_zdr_sdev = FALSE;
-
-///////////// KDP_zdr_sdev_max ////////////////////////
-//
-// Sets the threshold for the standard deviation of zdr in range.
-//
-// The sdev of zdr is a good test for clutter. If the sdev is less than 
-//   this value, we conclude we are in weather echo rather than clutter.
-//
-// Type: double
-
-KDP_zdr_sdev_max = 2;
-
 //======================================================================
 //
 // PHIDP FILTER METHOD.
@@ -165,15 +146,12 @@ KDP_zdr_sdev_max = 2;
 //
 // Type: enum
 // Options:
-//     FIR_FILTER
+//     FFT_FILTER
 //     QUADRATIC_FILTER
 //     REGRESSION_FILTER
-//     FFT_FILTER
+//     FIR_FILTER
 
-// phidp_filter_method = QUADRATIC_FILTER;
 phidp_filter_method = FFT_FILTER;
-// phidp_filter_method = REGRESSION_FILTER;
-// phidp_filter_method = FIR_FILTER;
 
 ///////////// phidp_feature_length_km /////////////////
 //
@@ -203,7 +181,7 @@ phidp_filter_method = FFT_FILTER;
 //
 // Type: double
 
-phidp_feature_length_km = 3;
+phidp_feature_length_km = 3.5;
 
 ///////////// fir_n_iterations ////////////////////////
 //
@@ -251,7 +229,7 @@ KDP_self_con_median_filter_len = 5;
 //
 // Type: double
 
-KDP_self_con_mean_delta_threshold = 1.0;
+KDP_self_con_mean_delta_threshold = 1;
 
 ///////////// KDP_self_con_Z_expon ////////////////////
 //
@@ -270,8 +248,7 @@ KDP_self_con_Z_expon = 1;
 //
 // Type: double
 
-// KDP_self_con_ZDR_expon = -2.05;
-KDP_self_con_ZDR_expon = 0.0;
+KDP_self_con_ZDR_expon = 0;
 
 ///////////// KDP_self_con_Z_coeff_10cm ///////////////
 //
@@ -298,6 +275,17 @@ KDP_self_con_Z_coeff_10cm = 3.32e-05;
 //
 //======================================================================
  
+///////////// KDP_use_attenuation_corrected_dbz_and_zdr 
+//
+// Option to use attenuation-corrected fields for KDP calculations.
+//
+// This mostly affects the estimation of the self-consistency method for 
+//   computing delta.
+//
+// Type: boolean
+
+KDP_use_attenuation_corrected_dbz_and_zdr = TRUE;
+
 ///////////// KDP_specify_coefficients_for_attenuation_correction 
 //
 // Option to specify the coefficients and exponents.

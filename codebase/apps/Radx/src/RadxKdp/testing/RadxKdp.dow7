@@ -570,7 +570,7 @@ output_format = OUTPUT_FORMAT_CFRADIAL;
 //
 // Type: string
 
-instance = "spol";
+instance = "dow7";
 
 ///////////// procmap_register_interval ///////////////
 //
