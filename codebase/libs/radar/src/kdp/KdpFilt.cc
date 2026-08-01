@@ -411,7 +411,6 @@ void KdpFilt::_initArrays(const double *snr,
   _rhohv.resize(_nGates);
 
   _zdr.resize(_nGates);
-  _zdrSdev.resize(_nGates);
   _zdrMedian.resize(_nGates);
 
   _phidp.resize(_nGates);
@@ -542,8 +541,6 @@ void KdpFilt::_initArrays(const double *snr,
 
     _validForKdp[ii] = false;
 
-    _zdrSdev[ii] = _missingValue;
-
     _phidpMean[ii] = _missingValue;
     _phidpMeanFilled[ii] = _missingValue;
     _phidpJitter[ii] = _missingValue;
@@ -620,7 +617,6 @@ int KdpFilt::_unfoldPhidp()
   for (int ii = _nGatesStatsHalf; 
        ii < _nGates - _nGatesStatsHalf; ii++) {
     _computePhidpStats(ii);
-    _computeZdrSdev(ii);
     _phidpJitter[ii] = _gateProps[ii].phidpJitter;
     _phidpSdev[ii] = _gateProps[ii].phidpSdev;
     _phidpMean[ii] = _gateProps[ii].phidpMean;
@@ -1128,11 +1124,6 @@ bool KdpFilt::_isGateValid(int igate)
   if (_phidpJitter[igate] > _params.KDP_phidp_jitter_max) {
     return false;
   }
-  if (_params.KDP_check_zdr_sdev) {
-    if (_zdrSdev[igate] > _params.KDP_zdr_sdev_max) {
-      return false;
-    }
-  }
   if (_params.KDP_check_rhohv) {
     if ((_rhohv[igate] != _missingValue) && (_rhohv[igate] < _params.KDP_rhohv_threshold)) {
       return false;
@@ -1246,47 +1237,6 @@ void KdpFilt::_computePhidpStats(int igate)
     if (term1 >= term2) {
       double sdev = sqrt(term1 - term2) * RAD_TO_DEG;
       iprops.phidpSdev = sdev;
-    }
-  }
-  
-}
-
-//////////////////////////////////////////////////////////////////////////
-//  To calculate the sdev of ZDR
-
-void KdpFilt::_computeZdrSdev(int igate)
-  
-{
-
-  double count = 0.0;
-  double sum = 0.0;
-  double sumSq = 0.0;
-  
-  for (int jj = igate - _nGatesStatsHalf;
-       jj <= igate + _nGatesStatsHalf; jj++) {
-    if (jj < 0 || jj >= _nGates) {
-      continue;
-    }
-    double zdr = _zdr[jj];
-    if (zdr != _missingValue) {
-      sum += zdr;
-      sumSq += zdr * zdr;
-      count++;
-    }
-  } // jj
-  
-  if (count <= _nGatesStatsHalf) {
-    // not enough data
-    return;
-  }
-
-  if (count > 2) {
-    double mean = sum / count;
-    double term1 = sumSq / count;
-    double term2 = mean * mean;
-    if (term1 >= term2) {
-      double sdev = sqrt(term1 - term2);
-      _zdrSdev[igate] = sdev;
     }
   }
   
@@ -1848,7 +1798,7 @@ void KdpFilt::_writeRayDataToFile()
   fprintf(out,
           "# gateNum validKdp "
           "snr dbz zdr rhohv phidp "
-          "phidpMean phidpMeanFilled phidpJitter phidpSdev zdrSdev "
+          "phidpMean phidpMeanFilled phidpJitter phidpSdev "
           "phidpUnfold phidpUnfoldFilled phidpFilt phidpFiltTrend phidpSC "
           "phidpFirFilt phidpQuadFilt kdpQuadFilt phidpFftFilt phidpRegrFilt "
           "delta deltaMean kdp kdpSC kdpZZdr "
@@ -1860,7 +1810,7 @@ void KdpFilt::_writeRayDataToFile()
     fprintf(out,
             "%3d %3d "
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
-            "%10.3f %10.3f %10.3f %10.3f %10.3f "
+            "%10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
@@ -1876,7 +1826,6 @@ void KdpFilt::_writeRayDataToFile()
             _getPlotVal(_phidpMeanFilled[igate], NAN),
             _getPlotVal(_phidpJitter[igate], NAN),
             _getPlotVal(_phidpSdev[igate], NAN),
-            _getPlotVal(_zdrSdev[igate], NAN),
             _getPlotVal(_phidpUnfold[igate], NAN),
             _getPlotVal(_phidpUnfoldFilled[igate], NAN),
             _getPlotVal(_phidpFilt[igate], NAN),

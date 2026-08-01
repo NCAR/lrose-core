@@ -66,10 +66,10 @@ public:
   // enum typedefs
 
   typedef enum {
-    FIR_FILTER = 0,
+    FFT_FILTER = 0,
     QUADRATIC_FILTER = 1,
     REGRESSION_FILTER = 2,
-    FFT_FILTER = 3
+    FIR_FILTER = 3
   } phidp_filter_method_t;
 
   ///////////////////////////
@@ -380,10 +380,6 @@ public:
 
   double KDP_snr_threshold;
 
-  tdrp_bool_t KDP_check_zdr_sdev;
-
-  double KDP_zdr_sdev_max;
-
   phidp_filter_method_t phidp_filter_method;
 
   double phidp_feature_length_km;
@@ -423,7 +419,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[32];
+  mutable TDRPtable _table[30];
 
   const char *_className;
 

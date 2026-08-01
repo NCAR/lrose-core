@@ -477,12 +477,6 @@ void Worker::_addDebugFields(RadxRay *outputRay)
             _kdp.getZdr());
   
   _addField(outputRay,
-            "ZDR_SDEV_FOR_KDP", "dB",
-            "standard_deviation_of_zdr_for_kdp_computations",
-            "differential_reflectivity_hv",
-            _kdp.getZdrSdev());
-  
-  _addField(outputRay,
             "RHOHV_FOR_KDP", "",
             "rhohv_filtered_for_kdp_computations",
             "cross_correlation_hv",
@@ -529,12 +523,6 @@ void Worker::_addDebugFields(RadxRay *outputRay)
             "phidp_filtered_for_kdp_computations",
             "differential_phase_hv",
             _kdp.getPhidpFilt());
-  
-  // _addField(outputRay,
-  //           "PHIDP_COND", "deg",
-  //           "phidp_cond_for_kdp_computations",
-  //           "differential_phase_hv",
-  //           _kdp.getPhidpCond());
   
 }
   

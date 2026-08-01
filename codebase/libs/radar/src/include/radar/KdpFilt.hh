@@ -176,7 +176,6 @@ public:
   const double *getPhidpSdev() const { return _phidpSdev.data(); }
   const double *getPhidpJitter() const { return _phidpJitter.data(); }
   const double *getPhidpFilt() const { return _phidpFilt.data(); }
-  const double *getZdrSdev() const { return _zdrSdev.data(); }
 
   /**
    * Get flag of valid gates after calling compute()
@@ -357,7 +356,6 @@ private:
 
   bool _zdrAvailable;
   vector<double> _zdr;
-  vector<double> _zdrSdev;
   vector<double> _zdrMedian;
 
   vector<double> _phidp;
@@ -474,7 +472,7 @@ private:
   void _adjustPhidpBeforeUnfolding(vector<double> &phidp);
   void _adjustPhidpAfterUnfolding(vector<double> &phidp);
 
-/// Load runs with valid gates
+  /// Load runs with valid gates
 
   int _findValidRuns();
 
@@ -490,10 +488,6 @@ private:
   /// in phidp at a gate, using stats on the circle
   
   void _computePhidpStats(int gateNum);
-
-  // compute sdev of zdr
-
-  void _computeZdrSdev(int igate);
 
   /// Compute estimated kdp from Z and ZDR using power law
 

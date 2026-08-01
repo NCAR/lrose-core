@@ -651,31 +651,7 @@
     tt->descr = tdrpStrDup("Sets the threshold for checking SNR (dB).");
     tt->help = tdrpStrDup("If the SNR drops below this value, KDP will not be computed at this gate.");
     tt->val_offset = (char *) &KDP_snr_threshold - &_start_;
-    tt->single_val.d = -6;
-    tt++;
-    
-    // Parameter 'KDP_check_zdr_sdev'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_check_zdr_sdev");
-    tt->descr = tdrpStrDup("Check the standard deviation of ZDR in range?");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_check_zdr_sdev - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_zdr_sdev_max'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_zdr_sdev_max");
-    tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of zdr in range.");
-    tt->help = tdrpStrDup("The sdev of zdr is a good test for clutter. If the sdev is less than this value, we conclude we are in weather echo rather than clutter.");
-    tt->val_offset = (char *) &KDP_zdr_sdev_max - &_start_;
-    tt->single_val.d = 2;
+    tt->single_val.d = 0;
     tt++;
     
     // Parameter 'Comment 2'
@@ -700,15 +676,15 @@
     tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FIR_FILTER");
-      tt->enum_def.fields[0].val = FIR_FILTER;
+      tt->enum_def.fields[0].name = tdrpStrDup("FFT_FILTER");
+      tt->enum_def.fields[0].val = FFT_FILTER;
       tt->enum_def.fields[1].name = tdrpStrDup("QUADRATIC_FILTER");
       tt->enum_def.fields[1].val = QUADRATIC_FILTER;
       tt->enum_def.fields[2].name = tdrpStrDup("REGRESSION_FILTER");
       tt->enum_def.fields[2].val = REGRESSION_FILTER;
-      tt->enum_def.fields[3].name = tdrpStrDup("FFT_FILTER");
-      tt->enum_def.fields[3].val = FFT_FILTER;
-    tt->single_val.e = QUADRATIC_FILTER;
+      tt->enum_def.fields[3].name = tdrpStrDup("FIR_FILTER");
+      tt->enum_def.fields[3].val = FIR_FILTER;
+    tt->single_val.e = FFT_FILTER;
     tt++;
     
     // Parameter 'phidp_feature_length_km'

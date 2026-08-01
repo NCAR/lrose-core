@@ -22,7 +22,6 @@ REQUIRED_COLUMNS = [
     "snr",
     "dbz",
     "zdr",
-    "zdrSdev",
     "rhohv",
     "phidp",
     "phidpMean",
@@ -297,7 +296,6 @@ class KdpRayPlotter:
             self.ax4.set_title(az_str, fontsize=12)
             return
 
-        zdr_sdev10 = [value * 10.0 for value in plot_data["zdrSdev"]]
         zdr_5 = [value * 5.0 for value in plot_data["zdr"]]
 
         # PLOT 1 - moments
@@ -309,8 +307,7 @@ class KdpRayPlotter:
             gate_num, plot_data["rhohv"],
             label="RHOHV", color="seagreen",
         )
-        self.ax1.plot(gate_num, zdr_sdev10, label="ZdrSdev*10", color="blue")
-        self.ax1.plot(gate_num, zdr_5, label="Zdr*5", color="magenta")
+        self.ax1.plot(gate_num, zdr_5, label="Zdr*5", color="blue")
         self.ax1.plot(gate_num, plot_data["snr"], label="SNR", color="black")
         self.ax1.plot(gate_num, plot_data["dbz"], label="DBZ", color="red")
         self.ax1.set_xlabel("gateNum")
@@ -321,7 +318,9 @@ class KdpRayPlotter:
         self.ax1r.yaxis.tick_right()
         self.ax1r.set_ylim(-0.2, 1.5)
         self.ax1r.tick_params(axis="y", labelcolor="seagreen")
-
+        self.ax1r.axhline(self.options.rhohv_threshold, color="lightgray",
+                          linewidth=1.0, linestyle="--", zorder=0)
+        
         lines1, labels1 = self.ax1.get_legend_handles_labels()
         lines2, labels2 = self.ax1r.get_legend_handles_labels()
         legend1 = self.ax1.legend(
@@ -363,10 +362,12 @@ class KdpRayPlotter:
         self.ax3.plot(gate_num, plot_data["kdpZZdr"], label="KDP_ZZDR", color="green")
         self.ax3.plot(gate_num, plot_data["delta"], label="DELTA", color="orange")
         self.ax3.plot(gate_num, plot_data["deltaMean"], label="DELTA_MEAN", color="black")
-        # self.ax3.plot(gate_num, plot_data["phidpFiltTrend"], label="TREND", color="magenta")
-        self.ax3.plot(gate_num, plot_data["kdpQuadFilt"], label="KDP_QUAD_FILT", color="magenta")
+        self.ax3.plot(gate_num, plot_data["phidpFiltTrend"], label="TREND", color="magenta")
+        # self.ax3.plot(gate_num, plot_data["kdpQuadFilt"], label="KDP_QUAD_FILT", color="magenta")
         self.ax3.set_xlabel("gateNum")
         self.ax3.set_ylabel("KDP, DELTA")
+        self.ax3.axhline(1.0, color="lightgray",
+                         linewidth=1.0, linestyle="--", zorder=0)
 
         draw_valid_regions(self,
                            self.ax3, gate_num, valid_kdp
@@ -520,6 +521,9 @@ def parse_args():
     parser.add_argument("--maxgates", dest="max_gates", type=int, default=10000,
                         help="Max number of gates to plot")
 
+    parser.add_argument("--rhohv_threshold", dest="rhohv_threshold", type=float,
+                        default=0.9, help="RHOHV threshold (default: 0.9)")
+    
     options = parser.parse_args()
     if options.verbose:
         options.debug = True
