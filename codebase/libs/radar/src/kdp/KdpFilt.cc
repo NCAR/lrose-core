@@ -406,7 +406,6 @@ void KdpFilt::_initArrays(const double *snr,
   _snr.resize(_nGates);
 
   _dbz.resize(_nGates);
-  _dbzMax.resize(_nGates);
   _dbzMedian.resize(_nGates);
 
   _rhohv.resize(_nGates);
@@ -476,7 +475,6 @@ void KdpFilt::_initArrays(const double *snr,
   }
   for (int ii = 0; ii < _nGates; ii++) {
     _dbzMedian[ii] = _dbz[ii];
-    _dbzMax[ii] = _dbz[ii];
   }
   FilterUtils::applyMedianFilter(_dbzMedian.data(), _nGates,
                                  _kdpZZdrMedianLen, _missingValue);
@@ -538,10 +536,6 @@ void KdpFilt::_initArrays(const double *snr,
     _rhohv[igate] = _missingValue;
   }
 
-  // compute max dbz for surrounding gates
-  
-  _computeDbzMax();
-  
   // initialize computed arrays
 
   for (int ii = 0; ii < _nGates; ii++) {
@@ -596,6 +590,10 @@ int KdpFilt::_unfoldPhidp()
 
 {
 
+  // adjust phidp array so that it folds at 180
+
+  _adjustPhidpBeforeUnfolding(_phidp);
+
   // TESTING
 
 #ifdef TESTING_FOLDING
@@ -624,15 +622,18 @@ int KdpFilt::_unfoldPhidp()
     _computePhidpStats(ii);
     _computeZdrSdev(ii);
     _phidpJitter[ii] = _gateProps[ii].phidpJitter;
+    _phidpSdev[ii] = _gateProps[ii].phidpSdev;
     _phidpMean[ii] = _gateProps[ii].phidpMean;
     _phidpMeanFilled[ii] = _gateProps[ii].phidpMean;
-    _phidpSdev[ii] = _gateProps[ii].phidpSdev;
   }
   
   // load up runs of valid phidp
   // also identifies the gap runs
 
   if (_findValidRuns()) {
+    _adjustPhidpAfterUnfolding(_phidp);
+    _adjustPhidpAfterUnfolding(_phidpMean);
+    _adjustPhidpAfterUnfolding(_phidpMeanFilled);
     std::copy(_phidp.begin(), _phidp.end(), _phidpUnfold.begin());
     return -1;
   }
@@ -731,6 +732,14 @@ int KdpFilt::_unfoldPhidp()
     _phidpUnfoldFilled[ii] = meanAtEnd;
   }
 
+  // adjust phidp arrays back to original range
+  
+  _adjustPhidpAfterUnfolding(_phidp);
+  _adjustPhidpAfterUnfolding(_phidpMean);
+  _adjustPhidpAfterUnfolding(_phidpMeanFilled);
+  _adjustPhidpAfterUnfolding(_phidpUnfold);
+  _adjustPhidpAfterUnfolding(_phidpUnfoldFilled);
+
   return 0;
 
 }
@@ -806,6 +815,8 @@ void KdpFilt::_computeKdp()
       continue;
     }
 
+    // compute the slope between each adjacent point
+    
     int i0 = ii - 1;
     int i1 = ii + 1;
     int len = i1 - i0;
@@ -813,63 +824,15 @@ void KdpFilt::_computeKdp()
         _phidpFilt[i1] != _missingValue) {
       double dphi = _phidpFilt[i1] - _phidpFilt[i0];
       _kdp[ii] = (dphi / (_gateSpacingKm * len)) / 2.0;
-      if (_foldsAt90) {
-        _kdp[ii] /= 2.0;
-      }
+      // if (_foldsAt90) {
+      //   _kdp[ii] /= 2.0;
+      // }
       _kdpZZdr[ii] = _computeKdpFromZZdr(_dbzMedian[ii], _zdrMedian[ii]);
     } else {
       _kdp[ii] = _missingValue;
       _kdpZZdr[ii] = _missingValue;
     }
 
-#ifdef NOTNOW
-    
-    // get max DBZ for surrounding gates
-    
-    double maxDbz = _dbzMax[ii];
-    
-    // Use max dbz val to decide the number of gates over which to
-    // compute kdp. The default value for adapLen is 4.
-    
-    int adapLen = 4;
-    if (maxDbz < 20.0) {
-      adapLen = 8;
-    } else if (maxDbz < 35.0) {
-      adapLen = 4;
-    } else {
-      adapLen = 2;
-    }
-
-    adapLen = 2;
-    
-    int i0 = ii - adapLen;
-    if (i0 < 0) {
-      i0 = 0;
-    }
-    int i1 = ii + adapLen;
-    if (i1 > _nGates - 1) {
-      i1 = _nGates - 1;
-    }
-    int len = i1 - i0;
-    if (len < 2) {
-       _kdp[ii] = 0;
-    } else {
-      // double dphi = _phidpCondFilt[i1] - _phidpCondFilt[i0];
-      if (_phidpFilt[i0] != _missingValue &&
-          _phidpFilt[i1] != _missingValue) {
-        double dphi = _phidpFilt[i1] - _phidpFilt[i0];
-        _kdp[ii] = (dphi / (_gateSpacingKm * len)) / 2.0;
-        if (_foldsAt90) {
-          _kdp[ii] /= 2.0;
-        }
-        _kdpZZdr[ii] = _computeKdpFromZZdr(_dbzMedian[ii], _zdrMedian[ii]);
-      } else {
-        _kdp[ii] = _missingValue;
-        _kdpZZdr[ii] = _missingValue;
-      }
-    }
-#endif
-    
   } // ii
 
 }
@@ -919,28 +882,6 @@ void KdpFilt::_computeAttenCorrection()
 }
 
 /////////////////////////////////////////////
-// Compute DBZ max for surrounding gates
-
-void KdpFilt::_computeDbzMax()
-
-{
- 
-  for (int ii = 0; ii < _nGates; ii++) {
-    double dmax = _dbz[ii];
-    for (int kk = ii - _nGatesStatsHalf; kk <= ii + _nGatesStatsHalf; kk++) {
-      if (kk >= 0 && kk < _nGates) {
-        double dbz = _dbz[kk];
-        if (dbz > dmax) {
-          dmax = dbz;
-        }
-      }
-    }
-    _dbzMax[ii] = dmax;
-  } // ii
-
-}
-    
-/////////////////////////////////////////////
 // compute the folding values and range
 // by inspecting the phidp values
 
@@ -979,12 +920,42 @@ void KdpFilt::_computeFoldingRange()
     }
   }
 
-  // adjust phidp array so that it folds at 180
+}
 
+//////////////////////////////////////////////////////////////////////////
+// adjust input phidp for folding range
+// this multiplies phidp by 2 for alternating mode radars
+// for which phidp folds at -90 and +90
+
+void KdpFilt::_adjustPhidpBeforeUnfolding(vector<double> &phidp)
+{
+
+  // adjust phidp array so that it folds at 180
+  
   if (_foldsAt90) {
     for (int igate = 0; igate < _nGates; igate++) {
-      if (_phidp[igate] != _missingValue) {
-        _phidp[igate] = _phidp[igate] * 2.0;
+      if (phidp[igate] != _missingValue) {
+        phidp[igate] = phidp[igate] * 2.0;
+      }
+    }
+  }
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+// adjust output unfolded values for folding range
+// this multiplies phidp by 0.5 for alternating mode radars
+// for which phidp folds at -90 and +90
+
+void KdpFilt::_adjustPhidpAfterUnfolding(vector<double> &phidp)
+{
+
+  // adjust phidp array so that it folds at 180
+  
+  if (_foldsAt90) {
+    for (int igate = 0; igate < _nGates; igate++) {
+      if (phidp[igate] != _missingValue) {
+        phidp[igate] = phidp[igate] * 0.5;
       }
     }
   }
@@ -1418,9 +1389,9 @@ void KdpFilt::_loadKdpSC()
     for (int igate = validRun.ibegin + 1; igate <= validRun.iend; igate++) {
       double kdpSC = _kdpSC[igate - 1];
       double deltaPhi = kdpSC * 2 * _gateSpacingKm;
-      if (_foldsAt90) {
-        deltaPhi *= 2;
-      }
+      // if (_foldsAt90) {
+      //   deltaPhi *= 2;
+      // }
       _phidpSC[igate] = RadarComplex::sumDeg(_phidpSC[igate - 1], deltaPhi);
       // compute phase shift on backscatter as the difference between
       // filtered value and SC phidp
@@ -1488,10 +1459,10 @@ void KdpFilt::_loadKdpSCRun(int startGate, int endGate)
   if (sumPhidpZZdr < 1.0) {
     return;
   }
-  if (_foldsAt90) {
-    sumPhidp *= 2.0;
-    sumPhidpZZdr *= 2.0;
-  }
+  // if (_foldsAt90) {
+  //   sumPhidp *= 2.0;
+  //   sumPhidpZZdr *= 2.0;
+  // }
   
   // compute factor to normalize the ZZdr estimate
   // from the measured estimate

@@ -379,5 +379,5 @@ KDP_write_ray_files = TRUE;
 //
 // Type: string
 
-KDP_ray_files_dir = "/tmp/kdp_ray_files";
+KDP_ray_files_dir = "/tmp/spol/kdp_ray_files";
 

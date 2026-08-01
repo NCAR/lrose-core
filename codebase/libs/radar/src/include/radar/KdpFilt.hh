@@ -151,6 +151,10 @@ public:
   double getStartRangeKm() const { return _startRangeKm; }
   double getGateSpacingKm() const { return _gateSpacingKm; }
 
+  // number of gates in use
+
+  int getNGates() const { return _nGates; }
+  
   /**
    * Get dbz & SNR array after calling compute()
    * @return an array of values
@@ -178,23 +182,33 @@ public:
    * Get flag of valid gates after calling compute()
    * @return an array of flag values
    */
+
   const int *getValidForKdp() const { return _validForKdp.data(); }
   
+  /**
+   * Get kdp array after calling compute()
+   * @return an array of kdp values
+   */
+
+  const double *getKdp() const { return _kdp.data(); }
+  const vector<double> &getKdpVec() const { return _kdp; }
+
+  // theoretical estimate from Z and ZDR
+
+  const double *getKdpZZdr() const { return _kdpZZdr.data(); }
+  const vector<double> &getKdpZZdrVec() const { return _kdpZZdr; }
+
+  // self-consistency conditioned result
+  
+  const double *getKdpSC() const { return _kdpSC.data(); }
+  const vector<double> &getKdpSCVec() const { return _kdpSC; }
+
   /**
    * Get phase shift on backscatter (deg) after calling compute()
    * @return an array of delta values
    */
   const double *getDelta() const { return _delta.data(); }
-
-  /**
-   * Get kdp array after calling compute()
-   * @return an array of kdp values
-   */
-  const double *getKdp() const { return _kdp.data(); }
-  const double *getKdpZZdr() const { return _kdpZZdr.data(); }
-
-  // self-consistency conditioned result
-  const double *getKdpSC() const { return _kdpSC.data(); }
+  const vector<double> &getDeltaVec() const { return _delta; }
 
   /**
    * Get attenuation correction after calling compute()
@@ -336,7 +350,6 @@ private:
   vector<double> _snr;
   
   vector<double> _dbz;
-  vector<double> _dbzMax;
   vector<double> _dbzMedian;
 
   bool _rhohvAvailable;
@@ -451,13 +464,17 @@ private:
   
   void _computeKdp();
   void _computeAttenCorrection();
-  void _computeDbzMax();
 
   /// Compute the folding range by inspecting the phidp data
 
   void _computeFoldingRange();
   
-  /// Load runs with valid gates
+  // adjust input phidp for folding range
+
+  void _adjustPhidpBeforeUnfolding(vector<double> &phidp);
+  void _adjustPhidpAfterUnfolding(vector<double> &phidp);
+
+/// Load runs with valid gates
 
   int _findValidRuns();
 

@@ -278,7 +278,7 @@ RHOHV_field_name = "RHOHV_F";
 //
 // Type: string
 
-KDP_params_file_path = "./testing/KdpParams.test";
+KDP_params_file_path = "./testing/KdpParams.spol";
 
 //======================================================================
 //
@@ -500,7 +500,7 @@ KDP_write_debug_fields = TRUE;
 //
 // Type: string
 
-output_dir = "/tmp/cfradial/spol/kdp";
+output_dir = "/tmp/spol/cfradial/kdp";
 
 ///////////// output_filename_mode ////////////////////
 //
