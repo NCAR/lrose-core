@@ -1,0 +1,10 @@
+#! /bin/csh
+
+source ~/.cshrc.miniforge
+
+cd $HOME/git/lrose-core/codebase/apps/Radx/src/RadxKdp/testing
+
+HawkEye -params HawkEye.kdp.cow2 -f /tmp/cow2/cfradial/kdp/20250618/cfrad.20250618_011211.925_to_20250618_011226.165_COW2_SUR.nc
+
+
+

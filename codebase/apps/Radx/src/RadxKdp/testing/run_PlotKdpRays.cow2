@@ -1,0 +1,9 @@
+#! /bin/csh
+
+source ~/.cshrc.miniforge
+
+cd $HOME/git/lrose-core/codebase/apps/Radx/src/RadxKdp/testing
+
+./PlotKdpRays_py3.py  --width 600 --height 250 --file /tmp/cow2/kdp_ray_files/kdpray_20250618-011223.608_el-000.97_az-210.50_.txt
+
+

@@ -91,7 +91,6 @@ mode = FILELIST;
 //
 // Type: string
 
-input_dir = "$(HOME)/data/cswr/IOP15/COW2/cfradial";
 input_dir = "$(HOME)/data/cswr/IOP19/Cow2/cfradial";
 
 ///////////// input_file_search_ext ///////////////////
@@ -123,7 +122,7 @@ input_file_search_substr = "cfrad";
 //
 // Type: string
 
-start_time = "2015 06 26 00 00 00";
+start_time = "2025 06 18 00 00 00";
 
 ///////////// end_time ////////////////////////////////
 //
@@ -133,7 +132,7 @@ start_time = "2015 06 26 00 00 00";
 //
 // Type: string
 
-end_time = "2015 06 26 12 00 00";
+end_time = "2015 06 19 00 00 00";
 
 //======================================================================
 //
@@ -173,7 +172,7 @@ apply_strict_angle_limits = TRUE;
 //
 // Type: double
 
-lower_fixed_angle_limit = 1.5;
+lower_fixed_angle_limit = 0.3;
 
 ///////////// upper_fixed_angle_limit /////////////////
 //
@@ -181,7 +180,7 @@ lower_fixed_angle_limit = 1.5;
 //
 // Type: double
 
-upper_fixed_angle_limit = 2.0;
+upper_fixed_angle_limit = 1.0;
 
 //======================================================================
 //
@@ -212,7 +211,7 @@ SNR_available = TRUE;
 //
 // Type: string
 
-SNR_field_name = "SNRHC_F";
+SNR_field_name = "SNRHC";
 
 ///////////// noise_dbz_at_100km //////////////////////
 //
@@ -234,7 +233,7 @@ noise_dbz_at_100km = 0;
 //
 // Type: string
 
-DBZ_field_name = "DBZ_F";
+DBZ_field_name = "DBZHC";
 
 ///////////// ZDR_field_name //////////////////////////
 //
@@ -242,7 +241,7 @@ DBZ_field_name = "DBZ_F";
 //
 // Type: string
 
-ZDR_field_name = "ZDR_F";
+ZDR_field_name = "ZDR";
 
 ///////////// PHIDP_field_name ////////////////////////
 //
@@ -250,7 +249,7 @@ ZDR_field_name = "ZDR_F";
 //
 // Type: string
 
-PHIDP_field_name = "PHIDP_F";
+PHIDP_field_name = "PHIDP";
 
 ///////////// RHOHV_field_name ////////////////////////
 //
@@ -258,7 +257,7 @@ PHIDP_field_name = "PHIDP_F";
 //
 // Type: string
 
-RHOHV_field_name = "RHOHV_F";
+RHOHV_field_name = "RHOHV";
 
 //======================================================================
 //
@@ -279,7 +278,7 @@ RHOHV_field_name = "RHOHV_F";
 //
 // Type: string
 
-KDP_params_file_path = "./testing/KdpParams.test";
+KDP_params_file_path = "./testing/KdpParams.cband";
 
 //======================================================================
 //
@@ -435,38 +434,43 @@ copy_selected_input_fields_to_output = TRUE;
 
 copy_fields = {
   {
-    input_name = "SNRHC_F",
+    input_name = "SNRHC",
     output_name = "SNR"
   }
   ,
   {
-    input_name = "DBZ_F",
+    input_name = "DBZHC",
     output_name = "DBZ"
   }
   ,
   {
-    input_name = "VEL_F",
+    input_name = "VEL",
     output_name = "VEL"
   }
   ,
   {
-    input_name = "WIDTH_F",
+    input_name = "WIDTH",
     output_name = "WIDTH"
   }
   ,
   {
-    input_name = "ZDR_F",
+    input_name = "ZDR",
     output_name = "ZDR"
   }
   ,
   {
-    input_name = "PHIDP_F",
+    input_name = "PHIDP",
     output_name = "PHIDP"
   }
   ,
   {
-    input_name = "RHOHV_F",
+    input_name = "RHOHV",
     output_name = "RHOHV"
+  }
+  ,
+  {
+    input_name = "KDP",
+    output_name = "KDP_ORIG"
   }
 };
 
@@ -501,7 +505,7 @@ KDP_write_debug_fields = TRUE;
 //
 // Type: string
 
-output_dir = "/tmp/cfradial/spol/kdp";
+output_dir = "/tmp/cow2/cfradial/kdp";
 
 ///////////// output_filename_mode ////////////////////
 //
