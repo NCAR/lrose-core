@@ -789,6 +789,18 @@
     tt->comment_text = tdrpStrDup("Received power attenuation, and differential attenuation, occur whenever scattering occurs, but is of most importance at shorter wavelengths or in reqions of heavy precipition. We use the reference text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, Table 7.1, page 494, to provide the default coefficients from which to estimate the attenuation correction. You may also choose to specify these coefficients in this section.");
     tt++;
     
+    // Parameter 'KDP_use_attenuation_corrected_dbz_and_zdr'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("KDP_use_attenuation_corrected_dbz_and_zdr");
+    tt->descr = tdrpStrDup("Option to use attenuation-corrected fields for KDP calculations.");
+    tt->help = tdrpStrDup("This mostly affects the estimation of the self-consistency method for computing delta.");
+    tt->val_offset = (char *) &KDP_use_attenuation_corrected_dbz_and_zdr - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'KDP_specify_coefficients_for_attenuation_correction'
     // ctype is 'tdrp_bool_t'
     

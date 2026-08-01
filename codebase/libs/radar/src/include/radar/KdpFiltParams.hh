@@ -396,6 +396,8 @@ public:
 
   double KDP_self_con_Z_coeff_10cm;
 
+  tdrp_bool_t KDP_use_attenuation_corrected_dbz_and_zdr;
+
   tdrp_bool_t KDP_specify_coefficients_for_attenuation_correction;
 
   double KDP_dbz_attenuation_coefficient;
@@ -419,7 +421,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[30];
+  mutable TDRPtable _table[31];
 
   const char *_className;
 

@@ -278,7 +278,7 @@ RHOHV_field_name = "RHOHV";
 //
 // Type: string
 
-KDP_params_file_path = "./testing/KdpParams.xband";
+KDP_params_file_path = "./testing/KdpParams.dow7";
 
 //======================================================================
 //

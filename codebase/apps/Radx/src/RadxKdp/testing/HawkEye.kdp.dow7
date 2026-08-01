@@ -312,7 +312,16 @@ fields = {
   {
     label = "DBZ",
     raw_name = "DBZ",
-    filtered_name = "DBZHC_F",
+    filtered_name = "",
+    units = "dBZ",
+    color_map = "dbz.colors",
+    shortcut = "1"
+  }
+  ,
+  {
+    label = "DBZ_ATTEN_CORRECTED",
+    raw_name = "DBZ_ATTEN_CORRECTED",
+    filtered_name = "",
     units = "dBZ",
     color_map = "dbz.colors",
     shortcut = "1"
@@ -321,7 +330,7 @@ fields = {
   {
     label = "VEL",
     raw_name = "VEL",
-    filtered_name = "VEL_F",
+    filtered_name = "",
     units = "m/s",
     color_map = "vel.colors",
     shortcut = "3"
@@ -330,7 +339,7 @@ fields = {
   {
     label = "WIDTH",
     raw_name = "WIDTH",
-    filtered_name = "WIDTH_F",
+    filtered_name = "",
     units = "m/s",
     color_map = "width.colors",
     shortcut = "4"
@@ -339,7 +348,16 @@ fields = {
   {
     label = "ZDR",
     raw_name = "ZDR",
-    filtered_name = "ZDR_F",
+    filtered_name = "",
+    units = "dB",
+    color_map = "zdr.colors",
+    shortcut = "6"
+  }
+  ,
+  {
+    label = "ZDR_ATTEN_CORRECTED",
+    raw_name = "ZDR_ATTEN_CORRECTED",
+    filtered_name = "",
     units = "dB",
     color_map = "zdr.colors",
     shortcut = "6"
@@ -348,7 +366,7 @@ fields = {
   {
     label = "PHIDP",
     raw_name = "PHIDP",
-    filtered_name = "PHIDP_F",
+    filtered_name = "",
     units = "deg",
     color_map = "phidp.colors",
     shortcut = "7"
@@ -357,7 +375,7 @@ fields = {
   {
     label = "RHOHV",
     raw_name = "RHOHV",
-    filtered_name = "RHOHV_F",
+    filtered_name = "",
     units = "unitless",
     color_map = "rhohv.colors",
     shortcut = "8"
@@ -366,7 +384,7 @@ fields = {
   {
     label = "SNR",
     raw_name = "SNR",
-    filtered_name = "SNRHC_F",
+    filtered_name = "",
     units = "dB",
     color_map = "snr.colors",
     shortcut = "8"
@@ -384,7 +402,7 @@ fields = {
   {
     label = "KDP",
     raw_name = "KDP",
-    filtered_name = "KDP_F",
+    filtered_name = "",
     units = "deg/km",
     color_map = "kdp.colors",
     shortcut = "8"

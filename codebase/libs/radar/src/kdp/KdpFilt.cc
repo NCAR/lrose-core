@@ -282,6 +282,10 @@ int KdpFilt::compute(time_t timeSecs,
   
   _computeKdp();
 
+  // compute attenuation corrections
+
+  _computeAttenCorrection();
+  
   // load up conditional KDP from estimated kdp and kdpZZdr
 
   _loadKdpSC();
@@ -290,10 +294,6 @@ int KdpFilt::compute(time_t timeSecs,
   
   _censorNonValidKdp();
 
-  // compute attenuation corrections
-
-  _computeAttenCorrection();
-  
   // write ray file if requested
 
   if (_writeRayFile) {
@@ -472,8 +472,14 @@ void KdpFilt::_initArrays(const double *snr,
       _dbz[ii] = _missingValue;
     }
   }
-  for (int ii = 0; ii < _nGates; ii++) {
-    _dbzMedian[ii] = _dbz[ii];
+  if (_params.KDP_use_attenuation_corrected_dbz_and_zdr) {
+    for (int ii = 0; ii < _nGates; ii++) {
+      _dbzMedian[ii] = _dbz[ii];
+    }
+  } else {
+    for (int ii = 0; ii < _nGates; ii++) {
+      _dbzMedian[ii] = _dbz[ii];
+    }
   }
   FilterUtils::applyMedianFilter(_dbzMedian.data(), _nGates,
                                  _kdpZZdrMedianLen, _missingValue);
@@ -875,6 +881,26 @@ void KdpFilt::_computeAttenCorrection()
 
   } // ii
 
+  // set the median value of DBZ to be used
+  
+  if (_params.KDP_use_attenuation_corrected_dbz_and_zdr) {
+    std::copy(_dbzCorrected.begin(), _dbzCorrected.end(), _dbzMedian.begin());
+  } else {
+    std::copy(_dbz.begin(), _dbz.end(), _dbzMedian.begin());
+  }
+  FilterUtils::applyMedianFilter(_dbzMedian.data(), _nGates,
+                                 _kdpZZdrMedianLen, _missingValue);
+
+  // set the median value of ZDR to be used
+  
+  if (_params.KDP_use_attenuation_corrected_dbz_and_zdr) {
+    std::copy(_zdrCorrected.begin(), _zdrCorrected.end(), _zdrMedian.begin());
+  } else {
+    std::copy(_zdr.begin(), _zdr.end(), _zdrMedian.begin());
+  }
+  FilterUtils::applyMedianFilter(_zdrMedian.data(), _nGates,
+                                 _kdpZZdrMedianLen, _missingValue);
+
 }
 
 /////////////////////////////////////////////
@@ -1254,7 +1280,7 @@ double KdpFilt::_computeKdpFromZZdr(double dbz,
       zdr == _missingValue) {
     return 0.0;
   }
-
+  
   double zzLin = pow(10.0, dbz / 10.0);
 
   if (zdr < 0.1) {
@@ -1266,6 +1292,12 @@ double KdpFilt::_computeKdpFromZZdr(double dbz,
   double zdrTerm = pow(zdrLin, _kdpZdrExpon);
   double kdpEst = zTerm * zdrTerm * _kdpZZdrCoeff;
 
+  if (dbz > 55) 
+  {
+    cerr << "11111111111111 _kdpZExpon, _kdpZdrExpon, _kdpZZdrCoeff, dbz, zdr, kdpEst: " << _kdpZExpon << ", " <<  _kdpZdrExpon << ", " <<  _kdpZZdrCoeff << ", " <<  dbz << ", " <<  zdr << ", " <<  kdpEst << endl;
+  }
+
+  
   return kdpEst;
   
 }
