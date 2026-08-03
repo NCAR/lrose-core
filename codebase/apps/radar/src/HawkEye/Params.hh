@@ -482,6 +482,11 @@ public:
 
   char* archive_data_url;
 
+  tdrp_bool_t check_scan_name;
+
+  char* *_scan_name_list;
+  int scan_name_list_n;
+
   show_status_t show_status_in_gui;
 
   char* color_scale_dir;
@@ -759,7 +764,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[175];
+  mutable TDRPtable _table[178];
 
   const char *_className;
 

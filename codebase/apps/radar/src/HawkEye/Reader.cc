@@ -101,9 +101,27 @@ void Reader::_addRay(RadxRay *ray)
     _rayQueue.pop_back();
   }
 
+  // check for scan name
+
+  if (_params.check_scan_name) {
+    string rayScanName = ray->getScanName();
+    bool valid = false;
+    for (int ii = 0; ii < _params.scan_name_list_n; ii++) {
+      if (rayScanName.compare(_params._scan_name_list[ii]) == 0) {
+        valid = true;
+        break;
+      }
+    }
+    // if not valid, delete the ray and return
+    if (!valid) {
+      delete ray;
+      return;
+    }
+  }
+
   _rayQueue.push_front(ray);
   AllocCheck::inst().addAlloc();
-
+  
 }
 
 

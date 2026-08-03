@@ -119,6 +119,22 @@ paramdef string {
 } archive_data_url;
 
 commentdef {
+  p_header = "INPUT DATA FILTERS";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to only plot data for given scan names.";
+  p_help = "If TRUE, the incoming moments data will be checked for scan name match. Only beams with the listed scan names will be displayed. See 'scan_name_list'.";
+} check_scan_name;
+
+paramdef string {
+  p_default = { "scan_name_1", "scan_name_2", "scan_name_3" };
+  p_descr = "List of valid scan names.";
+  p_help = "Only beams with scan names on this list will be displayed. See 'check_scan_name'.";
+} scan_name_list[];
+
+commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
 }
 
