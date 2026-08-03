@@ -123,7 +123,7 @@ commentdef {
 }
 
 paramdef boolean {
-  p_default = TRUE;
+  p_default = FALSE;
   p_descr = "Option to only plot data for given scan names.";
   p_help = "If TRUE, the incoming moments data will be checked for scan name match. Only beams with the listed scan names will be displayed. See 'scan_name_list'.";
 } check_scan_name;

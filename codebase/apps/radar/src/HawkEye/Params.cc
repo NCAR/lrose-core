@@ -800,7 +800,7 @@
     tt->descr = tdrpStrDup("Option to only plot data for given scan names.");
     tt->help = tdrpStrDup("If TRUE, the incoming moments data will be checked for scan name match. Only beams with the listed scan names will be displayed. See 'scan_name_list'.");
     tt->val_offset = (char *) &check_scan_name - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'scan_name_list'
