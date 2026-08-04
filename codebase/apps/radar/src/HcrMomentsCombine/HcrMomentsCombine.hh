@@ -150,16 +150,17 @@ private:
   RadxTime _nextDwellMidTime;
   RadxTime _thisDwellMidTime;
 
-  vector<RadxRay *> _dwellRays;      // all rays
   vector<RadxRay *> _dwellRaysSS;    // short pulse, short PRT
   vector<RadxRay *> _dwellRaysLL;    // long pulse, long PRT
   vector<RadxRay *> _dwellRaysLS;    // long pulse, short PRT
-  vector<RadxRay *> _dwellRaysFixed; // fixed PRT
+  vector<RadxRay *> _dwellRaysShort; // fixed short PRT
+  vector<RadxRay *> _dwellRaysLong;  // fixed long PRT
 
   RadxVol _dwellVolSS;
   RadxVol _dwellVolLL;
   RadxVol _dwellVolLS;
-  RadxVol _dwellVolFixed;
+  RadxVol _dwellVolShort;
+  RadxVol _dwellVolLong;
   
   RadxField::StatsMethod_t _globalMethod;
   vector<RadxField::NamedStatsMethod> _namedMethods;
@@ -192,7 +193,8 @@ private:
   
   RadxRay *_combineDwellTriple();
   RadxRay *_combineDwellDual();
-  RadxRay *_combineDwellFixed();
+  RadxRay *_combineDwellShort();
+  RadxRay *_combineDwellLong();
 
   RadxField *_unfoldVel(RadxField *velShortPrt,
                         RadxField *velLongPrt);
@@ -201,6 +203,8 @@ private:
                                          RadxField *velRawShort,
                                          RadxField *velRawLong,
                                          RadxField *velUnfolded);
+  
+  void _removeField(vector<RadxRay *> dwellRays, string fieldName);
   
   double _correctForNyquist(double vel, double nyquist);
   

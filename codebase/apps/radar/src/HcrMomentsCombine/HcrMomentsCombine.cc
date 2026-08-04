@@ -302,13 +302,17 @@ void HcrMomentsCombine::_processDwell()
              _dwellRaysLL.size() > 0) {
     
     rayCombined = _combineDwellDual();
+    
+  } else if (_dwellRaysShort.size() > 0) {
 
-  } else if (_dwellRaysFixed.size() > 0) {
+    rayCombined = _combineDwellShort();
 
-    rayCombined = _combineDwellFixed();
+  } else if (_dwellRaysLong.size() > 0) {
+
+    rayCombined = _combineDwellLong();
 
   }
-  
+
   if (rayCombined == nullptr) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "WARNING - HcrMomentsCombine::_processDwell" << endl;
@@ -318,7 +322,7 @@ void HcrMomentsCombine::_processDwell()
   }
 
   // create output message from combined ray
-  
+
   RadxMsg msg;
   rayCombined->serialize(msg);
   if ((_params.debug >= Params::DEBUG_VERBOSE) ||
@@ -599,8 +603,6 @@ int HcrMomentsCombine::_initializeInput()
 void HcrMomentsCombine::_addDwellRay(RadxRay *ray)
 {
   
-  _dwellRays.push_back(ray);
-  
   string dwellLabel = ray->getScanName();
   
   if (dwellLabel.find(_params.short_short_dwell_label) != string::npos) {
@@ -619,12 +621,12 @@ void HcrMomentsCombine::_addDwellRay(RadxRay *ray)
   }
   
   if (dwellLabel.find(_params.short_fixed_dwell_label) != string::npos) {
-    _dwellRaysFixed.push_back(ray);
+    _dwellRaysShort.push_back(ray);
     return;
   }
   
   if (dwellLabel.find(_params.long_fixed_dwell_label) != string::npos) {
-    _dwellRaysFixed.push_back(ray);
+    _dwellRaysLong.push_back(ray);
     return;
   }
   
@@ -635,8 +637,6 @@ void HcrMomentsCombine::_addDwellRay(RadxRay *ray)
 
 void HcrMomentsCombine::_clearDwellRays()
 {
-
-  _dwellRays.clear();
 
   for (size_t ii = 0; ii < _dwellRaysSS.size(); ii++) {
     delete _dwellRaysSS[ii];
@@ -653,10 +653,15 @@ void HcrMomentsCombine::_clearDwellRays()
   }
   _dwellRaysLS.clear();
   
-  for (size_t ii = 0; ii < _dwellRaysFixed.size(); ii++) {
-    delete _dwellRaysFixed[ii];
+  for (size_t ii = 0; ii < _dwellRaysShort.size(); ii++) {
+    delete _dwellRaysShort[ii];
   }
-  _dwellRaysFixed.clear();
+  _dwellRaysShort.clear();
+  
+  for (size_t ii = 0; ii < _dwellRaysLong.size(); ii++) {
+    delete _dwellRaysLong[ii];
+  }
+  _dwellRaysLong.clear();
   
 }
 
@@ -693,12 +698,21 @@ void HcrMomentsCombine::_printDwellRayInfo(ostream &out)
     }
     cerr << "========================================" << endl;
   }
-  if (_dwellRaysFixed.size() > 0) {
-    cerr << "=================>> fixed PRT ray count: " << _dwellRaysFixed.size() << endl;
-    for (size_t ii = 0; ii < _dwellRaysFixed.size(); ii++) {
+  if (_dwellRaysShort.size() > 0) {
+    cerr << "=================>> short PRT ray count: " << _dwellRaysShort.size() << endl;
+    for (size_t ii = 0; ii < _dwellRaysShort.size(); ii++) {
       cerr << "  long short ray time: "
-           << _dwellRaysFixed[ii]->getRadxTime().asString(6) << ", "
-           <<  _dwellRaysFixed[ii] << endl;
+           << _dwellRaysShort[ii]->getRadxTime().asString(6) << ", "
+           <<  _dwellRaysShort[ii] << endl;
+    }
+    cerr << "========================================" << endl;
+  }
+  if (_dwellRaysLong.size() > 0) {
+    cerr << "=================>> long PRT ray count: " << _dwellRaysLong.size() << endl;
+    for (size_t ii = 0; ii < _dwellRaysLong.size(); ii++) {
+      cerr << "  long short ray time: "
+           << _dwellRaysLong[ii]->getRadxTime().asString(6) << ", "
+           <<  _dwellRaysLong[ii] << endl;
     }
     cerr << "========================================" << endl;
   }
@@ -745,17 +759,6 @@ int HcrMomentsCombine::_readNextDwell()
       break;
     } else {
       _addDwellRay(ray);
-    }
-  }
-  
-  // remove the corrected velocity field if it exists, since it will
-  // be replaced by values computed in this app
-  
-  for (size_t ii = 0; ii < _dwellRays.size(); ii++) {
-    RadxRay *ray = _dwellRays[ii];
-    RadxField *velCorr = ray->getField(_params.input_vel_corr_field_name);
-    if (velCorr != nullptr) {
-      ray->removeField(_params.input_vel_corr_field_name);
     }
   }
   
@@ -889,9 +892,15 @@ RadxRay *HcrMomentsCombine::_computeMeanMoments(vector<RadxRay *> &dwellRays,
   // add rays to vol
   
   dwellVol.clear();
+  int nGatesMax = 0;
   for (size_t iray = 0; iray < dwellRays.size(); iray++) {
     dwellVol.addRay(dwellRays[iray]);
+    if (dwellRays[iray]->getNGates() > nGatesMax) {
+      nGatesMax = dwellRays[iray]->getNGates();
+    }
   }
+  // dwellVol.setNGates(nGatesMax);
+  dwellVol.setNGatesConstant();
   dwellVol.loadVolumeInfoFromRays();
 
   // ownership of rays passed to vol, which will free them
@@ -903,7 +912,6 @@ RadxRay *HcrMomentsCombine::_computeMeanMoments(vector<RadxRay *> &dwellRays,
   RadxRay *ray =
     dwellVol.computeFieldStats(_globalMethod, _namedMethods,
                                _params.dwell_stats_max_fraction_missing);
-
   return ray;
 
 }
@@ -948,11 +956,18 @@ RadxRay *HcrMomentsCombine::_combineDwellTriple()
     return nullptr;
   }
   
+  // remove the corrected velocity field if it exists, since it will
+  // be replaced by values computed in this app
+
+  _removeField(_dwellRaysSS, _params.input_vel_corr_field_name);
+  _removeField(_dwellRaysLL, _params.input_vel_corr_field_name);
+  _removeField(_dwellRaysLS, _params.input_vel_corr_field_name);
+  
   // rename short fields and add to the long moments ray
 
   vector<RadxField *> fieldsSS = raySS->getFields();
   for (size_t ifield = 0; ifield < fieldsSS.size(); ifield++) {
-    RadxField *fld = fieldsSS[ifield];
+    RadxField *fld = new RadxField(*fieldsSS[ifield]);
     string newName = fld->getName() + _params.suffix_for_short_pulse_fields;
     fld->setName(newName);
     rayLL->addField(fld);
@@ -964,7 +979,7 @@ RadxRay *HcrMomentsCombine::_combineDwellTriple()
   _initDualPrt(raySS->getPrtSec(), rayLL->getPrtSec());
 
   {
-    
+
     RadxField *velShort = rayLS->getField(_params.input_vel_raw_field_name);
     RadxField *velLong = rayLL->getField(_params.input_vel_raw_field_name);
     
@@ -1058,6 +1073,12 @@ RadxRay *HcrMomentsCombine::_combineDwellDual()
     return nullptr;
   }
   
+  // remove the corrected velocity field if it exists, since it will
+  // be replaced by values computed in this app
+
+  _removeField(_dwellRaysSS, _params.input_vel_corr_field_name);
+  _removeField(_dwellRaysLL, _params.input_vel_corr_field_name);
+  
   // rename short fields and add to the long moments ray
 
   vector<RadxField *> fieldsSS = raySS->getFields();
@@ -1108,43 +1129,101 @@ RadxRay *HcrMomentsCombine::_combineDwellDual()
 }
 
 /////////////////////////////////////////////////////////////////
-// combine dwell rays from fixed PRT
+// combine dwell rays from fixed short PRT
 // returns pointer to combined ray - this must be freed by caller.
 
-RadxRay *HcrMomentsCombine::_combineDwellFixed()
+RadxRay *HcrMomentsCombine::_combineDwellShort()
 
 {
 
   // check that the dwell has constant PRT
   
-  if (_checkDwellConstantPrt(_dwellRaysFixed)) {
+  if (_checkDwellConstantPrt(_dwellRaysShort)) {
     return nullptr;
   }
 
   // compute the mean moments for the fixed PRT dwell
   
-  RadxRay *rayFixed = _computeMeanMoments(_dwellRaysFixed, _dwellVolFixed);
-  if (rayFixed == nullptr) {
+  RadxRay *rayShort = _computeMeanMoments(_dwellRaysShort, _dwellVolShort);
+  if (rayShort == nullptr) {
     return nullptr;
   }
   
+  // remove the corrected velocity field if it exists, since it will
+  // be replaced by values computed in this app
+
+  _removeField(_dwellRaysShort, _params.input_vel_corr_field_name);
+
   // correct the velocity for platform motion
 
-  RadxField *velFixedPrt = rayFixed->getField(_params.input_vel_raw_field_name);
-    
-  if (velFixedPrt != nullptr) {
-    _computeVelCorrectedForVertMotion(rayFixed, velFixedPrt, nullptr, nullptr);
+  RadxField *velShort = rayShort->getField(_params.input_vel_raw_field_name);
+  if (velShort != nullptr) {
+    _computeVelCorrectedForVertMotion(rayShort, velShort, nullptr, nullptr);
   }
   
   // set the combined time
   
-  rayFixed->setTime(_thisDwellMidTime);
+  rayShort->setTime(_thisDwellMidTime);
+  
+  // rename fields to short
+  
+  vector<RadxField *> fieldsShort = rayShort->getFields();
+  for (size_t ifield = 0; ifield < fieldsShort.size(); ifield++) {
+    RadxField *fld = fieldsShort[ifield];
+    string newName = fld->getName() + _params.suffix_for_short_pulse_fields;
+    fld->setName(newName);
+  }
   
   // free up memory
-
+  
   _clearDwellRays();
 
-  return rayFixed;
+  return rayShort;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// combine dwell rays from fixed long PRT
+// returns pointer to combined ray - this must be freed by caller.
+
+RadxRay *HcrMomentsCombine::_combineDwellLong()
+
+{
+
+  // check that the dwell has constant PRT
+  
+  if (_checkDwellConstantPrt(_dwellRaysLong)) {
+    return nullptr;
+  }
+
+  // compute the mean moments for the fixed PRT dwell
+  
+  RadxRay *rayLong = _computeMeanMoments(_dwellRaysLong, _dwellVolLong);
+  if (rayLong == nullptr) {
+    return nullptr;
+  }
+  
+  // remove the corrected velocity field if it exists, since it will
+  // be replaced by values computed in this app
+
+  _removeField(_dwellRaysLong, _params.input_vel_corr_field_name);
+
+  // correct the velocity for platform motion
+
+  RadxField *velLong = rayLong->getField(_params.input_vel_raw_field_name);
+  if (velLong != nullptr) {
+    _computeVelCorrectedForVertMotion(rayLong, nullptr, velLong, nullptr);
+  }
+  
+  // set the combined time
+  
+  rayLong->setTime(_thisDwellMidTime);
+  
+  // free up memory
+  
+  _clearDwellRays();
+
+  return rayLong;
 
 }
 
@@ -1164,9 +1243,10 @@ RadxField *HcrMomentsCombine::_unfoldVel(RadxField *velShortPrt,
   velShortPrt->convertToFl32();
   velLongPrt->convertToFl32();
 
-  // copy long prt field to get unfolded
+  // copy short prt field as the unfolded template since
+  // it has fewer gates than the long
   
-  RadxField *velUnfold = new RadxField(*velLongPrt);
+  RadxField *velUnfold = new RadxField(*velShortPrt);
 
   // compute the unfolded velocity
 
@@ -1200,7 +1280,7 @@ RadxField *HcrMomentsCombine::_unfoldVel(RadxField *velShortPrt,
   double nyquistDiff = _nyquistShort - _nyquistLong;
 
   for (size_t ii = 0; ii < nGates; ii++) {
-    
+
     double vel_diff = dataShort[ii] - dataLong[ii];
     double nyquistIntervalShort = (vel_diff / nyquistDiff) / 2.0;
     int ll = (int) floor(nyquistIntervalShort + 0.5);
@@ -1349,13 +1429,13 @@ void HcrMomentsCombine::_computeVelCorrectedForVertMotion(RadxRay *ray,
 
     Radx::fl32 missShort = velShort->getMissingFl32();
     Radx::fl32 *dataShort = velShort->getDataFl32();
-    
-    for (size_t ii = 0; ii < ray->getNGates(); ii++) {
+
+    for (size_t ii = 0; ii < velShort->getNPoints(); ii++) {
       
-      double valShort = dataShort[ii];
-      if (valShort != missShort) {
-        double shortCorrected = _correctForNyquist(valShort + vertCorr, _nyquistShort);
-        dataShort[ii] = shortCorrected;
+      double val = dataShort[ii];
+      if (val != missShort) {
+        double corrected = _correctForNyquist(val + vertCorr, _nyquistShort);
+        dataShort[ii] = corrected;
       }
       
     } // ii
@@ -1398,6 +1478,24 @@ void HcrMomentsCombine::_computeVelCorrectedForVertMotion(RadxRay *ray,
   
 }
 
+///////////////////////////////////////////////////////////
+// remove a specified field from a set of dwell rays
+
+void HcrMomentsCombine::_removeField(vector<RadxRay *> dwellRays,
+                                     string fieldName)
+  
+{
+  
+  for (size_t ii = 0; ii < dwellRays.size(); ii++) {
+    RadxRay *ray = dwellRays[ii];
+    RadxField *fld = ray->getField(fieldName);
+    if (fld != nullptr) {
+      ray->removeField(fieldName);
+    }
+  }
+
+}
+  
 /////////////////////////////////////////////////
 // correct velocity for nyquist
   
