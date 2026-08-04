@@ -150,7 +150,9 @@ add_dependencies(${PROJECT_NAME} tdrp_gen)
 
 # install
 
-INSTALL(TARGETS ${PROJECT_NAME}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-       )
-
+install(
+    TARGETS SpolCal2Xml
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)

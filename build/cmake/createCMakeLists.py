@@ -1144,13 +1144,30 @@ def writeCMakeListsLib(libName, libSrcDir,
 
     fo.write("# install\n")
     fo.write("\n")
-    fo.write("INSTALL(TARGETS %s\n" % libName)
-    fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib\n")
-    fo.write("       )\n")
-    fo.write("INSTALL(DIRECTORY include/%s\n" % libName)
-    fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/include\n")
-    fo.write("       )\n")
-    fo.write("\n")
+#    fo.write("INSTALL(TARGETS %s\n" % libName)
+#    fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib\n")
+#    fo.write("       )\n")
+#    fo.write("INSTALL(DIRECTORY include/%s\n" % libName)
+#    fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/include\n")
+#    fo.write("       )\n")
+#    fo.write("\n")
+
+    fo.write("install(\n");
+    fo.write("    TARGETS %s\n" % libName);
+    fo.write("    RUNTIME DESTINATION bin\n")
+    fo.write("    LIBRARY DESTINATION lib\n")
+    fo.write("    ARCHIVE DESTINATION lib\n")
+    fo.write(")\n")
+
+    fo.write('if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")\n')
+    fo.write("  install(\n");
+    fo.write("      DIRECTORY include/\n")
+    fo.write("      DESTINATION include\n")
+    fo.write('      PATTERN "*.h"\n')
+    fo.write('      PATTERN "*.hh"\n')
+    fo.write('      PATTERN "*.hpp"\n')
+    fo.write("  )\n")
+    fo.write("endif()\n")
 
     fo.close
     return
@@ -1662,10 +1679,17 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     
     fo.write("# install\n")
     fo.write("\n")
-    fo.write("INSTALL(TARGETS ${PROJECT_NAME}\n")
-    fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/bin\n")
-    fo.write("       )\n")
-    fo.write("\n")
+    fo.write("install(\n")
+    fo.write("    TARGETS %s\n" % appName)
+    fo.write("    RUNTIME DESTINATION bin\n")
+    fo.write("    LIBRARY DESTINATION lib\n")
+    fo.write("    ARCHIVE DESTINATION lib\n")
+    fo.write(")\n")
+
+    #fo.write("INSTALL(TARGETS ${PROJECT_NAME}\n")
+    #fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/bin\n")
+    #fo.write("       )\n")
+    #fo.write("\n")
 
     fo.close
     return

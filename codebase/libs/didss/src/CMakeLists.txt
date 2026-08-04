@@ -95,10 +95,18 @@ endif(APPLE)
 
 # install
 
-INSTALL(TARGETS didss
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-       )
-INSTALL(DIRECTORY include/didss
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include
-       )
-
+install(
+    TARGETS didss
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")
+  install(
+      DIRECTORY include/
+      DESTINATION include
+      PATTERN "*.h"
+      PATTERN "*.hh"
+      PATTERN "*.hpp"
+  )
+endif()

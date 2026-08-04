@@ -196,10 +196,18 @@ endif(APPLE)
 
 # install
 
-INSTALL(TARGETS Mdv
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-       )
-INSTALL(DIRECTORY include/Mdv
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include
-       )
-
+install(
+    TARGETS Mdv
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")
+  install(
+      DIRECTORY include/
+      DESTINATION include
+      PATTERN "*.h"
+      PATTERN "*.hh"
+      PATTERN "*.hpp"
+  )
+endif()
