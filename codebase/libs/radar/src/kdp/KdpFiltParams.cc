@@ -789,76 +789,160 @@
     tt->comment_text = tdrpStrDup("Received power attenuation, and differential attenuation, occur whenever scattering occurs, but is of most importance at shorter wavelengths or in reqions of heavy precipition. We use the reference text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, Table 7.1, page 494, to provide the default coefficients from which to estimate the attenuation correction. You may also choose to specify these coefficients in this section.");
     tt++;
     
-    // Parameter 'KDP_use_attenuation_corrected_dbz_and_zdr'
+    // Parameter 'KDP_correct_dbz_and_zdr_for_attenuation'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_use_attenuation_corrected_dbz_and_zdr");
+    tt->param_name = tdrpStrDup("KDP_correct_dbz_and_zdr_for_attenuation");
     tt->descr = tdrpStrDup("Option to use attenuation-corrected fields for KDP calculations.");
-    tt->help = tdrpStrDup("This mostly affects the estimation of the self-consistency method for computing delta.");
-    tt->val_offset = (char *) &KDP_use_attenuation_corrected_dbz_and_zdr - &_start_;
+    tt->help = tdrpStrDup("This affects the estimation of the self-consistency method. We compute the dbz and zdr corrections based on KDP in range.\n\nDBZ_correction = dbzCoeff * KDP ^ dbzExpon.\n\nZDR_correction = zdrCoeff * KDP ^ zdrCoeff.");
+    tt->val_offset = (char *) &KDP_correct_dbz_and_zdr_for_attenuation - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'KDP_specify_coefficients_for_attenuation_correction'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'sband_atten'
+    // ctype is '_atten_params_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_specify_coefficients_for_attenuation_correction");
-    tt->descr = tdrpStrDup("Option to specify the coefficients and exponents.");
-    tt->help = tdrpStrDup("If false, the default coefficients will be determined for the radar wavelength.");
-    tt->val_offset = (char *) &KDP_specify_coefficients_for_attenuation_correction - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("sband_atten");
+    tt->descr = tdrpStrDup("Attenuation parameters for S-band");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &sband_atten - &_start_;
+    tt->struct_def.name = tdrpStrDup("atten_params_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("reference");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &sband_atten.reference - (char *) &sband_atten;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("dbz_coeff");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &sband_atten.dbz_coeff - (char *) &sband_atten;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("dbz_expon");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &sband_atten.dbz_expon - (char *) &sband_atten;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("zdr_coeff");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &sband_atten.zdr_coeff - (char *) &sband_atten;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &sband_atten.zdr_expon - (char *) &sband_atten;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494");
+      tt->struct_vals[1].d = 0.017;
+      tt->struct_vals[2].d = 0.84;
+      tt->struct_vals[3].d = 0.003;
+      tt->struct_vals[4].d = 1.05;
     tt++;
     
-    // Parameter 'KDP_dbz_attenuation_coefficient'
-    // ctype is 'double'
+    // Parameter 'cband_atten'
+    // ctype is '_atten_params_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_dbz_attenuation_coefficient");
-    tt->descr = tdrpStrDup("Coefficient for computing DBZ attenuation correction.");
-    tt->help = tdrpStrDup("Default is 0.017. See Bringi and Chandrasekar, Table 7.1, page 494.");
-    tt->val_offset = (char *) &KDP_dbz_attenuation_coefficient - &_start_;
-    tt->single_val.d = 0.017;
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("cband_atten");
+    tt->descr = tdrpStrDup("Attenuation parameters for C-band");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cband_atten - &_start_;
+    tt->struct_def.name = tdrpStrDup("atten_params_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("reference");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &cband_atten.reference - (char *) &cband_atten;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("dbz_coeff");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &cband_atten.dbz_coeff - (char *) &cband_atten;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("dbz_expon");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &cband_atten.dbz_expon - (char *) &cband_atten;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("zdr_coeff");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &cband_atten.zdr_coeff - (char *) &cband_atten;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &cband_atten.zdr_expon - (char *) &cband_atten;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494");
+      tt->struct_vals[1].d = 0.073;
+      tt->struct_vals[2].d = 0.99;
+      tt->struct_vals[3].d = 0.013;
+      tt->struct_vals[4].d = 1.23;
     tt++;
     
-    // Parameter 'KDP_dbz_attenuation_exponent'
-    // ctype is 'double'
+    // Parameter 'xband_atten'
+    // ctype is '_atten_params_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_dbz_attenuation_exponent");
-    tt->descr = tdrpStrDup("Exponent for computing DBZ attenuation correction.");
-    tt->help = tdrpStrDup("Default is 0.84. See Bringi and Chandrasekar, Table 7.1, page 494.");
-    tt->val_offset = (char *) &KDP_dbz_attenuation_exponent - &_start_;
-    tt->single_val.d = 0.84;
-    tt++;
-    
-    // Parameter 'KDP_zdr_attenuation_coefficient'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_zdr_attenuation_coefficient");
-    tt->descr = tdrpStrDup("Coefficient for computing ZDR attenuation correction.");
-    tt->help = tdrpStrDup("Default is 0.003. See Bringi and Chandrasekar, Table 7.1, page 494.");
-    tt->val_offset = (char *) &KDP_zdr_attenuation_coefficient - &_start_;
-    tt->single_val.d = 0.003;
-    tt++;
-    
-    // Parameter 'KDP_zdr_attenuation_exponent'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_zdr_attenuation_exponent");
-    tt->descr = tdrpStrDup("Exponent for computing ZDR attenuation correction.");
-    tt->help = tdrpStrDup("Default is 1.05. See Bringi and Chandrasekar, Table 7.1, page 494.");
-    tt->val_offset = (char *) &KDP_zdr_attenuation_exponent - &_start_;
-    tt->single_val.d = 1.05;
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("xband_atten");
+    tt->descr = tdrpStrDup("Attenuation parameters for X-band");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &xband_atten - &_start_;
+    tt->struct_def.name = tdrpStrDup("atten_params_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("reference");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &xband_atten.reference - (char *) &xband_atten;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("dbz_coeff");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &xband_atten.dbz_coeff - (char *) &xband_atten;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("dbz_expon");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &xband_atten.dbz_expon - (char *) &xband_atten;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("zdr_coeff");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &xband_atten.zdr_coeff - (char *) &xband_atten;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &xband_atten.zdr_expon - (char *) &xband_atten;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494");
+      tt->struct_vals[1].d = 0.233;
+      tt->struct_vals[2].d = 1.02;
+      tt->struct_vals[3].d = 0.033;
+      tt->struct_vals[4].d = 1.15;
     tt++;
     
     // Parameter 'Comment 5'

@@ -70,14 +70,6 @@ KdpFilt::KdpFilt()
   _elevDeg = -9999;
   _azDeg = -9999;
 
-  // initialize attenuation correction for Sband
-
-  _dbzAttenCoeff = 0.017;
-  _dbzAttenExpon = 0.84;
-  _zdrAttenCoeff = 0.003;
-  _zdrAttenExpon = 1.05;
-  _attenCoeffsSpecified = false;
-
   // initialize computation of KDP from Z and ZDR
 
   _kdpZExpon = 1.0;
@@ -112,22 +104,6 @@ void KdpFilt::setWriteRayFile(bool state /* = true */,
 
 }
   
-//////////////////////////////////////////
-// Set attenuation coefficients
-
-void KdpFilt::setAttenCoeffs(double dbzCoeff, double dbzExpon,
-                             double zdrCoeff, double zdrExpon)
-
-{
-
-  _dbzAttenCoeff = dbzCoeff;
-  _dbzAttenExpon = dbzExpon;
-  _zdrAttenCoeff = zdrCoeff;
-  _zdrAttenExpon = zdrExpon;
-  _attenCoeffsSpecified = true;
-
-}
-  
 ////////////////////////////////////////////
 // Set processing options from params object
 
@@ -135,13 +111,6 @@ void KdpFilt::setParams(const KdpFiltParams &params)
 {
 
   _params = params;
-
-  if (params.KDP_specify_coefficients_for_attenuation_correction) {
-    setAttenCoeffs(params.KDP_dbz_attenuation_coefficient,
-                   params.KDP_dbz_attenuation_exponent,
-                   params.KDP_zdr_attenuation_coefficient,
-                   params.KDP_zdr_attenuation_exponent);
-  }
 
   // initialize KDP object
 
@@ -214,32 +183,6 @@ int KdpFilt::compute(time_t timeSecs,
   // set wavelength
 
   _wavelengthCm = wavelengthCm;
-
-  // set attenuation coefficients from wavelenth if
-  // not previously specified by caller
-  // Ref: Bringi and Chandrasekar, Table 7.1, p494.
-
-  if (!_attenCoeffsSpecified) {
-    if (_wavelengthCm < 4) {
-      // x band
-      _dbzAttenCoeff = 0.233;
-      _dbzAttenExpon = 1.02;
-      _zdrAttenCoeff = 0.033;
-      _zdrAttenExpon = 1.15;
-    } else if (_wavelengthCm < 7) {
-      // C band
-      _dbzAttenCoeff = 0.073;
-      _dbzAttenExpon = 0.99;
-      _zdrAttenCoeff = 0.013;
-      _zdrAttenExpon = 1.23;
-    } else {
-      // S band
-      _dbzAttenCoeff = 0.017;
-      _dbzAttenExpon = 0.84;
-      _zdrAttenCoeff = 0.003;
-      _zdrAttenExpon = 1.05;
-    }
-  }
 
   // set range details
 
@@ -472,7 +415,7 @@ void KdpFilt::_initArrays(const double *snr,
       _dbz[ii] = _missingValue;
     }
   }
-  if (_params.KDP_use_attenuation_corrected_dbz_and_zdr) {
+  if (_params.KDP_correct_dbz_and_zdr_for_attenuation) {
     for (int ii = 0; ii < _nGates; ii++) {
       _dbzMedian[ii] = _dbz[ii];
     }
@@ -862,8 +805,8 @@ void KdpFilt::_computeAttenCorrection()
     double zdrCorr = 0.0;
     
     if (_validForKdp[ii] && kdp != _missingValue && kdp > 0) {
-      dbzCorr = _dbzAttenCoeff * pow(kdp, _dbzAttenExpon);
-      zdrCorr = _zdrAttenCoeff * pow(kdp, _zdrAttenExpon);
+      dbzCorr = _getDbzAttenCoeff() * pow(kdp, _getDbzAttenExpon());
+      zdrCorr = _getZdrAttenCoeff() * pow(kdp, _getZdrAttenExpon());
     }
 
     sumDbzCorr += (dbzCorr * _gateSpacingKm);
@@ -883,7 +826,7 @@ void KdpFilt::_computeAttenCorrection()
 
   // set the median value of DBZ to be used
   
-  if (_params.KDP_use_attenuation_corrected_dbz_and_zdr) {
+  if (_params.KDP_correct_dbz_and_zdr_for_attenuation) {
     std::copy(_dbzCorrected.begin(), _dbzCorrected.end(), _dbzMedian.begin());
   } else {
     std::copy(_dbz.begin(), _dbz.end(), _dbzMedian.begin());
@@ -893,7 +836,7 @@ void KdpFilt::_computeAttenCorrection()
 
   // set the median value of ZDR to be used
   
-  if (_params.KDP_use_attenuation_corrected_dbz_and_zdr) {
+  if (_params.KDP_correct_dbz_and_zdr_for_attenuation) {
     std::copy(_zdrCorrected.begin(), _zdrCorrected.end(), _zdrMedian.begin());
   } else {
     std::copy(_zdr.begin(), _zdr.end(), _zdrMedian.begin());
@@ -1894,6 +1837,73 @@ double KdpFilt::_getPlotVal(double val, double valIfMissing)
     return valIfMissing;
   } else {
     return val;
+  }
+}
+
+//////////////////////////////////////////////
+// get atten parameters, based on wavelength
+
+double KdpFilt::_getDbzAttenCoeff()
+
+{
+  
+  if (_wavelengthCm < 4) {
+    // X band
+    return _params.xband_atten.dbz_coeff;
+  } else if (_wavelengthCm < 7) {
+    // C band
+    return _params.cband_atten.dbz_coeff;
+  } else {
+    // S band
+    return _params.sband_atten.dbz_coeff;
+  }
+}
+
+double KdpFilt::_getDbzAttenExpon()
+
+{
+  
+  if (_wavelengthCm < 4) {
+    // X band
+    return _params.xband_atten.dbz_expon;
+  } else if (_wavelengthCm < 7) {
+    // C band
+    return _params.cband_atten.dbz_expon;
+  } else {
+    // S band
+    return _params.sband_atten.dbz_expon;
+  }
+}
+
+double KdpFilt::_getZdrAttenCoeff()
+
+{
+  
+  if (_wavelengthCm < 4) {
+    // X band
+    return _params.xband_atten.zdr_coeff;
+  } else if (_wavelengthCm < 7) {
+    // C band
+    return _params.cband_atten.zdr_coeff;
+  } else {
+    // S band
+    return _params.sband_atten.zdr_coeff;
+  }
+}
+
+double KdpFilt::_getZdrAttenExpon()
+
+{
+  
+  if (_wavelengthCm < 4) {
+    // X band
+    return _params.xband_atten.zdr_expon;
+  } else if (_wavelengthCm < 7) {
+    // C band
+    return _params.cband_atten.zdr_expon;
+  } else {
+    // S band
+    return _params.sband_atten.zdr_expon;
   }
 }
 

@@ -82,14 +82,6 @@ public:
   void setParams(const KdpFiltParams &params);
 
   /**
-   * Set attenuation coefficients
-   * Overrides what was set from the params file.
-   */
-  
-  void setAttenCoeffs(double dbzCoeff, double dbzExpon,
-                      double zdrCoeff, double zdrExpon);
-
-  /**
    * Initialize the object arrays for later use.
    * Do this if you need access to the arrays, but have not yet called
    * compute(), and do not plan to do so.
@@ -390,14 +382,6 @@ private:
   vector<double> _xxVals;
   vector<double> _scBlock;
   
-  // Z and ZDR attenuation correction
-  
-  bool _attenCoeffsSpecified;
-  double _dbzAttenCoeff;
-  double _dbzAttenExpon;
-  double _zdrAttenCoeff;
-  double _zdrAttenExpon;
-  
   // debug printing and writing ray files
 
   bool _writeRayFile;
@@ -540,6 +524,13 @@ private:
   void _writeRayDataToFile();
   double _getPlotVal(double val, double valIfMissing);
 
+  // get attenuation parameters
+  
+  double _getDbzAttenCoeff();
+  double _getDbzAttenExpon();
+  double _getZdrAttenCoeff();
+  double _getZdrAttenExpon();
+  
 };
 
 #endif

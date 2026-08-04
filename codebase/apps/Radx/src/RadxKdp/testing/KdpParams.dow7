@@ -275,67 +275,86 @@ KDP_self_con_Z_coeff_10cm = 3.32e-05;
 //
 //======================================================================
  
-///////////// KDP_use_attenuation_corrected_dbz_and_zdr 
+///////////// KDP_correct_dbz_and_zdr_for_attenuation /
 //
 // Option to use attenuation-corrected fields for KDP calculations.
 //
-// This mostly affects the estimation of the self-consistency method for 
-//   computing delta.
+// This affects the estimation of the self-consistency method. We 
+//   compute the dbz and zdr corrections based on KDP in range.
+//
+// DBZ_correction = dbzCoeff * KDP ^ dbzExpon.
+//
+// ZDR_correction = zdrCoeff * KDP ^ zdrCoeff.
 //
 // Type: boolean
 
-KDP_use_attenuation_corrected_dbz_and_zdr = TRUE;
+KDP_correct_dbz_and_zdr_for_attenuation = FALSE;
 
-///////////// KDP_specify_coefficients_for_attenuation_correction 
+///////////// sband_atten /////////////////////////////
 //
-// Option to specify the coefficients and exponents.
+// Attenuation parameters for S-band.
 //
-// If false, the default coefficients will be determined for the radar 
-//   wavelength.
+// Type: struct
+//   typedef struct {
+//      string reference;
+//      double dbz_coeff;
+//      double dbz_expon;
+//      double zdr_coeff;
+//      double zdr_expon;
+//   }
 //
-// Type: boolean
 
-KDP_specify_coefficients_for_attenuation_correction = FALSE;
+sband_atten = {
+    reference = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
+    dbz_coeff = 0.017,
+    dbz_expon = 0.84,
+    zdr_coeff = 0.003,
+    zdr_expon = 1.05
+};
 
-///////////// KDP_dbz_attenuation_coefficient /////////
+///////////// cband_atten /////////////////////////////
 //
-// Coefficient for computing DBZ attenuation correction.
+// Attenuation parameters for C-band.
 //
-// Default is 0.017. See Bringi and Chandrasekar, Table 7.1, page 494.
+// Type: struct
+//   typedef struct {
+//      string reference;
+//      double dbz_coeff;
+//      double dbz_expon;
+//      double zdr_coeff;
+//      double zdr_expon;
+//   }
 //
-// Type: double
 
-KDP_dbz_attenuation_coefficient = 0.017;
+cband_atten = {
+    reference = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
+    dbz_coeff = 0.073,
+    dbz_expon = 0.99,
+    zdr_coeff = 0.013,
+    zdr_expon = 1.23
+};
 
-///////////// KDP_dbz_attenuation_exponent ////////////
+///////////// xband_atten /////////////////////////////
 //
-// Exponent for computing DBZ attenuation correction.
+// Attenuation parameters for X-band.
 //
-// Default is 0.84. See Bringi and Chandrasekar, Table 7.1, page 494.
+// Type: struct
+//   typedef struct {
+//      string reference;
+//      double dbz_coeff;
+//      double dbz_expon;
+//      double zdr_coeff;
+//      double zdr_expon;
+//   }
 //
-// Type: double
 
-KDP_dbz_attenuation_exponent = 0.84;
-
-///////////// KDP_zdr_attenuation_coefficient /////////
-//
-// Coefficient for computing ZDR attenuation correction.
-//
-// Default is 0.003. See Bringi and Chandrasekar, Table 7.1, page 494.
-//
-// Type: double
-
-KDP_zdr_attenuation_coefficient = 0.003;
-
-///////////// KDP_zdr_attenuation_exponent ////////////
-//
-// Exponent for computing ZDR attenuation correction.
-//
-// Default is 1.05. See Bringi and Chandrasekar, Table 7.1, page 494.
-//
-// Type: double
-
-KDP_zdr_attenuation_exponent = 1.05;
+xband_atten = {
+    reference = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
+    dbz_coeff = 0.233,
+    dbz_expon = 1.02,
+    zdr_coeff = 0.033,
+    zdr_expon = 1.15
+};
 
 //======================================================================
 //

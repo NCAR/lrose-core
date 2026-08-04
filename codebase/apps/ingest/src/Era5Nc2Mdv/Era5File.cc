@@ -201,39 +201,77 @@ int Era5File::_readDimensions()
 
 {
 
-  // read required dimensions
-
+  int iret = 0;
+  
   _nTimesInFile = 0;
+  _nLevels = 0;
+  _nLat = 0;
+  _nLon = 0;
   _nPointsPlane = 0;
   _nPointsVol = 0;
-  
+
   try {
-    
+
+    // Time dimension: accept either "time" or "valid_time"
+
     _timeDim = _file.getDim("time");
-    _nTimesInFile = _timeDim.getSize();
+    
+    if (_timeDim.isNull()) {
+      _timeDim = _file.getDim("valid_time");
+    }
+    
+    if (_timeDim.isNull()) {
+      _addErrStr("ERROR - Era5File::_readDimensions");
+      _addErrStr("Cannot find 'time' or 'valid_time' dimension");
+      iret = -1;
+    } else {
+      _nTimesInFile = _timeDim.getSize();
+    }
+    
+    // Vertical dimension: accept either "level" or "pressure_level"
 
     _levelDim = _file.getDim("level");
-    _nLevels = _levelDim.getSize();
+
+    if (_levelDim.isNull()) {
+      _levelDim = _file.getDim("pressure_level");
+    }
     
+    if (_levelDim.isNull()) {
+      _addErrStr("ERROR - Era5File::_readDimensions");
+      _addErrStr("Cannot find 'level' or 'pressure_level' dimension");
+      iret = -1;
+    } else {
+      _nLevels = _levelDim.getSize();
+    }
+
+    // Horizontal dimensions
+
     _latDim = _file.getDim("latitude");
-    _nLat = _latDim.getSize();
-    
     _lonDim = _file.getDim("longitude");
-    _nLon = _lonDim.getSize();
-    
-  } catch (NcxxException &e) {
+
+    if (_latDim.isNull() || _lonDim.isNull()) {
+      _addErrStr("ERROR - Era5File::_readDimensions");
+      _addErrStr("Cannot find 'latitude' or 'longitude' dimensions");
+      iret = -1;
+    } else {
+      _nLat = _latDim.getSize();
+      _nLon = _lonDim.getSize();
+    }
+
+  } catch (const NcxxException &ee) {
 
     _addErrStr("ERROR - Era5File::_readDimensions");
-    _addErrStr("  exception: ", e.what());
-    return -1;
+    _addErrStr("  exception: ", ee.what());
+    iret = -1;
 
   }
 
-  _nPointsPlane = _nLat * _nLon;
-  _nPointsVol = _nPointsPlane * _nLevels;
+  if (iret == 0) {
+    _nPointsPlane = _nLat * _nLon;
+    _nPointsVol = _nPointsPlane * _nLevels;
+  }
 
-  return 0;
-
+  return iret;
 }
 
 ///////////////////////////////////
@@ -294,10 +332,13 @@ int Era5File::_readTimes()
 
   _timeVar = _file.getVar("time");
   if (_timeVar.isNull()) {
-    _addErrStr("ERROR - Era5File::_readTimes");
-    _addErrStr("  Cannot find 'time' variable");
-    _addErrStr(_file.getErrStr());
-    return -1;
+    _timeVar = _file.getVar("valid_time");
+    if (_timeVar.isNull()) {
+      _addErrStr("ERROR - Era5File::_readTimes");
+      _addErrStr("  Cannot find 'time' or 'va;id_time' variable");
+      _addErrStr(_file.getErrStr());
+      return -1;
+    }
   }
   if (_timeVar.getDimCount() < 1) {
     _addErrStr("ERROR - Era5File::_readTimes");
@@ -332,6 +373,11 @@ int Era5File::_readTimes()
     _refTime.set(year, month, day, hour, min, sec);
   } else if (sscanf(units.c_str(),
                     "hours since %4d-%2d-%2d",
+                    &year, &month, &day) == 3) {
+    hour = min = sec = 0;
+    _refTime.set(year, month, day, hour, min, sec);
+  } else if (sscanf(units.c_str(),
+                    "seconds since %4d-%2d-%2d",
                     &year, &month, &day) == 3) {
     hour = min = sec = 0;
     _refTime.set(year, month, day, hour, min, sec);
@@ -449,13 +495,18 @@ int Era5File::_readLevels()
 {
 
   _levels.clear();
-  
-  _levelVar = _file.getVar("level");
+
+  string levelName = "level";
+  _levelVar = _file.getVar(levelName);
   if (_levelVar.isNull() || _levelVar.numVals() < 1) {
-    _addErrStr("ERROR - Era5File::_readLevel");
-    _addErrStr("  Cannot read level");
-    _addErrStr(_file.getErrStr());
-    return -1;
+    levelName = "pressure_level";
+    _levelVar = _file.getVar(levelName);
+    if (_levelVar.isNull() || _levelVar.numVals() < 1) {
+      _addErrStr("ERROR - Era5File::_readLevel");
+      _addErrStr("  Cannot read 'level' or 'pressure_level'");
+      _addErrStr(_file.getErrStr());
+      return -1;
+    }
   }
   
   if (_levelVar.getDimCount() != 1) {
@@ -467,16 +518,10 @@ int Era5File::_readLevels()
   NcxxDim levelDim = _levelVar.getDim(0);
   if (levelDim != _levelDim) {
     _addErrStr("ERROR - Era5File::_readLevel");
-    _addErrStr("  levelitude has incorrect dimension, name: ", _levelVar.getName());
+    _addErrStr("  level var, name: ", levelName);
+    _addErrStr("  has incorrect dimension, name: ", _levelVar.getName());
     return -1;
   }
-  
-  // if (_nLevels != 1) {
-  //   _addErrStr("ERROR - Era5File::_readLevel");
-  //   _addErrStr("  Should be only 1 level");
-  //   _addErrInt("  nLevels: ", _nLevels);
-  //   return -1;
-  // }
   
   _levels.resize(_nLevels);
   try {
@@ -590,10 +635,9 @@ int Era5File::_readFieldVariable(string fieldName,
     NcxxVarAtt att = var.getAtt("short_name");
     att.getValues(_shortName);
   } catch (NcxxException& e) {
-    _addErrStr("ERROR - Era5File::_readFieldVariable");
-    _addErrStr("  Var has no short_name: ", fieldName);
-    _addErrStr("  ", e.whatStr());
-    return -1;
+    // _addErrStr("WARNING - Era5File::_readFieldVariable");
+    // _addErrStr("  Var has no short_name: ", fieldName);
+    _shortName = fieldName;
   }
 
   try {

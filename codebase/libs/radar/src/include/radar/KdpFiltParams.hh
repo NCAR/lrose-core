@@ -72,6 +72,16 @@ public:
     FIR_FILTER = 3
   } phidp_filter_method_t;
 
+  // struct typedefs
+
+  typedef struct {
+    char* reference;
+    double dbz_coeff;
+    double dbz_expon;
+    double zdr_coeff;
+    double zdr_expon;
+  } atten_params_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -396,17 +406,13 @@ public:
 
   double KDP_self_con_Z_coeff_10cm;
 
-  tdrp_bool_t KDP_use_attenuation_corrected_dbz_and_zdr;
+  tdrp_bool_t KDP_correct_dbz_and_zdr_for_attenuation;
 
-  tdrp_bool_t KDP_specify_coefficients_for_attenuation_correction;
+  atten_params_t sband_atten;
 
-  double KDP_dbz_attenuation_coefficient;
+  atten_params_t cband_atten;
 
-  double KDP_dbz_attenuation_exponent;
-
-  double KDP_zdr_attenuation_coefficient;
-
-  double KDP_zdr_attenuation_exponent;
+  atten_params_t xband_atten;
 
   tdrp_bool_t KDP_compute_all_filters;
 
@@ -421,7 +427,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[31];
+  mutable TDRPtable _table[29];
 
   const char *_className;
 
