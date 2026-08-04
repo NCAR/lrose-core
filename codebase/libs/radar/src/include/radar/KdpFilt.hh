@@ -285,13 +285,6 @@ private:
   double _elevDeg;         /**< The current beam elevation */
   double _azDeg;           /**< The current beam azimuth */
 
-  // parameters for KDP conditioned by ZZDR
-
-  double _kdpZExpon;
-  double _kdpZdrExpon;
-  double _kdpZZdrCoeff;
-  int _kdpZZdrMedianLen;
-
   // phidp state for unfolding
 
   class GateProps {
@@ -518,7 +511,6 @@ private:
                    size_t filtLen,
                    std::vector<double>& filt);
   
-  
   /// Write ray data to a file
   
   void _writeRayDataToFile();
@@ -530,6 +522,12 @@ private:
   double _getDbzAttenExpon();
   double _getZdrAttenCoeff();
   double _getZdrAttenExpon();
+
+  // get self-consistency parameters
+
+  double _getSelfConACoeff();
+  double _getSelfConZExpon();
+  double _getSelfConZdrExpon();
   
 };
 

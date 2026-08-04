@@ -70,13 +70,6 @@ KdpFilt::KdpFilt()
   _elevDeg = -9999;
   _azDeg = -9999;
 
-  // initialize computation of KDP from Z and ZDR
-
-  _kdpZExpon = 1.0;
-  _kdpZdrExpon = -2.05;
-  _kdpZZdrCoeff = 3.32e-5;
-  _kdpZZdrMedianLen = 5;
-
   // debugging
 
   _writeRayFile = false;
@@ -119,13 +112,6 @@ void KdpFilt::setParams(const KdpFiltParams &params)
   if (_params.KDP_write_ray_files) {
     _params.KDP_compute_all_filters = pTRUE;
   }
-
-  // set params for computing KDP from Z and ZDR
-
-  _kdpZExpon = _params.KDP_self_con_Z_expon;
-  _kdpZdrExpon = _params.KDP_self_con_ZDR_expon;
-  _kdpZZdrCoeff = _params.KDP_self_con_Z_coeff_10cm * (10.0 / _wavelengthCm);
-  _kdpZZdrMedianLen = _params.KDP_self_con_median_filter_len;
 
   // writing ray files
 
@@ -425,7 +411,7 @@ void KdpFilt::_initArrays(const double *snr,
     }
   }
   FilterUtils::applyMedianFilter(_dbzMedian.data(), _nGates,
-                                 _kdpZZdrMedianLen, _missingValue);
+                                 _params.KDP_self_con_median_filter_len, _missingValue);
 
   std::copy(_dbz.begin(), _dbz.end(), _dbzCorrected.begin());
 
@@ -460,7 +446,7 @@ void KdpFilt::_initArrays(const double *snr,
   std::copy(_zdr.begin(), _zdr.end(), _zdrCorrected.begin());
   
   FilterUtils::applyMedianFilter(_zdrMedian.data(), _nGates,
-                                 _kdpZZdrMedianLen, _missingValue);
+                                 _params.KDP_self_con_median_filter_len, _missingValue);
 
   // PHIDP
   
@@ -832,7 +818,7 @@ void KdpFilt::_computeAttenCorrection()
     std::copy(_dbz.begin(), _dbz.end(), _dbzMedian.begin());
   }
   FilterUtils::applyMedianFilter(_dbzMedian.data(), _nGates,
-                                 _kdpZZdrMedianLen, _missingValue);
+                                 _params.KDP_self_con_median_filter_len, _missingValue);
 
   // set the median value of ZDR to be used
   
@@ -842,7 +828,7 @@ void KdpFilt::_computeAttenCorrection()
     std::copy(_zdr.begin(), _zdr.end(), _zdrMedian.begin());
   }
   FilterUtils::applyMedianFilter(_zdrMedian.data(), _nGates,
-                                 _kdpZZdrMedianLen, _missingValue);
+                                 _params.KDP_self_con_median_filter_len, _missingValue);
 
 }
 
@@ -1231,15 +1217,9 @@ double KdpFilt::_computeKdpFromZZdr(double dbz,
   }
   double zdrLin = pow(10.0, zdr / 10.0);
   
-  double zTerm = pow(zzLin, _kdpZExpon);
-  double zdrTerm = pow(zdrLin, _kdpZdrExpon);
-  double kdpEst = zTerm * zdrTerm * _kdpZZdrCoeff;
-
-  if (dbz > 55) 
-  {
-    cerr << "11111111111111 _kdpZExpon, _kdpZdrExpon, _kdpZZdrCoeff, dbz, zdr, kdpEst: " << _kdpZExpon << ", " <<  _kdpZdrExpon << ", " <<  _kdpZZdrCoeff << ", " <<  dbz << ", " <<  zdr << ", " <<  kdpEst << endl;
-  }
-
+  double zTerm = pow(zzLin, _getSelfConZExpon());
+  double zdrTerm = pow(zdrLin, _getSelfConZdrExpon());
+  double kdpEst = zTerm * zdrTerm * _getSelfConACoeff();
   
   return kdpEst;
   
@@ -1849,13 +1829,13 @@ double KdpFilt::_getDbzAttenCoeff()
   
   if (_wavelengthCm < 4) {
     // X band
-    return _params.xband_atten.dbz_coeff;
+    return _params.atten_xband.dbz_coeff;
   } else if (_wavelengthCm < 7) {
     // C band
-    return _params.cband_atten.dbz_coeff;
+    return _params.atten_cband.dbz_coeff;
   } else {
     // S band
-    return _params.sband_atten.dbz_coeff;
+    return _params.atten_sband.dbz_coeff;
   }
 }
 
@@ -1865,13 +1845,13 @@ double KdpFilt::_getDbzAttenExpon()
   
   if (_wavelengthCm < 4) {
     // X band
-    return _params.xband_atten.dbz_expon;
+    return _params.atten_xband.dbz_expon;
   } else if (_wavelengthCm < 7) {
     // C band
-    return _params.cband_atten.dbz_expon;
+    return _params.atten_cband.dbz_expon;
   } else {
     // S band
-    return _params.sband_atten.dbz_expon;
+    return _params.atten_sband.dbz_expon;
   }
 }
 
@@ -1881,13 +1861,13 @@ double KdpFilt::_getZdrAttenCoeff()
   
   if (_wavelengthCm < 4) {
     // X band
-    return _params.xband_atten.zdr_coeff;
+    return _params.atten_xband.zdr_coeff;
   } else if (_wavelengthCm < 7) {
     // C band
-    return _params.cband_atten.zdr_coeff;
+    return _params.atten_cband.zdr_coeff;
   } else {
     // S band
-    return _params.sband_atten.zdr_coeff;
+    return _params.atten_sband.zdr_coeff;
   }
 }
 
@@ -1897,13 +1877,64 @@ double KdpFilt::_getZdrAttenExpon()
   
   if (_wavelengthCm < 4) {
     // X band
-    return _params.xband_atten.zdr_expon;
+    return _params.atten_xband.zdr_expon;
   } else if (_wavelengthCm < 7) {
     // C band
-    return _params.cband_atten.zdr_expon;
+    return _params.atten_cband.zdr_expon;
   } else {
     // S band
-    return _params.sband_atten.zdr_expon;
+    return _params.atten_sband.zdr_expon;
+  }
+}
+
+///////////////////////////////////////////////////////
+// get self-consistency parameters, based on wavelength
+
+double KdpFilt::_getSelfConACoeff()
+
+{
+  
+  if (_wavelengthCm < 4) {
+    // X band
+    return _params.self_con_xband.a_coeff;
+  } else if (_wavelengthCm < 7) {
+    // C band
+    return _params.self_con_cband.a_coeff;
+  } else {
+    // S band
+    return _params.self_con_sband.a_coeff;
+  }
+}
+
+double KdpFilt::_getSelfConZExpon()
+
+{
+  
+  if (_wavelengthCm < 4) {
+    // X band
+    return _params.self_con_xband.z_expon;
+  } else if (_wavelengthCm < 7) {
+    // C band
+    return _params.self_con_cband.z_expon;
+  } else {
+    // S band
+    return _params.self_con_sband.z_expon;
+  }
+}
+
+double KdpFilt::_getSelfConZdrExpon()
+
+{
+  
+  if (_wavelengthCm < 4) {
+    // X band
+    return _params.self_con_xband.zdr_expon;
+  } else if (_wavelengthCm < 7) {
+    // C band
+    return _params.self_con_cband.zdr_expon;
+  } else {
+    // S band
+    return _params.self_con_sband.zdr_expon;
   }
 }
 

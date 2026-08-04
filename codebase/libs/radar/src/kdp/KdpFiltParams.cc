@@ -716,8 +716,152 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("ESTIMATING DELTA from KDP_ZZDR");
+    tt->comment_hdr = tdrpStrDup("ESTIMATING DELTA from KDP_ZZDR self-consistency.");
     tt->comment_text = tdrpStrDup("We estimate delta (backscatter differential phase) using the self-consistency method of Bringi.  Using the self-consistency approach, we can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute KDP conditioned using self-consistenty. We call this KDP_SC.");
+    tt++;
+    
+    // Parameter 'self_con_sband'
+    // ctype is '_self_con_params_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("self_con_sband");
+    tt->descr = tdrpStrDup("Self consistency parameters for S-band.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &self_con_sband - &_start_;
+    tt->struct_def.name = tdrpStrDup("self_con_params_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("citation");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &self_con_sband.citation - (char *) &self_con_sband;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("ref_wavelength_cm");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &self_con_sband.ref_wavelength_cm - (char *) &self_con_sband;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("a_coeff");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &self_con_sband.a_coeff - (char *) &self_con_sband;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("z_expon");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &self_con_sband.z_expon - (char *) &self_con_sband;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &self_con_sband.zdr_expon - (char *) &self_con_sband;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Scarchilli et al., 1996: Self-Consistency of Polarization Diversity Measurement of Rainfall. II: Theoretical developments.");
+      tt->struct_vals[1].d = 10;
+      tt->struct_vals[2].d = 0.0001051;
+      tt->struct_vals[3].d = 0.96;
+      tt->struct_vals[4].d = -0.26;
+    tt++;
+    
+    // Parameter 'self_con_cband'
+    // ctype is '_self_con_params_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("self_con_cband");
+    tt->descr = tdrpStrDup("Self consistency parameters for C-band.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &self_con_cband - &_start_;
+    tt->struct_def.name = tdrpStrDup("self_con_params_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("citation");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &self_con_cband.citation - (char *) &self_con_cband;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("ref_wavelength_cm");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &self_con_cband.ref_wavelength_cm - (char *) &self_con_cband;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("a_coeff");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &self_con_cband.a_coeff - (char *) &self_con_cband;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("z_expon");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &self_con_cband.z_expon - (char *) &self_con_cband;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &self_con_cband.zdr_expon - (char *) &self_con_cband;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Scarchilli et al., 1996: Self-Consistency of Polarization Diversity Measurement of Rainfall. II: Theoretical developments.");
+      tt->struct_vals[1].d = 5.5;
+      tt->struct_vals[2].d = 0.0001461;
+      tt->struct_vals[3].d = 0.98;
+      tt->struct_vals[4].d = -0.2;
+    tt++;
+    
+    // Parameter 'self_con_xband'
+    // ctype is '_self_con_params_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("self_con_xband");
+    tt->descr = tdrpStrDup("Self consistency parameters for X-band.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &self_con_xband - &_start_;
+    tt->struct_def.name = tdrpStrDup("self_con_params_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("citation");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &self_con_xband.citation - (char *) &self_con_xband;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("ref_wavelength_cm");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &self_con_xband.ref_wavelength_cm - (char *) &self_con_xband;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("a_coeff");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &self_con_xband.a_coeff - (char *) &self_con_xband;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("z_expon");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &self_con_xband.z_expon - (char *) &self_con_xband;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &self_con_xband.zdr_expon - (char *) &self_con_xband;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Shi et al., 2018: Deployment and Performance of an X-Band Dual-Polarization Radar during the Southern China Monsoon Rainfall Experiment. Table 3.");
+      tt->struct_vals[1].d = 3.2;
+      tt->struct_vals[2].d = 0.000222;
+      tt->struct_vals[3].d = 1;
+      tt->struct_vals[4].d = -4.58;
     tt++;
     
     // Parameter 'KDP_self_con_median_filter_len'
@@ -744,49 +888,13 @@
     tt->single_val.d = 0.5;
     tt++;
     
-    // Parameter 'KDP_self_con_Z_expon'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_self_con_Z_expon");
-    tt->descr = tdrpStrDup("Exponent for Z in estimating KDP from Z/ZDR.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_self_con_Z_expon - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'KDP_self_con_ZDR_expon'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_self_con_ZDR_expon");
-    tt->descr = tdrpStrDup("Exponent for ZDR in estimating KDP from Z/ZDR.");
-    tt->help = tdrpStrDup("Set this to 0.0 to use only Z for estimation. This is useful if the calibration of ZDR is not trusted.");
-    tt->val_offset = (char *) &KDP_self_con_ZDR_expon - &_start_;
-    tt->single_val.d = -2.05;
-    tt++;
-    
-    // Parameter 'KDP_self_con_Z_coeff_10cm'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_self_con_Z_coeff_10cm");
-    tt->descr = tdrpStrDup("Exponent for Z in estimating KDP from Z/ZDR.");
-    tt->help = tdrpStrDup("This is the value for a 10cm wavelength. It is scaled for wavelength in the code.");
-    tt->val_offset = (char *) &KDP_self_con_Z_coeff_10cm - &_start_;
-    tt->single_val.d = 3.32e-05;
-    tt++;
-    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("ESTIMATING ATTENUATION CORRECTION FOR DBZ AND ZDR");
-    tt->comment_text = tdrpStrDup("Received power attenuation, and differential attenuation, occur whenever scattering occurs, but is of most importance at shorter wavelengths or in reqions of heavy precipition. We use the reference text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, Table 7.1, page 494, to provide the default coefficients from which to estimate the attenuation correction. You may also choose to specify these coefficients in this section.");
+    tt->comment_text = tdrpStrDup("Received power attenuation, and differential attenuation, occur whenever scattering occurs, but is of most importance at shorter wavelengths or in reqions of heavy precipition. We use the citation text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, Table 7.1, page 494, to provide the default coefficients from which to estimate the attenuation correction. You may also choose to specify these coefficients in this section.");
     tt++;
     
     // Parameter 'KDP_correct_dbz_and_zdr_for_attenuation'
@@ -801,44 +909,44 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'sband_atten'
+    // Parameter 'atten_sband'
     // ctype is '_atten_params_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("sband_atten");
+    tt->param_name = tdrpStrDup("atten_sband");
     tt->descr = tdrpStrDup("Attenuation parameters for S-band");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &sband_atten - &_start_;
+    tt->val_offset = (char *) &atten_sband - &_start_;
     tt->struct_def.name = tdrpStrDup("atten_params_t");
     tt->struct_def.nfields = 5;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("reference");
+      tt->struct_def.fields[0].fname = tdrpStrDup("citation");
       tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &sband_atten.reference - (char *) &sband_atten;
+        (char *) &atten_sband.citation - (char *) &atten_sband;
       tt->struct_def.fields[1].ftype = tdrpStrDup("double");
       tt->struct_def.fields[1].fname = tdrpStrDup("dbz_coeff");
       tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &sband_atten.dbz_coeff - (char *) &sband_atten;
+        (char *) &atten_sband.dbz_coeff - (char *) &atten_sband;
       tt->struct_def.fields[2].ftype = tdrpStrDup("double");
       tt->struct_def.fields[2].fname = tdrpStrDup("dbz_expon");
       tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &sband_atten.dbz_expon - (char *) &sband_atten;
+        (char *) &atten_sband.dbz_expon - (char *) &atten_sband;
       tt->struct_def.fields[3].ftype = tdrpStrDup("double");
       tt->struct_def.fields[3].fname = tdrpStrDup("zdr_coeff");
       tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &sband_atten.zdr_coeff - (char *) &sband_atten;
+        (char *) &atten_sband.zdr_coeff - (char *) &atten_sband;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
       tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &sband_atten.zdr_expon - (char *) &sband_atten;
+        (char *) &atten_sband.zdr_expon - (char *) &atten_sband;
     tt->n_struct_vals = 5;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
@@ -849,44 +957,44 @@
       tt->struct_vals[4].d = 1.05;
     tt++;
     
-    // Parameter 'cband_atten'
+    // Parameter 'atten_cband'
     // ctype is '_atten_params_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("cband_atten");
+    tt->param_name = tdrpStrDup("atten_cband");
     tt->descr = tdrpStrDup("Attenuation parameters for C-band");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &cband_atten - &_start_;
+    tt->val_offset = (char *) &atten_cband - &_start_;
     tt->struct_def.name = tdrpStrDup("atten_params_t");
     tt->struct_def.nfields = 5;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("reference");
+      tt->struct_def.fields[0].fname = tdrpStrDup("citation");
       tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &cband_atten.reference - (char *) &cband_atten;
+        (char *) &atten_cband.citation - (char *) &atten_cband;
       tt->struct_def.fields[1].ftype = tdrpStrDup("double");
       tt->struct_def.fields[1].fname = tdrpStrDup("dbz_coeff");
       tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &cband_atten.dbz_coeff - (char *) &cband_atten;
+        (char *) &atten_cband.dbz_coeff - (char *) &atten_cband;
       tt->struct_def.fields[2].ftype = tdrpStrDup("double");
       tt->struct_def.fields[2].fname = tdrpStrDup("dbz_expon");
       tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &cband_atten.dbz_expon - (char *) &cband_atten;
+        (char *) &atten_cband.dbz_expon - (char *) &atten_cband;
       tt->struct_def.fields[3].ftype = tdrpStrDup("double");
       tt->struct_def.fields[3].fname = tdrpStrDup("zdr_coeff");
       tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &cband_atten.zdr_coeff - (char *) &cband_atten;
+        (char *) &atten_cband.zdr_coeff - (char *) &atten_cband;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
       tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &cband_atten.zdr_expon - (char *) &cband_atten;
+        (char *) &atten_cband.zdr_expon - (char *) &atten_cband;
     tt->n_struct_vals = 5;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
@@ -897,44 +1005,44 @@
       tt->struct_vals[4].d = 1.23;
     tt++;
     
-    // Parameter 'xband_atten'
+    // Parameter 'atten_xband'
     // ctype is '_atten_params_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("xband_atten");
+    tt->param_name = tdrpStrDup("atten_xband");
     tt->descr = tdrpStrDup("Attenuation parameters for X-band");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &xband_atten - &_start_;
+    tt->val_offset = (char *) &atten_xband - &_start_;
     tt->struct_def.name = tdrpStrDup("atten_params_t");
     tt->struct_def.nfields = 5;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("reference");
+      tt->struct_def.fields[0].fname = tdrpStrDup("citation");
       tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &xband_atten.reference - (char *) &xband_atten;
+        (char *) &atten_xband.citation - (char *) &atten_xband;
       tt->struct_def.fields[1].ftype = tdrpStrDup("double");
       tt->struct_def.fields[1].fname = tdrpStrDup("dbz_coeff");
       tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &xband_atten.dbz_coeff - (char *) &xband_atten;
+        (char *) &atten_xband.dbz_coeff - (char *) &atten_xband;
       tt->struct_def.fields[2].ftype = tdrpStrDup("double");
       tt->struct_def.fields[2].fname = tdrpStrDup("dbz_expon");
       tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &xband_atten.dbz_expon - (char *) &xband_atten;
+        (char *) &atten_xband.dbz_expon - (char *) &atten_xband;
       tt->struct_def.fields[3].ftype = tdrpStrDup("double");
       tt->struct_def.fields[3].fname = tdrpStrDup("zdr_coeff");
       tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &xband_atten.zdr_coeff - (char *) &xband_atten;
+        (char *) &atten_xband.zdr_coeff - (char *) &atten_xband;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
       tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &xband_atten.zdr_expon - (char *) &xband_atten;
+        (char *) &atten_xband.zdr_expon - (char *) &atten_xband;
     tt->n_struct_vals = 5;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));

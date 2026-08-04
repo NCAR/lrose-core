@@ -197,7 +197,7 @@ fir_n_iterations = 2;
 
 //======================================================================
 //
-// ESTIMATING DELTA from KDP_ZZDR.
+// ESTIMATING DELTA from KDP_ZZDR self-consistency.
 //
 // We estimate delta (backscatter differential phase) using the 
 //   self-consistency method of Bringi.  Using the self-consistency 
@@ -207,6 +207,72 @@ fir_n_iterations = 2;
 //
 //======================================================================
  
+///////////// self_con_sband //////////////////////////
+//
+// Self consistency parameters for S-band.
+//
+// Type: struct
+//   typedef struct {
+//      string citation;
+//      double ref_wavelength_cm;
+//      double a_coeff;
+//      double z_expon;
+//      double zdr_expon;
+//   }
+//
+
+self_con_sband = {
+    citation = "Scarchilli et al., 1996: Self-Consistency of Polarization Diversity Measurement of Rainfall. II: Theoretical developments.",
+    ref_wavelength_cm = 10,
+    a_coeff = 0.0001051,
+    z_expon = 0.96,
+    zdr_expon = -0.26
+};
+
+///////////// self_con_cband //////////////////////////
+//
+// Self consistency parameters for C-band.
+//
+// Type: struct
+//   typedef struct {
+//      string citation;
+//      double ref_wavelength_cm;
+//      double a_coeff;
+//      double z_expon;
+//      double zdr_expon;
+//   }
+//
+
+self_con_cband = {
+    citation = "Scarchilli et al., 1996: Self-Consistency of Polarization Diversity Measurement of Rainfall. II: Theoretical developments.",
+    ref_wavelength_cm = 5.5,
+    a_coeff = 0.0001461,
+    z_expon = 0.98,
+    zdr_expon = -0.2
+};
+
+///////////// self_con_xband //////////////////////////
+//
+// Self consistency parameters for X-band.
+//
+// Type: struct
+//   typedef struct {
+//      string citation;
+//      double ref_wavelength_cm;
+//      double a_coeff;
+//      double z_expon;
+//      double zdr_expon;
+//   }
+//
+
+self_con_xband = {
+    citation = "Shi et al., 2018: Deployment and Performance of an X-Band Dual-Polarization Radar during the Southern China Monsoon Rainfall Experiment. Table 3.",
+    ref_wavelength_cm = 3.2,
+    a_coeff = 0.000222,
+    z_expon = 1,
+    zdr_expon = -4.58
+};
+
 ///////////// KDP_self_con_median_filter_len //////////
 //
 // Sets the length of the median filter when computing KDP_ZZDR.
@@ -231,43 +297,13 @@ KDP_self_con_median_filter_len = 5;
 
 KDP_self_con_mean_delta_threshold = 1;
 
-///////////// KDP_self_con_Z_expon ////////////////////
-//
-// Exponent for Z in estimating KDP from Z/ZDR.
-//
-// Type: double
-
-KDP_self_con_Z_expon = 1;
-
-///////////// KDP_self_con_ZDR_expon //////////////////
-//
-// Exponent for ZDR in estimating KDP from Z/ZDR.
-//
-// Set this to 0.0 to use only Z for estimation. This is useful if the 
-//   calibration of ZDR is not trusted.
-//
-// Type: double
-
-KDP_self_con_ZDR_expon = 0;
-
-///////////// KDP_self_con_Z_coeff_10cm ///////////////
-//
-// Exponent for Z in estimating KDP from Z/ZDR.
-//
-// This is the value for a 10cm wavelength. It is scaled for wavelength 
-//   in the code.
-//
-// Type: double
-
-KDP_self_con_Z_coeff_10cm = 3.32e-05;
-
 //======================================================================
 //
 // ESTIMATING ATTENUATION CORRECTION FOR DBZ AND ZDR.
 //
 // Received power attenuation, and differential attenuation, occur 
 //   whenever scattering occurs, but is of most importance at shorter 
-//   wavelengths or in reqions of heavy precipition. We use the reference 
+//   wavelengths or in reqions of heavy precipition. We use the citation 
 //   text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, 
 //   Table 7.1, page 494, to provide the default coefficients from which 
 //   to estimate the attenuation correction. You may also choose to 
@@ -290,13 +326,13 @@ KDP_self_con_Z_coeff_10cm = 3.32e-05;
 
 KDP_correct_dbz_and_zdr_for_attenuation = FALSE;
 
-///////////// sband_atten /////////////////////////////
+///////////// atten_sband /////////////////////////////
 //
 // Attenuation parameters for S-band.
 //
 // Type: struct
 //   typedef struct {
-//      string reference;
+//      string citation;
 //      double dbz_coeff;
 //      double dbz_expon;
 //      double zdr_coeff;
@@ -304,21 +340,21 @@ KDP_correct_dbz_and_zdr_for_attenuation = FALSE;
 //   }
 //
 
-sband_atten = {
-    reference = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
+atten_sband = {
+    citation = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
     dbz_coeff = 0.017,
     dbz_expon = 0.84,
     zdr_coeff = 0.003,
     zdr_expon = 1.05
 };
 
-///////////// cband_atten /////////////////////////////
+///////////// atten_cband /////////////////////////////
 //
 // Attenuation parameters for C-band.
 //
 // Type: struct
 //   typedef struct {
-//      string reference;
+//      string citation;
 //      double dbz_coeff;
 //      double dbz_expon;
 //      double zdr_coeff;
@@ -326,21 +362,21 @@ sband_atten = {
 //   }
 //
 
-cband_atten = {
-    reference = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
+atten_cband = {
+    citation = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
     dbz_coeff = 0.073,
     dbz_expon = 0.99,
     zdr_coeff = 0.013,
     zdr_expon = 1.23
 };
 
-///////////// xband_atten /////////////////////////////
+///////////// atten_xband /////////////////////////////
 //
 // Attenuation parameters for X-band.
 //
 // Type: struct
 //   typedef struct {
-//      string reference;
+//      string citation;
 //      double dbz_coeff;
 //      double dbz_expon;
 //      double zdr_coeff;
@@ -348,8 +384,8 @@ cband_atten = {
 //   }
 //
 
-xband_atten = {
-    reference = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
+atten_xband = {
+    citation = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
     dbz_coeff = 0.233,
     dbz_expon = 1.02,
     zdr_coeff = 0.033,

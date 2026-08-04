@@ -75,7 +75,15 @@ public:
   // struct typedefs
 
   typedef struct {
-    char* reference;
+    char* citation;
+    double ref_wavelength_cm;
+    double a_coeff;
+    double z_expon;
+    double zdr_expon;
+  } self_con_params_t;
+
+  typedef struct {
+    char* citation;
     double dbz_coeff;
     double dbz_expon;
     double zdr_coeff;
@@ -396,23 +404,23 @@ public:
 
   int fir_n_iterations;
 
+  self_con_params_t self_con_sband;
+
+  self_con_params_t self_con_cband;
+
+  self_con_params_t self_con_xband;
+
   int KDP_self_con_median_filter_len;
 
   double KDP_self_con_mean_delta_threshold;
 
-  double KDP_self_con_Z_expon;
-
-  double KDP_self_con_ZDR_expon;
-
-  double KDP_self_con_Z_coeff_10cm;
-
   tdrp_bool_t KDP_correct_dbz_and_zdr_for_attenuation;
 
-  atten_params_t sband_atten;
+  atten_params_t atten_sband;
 
-  atten_params_t cband_atten;
+  atten_params_t atten_cband;
 
-  atten_params_t xband_atten;
+  atten_params_t atten_xband;
 
   tdrp_bool_t KDP_compute_all_filters;
 

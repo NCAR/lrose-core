@@ -90,9 +90,50 @@ paramdef int {
 } fir_n_iterations;
 
 commentdef {
-  p_header = "ESTIMATING DELTA from KDP_ZZDR";
+  p_header = "ESTIMATING DELTA from KDP_ZZDR self-consistency.";
   p_text = "We estimate delta (backscatter differential phase) using the self-consistency method of Bringi.  Using the self-consistency approach, we can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute KDP conditioned using self-consistenty. We call this KDP_SC.";
 }
+
+typedef struct {
+  string citation;
+  double ref_wavelength_cm;
+  double a_coeff;
+  double z_expon;
+  double zdr_expon;
+} self_con_params_t;
+
+paramdef struct self_con_params_t {
+  p_default = {
+    citation = "Scarchilli et al., 1996: Self-Consistency of Polarization Diversity Measurement of Rainfall. II: Theoretical developments.",
+    ref_wavelength_cm = 10.0,
+    a_coeff = 1.0510e-4,
+    z_expon = 0.96,
+    zdr_expon = -0.26
+  };
+  p_descr = "Self consistency parameters for S-band.";
+} self_con_sband;
+
+paramdef struct self_con_params_t {
+  p_default = {
+    citation = "Scarchilli et al., 1996: Self-Consistency of Polarization Diversity Measurement of Rainfall. II: Theoretical developments.",
+    ref_wavelength_cm = 5.5,
+    a_coeff = 1.4610e-4,
+    z_expon = 0.98,
+    zdr_expon = -0.20
+  };
+  p_descr = "Self consistency parameters for C-band.";
+} self_con_cband;
+
+paramdef struct self_con_params_t {
+  p_default = {
+    citation = "Shi et al., 2018: Deployment and Performance of an X-Band Dual-Polarization Radar during the Southern China Monsoon Rainfall Experiment. Table 3.",
+    ref_wavelength_cm = 3.2,
+    a_coeff = 2.22e-4,
+    z_expon = 1.0,
+    zdr_expon = -4.58
+  };
+  p_descr = "Self consistency parameters for X-band.";
+} self_con_xband;
 
 paramdef int {
   p_default = 5;
@@ -106,26 +147,9 @@ paramdef double {
   p_help = "When identifying and estimating delta using self-consistency, we need to ignore minor cases. We compute the mean delta, and if it exceeds this threshold we make the estimate.";
 } KDP_self_con_mean_delta_threshold;
 
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Exponent for Z in estimating KDP from Z/ZDR.";
-} KDP_self_con_Z_expon;
-
-paramdef double {
-  p_default = -2.05;
-  p_descr = "Exponent for ZDR in estimating KDP from Z/ZDR.";
-  p_help = "Set this to 0.0 to use only Z for estimation. This is useful if the calibration of ZDR is not trusted.";
-} KDP_self_con_ZDR_expon;
-
-paramdef double {
-  p_default = 3.32e-5;
-  p_descr = "Exponent for Z in estimating KDP from Z/ZDR.";
-  p_help = "This is the value for a 10cm wavelength. It is scaled for wavelength in the code.";
-} KDP_self_con_Z_coeff_10cm;
-
 commentdef {
   p_header = "ESTIMATING ATTENUATION CORRECTION FOR DBZ AND ZDR";
-  p_text = "Received power attenuation, and differential attenuation, occur whenever scattering occurs, but is of most importance at shorter wavelengths or in reqions of heavy precipition. We use the reference text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, Table 7.1, page 494, to provide the default coefficients from which to estimate the attenuation correction. You may also choose to specify these coefficients in this section.";
+  p_text = "Received power attenuation, and differential attenuation, occur whenever scattering occurs, but is of most importance at shorter wavelengths or in reqions of heavy precipition. We use the citation text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, Table 7.1, page 494, to provide the default coefficients from which to estimate the attenuation correction. You may also choose to specify these coefficients in this section.";
 }
 
 paramdef boolean {
@@ -135,7 +159,7 @@ paramdef boolean {
 } KDP_correct_dbz_and_zdr_for_attenuation;
 
 typedef struct {
-  string reference;
+  string citation;
   double dbz_coeff;
   double dbz_expon;
   double zdr_coeff;
@@ -144,36 +168,36 @@ typedef struct {
 
 paramdef struct atten_params_t {
   p_default = {
-    reference = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
+    citation = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
     dbz_coeff = 0.017,
     dbz_expon = 0.84,
     zdr_coeff = 0.003,
     zdr_expon = 1.05
   };
   p_descr = "Attenuation parameters for S-band";
-} sband_atten;
+} atten_sband;
 
 paramdef struct atten_params_t {
   p_default = {
-    reference = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
+    citation = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
     dbz_coeff = 0.073,
     dbz_expon = 0.99,
     zdr_coeff = 0.013,
     zdr_expon = 1.23
   };
   p_descr = "Attenuation parameters for C-band";
-} cband_atten;
+} atten_cband;
 
 paramdef struct atten_params_t {
   p_default = {
-    reference = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
+    citation = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
     dbz_coeff = 0.233,
     dbz_expon = 1.02,
     zdr_coeff = 0.033,
     zdr_expon = 1.15
   };
   p_descr = "Attenuation parameters for X-band";
-} xband_atten;
+} atten_xband;
 
 commentdef {
   p_header = "DEBUGGING";
