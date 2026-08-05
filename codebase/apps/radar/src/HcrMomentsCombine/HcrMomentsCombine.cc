@@ -1050,7 +1050,7 @@ RadxRay *HcrMomentsCombine::_combineDwellTriple()
 RadxRay *HcrMomentsCombine::_combineDwellDual()
 
 {
-  
+
   // check that the dwells have constant PRT
   
   if (_checkDwellConstantPrt(_dwellRaysSS) ||
@@ -1083,7 +1083,7 @@ RadxRay *HcrMomentsCombine::_combineDwellDual()
 
   vector<RadxField *> fieldsSS = raySS->getFields();
   for (size_t ifield = 0; ifield < fieldsSS.size(); ifield++) {
-    RadxField *fld = fieldsSS[ifield];
+    RadxField *fld = new RadxField(*fieldsSS[ifield]);
     string newName = fld->getName() + _params.suffix_for_short_pulse_fields;
     fld->setName(newName);
     rayLL->addField(fld);
