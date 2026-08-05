@@ -382,7 +382,7 @@ class KdpRayPlotter:
 
         self.ax4.set_title(az_str, fontsize=12)
         self.ax4.plot(gate_num, plot_data["phidpUnfoldFilled"], label="phidpUnfoldFilled", color="seagreen")
-        self.ax4.plot(gate_num, plot_data["phidpRegrFilt"], label="Regr-Filt", color="orange")
+        # self.ax4.plot(gate_num, plot_data["phidpRegrFilt"], label="Regr-Filt", color="orange")
         self.ax4.plot(gate_num, plot_data["phidpFirFilt"], label="Fir-Filt", color="black")
         self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="Fft-Filt", color="magenta")
         self.ax4.plot(gate_num, plot_data["phidpQuadFilt"], label="Quad-Filt", color="blue")
