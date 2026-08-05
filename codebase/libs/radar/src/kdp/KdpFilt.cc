@@ -1378,6 +1378,7 @@ void KdpFilt::_loadKdpSCRun(int startGate, int endGate)
 
   for (int igate = startGate; igate <= endGate; igate++) {
     _kdpSC[igate] = _kdpZZdr[igate] * condFactor;
+    _kdpZZdr[igate] *= condFactor;
   }
 
 }

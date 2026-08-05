@@ -151,7 +151,9 @@ KDP_snr_threshold = 0;
 //     REGRESSION_FILTER
 //     FIR_FILTER
 
-phidp_filter_method = FFT_FILTER;
+phidp_filter_method = FIR_FILTER;
+// phidp_filter_method = QUADRATIC_FILTER;
+// phidp_filter_method = FFT_FILTER;
 
 ///////////// phidp_feature_length_km /////////////////
 //
