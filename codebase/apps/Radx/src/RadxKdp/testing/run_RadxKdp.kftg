@@ -1,0 +1,7 @@
+#! /bin/csh
+
+cd $HOME/git/lrose-core/codebase/apps/Radx/src/RadxKdp
+
+./RadxKdp -params testing/RadxKdp.kftg -debug -start "2015 06 26 00 00 00" -end "2015 06 26 00 04 00"
+
+

@@ -1,0 +1,427 @@
+/**********************************************************************
+ * TDRP params for KdpFiltParams
+ **********************************************************************/
+
+//======================================================================
+//
+// KdpFilt computes KDP from PHIDP.
+//
+// KDP is defined as half the change in PHIDP per km in range.
+//
+// Regions with valid PHIDP are determined by examining the quality of 
+//   the PHIDP data, from RHOHV, and optionally from SNR and the variance 
+//   of ZDR.
+//
+// PHIPD folds, so unfolding is the first step in the processing.
+// 	For simultaneous-mode radars PHIDP folds at -180 and +180.
+// 	For alternating mode radars, this is -90 to +90.
+//
+// After unfolding, filtering is applied to smooth PHIDP in range. 4 
+//   filtering methods are available.
+//
+// KDP is then computed as the PHIDP slope of the filtered PHIDP.
+//
+// This is followed by a step to identify regions with phase shift on 
+//   backscatter (delta).The various filtering steps smeer out the KDP in 
+//   range, which means that the high KDP values are not located in the 
+//   core of the precip echoes. To help correct for this, we make use of 
+//   the self-consistency approach. This allows us to theoretically 
+//   determine KDP from Z and ZDR - we can call this KDP_ZZDR. We can then 
+//   use these self-consistent KDP_ZZDR values to compute a conditioned 
+//   KDP field, by constraining the estimated KDP values to the relevant 
+//   gates. This reduces the smeering effect. We refer to this KDP field, 
+//   conditioned using self-consistency, as KDP_SC.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// IDENTIFYING VALID KDP REGIONS.
+//
+// In weak signal, the PHIDP is very noisy and contains no useful 
+//   information. We compute various statistics to help to identify those 
+//   gates containing valid PHIDP, and those with just noise.
+//
+//======================================================================
+ 
+///////////// KDP_ngates_for_stats ////////////////////
+//
+// Number of gates over which the phidp mean, sdev and jitter are 
+//   computed.
+//
+// The mean, sdev and jitter of phidp are computed over a consecutive 
+//   number of gates in range, centered on the current gate of interest. 
+//   This parameter is the number of gates over which these statistics are 
+//   computed.
+//
+// Type: int
+
+KDP_ngates_for_stats = 9;
+
+///////////// KDP_phidp_sdev_max //////////////////////
+//
+// Sets the threshold for the standard deviation of phidp in range.
+//
+// The sdev of phidp is a good test for valid phidp. The sdev is 
+//   computed in the circle, so that it takes account of folding if 
+//   present. If the sdev is less than this value, we conclude we are in 
+//   weather echo and the PHIDP is valid and KDP should be computed.
+//
+// Type: double
+
+KDP_phidp_sdev_max = 20;
+
+///////////// KDP_phidp_jitter_max ////////////////////
+//
+// Sets the threshold for the jitter of phidp in range.
+//
+// The jitter of phidp is defined as the mean absolute change in angle 
+//   between successive phidp measurements in range. It is computed on the 
+//   circle to take account of folding. If the jitter is less than this 
+//   value, we conclude we are in weather echo, the PHIDP is valid and KDP 
+//   should be computed at this gate.
+//
+// Type: double
+
+KDP_phidp_jitter_max = 30;
+
+///////////// KDP_check_rhohv /////////////////////////
+//
+// Check the RHOHV.
+//
+// Type: boolean
+
+KDP_check_rhohv = TRUE;
+
+///////////// KDP_rhohv_threshold /////////////////////
+//
+// Sets the threshold for checking RHOHV.
+//
+// If the RHOHV drops below this value, KDP will not be computed at this 
+//   gate.
+//
+// Type: double
+
+KDP_rhohv_threshold = 0.8;
+
+///////////// KDP_check_snr ///////////////////////////
+//
+// Check the SNR.
+//
+// Type: boolean
+
+KDP_check_snr = FALSE;
+
+///////////// KDP_snr_threshold ///////////////////////
+//
+// Sets the threshold for checking SNR (dB).
+//
+// If the SNR drops below this value, KDP will not be computed at this 
+//   gate.
+//
+// Type: double
+
+KDP_snr_threshold = -6;
+
+//======================================================================
+//
+// PHIDP FILTER METHOD.
+//
+// 	FIR_FILTER: used in the Hubbert-Bringi method.
+// 	QUADRATIC_METHOD: When we filter PHIDP, we need to set the filter 
+//   appropriately to capture the typical features we want to preserve, 
+//   and to remove shorter-range (higher-frequency) features. If 
+//   KDP_compute_all_filters is true, all of the filters are computed for 
+//   debugging and comparison purposes.
+//
+//======================================================================
+ 
+///////////// phidp_filter_method /////////////////////
+//
+// Method for filtering PHIDP in range.
+//
+// FIR: the Hubbert/Bringi approach used an FIR filter. QUADRATIC: local 
+//   per-gate quadratic fit. REGRESSION: polynomial regression per valid 
+//   phidp region. FFT: global fft low-pass filter for the entire ray.
+//
+// Type: enum
+// Options:
+//     FFT_FILTER
+//     QUADRATIC_FILTER
+//     REGRESSION_FILTER
+//     FIR_FILTER
+
+phidp_filter_method = FFT_FILTER;
+
+///////////// phidp_feature_length_km /////////////////
+//
+// When we filter PHIDP, we need to set the filter appropriately to 
+//   capture the typical features we want to preserve, and to remove 
+//   shorter-range (higher-frequency) features.
+//
+// We use the feature length to set the parameters for the filters.
+//
+// FIR_FILTER: we determine the length of the FIR filter kernel.
+//
+// QUADRATIC FILTER: we use gates that cover this distance on either 
+//   side of the local gate.
+//
+// REGRESSION_FILTER: we need to determine the polynomial order. We 
+//   divide the ray into valid segments in range - i.e. segments with 
+//   valid phidp. Then we compute
+//
+// order = (length of valid region / feature_length) * 2 + 1
+//
+// We are fitting a polynomial to the phidp values in the valid segment. 
+//   The longer the segment the higher the polynomial order required to 
+//   fit the target features in that segment.
+//
+// FIR_FILTER: the feature length giverns the tuning of the low-pass 
+//   filter.
+//
+// Type: double
+
+phidp_feature_length_km = 3;
+
+///////////// fir_n_iterations ////////////////////////
+//
+// Sets the number of iterations for the FIR filter for unfolded PHIDP.
+//
+// After unfolding PHIDP, the FIR filter is applied to the unfolded 
+//   phidp, a set number of times, to smooth it. The effect of the filter 
+//   is a combination of the filter length and the number of iterations.
+//
+// Type: int
+
+fir_n_iterations = 2;
+
+//======================================================================
+//
+// ESTIMATING DELTA from KDP_ZZDR self-consistency.
+//
+// We estimate delta (backscatter differential phase) using the 
+//   self-consistency method of Bringi.  Using the self-consistency 
+//   approach, we can estimate KDP from Z and ZDR - we call this KDP_ZZDR. 
+//   We can then compute KDP conditioned using self-consistenty. We call 
+//   this KDP_SC.
+//
+//======================================================================
+ 
+///////////// self_con_sband //////////////////////////
+//
+// Self consistency parameters for S-band.
+//
+// Type: struct
+//   typedef struct {
+//      string citation;
+//      double ref_wavelength_cm;
+//      double a_coeff;
+//      double z_expon;
+//      double zdr_expon;
+//   }
+//
+
+self_con_sband = {
+    citation = "Scarchilli et al., 1996: Self-Consistency of Polarization Diversity Measurement of Rainfall. II: Theoretical developments.",
+    ref_wavelength_cm = 10,
+    a_coeff = 0.0001051,
+    z_expon = 0.96,
+    zdr_expon = -0.26
+};
+
+///////////// self_con_cband //////////////////////////
+//
+// Self consistency parameters for C-band.
+//
+// Type: struct
+//   typedef struct {
+//      string citation;
+//      double ref_wavelength_cm;
+//      double a_coeff;
+//      double z_expon;
+//      double zdr_expon;
+//   }
+//
+
+self_con_cband = {
+    citation = "Scarchilli et al., 1996: Self-Consistency of Polarization Diversity Measurement of Rainfall. II: Theoretical developments.",
+    ref_wavelength_cm = 5.5,
+    a_coeff = 0.0001461,
+    z_expon = 0.98,
+    zdr_expon = -0.2
+};
+
+///////////// self_con_xband //////////////////////////
+//
+// Self consistency parameters for X-band.
+//
+// Type: struct
+//   typedef struct {
+//      string citation;
+//      double ref_wavelength_cm;
+//      double a_coeff;
+//      double z_expon;
+//      double zdr_expon;
+//   }
+//
+
+self_con_xband = {
+    citation = "Shi et al., 2018: Deployment and Performance of an X-Band Dual-Polarization Radar during the Southern China Monsoon Rainfall Experiment. Table 3.",
+    ref_wavelength_cm = 3.2,
+    a_coeff = 0.000222,
+    z_expon = 1,
+    zdr_expon = -4.58
+};
+
+///////////// KDP_self_con_median_filter_len //////////
+//
+// Sets the length of the median filter when computing KDP_ZZDR.
+//
+// When we compute KDP_ZZDR, we first apply a median filter to both Z 
+//   and ZDR in range. This parameter is the length of that median filter, 
+//   in gates.
+//
+// Type: int
+
+KDP_self_con_median_filter_len = 5;
+
+///////////// KDP_self_con_mean_delta_threshold ///////
+//
+// Threshold of delta mean when estimating delta (deg).
+//
+// When identifying and estimating delta using self-consistency, we need 
+//   to ignore minor cases. We compute the mean delta, and if it exceeds 
+//   this threshold we make the estimate.
+//
+// Type: double
+
+KDP_self_con_mean_delta_threshold = 1;
+
+//======================================================================
+//
+// ESTIMATING ATTENUATION CORRECTION FOR DBZ AND ZDR.
+//
+// Received power attenuation, and differential attenuation, occur 
+//   whenever scattering occurs, but is of most importance at shorter 
+//   wavelengths or in reqions of heavy precipition. We use the citation 
+//   text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, 
+//   Table 7.1, page 494, to provide the default coefficients from which 
+//   to estimate the attenuation correction. You may also choose to 
+//   specify these coefficients in this section.
+//
+//======================================================================
+ 
+///////////// KDP_correct_dbz_and_zdr_for_attenuation /
+//
+// Option to use attenuation-corrected fields for KDP calculations.
+//
+// This affects the estimation of the self-consistency method. We 
+//   compute the dbz and zdr corrections based on KDP in range.
+//
+// DBZ_correction = dbzCoeff * KDP ^ dbzExpon.
+//
+// ZDR_correction = zdrCoeff * KDP ^ zdrCoeff.
+//
+// Type: boolean
+
+KDP_correct_dbz_and_zdr_for_attenuation = FALSE;
+
+///////////// atten_sband /////////////////////////////
+//
+// Attenuation parameters for S-band.
+//
+// Type: struct
+//   typedef struct {
+//      string citation;
+//      double dbz_coeff;
+//      double dbz_expon;
+//      double zdr_coeff;
+//      double zdr_expon;
+//   }
+//
+
+atten_sband = {
+    citation = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
+    dbz_coeff = 0.017,
+    dbz_expon = 0.84,
+    zdr_coeff = 0.003,
+    zdr_expon = 1.05
+};
+
+///////////// atten_cband /////////////////////////////
+//
+// Attenuation parameters for C-band.
+//
+// Type: struct
+//   typedef struct {
+//      string citation;
+//      double dbz_coeff;
+//      double dbz_expon;
+//      double zdr_coeff;
+//      double zdr_expon;
+//   }
+//
+
+atten_cband = {
+    citation = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
+    dbz_coeff = 0.073,
+    dbz_expon = 0.99,
+    zdr_coeff = 0.013,
+    zdr_expon = 1.23
+};
+
+///////////// atten_xband /////////////////////////////
+//
+// Attenuation parameters for X-band.
+//
+// Type: struct
+//   typedef struct {
+//      string citation;
+//      double dbz_coeff;
+//      double dbz_expon;
+//      double zdr_coeff;
+//      double zdr_expon;
+//   }
+//
+
+atten_xband = {
+    citation = "Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494",
+    dbz_coeff = 0.233,
+    dbz_expon = 1.02,
+    zdr_coeff = 0.033,
+    zdr_expon = 1.15
+};
+
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// KDP_compute_all_filters /////////////////
+//
+// Option to compute all of the filtered methods.
+//
+// This is useful for debugging and comparing the filter results. This 
+//   is forced to true if KDP_write_ray_files is true.
+//
+// Type: boolean
+
+KDP_compute_all_filters = TRUE;
+
+///////////// KDP_write_ray_files /////////////////////
+//
+// Option to write ray files to debug KDP computation.
+//
+// Type: boolean
+
+KDP_write_ray_files = TRUE;
+
+///////////// KDP_ray_files_dir ///////////////////////
+//
+// Directory for KDP ray files.
+//
+// Type: string
+
+KDP_ray_files_dir = "/tmp/kftg/kdp_ray_files";
+

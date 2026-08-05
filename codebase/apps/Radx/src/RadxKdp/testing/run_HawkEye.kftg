@@ -1,0 +1,8 @@
+#! /bin/csh
+
+source ~/.cshrc.miniforge
+
+cd $HOME/git/lrose-core/codebase/apps/Radx/src/RadxKdp/testing
+
+HawkEye -params HawkEye.kdp.nexrad -f /tmp/kftg/cfradial/kdp/20150626/cfrad.20150626_000334.800_to_20150626_000357.040_KFTG_SUR.nc
+
