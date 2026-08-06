@@ -478,6 +478,10 @@ void RadxKdp::_setupRead(RadxFile &file)
     }
   }
     
+  if (_params.set_max_range) {
+    file.setReadMaxRangeKm(_params.max_range_km);
+  }
+
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }

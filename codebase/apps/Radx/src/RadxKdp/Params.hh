@@ -447,6 +447,10 @@ public:
 
   double upper_fixed_angle_limit;
 
+  tdrp_bool_t set_max_range;
+
+  double max_range_km;
+
   tdrp_bool_t SNR_available;
 
   char* SNR_field_name;
@@ -498,7 +502,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[49];
+  mutable TDRPtable _table[52];
 
   const char *_className;
 

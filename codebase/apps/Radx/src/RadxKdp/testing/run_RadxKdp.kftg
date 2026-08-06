@@ -2,6 +2,8 @@
 
 cd $HOME/git/lrose-core/codebase/apps/Radx/src/RadxKdp
 
-./RadxKdp -params testing/RadxKdp.kftg -debug -start "2015 06 26 00 00 00" -end "2015 06 26 00 04 00"
+./RadxKdp -params testing/RadxKdp.kftg -debug -start "2015 06 25 22 42 00" -end "2015 06 25 22 45 00"
+
+#./RadxKdp -params testing/RadxKdp.kftg -debug -start "2015 06 26 00 00 00" -end "2015 06 26 00 04 00"
 
 

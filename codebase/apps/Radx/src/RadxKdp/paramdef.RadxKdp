@@ -131,6 +131,21 @@ paramdef double {
 } upper_fixed_angle_limit;
 
 commentdef {
+  p_header = "OPTIONAL RANGE LIMIT";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+commentdef {
   p_header = "INPUT FIELD INFORMATION";
   p_text = "Names of fields in the input file. The following fields are required: SNR, DBZ, ZDR, PHIDP and RHOHV. If SNR is not available, it is computed from DBZ.";
 }
