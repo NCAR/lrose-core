@@ -199,23 +199,3 @@ paramdef struct atten_params_t {
   p_descr = "Attenuation parameters for X-band";
 } atten_xband;
 
-commentdef {
-  p_header = "DEBUGGING";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to compute all of the filtered methods.";
-  p_help = "This is useful for debugging and comparing the filter results. This is forced to true if KDP_write_ray_files is true.";
-} KDP_compute_all_filters;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write ray files to debug KDP computation.";
-} KDP_write_ray_files;
-
-paramdef string {
-  p_default = "/tmp/kdp_ray_files";
-  p_descr = "Directory for KDP ray files.";
-} KDP_ray_files_dir;
-

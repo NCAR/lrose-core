@@ -211,11 +211,27 @@ public:
   const double *getZdrCorrected() const { return _zdrCorrected.data(); }
 
   /**
-   * set writing of ray file
-   * Ray data will be written to the specified dir
+   * set writing of ray files
+   * Ray data will be written to files in the specified dir
    */
-  void setWriteRayFile(bool state = true,
-                       string dir = "");
+
+  void setWriteRayFiles(bool state, string dir) {
+    _writeRayFiles = state;
+    _rayFileDir = dir;
+    if (state) {
+      _computeAllFilters = true;
+    }
+  }
+  
+  /**
+   * set flag to indicate whether to compute all filters
+   * this is useful for debugging and for producing plots
+   * from the ray files
+   */
+
+  void setComputeAllFilters(bool state) {
+    _computeAllFilters = state;
+  }
   
   // runs of valid phidp
 
@@ -252,6 +268,14 @@ private:
   // parameters
 
   KdpFiltParams _params;
+  bool _computeAllFilters;
+  bool _writeRayFiles;
+  string _rayFilesDir;
+
+  // debug printing and writing ray files
+
+  bool _writeRayFile;
+  string _rayFileDir;
 
   // time for ray
 
@@ -375,11 +399,6 @@ private:
   vector<double> _xxVals;
   vector<double> _scBlock;
   
-  // debug printing and writing ray files
-
-  bool _writeRayFile;
-  string _rayFileDir;
-
   // FIR filter
   
   KdpFirFilt _firFilt;

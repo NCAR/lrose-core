@@ -394,36 +394,3 @@ atten_xband = {
     zdr_expon = 1.15
 };
 
-//======================================================================
-//
-// DEBUGGING.
-//
-//======================================================================
- 
-///////////// KDP_compute_all_filters /////////////////
-//
-// Option to compute all of the filtered methods.
-//
-// This is useful for debugging and comparing the filter results. This 
-//   is forced to true if KDP_write_ray_files is true.
-//
-// Type: boolean
-
-KDP_compute_all_filters = TRUE;
-
-///////////// KDP_write_ray_files /////////////////////
-//
-// Option to write ray files to debug KDP computation.
-//
-// Type: boolean
-
-KDP_write_ray_files = TRUE;
-
-///////////// KDP_ray_files_dir ///////////////////////
-//
-// Directory for KDP ray files.
-//
-// Type: string
-
-KDP_ray_files_dir = "/tmp/cow2/kdp_ray_files";
-

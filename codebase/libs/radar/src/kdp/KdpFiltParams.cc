@@ -1053,51 +1053,6 @@
       tt->struct_vals[4].d = 1.15;
     tt++;
     
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("DEBUGGING");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'KDP_compute_all_filters'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_compute_all_filters");
-    tt->descr = tdrpStrDup("Option to compute all of the filtered methods.");
-    tt->help = tdrpStrDup("This is useful for debugging and comparing the filter results. This is forced to true if KDP_write_ray_files is true.");
-    tt->val_offset = (char *) &KDP_compute_all_filters - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_write_ray_files'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_write_ray_files");
-    tt->descr = tdrpStrDup("Option to write ray files to debug KDP computation.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_write_ray_files - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_ray_files_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("KDP_ray_files_dir");
-    tt->descr = tdrpStrDup("Directory for KDP ray files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_ray_files_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/kdp_ray_files");
-    tt++;
-    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

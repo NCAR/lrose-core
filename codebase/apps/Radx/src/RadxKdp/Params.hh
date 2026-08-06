@@ -419,6 +419,12 @@ public:
 
   debug_t debug;
 
+  tdrp_bool_t compute_all_filters;
+
+  tdrp_bool_t write_ray_files;
+
+  char* ray_files_dir;
+
   int n_compute_threads;
 
   mode_t mode;
@@ -492,7 +498,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[46];
+  mutable TDRPtable _table[49];
 
   const char *_className;
 

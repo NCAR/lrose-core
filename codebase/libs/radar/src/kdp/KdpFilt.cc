@@ -72,7 +72,8 @@ KdpFilt::KdpFilt()
 
   // debugging
 
-  _writeRayFile = false;
+  _computeAllFilters = false;
+  _writeRayFiles = false;
 
 }
 
@@ -84,19 +85,6 @@ KdpFilt::~KdpFilt()
 
 }
 
-//////////////////////////////////////////
-// set to write ray data to specified dir
-
-void KdpFilt::setWriteRayFile(bool state /* = true */,
-                              string dir /* = "" */)
-  
-{
-
-  _writeRayFile = state;
-  _rayFileDir = dir;
-
-}
-  
 ////////////////////////////////////////////
 // Set processing options from params object
 
@@ -108,15 +96,6 @@ void KdpFilt::setParams(const KdpFiltParams &params)
   // initialize KDP object
 
   _setNGatesStats(_params.KDP_ngates_for_stats);
-
-  if (_params.KDP_write_ray_files) {
-    _params.KDP_compute_all_filters = pTRUE;
-  }
-
-  // writing ray files
-
-  setWriteRayFile(_params.KDP_write_ray_files,
-                  _params.KDP_ray_files_dir);
 
 }
 
@@ -225,7 +204,7 @@ int KdpFilt::compute(time_t timeSecs,
 
   // write ray file if requested
 
-  if (_writeRayFile) {
+  if (_writeRayFiles) {
     _writeRayDataToFile();
   }
     
@@ -685,28 +664,28 @@ void KdpFilt::_filterPhidp()
   // apply FIR filter to unfolded phidp
 
   if (_params.phidp_filter_method == KdpFiltParams::FIR_FILTER ||
-      _params.KDP_compute_all_filters) {
+      _computeAllFilters) {
     _applyFirFilter();
   }
   
   // apply quadratic filter to phidp unfolded
 
   if (_params.phidp_filter_method == KdpFiltParams::QUADRATIC_FILTER ||
-      _params.KDP_compute_all_filters) {
+      _computeAllFilters) {
     _applyQuadFilter();
   }
   
   // apply fft filter to phidp unfolded
 
   if (_params.phidp_filter_method == KdpFiltParams::FFT_FILTER ||
-      _params.KDP_compute_all_filters) {
+      _computeAllFilters) {
     _applyFftFilter();
   }
   
   // compute phidp filtered with regression filter
 
   if (_params.phidp_filter_method == KdpFiltParams::REGRESSION_FILTER ||
-      _params.KDP_compute_all_filters) {
+      _computeAllFilters) {
     _applyRegrFilter();
   }
 

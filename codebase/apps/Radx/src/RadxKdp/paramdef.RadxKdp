@@ -26,6 +26,22 @@ paramdef enum debug_t {
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compute all of the filtered methods.";
+  p_help = "This is useful for debugging and comparing the filter results. This is forced to true if KDP_write_ray_files is true.";
+} compute_all_filters;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write ray files to debug KDP computation.";
+} write_ray_files;
+
+paramdef string {
+  p_default = "/tmp/kdp_ray_files";
+  p_descr = "Directory for KDP ray files.";
+} ray_files_dir;
+
 commentdef {
   p_header = "THREADING FOR SPEED.";
   p_text = "Multiple threads are used to improve performance. The computations are carried out in parallel in separate threads. The read and write stages occur in the main thread, since netCDF is not thread safe.";

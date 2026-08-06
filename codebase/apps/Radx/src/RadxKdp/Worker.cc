@@ -137,6 +137,11 @@ void Worker::_kdpInit()
   // initialize KDP object
 
   _kdp.setParams(_kdpFiltParams);
+  if (_params.write_ray_files) {
+    _kdp.setWriteRayFiles(_params.write_ray_files,
+                          _params.ray_files_dir);
+  }
+  _kdp.setComputeAllFilters(_params.compute_all_filters);
   
 }
 

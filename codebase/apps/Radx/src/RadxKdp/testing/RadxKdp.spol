@@ -589,3 +589,36 @@ procmap_register_interval = 60;
 
 max_realtime_data_age_secs = 300;
 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// KDP_compute_all_filters /////////////////
+//
+// Option to compute all of the filtered methods.
+//
+// This is useful for debugging and comparing the filter results. This 
+//   is forced to true if KDP_write_ray_files is true.
+//
+// Type: boolean
+
+compute_all_filters = TRUE;
+
+///////////// KDP_write_ray_files /////////////////////
+//
+// Option to write ray files to debug KDP computation.
+//
+// Type: boolean
+
+write_ray_files = TRUE;
+
+///////////// KDP_ray_files_dir ///////////////////////
+//
+// Directory for KDP ray files.
+//
+// Type: string
+
+ray_files_dir = "/tmp/spol/kdp_ray_files";
+

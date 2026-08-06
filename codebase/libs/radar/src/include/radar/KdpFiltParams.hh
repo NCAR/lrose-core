@@ -422,12 +422,6 @@ public:
 
   atten_params_t atten_xband;
 
-  tdrp_bool_t KDP_compute_all_filters;
-
-  tdrp_bool_t KDP_write_ray_files;
-
-  char* KDP_ray_files_dir;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -435,7 +429,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[29];
+  mutable TDRPtable _table[25];
 
   const char *_className;
 
