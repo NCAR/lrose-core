@@ -190,14 +190,11 @@ int KdpFilt::compute(time_t timeSecs,
   
   _computeKdp();
 
-  // compute attenuation corrections
+  // estimate KDP using self-consistency method,
+  // taking attenuation into account
 
-  _computeAttenCorrection();
+  _estimateKdpSC();
   
-  // load up conditional KDP from estimated kdp and kdpZZdr
-
-  _loadKdpSC();
-
   // confine the results to the valid regions
   
   _censorNonValidKdp();
@@ -749,70 +746,6 @@ void KdpFilt::_computeKdp()
 
 }
 
-////////////////////////////////////////////////
-// compute attenuation corrections based on KDP
-
-void KdpFilt::_computeAttenCorrection()
-  
-{
-
-  // sum up corrections
-
-  double sumDbzCorr = 0.0;
-  double sumZdrCorr = 0.0;
-
-  for (int ii = 0; ii < _nGates; ii++) {
-    
-    double kdp = _kdp[ii];
-    if (kdp > 20) {
-      kdp = 20;
-    }
-    
-    double dbzCorr = 0.0;
-    double zdrCorr = 0.0;
-    
-    if (_validForKdp[ii] && kdp != _missingValue && kdp > 0) {
-      dbzCorr = _getDbzAttenCoeff() * pow(kdp, _getDbzAttenExpon());
-      zdrCorr = _getZdrAttenCoeff() * pow(kdp, _getZdrAttenExpon());
-    }
-
-    sumDbzCorr += (dbzCorr * _gateSpacingKm);
-    sumZdrCorr += (zdrCorr * _gateSpacingKm);
-
-    _dbzAttenCorr[ii] = sumDbzCorr;
-    _zdrAttenCorr[ii] = sumZdrCorr;
-
-    if (_dbz[ii] > -9990) {
-      _dbzCorrected[ii] = _dbz[ii] + sumDbzCorr;
-    }
-    if (_zdr[ii] > -9990) {
-      _zdrCorrected[ii] = _zdr[ii] + sumZdrCorr;
-    }
-
-  } // ii
-
-  // set the median value of DBZ to be used
-  
-  if (_params.KDP_correct_dbz_and_zdr_for_attenuation) {
-    std::copy(_dbzCorrected.begin(), _dbzCorrected.end(), _dbzMedian.begin());
-  } else {
-    std::copy(_dbz.begin(), _dbz.end(), _dbzMedian.begin());
-  }
-  FilterUtils::applyMedianFilter(_dbzMedian.data(), _nGates,
-                                 _params.KDP_self_con_median_filter_len, _missingValue);
-
-  // set the median value of ZDR to be used
-  
-  if (_params.KDP_correct_dbz_and_zdr_for_attenuation) {
-    std::copy(_zdrCorrected.begin(), _zdrCorrected.end(), _zdrMedian.begin());
-  } else {
-    std::copy(_zdr.begin(), _zdr.end(), _zdrMedian.begin());
-  }
-  FilterUtils::applyMedianFilter(_zdrMedian.data(), _nGates,
-                                 _params.KDP_self_con_median_filter_len, _missingValue);
-
-}
-
 /////////////////////////////////////////////
 // compute the folding values and range
 // by inspecting the phidp values
@@ -1189,6 +1122,70 @@ double KdpFilt::_computeKdpFromZZdr(double dbz,
   
 }
 
+////////////////////////////////////////////////
+// compute attenuation corrections based on KDP
+
+void KdpFilt::_computeAttenCorrection(const vector<double> &kdp)
+  
+{
+
+  // sum up corrections
+
+  double sumDbzCorr = 0.0;
+  double sumZdrCorr = 0.0;
+
+  for (int ii = 0; ii < _nGates; ii++) {
+    
+    double kdpVal = kdp[ii];
+    if (kdpVal > 20) {
+      kdpVal = 20;
+    }
+    
+    double dbzCorr = 0.0;
+    double zdrCorr = 0.0;
+    
+    if (_validForKdp[ii] && kdpVal != _missingValue && kdpVal > 0) {
+      dbzCorr = _getDbzAttenCoeff() * pow(kdpVal, _getDbzAttenExpon());
+      zdrCorr = _getZdrAttenCoeff() * pow(kdpVal, _getZdrAttenExpon());
+    }
+
+    sumDbzCorr += (dbzCorr * _gateSpacingKm);
+    sumZdrCorr += (zdrCorr * _gateSpacingKm);
+
+    _dbzAttenCorr[ii] = sumDbzCorr;
+    _zdrAttenCorr[ii] = sumZdrCorr;
+
+    if (_dbz[ii] > -9990) {
+      _dbzCorrected[ii] = _dbz[ii] + sumDbzCorr;
+    }
+    if (_zdr[ii] > -9990) {
+      _zdrCorrected[ii] = _zdr[ii] + sumZdrCorr;
+    }
+
+  } // ii
+
+  // set the median value of DBZ to be used
+  
+  if (_params.KDP_correct_dbz_and_zdr_for_attenuation) {
+    std::copy(_dbzCorrected.begin(), _dbzCorrected.end(), _dbzMedian.begin());
+  } else {
+    std::copy(_dbz.begin(), _dbz.end(), _dbzMedian.begin());
+  }
+  FilterUtils::applyMedianFilter(_dbzMedian.data(), _nGates,
+                                 _params.KDP_self_con_median_filter_len, _missingValue);
+
+  // set the median value of ZDR to be used
+  
+  if (_params.KDP_correct_dbz_and_zdr_for_attenuation) {
+    std::copy(_zdrCorrected.begin(), _zdrCorrected.end(), _zdrMedian.begin());
+  } else {
+    std::copy(_zdr.begin(), _zdr.end(), _zdrMedian.begin());
+  }
+  FilterUtils::applyMedianFilter(_zdrMedian.data(), _nGates,
+                                 _params.KDP_self_con_median_filter_len, _missingValue);
+
+}
+
 ////////////////////////////////////////////////////////////
 /// load up kdp conditioned using ZZDR self-consistency
 
@@ -1304,6 +1301,36 @@ void KdpFilt::_loadKdpSC()
 
 }
 
+////////////////////////////////////////////////////////////
+/// estimate kdp conditioned using ZZDR self-consistency
+/// taking attenuation into account
+
+void KdpFilt::_estimateKdpSC()
+
+{
+
+  // to estimate KDP we first need to compute an attenuation correction
+  // this is an iterative process because we use the Z and ZDR values
+  // corrected for attenuation to compute the self-consistency KDP
+
+  // Step 1: compute attenuation correction based on computed KDP
+
+  _computeAttenCorrection(_kdp);
+  
+  // Step 2: load up conditional KDP from estimated kdp and kdpZZdr
+
+  _loadKdpSC();
+  
+  // Step 3: commpute attenuation correction based on self-consistency KDP
+
+  _computeAttenCorrection(_kdp);
+
+  // step 4: recompute KDP self-consistency
+  
+  _loadKdpSC();
+
+}
+  
 ////////////////////////////////////////////////////////////
 /// load up kdp conditioned using ZZDR self-consistency
 /// for a specific run

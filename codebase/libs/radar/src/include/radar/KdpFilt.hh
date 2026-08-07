@@ -457,7 +457,6 @@ private:
   // worker methods
   
   void _computeKdp();
-  void _computeAttenCorrection();
 
   /// Compute the folding range by inspecting the phidp data
 
@@ -489,8 +488,13 @@ private:
 
   double _computeKdpFromZZdr(double dbz, double zdr);
 
+  // compute attenuation correction based on KDP
+  
+  void _computeAttenCorrection(const vector<double> &kdp);
+
   /// load up conditional kdp from computed kdp and kdpZZdr
 
+  void _estimateKdpSC();
   void _loadKdpSC();
   void _loadKdpSCRun(int startGate, int endGate);
   
