@@ -505,7 +505,7 @@ KDP_write_debug_fields = TRUE;
 //
 // Type: string
 
-output_dir = "/tmp/cow2/cfradial/kdp";
+output_dir = "$(HOME)/data/kdp/cow2/cfradial/kdp";
 
 ///////////// output_filename_mode ////////////////////
 //
@@ -625,5 +625,5 @@ write_ray_files = TRUE;
 //
 // Type: string
 
-ray_files_dir = "/tmp/cow2/kdp_ray_files";
+ray_files_dir = "$(HOME)/data/kdp/cow2/kdp_ray_files";
 

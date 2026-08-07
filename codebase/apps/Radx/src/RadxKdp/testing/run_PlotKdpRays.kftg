@@ -4,5 +4,5 @@ source ~/.cshrc.miniforge
 
 cd $HOME/git/lrose-core/codebase/apps/Radx/src/RadxKdp/testing
 
-./PlotKdpRays_py3.py --file /tmp/kftg/kdp_ray_files/kdpray_20150625-224111.245_el-002.42_az-045.52_.txt --width 600 --height 250 --rhohv_threshold 0.8
+./PlotKdpRays_py3.py --file $HOME/data/kdp/kftg/kdp_ray_files/kdpray_20150625-224111.245_el-002.42_az-045.52_.txt --width 600 --height 250 --rhohv_threshold 0.8
 

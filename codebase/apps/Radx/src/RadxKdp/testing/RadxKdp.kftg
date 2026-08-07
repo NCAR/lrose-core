@@ -55,7 +55,7 @@ write_ray_files = TRUE;
 //
 // Type: string
 
-ray_files_dir = "/tmp/kftg/kdp_ray_files";
+ray_files_dir = "$(HOME)/data/kdp/kftg/kdp_ray_files";
 
 //======================================================================
 //
@@ -552,7 +552,7 @@ KDP_write_debug_fields = TRUE;
 //
 // Type: string
 
-output_dir = "/tmp/kftg/cfradial/kdp";
+output_dir = "$(HOME)/data/kdp/kftg/cfradial/kdp";
 
 ///////////// output_filename_mode ////////////////////
 //

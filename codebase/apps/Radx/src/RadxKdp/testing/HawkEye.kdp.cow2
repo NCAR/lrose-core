@@ -98,7 +98,7 @@ input_mode = IWRF_FMQ_INPUT;
 //
 // Type: string
 
-input_fmq_url = "/tmp/fmq/test";
+input_fmq_url = "$(HOME)/data/kdp/fmq/test";
 
 ///////////// seek_to_start_of_fmq ////////////////////
 //
@@ -1560,7 +1560,7 @@ bscan_dwell_stats = DWELL_STATS_MIDDLE;
 //
 // Type: string
 
-images_output_dir = "/tmp/images/HawkEye";
+images_output_dir = "$(HOME)/data/kdp/images/HawkEye";
 
 ///////////// images_write_to_day_dir /////////////////
 //
@@ -1846,5 +1846,5 @@ sim_gate_spacing_km = 0.15;
 //
 // Type: string
 
-click_point_fmq_url = "/tmp/fmq/click_point";
+click_point_fmq_url = "$(HOME)/data/kdp/fmq/click_point";
 
