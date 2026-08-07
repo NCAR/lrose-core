@@ -507,12 +507,12 @@ int KdpFilt::_unfoldPhidp()
 
   // TESTING
 
-// #define TESTING_FOLDING
+  // #define TESTING_FOLDING
 #ifdef TESTING_FOLDING
   for (int igate = 0; igate < _nGates; igate++) {
     if (_phidp[igate] != _missingValue) {
-      // _phidp[igate] -= 80.0;
-      _phidp[igate] += 50.0;
+      _phidp[igate] -= 80.0;
+      // _phidp[igate] += 50.0;
       if (_phidp[igate] < -180) {
         _phidp[igate] += 360.0;
       }
@@ -1362,6 +1362,10 @@ void KdpFilt::_applyFftFilter()
 
 {
 
+  // adjust folding interval for phidp unfolded
+  
+  _adjustPhidpBeforeUnfolding(_phidpUnfoldFilled);
+
   // create complex array for phidp
   // pad out to avoid ringing at extremities
   
@@ -1440,6 +1444,11 @@ void KdpFilt::_applyFftFilter()
     }
 
   } // ii
+
+  // adjust folding interval after phidp unfolded
+  
+  _adjustPhidpAfterUnfolding(_phidpUnfoldFilled);
+  _adjustPhidpAfterUnfolding(_phidpFftFilt);
 
 }
 
