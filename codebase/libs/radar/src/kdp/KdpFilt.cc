@@ -507,10 +507,12 @@ int KdpFilt::_unfoldPhidp()
 
   // TESTING
 
+// #define TESTING_FOLDING
 #ifdef TESTING_FOLDING
   for (int igate = 0; igate < _nGates; igate++) {
     if (_phidp[igate] != _missingValue) {
-      _phidp[igate] -= 80.0;
+      // _phidp[igate] -= 80.0;
+      _phidp[igate] += 50.0;
       if (_phidp[igate] < -180) {
         _phidp[igate] += 360.0;
       }
@@ -1008,23 +1010,6 @@ int KdpFilt::_findValidRuns()
   _firstValidGate = _validRuns[0].ibegin + 2;
   _lastValidGate = _validRuns[_validRuns.size()-1].iend - 2;
 
-#ifdef NOTNOW
-
-  // if gap is smaller than the surrounding valid runs,
-  // flag as OK for KDP
-
-  for (size_t igap = 0; igap < _gapRuns.size(); igap++) {
-    const PhidpRun &gap = _gapRuns[igap];
-    const PhidpRun &prevValid = _validRuns[igap];
-    const PhidpRun &nextValid = _validRuns[igap + 1];
-    if (prevValid.len() > gap.len() && nextValid.len() > gap.len()) {
-      for (int igate = gap.ibegin; igate <= gap.iend; igate++) {
-        _validForKdp[igate] = true;
-      }
-    }
-  }
-#endif
-
   return 0;
 
 }
@@ -1280,6 +1265,14 @@ void KdpFilt::_loadKdpSC()
       // compute phase shift on backscatter as the difference between
       // filtered value and SC phidp
       _delta[igate] = _phidpFilt[igate] - _phidpSC[igate];
+      // ensure phidpSC is in the same folding interval as _phidpFilt
+      if (_delta[igate] > 180) {
+        _delta[igate] -= 360.0;
+        _phidpSC[igate] += 360.0;
+      } else if (_delta[igate] < -180) {
+        _delta[igate] += 360.0;
+        _phidpSC[igate] -= 360.0;
+      }
     }
   }
 
@@ -1418,10 +1411,35 @@ void KdpFilt::_applyFftFilter()
   _fft.inv(phiSpec_.data(), phiComplex_.data());
 
   // compute the filtered PHIDP
-
+  
+  vector<double> fftFilt;
+  fftFilt.resize(_nGates);
   for (int kk = 0; kk < _nGates; ++kk) {
-    _phidpFftFilt[kk] = RadarComplex::argDeg(phiComplex[kk]);
+    fftFilt[kk] = RadarComplex::argDeg(phiComplex[kk]);
   }
+
+  // unfold the filtered fft
+
+  int sumFold = 0;
+  for (int ii = 1; ii < _nGates; ii++) {
+    int fold = 0;
+    RadarComplex_t &phi0 = phiComplex[ii-1];
+    RadarComplex_t &phi1 = phiComplex[ii];
+    if (phi0.re < 0 && phi1.re < 0) {
+      if (phi0.im < 0 && phi1.im > 0) {
+        fold = -1;
+      } else if (phi0.im > 0 && phi1.im < 0) {
+        fold = 1;
+      }
+    }
+    sumFold += fold;
+    if (fftFilt[ii] == _missingValue) {
+      _phidpFftFilt[ii] = _missingValue;
+    } else {
+      _phidpFftFilt[ii] = fftFilt[ii] + (sumFold * _foldRange);
+    }
+
+  } // ii
 
 }
 
