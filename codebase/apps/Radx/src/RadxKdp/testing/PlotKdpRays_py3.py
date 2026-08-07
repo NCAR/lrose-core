@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 REQUIRED_COLUMNS = [
     "gateNum",
     "validKdp",
+    "rangeKm",
     "snr",
     "dbz",
     "zdr",
@@ -279,7 +280,7 @@ class KdpRayPlotter:
             for name, values in self.data.items()
         }
 
-        gate_num = plot_data["gateNum"]
+        gate_num = plot_data["rangeKm"]
         valid_kdp = plot_data["validKdp"]
 
         if not gate_num:
@@ -310,7 +311,7 @@ class KdpRayPlotter:
         self.ax1.plot(gate_num, zdr_5, label="Zdr*5", color="blue")
         self.ax1.plot(gate_num, plot_data["snr"], label="SNR", color="black")
         self.ax1.plot(gate_num, plot_data["dbz"], label="DBZ", color="red")
-        self.ax1.set_xlabel("gateNum")
+        self.ax1.set_xlabel("rangeKm")
         self.ax1.set_ylabel("SNR, DBZ")
 
         self.ax1r.set_ylabel("RHOHV", color="seagreen")
@@ -343,7 +344,7 @@ class KdpRayPlotter:
         self.ax2.plot(gate_num, plot_data["phidpFilt"], label="PhidpFilt", color="black")
         self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="yellow")
         draw_block_limits(self, self.ax2, gate_num, self.data["scBlock"])
-        self.ax2.set_xlabel("gateNum")
+        self.ax2.set_xlabel("rangeKm")
         self.ax2.set_ylabel("PHIDP")
 
         legend2 = self.ax2.legend(loc="upper right")
@@ -357,14 +358,14 @@ class KdpRayPlotter:
         # PLOT 3 - KDP and DELTA
 
         self.ax3.set_title(el_str, fontsize=12)
-        self.ax3.plot(gate_num, plot_data["kdp"], label="KDP", color="red")
-        self.ax3.plot(gate_num, plot_data["kdpSC"], label="KDP_SC", color="blue")
         self.ax3.plot(gate_num, plot_data["kdpZZdr"], label="KDP_ZZDR", color="green")
         self.ax3.plot(gate_num, plot_data["delta"], label="DELTA", color="orange")
         self.ax3.plot(gate_num, plot_data["deltaMean"], label="DELTA_MEAN", color="black")
-        self.ax3.plot(gate_num, plot_data["phidpFiltTrend"], label="TREND", color="magenta")
+        #self.ax3.plot(gate_num, plot_data["phidpFiltTrend"], label="TREND", color="magenta")
+        self.ax3.plot(gate_num, plot_data["kdp"], label="KDP", color="red")
+        self.ax3.plot(gate_num, plot_data["kdpSC"], label="KDP_SC", color="blue")
         # self.ax3.plot(gate_num, plot_data["kdpQuadFilt"], label="KDP_QUAD_FILT", color="magenta")
-        self.ax3.set_xlabel("gateNum")
+        self.ax3.set_xlabel("rangeKm")
         self.ax3.set_ylabel("KDP, DELTA")
         self.ax3.axhline(1.0, color="lightgray",
                          linewidth=1.0, linestyle="--", zorder=0)
@@ -386,7 +387,7 @@ class KdpRayPlotter:
         self.ax4.plot(gate_num, plot_data["phidpFirFilt"], label="Fir-Filt", color="black")
         self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="Fft-Filt", color="magenta")
         self.ax4.plot(gate_num, plot_data["phidpQuadFilt"], label="Quad-Filt", color="blue")
-        self.ax4.set_xlabel("gateNum")
+        self.ax4.set_xlabel("rangeKm")
         self.ax4.set_ylabel("PHIDP")
         draw_block_limits(self, self.ax4, gate_num, self.data["scBlock"])
         

@@ -30,6 +30,33 @@
 
 debug = DEBUG_OFF;
 
+///////////// compute_all_filters /////////////////////
+//
+// Option to compute all of the filtered methods.
+//
+// This is useful for debugging and comparing the filter results. This 
+//   is forced to true if KDP_write_ray_files is true.
+//
+// Type: boolean
+
+compute_all_filters = TRUE;
+
+///////////// write_ray_files /////////////////////////
+//
+// Option to write ray files to debug KDP computation.
+//
+// Type: boolean
+
+write_ray_files = TRUE;
+
+///////////// ray_files_dir ///////////////////////////
+//
+// Directory for KDP ray files.
+//
+// Type: string
+
+ray_files_dir = "/tmp/kddc/kdp_ray_files";
+
 //======================================================================
 //
 // THREADING FOR SPEED.
@@ -184,6 +211,30 @@ upper_fixed_angle_limit = 1.5;
 
 //======================================================================
 //
+// OPTIONAL RANGE LIMIT.
+//
+//======================================================================
+ 
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+//
+// Type: boolean
+
+set_max_range = TRUE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+//
+// Gates beyond this range are removed.
+//
+// Type: double
+
+max_range_km = 150;
+
+//======================================================================
+//
 // INPUT FIELD INFORMATION.
 //
 // Names of fields in the input file. The following fields are required: 
@@ -309,6 +360,7 @@ KDP_params_file_path = "./testing/KdpParams.kddc";
 //        Options:
 //          KDP
 //          KDP_SC
+//          DELTA
 //          DBZ_ATTEN_CORRECTION
 //          ZDR_ATTEN_CORRECTION
 //          DBZ_ATTEN_CORRECTED
@@ -588,37 +640,4 @@ procmap_register_interval = 60;
 // Type: int
 
 max_realtime_data_age_secs = 300;
-
-//======================================================================
-//
-// DEBUGGING.
-//
-//======================================================================
- 
-///////////// KDP_compute_all_filters /////////////////
-//
-// Option to compute all of the filtered methods.
-//
-// This is useful for debugging and comparing the filter results. This 
-//   is forced to true if KDP_write_ray_files is true.
-//
-// Type: boolean
-
-compute_all_filters = TRUE;
-
-///////////// KDP_write_ray_files /////////////////////
-//
-// Option to write ray files to debug KDP computation.
-//
-// Type: boolean
-
-write_ray_files = TRUE;
-
-///////////// KDP_ray_files_dir ///////////////////////
-//
-// Directory for KDP ray files.
-//
-// Type: string
-
-ray_files_dir = "/tmp/kddc/kdp_ray_files";
 

@@ -1731,7 +1731,7 @@ void KdpFilt::_writeRayDataToFile()
   // write header line
 
   fprintf(out,
-          "# gateNum validKdp "
+          "# gateNum validKdp rangeKm "
           "snr dbz zdr rhohv phidp "
           "phidpMean phidpMeanFilled phidpJitter phidpSdev "
           "phidpUnfold phidpUnfoldFilled phidpFilt phidpFiltTrend phidpSC "
@@ -1742,8 +1742,9 @@ void KdpFilt::_writeRayDataToFile()
   // write data
 
   for (int igate = 0; igate < _nGates; igate++) {
+    double rangeKm = igate * _gateSpacingKm + _startRangeKm;
     fprintf(out,
-            "%3d %3d "
+            "%3d %3d %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f "
             "%10.3f %10.3f %10.3f %10.3f %10.3f "
@@ -1752,6 +1753,7 @@ void KdpFilt::_writeRayDataToFile()
             "%10.3f\n",
             igate,
             (_validForKdp[igate]?1:0),
+            rangeKm,
             _getPlotVal(_snr[igate], NAN),
             _getPlotVal(_dbz[igate], NAN),
             _getPlotVal(_zdr[igate], NAN),
