@@ -339,7 +339,7 @@ class KdpRayPlotter:
         # PLOT 2 - PHIDP processing
 
         self.ax2.set_title(az_str, fontsize=12)
-        self.ax2.plot(gate_num, plot_data["phidpUnfoldFilled"], label="phidpUnfoldFilled", color="green")
+        self.ax2.plot(gate_num, plot_data["phidpUnfoldFilled"], label="phidpUnfold", color="green")
         #self.ax2.plot(gate_num, plot_data["phidpFilt"], label="FIR_Filt", color="orange")
         self.ax2.plot(gate_num, plot_data["phidpFilt"], label="PhidpFilt", color="black")
         self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="yellow")
