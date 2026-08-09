@@ -296,7 +296,7 @@ class KdpRayPlotter:
             self.ax3.set_title(el_str, fontsize=12)
             self.ax4.set_title(az_str, fontsize=12)
             return
-
+        
         zdr_5 = [value * 5.0 for value in plot_data["zdr"]]
 
         # PLOT 1 - moments
@@ -382,11 +382,14 @@ class KdpRayPlotter:
         # PLOT 4 - PHIDP FFT filtering
 
         self.ax4.set_title(az_str, fontsize=12)
-        self.ax4.plot(gate_num, plot_data["phidpUnfoldFilled"], label="phidpUnfoldFilled", color="seagreen")
-        # self.ax4.plot(gate_num, plot_data["phidpRegrFilt"], label="Regr-Filt", color="orange")
+        self.ax4.plot(gate_num, plot_data["phidp"], label="PHIDP", color="seagreen")
+        #self.ax4.plot(gate_num, plot_data["phidpUnfoldFilled"], label="phidpUnfolded", color="seagreen")
+        self.ax4.plot(gate_num, plot_data["phidpRegrFilt"], label="Regr-Filt", color="orange")
         self.ax4.plot(gate_num, plot_data["phidpFirFilt"], label="Fir-Filt", color="black")
         self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="Fft-Filt", color="magenta")
         self.ax4.plot(gate_num, plot_data["phidpQuadFilt"], label="Quad-Filt", color="blue")
+        #self.ax4.plot(gate_num, plot_data["phidpUnfoldFilled"], label="PHIDP-unfold", color="blue", linewidth=2)
+        #self.ax4.plot(gate_num, plot_data["phidpFilt"], label="PHIDP-Filt", color="black", linewidth=2)
         self.ax4.set_xlabel("rangeKm")
         self.ax4.set_ylabel("PHIDP")
         draw_block_limits(self, self.ax4, gate_num, self.data["scBlock"])
