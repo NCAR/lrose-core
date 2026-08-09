@@ -1149,8 +1149,10 @@ void KdpFilt::_computeAttenCorrection(const vector<double> &kdp)
       zdrCorr = _getZdrAttenCoeff() * pow(kdpVal, _getZdrAttenExpon());
     }
 
-    sumDbzCorr += (dbzCorr * _gateSpacingKm);
-    sumZdrCorr += (zdrCorr * _gateSpacingKm);
+    // attenuation is 2-way
+    
+    sumDbzCorr += 2 * (dbzCorr * _gateSpacingKm);
+    sumZdrCorr += 2 * (zdrCorr * _gateSpacingKm);
 
     _dbzAttenCorr[ii] = sumDbzCorr;
     _zdrAttenCorr[ii] = sumZdrCorr;
