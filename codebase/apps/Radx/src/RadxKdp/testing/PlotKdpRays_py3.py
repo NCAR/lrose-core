@@ -302,6 +302,7 @@ class KdpRayPlotter:
         # PLOT 1 - moments
 
         self.ax1.set_title(time_str, fontsize=12)
+        draw_block_limits(self, self.ax1, gate_num, self.data["scBlock"])
         self.ax1.plot(gate_num, plot_data["phidpSdev"], label="Sdev", color="pink")
         self.ax1.plot(gate_num, plot_data["phidpJitter"], label="Jitter", color="orange")
         self.ax1r.plot(
@@ -334,20 +335,19 @@ class KdpRayPlotter:
         draw_valid_regions(self,
                            self.ax1, gate_num, valid_kdp
                            )
-        draw_block_limits(self, self.ax1, gate_num, self.data["scBlock"])
 
         # PLOT 2 - PHIDP processing
 
         self.ax2.set_title(az_str, fontsize=12)
+        draw_block_limits(self, self.ax2, gate_num, self.data["scBlock"])
         self.ax2.plot(gate_num, plot_data["phidpUnfoldFilled"], label="phidpUnfold", color="green")
         #self.ax2.plot(gate_num, plot_data["phidpFilt"], label="FIR_Filt", color="orange")
         self.ax2.plot(gate_num, plot_data["phidpFilt"], label="PhidpFilt", color="black")
         self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="yellow")
-        draw_block_limits(self, self.ax2, gate_num, self.data["scBlock"])
         self.ax2.set_xlabel("rangeKm")
         self.ax2.set_ylabel("PHIDP")
 
-        legend2 = self.ax2.legend(loc="upper right")
+        legend2 = self.ax2.legend(loc="lower right")
         for label in legend2.get_texts():
             label.set_fontsize("small")
 
@@ -358,6 +358,8 @@ class KdpRayPlotter:
         # PLOT 3 - KDP and DELTA
 
         self.ax3.set_title(el_str, fontsize=12)
+        draw_block_limits(self, self.ax3, gate_num, self.data["scBlock"])
+                
         self.ax3.plot(gate_num, plot_data["kdpZZdr"], label="KDP_ZZDR", color="green")
         self.ax3.plot(gate_num, plot_data["delta"], label="DELTA", color="orange")
         self.ax3.plot(gate_num, plot_data["deltaMean"], label="DELTA_MEAN", color="black")
@@ -373,8 +375,6 @@ class KdpRayPlotter:
         draw_valid_regions(self,
                            self.ax3, gate_num, valid_kdp
                            )
-        draw_block_limits(self, self.ax3, gate_num, self.data["scBlock"])
-                
         legend3 = self.ax3.legend(loc="upper right")
         for label in legend3.get_texts():
             label.set_fontsize("small")
@@ -382,6 +382,7 @@ class KdpRayPlotter:
         # PLOT 4 - PHIDP FFT filtering
 
         self.ax4.set_title(az_str, fontsize=12)
+        draw_block_limits(self, self.ax4, gate_num, self.data["scBlock"])
         self.ax4.plot(gate_num, plot_data["phidp"], label="PHIDP", color="seagreen")
         #self.ax4.plot(gate_num, plot_data["phidpUnfoldFilled"], label="phidpUnfolded", color="seagreen")
         self.ax4.plot(gate_num, plot_data["phidpRegrFilt"], label="Regr-Filt", color="orange")
@@ -392,7 +393,6 @@ class KdpRayPlotter:
         #self.ax4.plot(gate_num, plot_data["phidpFilt"], label="PHIDP-Filt", color="black", linewidth=2)
         self.ax4.set_xlabel("rangeKm")
         self.ax4.set_ylabel("PHIDP")
-        draw_block_limits(self, self.ax4, gate_num, self.data["scBlock"])
         
         # self.ax4r.plot(
         #     gate_num, plot_data["zdr"],
@@ -476,7 +476,7 @@ def draw_block_limits(self, ax, x, valid):
     for i in range(self.first_valid, self.last_valid):
         j = i - self.first_valid
         if valid[i]:
-            ax.axvline(x[j], color='pink', lw=1)
+            ax.axvline(x[j], color='pink', lw=2)
 
 #=========================================================================
 # Run a command in a shell, wait for it to complete
