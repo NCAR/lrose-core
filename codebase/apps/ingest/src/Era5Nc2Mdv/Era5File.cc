@@ -214,15 +214,10 @@ int Era5File::_readDimensions()
 
     // Time dimension: accept either "time" or "valid_time"
 
-    _timeDim = _file.getDim("time");
-    
-    if (_timeDim.isNull()) {
-      _timeDim = _file.getDim("valid_time");
-    }
-    
+    _timeDim = _file.getDim(_params.time_name);
     if (_timeDim.isNull()) {
       _addErrStr("ERROR - Era5File::_readDimensions");
-      _addErrStr("Cannot find 'time' or 'valid_time' dimension");
+      _addErrStr("Cannot find time dimension named: ", _params.time_name);
       iret = -1;
     } else {
       _nTimesInFile = _timeDim.getSize();
@@ -230,15 +225,10 @@ int Era5File::_readDimensions()
     
     // Vertical dimension: accept either "level" or "pressure_level"
 
-    _levelDim = _file.getDim("level");
-
-    if (_levelDim.isNull()) {
-      _levelDim = _file.getDim("pressure_level");
-    }
-    
+    _levelDim = _file.getDim(_params.level_name);
     if (_levelDim.isNull()) {
       _addErrStr("ERROR - Era5File::_readDimensions");
-      _addErrStr("Cannot find 'level' or 'pressure_level' dimension");
+      _addErrStr("Cannot find level dimension named: ", _params.level_name);
       iret = -1;
     } else {
       _nLevels = _levelDim.getSize();
@@ -246,15 +236,21 @@ int Era5File::_readDimensions()
 
     // Horizontal dimensions
 
-    _latDim = _file.getDim("latitude");
-    _lonDim = _file.getDim("longitude");
-
-    if (_latDim.isNull() || _lonDim.isNull()) {
+    _latDim = _file.getDim(_params.latitude_name);
+    if (_latDim.isNull()) {
       _addErrStr("ERROR - Era5File::_readDimensions");
-      _addErrStr("Cannot find 'latitude' or 'longitude' dimensions");
+      _addErrStr("Cannot find latitude dimension named: ", _params.latitude_name);
       iret = -1;
     } else {
       _nLat = _latDim.getSize();
+    }
+
+    _lonDim = _file.getDim(_params.longitude_name);
+    if (_lonDim.isNull()) {
+      _addErrStr("ERROR - Era5File::_readDimensions");
+      _addErrStr("Cannot find longitude dimension named: ", _params.longitude_name);
+      iret = -1;
+    } else {
       _nLon = _lonDim.getSize();
     }
 

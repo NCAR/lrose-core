@@ -132,6 +132,42 @@ paramdef string
 
 
 /////////////////////////////////////////////////////////////////////////
+// NetCDF attributes
+
+commentdef
+{
+  p_header = "NetCDF dimension and variable names.";
+}
+
+paramdef string
+{
+  p_default = "time";
+  p_descr = "The name of the time dimension and variable.";
+  p_help = "This must match what is in the file. Run 'ncdump' to verify.";
+} time_name;
+
+paramdef string
+{
+  p_default = "level";
+  p_descr = "The name of the level dimension and variable";
+  p_help = "This must match what is in the file. Run 'ncdump' to verify.";
+} level_name;
+
+paramdef string
+{
+  p_default = "latitude";
+  p_descr = "The name of the latitude dimension and variable";
+  p_help = "This must match what is in the file. Run 'ncdump' to verify.";
+} latitude_name;
+
+paramdef string
+{
+  p_default = "longitude";
+  p_descr = "The name of the longitude dimension and variable";
+  p_help = "This must match what is in the file. Run 'ncdump' to verify.";
+} longitude_name;
+
+/////////////////////////////////////////////////////////////////////////
 // Interpolate to height levels
 
 commentdef

@@ -396,6 +396,14 @@ public:
 
   char* temperature_field_name;
 
+  char* time_name;
+
+  char* level_name;
+
+  char* latitude_name;
+
+  char* longitude_name;
+
   tdrp_bool_t interp_to_height_levels;
 
   char* geopotential_field_name;
@@ -421,7 +429,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[24];
+  mutable TDRPtable _table[29];
 
   const char *_className;
 

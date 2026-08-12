@@ -708,6 +708,63 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("NetCDF dimension and variable names.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'time_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("time_name");
+    tt->descr = tdrpStrDup("The name of the time dimension and variable.");
+    tt->help = tdrpStrDup("This must match what is in the file. Run 'ncdump' to verify.");
+    tt->val_offset = (char *) &time_name - &_start_;
+    tt->single_val.s = tdrpStrDup("time");
+    tt++;
+    
+    // Parameter 'level_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("level_name");
+    tt->descr = tdrpStrDup("The name of the level dimension and variable");
+    tt->help = tdrpStrDup("This must match what is in the file. Run 'ncdump' to verify.");
+    tt->val_offset = (char *) &level_name - &_start_;
+    tt->single_val.s = tdrpStrDup("level");
+    tt++;
+    
+    // Parameter 'latitude_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("latitude_name");
+    tt->descr = tdrpStrDup("The name of the latitude dimension and variable");
+    tt->help = tdrpStrDup("This must match what is in the file. Run 'ncdump' to verify.");
+    tt->val_offset = (char *) &latitude_name - &_start_;
+    tt->single_val.s = tdrpStrDup("latitude");
+    tt++;
+    
+    // Parameter 'longitude_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("longitude_name");
+    tt->descr = tdrpStrDup("The name of the longitude dimension and variable");
+    tt->help = tdrpStrDup("This must match what is in the file. Run 'ncdump' to verify.");
+    tt->val_offset = (char *) &longitude_name - &_start_;
+    tt->single_val.s = tdrpStrDup("longitude");
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("INTERP TO HEIGHT.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -799,11 +856,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OUTPUT DATA.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -820,11 +877,11 @@
     tt->single_val.s = tdrpStrDup("/tmp/ERA5");
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("SPECIFY OUTPUT FIELD NAMES AND UNITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
