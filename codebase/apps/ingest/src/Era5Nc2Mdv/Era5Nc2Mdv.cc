@@ -38,6 +38,7 @@
 #include <cmath>
 #include <set>
 #include <algorithm>
+#include <cctype>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/umisc.h>
 #include <toolsa/DateTime.hh>
@@ -292,7 +293,7 @@ int Era5Nc2Mdv::_setGeomFromFirstFile(const vector<string> &pathsAtTime)
   // read first file
   
   Era5File eraFile0(_params);
-  if (eraFile0.readFromPath(pathsAtTime[0], 0)) {
+  if (eraFile0.readFromPath(pathsAtTime[0], -1)) {
     cerr << "ERROR - Era5Nc2Mdv::_setGeomFromFirstFile" << endl;
     cerr << "  File path: " << pathsAtTime[0] << endl;
     cerr << eraFile0.getErrStr() << endl;
@@ -330,7 +331,7 @@ int Era5Nc2Mdv::_adjustGeom(const vector<string> &pathsAtTime)
     // read file metadata
     
     Era5File eraFile(_params);
-    if (eraFile.readFromPath(pathsAtTime[ii], 0)) {
+    if (eraFile.readFromPath(pathsAtTime[ii], -1)) {
       cerr << "ERROR - Era5Nc2Mdv::_adjustGeom" << endl;
       cerr << "  File path: " << pathsAtTime[ii] << endl;
       cerr << eraFile.getErrStr() << endl;
@@ -407,7 +408,10 @@ int Era5Nc2Mdv::_adjustGeom(const vector<string> &pathsAtTime)
       levelsSet.insert(eraFile.getLevel(0));
     }
     
-    fieldNamesSet.insert(eraFile.getFieldName());
+    const vector<string> &fieldNames = eraFile.getFieldNames();
+    for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
+      fieldNamesSet.insert(fieldNames[ifield]);
+    }
 
   } // ii
 
@@ -439,9 +443,13 @@ int Era5Nc2Mdv::_adjustGeom(const vector<string> &pathsAtTime)
 
   // set geom
   
-  _deltaTimeSecs =
-    (int) ((_dataTimes[_dataTimes.size()-1] - _dataTimes[0]) /
-           (_dataTimes.size()-1.0) + 0.5);
+  if (_dataTimes.size() > 1) {
+    _deltaTimeSecs =
+      (int) ((_dataTimes[_dataTimes.size()-1] - _dataTimes[0]) /
+             (_dataTimes.size()-1.0) + 0.5);
+  } else {
+    _deltaTimeSecs = 0;
+  }
 
   _ny = _nLat;
   _miny = _lat[0];
@@ -515,63 +523,48 @@ int Era5Nc2Mdv::_createVol(const vector<string> &pathsAtTime,
       cerr << eraFile.getErrStr() << endl;
       return -1;
     }
-    string fieldName = eraFile.getFieldName();
-
-    // get the relevant Mdvx field
+    const vector<Era5File::field_t> &eraFields = eraFile.getFields();
     
-    MdvxField *field = mdvx.getField(fieldName.c_str());
-    if (field == NULL) {
-      cerr << "ERROR - Era5Nc2Mdv::_createVol" << endl;
-      cerr << "  File path: " << pathsAtTime[ipath] << endl;
-      cerr << "  Ignoring field: " << fieldName << endl;
-      continue;
-    }
+    for (size_t ifield = 0; ifield < eraFields.size(); ifield++) {
 
-    // set metadata
+      const Era5File::field_t &eraField = eraFields[ifield];
+      string fieldName = eraField.fieldName;
+
+      // get the relevant Mdvx field
     
-    field->setFieldNameLong(eraFile.getLongName().c_str());
-    field->setUnits(eraFile.getUnits().c_str());
-
-    // set the field data
-
-    if (eraFile.getNLevels() == 1) {
-
-      // only 1 level per file
-      
-      double level = eraFile.getLevel(0);
-      int levelNum = _getOutputLevelIndex(level);
-      int nLatLon = _nLat * _nLon;
-      long offset = nLatLon * levelNum;
-      const float *inData = eraFile.getFieldData().data();
-      float *outData = (float *) field->getVol() + offset;
-      
-      if (_inverty) {
-        // copy in reverse row order
-        for (size_t ilat = 0; ilat < _nLat; ilat++) {
-          int jlat = _nLat - ilat - 1;
-          const float *source = inData + jlat * _nLon;
-          float *dest = outData + ilat * _nLon;
-          memcpy(dest, source, _nLon * sizeof(float));
-        }
-      } else {
-        // copy array unchanged
-        memcpy(outData, inData, nLatLon * sizeof(float));
+      MdvxField *field = mdvx.getField(fieldName.c_str());
+      if (field == NULL) {
+        cerr << "ERROR - Era5Nc2Mdv::_createVol" << endl;
+        cerr << "  File path: " << pathsAtTime[ipath] << endl;
+        cerr << "  Ignoring field: " << fieldName << endl;
+        continue;
       }
 
-    } else {
+      if (eraField.data.size() == 0) {
+        cerr << "ERROR - Era5Nc2Mdv::_createVol" << endl;
+        cerr << "  File path: " << pathsAtTime[ipath] << endl;
+        cerr << "  No data found for field: " << fieldName << endl;
+        return -1;
+      }
+
+      // set metadata
+    
+      field->setFieldNameLong(eraField.longName.c_str());
+      field->setUnits(eraField.units.c_str());
+
+      // set the field data
+
+      if (eraFile.getNLevels() == 1) {
+
+        // only 1 level per file
       
-      // all levels in a single file
-
-      for (size_t ilevel = 0; ilevel < _nLevels; ilevel++) {
-
-        double level = _levels[ilevel];
-        int levelNum = _getFileLevelIndex(level);
+        double level = eraFile.getLevel(0);
+        int levelNum = _getOutputLevelIndex(level);
         int nLatLon = _nLat * _nLon;
         long offset = nLatLon * levelNum;
-        const float *inData = eraFile.getFieldData().data() + offset;
-        // float *outData = (float *) field->getVol() + offset;
-        float *outData = (float *) field->getVol() + nLatLon * ilevel;
-
+        const float *inData = eraField.data.data();
+        float *outData = (float *) field->getVol() + offset;
+      
         if (_inverty) {
           // copy in reverse row order
           for (size_t ilat = 0; ilat < _nLat; ilat++) {
@@ -585,9 +578,38 @@ int Era5Nc2Mdv::_createVol(const vector<string> &pathsAtTime,
           memcpy(outData, inData, nLatLon * sizeof(float));
         }
 
+      } else {
+      
+        // all levels in a single file
+
+        for (size_t ilevel = 0; ilevel < _nLevels; ilevel++) {
+
+          double level = _levels[ilevel];
+          int levelNum = _getFileLevelIndex(level);
+          int nLatLon = _nLat * _nLon;
+          long offset = nLatLon * levelNum;
+          const float *inData = eraField.data.data() + offset;
+          // float *outData = (float *) field->getVol() + offset;
+          float *outData = (float *) field->getVol() + nLatLon * ilevel;
+
+          if (_inverty) {
+            // copy in reverse row order
+            for (size_t ilat = 0; ilat < _nLat; ilat++) {
+              int jlat = _nLat - ilat - 1;
+              const float *source = inData + jlat * _nLon;
+              float *dest = outData + ilat * _nLon;
+              memcpy(dest, source, _nLon * sizeof(float));
+            }
+          } else {
+            // copy array unchanged
+            memcpy(outData, inData, nLatLon * sizeof(float));
+          }
+
+        }
+
       }
 
-    }
+    } // ifield
 
   } // ipath
 
@@ -791,6 +813,38 @@ MdvxField *Era5Nc2Mdv::_createMdvxField(const string &fieldName)
 }
 
 /////////////////////////////////////////////////
+// Get field by name, accepting a case-insensitive match
+// only if no exact match exists.
+
+MdvxField *Era5Nc2Mdv::_getFieldByName(DsMdvx &mdvx,
+                                       const string &fieldName)
+
+{
+
+  MdvxField *field = mdvx.getField(fieldName.c_str());
+  if (field != NULL) {
+    return field;
+  }
+
+  string fieldNameLower = fieldName;
+  transform(fieldNameLower.begin(), fieldNameLower.end(), fieldNameLower.begin(),
+            [](unsigned char cc) { return std::tolower(cc); });
+
+  for (size_t ii = 0; ii < mdvx.getNFields(); ii++) {
+    MdvxField *thisField = mdvx.getField(ii);
+    string thisName = thisField->getFieldName();
+    transform(thisName.begin(), thisName.end(), thisName.begin(),
+              [](unsigned char cc) { return std::tolower(cc); });
+    if (thisName == fieldNameLower) {
+      return thisField;
+    }
+  }
+
+  return NULL;
+
+}
+
+/////////////////////////////////////////////////
 // Get output index for a specified level
 //
 // Returns index on success, -1 on failure
@@ -849,7 +903,7 @@ int Era5Nc2Mdv::_addHeightField(DsMdvx &mdvx)
 
   // copy the geopeotential field
   
-  const MdvxField *zField = mdvx.getField(_params.geopotential_field_name);
+  const MdvxField *zField = _getFieldByName(mdvx, _params.geopotential_field_name);
   if (zField == NULL) {
     cerr << "ERROR - Era5Nc2Mdv::_createHeightField" << endl;
     cerr << "  Cannot find geopotential field: "
@@ -914,7 +968,7 @@ int Era5Nc2Mdv::_convertTempToC(DsMdvx &mdvx)
 
 {
 
-  MdvxField *tField = mdvx.getField(_params.temperature_field_name);
+  MdvxField *tField = _getFieldByName(mdvx, _params.temperature_field_name);
   if (tField == NULL) {
     cerr << "WARNING - Era5Nc2Mdv::_convertTempToC" << endl;
     cerr << "  Cannot find temperature field: "
@@ -947,7 +1001,7 @@ void Era5Nc2Mdv::_renameFields(DsMdvx &mdvx)
 
     const Params::output_field_t &ofld = _params._output_fields[ifield];
     
-    MdvxField *field = mdvx.getField(ofld.input_field_name);
+    MdvxField *field = _getFieldByName(mdvx, ofld.input_field_name);
     if (field == NULL) {
       cerr << "WARNING - Era5Nc2Mdv::_renameFields" << endl;
       cerr << "  Cannot find field: "
@@ -1001,5 +1055,3 @@ void Era5Nc2Mdv::_printLevels(const string &label,
   out << "==========================================================" << endl;
   
 }
-
-

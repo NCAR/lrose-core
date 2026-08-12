@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./Era5Nc2Mdv
+ * TDRP params for Era5Nc2Mdv
  **********************************************************************/
 
 //======================================================================
@@ -22,14 +22,12 @@
 // NORM - minimal debug level. VERBOSE - verbose messaged. EXTRA - extra 
 //   verbose messages.
 //
-//
 // Type: enum
 // Options:
 //     DEBUG_OFF
 //     DEBUG_NORM
 //     DEBUG_VERBOSE
 //     DEBUG_EXTRA
-//
 
 debug = DEBUG_OFF;
 
@@ -49,12 +47,10 @@ debug = DEBUG_OFF;
 //   search for all files with the same time interval, assemble all of the 
 //   levels and fields, and write out one output file per input time.
 //
-//
 // Type: enum
 // Options:
 //     ARCHIVE
 //     FILELIST
-//
 
 mode = ARCHIVE;
 
@@ -64,9 +60,7 @@ mode = ARCHIVE;
 //
 // Format is 'yyyy mm dd hh mm ss'.
 //
-//
 // Type: string
-//
 
 start_time = "2023 06 01 00 00 00";
 
@@ -76,9 +70,7 @@ start_time = "2023 06 01 00 00 00";
 //
 // Format is 'yyyy mm dd hh mm ss'.
 //
-//
 // Type: string
-//
 
 end_time = "2023 07 01 00 00 00";
 
@@ -94,11 +86,9 @@ end_time = "2023 07 01 00 00 00";
 //
 // We search this dir for all files between the start and end times.
 //
-//
 // Type: string
-//
 
-input_dir = "$(HOME)/data/ERA5/levelFiles";
+input_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ERA5/levelFiles";
 
 //======================================================================
 //
@@ -111,9 +101,7 @@ input_dir = "$(HOME)/data/ERA5/levelFiles";
 // The temperature is read in degrees Kelvin. This option allows us to 
 //   convert to degrees C.
 //
-//
 // Type: boolean
-//
 
 convert_temperature_to_celcius = TRUE;
 
@@ -123,11 +111,55 @@ convert_temperature_to_celcius = TRUE;
 //
 // This is the field to be converted to C.
 //
+// Type: string
+
+temperature_field_name = "t";
+
+//======================================================================
+//
+// NetCDF dimension and variable names.
+//
+//======================================================================
+ 
+///////////// time_name ///////////////////////////////
+//
+// The name of the time dimension and variable.
+//
+// This must match what is in the file. Run 'ncdump' to verify.
 //
 // Type: string
-//
 
-temperature_field_name = "T";
+time_name = "valid_time";
+
+///////////// level_name //////////////////////////////
+//
+// The name of the level dimension and variable.
+//
+// This must match what is in the file. Run 'ncdump' to verify.
+//
+// Type: string
+
+level_name = "pressure_level";
+
+///////////// latitude_name ///////////////////////////
+//
+// The name of the latitude dimension and variable.
+//
+// This must match what is in the file. Run 'ncdump' to verify.
+//
+// Type: string
+
+latitude_name = "latitude";
+
+///////////// longitude_name //////////////////////////
+//
+// The name of the longitude dimension and variable.
+//
+// This must match what is in the file. Run 'ncdump' to verify.
+//
+// Type: string
+
+longitude_name = "longitude";
 
 //======================================================================
 //
@@ -142,9 +174,7 @@ temperature_field_name = "T";
 // This requires that the geopotential height field exists in the input 
 //   data. This normally has the field name 'Z'.
 //
-//
 // Type: boolean
-//
 
 interp_to_height_levels = TRUE;
 
@@ -154,11 +184,9 @@ interp_to_height_levels = TRUE;
 //
 // We use this field to provide heights for interpolation.
 //
-//
 // Type: string
-//
 
-geopotential_field_name = "Z";
+geopotential_field_name = "z";
 
 ///////////// height_levels ///////////////////////////
 //
@@ -166,10 +194,8 @@ geopotential_field_name = "Z";
 //
 // The various data fields are interpolated onto these height levels.
 //
-//
 // Type: double
 // 1D array - variable length.
-//
 
 height_levels = {
  0,
@@ -204,9 +230,7 @@ height_levels = {
 //   If TRUE, the height levels will be computed from the standard 
 //   atmosphere.
 //
-//
 // Type: boolean
-//
 
 compute_heights_from_pressure_levels = FALSE;
 
@@ -217,9 +241,7 @@ compute_heights_from_pressure_levels = FALSE;
 // Any heights below this are removed when converting from pressure 
 //   levels.
 //
-//
 // Type: double
-//
 
 min_height_from_pressure_levels = 0;
 
@@ -235,11 +257,9 @@ min_height_from_pressure_levels = 0;
 //
 // The assembled ERA5 data is output to this dir in MDV format.
 //
-//
 // Type: string
-//
 
-output_dir = "$(HOME)/data/ERA5/mdv";
+output_dir = "/tmp/ERA5";
 
 //======================================================================
 //
@@ -251,9 +271,7 @@ output_dir = "$(HOME)/data/ERA5/mdv";
 //
 // Option to rename the fields, and set the units, before writing.
 //
-//
 // Type: boolean
-//
 
 rename_output_fields = TRUE;
 
@@ -266,7 +284,6 @@ rename_output_fields = TRUE;
 //   If the long name or standard name are empty, the existing names are 
 //   used.
 //
-//
 // Type: struct
 //   typedef struct {
 //      string input_field_name;
@@ -276,54 +293,32 @@ rename_output_fields = TRUE;
 //   }
 //
 // 1D array - variable length.
-//
 
 output_fields = {
   {
-    input_field_name = "D",
-    output_field_name = "div",
+    input_field_name = "d",
+    output_field_name = "divergence",
     output_long_name = "divergence_of_wind",
     output_units = "1/s"
   }
   ,
   {
-    input_field_name = "Q",
-    output_field_name = "spec_hum",
+    input_field_name = "q",
+    output_field_name = "specific_humidity",
     output_long_name = "specific_humidity",
     output_units = "kg/kg"
   }
   ,
   {
-    input_field_name = "R",
-    output_field_name = "RH",
-    output_long_name = "relative_humidity",
-    output_units = "%"
-  }
-  ,
-  {
-    input_field_name = "T",
-    output_field_name = "temp",
+    input_field_name = "t",
+    output_field_name = "temperature",
     output_long_name = "air_temperature",
     output_units = "K"
   }
   ,
   {
-    input_field_name = "U",
-    output_field_name = "U",
-    output_long_name = "wind_east_component",
-    output_units = "m/s"
-  }
-  ,
-  {
-    input_field_name = "V",
-    output_field_name = "V",
-    output_long_name = "wind_north_component",
-    output_units = "m/s"
-  }
-  ,
-  {
-    input_field_name = "W",
-    output_field_name = "W",
+    input_field_name = "w",
+    output_field_name = "w",
     output_long_name = "vertical_velocity",
     output_units = "m/s"
   }

@@ -120,6 +120,7 @@ private:
 
   int _setMasterHeader(DsMdvx &mdvx, time_t volTime);
   MdvxField *_createMdvxField(const string &fieldName);
+  MdvxField *_getFieldByName(DsMdvx &mdvx, const string &fieldName);
   int _getOutputLevelIndex(double level);
   int _getFileLevelIndex(double level);
   int _addHeightField(DsMdvx &mdvx);
@@ -136,4 +137,3 @@ private:
 };
 
 #endif
-

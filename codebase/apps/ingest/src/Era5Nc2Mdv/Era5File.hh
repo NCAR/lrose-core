@@ -56,6 +56,19 @@ class Era5File
   
 public:
 
+  typedef struct {
+    string fieldName;
+    string longName;
+    string shortName;
+    string units;
+    float fillValue;
+    float minValue;
+    float maxValue;
+    string datasetUrl;
+    string datasetDoi;
+    vector<float> data;
+  } field_t;
+
   /// Constructor
   
   Era5File(const Params &params);
@@ -108,7 +121,7 @@ public:
   const DateTime &getRefTime() const { return _refTime; }
   const DateTime &getStartTime() const { return _startTime; }
   const vector<DateTime> &getDataTimes() const { return _dataTimes; }
-  const vector<int> &getITimes() const { return _iTimes; }
+  const vector<double> &getITimes() const { return _iTimes; }
 
   const vector<double> &getLon() const { return _lon; }
   const vector<double> &getLat() const { return _lat; }
@@ -121,6 +134,8 @@ public:
   }
   const vector<double> &getLevels() const { return _levels; }
   int getTimeIndex() const { return _timeIndex; }
+  const vector<field_t> &getFields() const { return _fields; }
+  const vector<string> &getFieldNames() const { return _fieldNames; }
   string getFieldName() const { return _fieldName; }
   string getLongName() const { return _longName; }
   string getShortName() const { return _shortName; }
@@ -174,7 +189,8 @@ private:
   DateTime _startTime;
   NcxxVar _timeVar;
   vector<DateTime> _dataTimes;
-  vector<int> _iTimes;
+  vector<double> _iTimes;
+  int _timeUnitsMultiplierSecs;
 
   // lon/lat
 
@@ -196,6 +212,8 @@ private:
   float _fillValue;
   float _minValue, _maxValue;
   vector<float> _fieldData;
+  vector<string> _fieldNames;
+  vector<field_t> _fields;
 
   // private methods
   
@@ -205,10 +223,16 @@ private:
   int _readTimes();
   int _readLatLon();
   int _readLevels();
+  int _readFieldsMetadata();
   int _readField(int timeIndex);
+  bool _isFieldVariable(NcxxVar &var);
+  int _readFieldMetadata(string fieldName,
+                         NcxxVar &var,
+                         field_t &field);
   int _readFieldVariable(string fieldName,
                          int timeIndex,
-                         NcxxVar &var);
+                         NcxxVar &var,
+                         field_t &field);
 
   /// add integer value to error string, with label
   
@@ -228,4 +252,3 @@ private:
 };
 
 #endif
-

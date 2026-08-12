@@ -89,8 +89,11 @@ void Era5File::clear()
 
   _dataTimes.clear();
   _iTimes.clear();
+  _timeUnitsMultiplierSecs = 3600;
 
   _fieldData.clear();
+  _fieldNames.clear();
+  _fields.clear();
   
 }
 
@@ -171,6 +174,13 @@ int Era5File::readFromPath(const string &path,
     return -1;
   }
 
+  // discover field variables
+  
+  if (_readFieldsMetadata()) {
+    _addErrStr(errStr);
+    return -1;
+  }
+
   // read field data if time index non-negative
   
   if (timeIndex >= 0) {
@@ -215,6 +225,9 @@ int Era5File::_readDimensions()
     // Time dimension: accept either "time" or "valid_time"
 
     _timeDim = _file.getDim(_params.time_name);
+    if (_timeDim.isNull() && !strcmp(_params.time_name, "time")) {
+      _timeDim = _file.getDim("valid_time");
+    }
     if (_timeDim.isNull()) {
       _addErrStr("ERROR - Era5File::_readDimensions");
       _addErrStr("Cannot find time dimension named: ", _params.time_name);
@@ -226,6 +239,9 @@ int Era5File::_readDimensions()
     // Vertical dimension: accept either "level" or "pressure_level"
 
     _levelDim = _file.getDim(_params.level_name);
+    if (_levelDim.isNull() && !strcmp(_params.level_name, "level")) {
+      _levelDim = _file.getDim("pressure_level");
+    }
     if (_levelDim.isNull()) {
       _addErrStr("ERROR - Era5File::_readDimensions");
       _addErrStr("Cannot find level dimension named: ", _params.level_name);
@@ -328,10 +344,11 @@ int Era5File::_readTimes()
 
   // read the time variable
 
-  _timeVar = _file.getVar(_params.time_name);
+  string timeName = _timeDim.getName();
+  _timeVar = _file.getVar(timeName);
   if (_timeVar.isNull()) {
     _addErrStr("ERROR - Era5File::_readTimes");
-    _addErrStr("  Cannot find time variable, name: ", _params.time_name);
+    _addErrStr("  Cannot find time variable, name: ", timeName);
     _addErrStr(_file.getErrStr());
     return -1;
   }
@@ -371,14 +388,22 @@ int Era5File::_readTimes()
                     &year, &month, &day) == 3) {
     hour = min = sec = 0;
     _refTime.set(year, month, day, hour, min, sec);
+    _timeUnitsMultiplierSecs = 3600;
+  } else if (sscanf(units.c_str(),
+                    "seconds since %4d-%2d-%2d %2d:%2d:%2d",
+                    &year, &month, &day, &hour, &min, &sec) == 6) {
+    _refTime.set(year, month, day, hour, min, sec);
+    _timeUnitsMultiplierSecs = 1;
   } else if (sscanf(units.c_str(),
                     "seconds since %4d-%2d-%2d",
                     &year, &month, &day) == 3) {
     hour = min = sec = 0;
     _refTime.set(year, month, day, hour, min, sec);
+    _timeUnitsMultiplierSecs = 1;
   } else {
     _addErrStr("ERROR - Era5File::_readTimes");
     _addErrStr("  Bad time units string: ", units);
+    return -1;
   }
 
   // read the time array
@@ -393,7 +418,7 @@ int Era5File::_readTimes()
     return -1;
   }
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    DeltaTime delTime((long) _iTimes[ii] * 3600);
+    DeltaTime delTime((long) (_iTimes[ii] * _timeUnitsMultiplierSecs));
     DateTime mtime = _refTime + delTime;
     _dataTimes.push_back(mtime);
   }
@@ -491,7 +516,7 @@ int Era5File::_readLevels()
 
   _levels.clear();
   
-  string levelName = _params.level_name;
+  string levelName = _levelDim.getName();
   _levelVar = _file.getVar(levelName);
   if (_levelVar.isNull() || _levelVar.numVals() < 1) {
     _addErrStr("ERROR - Era5File::_readLevel");
@@ -529,13 +554,21 @@ int Era5File::_readLevels()
 }
 
 /////////////////////////////////////////
-// read field for a specified time index
+// read field metadata
 
-int Era5File::_readField(int timeIndex)
+int Era5File::_readFieldsMetadata()
 
 {
 
-  // loop through the variables, adding data fields as appropriate
+  _fieldNames.clear();
+  _fields.clear();
+  _fieldName.clear();
+  _longName.clear();
+  _shortName.clear();
+  _units.clear();
+  _fillValue = -9999.0;
+  _minValue = -1.0e33;
+  _maxValue = 1.0e33;
   
   const multimap<string, NcxxVar> &vars = _file.getVars();
 
@@ -543,19 +576,200 @@ int Era5File::_readField(int timeIndex)
        iter != vars.end(); iter++) {
     
     NcxxVar var = iter->second;
-    if (var.isNull()) {
+    if (var.isNull() || !_isFieldVariable(var)) {
       continue;
     }
-    
-    if (_readFieldVariable(var.getName(), timeIndex, var) == 0) {
-      return 0;
+
+    field_t field;
+    if (_readFieldMetadata(var.getName(), var, field)) {
+      return -1;
     }
+    
+    _fieldNames.push_back(field.fieldName);
+    _fields.push_back(field);
     
   } // iter
 
-  // no field found
+  if (_fields.size() == 0) {
+    _addErrStr("ERROR - Era5File::_readFieldsMetadata");
+    _addErrStr("  No 4-D float field variables found");
+    return -1;
+  }
+
+  _fieldName = _fields[0].fieldName;
+  _longName = _fields[0].longName;
+  _shortName = _fields[0].shortName;
+  _units = _fields[0].units;
+  _fillValue = _fields[0].fillValue;
+  _minValue = _fields[0].minValue;
+  _maxValue = _fields[0].maxValue;
+  _datasetUrl = _fields[0].datasetUrl;
+  _datasetDoi = _fields[0].datasetDoi;
+
+  return 0;
+
+}
+
+/////////////////////////////////////////
+// read field for a specified time index
+
+int Era5File::_readField(int timeIndex)
+
+{
+
+  for (size_t ii = 0; ii < _fields.size(); ii++) {
+    
+    NcxxVar var = _file.getVar(_fields[ii].fieldName);
+    if (var.isNull()) {
+      _addErrStr("ERROR - Era5File::_readField");
+      _addErrStr("  Cannot find field variable: ", _fields[ii].fieldName);
+      return -1;
+    }
+    
+    if (_readFieldVariable(var.getName(), timeIndex, var, _fields[ii])) {
+      return -1;
+    }
+    
+  } // ii
+
+  _fieldData = _fields[0].data;
+
+  return 0;
+
+}
+
+////////////////////////////////////////////
+// check whether this is a data field variable
+
+bool Era5File::_isFieldVariable(NcxxVar &var)
   
-  return -1;
+{
+
+  // check the type
+  
+  NcxxType ftype = var.getType();
+  if (ftype != ncxxFloat) {
+    return false;
+  }
+  
+  int numDims = var.getDimCount();
+  // we need fields with 4 dimensions
+  if (numDims != 4) {
+    return false;
+  }
+  
+  // check that we have the correct dimensions
+  
+  NcxxDim timeDim = var.getDim(0);
+  if (timeDim != _timeDim) {
+    return false;
+  }
+  
+  NcxxDim levelDim = var.getDim(1);
+  if (levelDim != _levelDim) {
+    return false;
+  }
+  
+  NcxxDim latDim = var.getDim(2);
+  if (latDim != _latDim) {
+    return false;
+  }
+  
+  NcxxDim lonDim = var.getDim(3);
+  if (lonDim != _lonDim) {
+    return false;
+  }
+
+  return true;
+
+}
+
+////////////////////////////////////////////
+// read field metadata
+
+int Era5File::_readFieldMetadata(string fieldName,
+                                 NcxxVar &var,
+                                 field_t &field)
+  
+{
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "DEBUG - Era5File::_readFieldMetadata" << endl;
+    cerr << "  -->> adding field, input name: " << fieldName << endl;
+  }
+
+  field.fieldName = var.getName();
+  
+  // set names, units, etc from attributes
+
+  try {
+    NcxxVarAtt att = var.getAtt("long_name");
+    att.getValues(field.longName);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Era5File::_readFieldMetadata");
+    _addErrStr("  Var has no long_name: ", fieldName);
+    _addErrStr("  ", e.whatStr());
+    return -1;
+  }
+
+  try {
+    NcxxVarAtt att = var.getAtt("short_name");
+    att.getValues(field.shortName);
+  } catch (NcxxException& e) {
+    // _addErrStr("WARNING - Era5File::_readFieldMetadata");
+    // _addErrStr("  Var has no short_name: ", fieldName);
+    field.shortName = fieldName;
+  }
+
+  try {
+    NcxxVarAtt att = var.getAtt("units");
+    att.getValues(field.units);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Era5File::_readFieldMetadata");
+    _addErrStr("  Var has no units: ", fieldName);
+    _addErrStr("  ", e.whatStr());
+    return -1;
+  }
+
+  try {
+    NcxxVarAtt att = var.getAtt("_FillValue");
+    att.getValues(&field.fillValue);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Era5File::_readFieldMetadata");
+    _addErrStr("  Var has no _FillValue: ", fieldName);
+    _addErrStr("  ", e.whatStr());
+    return -1;
+  }
+
+  field.minValue = -1.0e33;
+  try {
+    NcxxVarAtt att = var.getAtt("minimum_value");
+    att.getValues(&field.minValue);
+  } catch (NcxxException& e) {
+  }
+
+  field.maxValue = 1.0e33;
+  try {
+    NcxxVarAtt att = var.getAtt("maximum_value");
+    att.getValues(&field.maxValue);
+  } catch (NcxxException& e) {
+  }
+
+  field.datasetUrl.clear();
+  try {
+    NcxxVarAtt att = var.getAtt("rda_dataset_url");
+    att.getValues(field.datasetUrl);
+  } catch (NcxxException& e) {
+  }
+
+  field.datasetDoi.clear();
+  try {
+    NcxxVarAtt att = var.getAtt("rda_dataset_doi");
+    att.getValues(field.datasetDoi);
+  } catch (NcxxException& e) {
+  }
+
+  return 0;
 
 }
 
@@ -564,7 +778,8 @@ int Era5File::_readField(int timeIndex)
 
 int Era5File::_readFieldVariable(string fieldName,
                                  int timeIndex,
-                                 NcxxVar &var)
+                                 NcxxVar &var,
+                                 field_t &field)
   
 {
 
@@ -574,109 +789,8 @@ int Era5File::_readFieldVariable(string fieldName,
     cerr << "  -->> timeIndex: " << timeIndex << endl;
   }
   
-  // check the type
-  
-  NcxxType ftype = var.getType();
-  if (ftype != ncxxFloat) {
+  if (!_isFieldVariable(var)) {
     return -1;
-  }
-  
-  int numDims = var.getDimCount();
-  // we need fields with 4 dimensions
-  if (numDims != 4) {
-    return -1;
-  }
-  
-  // check that we have the correct dimensions
-  
-  NcxxDim timeDim = var.getDim(0);
-  if (timeDim != _timeDim) {
-    return -1;
-  }
-  
-  NcxxDim levelDim = var.getDim(1);
-  if (levelDim != _levelDim) {
-    return -1;
-  }
-  
-  NcxxDim latDim = var.getDim(2);
-  if (latDim != _latDim) {
-    return -1;
-  }
-  
-  NcxxDim lonDim = var.getDim(3);
-  if (lonDim != _lonDim) {
-    return -1;
-  }
-  
-  // set names, units, etc from attributes
-
-  _fieldName = var.getName();
-  try {
-    NcxxVarAtt att = var.getAtt("long_name");
-    att.getValues(_longName);
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Era5File::_readFieldVariable");
-    _addErrStr("  Var has no long_name: ", fieldName);
-    _addErrStr("  ", e.whatStr());
-    return -1;
-  }
-
-  try {
-    NcxxVarAtt att = var.getAtt("short_name");
-    att.getValues(_shortName);
-  } catch (NcxxException& e) {
-    // _addErrStr("WARNING - Era5File::_readFieldVariable");
-    // _addErrStr("  Var has no short_name: ", fieldName);
-    _shortName = fieldName;
-  }
-
-  try {
-    NcxxVarAtt att = var.getAtt("units");
-    att.getValues(_units);
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Era5File::_readFieldVariable");
-    _addErrStr("  Var has no units: ", fieldName);
-    _addErrStr("  ", e.whatStr());
-    return -1;
-  }
-
-  try {
-    NcxxVarAtt att = var.getAtt("_FillValue");
-    att.getValues(&_fillValue);
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Era5File::_readFieldVariable");
-    _addErrStr("  Var has no _FillValue: ", fieldName);
-    _addErrStr("  ", e.whatStr());
-    return -1;
-  }
-
-  _minValue = -1.0e33;
-  try {
-    NcxxVarAtt att = var.getAtt("minimum_value");
-    att.getValues(&_minValue);
-  } catch (NcxxException& e) {
-  }
-
-  _maxValue = 1.0e33;
-  try {
-    NcxxVarAtt att = var.getAtt("maximum_value");
-    att.getValues(&_maxValue);
-  } catch (NcxxException& e) {
-  }
-
-  _datasetUrl.clear();
-  try {
-    NcxxVarAtt att = var.getAtt("rda_dataset_url");
-    att.getValues(_datasetUrl);
-  } catch (NcxxException& e) {
-  }
-
-  _datasetDoi.clear();
-  try {
-    NcxxVarAtt att = var.getAtt("rda_dataset_doi");
-    att.getValues(_datasetDoi);
-  } catch (NcxxException& e) {
   }
 
   // set starting location in each dimension
@@ -697,9 +811,9 @@ int Era5File::_readFieldVariable(string fieldName,
 
   // get the data
   
-  _fieldData.resize(_nPointsVol);
+  field.data.resize(_nPointsVol);
   try {
-    var.getVal(start, count, _fieldData.data());
+    var.getVal(start, count, field.data.data());
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Era5File::_readFieldVariable");
     _addErrStr("  getVal fails, var name: ",
@@ -824,4 +938,3 @@ void Era5File::_addErrStr(string label, string strarg, bool cr)
     _errStr += "\n";
   }
 }
-
