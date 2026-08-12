@@ -58,9 +58,11 @@ pthread_mutex_t Beam::_debugPrintMutex = PTHREAD_MUTEX_INITIALIZER;
 // Constructor
 
 Beam::Beam(const string &progName,
-	   const Params &params) :
+	   const Params &params,
+           const KdpFiltParams &kdpParams) :
         _progName(progName),
-        _params(params)
+        _params(params),
+        _kdpParams(kdpParams)
         
 {
 
@@ -660,54 +662,12 @@ void Beam::_kdpInit()
 
   // initialize KDP object
 
-  if (_params.KDP_fir_filter_len == Params::FIR_LEN_125) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_125);
-  } else if (_params.KDP_fir_filter_len == Params::FIR_LEN_60) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_60);
-  } else if (_params.KDP_fir_filter_len == Params::FIR_LEN_40) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_40);
-  } else if (_params.KDP_fir_filter_len == Params::FIR_LEN_30) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_30);
-  } else if (_params.KDP_fir_filter_len == Params::FIR_LEN_20) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_20);
-  } else {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_10);
+  _kdp.setParams(_kdpParams);
+  if (_params.KDP_write_ray_files) {
+    _kdp.setWriteRayFiles(_params.KDP_write_ray_files,
+                          _params.KDP_ray_files_dir);
   }
-  _kdp.setNGatesStats(_params.KDP_ngates_for_stats);
-  _kdp.setNFiltIterUnfolded(_params.KDP_n_filt_iterations_unfolded);
-  _kdp.setNFiltIterCond(_params.KDP_n_filt_iterations_conditioned);
-  if (_params.KDP_use_iterative_filtering) {
-    _kdp.setUseIterativeFiltering(true);
-    _kdp.setPhidpDiffThreshold(_params.KDP_phidp_difference_threshold);
-  }
-  _kdp.setPhidpSdevMax(_params.KDP_phidp_sdev_max);
-  _kdp.setPhidpJitterMax(_params.KDP_phidp_jitter_max);
-  _kdp.checkSnr(_params.KDP_check_snr);
-  _kdp.setSnrThreshold(_params.KDP_snr_threshold);
-  _kdp.checkRhohv(_params.KDP_check_rhohv);
-  _kdp.setRhohvThreshold(_params.KDP_rhohv_threshold);
-  if (_params.KDP_check_zdr_sdev) {
-    _kdp.checkZdrSdev(true);
-  }
-  _kdp.setZdrSdevMax(_params.KDP_zdr_sdev_max);
-  _kdp.setMinValidAbsKdp(_params.KDP_min_valid_abs_kdp);
-
-  if (_params.KDP_debug) {
-    _kdp.setDebug(true);
-  }
-
-
-  if (_params.apply_precip_attenuation_correction) {
-    if (_params.specify_coefficients_for_attenuation_correction) {
-      _kdp.setAttenCoeffs(_params.dbz_attenuation_coefficient,
-                          _params.dbz_attenuation_exponent,
-                          _params.zdr_attenuation_coefficient,
-                          _params.zdr_attenuation_exponent);
-    } else {
-      _kdp.setComputeAttenCorr(true);
-    }
-  }
-
+  
 }
 
 ////////////////////////////////////////////////
@@ -739,7 +699,7 @@ void Beam::_kdpCompute()
   
   if (_params.KDP_write_ray_files) {
     string rayDir = _params.KDP_ray_files_dir;
-    _kdp.setWriteRayFile(true, rayDir);
+    _kdp.setWriteRayFiles(true, rayDir);
   }
 
   // compute KDP
@@ -762,12 +722,11 @@ void Beam::_kdpCompute()
   // put KDP into fields objects
   
   const double *kdp = _kdp.getKdp();
-  const double *psob = _kdp.getPsob();
-  const double *phidpCond = _kdp.getPhidpCondFilt(); 
+  const double *delta = _kdp.getDelta();
+  const double *phidpSC = _kdp.getPhidpSC(); 
   const double *phidpFilt = _kdp.getPhidpFilt();
   const double *phidpSdev = _kdp.getPhidpSdev();
   const double *phidpJitter = _kdp.getPhidpJitter();
-  const double *zdrSdev = _kdp.getZdrSdev();
   
   const double *dbzAttenCorr = _kdp.getDbzAttenCorr();
   const double *zdrAttenCorr = _kdp.getZdrAttenCorr();
@@ -778,11 +737,11 @@ void Beam::_kdpCompute()
     if (kdp[ii] != _missingDbl) {
       _gateData[ii]->fields.kdp = kdp[ii];
     }
-    if (psob[ii] != _missingDbl) {
-      _gateData[ii]->fields.psob = psob[ii];
+    if (delta[ii] != _missingDbl) {
+      _gateData[ii]->fields.delta = delta[ii];
     }
-    if (phidpCond[ii] != _missingDbl) {
-      _gateData[ii]->fields.phidp_cond = phidpCond[ii];
+    if (phidpSC[ii] != _missingDbl) {
+      _gateData[ii]->fields.phidp_cond = phidpSC[ii];
     }
     if (phidpFilt[ii] != _missingDbl) {
       _gateData[ii]->fields.phidp_filt = phidpFilt[ii];
@@ -793,9 +752,7 @@ void Beam::_kdpCompute()
     if (phidpJitter[ii] != _missingDbl) {
       _gateData[ii]->fields.phidp_jitter_4kdp = phidpJitter[ii];
     }
-    if (zdrSdev[ii] != _missingDbl) {
-      _gateData[ii]->fields.zdr_sdev_4kdp = zdrSdev[ii];
-    }
+    _gateData[ii]->fields.zdr_sdev_4kdp = _missingDbl;
     if (_params.apply_precip_attenuation_correction) {
       _gateData[ii]->fields.dbz_atten_correction = dbzAttenCorr[ii];
       _gateData[ii]->fields.zdr_atten_correction = zdrAttenCorr[ii];

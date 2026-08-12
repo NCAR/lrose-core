@@ -28,6 +28,7 @@ HDRS = \
 	../include/radar/MatrixRegrFilter.hh \
 	../include/radar/NoiseLocator.hh \
 	../include/radar/RadarFft.hh \
+	../include/radar/RadarFftDouble.hh \
 	../include/radar/RadarMoments.hh \
 	../include/radar/Sz864.hh
 
@@ -46,6 +47,7 @@ CPPC_SRCS = \
 	NoiseLocator.cc \
 	PhaseCoding.cc \
 	RadarFft.cc \
+	RadarFftDouble.cc \
 	RadarMoments.cc \
 	Sz864.cc
 

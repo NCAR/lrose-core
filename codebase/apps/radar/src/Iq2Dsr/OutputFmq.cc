@@ -1670,7 +1670,7 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
     case Params::KDP:
       return (&_flds.kdp - start);
     case Params::PSOB:
-      return (&_flds.psob - start);
+      return (&_flds.delta - start);
     case Params::KDP_HB:
       return (&_flds.kdp_hb - start);
 

@@ -175,15 +175,6 @@ public:
     WIDTH_METHOD_HYBRID = 2
   } spectrum_width_method_t;
 
-  typedef enum {
-    FIR_LEN_125 = 0,
-    FIR_LEN_60 = 1,
-    FIR_LEN_40 = 2,
-    FIR_LEN_30 = 3,
-    FIR_LEN_20 = 4,
-    FIR_LEN_10 = 5
-  } fir_filter_len_t;
-
   // struct typedefs
 
   typedef struct {
@@ -850,37 +841,7 @@ public:
 
   spectrum_width_method_t spectrum_width_method;
 
-  fir_filter_len_t KDP_fir_filter_len;
-
-  int KDP_n_filt_iterations_unfolded;
-
-  int KDP_n_filt_iterations_conditioned;
-
-  tdrp_bool_t KDP_use_iterative_filtering;
-
-  double KDP_phidp_difference_threshold;
-
-  int KDP_ngates_for_stats;
-
-  double KDP_phidp_sdev_max;
-
-  double KDP_phidp_jitter_max;
-
-  tdrp_bool_t KDP_check_snr;
-
-  double KDP_snr_threshold;
-
-  tdrp_bool_t KDP_check_rhohv;
-
-  double KDP_rhohv_threshold;
-
-  tdrp_bool_t KDP_check_zdr_sdev;
-
-  double KDP_zdr_sdev_max;
-
-  double KDP_min_valid_abs_kdp;
-
-  tdrp_bool_t KDP_debug;
+  char* KDP_params_file_path;
 
   int n_samples;
 
@@ -963,7 +924,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[225];
+  mutable TDRPtable _table[210];
 
   const char *_className;
 

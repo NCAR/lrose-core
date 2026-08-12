@@ -52,7 +52,7 @@
 #include <radar/NoiseLocator.hh>
 #include <radar/AlternatingVelocity.hh>
 #include <radar/KdpFilt.hh>
-#include <radar/KdpBringi.hh>
+#include <radar/KdpFiltParams.hh>
 #include <radar/AtmosAtten.hh>
 #include <radar/PhaseCoding.hh>
 #include <radar/DwellSpectra.hh>
@@ -80,7 +80,8 @@ public:
   // Constructor
   
   Beam(const string &progName,
-       const Params &params);
+       const Params &params,
+       const KdpFiltParams &kdpParams);
         
   // initialize before use
   
@@ -204,7 +205,8 @@ private:
 
   string _progName;
   const Params &_params;
-
+  const KdpFiltParams &_kdpParams;
+  
   MomentsMgr _mmgr;
 
   // pulse vector
@@ -359,7 +361,6 @@ private:
   bool _needKdp;
   bool _needKdpFiltered;
   KdpFilt _kdp;
-  KdpBringi _kdpB;
 
   TaArray<double> _snrArray_;
   TaArray<double> _dbzArray_;

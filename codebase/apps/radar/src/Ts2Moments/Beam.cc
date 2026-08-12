@@ -62,9 +62,11 @@ pthread_mutex_t Beam::_debugPrintMutex = PTHREAD_MUTEX_INITIALIZER;
 // Constructor
 
 Beam::Beam(const string &progName,
-	   const Params &params) :
+	   const Params &params,
+           const KdpFiltParams &kdpParams) :
         _progName(progName),
         _params(params),
+        _kdpParams(kdpParams),
 	_mmgr(progName, params),
         _pcode(params.debug >= Params::DEBUG_VERBOSE)
         
@@ -801,16 +803,10 @@ void Beam::computeMoments()
 
   if (kdpAvail && _needKdp) {
     _kdpCompute(false);
-    if (_params.KDP_compute_using_hubbert_bringi_method) {
-      _kdpComputeBringi(false);
-    }
   }
   
   if (kdpAvail && _needKdpFiltered) {
     _kdpCompute(true);
-    if (_params.KDP_compute_using_hubbert_bringi_method) {
-      _kdpComputeBringi(true);
-    }
   }
 
   // compute corrected velocity
@@ -3223,7 +3219,7 @@ void Beam::_conditionDpFiltFields(MomentsFields &flds,
     fldsF.phidp_jitter_4kdp = flds.phidp_jitter_4kdp;
     fldsF.zdr_sdev_4kdp = flds.zdr_sdev_4kdp;
     fldsF.kdp = flds.kdp;
-    fldsF.psob = flds.psob;
+    fldsF.delta = flds.delta;
     fldsF.kdp_hb = flds.kdp_hb;
 
   }
@@ -3759,70 +3755,12 @@ void Beam::_kdpInit()
   
   // initialize KDP object
 
-  if (_params.KDP_fir_filter_len == Params::FIR_LEN_125) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_125);
-  } else if (_params.KDP_fir_filter_len == Params::FIR_LEN_60) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_60);
-  } else if (_params.KDP_fir_filter_len == Params::FIR_LEN_40) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_40);
-  } else if (_params.KDP_fir_filter_len == Params::FIR_LEN_30) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_30);
-  } else if (_params.KDP_fir_filter_len == Params::FIR_LEN_20) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_20);
-  } else {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_10);
+  _kdp.setParams(_kdpParams);
+  if (_params.KDP_write_ray_files) {
+    _kdp.setWriteRayFiles(_params.KDP_write_ray_files,
+                          _params.KDP_ray_files_dir);
   }
-  _kdp.setNGatesStats(_params.KDP_ngates_for_stats);
-  _kdp.setNFiltIterUnfolded(_params.KDP_n_filt_iterations_unfolded);
-  _kdp.setNFiltIterCond(_params.KDP_n_filt_iterations_conditioned);
-  if (_params.KDP_use_iterative_filtering) {
-    _kdp.setUseIterativeFiltering(true);
-    _kdp.setPhidpDiffThreshold(_params.KDP_phidp_difference_threshold);
-  }
-  _kdp.setPhidpSdevMax(_params.KDP_phidp_sdev_max);
-  _kdp.setPhidpJitterMax(_params.KDP_phidp_jitter_max);
-  _kdp.checkSnr(_params.KDP_check_snr);
-  _kdp.setSnrThreshold(_params.KDP_snr_threshold);
-  _kdp.checkRhohv(_params.KDP_check_rhohv);
-  _kdp.setRhohvThreshold(_params.KDP_rhohv_threshold);
-  if (_params.KDP_check_zdr_sdev) {
-    _kdp.checkZdrSdev(true);
-  }
-  _kdp.setZdrSdevMax(_params.KDP_zdr_sdev_max);
-  _kdp.setMinValidAbsKdp(_params.KDP_min_valid_abs_kdp);
-
-  if (_params.KDP_debug) {
-    _kdp.setDebug(true);
-  }
-
-
-  if (_params.apply_precip_attenuation_correction) {
-    if (_params.specify_coefficients_for_attenuation_correction) {
-      _kdp.setAttenCoeffs(_params.dbz_attenuation_coefficient,
-                          _params.dbz_attenuation_exponent,
-                          _params.zdr_attenuation_coefficient,
-                          _params.zdr_attenuation_exponent);
-    } else {
-      _kdp.setComputeAttenCorr(true);
-    }
-  }
-
-  // initialize KDP object - hubbert/bringi
-
-  if (_params.KDP_HB_fir_filter_len == Params::FIR_LEN_125) {
-    _kdpB.setFIRFilterLen(KdpBringi::FIR_LENGTH_125);
-  } else if (_params.KDP_HB_fir_filter_len == Params::FIR_LEN_30) {
-    _kdpB.setFIRFilterLen(KdpBringi::FIR_LENGTH_30);
-  } else if (_params.KDP_HB_fir_filter_len == Params::FIR_LEN_20) {
-    _kdpB.setFIRFilterLen(KdpBringi::FIR_LENGTH_20);
-  } else {
-    _kdpB.setFIRFilterLen(KdpBringi::FIR_LENGTH_10);
-  }
-  _kdpB.setPhidpDiffThreshold(_params.KDP_HB_phidp_difference_threshold);
-  _kdpB.setPhidpSdevThreshold(_params.KDP_HB_phidp_sdev_threshold);
-  _kdpB.setZdrSdevThreshold(_params.KDP_HB_zdr_sdev_threshold);
-  _kdpB.setRhohvWxThreshold(_params.KDP_HB_rhohv_threshold);
-
+  
 }
 
 ////////////////////////////////////////////////
@@ -3867,7 +3805,7 @@ void Beam::_kdpCompute(bool isFiltered)
     if (isFiltered) {
       rayDir += "_filt";
     }
-    _kdp.setWriteRayFile(true, rayDir);
+    _kdp.setWriteRayFiles(true, rayDir);
   }
 
   // compute KDP
@@ -3890,12 +3828,11 @@ void Beam::_kdpCompute(bool isFiltered)
   // put KDP into fields objects
   
   const double *kdp = _kdp.getKdp();
-  const double *psob = _kdp.getPsob();
-  const double *phidpCond = _kdp.getPhidpCondFilt(); 
+  const double *delta = _kdp.getDelta();
+  const double *phidpCond = _kdp.getPhidpSC(); 
   const double *phidpFilt = _kdp.getPhidpFilt();
   const double *phidpSdev = _kdp.getPhidpSdev();
   const double *phidpJitter = _kdp.getPhidpJitter();
-  const double *zdrSdev = _kdp.getZdrSdev();
   
   const double *dbzAttenCorr = _kdp.getDbzAttenCorr();
   const double *zdrAttenCorr = _kdp.getZdrAttenCorr();
@@ -3907,8 +3844,8 @@ void Beam::_kdpCompute(bool isFiltered)
       if (kdp[ii] != _missingDbl) {
 	_gateData[ii]->fieldsF.kdp = kdp[ii];
       }
-      if (psob[ii] != _missingDbl) {
-	_gateData[ii]->fieldsF.psob = psob[ii];
+      if (delta[ii] != _missingDbl) {
+	_gateData[ii]->fieldsF.delta = delta[ii];
       }
       if (phidpCond[ii] != _missingDbl) {
 	_gateData[ii]->fieldsF.phidp_cond = phidpCond[ii];
@@ -3921,9 +3858,6 @@ void Beam::_kdpCompute(bool isFiltered)
       }
       if (phidpJitter[ii] != _missingDbl) {
 	_gateData[ii]->fieldsF.phidp_jitter_4kdp = phidpJitter[ii];
-      }
-      if (zdrSdev[ii] != _missingDbl) {
-	_gateData[ii]->fieldsF.zdr_sdev_4kdp = zdrSdev[ii];
       }
       if (_params.apply_precip_attenuation_correction) {
 	_gateData[ii]->fieldsF.dbz_atten_correction = dbzAttenCorr[ii];
@@ -3943,8 +3877,8 @@ void Beam::_kdpCompute(bool isFiltered)
       if (kdp[ii] != _missingDbl) {
 	_gateData[ii]->fields.kdp = kdp[ii];
       }
-      if (psob[ii] != _missingDbl) {
-	_gateData[ii]->fields.psob = psob[ii];
+      if (delta[ii] != _missingDbl) {
+	_gateData[ii]->fields.delta = delta[ii];
       }
       if (phidpCond[ii] != _missingDbl) {
 	_gateData[ii]->fields.phidp_cond = phidpCond[ii];
@@ -3957,9 +3891,6 @@ void Beam::_kdpCompute(bool isFiltered)
       }
       if (phidpJitter[ii] != _missingDbl) {
 	_gateData[ii]->fields.phidp_jitter_4kdp = phidpJitter[ii];
-      }
-      if (zdrSdev[ii] != _missingDbl) {
-	_gateData[ii]->fields.zdr_sdev_4kdp = zdrSdev[ii];
       }
       if (_params.apply_precip_attenuation_correction) {
 	_gateData[ii]->fields.dbz_atten_correction = dbzAttenCorr[ii];
@@ -3977,79 +3908,6 @@ void Beam::_kdpCompute(bool isFiltered)
   }
 
 
-}
-
-////////////////////////////////////////////////
-// compute kdp from phidp
-
-void Beam::_kdpComputeBringi(bool isFiltered)
-  
-{
-
-  // check if we need to do this?
-
-  if (!_dualPol) {
-    return;
-  }
-
-  // copy from Fields into arrays
-
-  TaArray<double> snr_, dbz_, phidp_, rhohv_, zdr_;
-  double *snr = snr_.alloc(_nGates);
-  double *dbz = dbz_.alloc(_nGates);
-  double *phidp = phidp_.alloc(_nGates);
-  double *rhohv = rhohv_.alloc(_nGates);
-  double *zdr = zdr_.alloc(_nGates);
-  if (isFiltered) {
-    for (int ii = 0; ii < _nGates; ii++) {
-      snr[ii] = _gateData[ii]->fieldsF.snr;
-      dbz[ii] = _gateData[ii]->fieldsF.dbz;
-      phidp[ii] = _gateData[ii]->fieldsF.phidp;
-      rhohv[ii] = _gateData[ii]->fieldsF.rhohv;
-      zdr[ii] = _gateData[ii]->fieldsF.zdr;
-    }
-  } else {
-    for (int ii = 0; ii < _nGates; ii++) {
-      snr[ii] = _gateData[ii]->fields.snr;
-      dbz[ii] = _gateData[ii]->fields.dbz;
-      phidp[ii] = _gateData[ii]->fields.phidp;
-      rhohv[ii] = _gateData[ii]->fields.rhohv;
-      zdr[ii] = _gateData[ii]->fields.zdr;
-    }
-  }
-
-  // set up array for range
-  
-  TaArray<double> rangeKm_;
-  double *rangeKm = rangeKm_.alloc(_nGates);
-  double range = _startRangeKm;
-  for (int ii = 0; ii < _nGates; ii++, range += _gateSpacingKm) {
-    rangeKm[ii] = range;
-  }
-
-  // compute KDP
-  
-  _kdpB.compute(_el, _az, _nGates, rangeKm, dbz, zdr,
-                phidp, rhohv, snr, _missingDbl);
-  
-  const double *kdp = _kdpB.getKdp();
-
-  // put KDP into fields objects
-  
-  if (isFiltered) {
-    for (int ii = 0; ii < _nGates; ii++) {
-      if (kdp[ii] != _missingDbl) {
-	_gateData[ii]->fieldsF.kdp_hb = kdp[ii];
-      }
-    }
-  } else {
-    for (int ii = 0; ii < _nGates; ii++) {
-      if (kdp[ii] != _missingDbl) {
-	_gateData[ii]->fields.kdp_hb = kdp[ii];
-      }
-    }
-  }
-  
 }
 
 ///////////////////////////////////////////////////////////
@@ -6692,7 +6550,7 @@ void Beam::_censorFields(MomentsFields &mfield)
   mfield.rhohv_nnc = MomentsFields::missingDouble;
   mfield.phidp = MomentsFields::missingDouble;
   mfield.kdp = MomentsFields::missingDouble;
-  mfield.psob = MomentsFields::missingDouble;
+  mfield.delta = MomentsFields::missingDouble;
   
   mfield.snrhc = MomentsFields::missingDouble;
   mfield.snrhx = MomentsFields::missingDouble;

@@ -557,7 +557,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("KdpFilt computes KDP from PHIDP.\n\nKDP is defined as half the change in PHIDP per km in range.\n\nRegions with valid PHIDP are determined by examining the quality of the PHIDP data, from RHOHV, and optionally from SNR and the variance of ZDR.\n\nPHIPD folds, so unfolding is the first step in the processing. After unfolding, filtering is applied to smooth PHIDP in range. This is followed by a step to identify regions with phase shift on backscatter.\n\nKDP is then computed as the PHIDP slope between range gates. For DBZ values < 20, 8 gates are used; for DBZ between 20 and 35, 4 gates are used; and if the DBZ exceeds 35, 2 adjacent gates are used.\n\nThe various filtering steps smeer out the KDP in range, which means that the high KDP values are not always located in the core of the precip. To help correct for this effect, we can make use of the self-consistency approach. This allows us to theoretically determine KDP from Z and ZDR - we can call this KDP_ZZDR. We can then use these self-consistent KDP_ZZDR values to compute a conditioned KDP field, by constraining the estimated KDP values to the relevant gates. This reduces the smeering effect. We refer to this KDP field, conditioned using self-consistency, as KDP_SC.");
+    tt->comment_hdr = tdrpStrDup("KdpFilt computes KDP from PHIDP.\n\nKDP is defined as half the change in PHIDP per km in range.\n\nRegions with valid PHIDP are determined by examining the quality of the PHIDP data, from RHOHV, and optionally from SNR and the variance of ZDR.\n\nPHIPD folds, so unfolding is the first step in the processing.\n\tFor simultaneous-mode radars PHIDP folds at -180 and +180.\n\tFor alternating mode radars, this is -90 to +90.\n\nAfter unfolding, filtering is applied to smooth PHIDP in range. 4 filtering methods are available.\n\nKDP is then computed as the PHIDP slope of the filtered PHIDP.\n\nThis is followed by a step to identify regions with phase shift on backscatter (delta).The various filtering steps smeer out the KDP in range, which means that the high KDP values are not located in the core of the precip echoes. To help correct for this, we make use of the self-consistency approach. This allows us to theoretically determine KDP from Z and ZDR - we can call this KDP_ZZDR. We can then use these self-consistent KDP_ZZDR values to compute a conditioned KDP field, by constraining the estimated KDP values to the relevant gates. This reduces the smeering effect. We refer to this KDP field, conditioned using self-consistency, as KDP_SC.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -566,108 +566,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 1");
-    tt->comment_hdr = tdrpStrDup("UNFOLDING AND INITIAL FILTERING");
-    tt->comment_text = tdrpStrDup("The first step is to unfold the PHIDP data. PHIDP folds at -180/180 for simultaneous mode radars, and at -90/90 for alternating mode radars. In order to compute the gradient of PHIDP, we need to unfold it so that it varies smoothly rather than folding.");
-    tt++;
-    
-    // Parameter 'KDP_fir_filter_len'
-    // ctype is '_KDP_fir_filter_len_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("KDP_fir_filter_len");
-    tt->descr = tdrpStrDup("Filter length for the FIR filter for PHIDP (gates)");
-    tt->help = tdrpStrDup("When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.");
-    tt->val_offset = (char *) &KDP_fir_filter_len - &_start_;
-    tt->enum_def.name = tdrpStrDup("KDP_fir_filter_len_t");
-    tt->enum_def.nfields = 6;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("KDP_FIR_LEN_125");
-      tt->enum_def.fields[0].val = KDP_FIR_LEN_125;
-      tt->enum_def.fields[1].name = tdrpStrDup("KDP_FIR_LEN_60");
-      tt->enum_def.fields[1].val = KDP_FIR_LEN_60;
-      tt->enum_def.fields[2].name = tdrpStrDup("KDP_FIR_LEN_40");
-      tt->enum_def.fields[2].val = KDP_FIR_LEN_40;
-      tt->enum_def.fields[3].name = tdrpStrDup("KDP_FIR_LEN_30");
-      tt->enum_def.fields[3].val = KDP_FIR_LEN_30;
-      tt->enum_def.fields[4].name = tdrpStrDup("KDP_FIR_LEN_20");
-      tt->enum_def.fields[4].val = KDP_FIR_LEN_20;
-      tt->enum_def.fields[5].name = tdrpStrDup("KDP_FIR_LEN_10");
-      tt->enum_def.fields[5].val = KDP_FIR_LEN_10;
-    tt->single_val.e = KDP_FIR_LEN_10;
-    tt++;
-    
-    // Parameter 'KDP_n_filt_iterations_unfolded'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_n_filt_iterations_unfolded");
-    tt->descr = tdrpStrDup("Sets the number of iterations for the initial FIR filter for unfolded PHIDP.");
-    tt->help = tdrpStrDup("After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a set number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
-    tt->val_offset = (char *) &KDP_n_filt_iterations_unfolded - &_start_;
-    tt->single_val.i = 2;
-    tt++;
-    
-    // Parameter 'Comment 2'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("HANDLING PHASE SHIFT ON BACKSCATTER");
-    tt->comment_text = tdrpStrDup("As the beam passes through liquid precip, PHIDP generally increases. In some regions this increase is augmented by phase shift on backscatter (PSOB) leading to localized peaks in PHIDP. After a PSOB region, PHIDP will decrease to some intermediate level.\n\nKdpFilt offers 2 methods for handling PSOB:\n\t(a) The HUBBERT/BRINGI method, which uses an iterative filtering approach (Hubbert. J, and V.N.Bringi, 1995: An Iterative Filtering technique for the Analysis of Copolar Differential Phase and Dual-Frequency Radar Measurements. Journal of Atmospheric and Oceanic Technology, Vol 12, No 3, June 1995).\n\t(b) The Peak Removal method, which works backwards from longer to shorter ranges, finding the peaks caused by backscatter and trimming them off.");
-    tt++;
-    
-    // Parameter 'KDP_psob_method'
-    // ctype is '_psob_method_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("KDP_psob_method");
-    tt->descr = tdrpStrDup("Method for handling pbase shift on backscatter.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_psob_method - &_start_;
-    tt->enum_def.name = tdrpStrDup("psob_method_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("HUBBERT_BRINGI_METHOD");
-      tt->enum_def.fields[0].val = HUBBERT_BRINGI_METHOD;
-      tt->enum_def.fields[1].name = tdrpStrDup("PEAK_REMOVAL_METHOD");
-      tt->enum_def.fields[1].val = PEAK_REMOVAL_METHOD;
-    tt->single_val.e = PEAK_REMOVAL_METHOD;
-    tt++;
-    
-    // Parameter 'KDP_n_filt_iterations_hubbert_bringi'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_n_filt_iterations_hubbert_bringi");
-    tt->descr = tdrpStrDup("Sets the number of iterations for the Hubbert Bringi method.");
-    tt->help = tdrpStrDup("See above.");
-    tt->val_offset = (char *) &KDP_n_filt_iterations_hubbert_bringi - &_start_;
-    tt->single_val.i = 4;
-    tt++;
-    
-    // Parameter 'KDP_phidp_difference_threshold_hubbert_bringi'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_phidp_difference_threshold_hubbert_bringi");
-    tt->descr = tdrpStrDup("Difference threshold for the Hubbert Bringi method.");
-    tt->help = tdrpStrDup("After each iteration of the filter, the result is checked against the original. If the difference is less than this parameter, the original value at that gate is retained. If the difference exceeds this parameter, the new filtered value is retained.");
-    tt->val_offset = (char *) &KDP_phidp_difference_threshold_hubbert_bringi - &_start_;
-    tt->single_val.d = 4;
-    tt++;
-    
-    // Parameter 'Comment 3'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("IDENTIFYING VALID KDP REGIONS");
     tt->comment_text = tdrpStrDup("In weak signal, the PHIDP is very noisy and contains no useful information. We compute various statistics to help to identify those gates containing valid PHIDP, and those with just noise.");
     tt++;
@@ -705,7 +603,7 @@
     tt->descr = tdrpStrDup("Sets the threshold for the jitter of phidp in range.");
     tt->help = tdrpStrDup("The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, we conclude we are in weather echo, the PHIDP is valid and KDP should be computed at this gate.");
     tt->val_offset = (char *) &KDP_phidp_jitter_max - &_start_;
-    tt->single_val.d = 25;
+    tt->single_val.d = 30;
     tt++;
     
     // Parameter 'KDP_check_rhohv'
@@ -729,7 +627,7 @@
     tt->descr = tdrpStrDup("Sets the threshold for checking RHOHV.");
     tt->help = tdrpStrDup("If the RHOHV drops below this value, KDP will not be computed at this gate.");
     tt->val_offset = (char *) &KDP_rhohv_threshold - &_start_;
-    tt->single_val.d = 0.95;
+    tt->single_val.d = 0.8;
     tt++;
     
     // Parameter 'KDP_check_snr'
@@ -753,31 +651,241 @@
     tt->descr = tdrpStrDup("Sets the threshold for checking SNR (dB).");
     tt->help = tdrpStrDup("If the SNR drops below this value, KDP will not be computed at this gate.");
     tt->val_offset = (char *) &KDP_snr_threshold - &_start_;
-    tt->single_val.d = -6;
+    tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'KDP_check_zdr_sdev'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_check_zdr_sdev");
-    tt->descr = tdrpStrDup("Check the standard deviation of ZDR in range?");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_check_zdr_sdev - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 2");
+    tt->comment_hdr = tdrpStrDup("PHIDP FILTER METHOD");
+    tt->comment_text = tdrpStrDup("\tFIR_FILTER: used in the Hubbert-Bringi method.\n\tQUADRATIC_METHOD: When we filter PHIDP, we need to set the filter appropriately to capture the typical features we want to preserve, and to remove shorter-range (higher-frequency) features. If KDP_compute_all_filters is true, all of the filters are computed for debugging and comparison purposes.");
     tt++;
     
-    // Parameter 'KDP_zdr_sdev_max'
+    // Parameter 'phidp_filter_method'
+    // ctype is '_phidp_filter_method_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("phidp_filter_method");
+    tt->descr = tdrpStrDup("Method for filtering PHIDP in range.");
+    tt->help = tdrpStrDup("FIR: the Hubbert/Bringi approach used an FIR filter. QUADRATIC: local per-gate quadratic fit. REGRESSION: polynomial regression per valid phidp region. FFT: global fft low-pass filter for the entire ray.");
+    tt->val_offset = (char *) &phidp_filter_method - &_start_;
+    tt->enum_def.name = tdrpStrDup("phidp_filter_method_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("FFT_FILTER");
+      tt->enum_def.fields[0].val = FFT_FILTER;
+      tt->enum_def.fields[1].name = tdrpStrDup("QUADRATIC_FILTER");
+      tt->enum_def.fields[1].val = QUADRATIC_FILTER;
+      tt->enum_def.fields[2].name = tdrpStrDup("REGRESSION_FILTER");
+      tt->enum_def.fields[2].val = REGRESSION_FILTER;
+      tt->enum_def.fields[3].name = tdrpStrDup("FIR_FILTER");
+      tt->enum_def.fields[3].val = FIR_FILTER;
+    tt->single_val.e = FFT_FILTER;
+    tt++;
+    
+    // Parameter 'phidp_feature_length_km'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_zdr_sdev_max");
-    tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of zdr in range.");
-    tt->help = tdrpStrDup("The sdev of zdr is a good test for clutter. If the sdev is less than this value, we conclude we are in weather echo rather than clutter.");
-    tt->val_offset = (char *) &KDP_zdr_sdev_max - &_start_;
-    tt->single_val.d = 2;
+    tt->param_name = tdrpStrDup("phidp_feature_length_km");
+    tt->descr = tdrpStrDup("When we filter PHIDP, we need to set the filter appropriately to capture the typical features we want to preserve, and to remove shorter-range (higher-frequency) features.");
+    tt->help = tdrpStrDup("We use the feature length to set the parameters for the filters.\n\nFIR_FILTER: we determine the length of the FIR filter kernel.\n\nQUADRATIC FILTER: we use gates that cover this distance on either side of the local gate.\n\nREGRESSION_FILTER: we need to determine the polynomial order. We divide the ray into valid segments in range - i.e. segments with valid phidp. Then we compute\n\norder = (length of valid region / feature_length) * 2 + 1\n\nWe are fitting a polynomial to the phidp values in the valid segment. The longer the segment the higher the polynomial order required to fit the target features in that segment.\n\nFIR_FILTER: the feature length giverns the tuning of the low-pass filter.");
+    tt->val_offset = (char *) &phidp_feature_length_km - &_start_;
+    tt->single_val.d = 3;
+    tt++;
+    
+    // Parameter 'fir_n_iterations'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("fir_n_iterations");
+    tt->descr = tdrpStrDup("Sets the number of iterations for the FIR filter for unfolded PHIDP.");
+    tt->help = tdrpStrDup("After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a set number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
+    tt->val_offset = (char *) &fir_n_iterations - &_start_;
+    tt->single_val.i = 2;
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("ESTIMATING DELTA from KDP_ZZDR self-consistency.");
+    tt->comment_text = tdrpStrDup("We estimate delta (backscatter differential phase) using the self-consistency method of Bringi.  Using the self-consistency approach, we can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute KDP conditioned using self-consistenty. We call this KDP_SC.");
+    tt++;
+    
+    // Parameter 'self_con_sband'
+    // ctype is '_self_con_params_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("self_con_sband");
+    tt->descr = tdrpStrDup("Self consistency parameters for S-band.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &self_con_sband - &_start_;
+    tt->struct_def.name = tdrpStrDup("self_con_params_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("citation");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &self_con_sband.citation - (char *) &self_con_sband;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("ref_wavelength_cm");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &self_con_sband.ref_wavelength_cm - (char *) &self_con_sband;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("a_coeff");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &self_con_sband.a_coeff - (char *) &self_con_sband;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("z_expon");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &self_con_sband.z_expon - (char *) &self_con_sband;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &self_con_sband.zdr_expon - (char *) &self_con_sband;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Scarchilli et al., 1996: Self-Consistency of Polarization Diversity Measurement of Rainfall. II: Theoretical developments.");
+      tt->struct_vals[1].d = 10;
+      tt->struct_vals[2].d = 0.0001051;
+      tt->struct_vals[3].d = 0.96;
+      tt->struct_vals[4].d = -0.26;
+    tt++;
+    
+    // Parameter 'self_con_cband'
+    // ctype is '_self_con_params_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("self_con_cband");
+    tt->descr = tdrpStrDup("Self consistency parameters for C-band.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &self_con_cband - &_start_;
+    tt->struct_def.name = tdrpStrDup("self_con_params_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("citation");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &self_con_cband.citation - (char *) &self_con_cband;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("ref_wavelength_cm");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &self_con_cband.ref_wavelength_cm - (char *) &self_con_cband;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("a_coeff");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &self_con_cband.a_coeff - (char *) &self_con_cband;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("z_expon");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &self_con_cband.z_expon - (char *) &self_con_cband;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &self_con_cband.zdr_expon - (char *) &self_con_cband;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Scarchilli et al., 1996: Self-Consistency of Polarization Diversity Measurement of Rainfall. II: Theoretical developments.");
+      tt->struct_vals[1].d = 5.5;
+      tt->struct_vals[2].d = 0.0001461;
+      tt->struct_vals[3].d = 0.98;
+      tt->struct_vals[4].d = -0.2;
+    tt++;
+    
+    // Parameter 'self_con_xband'
+    // ctype is '_self_con_params_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("self_con_xband");
+    tt->descr = tdrpStrDup("Self consistency parameters for X-band.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &self_con_xband - &_start_;
+    tt->struct_def.name = tdrpStrDup("self_con_params_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("citation");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &self_con_xband.citation - (char *) &self_con_xband;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("ref_wavelength_cm");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &self_con_xband.ref_wavelength_cm - (char *) &self_con_xband;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("a_coeff");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &self_con_xband.a_coeff - (char *) &self_con_xband;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("z_expon");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &self_con_xband.z_expon - (char *) &self_con_xband;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &self_con_xband.zdr_expon - (char *) &self_con_xband;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Shi et al., 2018: Deployment and Performance of an X-Band Dual-Polarization Radar during the Southern China Monsoon Rainfall Experiment. Table 3.");
+      tt->struct_vals[1].d = 3.2;
+      tt->struct_vals[2].d = 0.000222;
+      tt->struct_vals[3].d = 1;
+      tt->struct_vals[4].d = -4.58;
+    tt++;
+    
+    // Parameter 'KDP_self_con_median_filter_len'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("KDP_self_con_median_filter_len");
+    tt->descr = tdrpStrDup("Sets the length of the median filter when computing KDP_ZZDR.");
+    tt->help = tdrpStrDup("When we compute KDP_ZZDR, we first apply a median filter to both Z and ZDR in range. This parameter is the length of that median filter, in gates.");
+    tt->val_offset = (char *) &KDP_self_con_median_filter_len - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'KDP_self_con_mean_delta_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("KDP_self_con_mean_delta_threshold");
+    tt->descr = tdrpStrDup("Threshold of delta mean when estimating delta (deg).");
+    tt->help = tdrpStrDup("When identifying and estimating delta using self-consistency, we need to ignore minor cases. We compute the mean delta, and if it exceeds this threshold we make the estimate.");
+    tt->val_offset = (char *) &KDP_self_con_mean_delta_threshold - &_start_;
+    tt->single_val.d = 0.5;
     tt++;
     
     // Parameter 'Comment 4'
@@ -785,167 +893,164 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("COMPUTING KDP FROM Z and ZDR");
-    tt->comment_text = tdrpStrDup("Using the self-consistency approach, we can estimate KDP from Z and ZDR - we call this KDP_ZZDR. We can then compute KDP conditioned using self-consistenty. We call this KDP_SC.");
-    tt++;
-    
-    // Parameter 'KDP_minimum_for_self_consistency'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_minimum_for_self_consistency");
-    tt->descr = tdrpStrDup("Sets the lower limit of KDP for computing KDP conditioned by self-consistency.");
-    tt->help = tdrpStrDup("To compute KDP_SC, we first find the gates over which regular KDP exceeds a minimum threshold (i.e. this parameter). Over this run of gates we compute the PHIDP change from the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, we can compute KDP_SC such that the PHIDP change over these gates is the same for both KDP and KDP_SC.");
-    tt->val_offset = (char *) &KDP_minimum_for_self_consistency - &_start_;
-    tt->single_val.d = 0.25;
-    tt++;
-    
-    // Parameter 'KDP_median_filter_len_for_ZZDR'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_median_filter_len_for_ZZDR");
-    tt->descr = tdrpStrDup("Sets the length of the median filter when computing KDP_ZZDR.");
-    tt->help = tdrpStrDup("When we compute KDP_ZZDR, we first apply a median filter to both Z and ZDR in range. This parameter is the length of that median filter, in gates.");
-    tt->val_offset = (char *) &KDP_median_filter_len_for_ZZDR - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("SANITY CHECK ON KDP RESULTS");
-    tt->comment_text = tdrpStrDup("Ignore small KDP values, which are likely just noise.");
-    tt++;
-    
-    // Parameter 'KDP_min_valid_abs_kdp'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_min_valid_abs_kdp");
-    tt->descr = tdrpStrDup("Sets the min valid KDP value.");
-    tt->help = tdrpStrDup("Values less than this are set to 0.");
-    tt->val_offset = (char *) &KDP_min_valid_abs_kdp - &_start_;
-    tt->single_val.d = 0.01;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("ESTIMATING ATTENUATION CORRECTION FOR DBZ AND ZDR");
-    tt->comment_text = tdrpStrDup("Received power attenuation, and differential attenuation, occur whenever scattering occurs, but is of most importance at shorter wavelengths or in reqions of heavy precipition. We use the reference text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, Table 7.1, page 494, to provide the default coefficients from which to estimate the attenuation correction. You may also choose to specify these coefficients in this section.");
+    tt->comment_text = tdrpStrDup("Received power attenuation, and differential attenuation, occur whenever scattering occurs, but is of most importance at shorter wavelengths or in reqions of heavy precipition. We use the citation text Polarimetric Doppler Weather Radar, by Bringi and Chandrasekar, Table 7.1, page 494, to provide the default coefficients from which to estimate the attenuation correction. You may also choose to specify these coefficients in this section.");
     tt++;
     
-    // Parameter 'KDP_specify_coefficients_for_attenuation_correction'
+    // Parameter 'KDP_correct_dbz_and_zdr_for_attenuation'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_specify_coefficients_for_attenuation_correction");
-    tt->descr = tdrpStrDup("Option to specify the coefficients and exponents.");
-    tt->help = tdrpStrDup("If false, the default coefficients will be determined for the radar wavelength.");
-    tt->val_offset = (char *) &KDP_specify_coefficients_for_attenuation_correction - &_start_;
+    tt->param_name = tdrpStrDup("KDP_correct_dbz_and_zdr_for_attenuation");
+    tt->descr = tdrpStrDup("Option to use attenuation-corrected fields for KDP calculations.");
+    tt->help = tdrpStrDup("This affects the estimation of the self-consistency method. We compute the dbz and zdr corrections based on KDP in range.\n\nDBZ_correction = dbzCoeff * KDP ^ dbzExpon.\n\nZDR_correction = zdrCoeff * KDP ^ zdrCoeff.");
+    tt->val_offset = (char *) &KDP_correct_dbz_and_zdr_for_attenuation - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'KDP_dbz_attenuation_coefficient'
-    // ctype is 'double'
+    // Parameter 'atten_sband'
+    // ctype is '_atten_params_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_dbz_attenuation_coefficient");
-    tt->descr = tdrpStrDup("Coefficient for computing DBZ attenuation correction.");
-    tt->help = tdrpStrDup("Default is 0.017. See Bringi and Chandrasekar, Table 7.1, page 494.");
-    tt->val_offset = (char *) &KDP_dbz_attenuation_coefficient - &_start_;
-    tt->single_val.d = 0.017;
-    tt++;
-    
-    // Parameter 'KDP_dbz_attenuation_exponent'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_dbz_attenuation_exponent");
-    tt->descr = tdrpStrDup("Exponent for computing DBZ attenuation correction.");
-    tt->help = tdrpStrDup("Default is 0.84. See Bringi and Chandrasekar, Table 7.1, page 494.");
-    tt->val_offset = (char *) &KDP_dbz_attenuation_exponent - &_start_;
-    tt->single_val.d = 0.84;
-    tt++;
-    
-    // Parameter 'KDP_zdr_attenuation_coefficient'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_zdr_attenuation_coefficient");
-    tt->descr = tdrpStrDup("Coefficient for computing ZDR attenuation correction.");
-    tt->help = tdrpStrDup("Default is 0.003. See Bringi and Chandrasekar, Table 7.1, page 494.");
-    tt->val_offset = (char *) &KDP_zdr_attenuation_coefficient - &_start_;
-    tt->single_val.d = 0.003;
-    tt++;
-    
-    // Parameter 'KDP_zdr_attenuation_exponent'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_zdr_attenuation_exponent");
-    tt->descr = tdrpStrDup("Exponent for computing ZDR attenuation correction.");
-    tt->help = tdrpStrDup("Default is 1.05. See Bringi and Chandrasekar, Table 7.1, page 494.");
-    tt->val_offset = (char *) &KDP_zdr_attenuation_exponent - &_start_;
-    tt->single_val.d = 1.05;
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("DEBUGGING");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'KDP_debug'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_debug");
-    tt->descr = tdrpStrDup("Option to print debug messages in KDP computation.");
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("atten_sband");
+    tt->descr = tdrpStrDup("Attenuation parameters for S-band");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_debug - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->val_offset = (char *) &atten_sband - &_start_;
+    tt->struct_def.name = tdrpStrDup("atten_params_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("citation");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &atten_sband.citation - (char *) &atten_sband;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("dbz_coeff");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &atten_sband.dbz_coeff - (char *) &atten_sband;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("dbz_expon");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &atten_sband.dbz_expon - (char *) &atten_sband;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("zdr_coeff");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &atten_sband.zdr_coeff - (char *) &atten_sband;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &atten_sband.zdr_expon - (char *) &atten_sband;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494");
+      tt->struct_vals[1].d = 0.017;
+      tt->struct_vals[2].d = 0.84;
+      tt->struct_vals[3].d = 0.003;
+      tt->struct_vals[4].d = 1.05;
     tt++;
     
-    // Parameter 'KDP_write_ray_files'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'atten_cband'
+    // ctype is '_atten_params_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_write_ray_files");
-    tt->descr = tdrpStrDup("Option to write ray files to debug KDP computation.");
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("atten_cband");
+    tt->descr = tdrpStrDup("Attenuation parameters for C-band");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_write_ray_files - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->val_offset = (char *) &atten_cband - &_start_;
+    tt->struct_def.name = tdrpStrDup("atten_params_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("citation");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &atten_cband.citation - (char *) &atten_cband;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("dbz_coeff");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &atten_cband.dbz_coeff - (char *) &atten_cband;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("dbz_expon");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &atten_cband.dbz_expon - (char *) &atten_cband;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("zdr_coeff");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &atten_cband.zdr_coeff - (char *) &atten_cband;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &atten_cband.zdr_expon - (char *) &atten_cband;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494");
+      tt->struct_vals[1].d = 0.073;
+      tt->struct_vals[2].d = 0.99;
+      tt->struct_vals[3].d = 0.013;
+      tt->struct_vals[4].d = 1.23;
     tt++;
     
-    // Parameter 'KDP_ray_files_dir'
-    // ctype is 'char*'
+    // Parameter 'atten_xband'
+    // ctype is '_atten_params_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("KDP_ray_files_dir");
-    tt->descr = tdrpStrDup("Directory for KDP ray files.");
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("atten_xband");
+    tt->descr = tdrpStrDup("Attenuation parameters for X-band");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_ray_files_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/kdp_ray_files");
+    tt->val_offset = (char *) &atten_xband - &_start_;
+    tt->struct_def.name = tdrpStrDup("atten_params_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("citation");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &atten_xband.citation - (char *) &atten_xband;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("dbz_coeff");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &atten_xband.dbz_coeff - (char *) &atten_xband;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("dbz_expon");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &atten_xband.dbz_expon - (char *) &atten_xband;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("zdr_coeff");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &atten_xband.zdr_coeff - (char *) &atten_xband;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("zdr_expon");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &atten_xband.zdr_expon - (char *) &atten_xband;
+    tt->n_struct_vals = 5;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("Bringi and Chandrasekar, 2001: Polarimetric Doppler Weather Radar: Principles and Applications, Table 7.1, p494");
+      tt->struct_vals[1].d = 0.233;
+      tt->struct_vals[2].d = 1.02;
+      tt->struct_vals[3].d = 0.033;
+      tt->struct_vals[4].d = 1.15;
     tt++;
     
     // trailing entry has param_name set to NULL

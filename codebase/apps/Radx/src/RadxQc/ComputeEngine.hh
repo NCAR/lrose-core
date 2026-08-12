@@ -40,6 +40,7 @@
 
 #include "Params.hh"
 #include <radar/KdpFilt.hh>
+#include <radar/KdpFiltParams.hh>
 #include <radar/NcarParticleId.hh>
 #include <radar/TempProfile.hh>
 #include <radar/AtmosAtten.hh>
@@ -61,7 +62,9 @@ public:
   
   // constructor
   
-  ComputeEngine(const Params &params, int id);
+  ComputeEngine(const Params &params,
+                const KdpFiltParams &kdpFiltParams,
+                int id);
 
   // destructor
   
@@ -87,6 +90,7 @@ private:
 
   static const double missingDbl;
   const Params &_params;
+  const KdpFiltParams &_kdpFiltParams;
   int _id;
 
   // current ray properties

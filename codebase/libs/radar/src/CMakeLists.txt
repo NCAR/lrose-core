@@ -107,9 +107,11 @@ set (SRCS
       ./iwrf/IwrfTsReader.cc
       ./iwrf/rsm_functions.cc
       ./kdp/KdpFiltParams.cc
+      ./kdp/KdpFirFilt.cc
       ./kdp/KdpBringi.cc
       ./kdp/KdpCompute.cc
       ./kdp/KdpFilt.cc
+      ./kdp/KdpQuadFilt.cc
       ./kdp/PhidpProc.cc
       ./moments/AlternatingVelocity.cc
       ./moments/AtmosAtten.cc
@@ -125,6 +127,7 @@ set (SRCS
       ./moments/NoiseLocator.cc
       ./moments/PhaseCoding.cc
       ./moments/RadarFft.cc
+      ./moments/RadarFftDouble.cc
       ./moments/RadarMoments.cc
       ./moments/Sz864.cc
       ./pid/NcarPidParams.cc

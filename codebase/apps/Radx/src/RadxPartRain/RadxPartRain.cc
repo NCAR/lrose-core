@@ -107,6 +107,27 @@ RadxPartRain::RadxPartRain(int argc, char **argv)
     return;
   }
 
+  // read params for KdpFilt
+  
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpFiltParams.load(_params.KDP_params_file_path,
+                            NULL, true, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // print params for KDP then exit
+
+  if (_args.printParamsKdp) {
+    _printParamsKdp();
+    exit(0);
+  }
+
   // check on overriding radar location
 
   if (_params.override_radar_location) {
@@ -145,7 +166,8 @@ RadxPartRain::RadxPartRain(int argc, char **argv)
     // set up compute thread pool
     
     for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-      ComputeThread *thread = new ComputeThread(this, _params, ii);
+      ComputeThread *thread = new ComputeThread(this, _params,
+                                                _kdpFiltParams, ii);
       if (!thread->OK) {
         delete thread;
         OK = FALSE;
@@ -158,7 +180,7 @@ RadxPartRain::RadxPartRain(int argc, char **argv)
 
     // single threaded
     
-    _engineSingle = new ComputeEngine(_params, 0);
+    _engineSingle = new ComputeEngine(_params, _kdpFiltParams, 0);
     if (!_engineSingle->OK) {
       OK = FALSE;
     }
@@ -2577,9 +2599,11 @@ void RadxPartRain::_applyInfillFilter(int nGates,
 
 RadxPartRain::ComputeThread::ComputeThread(RadxPartRain *obj,
                                            const Params &params,
+                                           const KdpFiltParams &kdpFiltParams,
                                            int threadNum) :
         _this(obj),
         _params(params),
+        _kdpFiltParams(kdpFiltParams),
         _threadNum(threadNum)
 {
 
@@ -2589,7 +2613,7 @@ RadxPartRain::ComputeThread::ComputeThread(RadxPartRain *obj,
 
   // create compute engine object
   
-  _engine = new ComputeEngine(_params, _threadNum);
+  _engine = new ComputeEngine(_params, _kdpFiltParams, _threadNum);
   if (_engine == NULL) {
     OK = FALSE;
     return;
@@ -2631,6 +2655,54 @@ void RadxPartRain::ComputeThread::run()
                                  _this->_radarHtKm,
                                  _this->_wavelengthM,
                                  &_this->_tempProfile);
+
+}
+
+//////////////////////////////////////////////////
+// Print params for KDP
+
+void RadxPartRain::_printParamsKdp()
+{
+  
+  if (_params.debug) {
+    cerr << "Reading KDP params from file: " << _params.KDP_params_file_path << endl;
+  }
+
+  // do we need to expand environment variables?
+
+  bool expandEnvVars = false;
+  if (_args.printParamsKdpMode.find("expand") != string::npos) {
+    expandEnvVars = true;
+  }
+
+  // read in KDP params if applicable
+
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpFiltParams.load(_params.KDP_params_file_path,
+                            NULL, expandEnvVars, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // set print mode
+
+  tdrp_print_mode_t printMode = PRINT_LONG;
+  if (_args.printParamsKdpMode.find("short") == 0) {
+    printMode = PRINT_SHORT;
+  } else if (_args.printParamsKdpMode.find("norm") == 0) {
+    printMode = PRINT_NORM;
+  } else if (_args.printParamsKdpMode.find("verbose") == 0) {
+    printMode = PRINT_VERBOSE;
+  }
+
+  // do the print to stdout
+
+  _kdpFiltParams.print(stdout, printMode);
 
 }
 

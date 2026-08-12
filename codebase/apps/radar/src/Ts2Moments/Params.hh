@@ -187,15 +187,6 @@ public:
   } notch_interp_method_t;
 
   typedef enum {
-    FIR_LEN_125 = 0,
-    FIR_LEN_60 = 1,
-    FIR_LEN_40 = 2,
-    FIR_LEN_30 = 3,
-    FIR_LEN_20 = 4,
-    FIR_LEN_10 = 5
-  } fir_filter_len_t;
-
-  typedef enum {
     NOISE_RAY_BY_RAY = 0,
     NOISE_RUNNING_MEDIAN = 1
   } noise_method_t;
@@ -298,119 +289,117 @@ public:
     PHIDP_FILT = 81,
     PHIDP_SDEV_4KDP = 82,
     PHIDP_JITTER_4KDP = 83,
-    ZDR_SDEV_4KDP = 84,
-    KDP = 85,
-    PSOB = 86,
-    KDP_HB = 87,
-    RHO_HC_VX = 88,
-    RHO_VC_HX = 89,
-    RHO_VX_HX = 90,
-    RHO_PHIDP = 91,
-    CPR_MAG = 92,
-    CPR_PHASE = 93,
-    CPR_LDR = 94,
-    DBZ_ATTEN_CORRECTION = 95,
-    ZDR_ATTEN_CORRECTION = 96,
-    DBZ_ATTEN_CORRECTED = 97,
-    ZDR_ATTEN_CORRECTED = 98,
-    CPA = 99,
-    TDBZ = 100,
-    SPIN = 101,
-    MAX_TDBZ_SPIN = 102,
-    ZDR_SDEV = 103,
-    PHIDP_SDEV = 104,
-    DBZ_DIFF_SQ = 105,
-    DBZ_SPIN_CHANGE = 106,
-    CMD = 107,
-    CMD_FLAG = 108,
-    RHOHV_TEST_UNFILT = 109,
-    RHOHV_TEST_FILT = 110,
-    RHOHV_TEST_IMPROV = 111,
-    RHOHV_TEST_FLAG = 112,
-    TDBZ_INTEREST = 113,
-    SPIN_INTEREST = 114,
-    CPA_INTEREST = 115,
-    ZDR_SDEV_INTEREST = 116,
-    PHIDP_SDEV_INTEREST = 117,
-    CLUT = 118,
-    CLUT_2_WX_RATIO = 119,
-    SPECTRAL_NOISE = 120,
-    SPECTRAL_SNR = 121,
-    REGR_FILT_POLY_ORDER = 122,
-    REGR_FILT_CNR_DB = 123,
-    AIQ_HC = 124,
-    NIQ_HC = 125,
-    AIQ_VC = 126,
-    NIQ_VC = 127,
-    SZ_TRIP_FLAG = 128,
-    SZ_LEAKAGE = 129,
-    CENSORING_FLAG = 130,
-    LAG0_HC_DB = 131,
-    LAG0_HX_DB = 132,
-    LAG0_VC_DB = 133,
-    LAG0_VX_DB = 134,
-    LAG0_HC_SHORT_DB = 135,
-    LAG0_VC_SHORT_DB = 136,
-    LAG0_HC_LONG_DB = 137,
-    LAG0_VC_LONG_DB = 138,
-    LAG0_VCHX_DB = 139,
-    LAG0_VCHX_PHASE = 140,
-    LAG0_HCVX_DB = 141,
-    LAG0_HCVX_PHASE = 142,
-    LAG1_HC_DB = 143,
-    LAG1_HC_PHASE = 144,
-    LAG1_VC_DB = 145,
-    LAG1_VC_PHASE = 146,
-    LAG1_HCVC_DB = 147,
-    LAG1_HCVC_PHASE = 148,
-    LAG1_VCHC_DB = 149,
-    LAG1_VCHC_PHASE = 150,
-    LAG1_VXHX_DB = 151,
-    LAG1_VXHX_PHASE = 152,
-    LAG1_HC_LONG_DB = 153,
-    LAG1_HC_LONG_PHASE = 154,
-    LAG1_VC_LONG_DB = 155,
-    LAG1_VC_LONG_PHASE = 156,
-    LAG1_HC_SHORT_DB = 157,
-    LAG1_HC_SHORT_PHASE = 158,
-    LAG1_VC_SHORT_DB = 159,
-    LAG1_VC_SHORT_PHASE = 160,
-    LAG1_HC_LONG_TO_SHORT_DB = 161,
-    LAG1_HC_LONG_TO_SHORT_PHASE = 162,
-    LAG1_VC_LONG_TO_SHORT_DB = 163,
-    LAG1_VC_LONG_TO_SHORT_PHASE = 164,
-    LAG1_HC_SHORT_TO_LONG_DB = 165,
-    LAG1_HC_SHORT_TO_LONG_PHASE = 166,
-    LAG1_VC_SHORT_TO_LONG_DB = 167,
-    LAG1_VC_SHORT_TO_LONG_PHASE = 168,
-    LAG2_HC_DB = 169,
-    LAG2_HC_PHASE = 170,
-    LAG2_VC_DB = 171,
-    LAG2_VC_PHASE = 172,
-    LAG3_HC_DB = 173,
-    LAG3_HC_PHASE = 174,
-    LAG3_VC_DB = 175,
-    LAG3_VC_PHASE = 176,
-    RVVHH0_DB = 177,
-    RVVHH0_PHASE = 178,
-    RVVHH0_LONG_DB = 179,
-    RVVHH0_LONG_PHASE = 180,
-    RVVHH0_SHORT_DB = 181,
-    RVVHH0_SHORT_PHASE = 182,
-    SDEV_VV = 183,
-    PRT = 184,
-    NUM_PULSES = 185,
-    TEST = 186,
-    TEST0 = 187,
-    TEST1 = 188,
-    TEST2 = 189,
-    TEST3 = 190,
-    TEST4 = 191,
-    TEST5 = 192,
-    TEST6 = 193,
-    TEST7 = 194,
-    TEST8 = 195,
-    TEST9 = 196
+    KDP = 84,
+    DELTA = 85,
+    RHO_HC_VX = 86,
+    RHO_VC_HX = 87,
+    RHO_VX_HX = 88,
+    RHO_PHIDP = 89,
+    CPR_MAG = 90,
+    CPR_PHASE = 91,
+    CPR_LDR = 92,
+    DBZ_ATTEN_CORRECTION = 93,
+    ZDR_ATTEN_CORRECTION = 94,
+    DBZ_ATTEN_CORRECTED = 95,
+    ZDR_ATTEN_CORRECTED = 96,
+    CPA = 97,
+    TDBZ = 98,
+    SPIN = 99,
+    MAX_TDBZ_SPIN = 100,
+    ZDR_SDEV = 101,
+    PHIDP_SDEV = 102,
+    DBZ_DIFF_SQ = 103,
+    DBZ_SPIN_CHANGE = 104,
+    CMD = 105,
+    CMD_FLAG = 106,
+    RHOHV_TEST_UNFILT = 107,
+    RHOHV_TEST_FILT = 108,
+    RHOHV_TEST_IMPROV = 109,
+    RHOHV_TEST_FLAG = 110,
+    TDBZ_INTEREST = 111,
+    SPIN_INTEREST = 112,
+    CPA_INTEREST = 113,
+    ZDR_SDEV_INTEREST = 114,
+    PHIDP_SDEV_INTEREST = 115,
+    CLUT = 116,
+    CLUT_2_WX_RATIO = 117,
+    SPECTRAL_NOISE = 118,
+    SPECTRAL_SNR = 119,
+    REGR_FILT_POLY_ORDER = 120,
+    REGR_FILT_CNR_DB = 121,
+    AIQ_HC = 122,
+    NIQ_HC = 123,
+    AIQ_VC = 124,
+    NIQ_VC = 125,
+    SZ_TRIP_FLAG = 126,
+    SZ_LEAKAGE = 127,
+    CENSORING_FLAG = 128,
+    LAG0_HC_DB = 129,
+    LAG0_HX_DB = 130,
+    LAG0_VC_DB = 131,
+    LAG0_VX_DB = 132,
+    LAG0_HC_SHORT_DB = 133,
+    LAG0_VC_SHORT_DB = 134,
+    LAG0_HC_LONG_DB = 135,
+    LAG0_VC_LONG_DB = 136,
+    LAG0_VCHX_DB = 137,
+    LAG0_VCHX_PHASE = 138,
+    LAG0_HCVX_DB = 139,
+    LAG0_HCVX_PHASE = 140,
+    LAG1_HC_DB = 141,
+    LAG1_HC_PHASE = 142,
+    LAG1_VC_DB = 143,
+    LAG1_VC_PHASE = 144,
+    LAG1_HCVC_DB = 145,
+    LAG1_HCVC_PHASE = 146,
+    LAG1_VCHC_DB = 147,
+    LAG1_VCHC_PHASE = 148,
+    LAG1_VXHX_DB = 149,
+    LAG1_VXHX_PHASE = 150,
+    LAG1_HC_LONG_DB = 151,
+    LAG1_HC_LONG_PHASE = 152,
+    LAG1_VC_LONG_DB = 153,
+    LAG1_VC_LONG_PHASE = 154,
+    LAG1_HC_SHORT_DB = 155,
+    LAG1_HC_SHORT_PHASE = 156,
+    LAG1_VC_SHORT_DB = 157,
+    LAG1_VC_SHORT_PHASE = 158,
+    LAG1_HC_LONG_TO_SHORT_DB = 159,
+    LAG1_HC_LONG_TO_SHORT_PHASE = 160,
+    LAG1_VC_LONG_TO_SHORT_DB = 161,
+    LAG1_VC_LONG_TO_SHORT_PHASE = 162,
+    LAG1_HC_SHORT_TO_LONG_DB = 163,
+    LAG1_HC_SHORT_TO_LONG_PHASE = 164,
+    LAG1_VC_SHORT_TO_LONG_DB = 165,
+    LAG1_VC_SHORT_TO_LONG_PHASE = 166,
+    LAG2_HC_DB = 167,
+    LAG2_HC_PHASE = 168,
+    LAG2_VC_DB = 169,
+    LAG2_VC_PHASE = 170,
+    LAG3_HC_DB = 171,
+    LAG3_HC_PHASE = 172,
+    LAG3_VC_DB = 173,
+    LAG3_VC_PHASE = 174,
+    RVVHH0_DB = 175,
+    RVVHH0_PHASE = 176,
+    RVVHH0_LONG_DB = 177,
+    RVVHH0_LONG_PHASE = 178,
+    RVVHH0_SHORT_DB = 179,
+    RVVHH0_SHORT_PHASE = 180,
+    SDEV_VV = 181,
+    PRT = 182,
+    NUM_PULSES = 183,
+    TEST = 184,
+    TEST0 = 185,
+    TEST1 = 186,
+    TEST2 = 187,
+    TEST3 = 188,
+    TEST4 = 189,
+    TEST5 = 190,
+    TEST6 = 191,
+    TEST7 = 192,
+    TEST8 = 193,
+    TEST9 = 194
   } field_id_t;
 
   typedef enum {
@@ -1037,53 +1026,11 @@ public:
 
   tdrp_bool_t write_alt_mode_vel_debug_fields;
 
-  fir_filter_len_t KDP_fir_filter_len;
-
-  int KDP_n_filt_iterations_unfolded;
-
-  int KDP_n_filt_iterations_conditioned;
-
-  tdrp_bool_t KDP_use_iterative_filtering;
-
-  double KDP_phidp_difference_threshold;
-
-  int KDP_ngates_for_stats;
-
-  double KDP_phidp_sdev_max;
-
-  double KDP_phidp_jitter_max;
-
-  tdrp_bool_t KDP_check_snr;
-
-  double KDP_snr_threshold;
-
-  tdrp_bool_t KDP_check_rhohv;
-
-  double KDP_rhohv_threshold;
-
-  tdrp_bool_t KDP_check_zdr_sdev;
-
-  double KDP_zdr_sdev_max;
-
-  double KDP_min_valid_abs_kdp;
-
-  tdrp_bool_t KDP_debug;
+  char* KDP_params_file_path;
 
   tdrp_bool_t KDP_write_ray_files;
 
   char* KDP_ray_files_dir;
-
-  tdrp_bool_t KDP_compute_using_hubbert_bringi_method;
-
-  fir_filter_len_t KDP_HB_fir_filter_len;
-
-  double KDP_HB_phidp_difference_threshold;
-
-  double KDP_HB_phidp_sdev_threshold;
-
-  double KDP_HB_zdr_sdev_threshold;
-
-  double KDP_HB_rhohv_threshold;
 
   tdrp_bool_t use_estimated_noise_for_noise_subtraction;
 
@@ -1368,7 +1315,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[318];
+  mutable TDRPtable _table[296];
 
   const char *_className;
 

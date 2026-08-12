@@ -42,6 +42,7 @@
 #include "HcaNexrad.hh"
 #include "HcaInterestMap.hh"
 #include <radar/KdpFilt.hh>
+#include <radar/KdpFiltParams.hh>
 #include <radar/NcarParticleId.hh>
 #include <radar/TempProfile.hh>
 #include <radar/AtmosAtten.hh>
@@ -62,7 +63,9 @@ public:
   
   // constructor
   
-  ComputeEngine(const Params &params, int id,
+  ComputeEngine(const Params &params,
+                const KdpFiltParams &kdpFiltParams,
+                int id,
                 const TempProfile &tempProfile);
 
   // is constructor OK?
@@ -94,6 +97,7 @@ private:
 
   static const double missingDbl;
   const Params &_params;
+  const KdpFiltParams &_kdpFiltParams;
   int _id;
 
   // temperature profile

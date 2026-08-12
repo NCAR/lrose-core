@@ -104,6 +104,20 @@ IpsTs2Moments::IpsTs2Moments(int argc, char **argv)
     return;
   }
 
+  // read params for KdpFilt
+
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpParams.load(_params.KDP_params_file_path,
+                        NULL, true, false)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      constructorOK = false;
+      return;
+    }
+  }
+
   // initalize calibration object, read in starting calibration
 
   _calib = new Calibration(_params);
@@ -119,7 +133,7 @@ IpsTs2Moments::IpsTs2Moments(int argc, char **argv)
   // create the beam reader
   
   pthread_mutex_init(&_beamRecyclePoolMutex, NULL);
-  _beamReader = new BeamReader(_progName, _params, _args,
+  _beamReader = new BeamReader(_progName, _params, _kdpParams, _args,
                                _beamRecyclePool,
                                _beamRecyclePoolMutex);
   if (!_beamReader->constructorOK) {

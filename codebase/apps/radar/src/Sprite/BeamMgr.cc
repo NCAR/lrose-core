@@ -48,11 +48,13 @@ using namespace std;
 // Constructor
 
 BeamMgr::BeamMgr(const string &prog_name,
-		 const Params &params) :
-  _progName(prog_name),
-  _params(params),
-  _opsInfo()
-  
+		 const Params &params,
+                 const KdpFiltParams &kdpParams) :
+        _progName(prog_name),
+        _params(params),
+        _kdpParams(kdpParams),
+        _opsInfo()
+        
 {
 
   isOK = true;

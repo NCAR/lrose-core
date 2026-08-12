@@ -81,15 +81,6 @@ public:
   } mode_t;
 
   typedef enum {
-    FIR_LEN_125 = 0,
-    FIR_LEN_60 = 1,
-    FIR_LEN_40 = 2,
-    FIR_LEN_30 = 3,
-    FIR_LEN_20 = 4,
-    FIR_LEN_10 = 5
-  } fir_filter_len_t;
-
-  typedef enum {
     SELF_CON_ZDR_POWER_LAW_METHOD = 0,
     SELF_CON_ZDR_POLYNOMIAL_METHOD = 1
   } self_con_method_t;
@@ -108,7 +99,7 @@ public:
     KDP_ZZDR = 10,
     KDP_COND = 11,
     KDP_BRINGI = 12,
-    PSOB = 13,
+    DELTA = 13,
     ZDP = 14,
     PRECIP_RATE_ZH = 15,
     PRECIP_RATE_ZH_SNOW = 16,
@@ -131,39 +122,38 @@ public:
     VALID_FLAG_FOR_KDP = 33,
     PHIDP_FOR_KDP = 34,
     PHIDP_MEAN_FOR_KDP = 35,
-    PHIDP_MEAN_UNFOLD_FOR_KDP = 36,
+    PHIDP_UNFOLD_FOR_KDP = 36,
     PHIDP_SDEV_FOR_KDP = 37,
     PHIDP_JITTER_FOR_KDP = 38,
-    PHIDP_UNFOLD_FOR_KDP = 39,
-    PHIDP_FILT_FOR_KDP = 40,
-    PHIDP_COND_FOR_KDP = 41,
-    PHIDP_COND_FILT_FOR_KDP = 42,
-    DBZ_FOR_RATE = 43,
-    ZDR_FOR_RATE = 44,
-    KDP_FOR_RATE = 45,
-    PARTICLE_ID = 46,
-    PID_INTEREST = 47,
-    PARTICLE_ID2 = 48,
-    PID_INTEREST2 = 49,
-    DBZ_FOR_PID = 50,
-    ZDR_FOR_PID = 51,
-    LDR_FOR_PID = 52,
-    PHIDP_FOR_PID = 53,
-    RHOHV_FOR_PID = 54,
-    KDP_FOR_PID = 55,
-    SDZDR_FOR_PID = 56,
-    SDPHIDP_FOR_PID = 57,
-    TEMP_FOR_PID = 58,
-    ZDRM_IN_ICE = 59,
-    ZDRM_IN_BRAGG = 60,
-    ZDR_IN_ICE = 61,
-    ZDR_IN_BRAGG = 62,
-    ZDR_FLAG_IN_ICE = 63,
-    ZDR_FLAG_IN_BRAGG = 64,
-    ML_INTEREST = 65,
-    ELEVATION_ANGLE = 66,
-    RANGE = 67,
-    BEAM_HEIGHT = 68
+    PHIDP_FILT_FOR_KDP = 39,
+    PHIDP_COND_FOR_KDP = 40,
+    PHIDP_COND_FILT_FOR_KDP = 41,
+    DBZ_FOR_RATE = 42,
+    ZDR_FOR_RATE = 43,
+    KDP_FOR_RATE = 44,
+    PARTICLE_ID = 45,
+    PID_INTEREST = 46,
+    PARTICLE_ID2 = 47,
+    PID_INTEREST2 = 48,
+    DBZ_FOR_PID = 49,
+    ZDR_FOR_PID = 50,
+    LDR_FOR_PID = 51,
+    PHIDP_FOR_PID = 52,
+    RHOHV_FOR_PID = 53,
+    KDP_FOR_PID = 54,
+    SDZDR_FOR_PID = 55,
+    SDPHIDP_FOR_PID = 56,
+    TEMP_FOR_PID = 57,
+    ZDRM_IN_ICE = 58,
+    ZDRM_IN_BRAGG = 59,
+    ZDR_IN_ICE = 60,
+    ZDR_IN_BRAGG = 61,
+    ZDR_FLAG_IN_ICE = 62,
+    ZDR_FLAG_IN_BRAGG = 63,
+    ML_INTEREST = 64,
+    ELEVATION_ANGLE = 65,
+    RANGE = 66,
+    BEAM_HEIGHT = 67
   } output_field_id_t;
 
   typedef enum {
@@ -606,61 +596,7 @@ public:
 
   char* RHO_VXHX_field_name;
 
-  fir_filter_len_t KDP_fir_filter_len;
-
-  int KDP_n_filt_iterations_unfolded;
-
-  int KDP_n_filt_iterations_conditioned;
-
-  tdrp_bool_t KDP_use_iterative_filtering;
-
-  double KDP_phidp_difference_threshold;
-
-  int KDP_ngates_for_stats;
-
-  double KDP_phidp_sdev_max;
-
-  double KDP_phidp_jitter_max;
-
-  double KDP_min_valid_abs_kdp;
-
-  tdrp_bool_t KDP_check_snr;
-
-  double KDP_snr_threshold;
-
-  tdrp_bool_t KDP_check_rhohv;
-
-  double KDP_rhohv_threshold;
-
-  tdrp_bool_t KDP_check_zdr_sdev;
-
-  double KDP_zdr_sdev_max;
-
-  double KDP_minimum_for_self_consistency;
-
-  int KDP_median_filter_len_for_ZZDR;
-
-  tdrp_bool_t KDP_debug;
-
-  tdrp_bool_t KDP_write_ray_files;
-
-  char* KDP_ray_files_dir;
-
-  tdrp_bool_t compute_kdp_bringi;
-
-  fir_filter_len_t KDP_BRINGI_fir_filter_len;
-
-  double KDP_BRINGI_phidp_difference_threshold;
-
-  double KDP_BRINGI_phidp_sdev_threshold;
-
-  double KDP_BRINGI_zdr_sdev_threshold;
-
-  double KDP_BRINGI_rhohv_threshold;
-
-  tdrp_bool_t KDP_BRINGI_apply_median_filter_to_PHIDP;
-
-  int KDP_BRINGI_median_filter_len;
+  char* KDP_params_file_path;
 
   tdrp_bool_t apply_precip_attenuation_correction;
 
@@ -1020,7 +956,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[279];
+  mutable TDRPtable _table[252];
 
   const char *_className;
 

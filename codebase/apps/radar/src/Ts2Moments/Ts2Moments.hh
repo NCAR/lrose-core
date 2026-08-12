@@ -42,6 +42,7 @@
 #include <string>
 #include <vector>
 #include <rapformats/DsRadarSweep.hh>
+#include <radar/KdpFiltParams.hh>
 #include "Args.hh"
 #include "Params.hh"
 #include "MomentsMgr.hh"
@@ -105,6 +106,7 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+  KdpFiltParams _kdpParams;
 
   // beam reader
 

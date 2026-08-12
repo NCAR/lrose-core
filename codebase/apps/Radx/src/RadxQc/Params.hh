@@ -81,15 +81,6 @@ public:
   } mode_t;
 
   typedef enum {
-    FIR_LEN_125 = 0,
-    FIR_LEN_60 = 1,
-    FIR_LEN_40 = 2,
-    FIR_LEN_30 = 3,
-    FIR_LEN_20 = 4,
-    FIR_LEN_10 = 5
-  } fir_filter_len_t;
-
-  typedef enum {
     SNR = 0,
     DBZ = 1,
     VEL = 2,
@@ -100,7 +91,7 @@ public:
     RHOHV = 7,
     PHIDP = 8,
     KDP = 9,
-    PSOB = 10,
+    DELTA = 10,
     ZDP = 11,
     DBZ_ATTEN_CORRECTION = 12,
     ZDR_ATTEN_CORRECTION = 13,
@@ -114,43 +105,42 @@ public:
     VALID_FLAG_FOR_KDP = 21,
     PHIDP_FOR_KDP = 22,
     PHIDP_MEAN_FOR_KDP = 23,
-    PHIDP_MEAN_UNFOLD_FOR_KDP = 24,
+    PHIDP_UNFOLD_FOR_KDP = 24,
     PHIDP_SDEV_FOR_KDP = 25,
     PHIDP_JITTER_FOR_KDP = 26,
-    PHIDP_UNFOLD_FOR_KDP = 27,
-    PHIDP_FILT_FOR_KDP = 28,
-    PHIDP_COND_FOR_KDP = 29,
-    PHIDP_COND_FILT_FOR_KDP = 30,
-    SNR_RLAN = 31,
-    SNR_MODE_RLAN = 32,
-    SNR_DMODE_RLAN = 33,
-    ZDR_SDEV_RLAN = 34,
-    NCP_MEAN_RLAN = 35,
-    WIDTH_MEAN_RLAN = 36,
-    PHASE_RLAN = 37,
-    PHASE_NOISE_RLAN = 38,
-    PHASE_NOISE_INTEREST_RLAN = 39,
-    NCP_MEAN_INTEREST_RLAN = 40,
-    WIDTH_MEAN_INTEREST_RLAN = 41,
-    SNR_DMODE_INTEREST_RLAN = 42,
-    ZDR_SDEV_INTEREST_RLAN = 43,
-    RLAN_FLAG = 44,
-    RAY_HEIGHT = 45,
-    SNR_MEAN_SEACLUT = 46,
-    RHOHV_MEAN_SEACLUT = 47,
-    PHIDP_SDEV_SEACLUT = 48,
-    ZDR_SDEV_SEACLUT = 49,
-    DBZ_ELEV_GRADIENT_SEACLUT = 50,
-    RHOHV_MEAN_INTEREST_SEACLUT = 51,
-    PHIDP_SDEV_INTEREST_SEACLUT = 52,
-    ZDR_SDEV_INTEREST_SEACLUT = 53,
-    DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 54,
-    SEACLUT_FLAG = 55,
-    PARTICLE_ID = 56,
-    TEMP_FOR_PID = 57,
-    PID_CENSOR_FLAG = 58,
-    INPUT_FIELDS_CENSOR_FLAG = 59,
-    COMBINED_CENSOR_FLAG = 60
+    PHIDP_FILT_FOR_KDP = 27,
+    PHIDP_COND_FOR_KDP = 28,
+    PHIDP_COND_FILT_FOR_KDP = 29,
+    SNR_RLAN = 30,
+    SNR_MODE_RLAN = 31,
+    SNR_DMODE_RLAN = 32,
+    ZDR_SDEV_RLAN = 33,
+    NCP_MEAN_RLAN = 34,
+    WIDTH_MEAN_RLAN = 35,
+    PHASE_RLAN = 36,
+    PHASE_NOISE_RLAN = 37,
+    PHASE_NOISE_INTEREST_RLAN = 38,
+    NCP_MEAN_INTEREST_RLAN = 39,
+    WIDTH_MEAN_INTEREST_RLAN = 40,
+    SNR_DMODE_INTEREST_RLAN = 41,
+    ZDR_SDEV_INTEREST_RLAN = 42,
+    RLAN_FLAG = 43,
+    RAY_HEIGHT = 44,
+    SNR_MEAN_SEACLUT = 45,
+    RHOHV_MEAN_SEACLUT = 46,
+    PHIDP_SDEV_SEACLUT = 47,
+    ZDR_SDEV_SEACLUT = 48,
+    DBZ_ELEV_GRADIENT_SEACLUT = 49,
+    RHOHV_MEAN_INTEREST_SEACLUT = 50,
+    PHIDP_SDEV_INTEREST_SEACLUT = 51,
+    ZDR_SDEV_INTEREST_SEACLUT = 52,
+    DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 53,
+    SEACLUT_FLAG = 54,
+    PARTICLE_ID = 55,
+    TEMP_FOR_PID = 56,
+    PID_CENSOR_FLAG = 57,
+    INPUT_FIELDS_CENSOR_FLAG = 58,
+    COMBINED_CENSOR_FLAG = 59
   } output_field_id_t;
 
   typedef enum {
@@ -617,41 +607,7 @@ public:
 
   char* RHOHV_field_name;
 
-  fir_filter_len_t KDP_fir_filter_len;
-
-  int KDP_n_filt_iterations_unfolded;
-
-  int KDP_n_filt_iterations_conditioned;
-
-  tdrp_bool_t KDP_use_iterative_filtering;
-
-  double KDP_phidp_difference_threshold;
-
-  int KDP_ngates_for_stats;
-
-  double KDP_phidp_sdev_max;
-
-  double KDP_phidp_jitter_max;
-
-  double KDP_min_valid_abs_kdp;
-
-  tdrp_bool_t KDP_check_snr;
-
-  double KDP_snr_threshold;
-
-  tdrp_bool_t KDP_check_rhohv;
-
-  double KDP_rhohv_threshold;
-
-  tdrp_bool_t KDP_check_zdr_sdev;
-
-  double KDP_zdr_sdev_max;
-
-  tdrp_bool_t KDP_debug;
-
-  tdrp_bool_t KDP_write_ray_files;
-
-  char* KDP_ray_files_dir;
+  char* KDP_params_file_path;
 
   tdrp_bool_t apply_precip_attenuation_correction;
 
@@ -861,7 +817,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[180];
+  mutable TDRPtable _table[163];
 
   const char *_className;
 

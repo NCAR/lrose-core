@@ -47,6 +47,8 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <rapformats/coord_export.h>
+#include <radar/KdpFiltParams.hh>
+
 class SpriteMgr;
 class TsReader;
 class BeamMgr;
@@ -79,8 +81,9 @@ private:
   // basic
 
   string _progName;
-  Params _params;
   Args _args;
+  Params _params;
+  KdpFiltParams _kdpParams;
 
   // reading in the data
 

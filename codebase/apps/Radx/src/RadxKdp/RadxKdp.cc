@@ -89,13 +89,6 @@ RadxKdp::RadxKdp(int argc, char **argv)
     return;
   }
 
-  // print params for KDP then exit
-
-  if (_args.printParamsKdp) {
-    _printParamsKdp();
-    exit(0);
-  }
-
   // read params for KdpFilt
 
   if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
@@ -108,6 +101,13 @@ RadxKdp::RadxKdp(int argc, char **argv)
       OK = FALSE;
       return;
     }
+  }
+
+  // print params for KDP then exit
+
+  if (_args.printParamsKdp) {
+    _printParamsKdp();
+    exit(0);
   }
 
   // initialize compute object
@@ -478,6 +478,10 @@ void RadxKdp::_setupRead(RadxFile &file)
     }
   }
     
+  if (_params.set_max_range) {
+    file.setReadMaxRangeKm(_params.max_range_km);
+  }
+
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }

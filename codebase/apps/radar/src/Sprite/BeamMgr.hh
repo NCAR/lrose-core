@@ -45,6 +45,7 @@
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfCalib.hh>
 #include <radar/GateData.hh>
+#include <radar/KdpFiltParams.hh>
 #include "RadarSpectra.hh"
 #include "Params.hh"
 class Beam;
@@ -60,7 +61,8 @@ public:
   // constructor
   
   BeamMgr (const string &prog_name,
-	   const Params &params);
+	   const Params &params,
+           const KdpFiltParams &kdpParams);
   
   // destructor
   
@@ -143,6 +145,7 @@ private:
 
   string _progName;
   const Params &_params;
+  const KdpFiltParams &_kdpParams;
   
   // beam details
   

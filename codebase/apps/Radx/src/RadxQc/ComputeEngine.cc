@@ -50,8 +50,10 @@ const double ComputeEngine::missingDbl = -9999.0;
 // Constructor
 
 ComputeEngine::ComputeEngine(const Params &params,
+                             const KdpFiltParams &kdpFiltParams,
                              int id)  :
         _params(params),
+        _kdpFiltParams(kdpFiltParams),
         _id(id)
   
 {
@@ -192,19 +194,16 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
   const double *zdrForKdp = _kdp.getZdr();
   const double *rhohvForKdp = _kdp.getRhohv();
   const double *snrForKdp = _kdp.getSnr();
-  const double *zdrSdevForKdp = _kdp.getZdrSdev();
-  const bool *validFlagForKdp = _kdp.getValidForKdp();
+  const int *validFlagForKdp = _kdp.getValidForKdp();
 
   const double *phidpForKdp = _kdp.getPhidp();
   const double *phidpMeanForKdp = _kdp.getPhidpMean();
-  const double *phidpMeanUnfoldForKdp = _kdp.getPhidpMeanUnfold();
+  const double *phidpUnfoldForKdp = _kdp.getPhidpUnfold();
   const double *phidpSdevForKdp = _kdp.getPhidpSdev();
   const double *phidpJitterForKdp = _kdp.getPhidpJitter();
-  const double *phidpUnfoldForKdp = _kdp.getPhidpUnfold();
   const double *phidpFiltForKdp = _kdp.getPhidpFilt();
-  const double *phidpCondForKdp = _kdp.getPhidpCond();
-  const double *phidpCondFiltForKdp = _kdp.getPhidpCondFilt();
-  const double *psob = _kdp.getPsob();
+  const double *phidpCondForKdp = _kdp.getPhidpSC();
+  const double *delta = _kdp.getDelta();
 
   const double *dbzAtten = _kdp.getDbzAttenCorr();
   const double *zdrAtten = _kdp.getZdrAttenCorr();
@@ -303,8 +302,8 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::KDP:
           *datp = _kdpArray[igate];
           break;
-        case Params::PSOB:
-          *datp = psob[igate];
+        case Params::DELTA:
+          *datp = delta[igate];
           break;
         case Params::ZDP:
           *datp = _zdpArray[igate];
@@ -325,7 +324,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           *datp = snrForKdp[igate];
           break;
         case Params::ZDR_SDEV_FOR_KDP:
-          *datp = zdrSdevForKdp[igate];
+          *datp = missingDbl;
           break;
         case Params::VALID_FLAG_FOR_KDP:
           if (validFlagForKdp[igate]) {
@@ -341,17 +340,14 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
         case Params::PHIDP_MEAN_FOR_KDP:
           *datp = phidpMeanForKdp[igate];
           break;
-        case Params::PHIDP_MEAN_UNFOLD_FOR_KDP:
-          *datp = phidpMeanUnfoldForKdp[igate];
+        case Params::PHIDP_UNFOLD_FOR_KDP:
+          *datp = phidpUnfoldForKdp[igate];
           break;
         case Params::PHIDP_SDEV_FOR_KDP:
           *datp = phidpSdevForKdp[igate];
           break;
         case Params::PHIDP_JITTER_FOR_KDP:
           *datp = phidpJitterForKdp[igate];
-          break;
-        case Params::PHIDP_UNFOLD_FOR_KDP:
-          *datp = phidpUnfoldForKdp[igate];
           break;
         case Params::PHIDP_FILT_FOR_KDP:
           *datp = phidpFiltForKdp[igate];
@@ -360,7 +356,7 @@ void ComputeEngine::_loadOutputFields(RadxRay *inputRay,
           *datp = phidpCondForKdp[igate];
           break;
         case Params::PHIDP_COND_FILT_FOR_KDP:
-          *datp = phidpCondFiltForKdp[igate];
+          *datp = missingDbl;
           break;
 
           // attenuation
@@ -634,61 +630,8 @@ void ComputeEngine::_kdpInit()
   
 {
 
-  // initialize KDP object
-
-  if (_params.KDP_fir_filter_len == Params::FIR_LEN_125) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_125);
-  } else if (_params.KDP_fir_filter_len == Params::FIR_LEN_60) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_60);
-  } else if (_params.KDP_fir_filter_len == Params::FIR_LEN_40) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_40);
-  } else if (_params.KDP_fir_filter_len == Params::FIR_LEN_30) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_30);
-  } else if (_params.KDP_fir_filter_len == Params::FIR_LEN_20) {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_20);
-  } else {
-    _kdp.setFIRFilterLen(KdpFilt::FIR_LENGTH_10);
-  }
-  _kdp.setNGatesStats(_params.KDP_ngates_for_stats);
-  _kdp.setMinValidAbsKdp(_params.KDP_min_valid_abs_kdp);
-  if (_params.set_max_range) {
-    _kdp.setMaxRangeKm(true, _params.max_range_km);
-  }
-  _kdp.setNFiltIterUnfolded(_params.KDP_n_filt_iterations_unfolded);
-  _kdp.setNFiltIterCond(_params.KDP_n_filt_iterations_conditioned);
-  if (_params.KDP_use_iterative_filtering) {
-    _kdp.setUseIterativeFiltering(true);
-    _kdp.setPhidpDiffThreshold(_params.KDP_phidp_difference_threshold);
-  }
-  _kdp.setPhidpSdevMax(_params.KDP_phidp_sdev_max);
-  _kdp.setPhidpJitterMax(_params.KDP_phidp_jitter_max);
-  _kdp.setMinValidAbsKdp(_params.KDP_min_valid_abs_kdp);
-  _kdp.checkSnr(_params.KDP_check_snr);
-  _kdp.setSnrThreshold(_params.KDP_snr_threshold);
-  _kdp.checkRhohv(_params.KDP_check_rhohv);
-  _kdp.setRhohvThreshold(_params.KDP_rhohv_threshold);
-  if (_params.KDP_check_zdr_sdev) {
-    _kdp.checkZdrSdev(true);
-  }
-  _kdp.setZdrSdevMax(_params.KDP_zdr_sdev_max);
-  if (_params.KDP_debug) {
-    _kdp.setDebug(true);
-  }
-  if (_params.KDP_write_ray_files) {
-    _kdp.setWriteRayFile(true, _params.KDP_ray_files_dir);
-  }
-
-  if (_params.apply_precip_attenuation_correction) {
-    if (_params.specify_coefficients_for_attenuation_correction) {
-      _kdp.setAttenCoeffs(_params.dbz_attenuation_coefficient,
-                          _params.dbz_attenuation_exponent,
-                          _params.zdr_attenuation_coefficient,
-                          _params.zdr_attenuation_exponent);
-    } else {
-      _kdp.setComputeAttenCorr(true);
-    }
-  }
-
+  _kdp.setParams(_kdpFiltParams);
+  
 }
 
 ////////////////////////////////////////////////

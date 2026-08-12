@@ -155,7 +155,7 @@ void IpsMomFields::init()
   phidp_jitter_4kdp = missingDouble;
   zdr_sdev_4kdp = missingDouble;
   kdp = missingDouble;
-  psob = missingDouble;
+  delta = missingDouble;
   kdp_hb = missingDouble;
 
   // co-cross correlations

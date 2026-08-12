@@ -83,10 +83,11 @@ public:
   typedef enum {
     KDP = 0,
     KDP_SC = 1,
-    DBZ_ATTEN_CORRECTION = 2,
-    ZDR_ATTEN_CORRECTION = 3,
-    DBZ_ATTEN_CORRECTED = 4,
-    ZDR_ATTEN_CORRECTED = 5
+    DELTA = 2,
+    DBZ_ATTEN_CORRECTION = 3,
+    ZDR_ATTEN_CORRECTION = 4,
+    DBZ_ATTEN_CORRECTED = 5,
+    ZDR_ATTEN_CORRECTED = 6
   } output_field_id_t;
 
   typedef enum {
@@ -418,6 +419,12 @@ public:
 
   debug_t debug;
 
+  tdrp_bool_t compute_all_filters;
+
+  tdrp_bool_t write_ray_files;
+
+  char* ray_files_dir;
+
   int n_compute_threads;
 
   mode_t mode;
@@ -439,6 +446,10 @@ public:
   double lower_fixed_angle_limit;
 
   double upper_fixed_angle_limit;
+
+  tdrp_bool_t set_max_range;
+
+  double max_range_km;
 
   tdrp_bool_t SNR_available;
 
@@ -491,7 +502,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[46];
+  mutable TDRPtable _table[52];
 
   const char *_className;
 

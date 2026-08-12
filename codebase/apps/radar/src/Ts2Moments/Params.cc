@@ -2823,216 +2823,20 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 16");
-    tt->comment_hdr = tdrpStrDup("COMPUTING KDP USING ADAPTIVE FILTER METHOD");
+    tt->comment_hdr = tdrpStrDup("COMPUTING KDP");
     tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
     tt++;
     
-    // Parameter 'KDP_fir_filter_len'
-    // ctype is '_fir_filter_len_t'
+    // Parameter 'KDP_params_file_path'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("KDP_fir_filter_len");
-    tt->descr = tdrpStrDup("Filter length for the FIR filter for PHIDP (gates)");
-    tt->help = tdrpStrDup("When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.");
-    tt->val_offset = (char *) &KDP_fir_filter_len - &_start_;
-    tt->enum_def.name = tdrpStrDup("fir_filter_len_t");
-    tt->enum_def.nfields = 6;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FIR_LEN_125");
-      tt->enum_def.fields[0].val = FIR_LEN_125;
-      tt->enum_def.fields[1].name = tdrpStrDup("FIR_LEN_60");
-      tt->enum_def.fields[1].val = FIR_LEN_60;
-      tt->enum_def.fields[2].name = tdrpStrDup("FIR_LEN_40");
-      tt->enum_def.fields[2].val = FIR_LEN_40;
-      tt->enum_def.fields[3].name = tdrpStrDup("FIR_LEN_30");
-      tt->enum_def.fields[3].val = FIR_LEN_30;
-      tt->enum_def.fields[4].name = tdrpStrDup("FIR_LEN_20");
-      tt->enum_def.fields[4].val = FIR_LEN_20;
-      tt->enum_def.fields[5].name = tdrpStrDup("FIR_LEN_10");
-      tt->enum_def.fields[5].val = FIR_LEN_10;
-    tt->single_val.e = FIR_LEN_20;
-    tt++;
-    
-    // Parameter 'KDP_n_filt_iterations_unfolded'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_n_filt_iterations_unfolded");
-    tt->descr = tdrpStrDup("Sets the number of iterations for the initial FIR filter for unfolded PHIDP.");
-    tt->help = tdrpStrDup("After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
-    tt->val_offset = (char *) &KDP_n_filt_iterations_unfolded - &_start_;
-    tt->single_val.i = 2;
-    tt++;
-    
-    // Parameter 'KDP_n_filt_iterations_conditioned'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_n_filt_iterations_conditioned");
-    tt->descr = tdrpStrDup("Sets the number of iterations for the final FIR filter for conditioned PHIDP.");
-    tt->help = tdrpStrDup("In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
-    tt->val_offset = (char *) &KDP_n_filt_iterations_conditioned - &_start_;
-    tt->single_val.i = 2;
-    tt++;
-    
-    // Parameter 'KDP_use_iterative_filtering'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_use_iterative_filtering");
-    tt->descr = tdrpStrDup("Perform iterative filtering to locate backscatter phase shift.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_use_iterative_filtering - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_phidp_difference_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_phidp_difference_threshold");
-    tt->descr = tdrpStrDup("Difference threshold for the iterative filtering method.");
-    tt->help = tdrpStrDup("The FIR filter is applied successively, KDP_n_filt_iterations_conditioned times. After each iteration the result is checked against the original. If the difference is less than this parameter, the original value at that gate is retained. If the difference exceeds this parameter, the new filtered value is retained.");
-    tt->val_offset = (char *) &KDP_phidp_difference_threshold - &_start_;
-    tt->single_val.d = 4;
-    tt++;
-    
-    // Parameter 'KDP_ngates_for_stats'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_ngates_for_stats");
-    tt->descr = tdrpStrDup("Number of gates over which the phidp mean, sdev and jitter are computed.");
-    tt->help = tdrpStrDup("The mean, sdev and jitter of phidp are computed over a consecutive number of gates in range, centered on the current gate of interest. This parameter is the number of gates over which these statistics are computed.");
-    tt->val_offset = (char *) &KDP_ngates_for_stats - &_start_;
-    tt->single_val.i = 9;
-    tt++;
-    
-    // Parameter 'KDP_phidp_sdev_max'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_phidp_sdev_max");
-    tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of phidp in range.");
-    tt->help = tdrpStrDup("The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_phidp_sdev_max - &_start_;
-    tt->single_val.d = 20;
-    tt++;
-    
-    // Parameter 'KDP_phidp_jitter_max'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_phidp_jitter_max");
-    tt->descr = tdrpStrDup("Sets the threshold for the jitter of phidp in range.");
-    tt->help = tdrpStrDup("The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_phidp_jitter_max - &_start_;
-    tt->single_val.d = 25;
-    tt++;
-    
-    // Parameter 'KDP_check_snr'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_check_snr");
-    tt->descr = tdrpStrDup("Check the SNR.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_check_snr - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_snr_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_snr_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for checking SNR (dB).");
-    tt->help = tdrpStrDup("If the SNR drops below this value, KDP will not be computed at this gate.");
-    tt->val_offset = (char *) &KDP_snr_threshold - &_start_;
-    tt->single_val.d = -6;
-    tt++;
-    
-    // Parameter 'KDP_check_rhohv'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_check_rhohv");
-    tt->descr = tdrpStrDup("Check the RHOHV.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_check_rhohv - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'KDP_rhohv_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_rhohv_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for checking RHOHV.");
-    tt->help = tdrpStrDup("If the RHOHV drops below this value, KDP will not be computed at this gate.");
-    tt->val_offset = (char *) &KDP_rhohv_threshold - &_start_;
-    tt->single_val.d = 0.95;
-    tt++;
-    
-    // Parameter 'KDP_check_zdr_sdev'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_check_zdr_sdev");
-    tt->descr = tdrpStrDup("Check the standard deviation of ZDR in range?");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_check_zdr_sdev - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'KDP_zdr_sdev_max'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_zdr_sdev_max");
-    tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of zdr in range.");
-    tt->help = tdrpStrDup("The sdev of zdr is a good test for clutter. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_zdr_sdev_max - &_start_;
-    tt->single_val.d = 2;
-    tt++;
-    
-    // Parameter 'KDP_min_valid_abs_kdp'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_min_valid_abs_kdp");
-    tt->descr = tdrpStrDup("Sets the min valid KDP value.");
-    tt->help = tdrpStrDup("Values less than this are set to 0.");
-    tt->val_offset = (char *) &KDP_min_valid_abs_kdp - &_start_;
-    tt->single_val.d = 0.025;
-    tt++;
-    
-    // Parameter 'KDP_debug'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_debug");
-    tt->descr = tdrpStrDup("Option to print debug messages in KDP computation.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_debug - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("KDP_params_file_path");
+    tt->descr = tdrpStrDup("Path for parameters for KDP computations.");
+    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
+    tt->val_offset = (char *) &KDP_params_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("use-defaults");
     tt++;
     
     // Parameter 'KDP_write_ray_files'
@@ -3064,103 +2868,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 17");
-    tt->comment_hdr = tdrpStrDup("COMPUTING KDP using Bringi method");
-    tt->comment_text = tdrpStrDup("Parameters for computing KDP.");
-    tt++;
-    
-    // Parameter 'KDP_compute_using_hubbert_bringi_method'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_compute_using_hubbert_bringi_method");
-    tt->descr = tdrpStrDup("Option to use bringi method for computing KDP.");
-    tt->help = tdrpStrDup("If true, KDP will also be computed using the Hubbert-Bringi method");
-    tt->val_offset = (char *) &KDP_compute_using_hubbert_bringi_method - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'KDP_HB_fir_filter_len'
-    // ctype is '_fir_filter_len_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("KDP_HB_fir_filter_len");
-    tt->descr = tdrpStrDup("Filter length for the FIR filter for PHIDP (gates)");
-    tt->help = tdrpStrDup("When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.");
-    tt->val_offset = (char *) &KDP_HB_fir_filter_len - &_start_;
-    tt->enum_def.name = tdrpStrDup("fir_filter_len_t");
-    tt->enum_def.nfields = 6;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FIR_LEN_125");
-      tt->enum_def.fields[0].val = FIR_LEN_125;
-      tt->enum_def.fields[1].name = tdrpStrDup("FIR_LEN_60");
-      tt->enum_def.fields[1].val = FIR_LEN_60;
-      tt->enum_def.fields[2].name = tdrpStrDup("FIR_LEN_40");
-      tt->enum_def.fields[2].val = FIR_LEN_40;
-      tt->enum_def.fields[3].name = tdrpStrDup("FIR_LEN_30");
-      tt->enum_def.fields[3].val = FIR_LEN_30;
-      tt->enum_def.fields[4].name = tdrpStrDup("FIR_LEN_20");
-      tt->enum_def.fields[4].val = FIR_LEN_20;
-      tt->enum_def.fields[5].name = tdrpStrDup("FIR_LEN_10");
-      tt->enum_def.fields[5].val = FIR_LEN_10;
-    tt->single_val.e = FIR_LEN_20;
-    tt++;
-    
-    // Parameter 'KDP_HB_phidp_difference_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_HB_phidp_difference_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for difference of phidp.");
-    tt->help = tdrpStrDup("This is used to test the difference between the unfolded phidp value and the filtered phidp value. If the difference exceeds this value, we use the original value instead of the filtered value. Applies to computation of KDP only");
-    tt->val_offset = (char *) &KDP_HB_phidp_difference_threshold - &_start_;
-    tt->single_val.d = 4;
-    tt++;
-    
-    // Parameter 'KDP_HB_phidp_sdev_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_HB_phidp_sdev_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of phidp in range.");
-    tt->help = tdrpStrDup("The sdev of phidp is a good test for weather. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_HB_phidp_sdev_threshold - &_start_;
-    tt->single_val.d = 12;
-    tt++;
-    
-    // Parameter 'KDP_HB_zdr_sdev_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_HB_zdr_sdev_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of zdr in range.");
-    tt->help = tdrpStrDup("The sdev of zdr is a good test for weather. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_HB_zdr_sdev_threshold - &_start_;
-    tt->single_val.d = 1.8;
-    tt++;
-    
-    // Parameter 'KDP_HB_rhohv_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_HB_rhohv_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for rhohv.");
-    tt->help = tdrpStrDup("rhohv is a good test for weather. If rhohv is greater than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_HB_rhohv_threshold - &_start_;
-    tt->single_val.d = 0.75;
-    tt++;
-    
-    // Parameter 'Comment 18'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("NOISE DETECTION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3257,11 +2964,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("INTEREST MAPS and WEIGHTS for NOISE LOCATION");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final interest value.");
     tt++;
@@ -3535,11 +3242,11 @@
     tt->single_val.d = 0.51;
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("REFRACTIVITY FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3556,11 +3263,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("PHASE DECODING PROCESSING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3713,11 +3420,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("CMD - CLUTTER MITIGATION DECISION system");
     tt->comment_text = tdrpStrDup("Option to compute and use CMD fields.");
     tt++;
@@ -4061,11 +3768,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("CMD INTEREST MAPS and WEIGHTS");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.");
     tt++;
@@ -4327,11 +4034,11 @@
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 23");
     tt->comment_hdr = tdrpStrDup("RHOHV TEST to AUGMENT CMD.");
     tt->comment_text = tdrpStrDup("If clutter is present along with weather, RHOHV should increase after application of the clutter filter. The RHOHV improvment factor is a measure of the change in RHOHV towards 1.0. We use different improvement thresholds to decide whether the filtered spectrum should be used for power or phase related fields.");
     tt++;
@@ -4396,11 +4103,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("SPECTRAL CMD");
     tt->comment_text = tdrpStrDup("You have the option of running the spectral version of CMD, to filter difficult targets such as wind farms. The moments from this step will be stored in variables specifically named for the purpose.");
     tt++;
@@ -4545,11 +4252,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("SPECTRAL CMD INTEREST MAPS and WEIGHTS");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.");
     tt++;
@@ -4774,11 +4481,11 @@
     tt->single_val.d = 0.7;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("OUTPUT TO MOMENTS FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4892,11 +4599,11 @@
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("CENSORING OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("You have the option of censoring the output data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression. This leads to smaller data files.");
     tt++;
@@ -4959,11 +4666,11 @@
     tt->single_val.i = 3;
     tt++;
     
-    // Parameter 'Comment 29'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 29");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("SELECTING OUTPUT FIELDS");
     tt->comment_text = tdrpStrDup("Select the fields you want in the output FMQ.");
     tt++;
@@ -4992,7 +4699,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 197;
+        tt->struct_def.fields[0].enum_def.nfields = 195;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("DBZ");
@@ -5163,232 +4870,228 @@
         tt->struct_def.fields[0].enum_def.fields[82].val = PHIDP_SDEV_4KDP;
         tt->struct_def.fields[0].enum_def.fields[83].name = tdrpStrDup("PHIDP_JITTER_4KDP");
         tt->struct_def.fields[0].enum_def.fields[83].val = PHIDP_JITTER_4KDP;
-        tt->struct_def.fields[0].enum_def.fields[84].name = tdrpStrDup("ZDR_SDEV_4KDP");
-        tt->struct_def.fields[0].enum_def.fields[84].val = ZDR_SDEV_4KDP;
-        tt->struct_def.fields[0].enum_def.fields[85].name = tdrpStrDup("KDP");
-        tt->struct_def.fields[0].enum_def.fields[85].val = KDP;
-        tt->struct_def.fields[0].enum_def.fields[86].name = tdrpStrDup("PSOB");
-        tt->struct_def.fields[0].enum_def.fields[86].val = PSOB;
-        tt->struct_def.fields[0].enum_def.fields[87].name = tdrpStrDup("KDP_HB");
-        tt->struct_def.fields[0].enum_def.fields[87].val = KDP_HB;
-        tt->struct_def.fields[0].enum_def.fields[88].name = tdrpStrDup("RHO_HC_VX");
-        tt->struct_def.fields[0].enum_def.fields[88].val = RHO_HC_VX;
-        tt->struct_def.fields[0].enum_def.fields[89].name = tdrpStrDup("RHO_VC_HX");
-        tt->struct_def.fields[0].enum_def.fields[89].val = RHO_VC_HX;
-        tt->struct_def.fields[0].enum_def.fields[90].name = tdrpStrDup("RHO_VX_HX");
-        tt->struct_def.fields[0].enum_def.fields[90].val = RHO_VX_HX;
-        tt->struct_def.fields[0].enum_def.fields[91].name = tdrpStrDup("RHO_PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[91].val = RHO_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[92].name = tdrpStrDup("CPR_MAG");
-        tt->struct_def.fields[0].enum_def.fields[92].val = CPR_MAG;
-        tt->struct_def.fields[0].enum_def.fields[93].name = tdrpStrDup("CPR_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[93].val = CPR_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[94].name = tdrpStrDup("CPR_LDR");
-        tt->struct_def.fields[0].enum_def.fields[94].val = CPR_LDR;
-        tt->struct_def.fields[0].enum_def.fields[95].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
-        tt->struct_def.fields[0].enum_def.fields[95].val = DBZ_ATTEN_CORRECTION;
-        tt->struct_def.fields[0].enum_def.fields[96].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
-        tt->struct_def.fields[0].enum_def.fields[96].val = ZDR_ATTEN_CORRECTION;
-        tt->struct_def.fields[0].enum_def.fields[97].name = tdrpStrDup("DBZ_ATTEN_CORRECTED");
-        tt->struct_def.fields[0].enum_def.fields[97].val = DBZ_ATTEN_CORRECTED;
-        tt->struct_def.fields[0].enum_def.fields[98].name = tdrpStrDup("ZDR_ATTEN_CORRECTED");
-        tt->struct_def.fields[0].enum_def.fields[98].val = ZDR_ATTEN_CORRECTED;
-        tt->struct_def.fields[0].enum_def.fields[99].name = tdrpStrDup("CPA");
-        tt->struct_def.fields[0].enum_def.fields[99].val = CPA;
-        tt->struct_def.fields[0].enum_def.fields[100].name = tdrpStrDup("TDBZ");
-        tt->struct_def.fields[0].enum_def.fields[100].val = TDBZ;
-        tt->struct_def.fields[0].enum_def.fields[101].name = tdrpStrDup("SPIN");
-        tt->struct_def.fields[0].enum_def.fields[101].val = SPIN;
-        tt->struct_def.fields[0].enum_def.fields[102].name = tdrpStrDup("MAX_TDBZ_SPIN");
-        tt->struct_def.fields[0].enum_def.fields[102].val = MAX_TDBZ_SPIN;
-        tt->struct_def.fields[0].enum_def.fields[103].name = tdrpStrDup("ZDR_SDEV");
-        tt->struct_def.fields[0].enum_def.fields[103].val = ZDR_SDEV;
-        tt->struct_def.fields[0].enum_def.fields[104].name = tdrpStrDup("PHIDP_SDEV");
-        tt->struct_def.fields[0].enum_def.fields[104].val = PHIDP_SDEV;
-        tt->struct_def.fields[0].enum_def.fields[105].name = tdrpStrDup("DBZ_DIFF_SQ");
-        tt->struct_def.fields[0].enum_def.fields[105].val = DBZ_DIFF_SQ;
-        tt->struct_def.fields[0].enum_def.fields[106].name = tdrpStrDup("DBZ_SPIN_CHANGE");
-        tt->struct_def.fields[0].enum_def.fields[106].val = DBZ_SPIN_CHANGE;
-        tt->struct_def.fields[0].enum_def.fields[107].name = tdrpStrDup("CMD");
-        tt->struct_def.fields[0].enum_def.fields[107].val = CMD;
-        tt->struct_def.fields[0].enum_def.fields[108].name = tdrpStrDup("CMD_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[108].val = CMD_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[109].name = tdrpStrDup("RHOHV_TEST_UNFILT");
-        tt->struct_def.fields[0].enum_def.fields[109].val = RHOHV_TEST_UNFILT;
-        tt->struct_def.fields[0].enum_def.fields[110].name = tdrpStrDup("RHOHV_TEST_FILT");
-        tt->struct_def.fields[0].enum_def.fields[110].val = RHOHV_TEST_FILT;
-        tt->struct_def.fields[0].enum_def.fields[111].name = tdrpStrDup("RHOHV_TEST_IMPROV");
-        tt->struct_def.fields[0].enum_def.fields[111].val = RHOHV_TEST_IMPROV;
-        tt->struct_def.fields[0].enum_def.fields[112].name = tdrpStrDup("RHOHV_TEST_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[112].val = RHOHV_TEST_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[113].name = tdrpStrDup("TDBZ_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[113].val = TDBZ_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[114].name = tdrpStrDup("SPIN_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[114].val = SPIN_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[115].name = tdrpStrDup("CPA_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[115].val = CPA_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[116].name = tdrpStrDup("ZDR_SDEV_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[116].val = ZDR_SDEV_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[117].name = tdrpStrDup("PHIDP_SDEV_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[117].val = PHIDP_SDEV_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[118].name = tdrpStrDup("CLUT");
-        tt->struct_def.fields[0].enum_def.fields[118].val = CLUT;
-        tt->struct_def.fields[0].enum_def.fields[119].name = tdrpStrDup("CLUT_2_WX_RATIO");
-        tt->struct_def.fields[0].enum_def.fields[119].val = CLUT_2_WX_RATIO;
-        tt->struct_def.fields[0].enum_def.fields[120].name = tdrpStrDup("SPECTRAL_NOISE");
-        tt->struct_def.fields[0].enum_def.fields[120].val = SPECTRAL_NOISE;
-        tt->struct_def.fields[0].enum_def.fields[121].name = tdrpStrDup("SPECTRAL_SNR");
-        tt->struct_def.fields[0].enum_def.fields[121].val = SPECTRAL_SNR;
-        tt->struct_def.fields[0].enum_def.fields[122].name = tdrpStrDup("REGR_FILT_POLY_ORDER");
-        tt->struct_def.fields[0].enum_def.fields[122].val = REGR_FILT_POLY_ORDER;
-        tt->struct_def.fields[0].enum_def.fields[123].name = tdrpStrDup("REGR_FILT_CNR_DB");
-        tt->struct_def.fields[0].enum_def.fields[123].val = REGR_FILT_CNR_DB;
-        tt->struct_def.fields[0].enum_def.fields[124].name = tdrpStrDup("AIQ_HC");
-        tt->struct_def.fields[0].enum_def.fields[124].val = AIQ_HC;
-        tt->struct_def.fields[0].enum_def.fields[125].name = tdrpStrDup("NIQ_HC");
-        tt->struct_def.fields[0].enum_def.fields[125].val = NIQ_HC;
-        tt->struct_def.fields[0].enum_def.fields[126].name = tdrpStrDup("AIQ_VC");
-        tt->struct_def.fields[0].enum_def.fields[126].val = AIQ_VC;
-        tt->struct_def.fields[0].enum_def.fields[127].name = tdrpStrDup("NIQ_VC");
-        tt->struct_def.fields[0].enum_def.fields[127].val = NIQ_VC;
-        tt->struct_def.fields[0].enum_def.fields[128].name = tdrpStrDup("SZ_TRIP_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[128].val = SZ_TRIP_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[129].name = tdrpStrDup("SZ_LEAKAGE");
-        tt->struct_def.fields[0].enum_def.fields[129].val = SZ_LEAKAGE;
-        tt->struct_def.fields[0].enum_def.fields[130].name = tdrpStrDup("CENSORING_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[130].val = CENSORING_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[131].name = tdrpStrDup("LAG0_HC_DB");
-        tt->struct_def.fields[0].enum_def.fields[131].val = LAG0_HC_DB;
-        tt->struct_def.fields[0].enum_def.fields[132].name = tdrpStrDup("LAG0_HX_DB");
-        tt->struct_def.fields[0].enum_def.fields[132].val = LAG0_HX_DB;
-        tt->struct_def.fields[0].enum_def.fields[133].name = tdrpStrDup("LAG0_VC_DB");
-        tt->struct_def.fields[0].enum_def.fields[133].val = LAG0_VC_DB;
-        tt->struct_def.fields[0].enum_def.fields[134].name = tdrpStrDup("LAG0_VX_DB");
-        tt->struct_def.fields[0].enum_def.fields[134].val = LAG0_VX_DB;
-        tt->struct_def.fields[0].enum_def.fields[135].name = tdrpStrDup("LAG0_HC_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[135].val = LAG0_HC_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[136].name = tdrpStrDup("LAG0_VC_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[136].val = LAG0_VC_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[137].name = tdrpStrDup("LAG0_HC_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[137].val = LAG0_HC_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[138].name = tdrpStrDup("LAG0_VC_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[138].val = LAG0_VC_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[139].name = tdrpStrDup("LAG0_VCHX_DB");
-        tt->struct_def.fields[0].enum_def.fields[139].val = LAG0_VCHX_DB;
-        tt->struct_def.fields[0].enum_def.fields[140].name = tdrpStrDup("LAG0_VCHX_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[140].val = LAG0_VCHX_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[141].name = tdrpStrDup("LAG0_HCVX_DB");
-        tt->struct_def.fields[0].enum_def.fields[141].val = LAG0_HCVX_DB;
-        tt->struct_def.fields[0].enum_def.fields[142].name = tdrpStrDup("LAG0_HCVX_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[142].val = LAG0_HCVX_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[143].name = tdrpStrDup("LAG1_HC_DB");
-        tt->struct_def.fields[0].enum_def.fields[143].val = LAG1_HC_DB;
-        tt->struct_def.fields[0].enum_def.fields[144].name = tdrpStrDup("LAG1_HC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[144].val = LAG1_HC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[145].name = tdrpStrDup("LAG1_VC_DB");
-        tt->struct_def.fields[0].enum_def.fields[145].val = LAG1_VC_DB;
-        tt->struct_def.fields[0].enum_def.fields[146].name = tdrpStrDup("LAG1_VC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[146].val = LAG1_VC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[147].name = tdrpStrDup("LAG1_HCVC_DB");
-        tt->struct_def.fields[0].enum_def.fields[147].val = LAG1_HCVC_DB;
-        tt->struct_def.fields[0].enum_def.fields[148].name = tdrpStrDup("LAG1_HCVC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[148].val = LAG1_HCVC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[149].name = tdrpStrDup("LAG1_VCHC_DB");
-        tt->struct_def.fields[0].enum_def.fields[149].val = LAG1_VCHC_DB;
-        tt->struct_def.fields[0].enum_def.fields[150].name = tdrpStrDup("LAG1_VCHC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[150].val = LAG1_VCHC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[151].name = tdrpStrDup("LAG1_VXHX_DB");
-        tt->struct_def.fields[0].enum_def.fields[151].val = LAG1_VXHX_DB;
-        tt->struct_def.fields[0].enum_def.fields[152].name = tdrpStrDup("LAG1_VXHX_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[152].val = LAG1_VXHX_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[153].name = tdrpStrDup("LAG1_HC_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[153].val = LAG1_HC_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[154].name = tdrpStrDup("LAG1_HC_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[154].val = LAG1_HC_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[155].name = tdrpStrDup("LAG1_VC_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[155].val = LAG1_VC_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[156].name = tdrpStrDup("LAG1_VC_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[156].val = LAG1_VC_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[157].name = tdrpStrDup("LAG1_HC_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[157].val = LAG1_HC_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[158].name = tdrpStrDup("LAG1_HC_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[158].val = LAG1_HC_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[159].name = tdrpStrDup("LAG1_VC_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[159].val = LAG1_VC_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[160].name = tdrpStrDup("LAG1_VC_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[160].val = LAG1_VC_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[161].name = tdrpStrDup("LAG1_HC_LONG_TO_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[161].val = LAG1_HC_LONG_TO_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[162].name = tdrpStrDup("LAG1_HC_LONG_TO_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[162].val = LAG1_HC_LONG_TO_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[163].name = tdrpStrDup("LAG1_VC_LONG_TO_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[163].val = LAG1_VC_LONG_TO_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[164].name = tdrpStrDup("LAG1_VC_LONG_TO_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[164].val = LAG1_VC_LONG_TO_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[165].name = tdrpStrDup("LAG1_HC_SHORT_TO_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[165].val = LAG1_HC_SHORT_TO_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[166].name = tdrpStrDup("LAG1_HC_SHORT_TO_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[166].val = LAG1_HC_SHORT_TO_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[167].name = tdrpStrDup("LAG1_VC_SHORT_TO_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[167].val = LAG1_VC_SHORT_TO_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[168].name = tdrpStrDup("LAG1_VC_SHORT_TO_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[168].val = LAG1_VC_SHORT_TO_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[169].name = tdrpStrDup("LAG2_HC_DB");
-        tt->struct_def.fields[0].enum_def.fields[169].val = LAG2_HC_DB;
-        tt->struct_def.fields[0].enum_def.fields[170].name = tdrpStrDup("LAG2_HC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[170].val = LAG2_HC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[171].name = tdrpStrDup("LAG2_VC_DB");
-        tt->struct_def.fields[0].enum_def.fields[171].val = LAG2_VC_DB;
-        tt->struct_def.fields[0].enum_def.fields[172].name = tdrpStrDup("LAG2_VC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[172].val = LAG2_VC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[173].name = tdrpStrDup("LAG3_HC_DB");
-        tt->struct_def.fields[0].enum_def.fields[173].val = LAG3_HC_DB;
-        tt->struct_def.fields[0].enum_def.fields[174].name = tdrpStrDup("LAG3_HC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[174].val = LAG3_HC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[175].name = tdrpStrDup("LAG3_VC_DB");
-        tt->struct_def.fields[0].enum_def.fields[175].val = LAG3_VC_DB;
-        tt->struct_def.fields[0].enum_def.fields[176].name = tdrpStrDup("LAG3_VC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[176].val = LAG3_VC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[177].name = tdrpStrDup("RVVHH0_DB");
-        tt->struct_def.fields[0].enum_def.fields[177].val = RVVHH0_DB;
-        tt->struct_def.fields[0].enum_def.fields[178].name = tdrpStrDup("RVVHH0_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[178].val = RVVHH0_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[179].name = tdrpStrDup("RVVHH0_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[179].val = RVVHH0_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[180].name = tdrpStrDup("RVVHH0_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[180].val = RVVHH0_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[181].name = tdrpStrDup("RVVHH0_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[181].val = RVVHH0_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[182].name = tdrpStrDup("RVVHH0_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[182].val = RVVHH0_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[183].name = tdrpStrDup("SDEV_VV");
-        tt->struct_def.fields[0].enum_def.fields[183].val = SDEV_VV;
-        tt->struct_def.fields[0].enum_def.fields[184].name = tdrpStrDup("PRT");
-        tt->struct_def.fields[0].enum_def.fields[184].val = PRT;
-        tt->struct_def.fields[0].enum_def.fields[185].name = tdrpStrDup("NUM_PULSES");
-        tt->struct_def.fields[0].enum_def.fields[185].val = NUM_PULSES;
-        tt->struct_def.fields[0].enum_def.fields[186].name = tdrpStrDup("TEST");
-        tt->struct_def.fields[0].enum_def.fields[186].val = TEST;
-        tt->struct_def.fields[0].enum_def.fields[187].name = tdrpStrDup("TEST0");
-        tt->struct_def.fields[0].enum_def.fields[187].val = TEST0;
-        tt->struct_def.fields[0].enum_def.fields[188].name = tdrpStrDup("TEST1");
-        tt->struct_def.fields[0].enum_def.fields[188].val = TEST1;
-        tt->struct_def.fields[0].enum_def.fields[189].name = tdrpStrDup("TEST2");
-        tt->struct_def.fields[0].enum_def.fields[189].val = TEST2;
-        tt->struct_def.fields[0].enum_def.fields[190].name = tdrpStrDup("TEST3");
-        tt->struct_def.fields[0].enum_def.fields[190].val = TEST3;
-        tt->struct_def.fields[0].enum_def.fields[191].name = tdrpStrDup("TEST4");
-        tt->struct_def.fields[0].enum_def.fields[191].val = TEST4;
-        tt->struct_def.fields[0].enum_def.fields[192].name = tdrpStrDup("TEST5");
-        tt->struct_def.fields[0].enum_def.fields[192].val = TEST5;
-        tt->struct_def.fields[0].enum_def.fields[193].name = tdrpStrDup("TEST6");
-        tt->struct_def.fields[0].enum_def.fields[193].val = TEST6;
-        tt->struct_def.fields[0].enum_def.fields[194].name = tdrpStrDup("TEST7");
-        tt->struct_def.fields[0].enum_def.fields[194].val = TEST7;
-        tt->struct_def.fields[0].enum_def.fields[195].name = tdrpStrDup("TEST8");
-        tt->struct_def.fields[0].enum_def.fields[195].val = TEST8;
-        tt->struct_def.fields[0].enum_def.fields[196].name = tdrpStrDup("TEST9");
-        tt->struct_def.fields[0].enum_def.fields[196].val = TEST9;
+        tt->struct_def.fields[0].enum_def.fields[84].name = tdrpStrDup("KDP");
+        tt->struct_def.fields[0].enum_def.fields[84].val = KDP;
+        tt->struct_def.fields[0].enum_def.fields[85].name = tdrpStrDup("DELTA");
+        tt->struct_def.fields[0].enum_def.fields[85].val = DELTA;
+        tt->struct_def.fields[0].enum_def.fields[86].name = tdrpStrDup("RHO_HC_VX");
+        tt->struct_def.fields[0].enum_def.fields[86].val = RHO_HC_VX;
+        tt->struct_def.fields[0].enum_def.fields[87].name = tdrpStrDup("RHO_VC_HX");
+        tt->struct_def.fields[0].enum_def.fields[87].val = RHO_VC_HX;
+        tt->struct_def.fields[0].enum_def.fields[88].name = tdrpStrDup("RHO_VX_HX");
+        tt->struct_def.fields[0].enum_def.fields[88].val = RHO_VX_HX;
+        tt->struct_def.fields[0].enum_def.fields[89].name = tdrpStrDup("RHO_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[89].val = RHO_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[90].name = tdrpStrDup("CPR_MAG");
+        tt->struct_def.fields[0].enum_def.fields[90].val = CPR_MAG;
+        tt->struct_def.fields[0].enum_def.fields[91].name = tdrpStrDup("CPR_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[91].val = CPR_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[92].name = tdrpStrDup("CPR_LDR");
+        tt->struct_def.fields[0].enum_def.fields[92].val = CPR_LDR;
+        tt->struct_def.fields[0].enum_def.fields[93].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
+        tt->struct_def.fields[0].enum_def.fields[93].val = DBZ_ATTEN_CORRECTION;
+        tt->struct_def.fields[0].enum_def.fields[94].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
+        tt->struct_def.fields[0].enum_def.fields[94].val = ZDR_ATTEN_CORRECTION;
+        tt->struct_def.fields[0].enum_def.fields[95].name = tdrpStrDup("DBZ_ATTEN_CORRECTED");
+        tt->struct_def.fields[0].enum_def.fields[95].val = DBZ_ATTEN_CORRECTED;
+        tt->struct_def.fields[0].enum_def.fields[96].name = tdrpStrDup("ZDR_ATTEN_CORRECTED");
+        tt->struct_def.fields[0].enum_def.fields[96].val = ZDR_ATTEN_CORRECTED;
+        tt->struct_def.fields[0].enum_def.fields[97].name = tdrpStrDup("CPA");
+        tt->struct_def.fields[0].enum_def.fields[97].val = CPA;
+        tt->struct_def.fields[0].enum_def.fields[98].name = tdrpStrDup("TDBZ");
+        tt->struct_def.fields[0].enum_def.fields[98].val = TDBZ;
+        tt->struct_def.fields[0].enum_def.fields[99].name = tdrpStrDup("SPIN");
+        tt->struct_def.fields[0].enum_def.fields[99].val = SPIN;
+        tt->struct_def.fields[0].enum_def.fields[100].name = tdrpStrDup("MAX_TDBZ_SPIN");
+        tt->struct_def.fields[0].enum_def.fields[100].val = MAX_TDBZ_SPIN;
+        tt->struct_def.fields[0].enum_def.fields[101].name = tdrpStrDup("ZDR_SDEV");
+        tt->struct_def.fields[0].enum_def.fields[101].val = ZDR_SDEV;
+        tt->struct_def.fields[0].enum_def.fields[102].name = tdrpStrDup("PHIDP_SDEV");
+        tt->struct_def.fields[0].enum_def.fields[102].val = PHIDP_SDEV;
+        tt->struct_def.fields[0].enum_def.fields[103].name = tdrpStrDup("DBZ_DIFF_SQ");
+        tt->struct_def.fields[0].enum_def.fields[103].val = DBZ_DIFF_SQ;
+        tt->struct_def.fields[0].enum_def.fields[104].name = tdrpStrDup("DBZ_SPIN_CHANGE");
+        tt->struct_def.fields[0].enum_def.fields[104].val = DBZ_SPIN_CHANGE;
+        tt->struct_def.fields[0].enum_def.fields[105].name = tdrpStrDup("CMD");
+        tt->struct_def.fields[0].enum_def.fields[105].val = CMD;
+        tt->struct_def.fields[0].enum_def.fields[106].name = tdrpStrDup("CMD_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[106].val = CMD_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[107].name = tdrpStrDup("RHOHV_TEST_UNFILT");
+        tt->struct_def.fields[0].enum_def.fields[107].val = RHOHV_TEST_UNFILT;
+        tt->struct_def.fields[0].enum_def.fields[108].name = tdrpStrDup("RHOHV_TEST_FILT");
+        tt->struct_def.fields[0].enum_def.fields[108].val = RHOHV_TEST_FILT;
+        tt->struct_def.fields[0].enum_def.fields[109].name = tdrpStrDup("RHOHV_TEST_IMPROV");
+        tt->struct_def.fields[0].enum_def.fields[109].val = RHOHV_TEST_IMPROV;
+        tt->struct_def.fields[0].enum_def.fields[110].name = tdrpStrDup("RHOHV_TEST_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[110].val = RHOHV_TEST_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[111].name = tdrpStrDup("TDBZ_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[111].val = TDBZ_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[112].name = tdrpStrDup("SPIN_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[112].val = SPIN_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[113].name = tdrpStrDup("CPA_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[113].val = CPA_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[114].name = tdrpStrDup("ZDR_SDEV_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[114].val = ZDR_SDEV_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[115].name = tdrpStrDup("PHIDP_SDEV_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[115].val = PHIDP_SDEV_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[116].name = tdrpStrDup("CLUT");
+        tt->struct_def.fields[0].enum_def.fields[116].val = CLUT;
+        tt->struct_def.fields[0].enum_def.fields[117].name = tdrpStrDup("CLUT_2_WX_RATIO");
+        tt->struct_def.fields[0].enum_def.fields[117].val = CLUT_2_WX_RATIO;
+        tt->struct_def.fields[0].enum_def.fields[118].name = tdrpStrDup("SPECTRAL_NOISE");
+        tt->struct_def.fields[0].enum_def.fields[118].val = SPECTRAL_NOISE;
+        tt->struct_def.fields[0].enum_def.fields[119].name = tdrpStrDup("SPECTRAL_SNR");
+        tt->struct_def.fields[0].enum_def.fields[119].val = SPECTRAL_SNR;
+        tt->struct_def.fields[0].enum_def.fields[120].name = tdrpStrDup("REGR_FILT_POLY_ORDER");
+        tt->struct_def.fields[0].enum_def.fields[120].val = REGR_FILT_POLY_ORDER;
+        tt->struct_def.fields[0].enum_def.fields[121].name = tdrpStrDup("REGR_FILT_CNR_DB");
+        tt->struct_def.fields[0].enum_def.fields[121].val = REGR_FILT_CNR_DB;
+        tt->struct_def.fields[0].enum_def.fields[122].name = tdrpStrDup("AIQ_HC");
+        tt->struct_def.fields[0].enum_def.fields[122].val = AIQ_HC;
+        tt->struct_def.fields[0].enum_def.fields[123].name = tdrpStrDup("NIQ_HC");
+        tt->struct_def.fields[0].enum_def.fields[123].val = NIQ_HC;
+        tt->struct_def.fields[0].enum_def.fields[124].name = tdrpStrDup("AIQ_VC");
+        tt->struct_def.fields[0].enum_def.fields[124].val = AIQ_VC;
+        tt->struct_def.fields[0].enum_def.fields[125].name = tdrpStrDup("NIQ_VC");
+        tt->struct_def.fields[0].enum_def.fields[125].val = NIQ_VC;
+        tt->struct_def.fields[0].enum_def.fields[126].name = tdrpStrDup("SZ_TRIP_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[126].val = SZ_TRIP_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[127].name = tdrpStrDup("SZ_LEAKAGE");
+        tt->struct_def.fields[0].enum_def.fields[127].val = SZ_LEAKAGE;
+        tt->struct_def.fields[0].enum_def.fields[128].name = tdrpStrDup("CENSORING_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[128].val = CENSORING_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[129].name = tdrpStrDup("LAG0_HC_DB");
+        tt->struct_def.fields[0].enum_def.fields[129].val = LAG0_HC_DB;
+        tt->struct_def.fields[0].enum_def.fields[130].name = tdrpStrDup("LAG0_HX_DB");
+        tt->struct_def.fields[0].enum_def.fields[130].val = LAG0_HX_DB;
+        tt->struct_def.fields[0].enum_def.fields[131].name = tdrpStrDup("LAG0_VC_DB");
+        tt->struct_def.fields[0].enum_def.fields[131].val = LAG0_VC_DB;
+        tt->struct_def.fields[0].enum_def.fields[132].name = tdrpStrDup("LAG0_VX_DB");
+        tt->struct_def.fields[0].enum_def.fields[132].val = LAG0_VX_DB;
+        tt->struct_def.fields[0].enum_def.fields[133].name = tdrpStrDup("LAG0_HC_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[133].val = LAG0_HC_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[134].name = tdrpStrDup("LAG0_VC_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[134].val = LAG0_VC_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[135].name = tdrpStrDup("LAG0_HC_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[135].val = LAG0_HC_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[136].name = tdrpStrDup("LAG0_VC_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[136].val = LAG0_VC_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[137].name = tdrpStrDup("LAG0_VCHX_DB");
+        tt->struct_def.fields[0].enum_def.fields[137].val = LAG0_VCHX_DB;
+        tt->struct_def.fields[0].enum_def.fields[138].name = tdrpStrDup("LAG0_VCHX_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[138].val = LAG0_VCHX_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[139].name = tdrpStrDup("LAG0_HCVX_DB");
+        tt->struct_def.fields[0].enum_def.fields[139].val = LAG0_HCVX_DB;
+        tt->struct_def.fields[0].enum_def.fields[140].name = tdrpStrDup("LAG0_HCVX_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[140].val = LAG0_HCVX_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[141].name = tdrpStrDup("LAG1_HC_DB");
+        tt->struct_def.fields[0].enum_def.fields[141].val = LAG1_HC_DB;
+        tt->struct_def.fields[0].enum_def.fields[142].name = tdrpStrDup("LAG1_HC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[142].val = LAG1_HC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[143].name = tdrpStrDup("LAG1_VC_DB");
+        tt->struct_def.fields[0].enum_def.fields[143].val = LAG1_VC_DB;
+        tt->struct_def.fields[0].enum_def.fields[144].name = tdrpStrDup("LAG1_VC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[144].val = LAG1_VC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[145].name = tdrpStrDup("LAG1_HCVC_DB");
+        tt->struct_def.fields[0].enum_def.fields[145].val = LAG1_HCVC_DB;
+        tt->struct_def.fields[0].enum_def.fields[146].name = tdrpStrDup("LAG1_HCVC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[146].val = LAG1_HCVC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[147].name = tdrpStrDup("LAG1_VCHC_DB");
+        tt->struct_def.fields[0].enum_def.fields[147].val = LAG1_VCHC_DB;
+        tt->struct_def.fields[0].enum_def.fields[148].name = tdrpStrDup("LAG1_VCHC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[148].val = LAG1_VCHC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[149].name = tdrpStrDup("LAG1_VXHX_DB");
+        tt->struct_def.fields[0].enum_def.fields[149].val = LAG1_VXHX_DB;
+        tt->struct_def.fields[0].enum_def.fields[150].name = tdrpStrDup("LAG1_VXHX_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[150].val = LAG1_VXHX_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[151].name = tdrpStrDup("LAG1_HC_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[151].val = LAG1_HC_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[152].name = tdrpStrDup("LAG1_HC_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[152].val = LAG1_HC_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[153].name = tdrpStrDup("LAG1_VC_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[153].val = LAG1_VC_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[154].name = tdrpStrDup("LAG1_VC_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[154].val = LAG1_VC_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[155].name = tdrpStrDup("LAG1_HC_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[155].val = LAG1_HC_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[156].name = tdrpStrDup("LAG1_HC_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[156].val = LAG1_HC_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[157].name = tdrpStrDup("LAG1_VC_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[157].val = LAG1_VC_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[158].name = tdrpStrDup("LAG1_VC_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[158].val = LAG1_VC_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[159].name = tdrpStrDup("LAG1_HC_LONG_TO_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[159].val = LAG1_HC_LONG_TO_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[160].name = tdrpStrDup("LAG1_HC_LONG_TO_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[160].val = LAG1_HC_LONG_TO_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[161].name = tdrpStrDup("LAG1_VC_LONG_TO_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[161].val = LAG1_VC_LONG_TO_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[162].name = tdrpStrDup("LAG1_VC_LONG_TO_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[162].val = LAG1_VC_LONG_TO_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[163].name = tdrpStrDup("LAG1_HC_SHORT_TO_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[163].val = LAG1_HC_SHORT_TO_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[164].name = tdrpStrDup("LAG1_HC_SHORT_TO_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[164].val = LAG1_HC_SHORT_TO_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[165].name = tdrpStrDup("LAG1_VC_SHORT_TO_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[165].val = LAG1_VC_SHORT_TO_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[166].name = tdrpStrDup("LAG1_VC_SHORT_TO_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[166].val = LAG1_VC_SHORT_TO_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[167].name = tdrpStrDup("LAG2_HC_DB");
+        tt->struct_def.fields[0].enum_def.fields[167].val = LAG2_HC_DB;
+        tt->struct_def.fields[0].enum_def.fields[168].name = tdrpStrDup("LAG2_HC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[168].val = LAG2_HC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[169].name = tdrpStrDup("LAG2_VC_DB");
+        tt->struct_def.fields[0].enum_def.fields[169].val = LAG2_VC_DB;
+        tt->struct_def.fields[0].enum_def.fields[170].name = tdrpStrDup("LAG2_VC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[170].val = LAG2_VC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[171].name = tdrpStrDup("LAG3_HC_DB");
+        tt->struct_def.fields[0].enum_def.fields[171].val = LAG3_HC_DB;
+        tt->struct_def.fields[0].enum_def.fields[172].name = tdrpStrDup("LAG3_HC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[172].val = LAG3_HC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[173].name = tdrpStrDup("LAG3_VC_DB");
+        tt->struct_def.fields[0].enum_def.fields[173].val = LAG3_VC_DB;
+        tt->struct_def.fields[0].enum_def.fields[174].name = tdrpStrDup("LAG3_VC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[174].val = LAG3_VC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[175].name = tdrpStrDup("RVVHH0_DB");
+        tt->struct_def.fields[0].enum_def.fields[175].val = RVVHH0_DB;
+        tt->struct_def.fields[0].enum_def.fields[176].name = tdrpStrDup("RVVHH0_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[176].val = RVVHH0_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[177].name = tdrpStrDup("RVVHH0_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[177].val = RVVHH0_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[178].name = tdrpStrDup("RVVHH0_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[178].val = RVVHH0_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[179].name = tdrpStrDup("RVVHH0_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[179].val = RVVHH0_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[180].name = tdrpStrDup("RVVHH0_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[180].val = RVVHH0_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[181].name = tdrpStrDup("SDEV_VV");
+        tt->struct_def.fields[0].enum_def.fields[181].val = SDEV_VV;
+        tt->struct_def.fields[0].enum_def.fields[182].name = tdrpStrDup("PRT");
+        tt->struct_def.fields[0].enum_def.fields[182].val = PRT;
+        tt->struct_def.fields[0].enum_def.fields[183].name = tdrpStrDup("NUM_PULSES");
+        tt->struct_def.fields[0].enum_def.fields[183].val = NUM_PULSES;
+        tt->struct_def.fields[0].enum_def.fields[184].name = tdrpStrDup("TEST");
+        tt->struct_def.fields[0].enum_def.fields[184].val = TEST;
+        tt->struct_def.fields[0].enum_def.fields[185].name = tdrpStrDup("TEST0");
+        tt->struct_def.fields[0].enum_def.fields[185].val = TEST0;
+        tt->struct_def.fields[0].enum_def.fields[186].name = tdrpStrDup("TEST1");
+        tt->struct_def.fields[0].enum_def.fields[186].val = TEST1;
+        tt->struct_def.fields[0].enum_def.fields[187].name = tdrpStrDup("TEST2");
+        tt->struct_def.fields[0].enum_def.fields[187].val = TEST2;
+        tt->struct_def.fields[0].enum_def.fields[188].name = tdrpStrDup("TEST3");
+        tt->struct_def.fields[0].enum_def.fields[188].val = TEST3;
+        tt->struct_def.fields[0].enum_def.fields[189].name = tdrpStrDup("TEST4");
+        tt->struct_def.fields[0].enum_def.fields[189].val = TEST4;
+        tt->struct_def.fields[0].enum_def.fields[190].name = tdrpStrDup("TEST5");
+        tt->struct_def.fields[0].enum_def.fields[190].val = TEST5;
+        tt->struct_def.fields[0].enum_def.fields[191].name = tdrpStrDup("TEST6");
+        tt->struct_def.fields[0].enum_def.fields[191].val = TEST6;
+        tt->struct_def.fields[0].enum_def.fields[192].name = tdrpStrDup("TEST7");
+        tt->struct_def.fields[0].enum_def.fields[192].val = TEST7;
+        tt->struct_def.fields[0].enum_def.fields[193].name = tdrpStrDup("TEST8");
+        tt->struct_def.fields[0].enum_def.fields[193].val = TEST8;
+        tt->struct_def.fields[0].enum_def.fields[194].name = tdrpStrDup("TEST9");
+        tt->struct_def.fields[0].enum_def.fields[194].val = TEST9;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -5991,11 +5694,11 @@
       tt->struct_vals[566].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 30'
+    // Parameter 'Comment 29'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 30");
+    tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("SWEEP TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-sweep and start-of-sweep conditions found in the time series.");
     tt++;
@@ -6072,11 +5775,11 @@
     tt->single_val.i = 32;
     tt++;
     
-    // Parameter 'Comment 31'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 31");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("VOLUME TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-volume conditions found in the time series. This section only applies if 'use_volume_info_from_time_series' is set to FALSE.");
     tt++;
@@ -6167,11 +5870,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 32'
+    // Parameter 'Comment 31'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 32");
+    tt->param_name = tdrpStrDup("Comment 31");
     tt->comment_hdr = tdrpStrDup("TRANSITION FLAG");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6236,11 +5939,11 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'Comment 33'
+    // Parameter 'Comment 32'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 33");
+    tt->param_name = tdrpStrDup("Comment 32");
     tt->comment_hdr = tdrpStrDup("COMPUTING THE ANTENNA RATE");
     tt->comment_text = tdrpStrDup("This is required for computing the number of samples in a dwell, and for angle interpolation if set,");
     tt++;
@@ -6257,11 +5960,11 @@
     tt->single_val.d = 0.1;
     tt++;
     
-    // Parameter 'Comment 34'
+    // Parameter 'Comment 33'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 34");
+    tt->param_name = tdrpStrDup("Comment 33");
     tt->comment_hdr = tdrpStrDup("INTERPOLATION OF ANTENNA ANGLES");
     tt->comment_text = tdrpStrDup("");
     tt++;

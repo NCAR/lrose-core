@@ -119,9 +119,11 @@ private:
 
   RadxArray<double> _kdpArray_;
   RadxArray<double> _kdpSCArray_;
+  RadxArray<double> _deltaArray_;
 
   double *_kdpArray;
   double *_kdpSCArray;
+  double *_deltaArray;
 
   // computing kdp
   
@@ -165,7 +167,7 @@ private:
                  const string &units,
                  const string &longName,
                  const string standardName,
-                 const bool *arrayBool);
+                 const int *arrayBool);
 
 
 };
