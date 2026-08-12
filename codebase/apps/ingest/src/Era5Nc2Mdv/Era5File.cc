@@ -285,7 +285,8 @@ int Era5File::_readGlobalAttributes()
     _dataSource = att.asString();
   } catch (NcxxException& e) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "WARNING - no dataSource global attribute found" << endl;
+      cerr << "NOTE - no dataSource global attribute found" << endl;
+      cerr << "This is not required" << endl;
     }
   }
   
@@ -297,7 +298,8 @@ int Era5File::_readGlobalAttributes()
     _history = att.asString();
   } catch (NcxxException& e) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "WARNING - no history global attribute found" << endl;
+      cerr << "NOTE - no history global attribute found" << endl;
+      cerr << "This is not required" << endl;
     }
   }
   
@@ -326,19 +328,16 @@ int Era5File::_readTimes()
 
   // read the time variable
 
-  _timeVar = _file.getVar("time");
+  _timeVar = _file.getVar(_params.time_name);
   if (_timeVar.isNull()) {
-    _timeVar = _file.getVar("valid_time");
-    if (_timeVar.isNull()) {
-      _addErrStr("ERROR - Era5File::_readTimes");
-      _addErrStr("  Cannot find 'time' or 'va;id_time' variable");
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
+    _addErrStr("ERROR - Era5File::_readTimes");
+    _addErrStr("  Cannot find time variable, name: ", _params.time_name);
+    _addErrStr(_file.getErrStr());
+    return -1;
   }
   if (_timeVar.getDimCount() < 1) {
     _addErrStr("ERROR - Era5File::_readTimes");
-    _addErrStr("  time variable has no dimensions");
+    _addErrStr("  time variable has no dimensions, name: ", _timeVar.getName());
     return -1;
   }
   NcxxDim timeDim = _timeVar.getDim(0);
@@ -415,17 +414,17 @@ int Era5File::_readLatLon()
 
   // latitude
   
-  _latVar = _file.getVar("latitude");
+  _latVar = _file.getVar(_params.latitude_name);
   if (_latVar.isNull() || _latVar.numVals() < 1) {
     _addErrStr("ERROR - Era5File::_readLatLon");
-    _addErrStr("  Cannot read latitude");
+    _addErrStr("  Cannot read latitude var, name: ", _params.latitude_name);
     _addErrStr(_file.getErrStr());
     return -1;
   }
   
   if (_latVar.getDimCount() != 1) {
     _addErrStr("ERROR - Era5File::_readLatLon");
-    _addErrStr("  'latitude' is not 1-dimensional");
+    _addErrStr("  latitude is not 1-dimensional, var name: ", _latVar.getName());
     return -1;
   }
     
@@ -448,17 +447,17 @@ int Era5File::_readLatLon()
 
   // longitude
   
-  _lonVar = _file.getVar("longitude");
+  _lonVar = _file.getVar(_params.longitude_name);
   if (_lonVar.isNull() || _lonVar.numVals() < 1) {
     _addErrStr("ERROR - Era5File::_readLatLon");
-    _addErrStr("  Cannot read longitude");
+    _addErrStr("  Cannot read longitude var, name: ", _params.longitude_name);
     _addErrStr(_file.getErrStr());
     return -1;
   }
   
   if (_lonVar.getDimCount() != 1) {
     _addErrStr("ERROR - Era5File::_readLatLon");
-    _addErrStr("  'longitude' is not 1-dimensional");
+    _addErrStr("  longitude is not 1-dimensional, var name: ", _lonVar.getName());
     return -1;
   }
     
@@ -491,23 +490,19 @@ int Era5File::_readLevels()
 {
 
   _levels.clear();
-
-  string levelName = "level";
+  
+  string levelName = _params.level_name;
   _levelVar = _file.getVar(levelName);
   if (_levelVar.isNull() || _levelVar.numVals() < 1) {
-    levelName = "pressure_level";
-    _levelVar = _file.getVar(levelName);
-    if (_levelVar.isNull() || _levelVar.numVals() < 1) {
-      _addErrStr("ERROR - Era5File::_readLevel");
-      _addErrStr("  Cannot read 'level' or 'pressure_level'");
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
+    _addErrStr("ERROR - Era5File::_readLevel");
+    _addErrStr("  Cannot read level var, name: ", _params.level_name);
+    _addErrStr(_file.getErrStr());
+    return -1;
   }
   
   if (_levelVar.getDimCount() != 1) {
     _addErrStr("ERROR - Era5File::_readLevel");
-    _addErrStr("  'level' is not 1-dimensional");
+    _addErrStr("  level var is not 1-dimensional, name: ", _levelVar.getName());
     return -1;
   }
   
