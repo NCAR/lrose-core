@@ -802,6 +802,7 @@ public:
   //        if multiple channels are to be filtered
   //
   //  Outputs:
+  //    reflSpec: spectrum of expanded time series with reflection
   //    iqFiltered: filtered time series
   //    filterRatio: ratio of raw to unfiltered power, before applying correction
   //    spectralNoise: spectral noise estimated from the spectrum
@@ -814,7 +815,8 @@ public:
                       const RadarComplex_t *iq,
                       double calNoise,
                       double nyquist,
-                      RadarComplex_t *iqFiltered,
+                      vector <double> &reflSpec,
+                      vector <RadarComplex_t> &iqFiltered,
                       double &filterRatio,
                       double &spectralNoise,
                       double &spectralSnr,

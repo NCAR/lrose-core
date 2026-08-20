@@ -4533,6 +4533,7 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
 //        if multiple channels are to be filtered
 //
 //  Outputs:
+//    reflSpec: spectrum of expanded time series with reflection
 //    iqFiltered: filtered time series
 //    filterRatio: ratio of raw to unfiltered power, before applying correction
 //    spectralNoise: spectral noise estimated from the spectrum
@@ -4545,7 +4546,8 @@ void RadarMoments::applyTsrFilter(int nSamples,
                                   const RadarComplex_t *iq,
                                   double calNoise,
                                   double nyquist,
-                                  RadarComplex_t *iqFiltered,
+                                  vector <double> &reflSpec,
+                                  vector <RadarComplex_t> &iqFiltered,
                                   double &filterRatio,
                                   double &spectralNoise,
                                   double &spectralSnr,
@@ -4556,52 +4558,57 @@ void RadarMoments::applyTsrFilter(int nSamples,
   // create reflected time series
 
   int nHalf = nSamples / 2;
-  int nCopy = nHalf - 1;
-  int nRefl = nSamples + nCopy * 2;
+  int nRefl = nHalf - 1;
+  int nExpanded = nSamples + nRefl * 2;
   vector<RadarComplex_t> refl;
-  refl.resize(nRefl);
+  refl.resize(nExpanded);
 
-  // copy in actual IQ
+  // copy in measured IQ
   
   for (int ii = 0; ii < nSamples; ii++) {
-    refl[ii + nCopy] = iq[ii];
+    refl[ii + nRefl] = iq[ii];
   }
 
   // copy in reflected IQ
 
-  for (int ii = 0; ii < nCopy; ii++) {
-    refl[nCopy - ii - 1] = iq[ii + 1];
+  for (int ii = 0; ii < nRefl; ii++) {
+    refl[nRefl - ii - 1] = iq[ii + 1];
   }
   
-  for (int ii = 0; ii < nCopy; ii++) {
-    refl[nCopy + nSamples + ii] = iq[nSamples - 1 - ii];
+  for (int ii = 0; ii < nRefl; ii++) {
+    refl[nRefl + nSamples + ii] = iq[nSamples - 1 - ii];
   }
   
   // take the forward fft to compute the raw complex power spectrum
   
   TaArray<RadarComplex_t> powerSpecC_;
-  RadarComplex_t *powerSpecC = powerSpecC_.alloc(nRefl);
+  RadarComplex_t *powerSpecC = powerSpecC_.alloc(nExpanded);
   fft.fwd(iq, powerSpecC);
 
   TaArray<RadarComplex_t> notchedSpecC_;
-  RadarComplex_t *notchedSpecC = notchedSpecC_.alloc(nRefl);
-  memcpy(notchedSpecC, powerSpecC, nRefl * sizeof(RadarComplex_t));
+  RadarComplex_t *notchedSpecC = notchedSpecC_.alloc(nExpanded);
+  memcpy(notchedSpecC, powerSpecC, nExpanded * sizeof(RadarComplex_t));
 
   // load the raw power spectrum
   
   TaArray<double> powerSpec_;
-  double *powerSpec = powerSpec_.alloc(nRefl);
-  RadarComplex::loadPower(powerSpecC, powerSpec, nRefl);
+  double *powerSpec = powerSpec_.alloc(nExpanded);
+  RadarComplex::loadPower(powerSpecC, powerSpec, nExpanded);
+
+  reflSpec.resize(nExpanded);
+  for (int ii = 0; ii < nExpanded; ii++) {
+    reflSpec[ii] = powerSpec[ii];
+  }
     
   // allocate space for the filtered power spectrum
   
   TaArray<double> powerSpecFilt_, powerSpecNotched_;
-  double *powerSpecFilt = powerSpecFilt_.alloc(nRefl);
-  double *powerSpecNotched = powerSpecNotched_.alloc(nRefl);
+  double *powerSpecFilt = powerSpecFilt_.alloc(nExpanded);
+  double *powerSpecNotched = powerSpecNotched_.alloc(nExpanded);
 
   // perform the adaptive filtering
   
-  clutFilt.performAdaptive(powerSpec, nRefl,
+  clutFilt.performAdaptive(powerSpec, nExpanded,
                            _clutterWidthMps, _clutterInitNotchWidthMps,
                            nyquist, calNoise,
                            powerSpecFilt, powerSpecNotched,
@@ -4626,20 +4633,38 @@ void RadarMoments::applyTsrFilter(int nSamples,
   
   if (powerRemoved > 0) {
     double correctionRatio =
-      _computePwrCorrectionRatio(nRefl, spectralSnr,
+      _computePwrCorrectionRatio(nExpanded, spectralSnr,
  				 rawPower, filteredPower,
                                  powerRemoved, calNoise);
     // correct the filtered powers for clutter residue
-    for (int ii = 0; ii < nRefl; ii++) {
+    for (int ii = 0; ii < nExpanded; ii++) {
       powerSpecFilt[ii] *= correctionRatio;
       powerSpecNotched[ii] *= correctionRatio;
     }
   }
+
+#ifdef NOTNOW
+  // fill the notched time series if requested
+  if (iqNotched != NULL) {
+    // adjust the input spectrum by the notched ratio
+    // constrain ratios to be 1 or less
+    for (int ii = 0; ii < nSamples; ii++) {
+      double magRatio = sqrt(powerSpecNotched[ii] / powerSpec[ii]);
+      if (magRatio > 1.0) {
+        magRatio = 1.0;
+      }
+      notchedSpecC[ii].re *= magRatio;
+      notchedSpecC[ii].im *= magRatio;
+    }
+    // invert the notched fft
+    fft.inv(notchedSpecC, iqNotched);
+  }
+#endif
   
   // adjust the input spectrum by the filter ratio
   // constrain ratios to be 1 or less
 
-  for (int ii = 0; ii < nRefl; ii++) {
+  for (int ii = 0; ii < nExpanded; ii++) {
     double magRatio = sqrt(powerSpecFilt[ii] / powerSpec[ii]);
     if (magRatio > 1.0) {
       magRatio = 1.0;
@@ -4651,13 +4676,13 @@ void RadarMoments::applyTsrFilter(int nSamples,
   // invert the fft
 
   vector<RadarComplex_t> reflFilt;
-  reflFilt.resize(nRefl);
+  reflFilt.resize(nExpanded);
   fft.inv(powerSpecC, reflFilt.data());
 
   // copy central part to IQ filtered
 
   for (int ii = 0; ii < nSamples; ii++) {
-    iqFiltered[ii] = reflFilt[ii + nCopy];
+    iqFiltered[ii] = reflFilt[ii + nRefl];
   }
 
 }
