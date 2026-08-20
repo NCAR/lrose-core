@@ -221,6 +221,7 @@ public:
     CLUTTER_FILTER_ADAPTIVE,
     CLUTTER_FILTER_REGRESSION,
     CLUTTER_FILTER_NOTCH,
+    CLUTTER_FILTER_TSR,
     CLUTTER_FILTER_NONE
   } clutter_filter_type_t;
 
@@ -247,6 +248,12 @@ public:
   void setApplySpectralResidueCorrection(bool state, double minSnrDb) {
     _applySpectralResidueCorrection = state;
     _minSnrDbForResidueCorrection = minSnrDb;
+  }
+
+  // use the TSR filter
+  
+  void setUseTsrFilter() {
+    _clutterFilterType = CLUTTER_FILTER_TSR;
   }
 
   // use polynomial regression filter

@@ -1935,6 +1935,15 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           } );
   setClutFiltType.addAction(&setClutFiltAdapt);
 
+  QAction setClutFiltTsr("TSR", &setClutFiltType);
+  connect(&setClutFiltTsr, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setClutterFilterType
+              (RadarMoments::CLUTTER_FILTER_TSR);
+            _configureWaterfall(id);
+          } );
+  setClutFiltType.addAction(&setClutFiltTsr);
+
   QAction setClutFiltRegr("Regression", &setClutFiltType);
   connect(&setClutFiltRegr, &QAction::triggered,
           [this, id] () {
@@ -2383,6 +2392,15 @@ void SpriteWidget::_createIqPlotContextMenu(const QPoint &pos)
             _configureIqPlot(id);
           } );
   setClutFiltType.addAction(&setClutFiltAdapt);
+
+  QAction setClutFiltTsr("TSR", &setClutFiltType);
+  connect(&setClutFiltTsr, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setClutterFilterType
+              (RadarMoments::CLUTTER_FILTER_TSR);
+            _configureIqPlot(id);
+          } );
+  setClutFiltType.addAction(&setClutFiltTsr);
 
   QAction setClutFiltRegr("Regression", &setClutFiltType);
   connect(&setClutFiltRegr, &QAction::triggered,

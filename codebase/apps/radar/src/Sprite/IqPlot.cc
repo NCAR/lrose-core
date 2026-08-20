@@ -351,6 +351,8 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     QPen pen(painter.pen());
     if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
       pen.setColor(_params.iqplot_adaptive_filtered_color);
+    } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
+      pen.setColor(_params.iqplot_tsr_filtered_color);
     } else {
       pen.setColor(_params.iqplot_regression_filtered_color);
     }
@@ -418,6 +420,9 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   }
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
     snprintf(text, 1024, "Adaptive filter");
+    legendsLeft.push_back(text);
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
+    snprintf(text, 1024, "TSR filter");
     legendsLeft.push_back(text);
   } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     snprintf(text, 1024, "Regression filter");
@@ -676,6 +681,9 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
   vector<string> legendsLeft;
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
     snprintf(text, 1024, "Adapt filt, clut width: %.2f", _clutModelWidthMps);
+    legendsLeft.push_back(text);
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
+    snprintf(text, 1024, "TSR filt, clut width: %.2f", _clutModelWidthMps);
     legendsLeft.push_back(text);
   } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     snprintf(text, 1024, "Regr filt, order: %d", _beam->getRegrOrder());
@@ -945,6 +953,8 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
     QPen pen(painter.pen());
     if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
       pen.setColor(_params.iqplot_adaptive_filtered_color);
+    } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
+      pen.setColor(_params.iqplot_tsr_filtered_color);
     } else {
       pen.setColor(_params.iqplot_regression_filtered_color);
     }
@@ -1012,6 +1022,9 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
   }
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
     snprintf(text, 1024, "Adaptive filter");
+    legendsLeft.push_back(text);
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
+    snprintf(text, 1024, "TSR filter");
     legendsLeft.push_back(text);
   } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     snprintf(text, 1024, "Regression filter");
@@ -1647,6 +1660,35 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
     
     for (size_t ii = 0; ii < _nSamples; ii++) {
       powerFilt[ii] = RadarComplex::power(filtAdaptSpec[ii]);
+    }
+    
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
+    
+    // adaptive spectral filter
+    
+    ClutFilter clutFilt;
+    vector<double> reflSpec;
+    vector<RadarComplex_t> iqFiltered;
+    iqFiltered.resize(_nSamples);
+    moments.applyTsrFilter(_nSamples, _beam->getPrt(),
+                           clutFilt, fft,
+                           iqIn,
+                           calibNoise,
+                           _beam->getNyquist(),
+                           reflSpec,
+                           iqFiltered,
+                           filterRatio,
+                           spectralNoise,
+                           spectralSnr);
+    
+    TaArray<RadarComplex_t> filtAdaptSpec_;
+    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(_nSamples);
+    fft.fwd(iqFiltered.data(), filtAdaptSpec);
+    fft.shift(filtAdaptSpec);
+    
+    for (size_t ii = 0; ii < _nSamples; ii++) {
+      powerFilt[ii] = RadarComplex::power(filtAdaptSpec[ii]);
+      iqFilt[ii] = iqFiltered[ii];
     }
     
   } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {

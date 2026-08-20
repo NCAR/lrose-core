@@ -472,6 +472,7 @@ typedef enum {
   CLUTTER_FILTER_ADAPTIVE,
   CLUTTER_FILTER_REGRESSION,
   CLUTTER_FILTER_NOTCH,
+  CLUTTER_FILTER_TSR,
   CLUTTER_FILTER_NONE
 } clutter_filter_type_t;
 
@@ -945,6 +946,11 @@ paramdef string {
   p_default = "pink";
   p_descr = "Color of adaptive filtered lines in spectra plots.";
 } iqplot_adaptive_filtered_color;
+
+paramdef string {
+  p_default = "green";
+  p_descr = "Color of TSR filtered lines in spectra plots.";
+} iqplot_tsr_filtered_color;
 
 paramdef string {
   p_default = "red";

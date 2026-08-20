@@ -1512,6 +1512,8 @@ void Beam::_filterSpStagPrt()
 
   if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
     _filterAdapSpStagPrt();
+  } else if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_TSR) {
+    _filterAdapSpStagPrt();
   } else {
     _filterRegrSpStagPrt();
   }
@@ -1652,7 +1654,8 @@ void Beam::_filterDpAltHvCoCross()
     MomentsFields &fields = gate->fields;
     MomentsFields &fieldsF = _compFieldsF[igate];
     
-    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE ||
+        _params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_TSR) {
 
       // filter the HC time series, save the filter ratio
       
@@ -1982,7 +1985,8 @@ void Beam::_filterDpSimHvStagPrt()
     double spectralNoiseHc = 1.0e-13;
     double filterRatioHc = 1.0;
     double spectralSnrHc = 1.0;
-    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE ||
+        _params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_TSR) {
       _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
                                    gate->iqhcPrtShort, gate->iqhcPrtLong,
                                    calibNoise,
@@ -2011,7 +2015,8 @@ void Beam::_filterDpSimHvStagPrt()
     // for adaptive filter use the same notch as Hc
     
     double filterRatioVc, spectralNoiseVc, spectralSnrVc;
-    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE ||
+        _params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_TSR) {
       _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
                                    gate->iqvcPrtShort, gate->iqvcPrtLong,
                                    calibNoise,
@@ -2153,7 +2158,8 @@ void Beam::_filterDpHOnlyStagPrt()
     double spectralNoiseHc = 1.0e-13;
     double filterRatioHc = 1.0;
     double spectralSnrHc = 1.0;
-    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE ||
+        _params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_TSR) {
       _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
                                    gate->iqhcPrtShort, gate->iqhcPrtLong,
                                    calibNoise,
@@ -2184,7 +2190,8 @@ void Beam::_filterDpHOnlyStagPrt()
     double spectralNoiseVx = 1.0e-13;
     double filterRatioVx = 1.0;
     double spectralSnrVx = 1.0;
-    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE ||
+        _params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_TSR) {
       _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
                                    gate->iqvxPrtShort, gate->iqvxPrtLong,
                                    calibNoise,
@@ -2320,7 +2327,8 @@ void Beam::_filterDpVOnlyStagPrt()
     double spectralNoiseVc = 1.0e-13;
     double filterRatioVc = 1.0;
     double spectralSnrVc = 1.0;
-    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE ||
+        _params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_TSR) {
       _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
                                    gate->iqvcPrtShort, gate->iqvcPrtLong,
                                    calibNoise,
@@ -2351,7 +2359,8 @@ void Beam::_filterDpVOnlyStagPrt()
     double spectralNoiseHx = 1.0e-13;
     double filterRatioHx = 1.0;
     double spectralSnrHx = 1.0;
-    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+    if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE ||
+        _params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_TSR) {
       _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
                                    gate->iqhxPrtShort, gate->iqhxPrtLong,
                                    calibNoise,
@@ -2462,7 +2471,8 @@ void Beam::_computeWindows()
 
   _freeWindows();
 
-  if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
+  if (_params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION ||
+      _params.ascope_clutter_filter_type == Params::CLUTTER_FILTER_TSR) {
     _window = RadarMoments::createWindowRect(_nSamples);
     _windowHalf = RadarMoments::createWindowRect(_nSamplesHalf);
   } else if (_fftWindowType == Params::FFT_WINDOW_RECT) {

@@ -117,7 +117,8 @@ public:
     CLUTTER_FILTER_ADAPTIVE = 0,
     CLUTTER_FILTER_REGRESSION = 1,
     CLUTTER_FILTER_NOTCH = 2,
-    CLUTTER_FILTER_NONE = 3
+    CLUTTER_FILTER_TSR = 3,
+    CLUTTER_FILTER_NONE = 4
   } clutter_filter_type_t;
 
   typedef enum {
@@ -800,6 +801,8 @@ public:
 
   char* iqplot_adaptive_filtered_color;
 
+  char* iqplot_tsr_filtered_color;
+
   char* iqplot_clutter_model_color;
 
   char* iqplot_regression_filtered_color;
@@ -963,7 +966,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[225];
+  mutable TDRPtable _table[226];
 
   const char *_className;
 

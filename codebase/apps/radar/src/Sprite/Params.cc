@@ -1637,7 +1637,7 @@
       tt->struct_def.fields[3].rel_offset = 
         (char *) &_waterfall_plots->clutter_filter_type - (char *) _waterfall_plots;
         tt->struct_def.fields[3].enum_def.name = tdrpStrDup("clutter_filter_type_t");
-        tt->struct_def.fields[3].enum_def.nfields = 4;
+        tt->struct_def.fields[3].enum_def.nfields = 5;
         tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("CLUTTER_FILTER_ADAPTIVE");
@@ -1646,8 +1646,10 @@
         tt->struct_def.fields[3].enum_def.fields[1].val = CLUTTER_FILTER_REGRESSION;
         tt->struct_def.fields[3].enum_def.fields[2].name = tdrpStrDup("CLUTTER_FILTER_NOTCH");
         tt->struct_def.fields[3].enum_def.fields[2].val = CLUTTER_FILTER_NOTCH;
-        tt->struct_def.fields[3].enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_NONE");
-        tt->struct_def.fields[3].enum_def.fields[3].val = CLUTTER_FILTER_NONE;
+        tt->struct_def.fields[3].enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_TSR");
+        tt->struct_def.fields[3].enum_def.fields[3].val = CLUTTER_FILTER_TSR;
+        tt->struct_def.fields[3].enum_def.fields[4].name = tdrpStrDup("CLUTTER_FILTER_NONE");
+        tt->struct_def.fields[3].enum_def.fields[4].val = CLUTTER_FILTER_NONE;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
       tt->struct_def.fields[4].fname = tdrpStrDup("clutter_model_width_mps");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
@@ -2340,7 +2342,7 @@
       tt->struct_def.fields[4].rel_offset = 
         (char *) &_iq_plots->clutter_filter_type - (char *) _iq_plots;
         tt->struct_def.fields[4].enum_def.name = tdrpStrDup("clutter_filter_type_t");
-        tt->struct_def.fields[4].enum_def.nfields = 4;
+        tt->struct_def.fields[4].enum_def.nfields = 5;
         tt->struct_def.fields[4].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[4].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[4].enum_def.fields[0].name = tdrpStrDup("CLUTTER_FILTER_ADAPTIVE");
@@ -2349,8 +2351,10 @@
         tt->struct_def.fields[4].enum_def.fields[1].val = CLUTTER_FILTER_REGRESSION;
         tt->struct_def.fields[4].enum_def.fields[2].name = tdrpStrDup("CLUTTER_FILTER_NOTCH");
         tt->struct_def.fields[4].enum_def.fields[2].val = CLUTTER_FILTER_NOTCH;
-        tt->struct_def.fields[4].enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_NONE");
-        tt->struct_def.fields[4].enum_def.fields[3].val = CLUTTER_FILTER_NONE;
+        tt->struct_def.fields[4].enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_TSR");
+        tt->struct_def.fields[4].enum_def.fields[3].val = CLUTTER_FILTER_TSR;
+        tt->struct_def.fields[4].enum_def.fields[4].name = tdrpStrDup("CLUTTER_FILTER_NONE");
+        tt->struct_def.fields[4].enum_def.fields[4].val = CLUTTER_FILTER_NONE;
       tt->struct_def.fields[5].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[5].fname = tdrpStrDup("plot_clutter_model");
       tt->struct_def.fields[5].ptype = BOOL_TYPE;
@@ -2840,6 +2844,18 @@
     tt->single_val.s = tdrpStrDup("pink");
     tt++;
     
+    // Parameter 'iqplot_tsr_filtered_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("iqplot_tsr_filtered_color");
+    tt->descr = tdrpStrDup("Color of TSR filtered lines in spectra plots.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &iqplot_tsr_filtered_color - &_start_;
+    tt->single_val.s = tdrpStrDup("green");
+    tt++;
+    
     // Parameter 'iqplot_clutter_model_color'
     // ctype is 'char*'
     
@@ -3060,7 +3076,7 @@
     tt->help = tdrpStrDup("ADAPTIVE: spectral filter with gaussian interpolation. REGRESSION: polynomial filter with specified interpolation. NOTCH: simple notch filter of specified width. NONE: cancels clutter filtering.");
     tt->val_offset = (char *) &ascope_clutter_filter_type - &_start_;
     tt->enum_def.name = tdrpStrDup("clutter_filter_type_t");
-    tt->enum_def.nfields = 4;
+    tt->enum_def.nfields = 5;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("CLUTTER_FILTER_ADAPTIVE");
@@ -3069,8 +3085,10 @@
       tt->enum_def.fields[1].val = CLUTTER_FILTER_REGRESSION;
       tt->enum_def.fields[2].name = tdrpStrDup("CLUTTER_FILTER_NOTCH");
       tt->enum_def.fields[2].val = CLUTTER_FILTER_NOTCH;
-      tt->enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_NONE");
-      tt->enum_def.fields[3].val = CLUTTER_FILTER_NONE;
+      tt->enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_TSR");
+      tt->enum_def.fields[3].val = CLUTTER_FILTER_TSR;
+      tt->enum_def.fields[4].name = tdrpStrDup("CLUTTER_FILTER_NONE");
+      tt->enum_def.fields[4].val = CLUTTER_FILTER_NONE;
     tt->single_val.e = CLUTTER_FILTER_ADAPTIVE;
     tt++;
     
