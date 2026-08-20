@@ -4516,6 +4516,152 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
 
 }
 
+//////////////////////////////////////////////////////////////////////
+// apply time series reflection clutter filter to IQ time series
+//
+// Inputs:
+//   nSamples
+//   prtSecs
+//   clutFilt: adaptive filter object to use
+//   fft: object to be used for FFT computations
+//   iq: unfiltered time series, no window
+//   calNoise: noise level at digitizer, from cal, linear units
+//   nyquist: folding velocity in m/s
+//   useStoredNotch:
+//     if false (the default) locate wx and clutter
+//     if true, use previously located wx and clutter - this is used
+//        if multiple channels are to be filtered
+//
+//  Outputs:
+//    iqFiltered: filtered time series
+//    filterRatio: ratio of raw to unfiltered power, before applying correction
+//    spectralNoise: spectral noise estimated from the spectrum
+//    spectralSnr: ratio of spectral noise to noise power
+
+void RadarMoments::applyTsrFilter(int nSamples,
+                                  double prtSecs,
+                                  ClutFilter &clutFilt,
+                                  const RadarFft &fft,
+                                  const RadarComplex_t *iq,
+                                  double calNoise,
+                                  double nyquist,
+                                  RadarComplex_t *iqFiltered,
+                                  double &filterRatio,
+                                  double &spectralNoise,
+                                  double &spectralSnr,
+                                  bool useStoredNotch /* = false */)
+  
+{
+
+  // create reflected time series
+
+  int nHalf = nSamples / 2;
+  int nCopy = nHalf - 1;
+  int nRefl = nSamples + nCopy * 2;
+  vector<RadarComplex_t> refl;
+  refl.resize(nRefl);
+
+  // copy in actual IQ
+  
+  for (int ii = 0; ii < nSamples; ii++) {
+    refl[ii + nCopy] = iq[ii];
+  }
+
+  // copy in reflected IQ
+
+  for (int ii = 0; ii < nCopy; ii++) {
+    refl[nCopy - ii - 1] = iq[ii + 1];
+  }
+  
+  for (int ii = 0; ii < nCopy; ii++) {
+    refl[nCopy + nSamples + ii] = iq[nSamples - 1 - ii];
+  }
+  
+  // take the forward fft to compute the raw complex power spectrum
+  
+  TaArray<RadarComplex_t> powerSpecC_;
+  RadarComplex_t *powerSpecC = powerSpecC_.alloc(nRefl);
+  fft.fwd(iq, powerSpecC);
+
+  TaArray<RadarComplex_t> notchedSpecC_;
+  RadarComplex_t *notchedSpecC = notchedSpecC_.alloc(nRefl);
+  memcpy(notchedSpecC, powerSpecC, nRefl * sizeof(RadarComplex_t));
+
+  // load the raw power spectrum
+  
+  TaArray<double> powerSpec_;
+  double *powerSpec = powerSpec_.alloc(nRefl);
+  RadarComplex::loadPower(powerSpecC, powerSpec, nRefl);
+    
+  // allocate space for the filtered power spectrum
+  
+  TaArray<double> powerSpecFilt_, powerSpecNotched_;
+  double *powerSpecFilt = powerSpecFilt_.alloc(nRefl);
+  double *powerSpecNotched = powerSpecNotched_.alloc(nRefl);
+
+  // perform the adaptive filtering
+  
+  clutFilt.performAdaptive(powerSpec, nRefl,
+                           _clutterWidthMps, _clutterInitNotchWidthMps,
+                           nyquist, calNoise,
+                           powerSpecFilt, powerSpecNotched,
+                           useStoredNotch);
+  
+  _notchStart = clutFilt.getNotchStart();
+  _notchEnd = clutFilt.getNotchEnd();
+  double rawPower = clutFilt.getRawPower();
+  double filteredPower = clutFilt.getFilteredPower();
+  double powerRemoved = clutFilt.getPowerRemoved();
+  spectralNoise = _spectralNoise = clutFilt.getSpectralNoise();
+  _weatherPos = clutFilt.getWeatherPos();
+  _clutterPos = clutFilt.getClutterPos();
+  
+  spectralSnr = (spectralNoise - calNoise) / calNoise;
+  if (spectralSnr < 0) {
+    spectralSnr = 1.0e-99;
+  }
+  filterRatio = rawPower / filteredPower;
+  
+  // correct for power residue
+  
+  if (powerRemoved > 0) {
+    double correctionRatio =
+      _computePwrCorrectionRatio(nRefl, spectralSnr,
+ 				 rawPower, filteredPower,
+                                 powerRemoved, calNoise);
+    // correct the filtered powers for clutter residue
+    for (int ii = 0; ii < nRefl; ii++) {
+      powerSpecFilt[ii] *= correctionRatio;
+      powerSpecNotched[ii] *= correctionRatio;
+    }
+  }
+  
+  // adjust the input spectrum by the filter ratio
+  // constrain ratios to be 1 or less
+
+  for (int ii = 0; ii < nRefl; ii++) {
+    double magRatio = sqrt(powerSpecFilt[ii] / powerSpec[ii]);
+    if (magRatio > 1.0) {
+      magRatio = 1.0;
+    }
+    powerSpecC[ii].re *= magRatio;
+    powerSpecC[ii].im *= magRatio;
+  }
+
+  // invert the fft
+
+  vector<RadarComplex_t> reflFilt;
+  reflFilt.resize(nRefl);
+  fft.inv(powerSpecC, reflFilt.data());
+
+  // copy central part to IQ filtered
+
+  for (int ii = 0; ii < nSamples; ii++) {
+    iqFiltered[ii] = reflFilt[ii + nCopy];
+  }
+
+}
+
 /////////////////////////////////////////////////////////////////
 // apply polynomial regression clutter filter to IQ time series
 //

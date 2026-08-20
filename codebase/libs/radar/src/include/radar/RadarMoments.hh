@@ -786,6 +786,40 @@ public:
                            double &spectralSnr,
                            bool useStoredNotch = false);
   
+  // apply time series reflection filter to IQ time series
+  //
+  // Inputs:
+  //   nSamples
+  //   prtSecs
+  //   clutFilt: adaptive filter object to use
+  //   fft: object to be used for FFT computations
+  //   iq: unfiltered time series, no window
+  //   calNoise: noise level at digitizer, from cal, linear units
+  //   nyquist: folding velocity in m/s
+  //   useStoredNotch:
+  //     if false (the default) locate wx and clutter
+  //     if true, use previously located wx and clutter - this is used
+  //        if multiple channels are to be filtered
+  //
+  //  Outputs:
+  //    iqFiltered: filtered time series
+  //    filterRatio: ratio of raw to unfiltered power, before applying correction
+  //    spectralNoise: spectral noise estimated from the spectrum
+  //    spectralSnr: ratio of spectral noise to noise power
+  
+  void applyTsrFilter(int nSamples,
+                      double prtSecs,
+                      ClutFilter &clutFilt,
+                      const RadarFft &fft,
+                      const RadarComplex_t *iq,
+                      double calNoise,
+                      double nyquist,
+                      RadarComplex_t *iqFiltered,
+                      double &filterRatio,
+                      double &spectralNoise,
+                      double &spectralSnr,
+                      bool useStoredNotch = false);
+  
   // apply polynomial regression clutter filter to IQ time series
   //
   // NOTE: IQ input data should not be windowed.
