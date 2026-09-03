@@ -74,11 +74,11 @@ private:
   Args _args;
   Params _params;
 
-  bool _firstFile;
-  bool _volInProgress;
-
+  bool _serialFirstFile;
+  bool _serialVolInProgress;
   int _serialStartIndex;
   int _serialThisIndex;
+
   RadxVol _mergedVol;
 
   int _runFilelist();

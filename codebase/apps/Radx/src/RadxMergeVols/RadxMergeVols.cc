@@ -96,8 +96,8 @@ RadxMergeVols::RadxMergeVols(int argc, char **argv)
 
   _serialStartIndex = -1;
   _serialThisIndex = -1;
-  _firstFile = true;
-  _volInProgress = false;
+  _serialFirstFile = true;
+  _serialVolInProgress = false;
 
 }
 
@@ -494,23 +494,29 @@ int RadxMergeVols::_processFileSerial(const string &serialPath)
     break;
   } // itype
 
+  if (_params.debug) {
+    cerr << "Checking serial input file: " << serialPath << endl;
+    cerr << "  typeNum: " << typeNum << endl;
+    cerr << "  title, scanName: " << latestTitle << ", " << latestScanName << endl;
+  }
+
   if (typeNum < 0) {
     // not wanted
     return -1;
   }
 
-  if (typeNum == 0 && _volInProgress) {
+  if (typeNum == 0 && _serialVolInProgress) {
 
     // indicates we have found the vol type that is not first in the list
     
-    if (!_firstFile) {
+    if (!_serialFirstFile) {
       // write out current data
       if (_writeVol(_mergedVol)) {
         _mergedVol.clear();
         return -1;
       }
     }
-    _firstFile = false;
+    _serialFirstFile = false;
 
     // initialize merged vol with the latest vol
     
@@ -521,7 +527,7 @@ int RadxMergeVols::_processFileSerial(const string &serialPath)
 
     // clear secondary flag - we are starting a new vol
 
-    _volInProgress = false;
+    _serialVolInProgress = false;
     
     if (_params.debug) {
       cerr << "Init mergeVol from path: " << serialPath << endl;
@@ -533,7 +539,7 @@ int RadxMergeVols::_processFileSerial(const string &serialPath)
     if (typeNum != 0) {
       // indicates we have found the vol type that is not first in the list
       // so set flag to indicate we have moved past the first vol type
-      _volInProgress = true;
+      _serialVolInProgress = true;
     }
     
     // later vol type, copy the rays across
@@ -556,14 +562,14 @@ int RadxMergeVols::_processFileSerial(const string &serialPath)
 
   }
   
-  // if (typeNum == _params.serial_vol_types_n - 1) {
-  //   // last type, write out
-  //   if (_writeVol(_mergedVol)) {
-  //     _mergedVol.clear();
-  //     return -1;
-  //   }
-  //   _mergedVol.clear();
-  // }
+  if (typeNum == _params.serial_vol_types_n - 1) {
+    // last type, write out
+    if (_writeVol(_mergedVol)) {
+      _mergedVol.clear();
+      return -1;
+    }
+    _mergedVol.clear();
+  }
 
   return 0;
 
