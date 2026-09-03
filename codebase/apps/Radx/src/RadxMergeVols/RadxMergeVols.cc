@@ -119,16 +119,23 @@ RadxMergeVols::~RadxMergeVols()
 int RadxMergeVols::Run()
 {
 
+  int iret = 0;
+  
   if (_params.mode == Params::ARCHIVE) {
-    return _runArchive();
+    iret = _runArchive();
   } else if (_params.mode == Params::FILELIST) {
-    return _runFilelist();
+    iret = _runFilelist();
   } else {
     if (_params.latest_data_info_avail) {
-      return _runRealtimeWithLdata();
+      iret = _runRealtimeWithLdata();
     } else {
-      return _runRealtimeNoLdata();
+      iret = _runRealtimeNoLdata();
     }
+  }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    return iret;
+  } else {
+    return 0;
   }
 }
 
@@ -507,7 +514,8 @@ int RadxMergeVols::_processFileSerial(const string &serialPath)
 
   if (typeNum == 0 && _serialVolInProgress) {
 
-    // indicates we have found the vol type that is not first in the list
+    // indicates we have previously found the vol type that is not first in the list
+    // and that has not yet been written out
     
     if (!_serialFirstFile) {
       // write out current data
