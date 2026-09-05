@@ -33,6 +33,7 @@
 #include <cmath>
 #include <cstring>
 #include <iostream>
+#include <stdexcept>
 #include <radar/KdpFirFilt.hh>
 using namespace std;
 
@@ -264,28 +265,40 @@ void KdpFirFilt::_setFilterLen(fir_filter_len_t len)
   switch (len) {
     case FIR_LENGTH_125:
       _firLength = FIR_LEN_125 + 1;
-      _firCoeff = firCoeff_125;
+      for (int ii = 0; ii < _firLength; ii++) {
+        _firCoeff.push_back(firCoeff_125[ii]);
+      }
       break;
     case FIR_LENGTH_60:
       _firLength = FIR_LEN_60 + 1;
-      _firCoeff = firCoeff_60;
+      for (int ii = 0; ii < _firLength; ii++) {
+        _firCoeff.push_back(firCoeff_60[ii]);
+      }
       break;
     case FIR_LENGTH_40:
       _firLength = FIR_LEN_40 + 1;
-      _firCoeff = firCoeff_40;
+      for (int ii = 0; ii < _firLength; ii++) {
+        _firCoeff.push_back(firCoeff_40[ii]);
+      }
       break;
     case FIR_LENGTH_30:
       _firLength = FIR_LEN_30 + 1;
-      _firCoeff = firCoeff_30;
+      for (int ii = 0; ii < _firLength; ii++) {
+        _firCoeff.push_back(firCoeff_30[ii]);
+      }
       break;
     case FIR_LENGTH_20:
       _firLength = FIR_LEN_20 + 1;
-      _firCoeff = firCoeff_20;
+      for (int ii = 0; ii < _firLength; ii++) {
+        _firCoeff.push_back(firCoeff_20[ii]);
+      }
       break;
     case FIR_LENGTH_10:
     default:
       _firLength = FIR_LEN_10 + 1;
-      _firCoeff = firCoeff_10;
+      for (int ii = 0; ii < _firLength; ii++) {
+        _firCoeff.push_back(firCoeff_10[ii]);
+      }
   }
 
   _firLenHalf = _firLength / 2;
@@ -466,3 +479,72 @@ double KdpFirFilt::_getFirFilterGain()
   return sum;
 }
     
+/////////////////////////////////////////////
+// Compute filter coeffs on the fly
+
+std::vector<double> KdpFirFilt::_initLowPass(int nTaps,
+                                             double gateSpacingKm,
+                                             double cutoffCyclesPerKm,
+                                             double beta)
+{
+
+  if (nTaps < 3) {
+    throw std::invalid_argument("nTaps must be >= 3");
+  }
+
+  // Force odd length for a symmetric centered filter.
+  if ((nTaps % 2) == 0) {
+    ++nTaps;
+  }
+
+  const double fc = cutoffCyclesPerKm * gateSpacingKm;
+
+  if (fc <= 0.0 || fc >= 0.5) {
+    throw std::invalid_argument(
+        "Normalized cutoff frequency must be between 0 and 0.5");
+  }
+
+  std::vector<double> h(nTaps);
+
+  const int M = (nTaps - 1) / 2;
+  const double denom = std::cyl_bessel_i(0.0, beta);
+
+  double sum = 0.0;
+
+  for (int n = 0; n < nTaps; ++n) {
+
+    const int k = n - M;
+
+    // Ideal low-pass sinc.
+    double ideal;
+
+    if (k == 0) {
+      ideal = 2.0 * fc;
+    } else {
+      ideal =
+        std::sin(2.0 * M_PI * fc * k) /
+        (M_PI * k);
+    }
+
+    // Kaiser window.
+    const double x =
+      static_cast<double>(k) / static_cast<double>(M);
+
+    const double window =
+      std::cyl_bessel_i(
+        0.0,
+        beta * std::sqrt(1.0 - x * x)) /
+      denom;
+
+    h[n] = ideal * window;
+    sum += h[n];
+  }
+
+  // Unity DC gain.
+  for (double &val : h) {
+    val /= sum;
+  }
+
+  return h;
+  
+}

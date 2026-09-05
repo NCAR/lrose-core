@@ -127,7 +127,7 @@ private:
   
   int _firLength;          /**< The length of the current FIR array */
   int _firLenHalf;         /**< Half the length of the current FIR array */
-  const double *_firCoeff; /**< The length of the current FIR array */
+  vector<double> _firCoeff; /**< The coefficients */
   
   int _nGates;          /**< n gates in input array */
   int _nGatesPad;       /**< padding at each end for regr and fft filters */
@@ -164,6 +164,10 @@ private:
   void _applyFirFilter(const double *in, double *out);
   double _getFirFilterGain();
 
+  std::vector<double> _initLowPass(int nTaps,
+                                   double gateSpacingKm,
+                                   double cutoffCyclesPerKm,
+                                   double beta);
 };
 
 #endif
