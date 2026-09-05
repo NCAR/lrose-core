@@ -63,10 +63,15 @@ public:
 
   ~KdpFirFilt();
 
-  // phidp feature length for filtering
-  // also selects the FIR length
+  // set phidp feature length for filtering
+  // computes filter length dynamically
   
-  void setFeatureLength(double featureLengthKm, double gateSpacingKm);
+  void initDynamic(double featureLengthKm, double gateSpacingKm);
+  
+  // set phidp feature length for filtering
+  // selects the FIR length from pre-defined options
+  
+  void initPredefined(double featureLengthKm, double gateSpacingKm);
   
   /////////////////////////////////////////////
   // apply the filter, save in filt.

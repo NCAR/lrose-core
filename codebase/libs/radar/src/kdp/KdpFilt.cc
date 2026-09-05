@@ -1488,8 +1488,10 @@ void KdpFilt::_applyFirFilter()
   
 {
   
-  _firFilt.setFeatureLength(_params.phidp_feature_length_km,
-                            _gateSpacingKm);
+  // _firFilt.initPredefined(_params.phidp_feature_length_km,
+  // _gateSpacingKm);
+  _firFilt.initDynamic(_params.phidp_feature_length_km,
+                       _gateSpacingKm);
   _firFilt.applyFilter(_phidpUnfoldFilled, _phidpFirFilt,
                        _params.fir_n_iterations, _missingValue);
 

@@ -143,7 +143,7 @@ KdpFirFilt::KdpFirFilt()
 
   // feature len
   
-  setFeatureLength(3.0, 0.25);
+  initPredefined(3.0, 0.25);
 
   // ngates
   
@@ -160,11 +160,42 @@ KdpFirFilt::~KdpFirFilt()
 }
 
 /////////////////////////////////////////////////////////////////////
-// phidp feature length for filtering
-// selects the FIR length
+// sets phidp feature length for filtering
+// dynamically selects the FIR length
 
-void KdpFirFilt::setFeatureLength(double featureLengthKm,
-                                  double gateSpacingKm)
+void KdpFirFilt::initDynamic(double featureLengthKm,
+                             double gateSpacingKm)
+{
+  
+  _featureLengthKm = featureLengthKm;
+  _gateSpacingKm = gateSpacingKm;
+  _nGatesFeature = (int) (_featureLengthKm / _gateSpacingKm) + 1;
+  _nGatesPad = _nGatesFeature;
+
+  int nTaps = 2 * ((int) (_featureLengthKm / (2 * _gateSpacingKm))) + 1;
+  double cutoffSpacingPerKm = 1.0 / _featureLengthKm;
+  double beta = 10.0;
+
+  _firCoeff = _initLowPass(nTaps, _gateSpacingKm, cutoffSpacingPerKm, beta);
+  _firLength = _firCoeff.size();
+  _firLenHalf = _firLength / 2;
+
+  cerr << "1111111111 _featureLengthKm: " << _featureLengthKm << endl;
+  cerr << "1111111111 _gateSpacingKm: " << _gateSpacingKm << endl;
+  cerr << "1111111111 _nGatesFeature: " << _nGatesFeature << endl;
+  cerr << "1111111111 _nGatesPad: " << _nGatesPad << endl;
+  cerr << "1111111111 _firLength: " << _firLength << endl;
+  cerr << "1111111111 nTaps: " << nTaps << endl;
+  cerr << "1111111111 beta: " << beta << endl;
+
+}
+  
+/////////////////////////////////////////////////////////////////////
+// phidp feature length for filtering
+// selects the FIR length from pre-defined options
+
+void KdpFirFilt::initPredefined(double featureLengthKm,
+                                double gateSpacingKm)
 {
 
   _featureLengthKm = featureLengthKm;
@@ -186,6 +217,12 @@ void KdpFirFilt::setFeatureLength(double featureLengthKm,
     _setFilterLen(FIR_LENGTH_125);
   }
   
+  cerr << "2222222221 _featureLengthKm: " << _featureLengthKm << endl;
+  cerr << "2222222221 _gateSpacingKm: " << _gateSpacingKm << endl;
+  cerr << "2222222221 _nGatesFeature: " << _nGatesFeature << endl;
+  cerr << "2222222221 _nGatesPad: " << _nGatesPad << endl;
+  cerr << "2222222221 _firLength: " << _firLength << endl;
+
 }
   
 /////////////////////////////////////////////
