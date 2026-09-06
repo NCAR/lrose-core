@@ -948,7 +948,7 @@ paramdef string {
 } iqplot_adaptive_filtered_color;
 
 paramdef string {
-  p_default = "green";
+  p_default = "magenta";
   p_descr = "Color of TSR filtered lines in spectra plots.";
 } iqplot_tsr_filtered_color;
 

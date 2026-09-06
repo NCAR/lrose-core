@@ -2853,7 +2853,7 @@
     tt->descr = tdrpStrDup("Color of TSR filtered lines in spectra plots.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_tsr_filtered_color - &_start_;
-    tt->single_val.s = tdrpStrDup("green");
+    tt->single_val.s = tdrpStrDup("magenta");
     tt++;
     
     // Parameter 'iqplot_clutter_model_color'

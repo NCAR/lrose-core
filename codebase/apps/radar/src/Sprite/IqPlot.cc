@@ -278,7 +278,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
   double *dbm = dbm_.alloc(_nSamples);
   double *dbmFilt = dbmFilt_.alloc(_nSamples);
-  
+ 
   double filterRatio, spectralNoise, spectralSnr;
   
   // apply window to time series
@@ -299,6 +299,12 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     minDbm = min(dbmFilt[ii], minDbm);
     maxDbm = max(dbm[ii], maxDbm);
     maxDbm = max(dbmFilt[ii], maxDbm);
+  }
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
+    for (size_t ii = 0; ii < _reflSpecDbm.size(); ii++) {
+      minDbm = min(_reflSpecDbm[ii], minDbm);
+      maxDbm = max(_reflSpecDbm[ii], maxDbm);
+    }
   }
 
   // set the Y axis range
@@ -352,7 +358,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
       pen.setColor(_params.iqplot_adaptive_filtered_color);
     } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
-      pen.setColor(_params.iqplot_tsr_filtered_color);
+      pen.setColor(_params.iqplot_adaptive_filtered_color);
     } else {
       pen.setColor(_params.iqplot_regression_filtered_color);
     }
@@ -366,6 +372,21 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     }
     _zoomWorld.drawLines(painter, filtPts);
     painter.restore();
+    if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
+      painter.save();
+      pen.setColor(_params.iqplot_tsr_filtered_color);
+      pen.setStyle(Qt::SolidLine);
+      pen.setWidth(_params.iqplot_line_width);
+      painter.setPen(pen);
+      QVector<QPointF> tsrPts;
+      for (size_t ii = 0; ii < _reflSpecDbm.size(); ii++) {
+        double xx = (ii * (double) _nSamples) / (double) _reflSpecDbm.size();
+        QPointF pt(xx, _reflSpecDbm[ii]);
+        tsrPts.push_back(pt);
+      }
+      _zoomWorld.drawLines(painter, tsrPts);
+      painter.restore();
+    }
   }
 
   // plot clutter model
@@ -1635,9 +1656,10 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
   
   TaArray<double> powerFilt_;
   double *powerFilt = powerFilt_.alloc(_nSamples);
-
+  
   _regrOrderInUse = 0;
   _cnrDbInUse = 0.0;
+  _reflSpecDbm.clear();
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
 
     // adaptive spectral filter
@@ -1664,33 +1686,39 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
     
   } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
     
-    // adaptive spectral filter
-    
+    // TSR spectral filter
+
+    RadarFft fftTsr;
     ClutFilter clutFilt;
-    vector<double> reflSpec;
+    vector<double> reflSpecPwr;
     vector<RadarComplex_t> iqFiltered;
     iqFiltered.resize(_nSamples);
     moments.applyTsrFilter(_nSamples, _beam->getPrt(),
-                           clutFilt, fft,
+                           clutFilt, fftTsr,
                            iqIn,
                            calibNoise,
                            _beam->getNyquist(),
-                           reflSpec,
+                           reflSpecPwr,
                            iqFiltered,
                            filterRatio,
                            spectralNoise,
                            spectralSnr);
     
-    TaArray<RadarComplex_t> filtAdaptSpec_;
-    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(_nSamples);
-    fft.fwd(iqFiltered.data(), filtAdaptSpec);
-    fft.shift(filtAdaptSpec);
+    TaArray<RadarComplex_t> filtTsrSpec_;
+    RadarComplex_t *filtTsrSpec = filtTsrSpec_.alloc(_nSamples);
+    fft.fwd(iqFiltered.data(), filtTsrSpec);
+    fft.shift(filtTsrSpec);
     
     for (size_t ii = 0; ii < _nSamples; ii++) {
-      powerFilt[ii] = RadarComplex::power(filtAdaptSpec[ii]);
+      powerFilt[ii] = RadarComplex::power(filtTsrSpec[ii]);
       iqFilt[ii] = iqFiltered[ii];
     }
     
+    _reflSpecDbm.resize(reflSpecPwr.size());
+    for (size_t ii = 0; ii < _reflSpecDbm.size(); ii++) {
+      _reflSpecDbm[ii] = 10.0 * log10(reflSpecPwr[ii]);
+    }
+
   } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
 
     // regression filter

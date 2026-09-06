@@ -4542,7 +4542,7 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
 void RadarMoments::applyTsrFilter(int nSamples,
                                   double prtSecs,
                                   ClutFilter &clutFilt,
-                                  const RadarFft &fft,
+                                  RadarFft &fft,
                                   const RadarComplex_t *iq,
                                   double calNoise,
                                   double nyquist,
@@ -4581,19 +4581,23 @@ void RadarMoments::applyTsrFilter(int nSamples,
   
   // take the forward fft to compute the raw complex power spectrum
   
+  fft.init(refl.size());
+  
   TaArray<RadarComplex_t> powerSpecC_;
   RadarComplex_t *powerSpecC = powerSpecC_.alloc(nExpanded);
-  fft.fwd(iq, powerSpecC);
+  fft.fwd(refl.data(), powerSpecC);
 
   TaArray<RadarComplex_t> notchedSpecC_;
   RadarComplex_t *notchedSpecC = notchedSpecC_.alloc(nExpanded);
   memcpy(notchedSpecC, powerSpecC, nExpanded * sizeof(RadarComplex_t));
 
-  // load the raw power spectrum
-  
+  // load the power spectrum for refl data
+
+  fft.shift(powerSpecC);
   TaArray<double> powerSpec_;
   double *powerSpec = powerSpec_.alloc(nExpanded);
   RadarComplex::loadPower(powerSpecC, powerSpec, nExpanded);
+  fft.shift(powerSpecC);
 
   reflSpec.resize(nExpanded);
   for (int ii = 0; ii < nExpanded; ii++) {

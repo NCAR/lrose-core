@@ -818,7 +818,7 @@ public:
   void applyTsrFilter(int nSamples,
                       double prtSecs,
                       ClutFilter &clutFilt,
-                      const RadarFft &fft,
+                      RadarFft &fft,
                       const RadarComplex_t *iq,
                       double calNoise,
                       double nyquist,
