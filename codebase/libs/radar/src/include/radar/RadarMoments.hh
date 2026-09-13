@@ -1662,6 +1662,8 @@ private:
 
   void _init();
 
+  static void _normalizeWindowPwr(int nSamples, double *window);
+  
   void _computeRangeCorrection(double startRangeKm,
                                double gateSpacingKm);
 

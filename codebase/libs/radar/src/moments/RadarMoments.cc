@@ -6468,14 +6468,7 @@ void RadarMoments::initWindowVonhann(int nSamples, double *window)
 
   // adjust window to keep power constant
 
-  double sumsq = 0.0;
-  for (int ii = 0; ii < nSamples; ii++) {
-    sumsq += window[ii] * window[ii];
-  }
-  double rms = sqrt(sumsq / nSamples);
-  for (int ii = 0; ii < nSamples; ii++) {
-    window[ii] /= rms;
-  }
+  _normalizeWindowPwr(nSamples, window);
 
 }
   
@@ -6496,14 +6489,7 @@ void RadarMoments::initWindowBlackman(int nSamples, double *window)
   
   // adjust window to keep power constant
   
-  double sumsq = 0.0;
-  for (int ii = 0; ii < nSamples; ii++) {
-    sumsq += window[ii] * window[ii];
-  }
-  double rms = sqrt(sumsq / nSamples);
-  for (int ii = 0; ii < nSamples; ii++) {
-    window[ii] /= rms;
-  }
+  _normalizeWindowPwr(nSamples, window);
 
 }
   
@@ -6529,14 +6515,7 @@ void RadarMoments::initWindowBlackmanNuttall(int nSamples, double *window)
 
   // adjust window to keep power constant
   
-  double sumsq = 0.0;
-  for (int ii = 0; ii < nSamples; ii++) {
-    sumsq += window[ii] * window[ii];
-  }
-  double rms = sqrt(sumsq / nSamples);
-  for (int ii = 0; ii < nSamples; ii++) {
-    window[ii] /= rms;
-  }
+  _normalizeWindowPwr(nSamples, window);
 
 }
   
@@ -6585,6 +6564,17 @@ void RadarMoments::initWindowTukey(double alpha, int nSamples, double *window)
 
   // adjust window to keep power constant
   
+  _normalizeWindowPwr(nSamples, window);
+
+}
+  
+////////////////////////////////////////
+// adjust window to keep power constant
+
+void RadarMoments::_normalizeWindowPwr(int nSamples, double *window)
+
+{
+
   double sumsq = 0.0;
   for (int ii = 0; ii < nSamples; ii++) {
     sumsq += window[ii] * window[ii];
