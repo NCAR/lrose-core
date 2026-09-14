@@ -149,6 +149,48 @@ public:
                               int &weatherPos,
                               int &clutterPos);
   
+  // Perform time series filtering on a power spectrum
+  //
+  // Inputs:
+  //   rawPowerSpec: unfiltered power spectrum
+  //   nSamples: number of samples
+  //   clutterWidthMps: spectrum width for clutter model (m/s)
+  //   initNotchWidthMps: width of first guess notch (m/s)
+  //   nyquistMps: unambiguous vel (m/s)
+  //   calibratedNoise: noise power at digitizer from calibration (mW)
+  //   useStoredNotch:
+  //     if false (the default) locate wx and clutter
+  //     if true, use previously located wx and clutter - this is used
+  //        if multiple channels are to be filtered
+  //
+  // Outputs:
+  //
+  //   filteredPowerSpec: power spectrum after filtering
+  //   notchedPowerSpec: power spectrum after notching, no interp
+  //
+  // After calling this method, you can use the get() methods
+  // to access the details, as follows:
+  //
+  //   getClutterFound(): true if clutter is identified in signal
+  //   getNotchStart(): spectral position of start of final filtering notch
+  //   getNotchEnd(): spectral position of end of final filtering notch
+  //   getRawPower(): mean power in unfiltered spectrum
+  //   getFilteredPower(): mean power in filtered spectrum
+  //   getPowerRemoved(): mean power removed by the filter (mW)
+  //   getSpectralNoise(): noise determined from the spectrum (mW)
+  //   getWeatherPos(): spectral location of weather peak
+  //   getClutterPos(): spectral location of clutter peak
+
+  void performTsr(const double *rawPowerSpec, 
+                  int nSamples,
+                  double clutterWidthMps,
+                  double initNotchWidthMps,
+                  double nyquistMps,
+                  double calibratedNoise,
+                  double *filteredPowerSpec,
+                  double *notchedPowerSpec,
+                  bool useStoredNotch = false);
+  
   // perform notch filtering on a power spectrum
   //
   // Inputs:

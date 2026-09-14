@@ -342,6 +342,144 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
 
 }
 
+/////////////////////////////////////////////////////////////////////
+// Perform time series reflection filtering on a power spectrum
+//
+// Inputs:
+//   rawPowerSpec: unfiltered power spectrum
+//   nSamples: number of samples
+//   clutterWidthMps: spectrum width for clutter model (m/s)
+//   initNotchWidthMps: width of first guess notch (m/s)
+//   nyquistMps: unambiguous vel (m/s)
+//   calibratedNoise: noise power at digitizer from calibration (mW)
+//   useStoredNotch:
+//     if false (the default) locate wx and clutter
+//     if true, use previously located wx and clutter - this is used
+//        if multiple channels are to be filtered
+//
+// Outputs:
+//
+//   filteredPowerSpec: power spectrum after filtering
+//   notchedPowerSpec: power spectrum after notching, no interp
+//
+// After calling this method, you can use the get() methods
+// to access the details, as follows:
+//
+//   getClutterFound(): true if clutter is identified in signal
+//   getNotchStart(): spectral position of start of final filtering notch
+//   getNotchEnd(): spectral position of end of final filtering notch
+//   getRawPower(): mean power in unfiltered spectrum
+//   getFilteredPower(): mean power in filtered spectrum
+//   getPowerRemoved(): mean power removed by the filter (mW)
+//   getSpectralNoise(): noise determined from the spectrum (mW)
+//   getWeatherPos(): spectral location of weather peak
+//   getClutterPos(): spectral location of clutter peak
+
+void ClutFilter::performTsr(const double *rawPowerSpec, 
+                            int nSamples,
+                            double clutterWidthMps,
+                            double initNotchWidthMps,
+                            double nyquistMps,
+                            double calibratedNoise,
+                            double *filteredPowerSpec,
+                            double *notchedPowerSpec,
+                            bool useStoredNotch /* = false */)
+
+{
+
+  // initialize
+
+  _powerRemoved = 0.0;
+
+  // compute raw power
+  
+  _rawPower = RadarComplex::meanPower(rawPowerSpec, nSamples);
+  _spectralNoise = computeSpectralNoise(rawPowerSpec, nSamples);
+  
+  // locate the weather and clutter
+  
+  if (!useStoredNotch) {
+
+    _clutterFound = false;
+    _notchStart = 0;
+    _notchEnd = 0;
+
+    locateWxAndClutter(rawPowerSpec,
+                       nSamples,
+                       clutterWidthMps,
+                       initNotchWidthMps,
+                       nyquistMps,
+                       _notchWidth,
+                       _clutterFound,
+                       _clutterPos,
+                       _clutterPeak,
+                       _weatherPos,
+                       _weatherPeak,
+                       _clutNoise);
+    
+    // compute half notch width
+    
+    _halfNotchWidth = computeHalfNotchWidth(rawPowerSpec,
+                                            nSamples,
+                                            clutterWidthMps,
+                                            initNotchWidthMps,
+                                            nyquistMps);
+
+  }
+  
+  // notch out the clutter, using the initial notch width
+  
+  TaArray<double> notched_;
+  double *notched = notched_.alloc(nSamples);
+  memcpy(notched, rawPowerSpec, nSamples * sizeof(double));
+  for (int ii = -_halfNotchWidth; ii <= _halfNotchWidth; ii++) {
+    notched[(ii + nSamples) % nSamples] = 0.0;
+  }
+  memcpy(notchedPowerSpec, notched, nSamples * sizeof(double));
+  
+  // widen the notch by one point on either side,
+  // copying in the value adjacent to the notch
+
+  notched[(-_halfNotchWidth - 1 + nSamples) % nSamples] =
+    notched[(-_halfNotchWidth - 2 + nSamples) % nSamples];
+  notched[(-_halfNotchWidth + 1 + nSamples) % nSamples] =
+    notched[(-_halfNotchWidth + 2 + nSamples) % nSamples];
+  
+  int maxSearchWidth = _halfNotchWidth * 2;
+  if (maxSearchWidth > nSamples / 4) {
+    maxSearchWidth = nSamples / 4;
+  }
+  int clutterLowerBound = -maxSearchWidth;
+  int clutterUpperBound = +maxSearchWidth;
+
+  // fill notch using a gaussian fit
+  // iterate 3 times, refining the correcting further each time
+
+  fillNotchWithGaussian(rawPowerSpec, nSamples, notched,
+                        _weatherPos, _spectralNoise, maxSearchWidth,
+                        clutterLowerBound, clutterUpperBound);
+
+  // set notch limits used
+  
+  _notchStart = (clutterLowerBound + nSamples) % nSamples;
+  _notchEnd = (clutterUpperBound + nSamples) % nSamples;
+
+  // set filtered power array
+  
+  for (int ii = 0; ii < nSamples; ii++) {
+    filteredPowerSpec[ii] = notched[ii];
+  }
+
+  // compute filtered power
+  
+  _filteredPower = RadarComplex::meanPower(filteredPowerSpec, nSamples);
+  
+  // compute power removed
+  
+  _powerRemoved = _rawPower - _filteredPower;
+
+}
+  
 /////////////////////////////////////////////////////
 // Given a spectrum which has been filtered,
 // fill in the notch using a gaussian fit.
