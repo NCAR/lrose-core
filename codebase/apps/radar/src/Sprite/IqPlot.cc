@@ -1693,9 +1693,14 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
     vector<double> reflSpecPwr;
     vector<RadarComplex_t> iqFiltered;
     iqFiltered.resize(_nSamples);
+    bool applyWindow = false;
+    if (_fftWindow != Params::FFT_WINDOW_RECT) {
+      applyWindow = true;
+    }
     moments.applyTsrFilter(_nSamples, _beam->getPrt(),
                            clutFilt, fftTsr,
                            iqIn,
+                           applyWindow,
                            calibNoise,
                            _beam->getNyquist(),
                            reflSpecPwr,

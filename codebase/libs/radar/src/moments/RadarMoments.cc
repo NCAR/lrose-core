@@ -4544,6 +4544,7 @@ void RadarMoments::applyTsrFilter(int nSamples,
                                   ClutFilter &clutFilt,
                                   RadarFft &fft,
                                   const RadarComplex_t *iq,
+                                  bool applyWindow,
                                   double calNoise,
                                   double nyquist,
                                   vector <double> &reflSpec,
@@ -4577,6 +4578,18 @@ void RadarMoments::applyTsrFilter(int nSamples,
   
   for (int ii = 0; ii < nRefl; ii++) {
     refl[nRefl + nSamples + ii] = iq[nSamples - 1 - ii];
+  }
+
+  if (applyWindow) {
+    // apply vonHann window to reflected iq
+    for (int ii = 0; ii < nRefl; ii++) {
+      double ang = 2.0 * M_PI * ((ii + 0.5) / (double) nSamples - 0.5);
+      double window = 0.5 * (1.0 + cos(ang));
+      refl[ii].re *= window;
+      refl[ii].im *= window;
+      refl[nExpanded - 1 - ii].re *= window;
+      refl[nExpanded - 1 - ii].im *= window;
+    }
   }
   
   // take the forward fft to compute the raw complex power spectrum

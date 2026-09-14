@@ -801,6 +801,7 @@ public:
   //   clutFilt: adaptive filter object to use
   //   fft: object to be used for FFT computations
   //   iq: unfiltered time series, no window
+  //   applyWindow: apply window to iq
   //   calNoise: noise level at digitizer, from cal, linear units
   //   nyquist: folding velocity in m/s
   //   useStoredNotch:
@@ -820,6 +821,7 @@ public:
                       ClutFilter &clutFilt,
                       RadarFft &fft,
                       const RadarComplex_t *iq,
+                      bool applyWindow,
                       double calNoise,
                       double nyquist,
                       vector <double> &reflSpec,
