@@ -276,6 +276,9 @@ protected:
                              double &spectralNoise,
                              double &spectralSnr);
   
+  vector<double> _runningMean(const vector<double>& data,
+                              int nRun);
+  
   void _runRegressionFilter(ForsytheRegrFilter &regrF,
                             const RadarComplex_t *iqIn,
                             RadarComplex_t *iqFilt);

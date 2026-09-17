@@ -32,10 +32,11 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <assert.h>
+#include <cassert>
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <algorithm>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
@@ -1708,6 +1709,19 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
                            filterRatio,
                            spectralNoise,
                            spectralSnr);
+
+    if (_fftWindow == Params::FFT_WINDOW_BLACKMAN ||
+        _fftWindow == Params::FFT_WINDOW_BLACKMAN_NUTTALL) {
+      // running mean on refl spectrum
+      int nRun = 3;
+      // if (_fftWindow == Params::FFT_WINDOW_BLACKMAN) {
+      //   nRun = 5;
+      // }
+      // if (_nSamples < 24) {
+      //   nRun = 3;
+      // }
+      reflSpecPwr = _runningMean(reflSpecPwr, nRun);
+    }
     
     TaArray<RadarComplex_t> filtTsrSpec_;
     RadarComplex_t *filtTsrSpec = filtTsrSpec_.alloc(_nSamples);
@@ -1816,6 +1830,40 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
 
 }
 
+///////////////////////
+// compute running mean
+
+vector<double> IqPlot::_runningMean(const vector<double>& data,
+                                    int nRun)
+{
+
+  const int n = data.size();
+  std::vector<double> result(n);
+  
+  if (n == 0 || nRun <= 0) {
+    return result;
+  }
+
+  const int half = nRun / 2;
+
+  for (int i = 0; i < n; ++i) {
+
+    const int iStart = std::max(0, i - half);
+    const int iEnd   = std::min(n - 1, i + half);
+
+    double sum = 0.0;
+
+    for (int j = iStart; j <= iEnd; ++j) {
+      sum += data[j];
+    }
+
+    result[i] = sum / (iEnd - iStart + 1);
+  }
+
+  return result;
+}
+
+  
 /*************************************************************************
  * run the regression filter without interp across notch
  */
