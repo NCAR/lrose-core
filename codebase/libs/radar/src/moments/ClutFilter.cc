@@ -883,44 +883,6 @@ void ClutFilter::locateTsrClutter(const double *power,
     }
   }
 
-  ///////////////////////////////////////////////////////
-  // check for bimodal spectrum, assuming one peak at DC
-
-  // find pos of peak away from DC
-
-  double weatherMean = 0.0;
-  int wxMeanPos = 0;
-  for (int ii = 2; ii < 7; ii++) {
-    if (blockMeans[ii] > weatherMean) {
-      weatherMean = blockMeans[ii];
-      wxMeanPos = ii;
-    }
-  }
-
-  // check for 3dB valleys between DC and peak
-  // if valleys exist on both sides, then we have a bimodal spectrum
-
-  int vallyFound = 0;
-  for (int ii = 1; ii < wxMeanPos; ii++) {
-    if (weatherMean / blockMeans[ii] > 5.0) {
-      vallyFound = 1;
-      break;
-    }
-  }
-  if (!vallyFound) {
-    biModal = 0;
-  }
-  vallyFound = 0;
-  for (int ii = wxMeanPos; ii < 8; ii++) {
-    if (weatherMean / blockMeans[ii] > 5.0) {
-      vallyFound = 1;
-      break;
-    }
-  }
-  if (!vallyFound) {
-    biModal = 0;
-  }
-
 }
     
 /////////////////////////////////////////////////////////////
