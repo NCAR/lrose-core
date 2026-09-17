@@ -4581,7 +4581,7 @@ void RadarMoments::applyTsrFilter(int nSamples,
   }
 
   if (applyWindow) {
-    // apply vonHann window to reflected iq
+    // apply vonHann window to reflected iq only
     for (int ii = 0; ii < nRefl; ii++) {
       double ang = 2.0 * M_PI * ((ii + 0.5) / (double) nSamples - 0.5);
       double window = 0.5 * (1.0 + cos(ang));
@@ -4625,7 +4625,7 @@ void RadarMoments::applyTsrFilter(int nSamples,
 
   // perform the adaptive filtering
   
-  clutFilt.performTsr(powerSpec, nExpanded,
+  clutFilt.performTsr(powerSpec, nSamples, nRefl, nExpanded,
                       _clutterWidthMps, _clutterInitNotchWidthMps,
                       nyquist, calNoise,
                       powerSpecFilt, powerSpecNotched,

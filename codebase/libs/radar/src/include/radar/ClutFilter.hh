@@ -183,6 +183,8 @@ public:
 
   void performTsr(const double *rawPowerSpec, 
                   int nSamples,
+                  int nRefl,
+                  int nExpanded,
                   double clutterWidthMps,
                   double initNotchWidthMps,
                   double nyquistMps,
@@ -244,6 +246,8 @@ public:
   
   void locateTsrClutter(const double *power,
                         int nSamples,
+                        int nRefl,
+                        int nExpanded,
                         double clutterWidthMps,
                         double initNotchWidthMps,
                         double nyquistMps,
@@ -397,6 +401,11 @@ private:
   
   double _weatherPeak, _clutterPeak, _clutNoise;
   int _notchWidth, _halfNotchWidth;
+  
+  vector<double> _runningMean(const vector<double>& data,
+                              int nRun);
+
+  bool _isMinimum(const vector<double>& data, int searchIndex, int searchWidth);
   
 };
 

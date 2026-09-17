@@ -377,6 +377,8 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
 
 void ClutFilter::performTsr(const double *rawPowerSpec, 
                             int nSamples,
+                            int nRefl,
+                            int nExpanded,
                             double clutterWidthMps,
                             double initNotchWidthMps,
                             double nyquistMps,
@@ -393,61 +395,94 @@ void ClutFilter::performTsr(const double *rawPowerSpec,
 
   // compute raw power
   
-  _rawPower = RadarComplex::meanPower(rawPowerSpec, nSamples);
-  _spectralNoise = computeSpectralNoise(rawPowerSpec, nSamples);
+  _rawPower = RadarComplex::meanPower(rawPowerSpec, nExpanded);
+  _spectralNoise = computeSpectralNoise(rawPowerSpec, nExpanded);
   
   // locate the weather and clutter
   
   if (!useStoredNotch) {
-
+    
     _clutterFound = false;
     _notchStart = 0;
     _notchEnd = 0;
-
-    locateWxAndClutter(rawPowerSpec,
-                       nSamples,
-                       clutterWidthMps,
-                       initNotchWidthMps,
-                       nyquistMps,
-                       _notchWidth,
-                       _clutterFound,
-                       _clutterPos,
-                       _clutterPeak,
-                       _weatherPos,
-                       _weatherPeak,
-                       _clutNoise);
+    
+    locateTsrClutter(rawPowerSpec,
+                     nSamples,
+                     nRefl,
+                     nExpanded,
+                     clutterWidthMps,
+                     initNotchWidthMps,
+                     nyquistMps,
+                     _notchWidth,
+                     _clutterFound,
+                     _clutterPos,
+                     _clutterPeak,
+                     _clutNoise);
     
     // compute half notch width
     
     _halfNotchWidth = computeHalfNotchWidth(rawPowerSpec,
-                                            nSamples,
+                                            nExpanded,
                                             clutterWidthMps,
                                             initNotchWidthMps,
                                             nyquistMps);
 
   }
+
+  if (!_clutterFound) {
+    memcpy(filteredPowerSpec, rawPowerSpec, nExpanded * sizeof(double));
+    memcpy(notchedPowerSpec, rawPowerSpec, nExpanded * sizeof(double));
+  }
+
+  // compute 3-pt running mean of power spectrum
+
+  vector<double> specRunMean;
+  for (int ii = 0; ii < nExpanded; ii++) {
+    specRunMean.push_back(rawPowerSpec[ii]);
+  }
+  specRunMean = _runningMean(specRunMean, 3);
+
+  // find locations of minima on each side of center point
+
+  int nHalf = nExpanded / 2;
+  int clutStart = 0;
+  for (int ii = nHalf - 1; ii >= 0; ii--) {
+    if (_isMinimum(specRunMean, ii, 5)) {
+      clutStart = ii;
+      break;
+    }
+  }
+  int clutEnd = nExpanded - 1;
+  for (int ii = nHalf + 1; ii < nExpanded; ii++) {
+    if (_isMinimum(specRunMean, ii, 5)) {
+      clutEnd = ii;
+      break;
+    }
+  }
+
+  cerr << "1111111111111 clutStart, clutEnd: " << clutStart << ", " << clutEnd << endl;
   
   // notch out the clutter, using the initial notch width
   
   TaArray<double> notched_;
-  double *notched = notched_.alloc(nSamples);
-  memcpy(notched, rawPowerSpec, nSamples * sizeof(double));
+  double *notched = notched_.alloc(nExpanded);
+  memcpy(notched, rawPowerSpec, nExpanded * sizeof(double));
   for (int ii = -_halfNotchWidth; ii <= _halfNotchWidth; ii++) {
-    notched[(ii + nSamples) % nSamples] = 0.0;
+    notched[(ii + nExpanded) % nExpanded] = 0.0;
   }
-  memcpy(notchedPowerSpec, notched, nSamples * sizeof(double));
+  memcpy(notchedPowerSpec, notched, nExpanded * sizeof(double));
   
   // widen the notch by one point on either side,
   // copying in the value adjacent to the notch
 
-  notched[(-_halfNotchWidth - 1 + nSamples) % nSamples] =
-    notched[(-_halfNotchWidth - 2 + nSamples) % nSamples];
-  notched[(-_halfNotchWidth + 1 + nSamples) % nSamples] =
-    notched[(-_halfNotchWidth + 2 + nSamples) % nSamples];
+  notched[(-_halfNotchWidth - 1 + nExpanded) % nExpanded] =
+    notched[(-_halfNotchWidth - 2 + nExpanded) % nExpanded];
+  notched[(-_halfNotchWidth + 1 + nExpanded) % nExpanded] =
+    notched[(-_halfNotchWidth + 2 + nExpanded) % nExpanded];
   
   int maxSearchWidth = _halfNotchWidth * 2;
-  if (maxSearchWidth > nSamples / 4) {
-    maxSearchWidth = nSamples / 4;
+  if (maxSearchWidth > nExpanded / 4) {
+    maxSearchWidth = nExpanded / 4;
   }
   int clutterLowerBound = -maxSearchWidth;
   int clutterUpperBound = +maxSearchWidth;
@@ -455,24 +490,24 @@ void ClutFilter::performTsr(const double *rawPowerSpec,
   // fill notch using a gaussian fit
   // iterate 3 times, refining the correcting further each time
 
-  fillNotchWithGaussian(rawPowerSpec, nSamples, notched,
+  fillNotchWithGaussian(rawPowerSpec, nExpanded, notched,
                         _weatherPos, _spectralNoise, maxSearchWidth,
                         clutterLowerBound, clutterUpperBound);
 
   // set notch limits used
   
-  _notchStart = (clutterLowerBound + nSamples) % nSamples;
-  _notchEnd = (clutterUpperBound + nSamples) % nSamples;
+  _notchStart = (clutterLowerBound + nExpanded) % nExpanded;
+  _notchEnd = (clutterUpperBound + nExpanded) % nExpanded;
 
   // set filtered power array
   
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (int ii = 0; ii < nExpanded; ii++) {
     filteredPowerSpec[ii] = notched[ii];
   }
 
   // compute filtered power
   
-  _filteredPower = RadarComplex::meanPower(filteredPowerSpec, nSamples);
+  _filteredPower = RadarComplex::meanPower(filteredPowerSpec, nExpanded);
   
   // compute power removed
   
@@ -803,6 +838,8 @@ void ClutFilter::locateWxAndClutter(const double *power,
 
 void ClutFilter::locateTsrClutter(const double *power,
                                   int nSamples,
+                                  int nRefl,
+                                  int nExpanded,
                                   double clutterWidthMps,
                                   double initNotchWidthMps,
                                   double nyquistMps,
@@ -813,9 +850,9 @@ void ClutFilter::locateTsrClutter(const double *power,
                                   double &spectralNoise)
   
 {
-
+  
   // initialize
-
+  
   clutterFound = false;
   clutterPos = 0;
 
@@ -832,17 +869,17 @@ void ClutFilter::locateTsrClutter(const double *power,
 
   // divide spectrum into 8 parts, compute power in each part
   
-  int nEighth = ((nSamples - 1) / 8) + 1;
+  int nEighth = ((nExpanded - 1) / 8) + 1;
   if (nEighth < 3) {
     nEighth = 3;
   }
   int nSixteenth = nEighth / 2;
   double blockMeans[8];
   for (int ii = 0; ii < 8; ii++) {
-    int jjStart = ((ii * nSamples) / 8) - nSixteenth;
+    int jjStart = ((ii * nExpanded) / 8) - nSixteenth;
     blockMeans[ii] = 0.0;
     for (int jj = jjStart; jj < jjStart + nEighth; jj++) {
-      int kk = (jj + nSamples) % nSamples;
+      int kk = (jj + nExpanded) % nExpanded;
       blockMeans[ii] += power[kk] / 8;
     }
   }
@@ -876,7 +913,7 @@ void ClutFilter::locateTsrClutter(const double *power,
   clutterPos = 0;
   clutterPeak = 0.0;
   for (int ii = -nClutWidth; ii <= nClutWidth; ii++) {
-    double val = power[(ii + nSamples) % nSamples];
+    double val = power[(ii + nExpanded) % nExpanded];
     if (val > clutterPeak) {
       clutterPeak = val;
       clutterPos = ii;
@@ -1378,3 +1415,69 @@ void ClutFilter::copy(double *dest,
   memcpy(dest, src, nSamples * sizeof(double));
 }
 
+////////////////////////////////////////////////////////////////////
+// compute running mean
+
+vector<double> ClutFilter::_runningMean(const vector<double>& data,
+                                        int nRun)
+{
+  
+  const int n = data.size();
+  std::vector<double> result(n);
+  
+  if (n == 0 || nRun <= 0) {
+    return result;
+  }
+
+  const int half = nRun / 2;
+
+  for (int i = 0; i < n; ++i) {
+
+    const int iStart = std::max(0, i - half);
+    const int iEnd   = std::min(n - 1, i + half);
+
+    double sum = 0.0;
+
+    for (int j = iStart; j <= iEnd; ++j) {
+      sum += data[j];
+    }
+
+    result[i] = sum / (iEnd - iStart + 1);
+  }
+
+  return result;
+}
+
+////////////////////////////////////////////////////////////////////
+// check if a specified point is a minimum
+
+bool ClutFilter::_isMinimum(const vector<double>& data,
+                            int searchIndex,
+                            int searchWidth)
+
+{
+
+  // search on either size of center index
+  
+  int searchHalf = searchWidth / 2;
+  double centerVal = data[searchIndex];
+  for (int ii = 1; ii < searchHalf; ii++) {
+    int jj = searchIndex - ii;
+    if (jj >= 0) {
+      if (data[jj] < centerVal) {
+        return false;
+      }
+    }
+    int kk = searchIndex + ii;
+    if (kk < (int) data.size() - 1) {
+      if (data[kk] < centerVal) {
+        return false;
+      }
+    }
+  }
+
+  // no values found below center val
+  
+  return true;
+  
+}
