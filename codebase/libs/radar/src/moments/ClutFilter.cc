@@ -796,6 +796,134 @@ void ClutFilter::locateWxAndClutter(const double *power,
 }
     
 /////////////////////////////////////////////////////////////
+// find clutter in TSR case
+//
+// Divide spectrum into 8 parts, compute peaks and means
+// for each part. Check for bi-modal spectrum.
+
+void ClutFilter::locateTsrClutter(const double *power,
+                                  int nSamples,
+                                  double clutterWidthMps,
+                                  double initNotchWidthMps,
+                                  double nyquistMps,
+                                  int &notchWidth,
+                                  bool &clutterFound,
+                                  int &clutterPos,
+                                  double &clutterPeak,
+                                  double &spectralNoise)
+  
+{
+
+  // initialize
+
+  clutterFound = false;
+  clutterPos = 0;
+
+  int nHalf = nSamples / 2;
+  int nClutWidth =
+    (int) ((clutterWidthMps / (nyquistMps * 2.0)) * nSamples + 0.5);
+  nClutWidth = MAX(nClutWidth, nHalf - 1);
+  nClutWidth = MIN(nClutWidth, 1);
+
+  notchWidth =
+    (int) ((initNotchWidthMps / (nyquistMps * 2.0)) * nSamples + 0.5);
+  notchWidth = MIN(notchWidth, nHalf - 1);
+  notchWidth = MAX(notchWidth, 1);
+
+  // divide spectrum into 8 parts, compute power in each part
+  
+  int nEighth = ((nSamples - 1) / 8) + 1;
+  if (nEighth < 3) {
+    nEighth = 3;
+  }
+  int nSixteenth = nEighth / 2;
+  double blockMeans[8];
+  for (int ii = 0; ii < 8; ii++) {
+    int jjStart = ((ii * nSamples) / 8) - nSixteenth;
+    blockMeans[ii] = 0.0;
+    for (int jj = jjStart; jj < jjStart + nEighth; jj++) {
+      int kk = (jj + nSamples) % nSamples;
+      blockMeans[ii] += power[kk] / 8;
+    }
+  }
+
+  // compare peak at 0 with max of other peaks
+  // if less than 40dB down, we have clutter
+  
+  double zeroMean = blockMeans[0];
+  double maxOtherMean = 0.0;
+  double minOtherMean = 1.0e100;
+  for (int ii = 1; ii < 8; ii++) {
+    maxOtherMean = MAX(maxOtherMean, blockMeans[ii]);
+    minOtherMean = MIN(minOtherMean, blockMeans[ii]);
+  }
+  clutterFound = false;
+  if ((zeroMean / maxOtherMean) > 0.0001) {
+    clutterFound = true;
+  }
+  
+  // estimate the spectral noise as the mean of the power
+  // in the lowest 1/8th
+
+  spectralNoise = minOtherMean;
+
+  if (!clutterFound) {
+    return;
+  }
+
+  // find clutter peak within clutter width limits
+
+  clutterPos = 0;
+  clutterPeak = 0.0;
+  for (int ii = -nClutWidth; ii <= nClutWidth; ii++) {
+    double val = power[(ii + nSamples) % nSamples];
+    if (val > clutterPeak) {
+      clutterPeak = val;
+      clutterPos = ii;
+    }
+  }
+
+  ///////////////////////////////////////////////////////
+  // check for bimodal spectrum, assuming one peak at DC
+
+  // find pos of peak away from DC
+
+  double weatherMean = 0.0;
+  int wxMeanPos = 0;
+  for (int ii = 2; ii < 7; ii++) {
+    if (blockMeans[ii] > weatherMean) {
+      weatherMean = blockMeans[ii];
+      wxMeanPos = ii;
+    }
+  }
+
+  // check for 3dB valleys between DC and peak
+  // if valleys exist on both sides, then we have a bimodal spectrum
+
+  int vallyFound = 0;
+  for (int ii = 1; ii < wxMeanPos; ii++) {
+    if (weatherMean / blockMeans[ii] > 5.0) {
+      vallyFound = 1;
+      break;
+    }
+  }
+  if (!vallyFound) {
+    biModal = 0;
+  }
+  vallyFound = 0;
+  for (int ii = wxMeanPos; ii < 8; ii++) {
+    if (weatherMean / blockMeans[ii] > 5.0) {
+      vallyFound = 1;
+      break;
+    }
+  }
+  if (!vallyFound) {
+    biModal = 0;
+  }
+
+}
+    
+/////////////////////////////////////////////////////////////
 // compute half notch using clutter model
 // we find the spectral points at which the clutter model
 // crosses the noise floor.

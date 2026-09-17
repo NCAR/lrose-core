@@ -238,6 +238,21 @@ public:
                                  double &weatherPeak,
                                  double &spectralNoise);
 
+  // find clutter in TSR case
+  // Divide spectrum into 8 parts, compute peaks and means
+  // for each part. Check for bi-modal spectrum.
+  
+  void locateTsrClutter(const double *power,
+                        int nSamples,
+                        double clutterWidthMps,
+                        double initNotchWidthMps,
+                        double nyquistMps,
+                        int &notchWidth,
+                        bool &clutterFound,
+                        int &clutterPos,
+                        double &clutterPeak,
+                        double &spectralNoise);
+  
   // compute half notch using clutter model
   // we find the spectral points at which the clutter model
   // crosses 
