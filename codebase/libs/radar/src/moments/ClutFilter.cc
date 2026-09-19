@@ -425,89 +425,25 @@ void ClutFilter::performTsr(const double *rawPowerSpec,
       
   }
 
+  // iitialize results
+  
+  memcpy(filteredPowerSpec, rawPowerSpec, nExpanded * sizeof(double));
+  memcpy(notchedPowerSpec, rawPowerSpec, nExpanded * sizeof(double));
+  
   if (_clutterFound) {
-
+    
     // interpolate across the notch
+    
+    double pwrStart = rawPowerSpec[_notchStart];
+    double pwrEnd = rawPowerSpec[_notchEnd];
+    double deltaTotal = pwrEnd - pwrStart;
+    double delta = deltaTotal / (_notchEnd - _notchStart);
 
-  } else {
-
-    memcpy(filteredPowerSpec, rawPowerSpec, nExpanded * sizeof(double));
-    memcpy(notchedPowerSpec, rawPowerSpec, nExpanded * sizeof(double));
-
-  }
-
-
-  
-
-  // compute 3-pt running mean of power spectrum
-
-  vector<double> specRunMean;
-  for (int ii = 0; ii < nExpanded; ii++) {
-    specRunMean.push_back(rawPowerSpec[ii]);
-  }
-  specRunMean = _runningMean(specRunMean, 3);
-
-  // find locations of minima on each side of center point
-
-  int nHalf = nExpanded / 2;
-  int clutStart = 0;
-  for (int ii = nHalf - 1; ii >= 0; ii--) {
-    if (_isMinimum(specRunMean, ii, 5)) {
-      clutStart = ii;
-      break;
+    for (int ii = _notchStart + 1; ii < _notchEnd; ii++) {
+      double interp = pwrStart + (ii - _notchStart) * delta;
+      filteredPowerSpec[ii] = interp;
     }
-  }
-  int clutEnd = nExpanded - 1;
-  for (int ii = nHalf + 1; ii < nExpanded; ii++) {
-    if (_isMinimum(specRunMean, ii, 5)) {
-      clutEnd = ii;
-      break;
-    }
-  }
 
-  cerr << "1111111111111 clutStart, clutEnd: " << clutStart << ", " << clutEnd << endl;
-  
-  // notch out the clutter, using the initial notch width
-  
-  TaArray<double> notched_;
-  double *notched = notched_.alloc(nExpanded);
-  memcpy(notched, rawPowerSpec, nExpanded * sizeof(double));
-  for (int ii = -_halfNotchWidth; ii <= _halfNotchWidth; ii++) {
-    notched[(ii + nExpanded) % nExpanded] = 0.0;
-  }
-  memcpy(notchedPowerSpec, notched, nExpanded * sizeof(double));
-  
-  // widen the notch by one point on either side,
-  // copying in the value adjacent to the notch
-
-  notched[(-_halfNotchWidth - 1 + nExpanded) % nExpanded] =
-    notched[(-_halfNotchWidth - 2 + nExpanded) % nExpanded];
-  notched[(-_halfNotchWidth + 1 + nExpanded) % nExpanded] =
-    notched[(-_halfNotchWidth + 2 + nExpanded) % nExpanded];
-  
-  int maxSearchWidth = _halfNotchWidth * 2;
-  if (maxSearchWidth > nExpanded / 4) {
-    maxSearchWidth = nExpanded / 4;
-  }
-  int clutterLowerBound = -maxSearchWidth;
-  int clutterUpperBound = +maxSearchWidth;
-
-  // fill notch using a gaussian fit
-  // iterate 3 times, refining the correcting further each time
-
-  fillNotchWithGaussian(rawPowerSpec, nExpanded, notched,
-                        _weatherPos, _spectralNoise, maxSearchWidth,
-                        clutterLowerBound, clutterUpperBound);
-
-  // set notch limits used
-  
-  _notchStart = (clutterLowerBound + nExpanded) % nExpanded;
-  _notchEnd = (clutterUpperBound + nExpanded) % nExpanded;
-
-  // set filtered power array
-  
-  for (int ii = 0; ii < nExpanded; ii++) {
-    filteredPowerSpec[ii] = notched[ii];
   }
 
   // compute filtered power
