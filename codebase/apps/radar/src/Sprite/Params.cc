@@ -2844,16 +2844,28 @@
     tt->single_val.s = tdrpStrDup("pink");
     tt++;
     
+    // Parameter 'iqplot_tsr_unfiltered_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("iqplot_tsr_unfiltered_color");
+    tt->descr = tdrpStrDup("Color of TSR unfiltered in spectra plots.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &iqplot_tsr_unfiltered_color - &_start_;
+    tt->single_val.s = tdrpStrDup("magenta");
+    tt++;
+    
     // Parameter 'iqplot_tsr_filtered_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("iqplot_tsr_filtered_color");
-    tt->descr = tdrpStrDup("Color of TSR filtered lines in spectra plots.");
+    tt->descr = tdrpStrDup("Color of TSR filtered in spectra plots.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_tsr_filtered_color - &_start_;
-    tt->single_val.s = tdrpStrDup("magenta");
+    tt->single_val.s = tdrpStrDup("green");
     tt++;
     
     // Parameter 'iqplot_clutter_model_color'

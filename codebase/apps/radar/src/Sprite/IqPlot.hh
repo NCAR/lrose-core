@@ -205,7 +205,7 @@ protected:
   double _regrClutWidthFactor;
   double _regrCnrExponent;
   RadarMoments::notch_interp_method_t _regrNotchInterpMethod;
-  vector<double> _reflSpecDbm;
+  vector<double> _tsrSpecDbm, _tsrSpecFiltDbm;
 
   ///////////////////////
   // Protected methods //

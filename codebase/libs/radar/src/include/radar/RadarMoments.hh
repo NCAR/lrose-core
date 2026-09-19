@@ -810,7 +810,8 @@ public:
   //        if multiple channels are to be filtered
   //
   //  Outputs:
-  //    reflSpec: spectrum of expanded time series with reflection
+  //    tsrSpec: spectrum of expanded time series with reflection
+  //    tsrSpecFilt: filtered spectrum of expanded time series with reflection
   //    iqFiltered: filtered time series
   //    iqNotched: if non-NULL, notched time series
   //    filterRatio: ratio of raw to unfiltered power, before applying correction
@@ -825,7 +826,8 @@ public:
                       bool applyWindow,
                       double calNoise,
                       double nyquist,
-                      vector <double> &reflSpec,
+                      vector <double> &tsrSpec,
+                      vector <double> &tsrSpecFilt,
                       RadarComplex_t *iqFiltered,
                       RadarComplex_t *iqNotched,
                       double &filterRatio,

@@ -801,6 +801,8 @@ public:
 
   char* iqplot_adaptive_filtered_color;
 
+  char* iqplot_tsr_unfiltered_color;
+
   char* iqplot_tsr_filtered_color;
 
   char* iqplot_clutter_model_color;
@@ -966,7 +968,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[226];
+  mutable TDRPtable _table[227];
 
   const char *_className;
 

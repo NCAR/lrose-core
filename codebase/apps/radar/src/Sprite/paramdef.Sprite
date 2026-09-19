@@ -949,7 +949,12 @@ paramdef string {
 
 paramdef string {
   p_default = "magenta";
-  p_descr = "Color of TSR filtered lines in spectra plots.";
+  p_descr = "Color of TSR unfiltered in spectra plots.";
+} iqplot_tsr_unfiltered_color;
+
+paramdef string {
+  p_default = "green";
+  p_descr = "Color of TSR filtered in spectra plots.";
 } iqplot_tsr_filtered_color;
 
 paramdef string {

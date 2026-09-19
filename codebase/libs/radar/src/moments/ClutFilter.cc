@@ -648,8 +648,8 @@ void ClutFilter::locateWxAndClutter(const double *power,
   int nHalf = nSamples / 2;
   int nClutWidth =
     (int) ((clutterWidthMps / (nyquistMps * 2.0)) * nSamples + 0.5);
-  nClutWidth = MAX(nClutWidth, nHalf - 1);
-  nClutWidth = MIN(nClutWidth, 1);
+  nClutWidth = MIN(nClutWidth, nHalf - 1);
+  nClutWidth = MAX(nClutWidth, 1);
 
   notchWidth =
     (int) ((initNotchWidthMps / (nyquistMps * 2.0)) * nSamples + 0.5);
@@ -810,11 +810,11 @@ void ClutFilter::locateTsrClutter(const double *power,
 
   // get clutter model width in bins
   
-  int nSamplesHalf = nSamples / 2;
+  int nExpandedHalf = nExpanded / 2;
   int nClutWidth =
-    (int) ((clutterWidthMps / (nyquistMps * 2.0)) * nSamples + 0.5);
-  nClutWidth = MAX(nClutWidth, nSamplesHalf - 1);
-  nClutWidth = MIN(nClutWidth, 1);
+    (int) ((clutterWidthMps / (nyquistMps * 2.0)) * nExpanded + 0.5);
+  nClutWidth = MIN(nClutWidth, nExpandedHalf - 1);
+  nClutWidth = MAX(nClutWidth, 1);
   
   // compute 3-pt running mean of power spectrum
   
@@ -837,6 +837,8 @@ void ClutFilter::locateTsrClutter(const double *power,
     }
   }
 
+  cerr << "=================================" << endl;
+  cerr << "0000000000000 nClutWidth: " << nClutWidth << endl;
   cerr << "1111111111111 clutStart, clutEnd: " << clutterStart << ", " << clutterEnd << endl;
   
   // find clutter peak within clutter limits
@@ -854,11 +856,15 @@ void ClutFilter::locateTsrClutter(const double *power,
   // check width, test if within theoretical * 2
   // otherwise no clutter
 
+  cerr << "3333333333333333333 clutterPos, clutterPeak (dBm): " << clutterPos << ", " << 10.0 * log10(clutterPeak) << endl;
+  
   if (clutterPos - clutterStart > nClutWidth * 2) {
-    return;
+    cerr << "4444444444444444444444 clutterPos - clutterStart, nClutWidth: " << clutterPos - clutterStart << ", " << nClutWidth << endl;
+    // return;
   }
   if (clutterEnd - clutterPos > nClutWidth * 2) {
-    return;
+    cerr << "555555555555555555555 clutterEnd - clutterPos, nClutWidth: " << clutterEnd - clutterPos << ", " << nClutWidth << endl;
+    // return;
   }
   
   // divide spectrum into 8 parts, compute power in each part
@@ -877,23 +883,29 @@ void ClutFilter::locateTsrClutter(const double *power,
       blockMeans[ii] += power[kk] / 8;
     }
   }
+  for (int ii = 0; ii < 8; ii++) {
+    cerr << "bbbbbbbbbbbbbbbb ii, blockMean: " << ii << ", " << 10.0 * log10(blockMeans[ii]) << endl;
+  }
 
   // compare peak at 0 with max of other peaks
   // if less than 20dB down, we can assume clutter
   
-  double zeroMean = blockMeans[0];
+  double zeroMean = blockMeans[4];
   double maxOtherMean = 0.0;
   double minOtherMean = 1.0e100;
-  for (int ii = 1; ii < 8; ii++) {
-    maxOtherMean = MAX(maxOtherMean, blockMeans[ii]);
-    minOtherMean = MIN(minOtherMean, blockMeans[ii]);
+  for (int ii = 0; ii < 8; ii++) {
+    if (ii != 4) {
+      maxOtherMean = MAX(maxOtherMean, blockMeans[ii]);
+      minOtherMean = MIN(minOtherMean, blockMeans[ii]);
+    }
   }
   clutterFound = false;
   if ((zeroMean / maxOtherMean) > 0.01) {
     clutterFound = true;
   }
-  
-  cerr << "222222222222 clutterFound, clutterPeak: " << clutterFound << ", " << clutterPeak << endl;
+
+  cerr << "aaaaaaaaaaaa zeroMean, minOther, maxOther: " << 10.0 * log10(zeroMean) << ", " << 10.0 * log10(minOtherMean) << ", " << 10.0 * log10(maxOtherMean) << endl;
+  cerr << "222222222222 clutterFound, clutterPeak: " << clutterFound << ", " << 10.0 * log10(clutterPeak) << endl;
   
   // estimate the spectral noise as the mean of the power
   // in the lowest 1/8th

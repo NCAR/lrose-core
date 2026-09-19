@@ -302,9 +302,9 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     maxDbm = max(dbmFilt[ii], maxDbm);
   }
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
-    for (size_t ii = 0; ii < _reflSpecDbm.size(); ii++) {
-      minDbm = min(_reflSpecDbm[ii], minDbm);
-      maxDbm = max(_reflSpecDbm[ii], maxDbm);
+    for (size_t ii = 0; ii < _tsrSpecDbm.size(); ii++) {
+      minDbm = min(_tsrSpecDbm[ii], minDbm);
+      maxDbm = max(_tsrSpecDbm[ii], maxDbm);
     }
   }
 
@@ -374,19 +374,39 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     _zoomWorld.drawLines(painter, filtPts);
     painter.restore();
     if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
+
+      // unfiltered spectrum
+      
+      painter.save();
+      pen.setColor(_params.iqplot_tsr_unfiltered_color);
+      pen.setStyle(Qt::SolidLine);
+      pen.setWidth(_params.iqplot_line_width);
+      painter.setPen(pen);
+      QVector<QPointF> tsrPts;
+      for (size_t ii = 0; ii < _tsrSpecDbm.size(); ii++) {
+        double xx = (ii * (double) _nSamples) / (double) _tsrSpecDbm.size();
+        QPointF pt(xx, _tsrSpecDbm[ii]);
+        tsrPts.push_back(pt);
+      }
+      _zoomWorld.drawLines(painter, tsrPts);
+      painter.restore();
+
+      // filtered spectrum
+      
       painter.save();
       pen.setColor(_params.iqplot_tsr_filtered_color);
       pen.setStyle(Qt::SolidLine);
       pen.setWidth(_params.iqplot_line_width);
       painter.setPen(pen);
-      QVector<QPointF> tsrPts;
-      for (size_t ii = 0; ii < _reflSpecDbm.size(); ii++) {
-        double xx = (ii * (double) _nSamples) / (double) _reflSpecDbm.size();
-        QPointF pt(xx, _reflSpecDbm[ii]);
-        tsrPts.push_back(pt);
+      QVector<QPointF> tsrFiltPts;
+      for (size_t ii = 0; ii < _tsrSpecFiltDbm.size(); ii++) {
+        double xx = (ii * (double) _nSamples) / (double) _tsrSpecDbm.size();
+        QPointF pt(xx, _tsrSpecFiltDbm[ii]);
+        tsrFiltPts.push_back(pt);
       }
-      _zoomWorld.drawLines(painter, tsrPts);
+      _zoomWorld.drawLines(painter, tsrFiltPts);
       painter.restore();
+
     }
   }
 
@@ -1660,7 +1680,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
   
   _regrOrderInUse = 0;
   _cnrDbInUse = 0.0;
-  _reflSpecDbm.clear();
+  _tsrSpecDbm.clear();
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
 
     // adaptive spectral filter
@@ -1691,7 +1711,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
 
     RadarFft fftTsr;
     ClutFilter clutFilt;
-    vector<double> reflSpecPwr;
+    vector<double> tsrSpec, tsrSpecFilt;
     vector<RadarComplex_t> iqFiltered;
     iqFiltered.resize(_nSamples);
     bool applyWindow = false;
@@ -1704,7 +1724,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
                            applyWindow,
                            calibNoise,
                            _beam->getNyquist(),
-                           reflSpecPwr,
+                           tsrSpec, tsrSpecFilt,
                            iqFiltered.data(), nullptr,
                            filterRatio,
                            spectralNoise,
@@ -1712,15 +1732,9 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
 
     if (_fftWindow == Params::FFT_WINDOW_BLACKMAN ||
         _fftWindow == Params::FFT_WINDOW_BLACKMAN_NUTTALL) {
-      // running mean on refl spectrum
+      // running mean on tsr spectrum
       int nRun = 3;
-      // if (_fftWindow == Params::FFT_WINDOW_BLACKMAN) {
-      //   nRun = 5;
-      // }
-      // if (_nSamples < 24) {
-      //   nRun = 3;
-      // }
-      reflSpecPwr = _runningMean(reflSpecPwr, nRun);
+      tsrSpec = _runningMean(tsrSpec, nRun);
     }
     
     TaArray<RadarComplex_t> filtTsrSpec_;
@@ -1733,9 +1747,14 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
       iqFilt[ii] = iqFiltered[ii];
     }
     
-    _reflSpecDbm.resize(reflSpecPwr.size());
-    for (size_t ii = 0; ii < _reflSpecDbm.size(); ii++) {
-      _reflSpecDbm[ii] = 10.0 * log10(reflSpecPwr[ii]);
+    _tsrSpecDbm.resize(tsrSpec.size());
+    for (size_t ii = 0; ii < _tsrSpecDbm.size(); ii++) {
+      _tsrSpecDbm[ii] = 10.0 * log10(tsrSpec[ii]);
+    }
+
+    _tsrSpecFiltDbm.resize(tsrSpecFilt.size());
+    for (size_t ii = 0; ii < _tsrSpecFiltDbm.size(); ii++) {
+      _tsrSpecFiltDbm[ii] = 10.0 * log10(tsrSpecFilt[ii]);
     }
 
   } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
