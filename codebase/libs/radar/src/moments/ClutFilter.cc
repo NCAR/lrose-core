@@ -398,6 +398,11 @@ void ClutFilter::performTsr(const double *rawPowerSpec,
   _rawPower = RadarComplex::meanPower(rawPowerSpec, nExpanded);
   _spectralNoise = computeSpectralNoise(rawPowerSpec, nExpanded);
   
+  // compute 3-pt running mean of power spectrum
+  
+  vector<double> pwrRunMean(rawPowerSpec, rawPowerSpec + nExpanded);
+  pwrRunMean = _runningMean(pwrRunMean, 3);
+  
   // locate the weather and clutter
   
   if (!useStoredNotch) {
@@ -407,6 +412,7 @@ void ClutFilter::performTsr(const double *rawPowerSpec,
     _notchEnd = 0;
     
     locateTsrClutter(rawPowerSpec,
+                     pwrRunMean.data(),
                      nSamples,
                      nRefl,
                      nExpanded,
@@ -434,12 +440,12 @@ void ClutFilter::performTsr(const double *rawPowerSpec,
     
     // interpolate across the notch
     
-    double pwrStart = rawPowerSpec[_notchStart];
-    double pwrEnd = rawPowerSpec[_notchEnd];
+    double pwrStart = pwrRunMean[_notchStart];
+    double pwrEnd = pwrRunMean[_notchEnd];
     double deltaTotal = pwrEnd - pwrStart;
     double delta = deltaTotal / (_notchEnd - _notchStart);
 
-    for (int ii = _notchStart + 1; ii < _notchEnd; ii++) {
+    for (int ii = _notchStart; ii <= _notchEnd; ii++) {
       double interp = pwrStart + (ii - _notchStart) * delta;
       filteredPowerSpec[ii] = interp;
     }
@@ -778,6 +784,7 @@ void ClutFilter::locateWxAndClutter(const double *power,
 // for each part. Check for bi-modal spectrum.
 
 void ClutFilter::locateTsrClutter(const double *power,
+                                  const double *pwrRunMean,
                                   int nSamples,
                                   int nRefl,
                                   int nExpanded,
@@ -816,22 +823,17 @@ void ClutFilter::locateTsrClutter(const double *power,
   nClutWidth = MIN(nClutWidth, nExpandedHalf - 1);
   nClutWidth = MAX(nClutWidth, 1);
   
-  // compute 3-pt running mean of power spectrum
-  
-  vector<double> pwrRunMean(power, power + nExpanded);
-  pwrRunMean = _runningMean(pwrRunMean, 3);
-  
   // find locations of minima on each side of center point
   
   int nHalfEx = nExpanded / 2;
   for (int ii = nHalfEx - 1; ii >= 0; ii--) {
-    if (_isMinimum(pwrRunMean, ii, 5)) {
+    if (_isMinimum(pwrRunMean, nExpanded, ii, 5)) {
       clutterStart = ii;
       break;
     }
   }
   for (int ii = nHalfEx + 1; ii < nExpanded; ii++) {
-    if (_isMinimum(pwrRunMean, ii, 5)) {
+    if (_isMinimum(pwrRunMean, nExpanded, ii, 5)) {
       clutterEnd = ii;
       break;
     }
@@ -1443,7 +1445,8 @@ vector<double> ClutFilter::_runningMean(const vector<double>& data,
 ////////////////////////////////////////////////////////////////////
 // check if a specified point is a minimum
 
-bool ClutFilter::_isMinimum(const vector<double>& data,
+bool ClutFilter::_isMinimum(const double *data,
+                            int len,
                             int searchIndex,
                             int searchWidth)
 
@@ -1461,7 +1464,7 @@ bool ClutFilter::_isMinimum(const vector<double>& data,
       }
     }
     int kk = searchIndex + ii;
-    if (kk < (int) data.size() - 1) {
+    if (kk < len - 1) {
       if (data[kk] < centerVal) {
         return false;
       }

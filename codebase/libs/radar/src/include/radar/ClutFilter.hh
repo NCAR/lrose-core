@@ -245,6 +245,7 @@ public:
   // for each part. Check for bi-modal spectrum.
   
   void locateTsrClutter(const double *power,
+                        const double *pwrRunMean,
                         int nSamples,
                         int nRefl,
                         int nExpanded,
@@ -406,7 +407,8 @@ private:
   vector<double> _runningMean(const vector<double>& data,
                               int nRun);
 
-  bool _isMinimum(const vector<double>& data, int searchIndex, int searchWidth);
+  bool _isMinimum(const double *data, int len,
+                  int searchIndex, int searchWidth);
   
   bool _hasPeakAtCenter(const double* pwr, int nExpanded);
   

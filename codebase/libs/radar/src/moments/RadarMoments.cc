@@ -4692,6 +4692,7 @@ void RadarMoments::applyTsrFilter(int nSamples,
 
   for (int ii = 0; ii < nExpanded; ii++) {
     double magRatio = sqrt(specFilt[ii] / powerSpec[ii]);
+    cerr << "cccccccccccccc ii, magRatio: " << ii << ", " << magRatio << endl;
     if (magRatio > 1.0) {
       magRatio = 1.0;
     }
