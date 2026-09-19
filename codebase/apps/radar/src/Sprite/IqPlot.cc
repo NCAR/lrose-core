@@ -1705,7 +1705,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
                            calibNoise,
                            _beam->getNyquist(),
                            reflSpecPwr,
-                           iqFiltered,
+                           iqFiltered.data(), nullptr,
                            filterRatio,
                            spectralNoise,
                            spectralSnr);

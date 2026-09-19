@@ -812,6 +812,7 @@ public:
   //  Outputs:
   //    reflSpec: spectrum of expanded time series with reflection
   //    iqFiltered: filtered time series
+  //    iqNotched: if non-NULL, notched time series
   //    filterRatio: ratio of raw to unfiltered power, before applying correction
   //    spectralNoise: spectral noise estimated from the spectrum
   //    spectralSnr: ratio of spectral noise to noise power
@@ -825,7 +826,8 @@ public:
                       double calNoise,
                       double nyquist,
                       vector <double> &reflSpec,
-                      vector <RadarComplex_t> &iqFiltered,
+                      RadarComplex_t *iqFiltered,
+                      RadarComplex_t *iqNotched,
                       double &filterRatio,
                       double &spectralNoise,
                       double &spectralSnr,

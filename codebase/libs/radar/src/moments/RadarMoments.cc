@@ -4535,6 +4535,7 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
 //  Outputs:
 //    reflSpec: spectrum of expanded time series with reflection
 //    iqFiltered: filtered time series
+//    iqNotched: if non-NULL, notched time series
 //    filterRatio: ratio of raw to unfiltered power, before applying correction
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
@@ -4548,7 +4549,8 @@ void RadarMoments::applyTsrFilter(int nSamples,
                                   double calNoise,
                                   double nyquist,
                                   vector <double> &reflSpec,
-                                  vector <RadarComplex_t> &iqFiltered,
+                                  RadarComplex_t *iqFiltered,
+                                  RadarComplex_t *iqNotched,
                                   double &filterRatio,
                                   double &spectralNoise,
                                   double &spectralSnr,
@@ -4660,7 +4662,6 @@ void RadarMoments::applyTsrFilter(int nSamples,
     }
   }
 
-#ifdef NOTNOW
   // fill the notched time series if requested
   if (iqNotched != NULL) {
     // adjust the input spectrum by the notched ratio
@@ -4676,7 +4677,6 @@ void RadarMoments::applyTsrFilter(int nSamples,
     // invert the notched fft
     fft.inv(notchedSpecC, iqNotched);
   }
-#endif
   
   // adjust the input spectrum by the filter ratio
   // constrain ratios to be 1 or less

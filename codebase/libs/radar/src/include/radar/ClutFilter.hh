@@ -251,8 +251,9 @@ public:
                         double clutterWidthMps,
                         double initNotchWidthMps,
                         double nyquistMps,
-                        int &notchWidth,
                         bool &clutterFound,
+                        int &clutterStart,
+                        int &clutterEnd,
                         int &clutterPos,
                         double &clutterPeak,
                         double &spectralNoise);
@@ -406,6 +407,8 @@ private:
                               int nRun);
 
   bool _isMinimum(const vector<double>& data, int searchIndex, int searchWidth);
+  
+  bool _hasPeakAtCenter(const double* pwr, int nExpanded);
   
 };
 
