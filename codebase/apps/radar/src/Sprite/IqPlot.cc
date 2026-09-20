@@ -325,91 +325,6 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
   _drawOverlays(painter, selectedRangeKm);
 
-  // draw the unfiltered spectrum
-
-  FilterUtils::applyMedianFilter(dbm, _nSamples, _medianFiltLen);
-  {
-    painter.save();
-    QPen pen(painter.pen());
-    pen.setColor(_params.iqplot_line_color);
-    pen.setStyle(Qt::SolidLine);
-    pen.setWidth(_params.iqplot_line_width);
-    painter.setPen(pen);
-    QVector<QPointF> pts;
-    for (size_t ii = 0; ii < _nSamples; ii++) {
-      double val = dbm[ii];
-      QPointF pt(ii, val);
-      pts.push_back(pt);
-    }
-    _zoomWorld.drawLines(painter, pts);
-    painter.restore();
-  }
-
-  // apply median filter to the spectrum if needed
-
-  if (_medianFiltLen > 1) {
-    FilterUtils::applyMedianFilter(dbmFilt, _nSamples, _medianFiltLen);
-  }
-
-  // draw filtered spectrum
-  
-  {
-    painter.save();
-    QPen pen(painter.pen());
-    if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
-      pen.setColor(_params.iqplot_adaptive_filtered_color);
-    } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
-      pen.setColor(_params.iqplot_adaptive_filtered_color);
-    } else {
-      pen.setColor(_params.iqplot_regression_filtered_color);
-    }
-    pen.setStyle(Qt::SolidLine);
-    pen.setWidth(_params.iqplot_line_width);
-    painter.setPen(pen);
-    QVector<QPointF> filtPts;
-    for (size_t ii = 0; ii < _nSamples; ii++) {
-      QPointF pt(ii, dbmFilt[ii]);
-      filtPts.push_back(pt);
-    }
-    _zoomWorld.drawLines(painter, filtPts);
-    painter.restore();
-    if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
-
-      // unfiltered spectrum
-      
-      painter.save();
-      pen.setColor(_params.iqplot_tsr_unfiltered_color);
-      pen.setStyle(Qt::SolidLine);
-      pen.setWidth(_params.iqplot_line_width);
-      painter.setPen(pen);
-      QVector<QPointF> tsrPts;
-      for (size_t ii = 0; ii < _tsrSpecDbm.size(); ii++) {
-        double xx = (ii * (double) _nSamples) / (double) _tsrSpecDbm.size();
-        QPointF pt(xx, _tsrSpecDbm[ii]);
-        tsrPts.push_back(pt);
-      }
-      _zoomWorld.drawLines(painter, tsrPts);
-      painter.restore();
-
-      // filtered spectrum
-      
-      painter.save();
-      pen.setColor(_params.iqplot_tsr_filtered_color);
-      pen.setStyle(Qt::SolidLine);
-      pen.setWidth(_params.iqplot_line_width);
-      painter.setPen(pen);
-      QVector<QPointF> tsrFiltPts;
-      for (size_t ii = 0; ii < _tsrSpecFiltDbm.size(); ii++) {
-        double xx = (ii * (double) _nSamples) / (double) _tsrSpecDbm.size();
-        QPointF pt(xx, _tsrSpecFiltDbm[ii]);
-        tsrFiltPts.push_back(pt);
-      }
-      _zoomWorld.drawLines(painter, tsrFiltPts);
-      painter.restore();
-
-    }
-  }
-
   // plot clutter model
 
   if (_plotClutModel) {
@@ -449,6 +364,96 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     } // if (clut.computeGaussianClutterModel
 
   } // if (_plotClutModel)
+
+  // draw the unfiltered spectrum
+
+  // if (_clutterFilterType != RadarMoments::CLUTTER_FILTER_TSR) {
+  {
+    FilterUtils::applyMedianFilter(dbm, _nSamples, _medianFiltLen);
+    painter.save();
+    QPen pen(painter.pen());
+    pen.setColor(_params.iqplot_line_color);
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(_params.iqplot_line_width);
+    painter.setPen(pen);
+    QVector<QPointF> pts;
+    for (size_t ii = 0; ii < _nSamples; ii++) {
+      double val = dbm[ii];
+      QPointF pt(ii, val);
+      pts.push_back(pt);
+    }
+    _zoomWorld.drawLines(painter, pts);
+    painter.restore();
+  }
+
+  // apply median filter to the spectrum if needed
+
+  if (_medianFiltLen > 1) {
+    FilterUtils::applyMedianFilter(dbmFilt, _nSamples, _medianFiltLen);
+  }
+
+  // draw filtered spectrum
+  
+  {
+
+    if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
+
+      // filtered spectrum
+      
+      painter.save();
+      QPen pen(painter.pen());
+      pen.setColor(_params.iqplot_tsr_filtered_color);
+      pen.setStyle(Qt::SolidLine);
+      pen.setWidth(_params.iqplot_line_width);
+      painter.setPen(pen);
+      QVector<QPointF> tsrFiltPts;
+      for (size_t ii = 0; ii < _tsrSpecFiltDbm.size(); ii++) {
+        double xx = (ii * (double) _nSamples) / (double) _tsrSpecDbm.size();
+        QPointF pt(xx, _tsrSpecFiltDbm[ii]);
+        tsrFiltPts.push_back(pt);
+      }
+      _zoomWorld.drawLines(painter, tsrFiltPts);
+      painter.restore();
+
+      // unfiltered spectrum
+      
+      painter.save();
+      pen.setColor(_params.iqplot_tsr_unfiltered_color);
+      pen.setStyle(Qt::SolidLine);
+      pen.setWidth(_params.iqplot_line_width);
+      painter.setPen(pen);
+      QVector<QPointF> tsrPts;
+      for (size_t ii = 0; ii < _tsrSpecDbm.size(); ii++) {
+        double xx = (ii * (double) _nSamples) / (double) _tsrSpecDbm.size();
+        QPointF pt(xx, _tsrSpecDbm[ii]);
+        tsrPts.push_back(pt);
+      }
+      _zoomWorld.drawLines(painter, tsrPts);
+      painter.restore();
+
+    }
+
+    painter.save();
+    QPen pen(painter.pen());
+    if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
+      pen.setColor(_params.iqplot_adaptive_filtered_color);
+    } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
+      pen.setColor(_params.iqplot_adaptive_filtered_color);
+    } else {
+      pen.setColor(_params.iqplot_regression_filtered_color);
+    }
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(_params.iqplot_line_width);
+    painter.setPen(pen);
+    QVector<QPointF> filtPts;
+    for (size_t ii = 0; ii < _nSamples; ii++) {
+      QPointF pt(ii, dbmFilt[ii]);
+      filtPts.push_back(pt);
+    }
+    _zoomWorld.drawLines(painter, filtPts);
+    painter.restore();
+    
+  }
 
   // legends
   

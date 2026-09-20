@@ -393,6 +393,13 @@ void ClutFilter::performTsr(const double *rawPowerSpec,
 
   _powerRemoved = 0.0;
 
+  if (nExpanded < 8) {
+    _clutterFound = false;
+    memcpy(filteredPowerSpec, rawPowerSpec, nExpanded * sizeof(double));
+    memcpy(notchedPowerSpec, rawPowerSpec, nExpanded * sizeof(double));
+    return;
+  }
+  
   // compute raw power
   
   _rawPower = RadarComplex::meanPower(rawPowerSpec, nExpanded);
@@ -833,9 +840,11 @@ void ClutFilter::locateTsrClutter(const double *power,
   nClutWidth = MAX(nClutWidth, 1);
   
   // find locations of minima on each side of center point
+  // out to a max of the sixth of the spectrum on each side
   
   int nHalfEx = nExpanded / 2;
-  for (int ii = nHalfEx - 1; ii >= 0; ii--) {
+  int nSixthEx = nExpanded / 6;
+  for (int ii = nHalfEx - 3; ii >= nHalfEx - nSixthEx; ii--) {
     // check for minimum
     if (_isMinimum(pwrRunMean, nExpanded, ii, 5)) {
       clutterStart = ii;
@@ -849,7 +858,7 @@ void ClutFilter::locateTsrClutter(const double *power,
       }
     }
   }
-  for (int ii = nHalfEx + 1; ii < nExpanded; ii++) {
+  for (int ii = nHalfEx + 3; ii < nHalfEx + nSixthEx; ii++) {
     // check for minimum
     if (_isMinimum(pwrRunMean, nExpanded, ii, 5)) {
       clutterEnd = ii;
@@ -879,12 +888,14 @@ void ClutFilter::locateTsrClutter(const double *power,
   // check width, test if within theoretical * 2
   // otherwise no clutter
 
-  if (clutterPos - clutterStart > nClutWidth * 2) {
-    // cerr << "4444444444444444444444 clutterPos - clutterStart, nClutWidth: " << clutterPos - clutterStart << ", " << nClutWidth << endl;
+  cerr << "4444444444444444444444 clutterPos: " << clutterPos << endl;
+  cerr << "4444444444444444444444 clutterStart: " << clutterStart << endl;
+  cerr << "4444444444444444444444 clutterEnd: " << clutterEnd << endl;
+
+    if (clutterPos - clutterStart > nClutWidth * 2) {
     // return;
   }
   if (clutterEnd - clutterPos > nClutWidth * 2) {
-    // cerr << "555555555555555555555 clutterEnd - clutterPos, nClutWidth: " << clutterEnd - clutterPos << ", " << nClutWidth << endl;
     // return;
   }
   
@@ -925,8 +936,8 @@ void ClutFilter::locateTsrClutter(const double *power,
     clutterFound = true;
   }
 
-  // cerr << "aaaaaaaaaaaa zeroMean, minOther, maxOther: " << 10.0 * log10(zeroMean) << ", " << 10.0 * log10(minOtherMean) << ", " << 10.0 * log10(maxOtherMean) << endl;
-  // cerr << "222222222222 clutterFound, clutterPeak: " << clutterFound << ", " << 10.0 * log10(clutterPeak) << endl;
+  cerr << "aaaaaaaaaaaa zeroMean, minOther, maxOther: " << 10.0 * log10(zeroMean) << ", " << 10.0 * log10(minOtherMean) << ", " << 10.0 * log10(maxOtherMean) << endl;
+  cerr << "222222222222 clutterFound, clutterPeak: " << clutterFound << ", " << 10.0 * log10(clutterPeak) << endl;
   
   // estimate the spectral noise as the mean of the power
   // in the lowest 1/8th
@@ -1479,12 +1490,14 @@ bool ClutFilter::_isMinimum(const double *data,
     int jj = searchIndex - ii;
     if (jj >= 0) {
       if (data[jj] < centerVal) {
+        cerr << "dddddddddddddddd searchIndex, jj: " << searchIndex << ", " << jj << endl;
         return false;
       }
     }
     int kk = searchIndex + ii;
     if (kk < len - 1) {
       if (data[kk] < centerVal) {
+        cerr << "eeeeeeeeeeeeeeee searchIndex, kk: " << searchIndex << ", " << kk << endl;
         return false;
       }
     }
@@ -1492,6 +1505,7 @@ bool ClutFilter::_isMinimum(const double *data,
 
   // no values found below center val
   
+  cerr << "fffffffffffffffffffff searchIndex: " << searchIndex << endl;
   return true;
   
 }
