@@ -4584,16 +4584,20 @@ void RadarMoments::applyTsrFilter(int nSamples,
     tsr[nRefl + nSamples + ii] = iq[nSamples - 1 - ii];
   }
 
+  double windowRatio = 1.0;
   if (applyWindow) {
     // apply vonHann window to reflected iq only
+    double windowSum = nSamples;
     for (int ii = 0; ii < nRefl; ii++) {
       double ang = 2.0 * M_PI * ((ii + 0.5) / (double) nSamples - 0.5);
       double window = 0.5 * (1.0 + cos(ang));
+      windowSum += 2 * window;
       tsr[ii].re *= window;
       tsr[ii].im *= window;
       tsr[nExpanded - 1 - ii].re *= window;
       tsr[nExpanded - 1 - ii].im *= window;
     }
+    windowRatio = windowSum / nExpanded;
   }
   
   // take the forward fft to compute the raw complex power spectrum
@@ -4617,7 +4621,7 @@ void RadarMoments::applyTsrFilter(int nSamples,
 
   tsrSpec.resize(nExpanded);
   for (int ii = 0; ii < nExpanded; ii++) {
-    tsrSpec[ii] = powerSpec[ii];
+    tsrSpec[ii] = powerSpec[ii] / windowRatio;
   }
 
   // allocate space for the filtered power spectrum
@@ -4636,7 +4640,7 @@ void RadarMoments::applyTsrFilter(int nSamples,
   
   tsrSpecFilt.resize(nExpanded);
   for (int ii = 0; ii < nExpanded; ii++) {
-    tsrSpecFilt[ii] = specFilt[ii];
+    tsrSpecFilt[ii] = specFilt[ii] / windowRatio;
   }
     
   _notchStart = clutFilt.getNotchStart();
@@ -4691,7 +4695,6 @@ void RadarMoments::applyTsrFilter(int nSamples,
 
   for (int ii = 0; ii < nExpanded; ii++) {
     double magRatio = sqrt(specFilt[ii] / powerSpec[ii]);
-    cerr << "cccccccccccccc ii, magRatio: " << ii << ", " << magRatio << endl;
     if (magRatio > 1.0) {
       magRatio = 1.0;
     }
@@ -4710,9 +4713,6 @@ void RadarMoments::applyTsrFilter(int nSamples,
 
   for (int ii = 0; ii < nSamples; ii++) {
     iqFiltered[ii] = tsrFiltC[ii + nRefl];
-    cerr << "dddddddd ii, iq.re, iq.im, filt.re, filt.im: " << ii << ", "
-         << iq[ii].re << ", " << iq[ii].im << ", "
-         << iqFiltered[ii].re << ", " << iqFiltered[ii].im << endl;
   }
 
 }

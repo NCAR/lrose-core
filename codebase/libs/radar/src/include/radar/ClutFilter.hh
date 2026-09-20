@@ -410,7 +410,7 @@ private:
   bool _isMinimum(const double *data, int len,
                   int searchIndex, int searchWidth);
   
-  bool _hasPeakAtCenter(const double* pwr, int nExpanded);
+  bool _hasPeakAtCenter(const double* pwr, int nExpanded, double &powerMax);
   
 };
 
