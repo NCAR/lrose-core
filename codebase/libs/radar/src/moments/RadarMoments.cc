@@ -4614,7 +4614,6 @@ void RadarMoments::applyTsrFilter(int nSamples,
   TaArray<double> powerSpec_;
   double *powerSpec = powerSpec_.alloc(nExpanded);
   RadarComplex::loadPower(powerSpecC, powerSpec, nExpanded);
-  fft.shift(powerSpecC);
 
   tsrSpec.resize(nExpanded);
   for (int ii = 0; ii < nExpanded; ii++) {
@@ -4704,12 +4703,16 @@ void RadarMoments::applyTsrFilter(int nSamples,
 
   vector<RadarComplex_t> tsrFiltC;
   tsrFiltC.resize(nExpanded);
+  fft.shift(powerSpecC);
   fft.inv(powerSpecC, tsrFiltC.data());
 
   // copy central part to IQ filtered
 
   for (int ii = 0; ii < nSamples; ii++) {
     iqFiltered[ii] = tsrFiltC[ii + nRefl];
+    cerr << "dddddddd ii, iq.re, iq.im, filt.re, filt.im: " << ii << ", "
+         << iq[ii].re << ", " << iq[ii].im << ", "
+         << iqFiltered[ii].re << ", " << iqFiltered[ii].im << endl;
   }
 
 }
