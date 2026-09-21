@@ -376,13 +376,7 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
 //   getClutterPos(): spectral location of clutter peak
 
 void ClutFilter::performTsr(const double *rawPowerSpec, 
-                            int nSamples,
-                            int nRefl,
                             int nExpanded,
-                            double clutterWidthMps,
-                            double initNotchWidthMps,
-                            double nyquistMps,
-                            double calibratedNoise,
                             double *filteredPowerSpec,
                             double *notchedPowerSpec,
                             bool useStoredNotch /* = false */)
@@ -404,6 +398,7 @@ void ClutFilter::performTsr(const double *rawPowerSpec,
   
   _rawPower = RadarComplex::meanPower(rawPowerSpec, nExpanded);
   _spectralNoise = computeSpectralNoise(rawPowerSpec, nExpanded);
+  _clutNoise = _spectralNoise;
   
   // compute 3-pt running mean of power spectrum
   
@@ -426,25 +421,19 @@ void ClutFilter::performTsr(const double *rawPowerSpec,
   
   locateTsrClutter(rawPowerSpec,
                    pwrRunMean.data(),
-                   nSamples,
-                   nRefl,
                    nExpanded,
-                   clutterWidthMps,
-                   initNotchWidthMps,
-                   nyquistMps,
                    _clutterFound,
                    _notchStart,
                    _notchEnd,
                    _clutterPos,
-                   _clutterPeak,
-                   _clutNoise);
+                   _clutterPeak);
   
   _notchWidth = _notchEnd - _notchStart + 1;
   _halfNotchWidth = _notchWidth / 2;
       
   // }
 
-  // iitialize results
+  // initialize results
   
   memcpy(filteredPowerSpec, rawPowerSpec, nExpanded * sizeof(double));
   memcpy(notchedPowerSpec, rawPowerSpec, nExpanded * sizeof(double));
@@ -793,57 +782,40 @@ void ClutFilter::locateWxAndClutter(const double *power,
 }
     
 /////////////////////////////////////////////////////////////
-// find clutter in TSR case
-//
-// Divide spectrum into 8 parts, compute peaks and means
-// for each part. Check for bi-modal spectrum.
+// locate clutter in TSR case
 
 void ClutFilter::locateTsrClutter(const double *power,
                                   const double *pwrRunMean,
-                                  int nSamples,
-                                  int nRefl,
                                   int nExpanded,
-                                  double clutterWidthMps,
-                                  double initNotchWidthMps,
-                                  double nyquistMps,
                                   bool &clutterFound,
                                   int &clutterStart,
                                   int &clutterEnd,
                                   int &clutterPos,
-                                  double &clutterPeak,
-                                  double &spectralNoise)
+                                  double &clutterPeakPwr)
   
 {
   
   // initialize
   
   clutterFound = false;
-  clutterStart = 0;
-  clutterEnd = nExpanded - 1;
   clutterPos = nExpanded / 2;
-  clutterPeak = 0.0;
-  spectralNoise = 0.0;
+  clutterStart = clutterPos;
+  clutterEnd = clutterPos;
+  clutterPeakPwr = 0.0;
 
-  // check for clutter peak at center
+  // check for clutter peak close to center
 
   double clutPowerMax;
-  if (!_hasPeakAtCenter(power, nExpanded, clutPowerMax)) {
+  if (!_hasPeakNearCenter(power, nExpanded, clutPowerMax)) {
     return;
   }
 
-  // get clutter model width in bins
-  
-  int nExpandedHalf = nExpanded / 2;
-  int nClutWidth =
-    (int) ((clutterWidthMps / (nyquistMps * 2.0)) * nExpanded + 0.5);
-  nClutWidth = MIN(nClutWidth, nExpandedHalf - 1);
-  nClutWidth = MAX(nClutWidth, 1);
-  
   // find locations of minima on each side of center point
   // out to a max of the sixth of the spectrum on each side
   
   int nHalfEx = nExpanded / 2;
   int nSixthEx = nExpanded / 6;
+  clutterStart = nHalfEx - nSixthEx;
   for (int ii = nHalfEx - 3; ii >= nHalfEx - nSixthEx; ii--) {
     // check for minimum
     if (_isMinimum(pwrRunMean, nExpanded, ii, 5)) {
@@ -858,7 +830,8 @@ void ClutFilter::locateTsrClutter(const double *power,
       }
     }
   }
-  for (int ii = nHalfEx + 3; ii < nHalfEx + nSixthEx; ii++) {
+  clutterEnd = nHalfEx + nSixthEx;
+  for (int ii = nHalfEx + 3; ii <= nHalfEx + nSixthEx; ii++) {
     // check for minimum
     if (_isMinimum(pwrRunMean, nExpanded, ii, 5)) {
       clutterEnd = ii;
@@ -876,73 +849,16 @@ void ClutFilter::locateTsrClutter(const double *power,
   // find clutter peak within clutter limits
   
   clutterPos = 0;
-  clutterPeak = 0.0;
+  clutterPeakPwr = 0.0;
   for (int ii = clutterStart; ii <= clutterEnd; ii++) {
     double val = power[ii];
-    if (val > clutterPeak) {
-      clutterPeak = val;
+    if (val > clutterPeakPwr) {
+      clutterPeakPwr = val;
       clutterPos = ii;
     }
   }
 
-  // check width, test if within theoretical * 2
-  // otherwise no clutter
-
-  cerr << "4444444444444444444444 clutterPos: " << clutterPos << endl;
-  cerr << "4444444444444444444444 clutterStart: " << clutterStart << endl;
-  cerr << "4444444444444444444444 clutterEnd: " << clutterEnd << endl;
-
-    if (clutterPos - clutterStart > nClutWidth * 2) {
-    // return;
-  }
-  if (clutterEnd - clutterPos > nClutWidth * 2) {
-    // return;
-  }
-  
-  // divide spectrum into 8 parts, compute power in each part
-  
-  int nEighth = ((nExpanded - 1) / 8) + 1;
-  if (nEighth < 3) {
-    nEighth = 3;
-  }
-  int nSixteenth = nEighth / 2;
-  double blockMeans[8];
-  for (int ii = 0; ii < 8; ii++) {
-    int jjStart = ((ii * nExpanded) / 8) - nSixteenth;
-    blockMeans[ii] = 0.0;
-    for (int jj = jjStart; jj < jjStart + nEighth; jj++) {
-      int kk = (jj + nExpanded) % nExpanded;
-      blockMeans[ii] += power[kk] / 8;
-    }
-  }
-  // for (int ii = 0; ii < 8; ii++) {
-  //   cerr << "bbbbbbbbbbbbbbbb ii, blockMean: " << ii << ", " << 10.0 * log10(blockMeans[ii]) << endl;
-  // }
-
-  // compare peak at 0 with max of other peaks
-  // if less than 40dB down, we can assume clutter
-  
-  double zeroMean = blockMeans[4];
-  double maxOtherMean = 0.0;
-  double minOtherMean = 1.0e100;
-  for (int ii = 0; ii < 8; ii++) {
-    if (ii != 4) {
-      maxOtherMean = MAX(maxOtherMean, blockMeans[ii]);
-      minOtherMean = MIN(minOtherMean, blockMeans[ii]);
-    }
-  }
-  clutterFound = false;
-  if ((zeroMean / maxOtherMean) > 0.0001) {
-    clutterFound = true;
-  }
-
-  cerr << "aaaaaaaaaaaa zeroMean, minOther, maxOther: " << 10.0 * log10(zeroMean) << ", " << 10.0 * log10(minOtherMean) << ", " << 10.0 * log10(maxOtherMean) << endl;
-  cerr << "222222222222 clutterFound, clutterPeak: " << clutterFound << ", " << 10.0 * log10(clutterPeak) << endl;
-  
-  // estimate the spectral noise as the mean of the power
-  // in the lowest 1/8th
-
-  spectralNoise = minOtherMean;
+  clutterFound = true;
 
 }
     
@@ -1490,14 +1406,12 @@ bool ClutFilter::_isMinimum(const double *data,
     int jj = searchIndex - ii;
     if (jj >= 0) {
       if (data[jj] < centerVal) {
-        cerr << "dddddddddddddddd searchIndex, jj: " << searchIndex << ", " << jj << endl;
         return false;
       }
     }
     int kk = searchIndex + ii;
     if (kk < len - 1) {
       if (data[kk] < centerVal) {
-        cerr << "eeeeeeeeeeeeeeee searchIndex, kk: " << searchIndex << ", " << kk << endl;
         return false;
       }
     }
@@ -1505,16 +1419,14 @@ bool ClutFilter::_isMinimum(const double *data,
 
   // no values found below center val
   
-  cerr << "fffffffffffffffffffff searchIndex: " << searchIndex << endl;
   return true;
   
 }
 
 ////////////////////////////////////////////////////////////////////
-// check for clutter peak at spectrum center
-// look 2 points on either side
+// check for clutter peak close to center of spectrum
 
-bool ClutFilter::_hasPeakAtCenter(const double* pwr, int nExpanded, double &powerMax)
+bool ClutFilter::_hasPeakNearCenter(const double* pwr, int nExpanded, double &powerMax)
 {
   
   // get center point index
@@ -1525,7 +1437,7 @@ bool ClutFilter::_hasPeakAtCenter(const double* pwr, int nExpanded, double &powe
     return true;
   }
 
-  // get power peak close to center
+  // get power peak within 2 points of center
   
   int peakIndex = centerIndex;
   for (int ii = centerIndex - 2; ii <= centerIndex + 2; ii++) {
@@ -1535,7 +1447,7 @@ bool ClutFilter::_hasPeakAtCenter(const double* pwr, int nExpanded, double &powe
     }
   }
 
-  // check further on either side
+  // check further 2 pts on either side
   
   for (int ii = 3; ii < 4; ii++) {
     if (powerMax < pwr[peakIndex - ii]) {

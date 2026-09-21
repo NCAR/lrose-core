@@ -182,13 +182,7 @@ public:
   //   getClutterPos(): spectral location of clutter peak
 
   void performTsr(const double *rawPowerSpec, 
-                  int nSamples,
-                  int nRefl,
                   int nExpanded,
-                  double clutterWidthMps,
-                  double initNotchWidthMps,
-                  double nyquistMps,
-                  double calibratedNoise,
                   double *filteredPowerSpec,
                   double *notchedPowerSpec,
                   bool useStoredNotch = false);
@@ -246,18 +240,12 @@ public:
   
   void locateTsrClutter(const double *power,
                         const double *pwrRunMean,
-                        int nSamples,
-                        int nRefl,
                         int nExpanded,
-                        double clutterWidthMps,
-                        double initNotchWidthMps,
-                        double nyquistMps,
                         bool &clutterFound,
                         int &clutterStart,
                         int &clutterEnd,
                         int &clutterPos,
-                        double &clutterPeak,
-                        double &spectralNoise);
+                        double &clutterPeak);
   
   // compute half notch using clutter model
   // we find the spectral points at which the clutter model
@@ -410,7 +398,7 @@ private:
   bool _isMinimum(const double *data, int len,
                   int searchIndex, int searchWidth);
   
-  bool _hasPeakAtCenter(const double* pwr, int nExpanded, double &powerMax);
+  bool _hasPeakNearCenter(const double* pwr, int nExpanded, double &powerMax);
   
 };
 

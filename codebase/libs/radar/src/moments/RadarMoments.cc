@@ -4632,10 +4632,10 @@ void RadarMoments::applyTsrFilter(int nSamples,
 
   // perform the adaptive filtering
   
-  clutFilt.performTsr(powerSpec, nSamples, nRefl, nExpanded,
-                      _clutterWidthMps, _clutterInitNotchWidthMps,
-                      nyquist, calNoise,
-                      specFilt, specNotched,
+  clutFilt.performTsr(powerSpec,
+                      nExpanded,
+                      specFilt,
+                      specNotched,
                       useStoredNotch);
   
   tsrSpecFilt.resize(nExpanded);
