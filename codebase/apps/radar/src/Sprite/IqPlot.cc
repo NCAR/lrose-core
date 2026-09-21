@@ -1972,14 +1972,18 @@ void IqPlot::_applyWindow(const RadarComplex_t *iqIn,
   // initialize the window
   
   _windowCoeff = _windowCoeff_.alloc(nSamples);
+
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
+    // no window applied
+    RadarMoments::initWindowRect(nSamples, _windowCoeff);
+    RadarMoments::applyWindow(iqIn, _windowCoeff, iqWindowed, nSamples);
+    return;
+  }
+  
   switch (_fftWindow) {
     case Params::FFT_WINDOW_RECT:
     default:
-      if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_TSR) {
-        RadarMoments::initWindowVonhann(nSamples, _windowCoeff);
-      } else {
-        RadarMoments::initWindowRect(nSamples, _windowCoeff);
-      }
+      RadarMoments::initWindowRect(nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_VONHANN:
       RadarMoments::initWindowVonhann(nSamples, _windowCoeff);
