@@ -91,6 +91,7 @@ set (SRCS
       ./Fm301/Fm301RadxFile.cc
       ./Fm301/Fm301RadxFile_read.cc
       ./Fm301/Fm301RadxFile_write.cc
+      ./Fm301/RadxFm301Str.cc
       ./ForayNc/ForayNcRadxFile.cc
       ./ForayNc/ForayNcRadxFile_read.cc
       ./ForayNc/ForayNcRadxFile_write.cc

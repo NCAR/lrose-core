@@ -29,7 +29,8 @@ HDRS = \
 CPPC_SRCS = \
 	Fm301RadxFile.cc \
 	Fm301RadxFile_read.cc \
-	Fm301RadxFile_write.cc
+	Fm301RadxFile_write.cc \
+	RadxFm301Str.cc
 
 #
 # general targets
