@@ -8,11 +8,11 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for Ncf modules for Radx
+# Makefile for Cf2 modules for Radx
 #
-# Mike Dixon, RAP, NCAR, Boulder, Co, USA, 80307
+# Mike Dixon, EOL, NCAR, Boulder, Co, USA, 80307
 #
-# Jan 2010
+# Sept 2026
 #
 ###########################################################################
 

@@ -27,6 +27,7 @@ SUB_DIRS = \
 	D3R \
 	Dorade \
 	EEC \
+	Fm301 \
 	ForayNc \
 	Gamic \
 	Gematronik \

@@ -8,7 +8,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for Cf2 modules for Radx
+# Makefile for Fm301 modules for Radx
 #
 # Mike Dixon, EOL, NCAR, Boulder, Co, USA, 80307
 #
@@ -24,12 +24,12 @@ LOC_INCLUDES = -I../include $(NETCDF4_INCS)
 LOC_CFLAGS = 
 
 HDRS = \
-	../include/Radx/Cf2RadxFile.hh
+	../include/Radx/Fm301RadxFile.hh
 
 CPPC_SRCS = \
-	Cf2RadxFile.cc \
-	Cf2RadxFile_read.cc \
-	Cf2RadxFile_write.cc
+	Fm301RadxFile.cc \
+	Fm301RadxFile_read.cc \
+	Fm301RadxFile_write.cc
 
 #
 # general targets

@@ -88,6 +88,9 @@ set (SRCS
       ./Dorade/DoradeData.cc
       ./Dorade/DoradeRadxFile.cc
       ./EEC/EdgeNcRadxFile.cc
+      ./Fm301/Fm301RadxFile.cc
+      ./Fm301/Fm301RadxFile_read.cc
+      ./Fm301/Fm301RadxFile_write.cc
       ./ForayNc/ForayNcRadxFile.cc
       ./ForayNc/ForayNcRadxFile_read.cc
       ./ForayNc/ForayNcRadxFile_write.cc
