@@ -25,16 +25,16 @@
 // RadxFm301Str.hh
 //
 // Base class containing
-// strings for NetCDF CF-compliant radar data
+// strings for FM301-compliant radar data
 //
 // Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Oct 2018
+// Sept 2026
 //
 ///////////////////////////////////////////////////////////////
 //
-// Ncf File classes will inherit both RadxFile and this class
+// Fm301 File classes will inherit both RadxFile and this class
 //
 ///////////////////////////////////////////////////////////////
 
