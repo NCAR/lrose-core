@@ -19,33 +19,31 @@ import matplotlib.pyplot as plt
 REQUIRED_COLUMNS = [
     "gateNum",
     "validKdp",
-    "validUnfold",
+    "rangeKm",
     "snr",
     "dbz",
     "zdr",
-    "zdrSdev",
     "rhohv",
     "phidp",
     "phidpMean",
-    "phidpMeanValid",
     "phidpJitter",
     "phidpSdev",
-    "phidpMeanUnfold",
     "phidpUnfold",
+    "phidpUnfoldFilled",
     "phidpFilt",
-    "phidpCond",
-    "phidpCondFilt",
-    "psob",
+    "phidpFiltTrend",
+    "phidpFirFilt",
+    "phidpFftFilt",
+    "phidpRegrFilt",
+    "phidpQuadFilt",
+    "kdpQuadFilt",
+    "delta",
+    "deltaMean",
     "kdp",
     "kdpSC",
-    "dbzAtten",
-    "zdrAtten",
-    "dbzCorrected",
-    "zdrCorrected",
-    "regrFilt",
-    "phidpFftFilt",
-    "phidpFftCond",
+    "kdpZZdr",
     "phidpSC",
+    "scBlock",
 ]
 
 ############################################################################
@@ -66,6 +64,7 @@ class KdpRayPlotter:
         self.ax2 = None
         self.ax3 = None
         self.ax4 = None
+        # self.ax4r = None
         self.first_valid = None
         self.last_valid = None
 
@@ -209,6 +208,8 @@ class KdpRayPlotter:
         self.set_plot_limits()
 
         if self.options.debug:
+            print(f"  first_valid: {self.first_valid}", file=sys.stderr)
+            print(f"  last_valid: {self.last_valid}", file=sys.stderr)
             print(
                 f"Plot index range: {self.first_valid} to {self.last_valid}",
                 file=sys.stderr,
@@ -245,6 +246,7 @@ class KdpRayPlotter:
         self.ax2 = self.fig.add_subplot(2, 2, 2, xmargin=0.0)
         self.ax3 = self.fig.add_subplot(2, 2, 3, xmargin=0.0)
         self.ax4 = self.fig.add_subplot(2, 2, 4, xmargin=0.0)
+        # self.ax4r = self.ax4.twinx()
 
         self.do_plot()
         self.fig.suptitle(self.options.title)
@@ -264,6 +266,7 @@ class KdpRayPlotter:
         self.ax2.clear()
         self.ax3.clear()
         self.ax4.clear()
+        # self.ax4r.clear()
 
         filename = self.file_list[self.file_index]
         name_parts = filename.split("_")
@@ -277,7 +280,7 @@ class KdpRayPlotter:
             for name, values in self.data.items()
         }
 
-        gate_num = plot_data["gateNum"]
+        gate_num = plot_data["rangeKm"]
         valid_kdp = plot_data["validKdp"]
 
         if not gate_num:
@@ -293,22 +296,23 @@ class KdpRayPlotter:
             self.ax3.set_title(el_str, fontsize=12)
             self.ax4.set_title(az_str, fontsize=12)
             return
-
-        zdr_sdev10 = [value * 10.0 for value in plot_data["zdrSdev"]]
+        
+        zdr_5 = [value * 5.0 for value in plot_data["zdr"]]
 
         # PLOT 1 - moments
 
         self.ax1.set_title(time_str, fontsize=12)
+        draw_block_limits(self, self.ax1, gate_num, self.data["scBlock"])
         self.ax1.plot(gate_num, plot_data["phidpSdev"], label="Sdev", color="pink")
         self.ax1.plot(gate_num, plot_data["phidpJitter"], label="Jitter", color="orange")
         self.ax1r.plot(
             gate_num, plot_data["rhohv"],
             label="RHOHV", color="seagreen",
         )
-        self.ax1.plot(gate_num, zdr_sdev10, label="ZdrSdev*10", color="blue")
+        self.ax1.plot(gate_num, zdr_5, label="Zdr*5", color="blue")
         self.ax1.plot(gate_num, plot_data["snr"], label="SNR", color="black")
         self.ax1.plot(gate_num, plot_data["dbz"], label="DBZ", color="red")
-        self.ax1.set_xlabel("gateNum")
+        self.ax1.set_xlabel("rangeKm")
         self.ax1.set_ylabel("SNR, DBZ")
 
         self.ax1r.set_ylabel("RHOHV", color="seagreen")
@@ -316,54 +320,61 @@ class KdpRayPlotter:
         self.ax1r.yaxis.tick_right()
         self.ax1r.set_ylim(-0.2, 1.5)
         self.ax1r.tick_params(axis="y", labelcolor="seagreen")
-
+        self.ax1r.axhline(self.options.rhohv_threshold, color="lightgray",
+                          linewidth=1.0, linestyle="--", zorder=0)
+        
         lines1, labels1 = self.ax1.get_legend_handles_labels()
         lines2, labels2 = self.ax1r.get_legend_handles_labels()
         legend1 = self.ax1.legend(
             lines1 + lines2, labels1 + labels2, loc="upper right"
         )
+        
         for label in legend1.get_texts():
             label.set_fontsize("small")
 
-        draw_valid_regions(
-            self.ax1, gate_num, valid_kdp,
-            color="lightgray", alpha=0.4,
-        )
+        draw_valid_regions(self,
+                           self.ax1, gate_num, valid_kdp
+                           )
 
         # PLOT 2 - PHIDP processing
 
         self.ax2.set_title(az_str, fontsize=12)
-        self.ax2.plot(gate_num, plot_data["phidpUnfold"], label="unfolded", color="green")
-        self.ax2.plot(gate_num, plot_data["phidpFilt"], label="Filt", color="red")
-        self.ax2.plot(gate_num, plot_data["phidpCondFilt"], label="CondFilt", color="black")
-        self.ax2.plot(gate_num, plot_data["phidpFftFilt"], label="FftFilt", color="magenta")
-        self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="orange")
-        self.ax2.set_xlabel("gateNum")
+        draw_block_limits(self, self.ax2, gate_num, self.data["scBlock"])
+        self.ax2.plot(gate_num, plot_data["phidpUnfoldFilled"], label="phidpUnfold", color="green")
+        #self.ax2.plot(gate_num, plot_data["phidpFilt"], label="FIR_Filt", color="orange")
+        self.ax2.plot(gate_num, plot_data["phidpFilt"], label="PhidpFilt", color="black")
+        self.ax2.plot(gate_num, plot_data["phidpSC"], label="phidpSC", color="yellow")
+        self.ax2.set_xlabel("rangeKm")
         self.ax2.set_ylabel("PHIDP")
 
-        legend2 = self.ax2.legend(loc="upper right")
+        legend2 = self.ax2.legend(loc="lower right")
         for label in legend2.get_texts():
             label.set_fontsize("small")
 
-        draw_valid_regions(
-            self.ax2, gate_num, valid_kdp,
-            color="lightgray", alpha=0.4,
-        )
+        draw_valid_regions(self,
+                           self.ax2, gate_num, valid_kdp
+                           )
 
-        # PLOT 3 - KDP and PSOB
+        # PLOT 3 - KDP and DELTA
 
         self.ax3.set_title(el_str, fontsize=12)
-        self.ax3.plot(gate_num, plot_data["psob"], label="PSOB", color="orange")
+        draw_block_limits(self, self.ax3, gate_num, self.data["scBlock"])
+                
+        self.ax3.plot(gate_num, plot_data["kdpZZdr"], label="KDP_ZZDR", color="green")
+        self.ax3.plot(gate_num, plot_data["delta"], label="DELTA", color="orange")
+        self.ax3.plot(gate_num, plot_data["deltaMean"], label="DELTA_MEAN", color="black")
+        #self.ax3.plot(gate_num, plot_data["phidpFiltTrend"], label="TREND", color="magenta")
         self.ax3.plot(gate_num, plot_data["kdp"], label="KDP", color="red")
         self.ax3.plot(gate_num, plot_data["kdpSC"], label="KDP_SC", color="blue")
-        self.ax3.set_xlabel("gateNum")
-        self.ax3.set_ylabel("KDP, PSOB")
+        # self.ax3.plot(gate_num, plot_data["kdpQuadFilt"], label="KDP_QUAD_FILT", color="magenta")
+        self.ax3.set_xlabel("rangeKm")
+        self.ax3.set_ylabel("KDP, DELTA")
+        self.ax3.axhline(1.0, color="lightgray",
+                         linewidth=1.0, linestyle="--", zorder=0)
 
-        draw_valid_regions(
-            self.ax3, gate_num, valid_kdp,
-            color="lightgray", alpha=0.4,
-        )
-
+        draw_valid_regions(self,
+                           self.ax3, gate_num, valid_kdp
+                           )
         legend3 = self.ax3.legend(loc="upper right")
         for label in legend3.get_texts():
             label.set_fontsize("small")
@@ -371,15 +382,31 @@ class KdpRayPlotter:
         # PLOT 4 - PHIDP FFT filtering
 
         self.ax4.set_title(az_str, fontsize=12)
-        self.ax4.plot(gate_num, plot_data["phidp"], label="phidp")
-        self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="phidpFftFilt")
-        self.ax4.set_xlabel("gateNum")
+        draw_block_limits(self, self.ax4, gate_num, self.data["scBlock"])
+        self.ax4.plot(gate_num, plot_data["phidp"], label="PHIDP", color="seagreen")
+        #self.ax4.plot(gate_num, plot_data["phidpUnfoldFilled"], label="phidpUnfolded", color="seagreen")
+        self.ax4.plot(gate_num, plot_data["phidpRegrFilt"], label="Regr-Filt", color="orange")
+        self.ax4.plot(gate_num, plot_data["phidpFirFilt"], label="Fir-Filt", color="black")
+        self.ax4.plot(gate_num, plot_data["phidpFftFilt"], label="Fft-Filt", color="magenta")
+        self.ax4.plot(gate_num, plot_data["phidpQuadFilt"], label="Quad-Filt", color="blue")
+        #self.ax4.plot(gate_num, plot_data["phidpUnfoldFilled"], label="PHIDP-unfold", color="blue", linewidth=2)
+        #self.ax4.plot(gate_num, plot_data["phidpFilt"], label="PHIDP-Filt", color="black", linewidth=2)
+        self.ax4.set_xlabel("rangeKm")
         self.ax4.set_ylabel("PHIDP")
+        
+        # self.ax4r.plot(
+        #     gate_num, plot_data["zdr"],
+        #     label="ZDR", color="red",
+        # )
+        # self.ax4r.set_ylabel("ZDR", color="red")
+        # self.ax4r.yaxis.set_label_position("right")
+        # self.ax4r.yaxis.tick_right()
+        # self.ax4r.set_ylim(-5, 10)
+        # self.ax4r.tick_params(axis="y", labelcolor="red")
 
-        draw_valid_regions(
-            self.ax4, gate_num, valid_kdp,
-            color="lightgray", alpha=0.4,
-        )
+        draw_valid_regions(self,
+                           self.ax4, gate_num, valid_kdp
+                           )
 
         legend4 = self.ax4.legend(loc="upper right")
         for label in legend4.get_texts():
@@ -389,35 +416,67 @@ class KdpRayPlotter:
 #=========================================================================
 # draw valid regions on plots
 
-def draw_valid_regions(ax, x, valid,
-                       color='lightgray',
+def draw_valid_regions(self, ax, x, valid,
+                       color="#505050",
                        alpha=0.4):
 
     if not x or not valid:
         return
 
+    if len(x) != len(valid):
+        raise ValueError(
+            f"x and valid lengths differ: {len(x)} versus {len(valid)}"
+        )
+
     in_run = False
+    x_start = None
 
-    for i in range(len(valid)):
+    for i, value in enumerate(valid):
 
-        if valid[i] and not in_run:
-            start = x[i]
+        if value > 0.5 and not in_run:
+            x_start = x[i]
             in_run = True
 
-        elif not valid[i] and in_run:
-            end = x[i]
-            ax.axvspan(start, end,
-                       facecolor=color,
-                       edgecolor='none',
-                       alpha=alpha)
+        elif value <= 0.5 and in_run:
+            x_end = x[i]
+
+            ax.axvspan(
+                x_start,
+                x_end,
+                facecolor=color,
+                edgecolor="none",
+                alpha=alpha,
+            )
+            ax.axvline(x_start, color="black", linewidth=1)
+            ax.axvline(x_end, color="black", linewidth=1)
+
             in_run = False
 
-    # Final run reaches end of data
+    # The final valid run reaches the end of the data.
     if in_run:
-        ax.axvspan(start, x[-1],
-                   facecolor=color,
-                   edgecolor='none',
-                   alpha=alpha)
+        x_end = x[-1]
+
+        ax.axvspan(
+            x_start,
+            x_end,
+            facecolor=color,
+            edgecolor="none",
+            alpha=alpha,
+        )
+        ax.axvline(x_start, color="black", linewidth=1)
+        ax.axvline(x_end, color="black", linewidth=1)
+
+
+#=========================================================================
+# draw block limit lines
+
+def draw_block_limits(self, ax, x, valid):
+    if not x or not valid:
+        return
+    for i in range(self.first_valid, self.last_valid):
+        j = i - self.first_valid
+        if valid[i]:
+            ax.axvline(x[j], color='pink', lw=2)
 
 #=========================================================================
 # Run a command in a shell, wait for it to complete
@@ -466,6 +525,9 @@ def parse_args():
     parser.add_argument("--maxgates", dest="max_gates", type=int, default=10000,
                         help="Max number of gates to plot")
 
+    parser.add_argument("--rhohv_threshold", dest="rhohv_threshold", type=float,
+                        default=0.9, help="RHOHV threshold (default: 0.9)")
+    
     options = parser.parse_args()
     if options.verbose:
         options.debug = True

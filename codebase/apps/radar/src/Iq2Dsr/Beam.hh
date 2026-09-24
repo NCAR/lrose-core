@@ -52,6 +52,7 @@
 #include <radar/NoiseLocator.hh>
 #include <radar/AlternatingVelocity.hh>
 #include <radar/KdpFilt.hh>
+#include <radar/KdpFiltParams.hh>
 #include <radar/KdpBringi.hh>
 #include <radar/AtmosAtten.hh>
 #include <radar/PhaseCoding.hh>
@@ -80,7 +81,8 @@ public:
   // Constructor
   
   Beam(const string &progName,
-       const Params &params);
+       const Params &params,
+       const KdpFiltParams &kdpParams);
         
   // initialize before use
   
@@ -204,6 +206,7 @@ private:
 
   string _progName;
   const Params &_params;
+  const KdpFiltParams &_kdpParams;
 
   MomentsMgr _mmgr;
 

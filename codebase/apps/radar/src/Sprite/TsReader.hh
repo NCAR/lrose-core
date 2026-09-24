@@ -43,6 +43,7 @@
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsGet.hh>
 #include <radar/IwrfTsReader.hh>
+#include <radar/KdpFiltParams.hh>
 #include "Params.hh"
 #include "Args.hh"
 #include "Beam.hh"
@@ -93,6 +94,7 @@ public:
   
   TsReader (const string &prog_name,
             const Params &params,
+            const KdpFiltParams &kdpParams,
             const Args &args);
   
   // destructor
@@ -164,6 +166,7 @@ private:
 
   string _progName;
   const Params &_params;
+  const KdpFiltParams &_kdpParams;
   const Args &_args;
   bool _isRhi;
   string _scanModeStr;

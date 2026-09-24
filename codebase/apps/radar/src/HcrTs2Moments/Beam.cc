@@ -2297,7 +2297,7 @@ void Beam::_censorFields(MomentsFields &mfield)
   mfield.rhohv_nnc = MomentsFields::missingDouble;
   mfield.phidp = MomentsFields::missingDouble;
   mfield.kdp = MomentsFields::missingDouble;
-  mfield.psob = MomentsFields::missingDouble;
+  mfield.delta = MomentsFields::missingDouble;
   
   mfield.snrhc = MomentsFields::missingDouble;
   mfield.snrhx = MomentsFields::missingDouble;

@@ -1658,21 +1658,17 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
     case Params::PHIDP:
       return (&_flds.phidp - start);
     case Params::PHIDP_COND:
-      return (&_flds.phidp_cond - start);
+      return (&_flds.phidp_sc - start);
     case Params::PHIDP_FILT:
       return (&_flds.phidp_filt - start);
     case Params::PHIDP_SDEV_4KDP:
       return (&_flds.phidp_sdev_4kdp - start);
     case Params::PHIDP_JITTER_4KDP:
       return (&_flds.phidp_jitter_4kdp - start);
-    case Params::ZDR_SDEV_4KDP:
-      return (&_flds.zdr_sdev_4kdp - start);
     case Params::KDP:
       return (&_flds.kdp - start);
-    case Params::PSOB:
-      return (&_flds.psob - start);
-    case Params::KDP_HB:
-      return (&_flds.kdp_hb - start);
+    case Params::DELTA:
+      return (&_flds.delta - start);
 
       // co-cross correlation
 

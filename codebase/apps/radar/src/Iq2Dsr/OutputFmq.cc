@@ -1658,7 +1658,7 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
     case Params::PHIDP:
       return (&_flds.phidp - start);
     case Params::PHIDP_COND:
-      return (&_flds.phidp_cond - start);
+      return (&_flds.phidp_sc - start);
     case Params::PHIDP_FILT:
       return (&_flds.phidp_filt - start);
     case Params::PHIDP_SDEV_4KDP:
@@ -1670,7 +1670,7 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
     case Params::KDP:
       return (&_flds.kdp - start);
     case Params::PSOB:
-      return (&_flds.psob - start);
+      return (&_flds.delta - start);
     case Params::KDP_HB:
       return (&_flds.kdp_hb - start);
 

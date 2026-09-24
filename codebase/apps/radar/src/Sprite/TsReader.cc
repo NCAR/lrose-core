@@ -78,9 +78,11 @@ TsReader::TimePath::TimePath(time_t valid_time,
 
 TsReader::TsReader(const string &prog_name,
                    const Params &params,
+                   const KdpFiltParams &kdpParams,
                    const Args &args) :
         _progName(prog_name),
         _params(params),
+        _kdpParams(kdpParams),
         _args(args)
   
 {
@@ -425,7 +427,7 @@ Beam *TsReader::_getBeamViaGetter(const DateTime &searchTime,
 
   // create new beam
   
-  Beam *beam = new Beam(_progName, _params);
+  Beam *beam = new Beam(_progName, _params, _kdpParams);
   beam->setPulses(_scanType == SCAN_TYPE_RHI,
                   _nSamples,
                   _nGates,
@@ -639,7 +641,7 @@ Beam *TsReader::_getBeamViaReader()
   
   // create new beam
   
-  Beam *beam = new Beam(_progName, _params);
+  Beam *beam = new Beam(_progName, _params, _kdpParams);
   beam->setPulses(_scanType == SCAN_TYPE_RHI,
                   _nSamples,
                   _nGates,

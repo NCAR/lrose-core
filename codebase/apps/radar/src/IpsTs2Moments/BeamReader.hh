@@ -42,6 +42,7 @@
 #include <radar/IpsTsPulse.hh>
 #include <radar/IpsTsReader.hh>
 #include <radar/AtmosAtten.hh>
+#include <radar/KdpFiltParams.hh>
 #include "Params.hh"
 #include "Args.hh"
 #include "Beam.hh"
@@ -58,6 +59,7 @@ public:
   
   BeamReader(const string &prog_name,
              const Params &params,
+             const KdpFiltParams &kdpParams,
              const Args &args,
              deque<Beam *> &beamRecyclePool,
              pthread_mutex_t &beamRecyclePoolMutex);
@@ -95,6 +97,7 @@ private:
 
   string _progName;
   const Params &_params;
+  const KdpFiltParams &_kdpParams;
   const Args &_args;
 
   // dwell sampling

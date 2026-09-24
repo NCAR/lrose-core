@@ -164,8 +164,7 @@ private:
   void _computeSpin(int nGates);
   void _computeMaxTdbzAndSpinInterest(int nGates);
   void _computeZdrSdev(int nGates);
-  void _computePhidpSdevOld(int nGates);
-  void _computePhidpSdevNew(int nGates);
+  void _computePhidpSdev(int nGates);
   void _computePhidpFoldingRange(int nGates);
   void _computeRhohvTest(const RadarMoments *mom, int nGates);
   void _applyRegrFiltFixed(const vector<RadarComplex_t> &iq,

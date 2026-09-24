@@ -278,7 +278,7 @@ RHOHV_field_name = "RHOHV_F";
 //
 // Type: string
 
-KDP_params_file_path = "./testing/KdpParams.test";
+KDP_params_file_path = "./testing/KdpParams.spol";
 
 //======================================================================
 //
@@ -338,7 +338,16 @@ output_fields = {
     long_name = "kdp_from_self_consistency_with_ZZDR",
     standard_name = "specific_differential_phase_hv",
     units = "deg/km",
-    do_write = FALSE
+    do_write = TRUE
+  }
+  ,
+  {
+    id = DELTA,
+    name = "DELTA",
+    long_name = "phase_shift_on_backscatter",
+    standard_name = "phase_shift_on_backscatter",
+    units = "deg",
+    do_write = TRUE
   }
   ,
   {
@@ -491,7 +500,7 @@ KDP_write_debug_fields = TRUE;
 //
 // Type: string
 
-output_dir = "/tmp/cfradial/spol/kdp";
+output_dir = "$(HOME)/data/kdp/spol/cfradial/kdp";
 
 ///////////// output_filename_mode ////////////////////
 //
@@ -579,4 +588,37 @@ procmap_register_interval = 60;
 // Type: int
 
 max_realtime_data_age_secs = 300;
+
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// KDP_compute_all_filters /////////////////
+//
+// Option to compute all of the filtered methods.
+//
+// This is useful for debugging and comparing the filter results. This 
+//   is forced to true if KDP_write_ray_files is true.
+//
+// Type: boolean
+
+compute_all_filters = TRUE;
+
+///////////// KDP_write_ray_files /////////////////////
+//
+// Option to write ray files to debug KDP computation.
+//
+// Type: boolean
+
+write_ray_files = TRUE;
+
+///////////// KDP_ray_files_dir ///////////////////////
+//
+// Directory for KDP ray files.
+//
+// Type: string
+
+ray_files_dir = "$(HOME)/data/kdp/spol/kdp_ray_files";
 

@@ -49,6 +49,7 @@
 #include <radar/GateData.hh>
 #include <radar/MomentsFields.hh>
 #include <radar/KdpFilt.hh>
+#include <radar/KdpFiltParams.hh>
 #include <radar/DwellSpectra.hh>
 
 #include "Params.hh"
@@ -65,7 +66,8 @@ public:
   // Constructor
   
   Beam(const string &progName,
-       const Params &params);
+       const Params &params,
+       const KdpFiltParams &kdpParams);
   
   // copy constructor
   
@@ -191,7 +193,8 @@ private:
 
   string _progName;
   const Params &_params;
-
+  const KdpFiltParams &_kdpParams;
+  
   // pulse vector
 
   deque<const IwrfTsPulse *> _pulses;

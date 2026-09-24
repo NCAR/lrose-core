@@ -49,11 +49,13 @@ using namespace std;
 
 BeamReader::BeamReader(const string &prog_name,
                        const Params &params,
+                       const KdpFiltParams &kdpParams,
                        const Args &args,
                        deque<Beam *> &beamRecyclePool,
                        pthread_mutex_t &beamRecyclePoolMutex) :
         _progName(prog_name),
         _params(params),
+        _kdpParams(kdpParams),
         _args(args),
         _beamRecyclePool(beamRecyclePool),
         _beamRecyclePoolMutex(beamRecyclePoolMutex)
@@ -317,7 +319,7 @@ Beam *BeamReader::getNextBeam()
       beam = _beamRecyclePool.back();
       _beamRecyclePool.pop_back();
     } else {
-      beam = new Beam(_progName, _params);
+      beam = new Beam(_progName, _params, _kdpParams);
     }
     pthread_mutex_unlock(&_beamRecyclePoolMutex);
   }

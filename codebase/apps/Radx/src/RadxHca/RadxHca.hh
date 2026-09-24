@@ -59,6 +59,7 @@
 #include <toolsa/TaThreadPool.hh>
 #include <radar/TempProfile.hh>
 #include <radar/BeamHeight.hh>
+#include <radar/KdpFiltParams.hh>
 #include <Radx/RadxArray.hh>
 class RadxVol;
 class RadxFile;
@@ -97,6 +98,7 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+  KdpFiltParams _kdpFiltParams;
   vector<string> _readPaths;
 
   // computations object
@@ -141,6 +143,7 @@ private:
   public:
     // constructor
     ComputeThread(RadxHca *obj, const Params &params,
+                  const KdpFiltParams &kdpFiltParams,
                   TempProfile &tempProfile, int threadNum);
     // destructor
     virtual ~ComputeThread();
@@ -159,6 +162,7 @@ private:
     RadxHca *_this;
     // params
     const Params &_params;
+    const KdpFiltParams &_kdpFiltParams;
     // temperature profile
     TempProfile &_tempProfile;
     // thread number
@@ -201,6 +205,7 @@ private:
   int _computeDbzGradient(RadxRay &lowerRay, RadxRay &upperRay);
   void _copyDbzGradient(const RadxRay &lowerRay, RadxRay &upperRay);
   void _printRunTime(const string& str);
+  void _printParamsKdp();
 
 };
 

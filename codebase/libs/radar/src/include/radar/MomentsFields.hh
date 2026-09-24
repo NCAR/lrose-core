@@ -159,13 +159,13 @@ public:
   double rhohv_nnc; // no noise correction
   double phidp0; // uncorrected phidp
   double phidp;
-  double phidp_cond; // phidp conditioned for kdp
+  double phidp_sc; // phidp conditioned for kdp
   double phidp_filt; // phidp filtered for kdp
   double phidp_sdev_4kdp; // phidp sdev when computing kdp
   double phidp_jitter_4kdp; // phidp jitter when computing kdp
   double zdr_sdev_4kdp; // ZDR standard deviation when computing kdp
   double kdp;
-  double psob; // phase shift on backscatter
+  double delta; // phase shift on backscatter
   double kdp_hb; // kdp from hubbert bringi method
 
   // co-cross correlations

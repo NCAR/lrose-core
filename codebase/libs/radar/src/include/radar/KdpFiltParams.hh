@@ -66,18 +66,29 @@ public:
   // enum typedefs
 
   typedef enum {
-    KDP_FIR_LEN_125 = 0,
-    KDP_FIR_LEN_60 = 1,
-    KDP_FIR_LEN_40 = 2,
-    KDP_FIR_LEN_30 = 3,
-    KDP_FIR_LEN_20 = 4,
-    KDP_FIR_LEN_10 = 5
-  } KDP_fir_filter_len_t;
+    FFT_FILTER = 0,
+    QUADRATIC_FILTER = 1,
+    REGRESSION_FILTER = 2,
+    FIR_FILTER = 3
+  } phidp_filter_method_t;
 
-  typedef enum {
-    HUBBERT_BRINGI_METHOD = 0,
-    PEAK_REMOVAL_METHOD = 1
-  } psob_method_t;
+  // struct typedefs
+
+  typedef struct {
+    char* citation;
+    double ref_wavelength_cm;
+    double a_coeff;
+    double z_expon;
+    double zdr_expon;
+  } self_con_params_t;
+
+  typedef struct {
+    char* citation;
+    double dbz_coeff;
+    double dbz_expon;
+    double zdr_coeff;
+    double zdr_expon;
+  } atten_params_t;
 
   ///////////////////////////
   // Member functions
@@ -373,16 +384,6 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  KDP_fir_filter_len_t KDP_fir_filter_len;
-
-  int KDP_n_filt_iterations_unfolded;
-
-  psob_method_t KDP_psob_method;
-
-  int KDP_n_filt_iterations_hubbert_bringi;
-
-  double KDP_phidp_difference_threshold_hubbert_bringi;
-
   int KDP_ngates_for_stats;
 
   double KDP_phidp_sdev_max;
@@ -397,31 +398,29 @@ public:
 
   double KDP_snr_threshold;
 
-  tdrp_bool_t KDP_check_zdr_sdev;
+  phidp_filter_method_t phidp_filter_method;
 
-  double KDP_zdr_sdev_max;
+  double phidp_feature_length_km;
 
-  double KDP_minimum_for_self_consistency;
+  int fir_n_iterations;
 
-  int KDP_median_filter_len_for_ZZDR;
+  self_con_params_t self_con_sband;
 
-  double KDP_min_valid_abs_kdp;
+  self_con_params_t self_con_cband;
 
-  tdrp_bool_t KDP_specify_coefficients_for_attenuation_correction;
+  self_con_params_t self_con_xband;
 
-  double KDP_dbz_attenuation_coefficient;
+  int KDP_self_con_median_filter_len;
 
-  double KDP_dbz_attenuation_exponent;
+  double KDP_self_con_mean_delta_threshold;
 
-  double KDP_zdr_attenuation_coefficient;
+  tdrp_bool_t KDP_correct_dbz_and_zdr_for_attenuation;
 
-  double KDP_zdr_attenuation_exponent;
+  atten_params_t atten_sband;
 
-  tdrp_bool_t KDP_debug;
+  atten_params_t atten_cband;
 
-  tdrp_bool_t KDP_write_ray_files;
-
-  char* KDP_ray_files_dir;
+  atten_params_t atten_xband;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -430,7 +429,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[34];
+  mutable TDRPtable _table[25];
 
   const char *_className;
 

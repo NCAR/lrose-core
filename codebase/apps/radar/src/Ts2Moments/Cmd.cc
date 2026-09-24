@@ -214,7 +214,7 @@ void Cmd::compute(int nGates, const RadarMoments *mom,
       _computeZdrSdev(nGates);
     }
     if (_params.phidp_sdev_interest_weight > 0) {
-      _computePhidpSdevNew(nGates);
+      _computePhidpSdev(nGates);
     }
     if (useRhohvTest) {
       _computeRhohvTest(mom, nGates);
@@ -628,104 +628,9 @@ void Cmd::_computeZdrSdev(int nGates)
 /////////////////////////////////////////////////
 // compute SDEV for PHIDP SDEV
 //
-// Old method, ignored folding
-
-void Cmd::_computePhidpSdevOld(int nGates)
-  
-{
-  
-  // compute number of gates in kernel, making sure there is an odd number
-  
-  int nGatesKernel = _params.cmd_kernel_ngates_phidp_sdev;
-  int nGatesHalf = nGatesKernel / 2;
-  
-  // set up gate limits
-  
-  vector<int> startGate;
-  vector<int> endGate;
-  for (int igate = 0; igate < nGates; igate++) {
-    int start = igate - nGatesHalf;
-    if (start < 0) {
-      start = 0;
-    }
-    startGate.push_back(start);
-    int end = igate + nGatesHalf;
-    if (end > nGates - 1) {
-      end = nGates - 1;
-    }
-    endGate.push_back(end);
-  } // igate
-  
-  // sdve computed in range
-  
-  double snrThresh = _params.cmd_snr_threshold;
-  for (int igate = 0; igate < nGates; igate++) {
-    
-    MomentsFields *iflds = _gateData[igate]->flds;
-    if (iflds->snr < snrThresh) {
-      continue;
-    }
-
-    // compute sums etc. for stats over the kernel space
-    
-    double nPhidp = 0.0;
-    double sumPhidp = 0.0;
-    double sumPhidpSq = 0.0;
-    
-    for (int jgate = startGate[igate]; jgate <= endGate[igate]; jgate++) {
-      
-      const MomentsFields *jflds = _gateData[jgate]->flds;
-    
-      double ph = jflds->phidp;
-      if (ph != MomentsFields::missingDouble) {
-        sumPhidp += ph;
-        sumPhidpSq += (ph * ph);
-        nPhidp++;
-      }
-      
-    } // jgate
-    
-    if (nPhidp > 0) {
-      double meanPhidp = sumPhidp / nPhidp;
-      if (nPhidp > 2) {
-        double term1 = sumPhidpSq / nPhidp;
-        double term2 = meanPhidp * meanPhidp;
-        if (term1 >= term2) {
-          iflds->phidp_sdev = sqrt(term1 - term2);
-        }
-      }
-    }
-    
-  } // igate
-  
-  // try KDP object method
-  
-  KdpFilt kdp;
-  kdp.setNGatesStats(_params.cmd_kernel_ngates_phidp_sdev);
-  TaArray<double> phidp_;
-  double *phidp = phidp_.alloc(nGates);
-  for (int igate = 0; igate < nGates; igate++) {
-    MomentsFields *iflds = _gateData[igate]->flds;
-    phidp[igate] = iflds->phidp;
-  }
-  kdp.computePhidpStats(nGates,
-                        _startRangeKm, _gateSpacingKm,
-                        phidp,
-                        MomentsFields::missingDouble);
-  const double *phidpSdev = kdp.getPhidpSdev();
-  for (int igate = 0; igate < nGates; igate++) {
-    MomentsFields *iflds = _gateData[igate]->flds;
-    iflds->phidp_sdev_4kdp = phidpSdev[igate];
-  }
-
-}
-
-/////////////////////////////////////////////////
-// compute SDEV for PHIDP SDEV
-//
 // New methods, takes account of folding
 
-void Cmd::_computePhidpSdevNew(int nGates)
+void Cmd::_computePhidpSdev(int nGates)
   
 {
 

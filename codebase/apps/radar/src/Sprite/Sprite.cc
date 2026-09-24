@@ -113,6 +113,20 @@ Sprite::Sprite(int argc, char **argv) :
     OK = false;
   }
 
+  // read params for KdpFilt
+
+  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_kdpParams.load(_params.KDP_params_file_path,
+                        NULL, true, false)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for KdpFilt: "
+           << _params.KDP_params_file_path << endl;
+      OK = false;
+      return;
+    }
+  }
+
   // create CIDD coord shmem 
   
   // _coordShmem = (coord_export_t *)
@@ -169,7 +183,7 @@ int Sprite::Run(QApplication &app)
 
   // create the time series reader
   
-  _tsReader = new TsReader(_progName, _params, _args);
+  _tsReader = new TsReader(_progName, _params, _kdpParams, _args);
   if (!_tsReader->OK) {
     return -1;
   }

@@ -1067,37 +1067,7 @@ public:
 
   tdrp_bool_t write_alt_mode_vel_debug_fields;
 
-  fir_filter_len_t KDP_fir_filter_len;
-
-  int KDP_n_filt_iterations_unfolded;
-
-  int KDP_n_filt_iterations_conditioned;
-
-  tdrp_bool_t KDP_use_iterative_filtering;
-
-  double KDP_phidp_difference_threshold;
-
-  int KDP_ngates_for_stats;
-
-  double KDP_phidp_sdev_max;
-
-  double KDP_phidp_jitter_max;
-
-  tdrp_bool_t KDP_check_snr;
-
-  double KDP_snr_threshold;
-
-  tdrp_bool_t KDP_check_rhohv;
-
-  double KDP_rhohv_threshold;
-
-  tdrp_bool_t KDP_check_zdr_sdev;
-
-  double KDP_zdr_sdev_max;
-
-  double KDP_min_valid_abs_kdp;
-
-  tdrp_bool_t KDP_debug;
+  char* KDP_params_file_path;
 
   tdrp_bool_t KDP_write_ray_files;
 
@@ -1396,7 +1366,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[323];
+  mutable TDRPtable _table[308];
 
   const char *_className;
 

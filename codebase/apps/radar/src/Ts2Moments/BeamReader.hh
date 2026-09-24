@@ -41,6 +41,7 @@
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
 #include <radar/IwrfTsReader.hh>
+#include <radar/KdpFiltParams.hh>
 #include <radar/AtmosAtten.hh>
 #include "ArrayDeque.hh"
 #include "Params.hh"
@@ -61,6 +62,7 @@ public:
   
   BeamReader(const string &prog_name,
              const Params &params,
+             const KdpFiltParams &kdpParams,
              const Args &args,
              deque<Beam *> &beamRecyclePool,
              pthread_mutex_t &beamRecyclePoolMutex,
@@ -108,6 +110,7 @@ private:
 
   string _progName;
   const Params &_params;
+  const KdpFiltParams &_kdpParams;
   const Args &_args;
 
   // beam pool - so that beam objects can be recycled

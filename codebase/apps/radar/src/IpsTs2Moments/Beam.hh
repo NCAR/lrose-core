@@ -44,6 +44,7 @@
 #include <radar/InterestMap.hh>
 #include <radar/AlternatingVelocity.hh>
 #include <radar/KdpFilt.hh>
+#include <radar/KdpFiltParams.hh>
 #include <radar/AtmosAtten.hh>
 #include <radar/IpsAltModeVel.hh>
 #include <radar/IpsMoments.hh>
@@ -53,7 +54,6 @@
 #include <radar/IpsTsPulse.hh>
 #include <radar/IpsTsCalib.hh>
 #include "Params.hh"
-// #include "MomentsMgr.hh"
 using namespace std;
 
 ////////////////////////
@@ -75,7 +75,8 @@ public:
   // Constructor
   
   Beam(const string &progName,
-       const Params &params);
+       const Params &params,
+       const KdpFiltParams &kdpParams);
         
   // initialize before use
   
@@ -177,6 +178,7 @@ private:
 
   string _progName;
   const Params &_params;
+  const KdpFiltParams &_kdpParams;
 
   // MomentsMgr _mmgr;
 

@@ -1172,375 +1172,19 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP");
-    tt->comment_text = tdrpStrDup("Parameters for computing KDP. KDP will be computed if KDP_available is FALSE.");
+    tt->comment_text = tdrpStrDup("Parameters for computing KDP. KDP will be computed if KDP_available is FALSE. The parameters for KDP computations are contained in a separate file. An example default file can be generated using the -print_params_kdp command line argument.");
     tt++;
     
-    // Parameter 'KDP_fir_filter_len'
-    // ctype is '_fir_filter_len_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("KDP_fir_filter_len");
-    tt->descr = tdrpStrDup("Filter length for the FIR filter for PHIDP (gates)");
-    tt->help = tdrpStrDup("When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.");
-    tt->val_offset = (char *) &KDP_fir_filter_len - &_start_;
-    tt->enum_def.name = tdrpStrDup("fir_filter_len_t");
-    tt->enum_def.nfields = 6;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FIR_LEN_125");
-      tt->enum_def.fields[0].val = FIR_LEN_125;
-      tt->enum_def.fields[1].name = tdrpStrDup("FIR_LEN_60");
-      tt->enum_def.fields[1].val = FIR_LEN_60;
-      tt->enum_def.fields[2].name = tdrpStrDup("FIR_LEN_40");
-      tt->enum_def.fields[2].val = FIR_LEN_40;
-      tt->enum_def.fields[3].name = tdrpStrDup("FIR_LEN_30");
-      tt->enum_def.fields[3].val = FIR_LEN_30;
-      tt->enum_def.fields[4].name = tdrpStrDup("FIR_LEN_20");
-      tt->enum_def.fields[4].val = FIR_LEN_20;
-      tt->enum_def.fields[5].name = tdrpStrDup("FIR_LEN_10");
-      tt->enum_def.fields[5].val = FIR_LEN_10;
-    tt->single_val.e = FIR_LEN_10;
-    tt++;
-    
-    // Parameter 'KDP_n_filt_iterations_unfolded'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_n_filt_iterations_unfolded");
-    tt->descr = tdrpStrDup("Sets the number of iterations for the initial FIR filter for unfolded PHIDP.");
-    tt->help = tdrpStrDup("After unfolding PHIDP, the FIR filter is applied to the unfolded phidp, a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
-    tt->val_offset = (char *) &KDP_n_filt_iterations_unfolded - &_start_;
-    tt->single_val.i = 2;
-    tt++;
-    
-    // Parameter 'KDP_n_filt_iterations_conditioned'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_n_filt_iterations_conditioned");
-    tt->descr = tdrpStrDup("Sets the number of iterations for the final FIR filter for conditioned PHIDP.");
-    tt->help = tdrpStrDup("In order to identify phase shift on backscatter (PSOB), we condition the PHIDP to keep it generally increasing with range. The FIR filter is applied to the conditioned phidp a number of times, to smooth it. The effect of the filter is a combination of the filter length and the number of iterations.");
-    tt->val_offset = (char *) &KDP_n_filt_iterations_conditioned - &_start_;
-    tt->single_val.i = 4;
-    tt++;
-    
-    // Parameter 'KDP_use_iterative_filtering'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_use_iterative_filtering");
-    tt->descr = tdrpStrDup("Perform iterative filtering to locate backscatter phase shift.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_use_iterative_filtering - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_phidp_difference_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_phidp_difference_threshold");
-    tt->descr = tdrpStrDup("Difference threshold for the iterative filtering method.");
-    tt->help = tdrpStrDup("The FIR filter is applied successively, KDP_n_filt_iterations_conditioned times. After each iteration the result is checked against the original. If the difference is less than this parameter, the original value at that gate is retained. If the difference exceeds this parameter, the new filtered value is retained.");
-    tt->val_offset = (char *) &KDP_phidp_difference_threshold - &_start_;
-    tt->single_val.d = 4;
-    tt++;
-    
-    // Parameter 'KDP_ngates_for_stats'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_ngates_for_stats");
-    tt->descr = tdrpStrDup("Number of gates over which the phidp mean, sdev and jitter are computed.");
-    tt->help = tdrpStrDup("The mean, sdev and jitter of phidp are computed over a consecutive number of gates in range, centered on the current gate of interest. This parameter is the number of gates over which these statistics are computed.");
-    tt->val_offset = (char *) &KDP_ngates_for_stats - &_start_;
-    tt->single_val.i = 9;
-    tt++;
-    
-    // Parameter 'KDP_phidp_sdev_max'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_phidp_sdev_max");
-    tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of phidp in range.");
-    tt->help = tdrpStrDup("The sdev of phidp is a good test for valid phidp. The sdev is computed in the circle, so that it takes account of folding if present. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_phidp_sdev_max - &_start_;
-    tt->single_val.d = 20;
-    tt++;
-    
-    // Parameter 'KDP_phidp_jitter_max'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_phidp_jitter_max");
-    tt->descr = tdrpStrDup("Sets the threshold for the jitter of phidp in range.");
-    tt->help = tdrpStrDup("The jitter of phidp is defined as the mean absolute change in angle between successive phidp measurements in range. It is computed on the circle to take account of folding. If the jitter is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_phidp_jitter_max - &_start_;
-    tt->single_val.d = 25;
-    tt++;
-    
-    // Parameter 'KDP_min_valid_abs_kdp'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_min_valid_abs_kdp");
-    tt->descr = tdrpStrDup("Sets the min valid KDP value.");
-    tt->help = tdrpStrDup("Values less than this are set to 0.");
-    tt->val_offset = (char *) &KDP_min_valid_abs_kdp - &_start_;
-    tt->single_val.d = 0.01;
-    tt++;
-    
-    // Parameter 'KDP_check_snr'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_check_snr");
-    tt->descr = tdrpStrDup("Check the SNR.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_check_snr - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_snr_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_snr_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for checking SNR (dB).");
-    tt->help = tdrpStrDup("If the SNR drops below this value, KDP will not be computed at this gate.");
-    tt->val_offset = (char *) &KDP_snr_threshold - &_start_;
-    tt->single_val.d = -6;
-    tt++;
-    
-    // Parameter 'KDP_check_rhohv'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_check_rhohv");
-    tt->descr = tdrpStrDup("Check the RHOHV.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_check_rhohv - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'KDP_rhohv_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_rhohv_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for checking RHOHV.");
-    tt->help = tdrpStrDup("If the RHOHV drops below this value, KDP will not be computed at this gate.");
-    tt->val_offset = (char *) &KDP_rhohv_threshold - &_start_;
-    tt->single_val.d = 0.95;
-    tt++;
-    
-    // Parameter 'KDP_check_zdr_sdev'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_check_zdr_sdev");
-    tt->descr = tdrpStrDup("Check the standard deviation of ZDR in range?");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_check_zdr_sdev - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_zdr_sdev_max'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_zdr_sdev_max");
-    tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of zdr in range.");
-    tt->help = tdrpStrDup("The sdev of zdr is a good test for clutter. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_zdr_sdev_max - &_start_;
-    tt->single_val.d = 2;
-    tt++;
-    
-    // Parameter 'KDP_minimum_for_self_consistency'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_minimum_for_self_consistency");
-    tt->descr = tdrpStrDup("Sets the lower limit of KDP for computing KDP conditioned by self-consistency.");
-    tt->help = tdrpStrDup("To compute KDP_SC, we first find the gates over which regular KDP exceeds a minimum threshold (i.e. this parameter). Over this run of gates we compute the PHIDP change from the regular KDP and from KDP_ZZDR. By taking the ratio of sum(KDP) / sum(KDP_ZZDR), and applying that ratio to KDP_ZZDR over these gates, we can compute KDP_SC such that the PHIDP change over these gates is the same for both KDP and KDP_SC.");
-    tt->val_offset = (char *) &KDP_minimum_for_self_consistency - &_start_;
-    tt->single_val.d = 0.25;
-    tt++;
-    
-    // Parameter 'KDP_median_filter_len_for_ZZDR'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_median_filter_len_for_ZZDR");
-    tt->descr = tdrpStrDup("Sets the length of the median filter when computing KDP_ZZDR.");
-    tt->help = tdrpStrDup("The Z and ZDR fields are smoothed with a median filter of this length prior to estimating KDP_ZZDR.");
-    tt->val_offset = (char *) &KDP_median_filter_len_for_ZZDR - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'KDP_debug'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_debug");
-    tt->descr = tdrpStrDup("Option to print debug messages in KDP computation.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_debug - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_write_ray_files'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_write_ray_files");
-    tt->descr = tdrpStrDup("Option to write ray files to debug KDP computation.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_write_ray_files - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_ray_files_dir'
+    // Parameter 'KDP_params_file_path'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("KDP_ray_files_dir");
-    tt->descr = tdrpStrDup("Directory for KDP ray files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &KDP_ray_files_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/kdp_ray_files");
-    tt++;
-    
-    // Parameter 'compute_kdp_bringi'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_kdp_bringi");
-    tt->descr = tdrpStrDup("Option to compute KDP using the BRINGI method.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &compute_kdp_bringi - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_fir_filter_len'
-    // ctype is '_fir_filter_len_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_fir_filter_len");
-    tt->descr = tdrpStrDup("Filter length for the FIR filter for PHIDP (gates)");
-    tt->help = tdrpStrDup("When computing KDP, an FIR filter is first applied to PHIDP to smooth it. This is the length of that filter, in gates.");
-    tt->val_offset = (char *) &KDP_BRINGI_fir_filter_len - &_start_;
-    tt->enum_def.name = tdrpStrDup("fir_filter_len_t");
-    tt->enum_def.nfields = 6;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FIR_LEN_125");
-      tt->enum_def.fields[0].val = FIR_LEN_125;
-      tt->enum_def.fields[1].name = tdrpStrDup("FIR_LEN_60");
-      tt->enum_def.fields[1].val = FIR_LEN_60;
-      tt->enum_def.fields[2].name = tdrpStrDup("FIR_LEN_40");
-      tt->enum_def.fields[2].val = FIR_LEN_40;
-      tt->enum_def.fields[3].name = tdrpStrDup("FIR_LEN_30");
-      tt->enum_def.fields[3].val = FIR_LEN_30;
-      tt->enum_def.fields[4].name = tdrpStrDup("FIR_LEN_20");
-      tt->enum_def.fields[4].val = FIR_LEN_20;
-      tt->enum_def.fields[5].name = tdrpStrDup("FIR_LEN_10");
-      tt->enum_def.fields[5].val = FIR_LEN_10;
-    tt->single_val.e = FIR_LEN_10;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_phidp_difference_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_phidp_difference_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for difference of phidp.");
-    tt->help = tdrpStrDup("This is used to test the difference between the unfolded phidp value and the filtered phidp value. If the difference exceeds this value, we use the original value instead of the filtered value. Applies to computation of KDP only");
-    tt->val_offset = (char *) &KDP_BRINGI_phidp_difference_threshold - &_start_;
-    tt->single_val.d = 4;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_phidp_sdev_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_phidp_sdev_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of phidp in range.");
-    tt->help = tdrpStrDup("The sdev of phidp is a good test for weather. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_BRINGI_phidp_sdev_threshold - &_start_;
-    tt->single_val.d = 12;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_zdr_sdev_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_zdr_sdev_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for the standard deviation of zdr in range.");
-    tt->help = tdrpStrDup("The sdev of zdr is a good test for weather. If the sdev is less than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_BRINGI_zdr_sdev_threshold - &_start_;
-    tt->single_val.d = 1.8;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_rhohv_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_rhohv_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold for rhohv.");
-    tt->help = tdrpStrDup("rhohv is a good test for weather. If rhohv is greater than this value, it is assumed we are in weather. Applies to computation of KDP only.");
-    tt->val_offset = (char *) &KDP_BRINGI_rhohv_threshold - &_start_;
-    tt->single_val.d = 0.75;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_apply_median_filter_to_PHIDP'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_apply_median_filter_to_PHIDP");
-    tt->descr = tdrpStrDup("Option to filter PHIDP with median filter.");
-    tt->help = tdrpStrDup("The filter is applied in range.");
-    tt->val_offset = (char *) &KDP_BRINGI_apply_median_filter_to_PHIDP - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'KDP_BRINGI_median_filter_len'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("KDP_BRINGI_median_filter_len");
-    tt->descr = tdrpStrDup("Length of median filter for PHIDP - gates.");
-    tt->help = tdrpStrDup("See 'appply_median_filter_to_PHIDP'");
-    tt->val_offset = (char *) &KDP_BRINGI_median_filter_len - &_start_;
-    tt->single_val.i = 5;
+    tt->param_name = tdrpStrDup("KDP_params_file_path");
+    tt->descr = tdrpStrDup("Path for parameters for KDP computations.");
+    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
+    tt->val_offset = (char *) &KDP_params_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("use-defaults");
     tt++;
     
     // Parameter 'Comment 9'
@@ -3758,7 +3402,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 69;
+        tt->struct_def.fields[0].enum_def.nfields = 68;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNR");
@@ -3787,8 +3431,8 @@
         tt->struct_def.fields[0].enum_def.fields[11].val = KDP_COND;
         tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("KDP_BRINGI");
         tt->struct_def.fields[0].enum_def.fields[12].val = KDP_BRINGI;
-        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("PSOB");
-        tt->struct_def.fields[0].enum_def.fields[13].val = PSOB;
+        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("DELTA");
+        tt->struct_def.fields[0].enum_def.fields[13].val = DELTA;
         tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("ZDP");
         tt->struct_def.fields[0].enum_def.fields[14].val = ZDP;
         tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("PRECIP_RATE_ZH");
@@ -3833,72 +3477,70 @@
         tt->struct_def.fields[0].enum_def.fields[34].val = PHIDP_FOR_KDP;
         tt->struct_def.fields[0].enum_def.fields[35].name = tdrpStrDup("PHIDP_MEAN_FOR_KDP");
         tt->struct_def.fields[0].enum_def.fields[35].val = PHIDP_MEAN_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[36].name = tdrpStrDup("PHIDP_MEAN_UNFOLD_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[36].val = PHIDP_MEAN_UNFOLD_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[36].name = tdrpStrDup("PHIDP_UNFOLD_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[36].val = PHIDP_UNFOLD_FOR_KDP;
         tt->struct_def.fields[0].enum_def.fields[37].name = tdrpStrDup("PHIDP_SDEV_FOR_KDP");
         tt->struct_def.fields[0].enum_def.fields[37].val = PHIDP_SDEV_FOR_KDP;
         tt->struct_def.fields[0].enum_def.fields[38].name = tdrpStrDup("PHIDP_JITTER_FOR_KDP");
         tt->struct_def.fields[0].enum_def.fields[38].val = PHIDP_JITTER_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[39].name = tdrpStrDup("PHIDP_UNFOLD_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[39].val = PHIDP_UNFOLD_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[40].name = tdrpStrDup("PHIDP_FILT_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[40].val = PHIDP_FILT_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[41].name = tdrpStrDup("PHIDP_COND_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[41].val = PHIDP_COND_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[42].name = tdrpStrDup("PHIDP_COND_FILT_FOR_KDP");
-        tt->struct_def.fields[0].enum_def.fields[42].val = PHIDP_COND_FILT_FOR_KDP;
-        tt->struct_def.fields[0].enum_def.fields[43].name = tdrpStrDup("DBZ_FOR_RATE");
-        tt->struct_def.fields[0].enum_def.fields[43].val = DBZ_FOR_RATE;
-        tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("ZDR_FOR_RATE");
-        tt->struct_def.fields[0].enum_def.fields[44].val = ZDR_FOR_RATE;
-        tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("KDP_FOR_RATE");
-        tt->struct_def.fields[0].enum_def.fields[45].val = KDP_FOR_RATE;
-        tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("PARTICLE_ID");
-        tt->struct_def.fields[0].enum_def.fields[46].val = PARTICLE_ID;
-        tt->struct_def.fields[0].enum_def.fields[47].name = tdrpStrDup("PID_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[47].val = PID_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[48].name = tdrpStrDup("PARTICLE_ID2");
-        tt->struct_def.fields[0].enum_def.fields[48].val = PARTICLE_ID2;
-        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("PID_INTEREST2");
-        tt->struct_def.fields[0].enum_def.fields[49].val = PID_INTEREST2;
-        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("DBZ_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[50].val = DBZ_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("ZDR_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[51].val = ZDR_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("LDR_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[52].val = LDR_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[53].name = tdrpStrDup("PHIDP_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[53].val = PHIDP_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[54].name = tdrpStrDup("RHOHV_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[54].val = RHOHV_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[55].name = tdrpStrDup("KDP_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[55].val = KDP_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[56].name = tdrpStrDup("SDZDR_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[56].val = SDZDR_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[57].name = tdrpStrDup("SDPHIDP_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[57].val = SDPHIDP_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[58].name = tdrpStrDup("TEMP_FOR_PID");
-        tt->struct_def.fields[0].enum_def.fields[58].val = TEMP_FOR_PID;
-        tt->struct_def.fields[0].enum_def.fields[59].name = tdrpStrDup("ZDRM_IN_ICE");
-        tt->struct_def.fields[0].enum_def.fields[59].val = ZDRM_IN_ICE;
-        tt->struct_def.fields[0].enum_def.fields[60].name = tdrpStrDup("ZDRM_IN_BRAGG");
-        tt->struct_def.fields[0].enum_def.fields[60].val = ZDRM_IN_BRAGG;
-        tt->struct_def.fields[0].enum_def.fields[61].name = tdrpStrDup("ZDR_IN_ICE");
-        tt->struct_def.fields[0].enum_def.fields[61].val = ZDR_IN_ICE;
-        tt->struct_def.fields[0].enum_def.fields[62].name = tdrpStrDup("ZDR_IN_BRAGG");
-        tt->struct_def.fields[0].enum_def.fields[62].val = ZDR_IN_BRAGG;
-        tt->struct_def.fields[0].enum_def.fields[63].name = tdrpStrDup("ZDR_FLAG_IN_ICE");
-        tt->struct_def.fields[0].enum_def.fields[63].val = ZDR_FLAG_IN_ICE;
-        tt->struct_def.fields[0].enum_def.fields[64].name = tdrpStrDup("ZDR_FLAG_IN_BRAGG");
-        tt->struct_def.fields[0].enum_def.fields[64].val = ZDR_FLAG_IN_BRAGG;
-        tt->struct_def.fields[0].enum_def.fields[65].name = tdrpStrDup("ML_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[65].val = ML_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[66].name = tdrpStrDup("ELEVATION_ANGLE");
-        tt->struct_def.fields[0].enum_def.fields[66].val = ELEVATION_ANGLE;
-        tt->struct_def.fields[0].enum_def.fields[67].name = tdrpStrDup("RANGE");
-        tt->struct_def.fields[0].enum_def.fields[67].val = RANGE;
-        tt->struct_def.fields[0].enum_def.fields[68].name = tdrpStrDup("BEAM_HEIGHT");
-        tt->struct_def.fields[0].enum_def.fields[68].val = BEAM_HEIGHT;
+        tt->struct_def.fields[0].enum_def.fields[39].name = tdrpStrDup("PHIDP_FILT_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[39].val = PHIDP_FILT_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[40].name = tdrpStrDup("PHIDP_COND_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[40].val = PHIDP_COND_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[41].name = tdrpStrDup("PHIDP_COND_FILT_FOR_KDP");
+        tt->struct_def.fields[0].enum_def.fields[41].val = PHIDP_COND_FILT_FOR_KDP;
+        tt->struct_def.fields[0].enum_def.fields[42].name = tdrpStrDup("DBZ_FOR_RATE");
+        tt->struct_def.fields[0].enum_def.fields[42].val = DBZ_FOR_RATE;
+        tt->struct_def.fields[0].enum_def.fields[43].name = tdrpStrDup("ZDR_FOR_RATE");
+        tt->struct_def.fields[0].enum_def.fields[43].val = ZDR_FOR_RATE;
+        tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("KDP_FOR_RATE");
+        tt->struct_def.fields[0].enum_def.fields[44].val = KDP_FOR_RATE;
+        tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("PARTICLE_ID");
+        tt->struct_def.fields[0].enum_def.fields[45].val = PARTICLE_ID;
+        tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("PID_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[46].val = PID_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[47].name = tdrpStrDup("PARTICLE_ID2");
+        tt->struct_def.fields[0].enum_def.fields[47].val = PARTICLE_ID2;
+        tt->struct_def.fields[0].enum_def.fields[48].name = tdrpStrDup("PID_INTEREST2");
+        tt->struct_def.fields[0].enum_def.fields[48].val = PID_INTEREST2;
+        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("DBZ_FOR_PID");
+        tt->struct_def.fields[0].enum_def.fields[49].val = DBZ_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("ZDR_FOR_PID");
+        tt->struct_def.fields[0].enum_def.fields[50].val = ZDR_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("LDR_FOR_PID");
+        tt->struct_def.fields[0].enum_def.fields[51].val = LDR_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("PHIDP_FOR_PID");
+        tt->struct_def.fields[0].enum_def.fields[52].val = PHIDP_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[53].name = tdrpStrDup("RHOHV_FOR_PID");
+        tt->struct_def.fields[0].enum_def.fields[53].val = RHOHV_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[54].name = tdrpStrDup("KDP_FOR_PID");
+        tt->struct_def.fields[0].enum_def.fields[54].val = KDP_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[55].name = tdrpStrDup("SDZDR_FOR_PID");
+        tt->struct_def.fields[0].enum_def.fields[55].val = SDZDR_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[56].name = tdrpStrDup("SDPHIDP_FOR_PID");
+        tt->struct_def.fields[0].enum_def.fields[56].val = SDPHIDP_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[57].name = tdrpStrDup("TEMP_FOR_PID");
+        tt->struct_def.fields[0].enum_def.fields[57].val = TEMP_FOR_PID;
+        tt->struct_def.fields[0].enum_def.fields[58].name = tdrpStrDup("ZDRM_IN_ICE");
+        tt->struct_def.fields[0].enum_def.fields[58].val = ZDRM_IN_ICE;
+        tt->struct_def.fields[0].enum_def.fields[59].name = tdrpStrDup("ZDRM_IN_BRAGG");
+        tt->struct_def.fields[0].enum_def.fields[59].val = ZDRM_IN_BRAGG;
+        tt->struct_def.fields[0].enum_def.fields[60].name = tdrpStrDup("ZDR_IN_ICE");
+        tt->struct_def.fields[0].enum_def.fields[60].val = ZDR_IN_ICE;
+        tt->struct_def.fields[0].enum_def.fields[61].name = tdrpStrDup("ZDR_IN_BRAGG");
+        tt->struct_def.fields[0].enum_def.fields[61].val = ZDR_IN_BRAGG;
+        tt->struct_def.fields[0].enum_def.fields[62].name = tdrpStrDup("ZDR_FLAG_IN_ICE");
+        tt->struct_def.fields[0].enum_def.fields[62].val = ZDR_FLAG_IN_ICE;
+        tt->struct_def.fields[0].enum_def.fields[63].name = tdrpStrDup("ZDR_FLAG_IN_BRAGG");
+        tt->struct_def.fields[0].enum_def.fields[63].val = ZDR_FLAG_IN_BRAGG;
+        tt->struct_def.fields[0].enum_def.fields[64].name = tdrpStrDup("ML_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[64].val = ML_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[65].name = tdrpStrDup("ELEVATION_ANGLE");
+        tt->struct_def.fields[0].enum_def.fields[65].val = ELEVATION_ANGLE;
+        tt->struct_def.fields[0].enum_def.fields[66].name = tdrpStrDup("RANGE");
+        tt->struct_def.fields[0].enum_def.fields[66].val = RANGE;
+        tt->struct_def.fields[0].enum_def.fields[67].name = tdrpStrDup("BEAM_HEIGHT");
+        tt->struct_def.fields[0].enum_def.fields[67].val = BEAM_HEIGHT;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -4025,8 +3667,8 @@
       tt->struct_vals[60].e = OUTPUT_SCALING_DYNAMIC;
       tt->struct_vals[61].d = 0.001;
       tt->struct_vals[62].d = 0;
-      tt->struct_vals[63].e = PSOB;
-      tt->struct_vals[64].s = tdrpStrDup("PSOB");
+      tt->struct_vals[63].e = DELTA;
+      tt->struct_vals[64].s = tdrpStrDup("DELTA");
       tt->struct_vals[65].s = tdrpStrDup("phase_shift_on_backscatter");
       tt->struct_vals[66].s = tdrpStrDup("phase_shift_on_backscatter");
       tt->struct_vals[67].s = tdrpStrDup("deg");

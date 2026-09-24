@@ -81,15 +81,6 @@ public:
   } mode_t;
 
   typedef enum {
-    FIR_LEN_125 = 0,
-    FIR_LEN_60 = 1,
-    FIR_LEN_40 = 2,
-    FIR_LEN_30 = 3,
-    FIR_LEN_20 = 4,
-    FIR_LEN_10 = 5
-  } fir_filter_len_t;
-
-  typedef enum {
     CLASS_GC = 0,
     CLASS_BS = 1,
     CLASS_DS = 2,
@@ -123,70 +114,67 @@ public:
     PHIDP = 8,
     KDP = 9,
     KDP_COND = 10,
-    PSOB = 11,
+    DELTA = 11,
     DBZ_ATTEN_CORRECTION = 12,
     ZDR_ATTEN_CORRECTION = 13,
     DBZ_ATTEN_CORRECTED = 14,
     ZDR_ATTEN_CORRECTED = 15,
     DBZ_FOR_KDP = 16,
-    ZDR_FOR_KDP = 17,
-    RHOHV_FOR_KDP = 18,
-    SNR_FOR_KDP = 19,
-    ZDR_SDEV_FOR_KDP = 20,
-    VALID_FLAG_FOR_KDP = 21,
-    PHIDP_FOR_KDP = 22,
-    PHIDP_MEAN_FOR_KDP = 23,
-    PHIDP_MEAN_UNFOLD_FOR_KDP = 24,
-    PHIDP_SDEV_FOR_KDP = 25,
-    PHIDP_JITTER_FOR_KDP = 26,
-    PHIDP_UNFOLD_FOR_KDP = 27,
-    PHIDP_FILT_FOR_KDP = 28,
-    PHIDP_COND_FOR_KDP = 29,
-    PHIDP_COND_FILT_FOR_KDP = 30,
-    RAY_HEIGHT = 31,
-    SNR_MEAN_SEACLUT = 32,
-    RHOHV_MEAN_SEACLUT = 33,
-    PHIDP_SDEV_SEACLUT = 34,
-    ZDR_SDEV_SEACLUT = 35,
-    DBZ_ELEV_GRADIENT_SEACLUT = 36,
-    RHOHV_MEAN_INTEREST_SEACLUT = 37,
-    PHIDP_SDEV_INTEREST_SEACLUT = 38,
-    ZDR_SDEV_INTEREST_SEACLUT = 39,
-    DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 40,
-    SEACLUT_FLAG = 41,
-    PARTICLE_ID = 42,
-    TEMP_FOR_PID = 43,
-    HCA_DBZ = 44,
-    HCA_ZDR = 45,
-    HCA_RHOHV = 46,
-    HCA_PHIDP = 47,
-    HCA_LOGKDP = 48,
-    HCA_TEMP_LOW = 49,
-    HCA_TEMP_MID = 50,
-    HCA_TEMP_HIGH = 51,
-    HCA_SMOOTH_DBZ = 52,
-    HCA_SMOOTH_ZDR = 53,
-    HCA_SMOOTH_RHOHV = 54,
-    HCA_SMOOTH_PHIDP = 55,
-    HCA_HVY_SMOOTH_PHIDP = 56,
-    HCA_TEXTURE_DBZ = 57,
-    HCA_TEXTURE_ZDR = 58,
-    HCA_TEXTURE_RHOHV = 59,
-    HCA_TEXTURE_PHIDP = 60,
-    HCA_SD_DBZ = 61,
-    HCA_SD_PHIDP = 62,
-    HCA_GC_INTEREST = 63,
-    HCA_BS_INTEREST = 64,
-    HCA_DS_INTEREST = 65,
-    HCA_WS_INTEREST = 66,
-    HCA_CR_INTEREST = 67,
-    HCA_GR_INTEREST = 68,
-    HCA_BD_INTEREST = 69,
-    HCA_RA_INTEREST = 70,
-    HCA_HR_INTEREST = 71,
-    HCA_RH_INTEREST = 72,
-    HCA_TEMP_CAT = 73,
-    HCA = 74
+    RHOHV_FOR_KDP = 17,
+    SNR_FOR_KDP = 18,
+    VALID_FLAG_FOR_KDP = 19,
+    PHIDP_FOR_KDP = 20,
+    PHIDP_MEAN_FOR_KDP = 21,
+    PHIDP_UNFOLD_FOR_KDP = 22,
+    PHIDP_SDEV_FOR_KDP = 23,
+    PHIDP_JITTER_FOR_KDP = 24,
+    PHIDP_FILT_FOR_KDP = 25,
+    PHIDP_SC_FOR_KDP = 26,
+    PHIDP_COND_FILT_FOR_KDP = 27,
+    RAY_HEIGHT = 28,
+    SNR_MEAN_SEACLUT = 29,
+    RHOHV_MEAN_SEACLUT = 30,
+    PHIDP_SDEV_SEACLUT = 31,
+    ZDR_SDEV_SEACLUT = 32,
+    DBZ_ELEV_GRADIENT_SEACLUT = 33,
+    RHOHV_MEAN_INTEREST_SEACLUT = 34,
+    PHIDP_SDEV_INTEREST_SEACLUT = 35,
+    ZDR_SDEV_INTEREST_SEACLUT = 36,
+    DBZ_ELEV_GRADIENT_INTEREST_SEACLUT = 37,
+    SEACLUT_FLAG = 38,
+    PARTICLE_ID = 39,
+    TEMP_FOR_PID = 40,
+    HCA_DBZ = 41,
+    HCA_ZDR = 42,
+    HCA_RHOHV = 43,
+    HCA_PHIDP = 44,
+    HCA_LOGKDP = 45,
+    HCA_TEMP_LOW = 46,
+    HCA_TEMP_MID = 47,
+    HCA_TEMP_HIGH = 48,
+    HCA_SMOOTH_DBZ = 49,
+    HCA_SMOOTH_ZDR = 50,
+    HCA_SMOOTH_RHOHV = 51,
+    HCA_SMOOTH_PHIDP = 52,
+    HCA_HVY_SMOOTH_PHIDP = 53,
+    HCA_TEXTURE_DBZ = 54,
+    HCA_TEXTURE_ZDR = 55,
+    HCA_TEXTURE_RHOHV = 56,
+    HCA_TEXTURE_PHIDP = 57,
+    HCA_SD_DBZ = 58,
+    HCA_SD_PHIDP = 59,
+    HCA_GC_INTEREST = 60,
+    HCA_BS_INTEREST = 61,
+    HCA_DS_INTEREST = 62,
+    HCA_WS_INTEREST = 63,
+    HCA_CR_INTEREST = 64,
+    HCA_GR_INTEREST = 65,
+    HCA_BD_INTEREST = 66,
+    HCA_RA_INTEREST = 67,
+    HCA_HR_INTEREST = 68,
+    HCA_RH_INTEREST = 69,
+    HCA_TEMP_CAT = 70,
+    HCA = 71
   } output_field_id_t;
 
   typedef enum {
@@ -630,45 +618,7 @@ public:
 
   char* LDR_field_name;
 
-  fir_filter_len_t KDP_fir_filter_len;
-
-  int KDP_n_filt_iterations_unfolded;
-
-  int KDP_n_filt_iterations_conditioned;
-
-  tdrp_bool_t KDP_use_iterative_filtering;
-
-  double KDP_phidp_difference_threshold;
-
-  int KDP_ngates_for_stats;
-
-  double KDP_phidp_sdev_max;
-
-  double KDP_phidp_jitter_max;
-
-  double KDP_min_valid_abs_kdp;
-
-  tdrp_bool_t KDP_check_snr;
-
-  double KDP_snr_threshold;
-
-  tdrp_bool_t KDP_check_rhohv;
-
-  double KDP_rhohv_threshold;
-
-  tdrp_bool_t KDP_check_zdr_sdev;
-
-  double KDP_zdr_sdev_max;
-
-  double KDP_minimum_for_self_consistency;
-
-  int KDP_median_filter_len_for_ZZDR;
-
-  tdrp_bool_t KDP_debug;
-
-  tdrp_bool_t KDP_write_ray_files;
-
-  char* KDP_ray_files_dir;
+  char* KDP_params_file_path;
 
   tdrp_bool_t apply_precip_attenuation_correction;
 
@@ -869,7 +819,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[175];
+  mutable TDRPtable _table[156];
 
   const char *_className;
 
