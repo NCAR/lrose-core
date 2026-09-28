@@ -544,7 +544,7 @@ std::vector<double> KdpFirFilt::_initLowPass(int nTaps,
   std::vector<double> h(nTaps);
 
   const int M = (nTaps - 1) / 2;
-  const double denom = std::cyl_bessel_i(0.0, beta);
+  const double denom = _besselI0(beta);
 
   double sum = 0.0;
 
@@ -568,10 +568,7 @@ std::vector<double> KdpFirFilt::_initLowPass(int nTaps,
       static_cast<double>(k) / static_cast<double>(M);
 
     const double window =
-      std::cyl_bessel_i(
-        0.0,
-        beta * std::sqrt(1.0 - x * x)) /
-      denom;
+      _besselI0(beta * std::sqrt(1.0 - x * x)) / denom;
 
     h[n] = ideal * window;
     sum += h[n];
@@ -584,4 +581,41 @@ std::vector<double> KdpFirFilt::_initLowPass(int nTaps,
 
   return h;
   
+}
+
+//////////////////////////////////////////
+// bessel function estimation
+
+double KdpFirFilt::_besselI0(double x)
+{
+  double ax = std::fabs(x);
+
+  if (ax < 3.75) {
+
+    double y = x / 3.75;
+    y *= y;
+
+    return 1.0 +
+      y * (3.5156229 +
+      y * (3.0899424 +
+      y * (1.2067492 +
+      y * (0.2659732 +
+      y * (0.0360768 +
+      y * 0.0045813)))));
+
+  } else {
+
+    double y = 3.75 / ax;
+
+    return (std::exp(ax) / std::sqrt(ax)) *
+      (0.39894228 +
+      y * (0.01328592 +
+      y * (0.00225319 +
+      y * (-0.00157565 +
+      y * (0.00916281 +
+      y * (-0.02057706 +
+      y * (0.02635537 +
+      y * (-0.01647633 +
+      y * 0.00392377))))))));
+  }
 }
