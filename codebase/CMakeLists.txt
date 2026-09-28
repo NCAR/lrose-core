@@ -92,10 +92,14 @@ if(APPLE)
 endif(APPLE)
 
 find_package (HDF5)
+include_directories(${HDF5_INCLUDE_DIRS})
+include_directories(${HDF5_C_INCLUDE_DIRS})
 
-# find_package (NETCDF)
+find_package (NETCDF)
+include_directories(${NETCDF_INCLUDE_DIR})
+
 # find_package (LROSE)
-
+#
 if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)
   get_filename_component(HDF5_INSTALL_PREFIX ${HDF5_hdf5_LIBRARY_RELEASE} DIRECTORY)
 endif()
@@ -105,13 +109,13 @@ endif()
 if (NOT IS_DIRECTORY HDF5_INSTALL_PREFIX)
   set (HDF5_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 endif()
-if (NOT IS_DIRECTORY HDF5_C_INCLUDE_DIR)
-  set (HDF5_C_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
+if (NOT IS_DIRECTORY HDF5_C_INCLUDE_DIRS)
+  set (HDF5_C_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include)
 endif()
 message("X11_X11_INCLUDE_PATH: ${X11_X11_INCLUDE_PATH}")
 message("X11_LIB_DIR: ${X11_LIB_DIR}")
 message("HDF5_INSTALL_PREFIX: ${HDF5_INSTALL_PREFIX}")
-message("HDF5_C_INCLUDE_DIR: ${HDF5_C_INCLUDE_DIR}")
+message("HDF5_C_INCLUDE_DIRS: ${HDF5_C_INCLUDE_DIRS}")
 
 # If user did not provide CMAKE_INSTALL_PREFIX, use ~/lrose
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
