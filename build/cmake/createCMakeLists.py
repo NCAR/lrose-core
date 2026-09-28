@@ -693,11 +693,16 @@ def writeCMakeListsCodebase(dir):
         fo.write('\n')
 
     fo.write('find_package (HDF5)\n')
+    fo.write('include_directories(${HDF5_INCLUDE_DIRS})\n')
+    fo.write('include_directories(${HDF5_C_INCLUDE_DIRS})\n')
     fo.write('\n')
 
-    fo.write('# find_package (NETCDF)\n')
-    fo.write('# find_package (LROSE)\n')
+    fo.write('find_package (NETCDF)\n')
+    fo.write('include_directories(${NETCDF_INCLUDE_DIR})\n')
     fo.write('\n')
+
+    fo.write('# find_package (LROSE)\n')
+    fo.write('#\n')
 
     fo.write("if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)\n")
     fo.write("  get_filename_component(HDF5_INSTALL_PREFIX ${HDF5_hdf5_LIBRARY_RELEASE} DIRECTORY)\n")
