@@ -91,12 +91,32 @@ if(APPLE)
   endif(DEFINED MAMBA_BUILD)
 endif(APPLE)
 
-find_package (HDF5)
-include_directories(${HDF5_INCLUDE_DIRS})
-include_directories(${HDF5_C_INCLUDE_DIRS})
+find_package (HDF5 REQUIRED COMPONENTS C)
+if (HDF5_C_LIBRARY)
+  get_filename_component(HDF5_LIBRARY_DIR "${HDF5_C_LIBRARY}" DIRECTORY)
+endif()
+
+message(DEBUG "HDF5_INCLUDE_DIRS: ${HDF5_INCLUDE_DIRS}")
+message(DEBUG "HDF5_C_INCLUDE_DIRS: ${HDF5_C_INCLUDE_DIRS}")
+message(DEBUG "HDF5_LIBRARY_DIR: ${HDF5_LIBRARY_DIR}")
+message(DEBUG "HDF5_C_LIBRARY: ${HDF5_C_LIBRARY}")
 
 find_package (NETCDF)
-include_directories(${NETCDF_INCLUDE_DIR})
+message(DEBUG "netCDF_INCLUDE_DIR: ${netCDF_INCLUDE_DIR}")
+message(DEBUG "netCDF_LIB_DIR: ${netCDF_LIB_DIR}")
+message(DEBUG "netCDF_INSTALL_PREFIX: ${netCDF_INSTALL_PREFIX}")
+
+foreach(_variableName ${_variableNames})
+  if(_variableName MATCHES "^HDF5")
+    message(DEBUG "${_variableName}=${${_variableName}}")
+  endif()
+endforeach()
+
+foreach(_variableName ${_variableNames})
+  if(_variableName MATCHES "^netCDF")
+    message(DEBUG "${_variableName}=${${_variableName}}")
+  endif()
+endforeach()
 
 # find_package (LROSE)
 #
@@ -114,14 +134,12 @@ if (NOT IS_DIRECTORY HDF5_C_INCLUDE_DIRS)
 endif()
 message("X11_X11_INCLUDE_PATH: ${X11_X11_INCLUDE_PATH}")
 message("X11_LIB_DIR: ${X11_LIB_DIR}")
-message("HDF5_INSTALL_PREFIX: ${HDF5_INSTALL_PREFIX}")
-message("HDF5_C_INCLUDE_DIRS: ${HDF5_C_INCLUDE_DIRS}")
 
 # If user did not provide CMAKE_INSTALL_PREFIX, use ~/lrose
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/lrose" CACHE PATH "..." FORCE)
 endif()
-message("CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}")
 
 # Function for creating TDRP Params.cc and Params.hh files
 

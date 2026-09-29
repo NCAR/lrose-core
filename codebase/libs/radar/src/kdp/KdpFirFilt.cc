@@ -544,7 +544,7 @@ std::vector<double> KdpFirFilt::_initLowPass(int nTaps,
   std::vector<double> h(nTaps);
 
   const int M = (nTaps - 1) / 2;
-  const double denom = _besselI0(beta);
+  const double denom = KdpFirFilt::_besselI0(beta);
 
   double sum = 0.0;
 
@@ -568,7 +568,7 @@ std::vector<double> KdpFirFilt::_initLowPass(int nTaps,
       static_cast<double>(k) / static_cast<double>(M);
 
     const double window =
-      _besselI0(beta * std::sqrt(1.0 - x * x)) / denom;
+      KdpFirFilt::_besselI0(beta * std::sqrt(1.0 - x * x)) / denom;
 
     h[n] = ideal * window;
     sum += h[n];
@@ -588,6 +588,7 @@ std::vector<double> KdpFirFilt::_initLowPass(int nTaps,
 
 double KdpFirFilt::_besselI0(double x)
 {
+
   double ax = std::fabs(x);
 
   if (ax < 3.75) {
@@ -618,4 +619,5 @@ double KdpFirFilt::_besselI0(double x)
       y * (-0.01647633 +
       y * 0.00392377))))))));
   }
+
 }

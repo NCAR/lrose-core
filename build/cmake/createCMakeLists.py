@@ -198,6 +198,7 @@ def main():
         print("==>>   nTotal  : ", nTotal, file=sys.stderr)
     
     # sanity check: we could not use Cray and Fujitsu compilers at the same time
+
     assert not (options.iscray and options.isfujitsu), "iscray and isfujitsu could not be both True..."
         
     sys.exit(0)
@@ -692,15 +693,37 @@ def writeCMakeListsCodebase(dir):
         fo.write('endif(APPLE)\n')
         fo.write('\n')
 
-    fo.write('find_package (HDF5)\n')
-    fo.write('include_directories(${HDF5_INCLUDE_DIRS})\n')
-    fo.write('include_directories(${HDF5_C_INCLUDE_DIRS})\n')
+    fo.write('find_package (HDF5 REQUIRED COMPONENTS C)\n')
+    fo.write('if (HDF5_C_LIBRARY)\n')
+    fo.write('  get_filename_component(HDF5_LIBRARY_DIR "${HDF5_C_LIBRARY}" DIRECTORY)\n')
+    fo.write('endif()\n')
+    fo.write('\n')
+    fo.write('message(DEBUG "HDF5_INCLUDE_DIRS: ${HDF5_INCLUDE_DIRS}")\n')
+    fo.write('message(DEBUG "HDF5_C_INCLUDE_DIRS: ${HDF5_C_INCLUDE_DIRS}")\n')
+    fo.write('message(DEBUG "HDF5_LIBRARY_DIR: ${HDF5_LIBRARY_DIR}")\n')
+    fo.write('message(DEBUG "HDF5_C_LIBRARY: ${HDF5_C_LIBRARY}")\n')
     fo.write('\n')
 
+    fo.write('foreach(_variableName ${_variableNames})\n')
+    fo.write('  if(_variableName MATCHES "^HDF5")\n')
+    fo.write('    message(DEBUG "${_variableName}=${${_variableName}}")\n')
+    fo.write('  endif()\n')
+    fo.write('endforeach()\n')
+    fo.write('\n')
+    
     fo.write('find_package (NETCDF)\n')
-    fo.write('include_directories(${NETCDF_INCLUDE_DIR})\n')
+    fo.write('message(DEBUG "netCDF_INCLUDE_DIR: ${netCDF_INCLUDE_DIR}")\n')
+    fo.write('message(DEBUG "netCDF_LIB_DIR: ${netCDF_LIB_DIR}")\n')
+    fo.write('message(DEBUG "netCDF_INSTALL_PREFIX: ${netCDF_INSTALL_PREFIX}")\n')
     fo.write('\n')
 
+    fo.write('foreach(_variableName ${_variableNames})\n')
+    fo.write('  if(_variableName MATCHES "^netCDF")\n')
+    fo.write('    message(DEBUG "${_variableName}=${${_variableName}}")\n')
+    fo.write('  endif()\n')
+    fo.write('endforeach()\n')
+    fo.write('\n')
+    
     fo.write('# find_package (LROSE)\n')
     fo.write('#\n')
 
@@ -719,8 +742,6 @@ def writeCMakeListsCodebase(dir):
     if (globalNeedX11 or globalNeedQt):
         fo.write('message("X11_X11_INCLUDE_PATH: ${X11_X11_INCLUDE_PATH}")\n')
         fo.write('message("X11_LIB_DIR: ${X11_LIB_DIR}")\n')
-    fo.write('message("HDF5_INSTALL_PREFIX: ${HDF5_INSTALL_PREFIX}")\n')
-    fo.write('message("HDF5_C_INCLUDE_DIRS: ${HDF5_C_INCLUDE_DIRS}")\n')
     fo.write('\n')
 
     if (len(options.prefix) == 0):
@@ -730,7 +751,7 @@ def writeCMakeListsCodebase(dir):
         fo.write('endif()\n')
     else:
         fo.write('set(CMAKE_INSTALL_PREFIX %s CACHE PATH "..." FORCE)\n' % options.prefix)
-    fo.write('message("CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}")\n')
+    fo.write('message(STATUS "CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX}")\n')
     fo.write('\n')
 
     fo.write('# Function for creating TDRP Params.cc and Params.hh files\n')
@@ -1090,45 +1111,18 @@ def writeCMakeListsLib(libName, libSrcDir,
     if (needQt):
         addFindQt(fo)
 
+    # add include dirs
+    
     fo.write("# include directories\n")
     fo.write("\n")
     fo.write("include_directories (./include)\n")
     for lib in libList:
         fo.write("include_directories (../../%s/src/include)\n" % lib)
-    for dir in dependDirs:
-        fo.write("include_directories (%s/include)\n" % dir)
-    fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
-    fo.write('if (DEFINED MAMBA_BUILD)\n')
-    fo.write('# MAMBA builds ignore system libs, use mamba libs\n')
-    fo.write('  include_directories (${MAMBA_INCLUDE_PATH})\n')
-    fo.write('else()\n')
-    if (needX11 or needQt):
-        fo.write("  if (DEFINED X11_X11_INCLUDE_PATH)\n")
-        fo.write("    include_directories (${X11_X11_INCLUDE_PATH})\n")
-        fo.write("  endif()\n")
-    fo.write("  if (DEFINED netCDF_INSTALL_PREFIX)\n")
-    fo.write("    include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
-    fo.write("  endif()\n")
-    fo.write("  if (DEFINED HDF5_C_INCLUDE_DIRS)\n")
-    fo.write("    include_directories (${HDF5_C_INCLUDE_DIRS})\n")
-    fo.write("  endif()\n")
-    fo.write("  if (DEFINED NETCDF_INCLUDE_DIR)\n")
-    fo.write("    include_directories (${NETCDF_INCLUDE_DIR})\n")
-    fo.write("  endif()\n")
-    fo.write("  if(IS_DIRECTORY /usr/include/hdf5/serial)\n")
-    fo.write("    include_directories (/usr/include/hdf5/serial)\n")
-    fo.write("  endif()\n")
-    fo.write("  if(IS_DIRECTORY /usr/local/include)\n")
-    fo.write("    include_directories (/usr/local/include)\n")
-    fo.write("  endif()\n")
-    fo.write("  # NOTE: cannot add /usr/include using include_directories()\n")
-    fo.write("  #add_compile_options(-I/usr/include)\n")
-    fo.write("  \n")
-    fo.write("endif(DEFINED MAMBA_BUILD)\n")
 
-    if (needQt):
-        addQtIncludes(fo)
+    addIncludeDirs(fo, needQt, needX11)
 
+    # source files
+    
     fo.write("# source files\n")
     fo.write("\n")
     fo.write("set (SRCS\n")
@@ -1152,13 +1146,6 @@ def writeCMakeListsLib(libName, libSrcDir,
 
     fo.write("# install\n")
     fo.write("\n")
-#    fo.write("INSTALL(TARGETS %s\n" % libName)
-#    fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib\n")
-#    fo.write("       )\n")
-#    fo.write("INSTALL(DIRECTORY include/%s\n" % libName)
-#    fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/include\n")
-#    fo.write("       )\n")
-#    fo.write("\n")
 
     fo.write("install(\n");
     fo.write("    TARGETS %s\n" % libName);
@@ -1222,27 +1209,8 @@ def createCMakeListsApp(appDir, libList):
 
     # get list of libs to be linked with
         
-    makefileLibList = getLinkLibList(makefilePath)
+    linkLibList = getLinkLibList(makefilePath)
 
-    if (options.static):
-        # for static libs, use libs from makefile
-        linkLibList = makefileLibList
-    else:
-        linkLibList = makefileLibList
-        # for shared libs, we need to link with all lib
-        # order the list
-        #linkOrder = getLroseLinkOrder()
-        #linkLibList = []
-        #for lib in linkOrder:
-        #    if (lib in libList):
-        #        linkLibList.append(lib)
-        #for lib in makefileLibList:
-        #    if (lib not in linkLibList):
-        #        linkLibList.append(lib)
-
-    #extendedLibs = getExtendedLibs(linkLibList)
-    #linkLibList.extend(extendedLibs)
-                
     # check if we need Qt support
 
     global globalNeedX11, globalNeedQt
@@ -1577,10 +1545,55 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     if (needQt):
         addFindQt(fo)
 
+    # add include dirs
+    
     fo.write("# include directories\n")
     fo.write("\n")
     for lib in libList:
         fo.write("include_directories (../../../../libs/%s/src/include)\n" % lib)
+    addIncludeDirs(fo, needQt, needX11)
+    
+    # add link dirs
+    
+    addLinkDirs(fo, linkLibList, needQt, needX11)
+    
+    if (needTdrp):
+        fo.write("# If needed, generate TDRP Params.cc and Params.hh files\n")
+        fo.write("# from their associated paramdef.<app> file\n")
+        fo.write("\n")
+        if (tdrpSingleton):
+            fo.write("makeTdrpSingleton()\n")
+        else:
+            fo.write("makeTdrpParams()\n")
+        fo.write("\n")
+
+    fo.write("# application\n")
+    fo.write("\n")
+    fo.write("add_executable (%s ${SRCS})\n" % appName)
+    fo.write("\n")
+
+    fo.write("# add tdrp_gen as a dependency\n")
+    fo.write("add_dependencies(${PROJECT_NAME} tdrp_gen)\n")
+    fo.write("\n")
+    
+    fo.write("# install\n")
+    fo.write("\n")
+    fo.write("install(\n")
+    fo.write("    TARGETS %s\n" % appName)
+    fo.write("    RUNTIME DESTINATION bin\n")
+    fo.write("    LIBRARY DESTINATION lib\n")
+    fo.write("    ARCHIVE DESTINATION lib\n")
+    fo.write(")\n")
+
+    fo.close
+    return
+    
+
+########################################################################
+# add include directories
+
+def addIncludeDirs(fo, needQt, needX11):
+
     for dir in dependDirs:
         fo.write("include_directories (%s/include)\n" % dir)
     fo.write("include_directories (${CMAKE_INSTALL_PREFIX}/include)\n")
@@ -1593,14 +1606,15 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
         fo.write("  if (DEFINED X11_X11_INCLUDE_PATH)\n")
         fo.write("    include_directories (${X11_X11_INCLUDE_PATH})\n")
         fo.write("  endif()\n")
-    fo.write("  if (DEFINED netCDF_INSTALL_PREFIX)\n")
+    fo.write("  if (DEFINED netCDF_INCLUDE_DIR)\n")
+    fo.write("    include_directories (${netCDF_INCLUDE_DIR})\n")
+    fo.write("  elseif (DEFINED netCDF_INSTALL_PREFIX)\n")
     fo.write("    include_directories (${netCDF_INSTALL_PREFIX}/include)\n")
     fo.write("  endif()\n")
     fo.write("  if (DEFINED HDF5_C_INCLUDE_DIRS)\n")
     fo.write("    include_directories (${HDF5_C_INCLUDE_DIRS})\n")
-    fo.write("  endif()\n")
-    fo.write("  if (DEFINED NETCDF_INCLUDE_DIR)\n")
-    fo.write("    include_directories (${NETCDF_INCLUDE_DIR})\n")
+    fo.write("  elseif (DEFINED HDF5_INCLUDE_DIRS)\n")
+    fo.write("    include_directories (${HDF5_INCLUDE_DIRS})\n")
     fo.write("  endif()\n")
     fo.write("  if(IS_DIRECTORY /usr/include/hdf5/serial)\n")
     fo.write("    include_directories (/usr/include/hdf5/serial)\n")
@@ -1616,6 +1630,11 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     if (needQt):
         addQtIncludes(fo)
 
+########################################################################
+# add link directories
+
+def addLinkDirs(fo, linkLibList, needQt, needX11):
+
     fo.write("# link directories\n")
     fo.write("\n")
     for dir in dependDirs:
@@ -1630,14 +1649,13 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
         fo.write("  if (DEFINED X11_LIB_DIR)\n")
         fo.write("    link_directories (${X11_LIB_DIR})\n")
         fo.write("  endif()\n")
-    fo.write("  if (DEFINED netCDF_INSTALL_PREFIX)\n")
+    fo.write("  if (DEFINED netCDF_LIB_DIR)\n")
+    fo.write("    link_directories (${netCDF_LIB_DIR})\n")
+    fo.write("  elseif (DEFINED netCDF_INSTALL_PREFIX)\n")
     fo.write("    link_directories (${netCDF_INSTALL_PREFIX}/lib)\n")
     fo.write("  endif()\n")
-    fo.write("  if (DEFINED HDF5_INSTALL_PREFIX)\n")
-    fo.write("    link_directories (${HDF5_INSTALL_PREFIX}/lib)\n")
-    fo.write("  endif()\n")
-    fo.write("  if (DEFINED HDF5_LIBRARY_DIRS)\n")
-    fo.write("    link_directories(${HDF5_LIBRARY_DIRS})\n")
+    fo.write("  if (DEFINED HDF5_LIBRARY_DIR)\n")
+    fo.write("    link_directories (${HDF5_LIBRARY_DIR})\n")
     fo.write("  endif()\n")
     fo.write("# add serial, for odd Debian hdf5 install\n")
     fo.write("  if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)\n")
@@ -1668,43 +1686,6 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     if (needQt):
         addQtLinks(fo)
     fo.write("\n")
-
-    if (needTdrp):
-        fo.write("# If needed, generate TDRP Params.cc and Params.hh files\n")
-        fo.write("# from their associated paramdef.<app> file\n")
-        fo.write("\n")
-        if (tdrpSingleton):
-            fo.write("makeTdrpSingleton()\n")
-        else:
-            fo.write("makeTdrpParams()\n")
-        fo.write("\n")
-
-    fo.write("# application\n")
-    fo.write("\n")
-    fo.write("add_executable (%s ${SRCS})\n" % appName)
-    fo.write("\n")
-
-    fo.write("# add tdrp_gen as a dependency\n")
-    fo.write("add_dependencies(${PROJECT_NAME} tdrp_gen)\n")
-    fo.write("\n")
-    
-    fo.write("# install\n")
-    fo.write("\n")
-    fo.write("install(\n")
-    fo.write("    TARGETS %s\n" % appName)
-    fo.write("    RUNTIME DESTINATION bin\n")
-    fo.write("    LIBRARY DESTINATION lib\n")
-    fo.write("    ARCHIVE DESTINATION lib\n")
-    fo.write(")\n")
-
-    #fo.write("INSTALL(TARGETS ${PROJECT_NAME}\n")
-    #fo.write("        DESTINATION ${CMAKE_INSTALL_PREFIX}/bin\n")
-    #fo.write("       )\n")
-    #fo.write("\n")
-
-    fo.close
-    return
-    
 
 ########################################################################
 # add code to find qt package

@@ -173,7 +173,8 @@ private:
                                    double gateSpacingKm,
                                    double cutoffCyclesPerKm,
                                    double beta);
-  double _besselI0(double x);
+
+  static double _besselI0(double x);
   
 };
 
