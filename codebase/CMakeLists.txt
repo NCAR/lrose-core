@@ -101,16 +101,16 @@ message(DEBUG "HDF5_C_INCLUDE_DIRS: ${HDF5_C_INCLUDE_DIRS}")
 message(DEBUG "HDF5_LIBRARY_DIR: ${HDF5_LIBRARY_DIR}")
 message(DEBUG "HDF5_C_LIBRARY: ${HDF5_C_LIBRARY}")
 
-find_package (NETCDF)
-message(DEBUG "netCDF_INCLUDE_DIR: ${netCDF_INCLUDE_DIR}")
-message(DEBUG "netCDF_LIB_DIR: ${netCDF_LIB_DIR}")
-message(DEBUG "netCDF_INSTALL_PREFIX: ${netCDF_INSTALL_PREFIX}")
-
 foreach(_variableName ${_variableNames})
   if(_variableName MATCHES "^HDF5")
     message(DEBUG "${_variableName}=${${_variableName}}")
   endif()
 endforeach()
+
+find_package (NETCDF)
+message(DEBUG "netCDF_INCLUDE_DIR: ${netCDF_INCLUDE_DIR}")
+message(DEBUG "netCDF_LIB_DIR: ${netCDF_LIB_DIR}")
+message(DEBUG "netCDF_INSTALL_PREFIX: ${netCDF_INSTALL_PREFIX}")
 
 foreach(_variableName ${_variableNames})
   if(_variableName MATCHES "^netCDF")
