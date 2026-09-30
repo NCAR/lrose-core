@@ -145,6 +145,14 @@ Then run:
 
 See [install](#install) for checking on the install.
 
+On the latest version of brew you may need to run:
+
+```
+  brew trust --formula ncar/lrose
+```
+
+before running the install.
+
 <a name="fractl"/>
 
 ## 5. Installing fractl (DO NOT use admin privileges)
