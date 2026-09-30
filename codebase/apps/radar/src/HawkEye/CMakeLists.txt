@@ -188,6 +188,8 @@ else()
   #add_compile_options(-I/usr/include)
   
 endif(DEFINED MAMBA_BUILD)
+message(DEBUG "==>> HDF5_INCLUDE_DIRS: ${HDF5_INCLUDE_DIRS}")
+message(DEBUG "==>> HDF5_C_INCLUDE_DIRS: ${HDF5_C_INCLUDE_DIRS}")
 #Including Qt
 if (Qt5_FOUND)
 include_directories(${Qt5Core_INCLUDE_DIRS})
