@@ -727,18 +727,6 @@ def writeCMakeListsCodebase(dir):
     fo.write('# find_package (LROSE)\n')
     fo.write('#\n')
 
-    # fo.write("if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)\n")
-    # fo.write("  get_filename_component(HDF5_INSTALL_PREFIX ${HDF5_hdf5_LIBRARY_RELEASE} DIRECTORY)\n")
-    # fo.write("endif()\n")
-    # fo.write("if (NOT IS_DIRECTORY netCDF_INSTALL_PREFIX)\n")
-    # fo.write("  set (netCDF_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})\n")
-    # fo.write("endif()\n")
-    # fo.write("if (NOT IS_DIRECTORY HDF5_INSTALL_PREFIX)\n")
-    # fo.write("  set (HDF5_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})\n")
-    # fo.write("endif()\n")
-    # fo.write("if (NOT IS_DIRECTORY HDF5_C_INCLUDE_DIRS)\n")
-    # fo.write("  set (HDF5_C_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include)\n")
-    # fo.write("endif()\n")
     if (globalNeedX11 or globalNeedQt):
         fo.write('message("X11_X11_INCLUDE_PATH: ${X11_X11_INCLUDE_PATH}")\n')
         fo.write('message("X11_LIB_DIR: ${X11_LIB_DIR}")\n')
@@ -1454,9 +1442,6 @@ def getExtendedLibs(linkLibList):
     if (options.withJasper):
         extendLibs.append('jasper')
     
-    #if ("radar" in linkLibList and "fftw3" not in linkLibList):
-    #    extendLibs.append("fftw3")
-
     return extendLibs
 
 ########################################################################
@@ -1626,9 +1611,6 @@ def addIncludeDirs(fo, needQt, needX11):
     fo.write("  #add_compile_options(-I/usr/include)\n")
     fo.write("  \n")
     fo.write("endif(DEFINED MAMBA_BUILD)\n")
-
-    # fo.write('message(DEBUG "==>> HDF5_INCLUDE_DIRS: ${HDF5_INCLUDE_DIRS}")\n')
-    # fo.write('message(DEBUG "==>> HDF5_C_INCLUDE_DIRS: ${HDF5_C_INCLUDE_DIRS}")\n')
 
     if (needQt):
         addQtIncludes(fo)
