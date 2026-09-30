@@ -1627,8 +1627,8 @@ def addIncludeDirs(fo, needQt, needX11):
     fo.write("  \n")
     fo.write("endif(DEFINED MAMBA_BUILD)\n")
 
-    fo.write('message(DEBUG "==>> HDF5_INCLUDE_DIRS: ${HDF5_INCLUDE_DIRS}")\n')
-    fo.write('message(DEBUG "==>> HDF5_C_INCLUDE_DIRS: ${HDF5_C_INCLUDE_DIRS}")\n')
+    # fo.write('message(DEBUG "==>> HDF5_INCLUDE_DIRS: ${HDF5_INCLUDE_DIRS}")\n')
+    # fo.write('message(DEBUG "==>> HDF5_C_INCLUDE_DIRS: ${HDF5_C_INCLUDE_DIRS}")\n')
 
     if (needQt):
         addQtIncludes(fo)

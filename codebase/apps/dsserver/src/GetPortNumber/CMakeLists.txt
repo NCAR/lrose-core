@@ -75,8 +75,6 @@ else()
   #add_compile_options(-I/usr/include)
   
 endif(DEFINED MAMBA_BUILD)
-message(DEBUG "==>> HDF5_INCLUDE_DIRS: ${HDF5_INCLUDE_DIRS}")
-message(DEBUG "==>> HDF5_C_INCLUDE_DIRS: ${HDF5_C_INCLUDE_DIRS}")
 # link directories
 
 link_directories(${CMAKE_INSTALL_PREFIX}/lib)
