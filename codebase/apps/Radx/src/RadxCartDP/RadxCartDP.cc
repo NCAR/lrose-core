@@ -1728,7 +1728,7 @@ int RadxCartDP::_readModel()
                             radarTime);
 
   for (int ii = 0; ii < _params.model_fields_n; ii++) {
-    if (_params._model_fields[ii].is_available) {
+    if (!_params._model_fields[ii].is_available) {
       continue;
     }
     _modelRawMdvx.addReadField(_params._model_fields[ii].input_name);
@@ -1775,6 +1775,8 @@ int RadxCartDP::_computeTempProfile()
     cerr << "ERROR - RadxCartDP::_computeTempProfile" << endl;
     cerr << "  Cannot find temp field in model, time: "
          << RadxTime::strm(_modelInterpMdvx.getValidTime()) << endl;
+    cerr << "  Temp name: " << getModelInputName(Params::TEMP) << endl;
+    cerr << "  Model file: " << _modelRawMdvx.getPathInUse() << endl;
     return -1;
   }
 
