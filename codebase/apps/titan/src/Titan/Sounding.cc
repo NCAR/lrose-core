@@ -56,6 +56,7 @@ Sounding::Sounding()
 {
   _params = nullptr;
   _tempProfile.clear();
+  _radarMdvx = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -180,5 +181,159 @@ int Sounding::retrieveTempProfile(time_t profileTime)
   
   return 0;
 
+}
+
+/////////////////////////////////////////////////////////
+// read in model data
+//
+// Returns 0 on success, -1 on failure.
+
+int Sounding::_readModel(const DsMdvx &radarMdvx)
+
+{
+
+  _radarMdvx = &radarMdvx;
+  _radarTime = _radarMdvx->getMasterHeader().time_centroid;
+  _modelRawMdvx.clearRead();
+  _modelRawMdvx.setReadTime(Mdvx::READ_CLOSEST,
+                            _params->model_input_url,
+                            _params->model_search_margin_secs,
+                            _radarTime);
+
+  for (int ii = 0; ii < _params->model_fields_n; ii++) {
+    if (_params->_model_fields[ii].is_available) {
+      continue;
+    }
+    _modelRawMdvx.addReadField(_params->_model_fields[ii].field_name);
+  }
+  
+  if (_modelRawMdvx.readVolume()) {
+    cerr << "ERROR - Sounding::_readModel" << endl;
+    cerr << "  Cannot read model data" << endl;
+    cerr << "  URL: " << _params->model_input_url << endl;
+    cerr << "  Search time: " << DateTime::strm(_radarTime) << endl;
+    cerr << "  Search margin (secs): " << _params->model_search_margin_secs << endl;
+    cerr << _modelRawMdvx.getErrStr() << endl;
+    return -1;
+  }
+
+  // interpolate the model data onto the output Cartesian grid
+
+  _interpModelToRadarGrid();
+
+  // compute the temperature profile from the model data
+
+  if (_computeModelTempProfile()) {
+    cerr << "ERROR - Sounding::_readModel" << endl;
+    cerr << "  Cannot compute temp profile, time: "
+         << DateTime::strm(_radarTime) << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////////////////////
+// compute the temperatude profile from the interpolated model
+
+int Sounding::_computeModelTempProfile()
+{
+
+  _tempProfile.clear();
+
+  MdvxField *tempFld =
+    _modelInterpMdvx.getField(getModelInputName(Params::TEMP).c_str());
+  if (tempFld == nullptr) {
+    cerr << "ERROR - Sounding::_computeModelTempProfile" << endl;
+    cerr << "  Cannot find temp field in model, time: "
+         << DateTime::strm(_radarTime) << endl;
+    return -1;
+  }
+
+  const Mdvx::field_header_t &fhdr = tempFld->getFieldHeader();
+  const Mdvx::vlevel_header_t &vhdr = tempFld->getVlevelHeader();
+  fl32 *tempVol = (fl32 *) tempFld->getVol();
+  fl32 miss = fhdr.missing_data_value;
+  size_t nPtsPlane = fhdr.ny * fhdr.nx;
+
+  for (int iz = 0; iz < fhdr.nz; iz++) {
+    double htKm = vhdr.level[iz];
+    fl32 *tmpPtr = tempVol + iz * nPtsPlane;
+    double sum = 0.0, nn = 0.0;
+    for (size_t ii = 0; ii < nPtsPlane; ii++, tmpPtr++) {
+      if (*tmpPtr != miss) {
+        sum += *tmpPtr;
+        nn++;
+      }
+    } // ii
+    if (nn > 0) {
+      double meanTemp = sum / nn;
+      TempProfile::PointVal val(htKm, meanTemp);
+      _tempProfile.addPoint(val);
+    }
+    
+  } // iz
+
+  if (_tempProfile.getProfile().size() < 2) {
+    cerr << "ERROR - Sounding::_computeModelTempProfile" << endl;
+    cerr << "  Not enough temp data for valid profile" << endl;
+    cerr << "  Cannot find temp field in model, time: "
+         << DateTime::strm(_radarTime) << endl;
+    return -1;
+  }
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////
+// interpolate the model data onto the output grid
+
+void Sounding::_interpModelToRadarGrid()
+{
+
+  _modelInterpMdvx.clear();
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
+    _modelInterpMdvx.setDebug(true);
+  }
+  _modelInterpMdvx.setMasterHeader(_radarMdvx->getMasterHeader());
+  
+  for (size_t ifield = 0; ifield < _modelRawMdvx.getNFields(); ifield++) {
+    MdvxField *rawFld = _modelRawMdvx.getField(ifield);
+    MdvxField *interpField = _modelRemap.interpField(*rawFld);
+    string rawName = rawFld->getFieldName();
+    _modelInterpMdvx.addField(interpField);
+  } // ifield
+  
+}
+
+//////////////////////////////////////////////////
+// get model field name from type
+
+string Sounding::getModelInputName(Params::model_field_type_t mftype)
+{
+  for (int ii = 0; ii < _params->model_fields_n; ii++) {
+    if (_params->_model_fields[ii].field_type == mftype) {
+      return _params->_model_fields[ii].field_name;
+    }
+  }
+  // not found
+  return "";
+}
+
+//////////////////////////////////////////////////
+// get model type from input name
+
+Params::model_field_type_t Sounding::getModelTypeFromInputName(const string name)
+{
+  for (int ii = 0; ii < _params->model_fields_n; ii++) {
+    string inputName = _params->_model_fields[ii].field_name;
+    if (name == inputName) {
+      return _params->_model_fields[ii].field_type;
+    }
+  }
+  // not found, assume temp
+  return Params::MODEL_NOT_SET;
 }
 

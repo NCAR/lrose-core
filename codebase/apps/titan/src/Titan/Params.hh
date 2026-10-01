@@ -90,8 +90,19 @@ public:
 
   typedef enum {
     SPECIFY_SOUNDING = 0,
-    READ_SOUNDING_FROM_SPDB = 1
+    READ_SOUNDING_FROM_SPDB = 1,
+    READ_SOUNDING_FROM_MODEL = 2
   } sounding_mode_t;
+
+  typedef enum {
+    TEMP = 0,
+    RH = 1,
+    PRESS = 2,
+    UVEL = 3,
+    VVEL = 4,
+    WVEL = 5,
+    MODEL_NOT_SET = 6
+  } model_field_type_t;
 
   typedef enum {
     HAIL_METRICS = 0,
@@ -147,6 +158,12 @@ public:
     double min_val;
     double max_val;
   } sounding_data_range_t;
+
+  typedef struct {
+    model_field_type_t field_type;
+    tdrp_bool_t is_available;
+    char* field_name;
+  } model_field_t;
 
   ///////////////////////////
   // Member functions
@@ -583,6 +600,13 @@ public:
 
   tdrp_bool_t sounding_check_pressure_monotonically_decreasing;
 
+  char* model_input_url;
+
+  int model_search_margin_secs;
+
+  model_field_t *_model_fields;
+  int model_fields_n;
+
   hail_detection_mode_t hail_detection_mode;
 
   debug_t debug_hail_metrics;
@@ -699,7 +723,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[154];
+  mutable TDRPtable _table[158];
 
   const char *_className;
 

@@ -490,7 +490,7 @@ commentdef {
 }
 
 typedef enum {
-  SPECIFY_SOUNDING, READ_SOUNDING_FROM_SPDB
+  SPECIFY_SOUNDING, READ_SOUNDING_FROM_SPDB, READ_SOUNDING_FROM_MODEL
 } sounding_mode_t;
 
 paramdef enum sounding_mode_t
@@ -603,6 +603,46 @@ paramdef boolean {
   p_descr = "Option to check that pressure decreases monotonically.";
   p_help = "If TRUE, we will check that pressure decreases monotonically. If not, the sounding is rejected and we look back for the next available one."; 
 } sounding_check_pressure_monotonically_decreasing;
+
+commentdef {
+  p_header = "MODEL DATA FOR SOUNDING";
+  p_text = "Applies if sounding_mode is READ_SOUNDING_FROM_MODEL.";
+}
+
+paramdef string {
+  p_default = "mdv/model";
+  p_descr = "URL for reading model data, in MDV/Netcdf-CF format.";
+  p_help = "We read in the model data that is closest in time to the radar data.";
+} model_input_url;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin for model data (secs)";
+  p_help =  "We search for model data within this margin of the radar data time.";
+} model_search_margin_secs;
+
+typedef enum {
+  TEMP, RH, PRESS, UVEL, VVEL, WVEL, MODEL_NOT_SET
+} model_field_type_t;
+
+typedef struct {
+  model_field_type_t field_type;
+  boolean is_available;
+  string field_name;
+} model_field_t;
+
+paramdef struct model_field_t {
+  p_default = { 
+    { TEMP, TRUE, "TEMP" },
+    { RH, TRUE, "RH" },
+    { PRESS, FALSE, "Pressure" },
+    { UVEL, FALSE, "UVEL" },
+    { VVEL, FALSE, "VVEL" },
+    { WVEL, FALSE, "WVEL" }
+  };
+  p_descr = "Details of available model fields. Exactly one of each field type must be present in the parameter file.";
+  p_help = "'is_available' specifies whether the field is available in the input file. If not available that field will be set to missing.";
+} model_fields[];
 
 commentdef {
   p_header = "OPTION FOR CALCULATING HAIL METRICS.";

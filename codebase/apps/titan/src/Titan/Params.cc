@@ -1628,13 +1628,15 @@
     tt->help = tdrpStrDup("SPECIFY_SOUNDING: if you do not have access to a measured or model sounding, specify the sounding in this parameter file.\n\nREAD_SOUNDING_FROM_SPDB: read in the closest sounding from SPDB. This assumes you have arranged to have the sounding(s) read in and stored in SPDB.");
     tt->val_offset = (char *) &sounding_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("sounding_mode_t");
-    tt->enum_def.nfields = 2;
+    tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("SPECIFY_SOUNDING");
       tt->enum_def.fields[0].val = SPECIFY_SOUNDING;
       tt->enum_def.fields[1].name = tdrpStrDup("READ_SOUNDING_FROM_SPDB");
       tt->enum_def.fields[1].val = READ_SOUNDING_FROM_SPDB;
+      tt->enum_def.fields[2].name = tdrpStrDup("READ_SOUNDING_FROM_MODEL");
+      tt->enum_def.fields[2].val = READ_SOUNDING_FROM_MODEL;
     tt->single_val.e = SPECIFY_SOUNDING;
     tt++;
     
@@ -1852,6 +1854,113 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 16");
+    tt->comment_hdr = tdrpStrDup("MODEL DATA FOR SOUNDING");
+    tt->comment_text = tdrpStrDup("Applies if sounding_mode is READ_SOUNDING_FROM_MODEL.");
+    tt++;
+    
+    // Parameter 'model_input_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("model_input_url");
+    tt->descr = tdrpStrDup("URL for reading model data, in MDV/Netcdf-CF format.");
+    tt->help = tdrpStrDup("We read in the model data that is closest in time to the radar data.");
+    tt->val_offset = (char *) &model_input_url - &_start_;
+    tt->single_val.s = tdrpStrDup("mdv/model");
+    tt++;
+    
+    // Parameter 'model_search_margin_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("model_search_margin_secs");
+    tt->descr = tdrpStrDup("Search margin for model data (secs)");
+    tt->help = tdrpStrDup("We search for model data within this margin of the radar data time.");
+    tt->val_offset = (char *) &model_search_margin_secs - &_start_;
+    tt->single_val.i = 3600;
+    tt++;
+    
+    // Parameter 'model_fields'
+    // ctype is '_model_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("model_fields");
+    tt->descr = tdrpStrDup("Details of available model fields. Exactly one of each field type must be present in the parameter file.");
+    tt->help = tdrpStrDup("'is_available' specifies whether the field is available in the input file. If not available that field will be set to missing.");
+    tt->array_offset = (char *) &_model_fields - &_start_;
+    tt->array_n_offset = (char *) &model_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(model_field_t);
+    tt->array_n = 6;
+    tt->struct_def.name = tdrpStrDup("model_field_t");
+    tt->struct_def.nfields = 3;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("model_field_type_t");
+      tt->struct_def.fields[0].fname = tdrpStrDup("field_type");
+      tt->struct_def.fields[0].ptype = ENUM_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_model_fields->field_type - (char *) _model_fields;
+        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("model_field_type_t");
+        tt->struct_def.fields[0].enum_def.nfields = 7;
+        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("TEMP");
+        tt->struct_def.fields[0].enum_def.fields[0].val = TEMP;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("RH");
+        tt->struct_def.fields[0].enum_def.fields[1].val = RH;
+        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("PRESS");
+        tt->struct_def.fields[0].enum_def.fields[2].val = PRESS;
+        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("UVEL");
+        tt->struct_def.fields[0].enum_def.fields[3].val = UVEL;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("VVEL");
+        tt->struct_def.fields[0].enum_def.fields[4].val = VVEL;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("WVEL");
+        tt->struct_def.fields[0].enum_def.fields[5].val = WVEL;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("MODEL_NOT_SET");
+        tt->struct_def.fields[0].enum_def.fields[6].val = MODEL_NOT_SET;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[1].fname = tdrpStrDup("is_available");
+      tt->struct_def.fields[1].ptype = BOOL_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_model_fields->is_available - (char *) _model_fields;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("field_name");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_model_fields->field_name - (char *) _model_fields;
+    tt->n_struct_vals = 18;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].e = TEMP;
+      tt->struct_vals[1].b = pTRUE;
+      tt->struct_vals[2].s = tdrpStrDup("TEMP");
+      tt->struct_vals[3].e = RH;
+      tt->struct_vals[4].b = pTRUE;
+      tt->struct_vals[5].s = tdrpStrDup("RH");
+      tt->struct_vals[6].e = PRESS;
+      tt->struct_vals[7].b = pFALSE;
+      tt->struct_vals[8].s = tdrpStrDup("Pressure");
+      tt->struct_vals[9].e = UVEL;
+      tt->struct_vals[10].b = pFALSE;
+      tt->struct_vals[11].s = tdrpStrDup("UVEL");
+      tt->struct_vals[12].e = VVEL;
+      tt->struct_vals[13].b = pFALSE;
+      tt->struct_vals[14].s = tdrpStrDup("VVEL");
+      tt->struct_vals[15].e = WVEL;
+      tt->struct_vals[16].b = pFALSE;
+      tt->struct_vals[17].s = tdrpStrDup("WVEL");
+    tt++;
+    
+    // Parameter 'Comment 17'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("OPTION FOR CALCULATING HAIL METRICS.");
     tt->comment_text = tdrpStrDup("NOTE: the 'ht_of_freezing' parameter has been deprecated. Use the 'specified_sounding' parameter instead - see section above.");
     tt++;
@@ -1954,11 +2063,11 @@
     tt->single_val.d = 45;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("The Foote-Krauss Category (FOKR)");
     tt->comment_text = tdrpStrDup("The FOKR Category is intended to separate non-hailstorms (Category 0 and 1) from potentially developing hailers (Cat. 2), likely hailstorms (Cat. 3) and severe hailstorms (Cat. 4)");
     tt++;
@@ -2011,11 +2120,11 @@
     tt->single_val.d = 65;
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2044,11 +2153,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("OPTION TO CREATE VERIFICATION FILES.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2077,11 +2186,11 @@
     tt->single_val.s = tdrpStrDup("mdv/verify");
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 21");
     tt->comment_hdr = tdrpStrDup("TRACKING PARAMETERS.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2176,11 +2285,11 @@
     tt->single_val.d = 0.6;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 22");
     tt->comment_hdr = tdrpStrDup("FORECAST PARAMETERS.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2360,20 +2469,20 @@
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 22'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
-    tt->comment_hdr = tdrpStrDup("SMOOTHING THE MOTION FORECAST.");
-    tt->comment_text = tdrpStrDup("Options for smoothing motion forecasts. The smoothed motion is computed using the motion of surrounding storms. The storms included are out to a given radius from the storm undergoing smoothing. NOTE: this will not be performed if the field tracker option is used to override the speed/dirn forecast.");
-    tt++;
-    
     // Parameter 'Comment 23'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 23");
+    tt->comment_hdr = tdrpStrDup("SMOOTHING THE MOTION FORECAST.");
+    tt->comment_text = tdrpStrDup("Options for smoothing motion forecasts. The smoothed motion is computed using the motion of surrounding storms. The storms included are out to a given radius from the storm undergoing smoothing. NOTE: this will not be performed if the field tracker option is used to override the speed/dirn forecast.");
+    tt++;
+    
+    // Parameter 'Comment 24'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("SMOOTHING CATEGORIES.");
     tt->comment_text = tdrpStrDup("For smoothing, you can turn on the following options separately or together: (a) tracking_smooth_invalid_forecasts: smooth motion for storms without a valid forecast; (b) tracking_spatial_smoothing: smooth motion for storms with a valid forecast; (c) tracking_smooth_fast_growth_decay: smooth the forecast for storms which have a rapid growth or decay. In addition to these main categories, you can set other parameters to control the way the smoothing is done.");
     tt++;
@@ -2402,11 +2511,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 24'
+    // Parameter 'Comment 25'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
+    tt->param_name = tdrpStrDup("Comment 25");
     tt->comment_hdr = tdrpStrDup("SMOOTHING RADIUS OF INFLUENCE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2437,11 +2546,11 @@
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'Comment 25'
+    // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 26");
     tt->comment_hdr = tdrpStrDup("SMOOTHING WEIGHTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2482,11 +2591,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("SMOOTHING THRESHOLDS FOR FAST GROWTH AND DECAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2527,11 +2636,11 @@
     tt->single_val.d = -0.5;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("SMOOTHING - DETECTING ERRATIC FORECASTS");
     tt->comment_text = tdrpStrDup("To determine whether a forecast is eratic, the error of the speed and direction is computed for a storm as compared with the mean motion for the storms within the radius of influence.");
     tt++;
@@ -2572,11 +2681,11 @@
     tt->single_val.d = 50;
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 29'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("OVERRIDE EARLY STORM MOTION FROM FIELD TRACKER");
     tt->comment_text = tdrpStrDup("If this is activated, all other spatial smoothing will be turned off.");
     tt++;

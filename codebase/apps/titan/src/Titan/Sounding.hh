@@ -43,7 +43,11 @@
 #define Sounding_HH
 
 #include "Params.hh"
+#include "InputMdv.hh"
 #include <radar/TempProfile.hh>
+#include <Mdv/DsMdvx.hh>
+#include <Mdv/MdvxProj.hh>
+#include <Mdv/MdvxRemapInterp.hh>
 using namespace std;
 
 class Sounding
@@ -73,6 +77,16 @@ public:
 
   const TempProfile &getProfile() { return _tempProfile; }
 
+  // get model field from type or name
+  // returns null on error
+  // NOTE: error cannot happen if _checkModelFields() succeeded
+  
+  Params::model_field_t *getModelField(Params::model_field_type_t mftype);
+  Params::model_field_t *getModelField(const string &fieldName);
+  
+  string getModelInputName(Params::model_field_type_t mftype);
+  Params::model_field_type_t getModelTypeFromInputName(const string name);
+  
 private:
   
   // Singleton instance pointer
@@ -89,7 +103,22 @@ private:
   const Params *_params;
   TempProfile _tempProfile;
 
-};
+  // model interpolation
+  
+  vector<Params::model_field_type_t> _modelFieldTypes;
+  MdvxRemapInterp _modelRemap;
+  DsMdvx _modelRawMdvx;
+  DsMdvx _modelInterpMdvx;
+  const DsMdvx *_radarMdvx;
+  time_t _radarTime;
+  
+  int _readModel(const DsMdvx &radarMdvx);
+  int _computeModelTempProfile();
+  void _interpModelToRadarGrid();
+  void _initModelFieldTypes();
+  int _checkModelFields();
+  string _modelFieldType2Str(Params::model_field_type_t mftype);
 
+};
 
 #endif
