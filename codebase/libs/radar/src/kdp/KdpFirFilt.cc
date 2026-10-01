@@ -180,13 +180,13 @@ void KdpFirFilt::initDynamic(double featureLengthKm,
   _firLength = _firCoeff.size();
   _firLenHalf = _firLength / 2;
 
-  cerr << "1111111111 _featureLengthKm: " << _featureLengthKm << endl;
-  cerr << "1111111111 _gateSpacingKm: " << _gateSpacingKm << endl;
-  cerr << "1111111111 _nGatesFeature: " << _nGatesFeature << endl;
-  cerr << "1111111111 _nGatesPad: " << _nGatesPad << endl;
-  cerr << "1111111111 _firLength: " << _firLength << endl;
-  cerr << "1111111111 nTaps: " << nTaps << endl;
-  cerr << "1111111111 beta: " << beta << endl;
+  // cerr << "1111111111 _featureLengthKm: " << _featureLengthKm << endl;
+  // cerr << "1111111111 _gateSpacingKm: " << _gateSpacingKm << endl;
+  // cerr << "1111111111 _nGatesFeature: " << _nGatesFeature << endl;
+  // cerr << "1111111111 _nGatesPad: " << _nGatesPad << endl;
+  // cerr << "1111111111 _firLength: " << _firLength << endl;
+  // cerr << "1111111111 nTaps: " << nTaps << endl;
+  // cerr << "1111111111 beta: " << beta << endl;
 
 }
   
@@ -217,11 +217,11 @@ void KdpFirFilt::initPredefined(double featureLengthKm,
     _setFilterLen(FIR_LENGTH_125);
   }
   
-  cerr << "2222222221 _featureLengthKm: " << _featureLengthKm << endl;
-  cerr << "2222222221 _gateSpacingKm: " << _gateSpacingKm << endl;
-  cerr << "2222222221 _nGatesFeature: " << _nGatesFeature << endl;
-  cerr << "2222222221 _nGatesPad: " << _nGatesPad << endl;
-  cerr << "2222222221 _firLength: " << _firLength << endl;
+  // cerr << "2222222221 _featureLengthKm: " << _featureLengthKm << endl;
+  // cerr << "2222222221 _gateSpacingKm: " << _gateSpacingKm << endl;
+  // cerr << "2222222221 _nGatesFeature: " << _nGatesFeature << endl;
+  // cerr << "2222222221 _nGatesPad: " << _nGatesPad << endl;
+  // cerr << "2222222221 _firLength: " << _firLength << endl;
 
 }
   
