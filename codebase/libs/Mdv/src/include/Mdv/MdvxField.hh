@@ -280,7 +280,7 @@ public:
   int negate(bool convert_to_linear = false);
   
   // Apply a linear transform to the field.
-  // Optionall set the field name and units.
+  // Optionally set the field name and units.
   // If newName is not empty, the new name is applied.
   // If newUnits is not empty, the new units string is applied.
   // Returns 0 on success, -1 on failure.
