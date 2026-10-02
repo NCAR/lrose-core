@@ -73,11 +73,12 @@ protected:
   // string constants
   
   string CfConvention;
-  string BaseConvention;
-  string CurrentVersion;
+  // string BaseConvention;
+  // string CurrentVersion;
+  string WmoCfProfile;
 
-  string CfRadial2Conventions;
-  string CfRadial2Version;
+  // string CfRadial2Conventions;
+  // string CfRadial2Version;
 
   // char * constants
 
@@ -637,6 +638,17 @@ protected:
   const char* XMIT_POWER_H_LONG;
   const char* XMIT_POWER_V_LONG;
   const char* ZDR_CORRECTION_LONG;
+
+  const char* WMO__CF_PROFILE;
+  const char* WMO__DATA_CATEGORY;
+  const char* WMO__DATA_POLICY;
+  const char* WMO__ID;
+  const char* WMO__ORIGINATING_CENTRE;
+  const char* WMO__ORIGINATING_SUB_CENTRE;
+  const char* WMO__PARAMATER_NAME;
+  const char* WMO__PARAMATER_URI;
+  const char* WMO__UPDATE_SEQUENCE_NUMBER;
+  const char* WMO__WSI;
 
 private:
 

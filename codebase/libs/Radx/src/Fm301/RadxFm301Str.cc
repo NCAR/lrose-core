@@ -49,12 +49,13 @@ RadxFm301Str::RadxFm301Str()
 
   // conventions
 
-  CfConvention = "CF-1.7";
-  BaseConvention = "CF-Radial";
-  CurrentVersion = "CF-Radial-1.4";
+  CfConvention = "CF-1.8, WMO CF-1.0";
+  // BaseConvention = "FM301";
+  // CurrentVersion = "FM301-2022";
+  WmoCfProfile = "FM 301-2022";
 
-  CfRadial2Conventions = "Cf/Radial";
-  CfRadial2Version = "2.0";
+  // CfRadial2Conventions = "Cf/Radial";
+  // CfRadial2Version = "2.0";
 
   // short names
 
@@ -615,6 +616,17 @@ RadxFm301Str::RadxFm301Str()
   XMIT_POWER_H_LONG = "calibrated_radar_xmit_power_h_channel";
   XMIT_POWER_V_LONG = "calibrated_radar_xmit_power_v_channel";
   ZDR_CORRECTION_LONG = "calibrated_radar_zdr_correction";
+
+  WMO__CF_PROFILE = "wmo__cf_profile";
+  WMO__DATA_CATEGORY = "wmo__data_category";
+  WMO__DATA_POLICY = "wmo__data_policy";
+  WMO__ID = "wmo__id";
+  WMO__ORIGINATING_CENTRE = "wmo__originating_centre";
+  WMO__ORIGINATING_SUB_CENTRE = "wmo__originating_sub_centre";
+  WMO__PARAMATER_NAME = "wmo__paramater_name";
+  WMO__PARAMATER_URI = "wmo__paramater_uri";
+  WMO__UPDATE_SEQUENCE_NUMBER = "wmo__update_sequence_number";
+  WMO__WSI = "wmo__wsi";
 
   // create the set of ray variable names
 
