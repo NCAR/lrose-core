@@ -95,16 +95,6 @@ public:
   } sounding_mode_t;
 
   typedef enum {
-    TEMP = 0,
-    RH = 1,
-    PRESS = 2,
-    UVEL = 3,
-    VVEL = 4,
-    WVEL = 5,
-    MODEL_NOT_SET = 6
-  } model_field_type_t;
-
-  typedef enum {
     HAIL_METRICS = 0,
     NEXRAD_HDA = 1
   } hail_detection_mode_t;
@@ -158,12 +148,6 @@ public:
     double min_val;
     double max_val;
   } sounding_data_range_t;
-
-  typedef struct {
-    model_field_type_t field_type;
-    tdrp_bool_t is_available;
-    char* field_name;
-  } model_field_t;
 
   ///////////////////////////
   // Member functions
@@ -604,8 +588,13 @@ public:
 
   int model_search_margin_secs;
 
-  model_field_t *_model_fields;
-  int model_fields_n;
+  char* model_temperature_field_name;
+
+  tdrp_bool_t model_convert_K_to_C;
+
+  tdrp_bool_t write_model_temp_files;
+
+  char* model_temp_output_url;
 
   hail_detection_mode_t hail_detection_mode;
 
@@ -723,7 +712,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[158];
+  mutable TDRPtable _table[161];
 
   const char *_className;
 

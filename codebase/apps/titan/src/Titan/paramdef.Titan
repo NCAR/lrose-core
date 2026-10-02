@@ -606,7 +606,7 @@ paramdef boolean {
 
 commentdef {
   p_header = "MODEL DATA FOR SOUNDING";
-  p_text = "Applies if sounding_mode is READ_SOUNDING_FROM_MODEL.";
+  p_text = "Applies if sounding_mode is READ_SOUNDING_FROM_MODEL. The model data must have been converted into 3-D CF-netCDF MDV format, with heights in km. Temperature is a required field.";
 }
 
 paramdef string {
@@ -616,33 +616,33 @@ paramdef string {
 } model_input_url;
 
 paramdef int {
-  p_default = 3600;
+  p_default = 10400;
   p_descr = "Search margin for model data (secs)";
   p_help =  "We search for model data within this margin of the radar data time.";
 } model_search_margin_secs;
 
-typedef enum {
-  TEMP, RH, PRESS, UVEL, VVEL, WVEL, MODEL_NOT_SET
-} model_field_type_t;
+paramdef string {
+  p_default = "TMP";
+  p_descr = "Name of the temperature field in the model.";
+  p_help = "This is required if model data is to be used for the temperature profile.";
+} model_temperature_field_name;
 
-typedef struct {
-  model_field_type_t field_type;
-  boolean is_available;
-  string field_name;
-} model_field_t;
+paramdef boolean {
+  p_default = false;
+  p_descr = "Do we need to convert model temperature from Kelvin to Celcius.";
+  p_help =  "The temperature profile used by Titan is in Celcius.";
+} model_convert_K_to_C;
 
-paramdef struct model_field_t {
-  p_default = { 
-    { TEMP, TRUE, "TEMP" },
-    { RH, TRUE, "RH" },
-    { PRESS, FALSE, "Pressure" },
-    { UVEL, FALSE, "UVEL" },
-    { VVEL, FALSE, "VVEL" },
-    { WVEL, FALSE, "WVEL" }
-  };
-  p_descr = "Details of available model fields. Exactly one of each field type must be present in the parameter file.";
-  p_help = "'is_available' specifies whether the field is available in the input file. If not available that field will be set to missing.";
-} model_fields[];
+paramdef boolean {
+  p_default = false;
+  p_descr = "Write the model temperature files.";
+  p_help =  "This can be used for debugging.";
+} write_model_temp_files;
+
+paramdef string {
+  p_default = "/tmp/mdv/model";
+  p_descr = "URL for writing model temperature files.";
+} model_temp_output_url;
 
 commentdef {
   p_header = "OPTION FOR CALCULATING HAIL METRICS.";

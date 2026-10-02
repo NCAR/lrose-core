@@ -57,6 +57,9 @@ Sounding::Sounding()
   _params = nullptr;
   _tempProfile.clear();
   _radarMdvx = nullptr;
+  _radarTime = 0;
+  _modelTime = 0;
+  _interpProjSet = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -82,103 +85,159 @@ Sounding &Sounding::inst()
 }
 
 ///////////////////////////////////////////////////
+// set the parameters
+  
+void Sounding::setParams(const Params *params)
+{
+  
+  _params = params;
+  _setFromParams();
+  
+}
+
+///////////////////////////////////////////////////
 // retrieve temperature profile for specified time
 // returns 0 on success, -1 on failure
   
-int Sounding::retrieveTempProfile(time_t profileTime)
+int Sounding::retrieveTempProfile(const DsMdvx &radarMdvx)
   
 {
 
+  assert(_params != nullptr);
+  time_t scanTime = radarMdvx.getMasterHeader().time_centroid;
+  assert(_params != nullptr);
   if (_params->debug >= Params::DEBUG_VERBOSE) {
     cerr << "Getting temp profile for time: " 
-         << DateTime::strm(profileTime) << endl;
+         << DateTime::strm(scanTime) << endl;
   }
-
-  assert(_params != nullptr);
   
-  time_t retrievedTime = profileTime;
-  _tempProfile.clear();
-
   if (_params->sounding_mode == Params::READ_SOUNDING_FROM_SPDB) {
-    
-    _tempProfile.setSoundingLocationName
-      (_params->sounding_location_name);
-    _tempProfile.setSoundingSearchTimeMarginSecs
-      (_params->sounding_search_time_margin_secs);
-    
-    _tempProfile.setCheckPressureRange
-      (_params->sounding_check_pressure_range);
-    _tempProfile.setSoundingRequiredMinPressureHpa
-      (_params->sounding_required_pressure_range_hpa.min_val);
-    _tempProfile.setSoundingRequiredMaxPressureHpa
-      (_params->sounding_required_pressure_range_hpa.max_val);
-    
-    _tempProfile.setCheckHeightRange
-      (_params->sounding_check_height_range);
-    _tempProfile.setSoundingRequiredMinHeightM
-      (_params->sounding_required_height_range_m.min_val);
-    _tempProfile.setSoundingRequiredMaxHeightM
-      (_params->sounding_required_height_range_m.max_val);
-    
-    _tempProfile.setCheckPressureMonotonicallyDecreasing
-      (_params->sounding_check_pressure_monotonically_decreasing);
-    
-    if (_params->debug >= Params::DEBUG_EXTRA) {
-      _tempProfile.setVerbose();
+    if (_readSpdb(radarMdvx) == 0) {
+      _tempProfile = _spdbProfile;
+    } else {
+      cerr << "WARNING - cannot get sounding from SPDB" << endl;
+      cerr << "  Creating profile from parameter file" << endl;
+      _tempProfile = _paramsProfile;
     }
-    if (_params->debug >= Params::DEBUG_VERBOSE) {
-      _tempProfile.setDebug();
+  } else if (_params->sounding_mode == Params::READ_SOUNDING_FROM_MODEL) {
+    if (_readModel(radarMdvx) == 0) {
+      _tempProfile = _modelProfile;
+    } else {
+      cerr << "WARNING - cannot get sounding from model" << endl;
+      cerr << "  Creating profile from parameter file" << endl;
+      _tempProfile = _paramsProfile;
     }
-  
-    if (_tempProfile.loadFromSpdb(_params->sounding_spdb_url,
-                                  profileTime,
-                                  retrievedTime)) {
-      cerr << "ERROR - Sounding::retrieveTempProfile" << endl;
-      cerr << "  Cannot retrive profile for time: "
-           << DateTime::strm(profileTime) << endl;
-      cerr << "  url: " << _params->sounding_spdb_url << endl;
-      cerr << "  station name: " << _params->sounding_location_name << endl;
-      cerr << "  time margin secs: "
-           << _params->sounding_search_time_margin_secs << endl;
-      return -1;
-    }
-    
-    if (_params->debug) {
-      cerr << "=====================================" << endl;
-      cerr << "Got temp profile, URL: " << _params->sounding_spdb_url << endl;
-      cerr << "Overriding temperature profile" << endl;
-      cerr << "  vol time: " << DateTime::strm(profileTime) << endl;
-      cerr << "  retrievedTime: " << DateTime::strm(retrievedTime) << endl;
-      cerr << "  freezingLevel: " << _tempProfile.getFreezingLevel() << endl;
-    }
-
   } else {
-    
-    // set profile from param file
-
-    _tempProfile.clear();
-    for (int ii = 0; ii < _params->specified_sounding_n; ii++) {
-      const Params::sounding_entry_t &entry = 
-        _params->_specified_sounding[ii];
-      TempProfile::PointVal point;
-      point.setHtKm(entry.height_m / 1000.0);
-      point.setTmpC(entry.temp_c);
-      if (entry.pressure_hpa >= 0) {
-        point.setPressHpa(entry.pressure_hpa);
-      }
-      if (entry.rh_percent >= 0) {
-        point.setRhPercent(entry.rh_percent);
-      }
-      _tempProfile.addPoint(point);
-    } // ii
-    _tempProfile.prepareForUse();
-
+    _tempProfile = _paramsProfile;
   }
 
+  _tempProfile.prepareForUse();
+  
+  if (_params->debug) {
+    cerr << "=====================================" << endl;
+    cerr << "Overriding temperature profile" << endl;
+    cerr << "  scanTime: " << DateTime::strm(scanTime) << endl;
+    cerr << "  freezingLevel: " << _tempProfile.getFreezingLevel() << endl;
+    cerr << "  htOfMinus20C: " << _tempProfile.getHtKmForTempC(-20.0) << endl;
+    cerr << "=====================================" << endl;
+  }
+  
   if (_params->debug >= Params::DEBUG_VERBOSE) {
     _tempProfile.print(cerr);
   }
   
+  return 0;
+
+}
+
+///////////////////////////////////////////////////
+// set from parameter file
+// returns 0 on success, -1 on failure
+  
+void Sounding::_setFromParams()
+  
+{
+  
+  // set profile from param file
+  
+  _paramsProfile.clear();
+  for (int ii = 0; ii < _params->specified_sounding_n; ii++) {
+    const Params::sounding_entry_t &entry = 
+      _params->_specified_sounding[ii];
+    TempProfile::PointVal point;
+    point.setHtKm(entry.height_m / 1000.0);
+    point.setTmpC(entry.temp_c);
+    if (entry.pressure_hpa >= 0) {
+      point.setPressHpa(entry.pressure_hpa);
+    }
+    if (entry.rh_percent >= 0) {
+      point.setRhPercent(entry.rh_percent);
+    }
+    _paramsProfile.addPoint(point);
+  } // ii
+  
+}
+
+  
+///////////////////////////////////////////////////
+// retrieve temperature profile from SPDB
+// returns 0 on success, -1 on failure
+  
+int Sounding::_readSpdb(const DsMdvx &radarMdvx)
+  
+{
+
+  time_t scanTime = radarMdvx.getMasterHeader().time_centroid;
+  
+  time_t retrievedTime = scanTime;
+  _spdbProfile.clear();
+  
+  _spdbProfile.setSoundingLocationName
+    (_params->sounding_location_name);
+  _spdbProfile.setSoundingSearchTimeMarginSecs
+    (_params->sounding_search_time_margin_secs);
+  
+  _spdbProfile.setCheckPressureRange
+    (_params->sounding_check_pressure_range);
+  _spdbProfile.setSoundingRequiredMinPressureHpa
+    (_params->sounding_required_pressure_range_hpa.min_val);
+  _spdbProfile.setSoundingRequiredMaxPressureHpa
+    (_params->sounding_required_pressure_range_hpa.max_val);
+  
+  _spdbProfile.setCheckHeightRange
+    (_params->sounding_check_height_range);
+  _spdbProfile.setSoundingRequiredMinHeightM
+    (_params->sounding_required_height_range_m.min_val);
+  _spdbProfile.setSoundingRequiredMaxHeightM
+    (_params->sounding_required_height_range_m.max_val);
+  
+  _spdbProfile.setCheckPressureMonotonicallyDecreasing
+    (_params->sounding_check_pressure_monotonically_decreasing);
+  
+  if (_params->debug >= Params::DEBUG_EXTRA) {
+    _spdbProfile.setVerbose();
+  }
+  if (_params->debug >= Params::DEBUG_VERBOSE) {
+    _spdbProfile.setDebug();
+  }
+  
+  if (_spdbProfile.loadFromSpdb(_params->sounding_spdb_url,
+                                scanTime,
+                                retrievedTime)) {
+    cerr << "ERROR - Sounding::retrieveTempProfile" << endl;
+    cerr << "  Cannot retrive profile for time: "
+         << DateTime::strm(scanTime) << endl;
+    cerr << "  url: " << _params->sounding_spdb_url << endl;
+    cerr << "  station name: " << _params->sounding_location_name << endl;
+    cerr << "  time margin secs: "
+         << _params->sounding_search_time_margin_secs << endl;
+    return -1;
+  }
+  
+  if (_params->debug) {
+    cerr << "Got SPDB temp profile, URL: " << _params->sounding_spdb_url << endl;
+  }
+
   return 0;
 
 }
@@ -192,29 +251,67 @@ int Sounding::_readModel(const DsMdvx &radarMdvx)
 
 {
 
+  // cerr << "111111111111111111111111111111111111" << endl;
+  // radarMdvx.printAllHeaders(cerr);
+  // cerr << "111111111111111111111111111111111111" << endl;
+  
   _radarMdvx = &radarMdvx;
   _radarTime = _radarMdvx->getMasterHeader().time_centroid;
+  // cerr << "  Search time: " << DateTime::strm(_radarTime) << endl;
+  // cerr << "111111111111111111111111111111111111" << endl;
+
+  // check for relevant model data
+  
+  MdvxTimeList timeList;
+  timeList.setModeClosest(_params->model_input_url, _radarTime,
+                          _params->model_search_margin_secs);
+  if (timeList.compile() ||
+      timeList.getValidTimes().size() < 1) {
+    cerr << "ERROR - Sounding::_readModel" << endl;
+    cerr << "  Cannot find model data within search time" << endl;
+    cerr << "  URL: " << _params->model_input_url << endl;
+    cerr << "  Search time: " << DateTime::strm(_radarTime) << endl;
+    cerr << "  Search margin (secs): " << _params->model_search_margin_secs << endl;
+    cerr << timeList.getErrStr() << endl;
+    return -1;
+  }
+  time_t thisModelTime = timeList.getValidTimes()[0];
+  // cerr << "  nTimes: " << timeList.getValidTimes().size() << endl;
+  // cerr << "  thisModelTime: " << DateTime::strm(thisModelTime) << endl;
+  // cerr << "111111111111111111111111111111111111" << endl;
+  if (thisModelTime == _modelTime) {
+    // same as previous time, so use previous
+    if (_params->debug) {
+      cerr << "Using temperature profile from previous model ingest" << endl;
+      cerr << "  Model time: " << DateTime::strm(_modelTime) << endl;
+    }
+    return 0;
+  }
+  
+  // read in model temperature
+  
   _modelRawMdvx.clearRead();
   _modelRawMdvx.setReadTime(Mdvx::READ_CLOSEST,
                             _params->model_input_url,
                             _params->model_search_margin_secs,
-                            _radarTime);
-
-  for (int ii = 0; ii < _params->model_fields_n; ii++) {
-    if (_params->_model_fields[ii].is_available) {
-      continue;
-    }
-    _modelRawMdvx.addReadField(_params->_model_fields[ii].field_name);
-  }
+                            thisModelTime);
+  _modelRawMdvx.addReadField(_params->model_temperature_field_name);
   
   if (_modelRawMdvx.readVolume()) {
     cerr << "ERROR - Sounding::_readModel" << endl;
     cerr << "  Cannot read model data" << endl;
     cerr << "  URL: " << _params->model_input_url << endl;
-    cerr << "  Search time: " << DateTime::strm(_radarTime) << endl;
+    cerr << "  Search time: " << DateTime::strm(thisModelTime) << endl;
     cerr << "  Search margin (secs): " << _params->model_search_margin_secs << endl;
     cerr << _modelRawMdvx.getErrStr() << endl;
     return -1;
+  }
+
+  _modelTime = _modelRawMdvx.getMasterHeader().time_centroid;
+  if (_params->debug) {
+    cerr << "Success reading model temperature" << endl;
+    cerr << "  Model file " << _modelRawMdvx.getPathInUse() << endl;
+    cerr << "  Model time: " << DateTime::strm(_modelTime) << endl;
   }
 
   // interpolate the model data onto the output Cartesian grid
@@ -240,14 +337,18 @@ int Sounding::_readModel(const DsMdvx &radarMdvx)
 int Sounding::_computeModelTempProfile()
 {
 
-  _tempProfile.clear();
-
+  _modelProfile.clear();
+  
   MdvxField *tempFld =
-    _modelInterpMdvx.getField(getModelInputName(Params::TEMP).c_str());
+    _modelInterpMdvx.getField(_params->model_temperature_field_name);
+  if (_params->model_convert_K_to_C) {
+    tempFld->applyLinearTransform(1.0, -273.15, "", "K");
+  }
   if (tempFld == nullptr) {
     cerr << "ERROR - Sounding::_computeModelTempProfile" << endl;
-    cerr << "  Cannot find temp field in model, time: "
-         << DateTime::strm(_radarTime) << endl;
+    cerr << "  Cannot find temp field in model, name: "
+         << _params->model_temperature_field_name << endl;
+    cerr << "  Model time: " << DateTime::strm(_modelTime) << endl;
     return -1;
   }
 
@@ -267,15 +368,16 @@ int Sounding::_computeModelTempProfile()
         nn++;
       }
     } // ii
+    // cerr << "tttttttttttttttt iz, htkm, meanTemp: " << iz << ", " << htKm << ", " << sum / nn << endl;
     if (nn > 0) {
       double meanTemp = sum / nn;
       TempProfile::PointVal val(htKm, meanTemp);
-      _tempProfile.addPoint(val);
+      _modelProfile.addPoint(val);
     }
     
   } // iz
 
-  if (_tempProfile.getProfile().size() < 2) {
+  if (_modelProfile.getProfile().size() < 2) {
     cerr << "ERROR - Sounding::_computeModelTempProfile" << endl;
     cerr << "  Not enough temp data for valid profile" << endl;
     cerr << "  Cannot find temp field in model, time: "
@@ -293,6 +395,19 @@ int Sounding::_computeModelTempProfile()
 void Sounding::_interpModelToRadarGrid()
 {
 
+  if (!_interpProjSet) {
+    _interpProj.init(*_radarMdvx);
+    MdvxField *fld0 = _radarMdvx->getField(0);
+    Mdvx::field_header_t fhdr0 = fld0->getFieldHeader();
+    Mdvx::vlevel_header_t vhdr0 = fld0->getVlevelHeader();
+    _interpVlevels.clear();
+    for (int ii = 0; ii < fhdr0.nz; ii++) {
+      _interpVlevels.push_back(vhdr0.level[ii]);
+    }
+    _modelRemap.setTargetCoords(_interpProj, _interpVlevels);
+    _interpProjSet = true;
+  }
+  
   _modelInterpMdvx.clear();
   if (_params->debug >= Params::DEBUG_VERBOSE) {
     _modelInterpMdvx.setDebug(true);
@@ -304,36 +419,19 @@ void Sounding::_interpModelToRadarGrid()
     MdvxField *interpField = _modelRemap.interpField(*rawFld);
     string rawName = rawFld->getFieldName();
     _modelInterpMdvx.addField(interpField);
-  } // ifield
+  }
+
+  if (_params->write_model_temp_files) {
+    if (_modelInterpMdvx.writeToDir(_params->model_temp_output_url) == 0) {
+      if (_params->debug) {
+        cerr << "Wrote model temp file: " << _modelInterpMdvx.getPathInUse() << endl;
+      }
+    } else {
+      cerr << "ERROR writing model temp data to url: "
+           << _params->model_temp_output_url << endl;
+      cerr << _modelInterpMdvx.getErrStr() << endl;
+    }
+  }
   
-}
-
-//////////////////////////////////////////////////
-// get model field name from type
-
-string Sounding::getModelInputName(Params::model_field_type_t mftype)
-{
-  for (int ii = 0; ii < _params->model_fields_n; ii++) {
-    if (_params->_model_fields[ii].field_type == mftype) {
-      return _params->_model_fields[ii].field_name;
-    }
-  }
-  // not found
-  return "";
-}
-
-//////////////////////////////////////////////////
-// get model type from input name
-
-Params::model_field_type_t Sounding::getModelTypeFromInputName(const string name)
-{
-  for (int ii = 0; ii < _params->model_fields_n; ii++) {
-    string inputName = _params->_model_fields[ii].field_name;
-    if (name == inputName) {
-      return _params->_model_fields[ii].field_type;
-    }
-  }
-  // not found, assume temp
-  return Params::MODEL_NOT_SET;
 }
 

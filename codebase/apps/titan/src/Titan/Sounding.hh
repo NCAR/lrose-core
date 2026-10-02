@@ -67,26 +67,16 @@ public:
 
   // initialize by setting the params
 
-  void setParams(const Params *params) { _params = params; }
+  void setParams(const Params *params);
 
-  // retrieve temperature profile for a given time
+  // retrieve temperature profile for a given scan time
   
-  int retrieveTempProfile(time_t profileTime);
+  int retrieveTempProfile(const DsMdvx &radarMdvx);
 
   // get the temperature profile
-
+  
   const TempProfile &getProfile() { return _tempProfile; }
 
-  // get model field from type or name
-  // returns null on error
-  // NOTE: error cannot happen if _checkModelFields() succeeded
-  
-  Params::model_field_t *getModelField(Params::model_field_type_t mftype);
-  Params::model_field_t *getModelField(const string &fieldName);
-  
-  string getModelInputName(Params::model_field_type_t mftype);
-  Params::model_field_type_t getModelTypeFromInputName(const string name);
-  
 private:
   
   // Singleton instance pointer
@@ -101,24 +91,35 @@ private:
   // members
 
   const Params *_params;
-  TempProfile _tempProfile;
+  
+  time_t _radarTime;
 
+  TempProfile _tempProfile;
+  TempProfile _paramsProfile;
+  TempProfile _spdbProfile;
+  TempProfile _modelProfile;
+  
   // model interpolation
   
-  vector<Params::model_field_type_t> _modelFieldTypes;
-  MdvxRemapInterp _modelRemap;
+  time_t _modelTime;
   DsMdvx _modelRawMdvx;
   DsMdvx _modelInterpMdvx;
   const DsMdvx *_radarMdvx;
-  time_t _radarTime;
+  MdvxRemapInterp _modelRemap;
+  bool _interpProjSet;
+  MdvxProj _interpProj;
+  vector<double> _interpVlevels;
+
+  // methods
   
+  void _setFromParams();
+  int _readSpdb(const DsMdvx &radarMdvx);
   int _readModel(const DsMdvx &radarMdvx);
   int _computeModelTempProfile();
   void _interpModelToRadarGrid();
   void _initModelFieldTypes();
   int _checkModelFields();
-  string _modelFieldType2Str(Params::model_field_type_t mftype);
-
+  
 };
 
 #endif

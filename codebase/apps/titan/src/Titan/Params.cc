@@ -1855,7 +1855,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("MODEL DATA FOR SOUNDING");
-    tt->comment_text = tdrpStrDup("Applies if sounding_mode is READ_SOUNDING_FROM_MODEL.");
+    tt->comment_text = tdrpStrDup("Applies if sounding_mode is READ_SOUNDING_FROM_MODEL. The model data must have been converted into 3-D CF-netCDF MDV format, with heights in km. Temperature is a required field.");
     tt++;
     
     // Parameter 'model_input_url'
@@ -1879,81 +1879,55 @@
     tt->descr = tdrpStrDup("Search margin for model data (secs)");
     tt->help = tdrpStrDup("We search for model data within this margin of the radar data time.");
     tt->val_offset = (char *) &model_search_margin_secs - &_start_;
-    tt->single_val.i = 3600;
+    tt->single_val.i = 10400;
     tt++;
     
-    // Parameter 'model_fields'
-    // ctype is '_model_field_t'
+    // Parameter 'model_temperature_field_name'
+    // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("model_fields");
-    tt->descr = tdrpStrDup("Details of available model fields. Exactly one of each field type must be present in the parameter file.");
-    tt->help = tdrpStrDup("'is_available' specifies whether the field is available in the input file. If not available that field will be set to missing.");
-    tt->array_offset = (char *) &_model_fields - &_start_;
-    tt->array_n_offset = (char *) &model_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(model_field_t);
-    tt->array_n = 6;
-    tt->struct_def.name = tdrpStrDup("model_field_t");
-    tt->struct_def.nfields = 3;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("model_field_type_t");
-      tt->struct_def.fields[0].fname = tdrpStrDup("field_type");
-      tt->struct_def.fields[0].ptype = ENUM_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_model_fields->field_type - (char *) _model_fields;
-        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("model_field_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 7;
-        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("TEMP");
-        tt->struct_def.fields[0].enum_def.fields[0].val = TEMP;
-        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("RH");
-        tt->struct_def.fields[0].enum_def.fields[1].val = RH;
-        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("PRESS");
-        tt->struct_def.fields[0].enum_def.fields[2].val = PRESS;
-        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("UVEL");
-        tt->struct_def.fields[0].enum_def.fields[3].val = UVEL;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("VVEL");
-        tt->struct_def.fields[0].enum_def.fields[4].val = VVEL;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("WVEL");
-        tt->struct_def.fields[0].enum_def.fields[5].val = WVEL;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("MODEL_NOT_SET");
-        tt->struct_def.fields[0].enum_def.fields[6].val = MODEL_NOT_SET;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[1].fname = tdrpStrDup("is_available");
-      tt->struct_def.fields[1].ptype = BOOL_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_model_fields->is_available - (char *) _model_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("field_name");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_model_fields->field_name - (char *) _model_fields;
-    tt->n_struct_vals = 18;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].e = TEMP;
-      tt->struct_vals[1].b = pTRUE;
-      tt->struct_vals[2].s = tdrpStrDup("TEMP");
-      tt->struct_vals[3].e = RH;
-      tt->struct_vals[4].b = pTRUE;
-      tt->struct_vals[5].s = tdrpStrDup("RH");
-      tt->struct_vals[6].e = PRESS;
-      tt->struct_vals[7].b = pFALSE;
-      tt->struct_vals[8].s = tdrpStrDup("Pressure");
-      tt->struct_vals[9].e = UVEL;
-      tt->struct_vals[10].b = pFALSE;
-      tt->struct_vals[11].s = tdrpStrDup("UVEL");
-      tt->struct_vals[12].e = VVEL;
-      tt->struct_vals[13].b = pFALSE;
-      tt->struct_vals[14].s = tdrpStrDup("VVEL");
-      tt->struct_vals[15].e = WVEL;
-      tt->struct_vals[16].b = pFALSE;
-      tt->struct_vals[17].s = tdrpStrDup("WVEL");
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("model_temperature_field_name");
+    tt->descr = tdrpStrDup("Name of the temperature field in the model.");
+    tt->help = tdrpStrDup("This is required if model data is to be used for the temperature profile.");
+    tt->val_offset = (char *) &model_temperature_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("TMP");
+    tt++;
+    
+    // Parameter 'model_convert_K_to_C'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("model_convert_K_to_C");
+    tt->descr = tdrpStrDup("Do we need to convert model temperature from Kelvin to Celcius.");
+    tt->help = tdrpStrDup("The temperature profile used by Titan is in Celcius.");
+    tt->val_offset = (char *) &model_convert_K_to_C - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'write_model_temp_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_model_temp_files");
+    tt->descr = tdrpStrDup("Write the model temperature files.");
+    tt->help = tdrpStrDup("This can be used for debugging.");
+    tt->val_offset = (char *) &write_model_temp_files - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'model_temp_output_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("model_temp_output_url");
+    tt->descr = tdrpStrDup("URL for writing model temperature files.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &model_temp_output_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/mdv/model");
     tt++;
     
     // Parameter 'Comment 17'

@@ -482,10 +482,10 @@ int StormIdent::_processScan(int scan_num, time_t scan_time,
     return -1;
   }
 
-  // read in sounding
+  // read in temperature profile
 
   Sounding &sndg = Sounding::inst();
-  sndg.retrieveTempProfile(scan_time);
+  sndg.retrieveTempProfile(_inputMdv.mdvx);
 
   // identify storms
   
