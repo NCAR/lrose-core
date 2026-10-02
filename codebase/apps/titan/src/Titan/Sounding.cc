@@ -60,6 +60,7 @@ Sounding::Sounding()
   _radarTime = 0;
   _modelTime = 0;
   _interpProjSet = false;
+  _modelTempAvail = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -289,7 +290,8 @@ int Sounding::_readModel(const DsMdvx &radarMdvx)
   }
   
   // read in model temperature
-  
+
+  _modelTempAvail = false;
   _modelRawMdvx.clearRead();
   _modelRawMdvx.setReadTime(Mdvx::READ_CLOSEST,
                             _params->model_input_url,
@@ -327,6 +329,7 @@ int Sounding::_readModel(const DsMdvx &radarMdvx)
     return -1;
   }
 
+  _modelTempAvail = true;
   return 0;
 
 }
@@ -434,4 +437,32 @@ void Sounding::_interpModelToRadarGrid()
   }
   
 }
+
+/////////////////////////////////////////////////////////
+// get temperature grid if model data was used
+// if success, missingVal is set
+// returns NULL if no 3D grid available
+
+const fl32* Sounding::getTemp3D(fl32 &missingVal)
+{
+
+  if (!_modelTempAvail) {
+    return nullptr;
+  }
+  
+  MdvxField *tempFld =
+    _modelInterpMdvx.getField(_params->model_temperature_field_name);
+  if (tempFld == nullptr) {
+    return nullptr;
+  }
+  
+  const Mdvx::field_header_t &fhdr = tempFld->getFieldHeader();
+  missingVal = fhdr.missing_data_value;
+  fl32 *tempVol = (fl32 *) tempFld->getVol();
+
+  return tempVol;
+
+}
+
+
 

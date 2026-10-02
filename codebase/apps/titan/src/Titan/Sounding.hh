@@ -77,6 +77,12 @@ public:
   
   const TempProfile &getProfile() { return _tempProfile; }
 
+  // get temperature grid if model data was used
+  // if success, missingVal is set
+  // returns NULL if no 3D grid available
+  
+  const fl32* getTemp3D(fl32 &missingVal);
+    
 private:
   
   // Singleton instance pointer
@@ -109,6 +115,7 @@ private:
   bool _interpProjSet;
   MdvxProj _interpProj;
   vector<double> _interpVlevels;
+  bool _modelTempAvail;
 
   // methods
   

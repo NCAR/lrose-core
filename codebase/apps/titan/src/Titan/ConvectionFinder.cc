@@ -44,6 +44,7 @@
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxChunk.hh>
 #include "ConvectionFinder.hh"
+#include "Sounding.hh"
 using namespace std;
 
 const fl32 ConvectionFinder::_missing = -9999.0;
@@ -117,6 +118,15 @@ int ConvectionFinder::run(const DsMdvx &inMdvx,
                      fhdr.grid_miny,
                      zLevels,
                      isLatLon);
+
+  // set temp grid if available
+
+  Sounding &sndg = Sounding::inst();
+  fl32 missingTemp;
+  const fl32 *tempGrid3D = sndg.getTemp3D(missingTemp);
+  if (tempGrid3D != nullptr) {
+    _convStrat.setTempBasedHts(tempGrid3D, missingTemp);
+  }
 
   // compute the convective stratifom partition
   
