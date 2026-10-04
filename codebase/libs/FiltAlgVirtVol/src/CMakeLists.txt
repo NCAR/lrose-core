@@ -104,6 +104,7 @@ else(APPLE)
 # build shared library
   add_library (FiltAlgVirtVol SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(FiltAlgVirtVol PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

@@ -166,6 +166,7 @@ else(APPLE)
 # build shared library
   add_library (qtplot SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(qtplot PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

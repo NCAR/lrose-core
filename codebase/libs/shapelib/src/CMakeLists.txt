@@ -85,6 +85,7 @@ else(APPLE)
 # build shared library
   add_library (shapelib SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(shapelib PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

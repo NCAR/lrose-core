@@ -85,6 +85,7 @@ else(APPLE)
 # build shared library
   add_library (advect SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(advect PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

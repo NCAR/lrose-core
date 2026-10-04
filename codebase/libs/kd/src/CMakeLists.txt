@@ -90,6 +90,7 @@ else(APPLE)
 # build shared library
   add_library (kd SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(kd PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

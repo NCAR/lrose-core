@@ -94,6 +94,7 @@ else(APPLE)
 # build shared library
   add_library (Fmq SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(Fmq PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

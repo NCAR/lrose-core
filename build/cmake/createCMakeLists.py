@@ -837,8 +837,8 @@ def writeCMakeListsCodebase(dir):
     fo.write('set(CMAKE_SKIP_BUILD_RPATH FALSE)\n')
     fo.write('set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)\n')
     fo.write('\n')
-    fo.write('set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)\n')
-    fo.write('set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)\n')
+    fo.write('set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")\n')
+    fo.write('set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)\n')
     fo.write('\n')
     fo.write('if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")\n')
     fo.write('  set(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags")\n')
@@ -1130,6 +1130,7 @@ def writeCMakeListsLib(libName, libSrcDir,
         fo.write("# build shared library\n")
         fo.write("  add_library (%s SHARED ${SRCS})\n" % libName)
         fo.write('endif(APPLE)\n')
+        fo.write('set_target_properties(%s PROPERTIES INSTALL_RPATH "$ORIGIN")\n' % libName)
     fo.write("\n")
 
     fo.write("# install\n")

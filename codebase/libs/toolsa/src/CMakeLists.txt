@@ -249,6 +249,7 @@ else(APPLE)
 # build shared library
   add_library (toolsa SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(toolsa PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

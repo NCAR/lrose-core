@@ -100,6 +100,7 @@ else(APPLE)
 # build shared library
   add_library (dsserver SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(dsserver PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

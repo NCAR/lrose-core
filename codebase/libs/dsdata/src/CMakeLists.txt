@@ -122,6 +122,7 @@ else(APPLE)
 # build shared library
   add_library (dsdata SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(dsdata PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

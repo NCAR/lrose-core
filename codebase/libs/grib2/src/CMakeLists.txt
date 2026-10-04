@@ -131,6 +131,7 @@ else(APPLE)
 # build shared library
   add_library (grib2 SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(grib2 PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

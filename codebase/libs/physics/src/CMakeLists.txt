@@ -95,6 +95,7 @@ else(APPLE)
 # build shared library
   add_library (physics SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(physics PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

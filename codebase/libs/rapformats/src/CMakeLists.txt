@@ -227,6 +227,7 @@ else(APPLE)
 # build shared library
   add_library (rapformats SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(rapformats PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

@@ -96,6 +96,7 @@ else(APPLE)
 # build shared library
   add_library (didss SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(didss PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

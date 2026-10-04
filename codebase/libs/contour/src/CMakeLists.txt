@@ -93,6 +93,7 @@ else(APPLE)
 # build shared library
   add_library (contour SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(contour PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

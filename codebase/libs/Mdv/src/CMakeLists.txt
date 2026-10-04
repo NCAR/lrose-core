@@ -197,6 +197,7 @@ else(APPLE)
 # build shared library
   add_library (Mdv SHARED ${SRCS})
 endif(APPLE)
+set_target_properties(Mdv PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 
