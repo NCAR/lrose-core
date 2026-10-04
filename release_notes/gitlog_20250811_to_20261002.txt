@@ -1,0 +1,545 @@
+0e71be440 apps/Radx/RadxConvert - working on support for FM301
+dc4b36fb6 libs/Radx - working on Fm301
+074a4be1f apps/titan/Titan - adding option to use model directly for temperature profile
+bb7437c69 apps/titan/Titan - adding option to use model directly for temperature profile
+777e5a800 apps/Radx/src/RadxCartDP - bug fix
+2b5d3bc8c Comment improvement
+5a464320f libs/radar/kdp/KdpFirFilt.cc - cleaning up comments and prints
+ce66e7349 apps/titan/Titan - working on adding model field for temperature
+7de54c330 updating docs/download/install_using_homebrew.mac_osx.md
+93e64fcf9 build/cmake/createCMakeLists.py - cleaning up commented code
+af2edf527 Working on cmake for OSX release
+367b68b21 Working on cmake for OSX release
+701c3a2e2 Working on cmake for OSX release
+78294e216 Updating build/cmake/createCMakeLists.py, and resulting CMakeLists.txt files, to use latest version of find_package() for HDF5 and netCDF
+b3b6aea82 Updating build/cmake/createCMakeLists.py, and resulting CMakeLists.txt files, to use latest version of find_package() for HDF5 and netCDF
+16c49ed47 cmake - adding include_directories for HDF5 and NETCDF
+9d8fbaed0 Merge branch 'master' of github.com:ncar/lrose-core
+d1f8ba729 In createCmakeLists.py, adding include_directories for NETCDF and HDF5
+1722802a4 libs/radar/src/kdp/KdpFirFilt.cc - changing to use _besselI0() instead of std::cyl_bessel_i(), the latter is less available on the mac
+5fe94dd8f Adding Radx Fm301 support
+0c9453335 Adding libs/Radx/RadxFm301Str.cc
+f7dbb918c Adding Radx Fm301 support
+bf4712d1c Merge in new_kdp branch - new version of libs/radar/KdpFilt class
+3871d925c apps/radar/src/Sprite/IqPlot.cc - working on TSR filter
+fbf2e8e9d libs/radar/ClutFilter - development of TSR filter
+d02479b2c libs/radar/ClutFilter - development of TSR filter
+73df762d2 libs/radar/ClutFilter - development of TSR filter
+ae52ac8c6 libs/radar/ClutFilter - workign on TSR filter
+bfc4ded1b libs/radar/ClutFilter - workign on TSR filter
+ce2bf4e2f libs/radar/ClutFilter - workign on TSR filter
+38b8623b9 libs/radar/ClutFilter - working on TSR filter
+431637e83 libs/radar/ClutFilter - working on TSR filter
+5dcebe3e0 libs/radar/ClutFilter - working on TSR filter
+418fb8264 libs/radar/src/moments/ClutFilter.cc - working on tsr filter
+b8c67739c libs/radar/RadarTimeSeriesSim - testing
+5b35c34ea apps/radar/src/Sprite/IqPlot - working on TSR filter
+a2f9c2ace Adding libs/radar/RadarTimeSeriesSim
+193f15e2b apps/radar/Sprite - working on TSR filter
+c44acea4b libs/radar/ClutFilter - working on time series reflection
+c130149c5 In libs/radar/RadarMoments::applyTsrFilter(), adding applyWindow boolean arg
+c0d7a06e8 libs/radar/RadarMoments - adding _normalizeWindowPwr()
+8ad3f4861 apps/radar/Sprite - testing Tsr filter
+7861bb031 libs/radar/src/kdp/KdpFirFilt.cc - testing dynamic initialization and computing the FIR filter taps on the fly
+965a47d79 libs/radarKdpFirFilt - adding _initLowPass()
+84b0c17ed apps/Radx/RadxMergeVols - uncommenting _writeVol() _processFileSerial() - this had been commented out, probably for testing, and then erroneously checked in
+ea505013f apps/Radx/RadxMergeVols - uncommenting _writeVol() _processFileSerial() - this had been commented out, probably for testing, and then erroneously checked in
+bb0473c41 libs/radar/RadarMoments, apps/radar/Sprite - testing TSR filter
+2bc876c5b libs/radar/RadarMoments - adding TSR filter
+ccea8130d libs/radar/RadarMoments - adding TSR filter
+4b3e8e347 apps/Radx/RadxKdp/testing - modifying plot scripts
+94dd6b345 apps/Radx/RadxKdp - plotting rays for testing
+b44d96a65 testing KdpFilt
+a021469e9 libs/radar/src/KdpFilt - attenuation correction is 2-way
+0278a98db apps/Radx/RadxKdp/testing - moving data from /tmp to ~/data/kdp
+31752cbe2 libs/radar/src/kdp/KdpFilt - adding iterative computation for attenuation, to estimate KDP SC
+143e3cfe1 Adding unfolding for FFT filtered phidp
+652f86aad Adding unfolding for FFT filtered phidp
+d83a4b078 libs/radar/src/kdp/KdpFilt - moving debugging params into app instead of KdpFiltParams
+e1cd98f51 RadxKdp - testing with NEXRAD data
+5d2dca223 libs/radar/src/kdp/KdpFilt - moving debugging params into app instead of KdpFiltParams
+8bbe596d9 apps/radar/src/HcrMomentsCombine - debugging
+6278fef09 libs/radar - adding RadarFftDouble class
+8ec3be1ac libs/radar - adding RadarFftDouble class
+73ab2ece6 apps/Radx/RadxKdp - adding kftg testing case
+87b940f87 apps/Radx/RadxKdp/testing - adding kddc
+bb3df7f20 libs/radar/src/kdp/KdpFilt - updating the parameter definition for attenuation correction and self consistency
+b27bb95b2 libs/radar/KdpFilt - updating parameter table for attenuation corrections, to support S, C and X bands directly
+7df178951 apps/radar/HcrMomentsCombine - debugging, testing unfolding
+2e1d090e3 Updating the install sections, with AI advice
+89af01217 apps/radar/HawkEye - adding check_scan_name parameter, to optionally filter out rays by scan name
+7a9f18637 apps/radar/HawkEye - adding check_scan_name parameter, to optionally filter out rays by scan name
+50e9a1bd2 libs/radar/src/kdp/KdpFilt - testing on CSWR dow7 and cow2 data
+29ff20bb8 libs/radar/src/kdp/KdpFilt - testing and cleaning up
+241a97086 libs/radar/src/kdp/KdpFilt - testing and cleaning up
+192430587 libs/radar/src/kdp/KdpFilt - testing and cleaning up
+e614ce60f Adding build/cmake/run_cmake scripts
+53b156555 Adding build/cmake/run_cmake scripts
+e20020d3b apps/Radx/src/RadxKdp - adding testing with dow7 and cow2
+bd12acbbf apps/Radx/src/RadxKdp - adding testing with dow7 and cow2
+e63ed2250 libs/radar/src/kdp - testing different filters
+47f5a8c62 libs/radar/src/kdp - testing different filters
+fdaa22bc4 libs/radar/src/kdp - cleaning up code
+e89983ded libs/radar/src/kdp - cleaning up code
+32c4049f8 libs/radar/src/kdp - cleaning up code
+bf2ab7b6e libs/radar/src/kdp/KdpFilt - cleaning up and testing
+62203173e apps/radar/TsPrint - in _printPrtDetails, commenting out printMetaQueue()
+35f0e88da apps/radar/HcrTs2Moments - fixing beam error conditions when block id changes, delete beam but do not exit
+4b9500fc4 Fixing paramdef file, HcrTs2Moments
+5c3bc07a3 Adding HcrMomentsCombine and HcrTs2Moments to CmakeLists
+b63c7ba23 HcrTs2Moments.test
+3fd2665c6 apps/radar/src/HcrTs2Moments - removing param for field name suffix
+e4031f044 apps/radar/src/HcrTs2Moments - removing param for field name suffix
+55228dfc1 apps/Radx/RadxRate - updating to latest KdpFilt
+a0c28a462 apps/Radx/RadxQc - updating to latest KdpFilt
+ed3c6dcc9 apps/Radx/RadxPid - updating to latest KdpFilt
+5a092ad02 apps/Radx/RadxPartRain - updating to latest KdpFilt
+3e32c571e apps/Radx/RadxHca - updating to latest KdpFilt
+a35f69e2d apps/Radx/RadxCov2Mom - updating to latest KdpFilt
+c341c1e39 libs/FiltAlgVirtVol/VirtVolSweep.cc - cleaning up unused #includes
+f9ae00611 libs/radar/KdpFilt - updates in progress
+7b90411e3 apps/radar/src/HcrMomentsCombine - work in progress
+e283bed37 apps/radar/src/HcrMomentsCombine - work in progress
+f7a68be48 apps/radar/src/HcrMomentsCombine - work in progress
+dea00109d apps/radar/src/HcrMomentsCombine - work in progress
+ad2ab99bf apps/radar/src/HcrTs2Moments - adding fixed PRT labels
+7d75af695 apps/radar/HcrTs2Moments - adding cross-pol moments on output
+6ca1b82ce libs/radar/src/kdp/KdpFilt.cc - cleaning up and testing
+3469165db libs/radar/src/kdp/KdpFilt.cc - cleaning up and testing
+14f26895b libs/radar/src/kdp/KdpFilt.cc - cleaning up and testing
+80cd202cf libs/radar/src/kdp/KdpFilt.cc - testing
+89116873c using libs/radar/kdp/KdpFirFilt.cc in KdpFilt
+e2d76bf2b uding libs/radar/kdp/KdpFirFilt.cc in KdpFilt
+b0182e175 apps/radar/src/HcrMomentsCombine - development in progress
+1ddfabef2 apps/radar/HcrMomentsCombine - improving param definitions
+d848b3ee9 apps/radar/HcrMomentsCombine - improving param definitions
+72b552006 apps/radar/src/HcrTs2Moments - comments in paramdef file
+2dedc37e0 apps/titan/src/Titan: (a) adding calls to free up memory. (b) removing unused params
+732d7c835 libs/radar/convstrat/ConvStratFinder.cc - adding call to _freeClumps() at line 382, to avoid memory leaks
+9fe348ce5 Working on libs/radar/src/kdp/KdpFirFilt.cc
+fc70a30bf adding libs/radar/kdp/KdpFirFilt.cc
+9d11cc988 libs/radar/src/kdp/KdpFilt.cc - tuning regression filter
+c2ba487fb libs/radar/src/kdp/KdpFilt.cc - tuning regression filter
+7c37169ed libs/radar/src/kdp/KdpFilt.cc - adding use of KdpQuadFit
+6719814b0 libs/radar/src/kdp/KdpFilt.cc - adding use of KdpQuadFit
+2f04e4809 libs/radar/src/kdp/KdpFilt.cc - censoring spob when not valid
+dd37312c3 libs/radar/src/kdp/KdpFilt.cc - testing phase shift on backscatter
+0d37302f0 libs/radar/src/kdp/KdpFilt.cc - adding PsobAccum
+0b5c27a45 apps/Radx/RadxKdp - testing SC method and phase shift on backscatter
+b19575f20 apps/Radx/RadxKdp - testing SC method and phase shift on backscatter
+025053c60 libs/radar/KdpFilt - testing self-consistency method for phase shift on backscatter (delta)
+bd170afc4 libs/radar/KdpFilt - deleting meanUnfold, using phidpUnfold only
+3b44188e7 Working on apps/radar/HcrMomentsCombine
+5a162147c apps/radar/HcrTripleCombine -> HcrMomentsCombine
+6fe03588c apps/radar/src/HcrTs2Moments - adding check on block_id, do not process blocks not listed in the params file
+9740bb66a apps/radar/src/HcrTs2Moments - adding param for fieldNameSuffix for output moments fields
+8bbd7164a libs/radar/src/kdp/KdpFilt.cc - testing unfolding
+c6ff9206e libs/radar/src/kdp/KdpFilt.cc - rationalizing code, cleaning up unused
+739ab5c6c Updating scripts/src/GetAwsRadar.py to create tmp dir in output dir
+a9b74f88a apps/scripts/GetAwsRadar.py - updated with help from ChatGpt
+af712d0cc apps/radar/src/HcrTs2Moments - adding blockId and blockName to output rays
+baedf4e07 libs/Radx/RadxRay - in print(), adding support for scanName
+776b7b849 debuggin apps/radar/src/HcrTs2Moments
+ba0ec28f3 HcrTS2Moments - changing volNum at minute boundaries
+efc7f34de adding apps/radar/HcrTripleCombine - based on HcrShortLongCombine
+73a451db7 adding apps/radar/HcrTripleCombine - based on HcrShortLongCombine
+1cb00f37e HcrTS2Moments - changing volNum at minute boundaries
+1f7115a98 libs/radar/kdp - adding KdpQuadFit
+765b4116e libs/radar/src/kdp/KdpFilt.cc - debugging and testing selfconsistency for phase shift on backscatter
+9b5acb583 libs/radar/src/kdp/KdpFilt.cc - debugging and testing selfconsistency for phase shift on backscatter
+9ee66fd50 Developing and testing KdpFilt for SC
+4449342cd Testing formulas for KDP SC
+0cf48ae25 Restoring apps/Radx/src files to version 33cb22fb8: RadxKdp/Worker.hh RadxPid/Worker.hh RadxRate/Worker.hh
+eab2f66cd Restoring apps/Radx/src files to version 33cb22fb8: RadxHca/ComputeEngine.cc RadxKdp/Worker.cc RadxPartRain/ComputeEngine.cc RadxPid/Worker.cc RadxQc/ComputeEngine.cc RadxRate/Worker.cc
+856e6f232 Restoring libs/radar/src files to version 33cb22fb8: include/radar/KdpFilt.hh, include/radar/KdpFiltParams.hh, kdp/KdpFilt.cc, kdp/KdpFiltParams.cc, kdp/paramdef.KdpFilt
+e832f7179 Working branch for new KDP
+8de0e6148 apps/radar/HcrTs2Moments - testing in progress
+91286c0a4 apps/radar/HcrTs2Moments - testing
+703257f4e apps/radar/HcrTs2Moments - testing in archive mode
+328bb229d apps/radar/HcrTs2Moments - development in progress
+62502f5d7 libs/radar/src/include/radar/IwrfTsPulse.hh - adding set() and get() methods for start and end of block
+fff5622c9 Merge branch 'master' of github.com:ncar/lrose-core
+5dcfa9aac apps/radar/HcrTs2Moments - adding typedef for block_def
+36c5e611d Merge branch 'master' of github.com:ncar/lrose-core
+e66339840 apps/titan - paramdef files, RAP_DATA_DIR -> DATA_DIR
+01b1ec38f Merge branch 'master' of github.com:ncar/lrose-core
+f89de5ada apps/radar/HcrTs2Moments - adding CalibMgr to handle calibration switching
+b29264bf4 libs/radar/src/kdp/KdpFilt.cc - updating self consistency computations
+de20c4c62 libs/radar/src/kdp/KdpFilt.cc - updating self consistency computations
+a10352651 libs/radar/KdpFilt - working on FFT method
+1a7a3fe85 libs/radar/KdpFilt - modifying _computePhidpConditioned() for finding increasing and decreasing regions
+693623f55 libs/radar/kdp/KdpFilt.cc - debugging FftConditional
+20fb86a76 libs/radar/kdp/KdpFilt.cc - adding interpolation for complex angles in fft method
+b8912c5ef Merge branch 'master' of github.com:ncar/lrose-core
+01d0303bd Working on KdpFilt - adding FFT filtering. In RadarComplex, added interpolation method in angle space
+0eb030401 Working on apps/radar/HcrTs2Moments
+6b1e71b15 Working on apps/radar/HcrTs2Moments
+694cae696 apps/radar/Ts2Moments/BeamReader.cc - fixing bug in check on scanType in _getNextPulse()
+2f9677b3b apps/radar/Iq2Dsr/BeamReader.cc - fixing bug in check on scanType in _getNextPulse()
+ed9071ae0 Testing RadxKdp and changes in KdpFilt
+bb10dc9ff libs/radar/KdpFilt - adding FFT-based filtering
+29cd72762 Merge branch 'master' of github.com:ncar/lrose-core
+250250f9d libs/radar/KdpFilt - adding FFT-based filtering
+b0fcae4f7 Merge branch 'master' of github.com:ncar/lrose-core
+387b4d270 Working on apps/radar/HcrTs2Moments
+dfab0893e .gitignore - adding HcrTs2Moments
+08512c5ed apps/radar/HcrTs2Moments - cleaning up unused params
+2b7b99024 Adding radar/src/HcrTs2Moments
+b2f85a63e libs/radar - include/radar/IwrfTsPulse.hh include/radar/iwrf_data.h iwrf/iwrf_functions.cc - block_num -> block_id
+8ec48b5c1 libs/radar/kdp/KdpFilt - experimenting with FFT filter
+de800e34f libs/radar/KdpFilt - testing FFT filter
+07299a5d8 apps/Radx/src/RadxKdp/testing/RadxKdp.spol - testing
+43466f5e6 libs/radar/KdpFilt - adding testing code for fft-based filtering
+cf5349077 libs/radar/moments/RadarFft - adding mutex for init and free methods because fftw init and free are not inherently thread safe
+02fce43c7 libs/radar/KdpFilt.cc - moving _computeFoldingRange() into main compute() method
+5ff15051b Testing RadxKdp
+608a9b378 apps/Radx - fixing for changes in KDP API
+0a1df085c apps/Radx/RadxHca/ComputeEngine.cc - fixing call to kdp.getValidForKdp() to int* instead of bool*
+b63d9c537 apps/radar/HawkEye SpreadSheetView - restoring includes for QJSEngine
+aa69f73b4 libs/radar/iwrf/iwrf_functions.cc - adding prints for block_num etc. related to HCR modes
+2f2a184a1 libs/radar/KdpFilt - working on regression filtering for each valid run
+1eb113130 libs/radar/KdpFilt - working on regression filtering for each valid run
+ffc943b25 apps/Radx/src/RadxKdp/testing - using Spol for PECAN
+76a6dff23 libs/radar/src/kdp/KdpFilt.cc - adding _computePhidpWtRegrFilt()
+5555c5118 libs/radar/KdpFilt - working on regression filtering
+f09e9c724 Adding CMakeLists for ConvStrat params
+1e9cdb58a libs/rapmath - adding NasaPolyFit
+6b9b35a77 libs/rapmath - adding NasaPolyFit
+f7b91334e libs/radar/KdpFilt - testing _computePhidpWtRegrFilt()
+d46999215 libs/radar/src/kdp/KdpFilt.cc - adding _computePhidpWtRegrFilt()
+0ff027a60 libs/radar/src/kdp/KdpFilt.cc: (a) converting TaArray -> vector. (b) initial addition and testing of regression filtering for phidp
+fd269ca20 libs/radar/KdpFilt - adding int _getNGatesMaxValid() method
+d4958ad64 libs/radar/src/include/radar/KdpFilt.hh - adding comments
+a915977c5 libs/radar/KdpFilt - adding params REGRESSION_FILTER option for range filtering
+433c432b9 libs/radar/KdpFilt - changing call args for _applyFirFilter() to be consistent with _copyArray(). Both now follow the memcpy() convection of memcpy(out, in)
+7663e1eb3 libs/radar/KdpFilt.cc - changing ray file name to have 2 decimal precision for elev and az
+19707ae84 RadxKdp - testing. Adding option for fixed angle limits
+9d0a7e5f4 libs/radar - adding kdp/PlotKdpRays_py3.py
+d4409222d apps/Radx/RadxCartDP: (a) removing unused params (b) cleaning up commented code (c) specifying KDP output
+4a18827f2 RadxCartDP - testing range, height and coverage fields
+9a7e4ee17 libs/Radx - fixing (a) reading Gem file, setting volNum (b) writing Cf2 file setting lat/lon
+863008af7 RadxCartDP - cleaning up redundant debug fields
+f8c6e2b77 apps/Radx/RadxCartDP - working on limiting output fields
+72541ac02 Adding get_sounding.py script to apps/ingest/NWSsoundingIngest
+3b96fa31f RadxCartDP - working on params to limit output fieds on write
+67317c18b apps/Radx/RadxCartDP - updating debug parameters
+ba1218786 apps/Radx/CartBeamBlock - adding option to make copies of DEM files that are used
+cc6d7d241 libs/toolsa - adding copyFileToDir() to TaFile
+4ddef0946 CartBeamBlock - updating for template 3D grid file
+9119773ca CartBeamBlock - updating for template 3D grid file
+653cfa6ae apps/Radx/RadxCartDP - adding param template_3d_field_name
+4e6f09775 create_grid_template_file -> create_grid_template
+1c1e42566 apps/Radx/RadxCartDP - cleaning up params for netcdf output
+0fd487a86 apps/Radx/RadxCartDP - working on template file output
+8d2d0457f apps/Radx/RadxCartDP - working on adding option for writing out a template grid
+6b8e27302 apps/Radx/RadxCartDP - rationalizing the parameters
+7617bad5f apps/Radx/RadxRate - fixing bug in Worker.cc::_addPidDebugFields(). Added checks for RadxField objects to be non-null before using them in addField()
+a90922ef3 apps/Radx/RadxCartDP: adding on ConvStrat partition
+eb7bdb61a libs/radar/ConvStratFinder: (a) converting from TaArray<> to vector<>. (b) adding get() methods for params used
+d14372d80 apps/Radx/RadxCartDP - testing conv/strat
+682ca790f apps/Radx/RadxCartDP - working on conv/strat
+db7d896db libs/radar/ConvStratFinder - adding setTempBasedHts() function
+942f9f395 apps/Radx/RadxCartDP - working on conv/strat
+5c2a9f4b1 apps/Radx/RadxCartDP - working on conv/strat
+994256cb0 apps/Radx/RadxCartDP - adding conv_strat params
+cfe72aec5 libs/radar/ConvStratFinder - adding in paramdef
+9141a30a0 libs/radar/src/convstrat - adding ConvStratParams
+67142a176 apps/Radx/RadxCartDP - testing QPE
+a161245e5 apps/Radx/RadxCartDP - adding 2D QPE fields
+cd52dee89 libs/Mdv - adding Mdvx_init.hh and Mdvx_init.cc, containing functions to initialize the structs
+be96d341c libs/Mdv - adding Mdvx_init.hh and Mdvx_init.cc, containing functions to initialize the structs
+3c8397ee6 libs/Mdv - adding Mdvx_init.hh and Mdvx_init.cc, containing functions to initialize the structs
+41cd7fe01 apps/Radx/RadxCartDP: CartInterp -> RadarInterp
+0afb23d27 apps/Radx/RadxCartDP - working on adding QPE fields
+195299fa6 apps/Radx/RadxCartDP - working on adding in QPE
+8776bb72e apps/Radx/RadxCartDP - adding in beam blockage fields
+9d71e7f86 apps/Radx/RadxCartDP - adding read for beam blockage
+cbad037ab apps/titan/src/EsdAcIngest/testing - testing the websocket script
+192c7c320 apps/titan/EsdAcIngest - in Input.cc, for TcpInput class, modifying to detect that the socket to the server is disconnected, and performing a reconnect
+59306ac2a apps/ingest/AcData2Spdb - in Input.cc, for TcpInput class, modifying to detect that the socket to the server is disconnected, and performing a reconnect
+313858e91 Testing ws_to_tcp.py in titan/EsdAcIngest
+0a924483a Adding apps/titan/src/EsdAcIngest/ws_to_tcp.py
+2ab041556 apps/ingest/src/MetarCsv2Spdb and UAEMesonet2Spdb - adding bz2 and z to the link line
+f2095162e apps/ingest/src/Mesonet2Spdb - adding bz2 and z to the link line
+f6068cd87 Update Centos to AlmaLinux in build instructions
+1e13d1dd2 Autonomously -> Automatically
+cfa06713d Laguna spring 2026 -> 2025
+81512885b README.md - adding Laguna 2026 release
+cb15cc588 Ncxx/src/Hdf5/H5xDataType.cc - making new API compatibility dependent on version 2.0
+c2011f067 build/checklists/apps_check_list.lrose-core - bringing up to date
+91efb1178 Updating CMakeLists
+2011f83df Updating CMakeLists
+cfcac3360 libs/Ncxx include/Ncxx/H5x.hh and Hdf5/H5xDataType.cc - adding ifdefs to deal with API changes after 1.14
+67063f07f Updating docs/build/prepare_for_build.md
+6d2b62b8b Updating main README for install instructions
+aff4f5392 Updating main README for install instructions
+83205f2d0 Updating main README for install instructions
+b5af064b3 docs/download/download_package_and_install.debian.md
+810041ab2 docs/download/download_package_and_install.debian.md
+33e9311df updating docs for download and installing packages
+939a7a4c1 apps/titan/HailKEswath - removing redundant parameters
+d5aed46fe apps/titan/HailKE - fixing output field names
+e7d53938f apps/titan/HailKE - removing unused params for swath accumulation
+ab3500064 apps/titan/HailKE - fixing bug related to lowest level
+c7d986470 README.md - release versions modified.
+8dde2d48f README.md - release versions modified.
+375a1a2ab Release install documentation.
+6dd036b57 README.md - build instructions modified.
+7dd56d8db apps/Radx/CartBeamBlock - testing
+86425bca1 apps/Radx/CartBeamBlock - adding elevation field to output
+fb386f497 apps/Radx/CartBeamBlock - testing V0.9
+6a0816fd4 apps/Radx/CartBeamBlock - adding print to show progress
+8e09734d6 apps/Radx/CartBeamBlock - adding print to show progress
+1e4e21edf apps/Radx/CartBeamBlock - cleaning up
+0ccae1e24 apps/Radx/CartBeamBlock - adding multithreading with help from ChatGpt
+660f79968 apps/Radx/CartBeamBlock - cleaning up and refactoring
+6ae998ff1 apps/Radx/CartBeamBlock - cleaning up and refactoring
+59865c9b8 apps/Radx/CartBeamBlock - working on BlockageCalc
+fafa1f086 apps/Radx/CartBeamBlock - working on BlockageCalc
+5ed35fa90 apps/Radx/CartBeamBlock - working on BlockageCalc
+581d4f176 apps/Radx/CartBeamBlock - working on BlockageCalc
+428d645c7 apps/Radx/CartBeamBlock - adding BeamPowerPattern class
+ccef51df3 apps/Radx/CartBeamBlock - adding BeamPowerPattern class
+7170e2a52 apps/Radx/CartBeamBlock - adding BeamPowerPattern class
+e9095f601 apps/Radx/CartBeamBlock - adding BeamPowerPattern class
+bc3e3f946 libs/euclid - adding EuclidAngle class
+be885bb4f libs/euclid - adding EuclidAngle class
+5ad61b3d0 apps/Radx/CartBeamBlock - adding BlockageCalc
+26cf41db0 apps/Radx/CartBeamBlock - adding BlockageCalc
+82e2dbbe3 apps/Radx/CartBeamBlock - adding better getElevation() method to DemProvider
+d05ce6921 apps/Radx/CartBeamBlock - adding read for SRTM tiles directly
+143e07dfc apps/Radx/CartBeamBlock - adding read for SRTM tiles directly
+022506cac apps/Radx/CartBeamBlock - adding read for SRTM tiles directly
+e5cb03975 apps/radar/CartBeamBlock - working on beam power shape
+cdebab9a1 libs/toolsa/TaArray and TaArray2D - refactored using ChatGpt. Also updated libs/radar/DwellSpectra and RadarMoments accordingly
+265a9cbf5 libs/toolsa/TaArray and TaArray2D - refactored using ChatGpt. Also updated libs/radar/DwellSpectra and RadarMoments accordingly
+11102e0a8 Fixing Makefile for HailKEswath
+42f19e8cb Adding in HailKE and HailKEswath
+2ece669af apps/Radx/CartBeamBlock - adding extinction
+b80e8709b apps/Radx/CartBeamBlock - adding extinction
+9e04763b4 apps/Radx/CartBeamBlock - working on extinction calculations
+63fde8ab7 apps/Radx/CartBeamBlock - working on reading DEM
+496acfb54 apps/Radx/CartBeamBlock - working on reading DEM
+53401aeca libs/Mdv/MdvxProj - in getEdgeExtrema(), adding optional argument = margin
+fcaa906b6 apps/Radx/CartBeamBlock - working on reading DEM
+476b77eca apps/Radx/CartBeamBlock - working on reading in template file for grid details
+200fd50e6 apps/Radx/CartBeamBlock - reading in template Cart file
+5eceb8056 Working on apps/Radx/CartBeamBlock
+76b1f76f6 apps/Radx/CartBeamBlock - RainFields files
+2a72edd04 apps/Radx/CartBeamBlock - working on RainFields.cc
+f7c8eefaa apps/Radx/CartBeamBlock - adding RainFields to contain all rainfields classes
+d5186b45b Starting work on apps/Radx/CartBeamBlock
+4171b7ae3 apps/Radx/RadxCartDP - adding precip rate
+3c6af58cc RadxCartDP - adding precip rate
+cab58ef8d libs/radar/PrecipRate - adding setMissingVal() method
+8d611553a RadxCartDP - adding precip rate
+8b4a24cc1 RadxCartDP - adding precip rate
+f9fba74ec libs/radar/PrecipRate - fixing calling params for computeHybrid()
+a646827d7 libs/radar - refactoring PrecipRate class
+eb528f513 libs/radar/NcarParticleId - adding SNR check to computePid()
+1ea5d59e6 RadxCartDP - adding param for PID mode kernel filter size
+c07d1713f apps/Radx/RadxCartDP: adding memory free routines, and mode filter for PID
+202240b6a apps/Radx/RadxCartDP - testing PID comps
+867ca8dbc Adding main computePid()
+450c3c293 Working on PID
+5d7eb65a9 RadxCartDP - InterpToCart -> CartInterp
+4400150f5 RadxCartDP - contolling OutputMdv from RadxCartDP class instead of InterpToCart
+6bff4d129 RadxCartDP: cleaning up debug prints
+45bd5281c RadxCartDP - improving handling of _outputFields array
+ecfed64fa RadxCartDP - cleaning up, testing
+f823a921f RadxCartDP - cleaning up, testing
+19c73251b RadxCartDP - removing temp from scalars
+357cb7e99 libs/radar/NcarParticleId - amending prepareForPid() to not include temperature - temp is handled in computePidBeam()
+e13bdd70a apps/Radx/src/RadxCartDP/ScalarsCompute: TaArray -> vector
+801e7ec45 apps/Radx/RadxCartDP - working on PID
+87ab4425f libs/radar/NcarParticleId - adding prepareForPid()
+808cd08ff apps/Radx/RadxCartDP - pid_output_fields -> output_fields
+1d2b82da4 RadxCartDP - working on interp initialization
+ccf3aeba2 RadxCartDP - working on interp initialization
+6760f890d RadxCartDP - adding sdPhidp
+a4257777e RadxCartDP - working on writing scalars into readVol
+3c576c1e2 libs/radar/NcarParticleId.cc - fixing debug message
+8e1b4c305 RadxCartDP - adding option for debug polar output files
+3b80663f0 apps - fixing compile warnings, using Codex
+b355b684f apps/Radx/RadxCartDP - merging the scalars into the read volume
+357b9578a apps/ingest/CwbSfc2Mdv/FieldHandler.cc - fixing compiler warnings of unused variables, unitialized variables
+f4f7fb42e apps/dsserver - fixing compiler warnings of unused variables, unitialized variables
+ba556cf75 apps/mdv_utils, apps/ingest - fixing compiler warnings of unused variables, unitialized variables
+ee8425514 apps/hydro - fixing compiler warnings of unused variables, unitialized variables
+220a57694 apps/physics - fixing compiler warnings of unused variables, unitialized variables
+b43918a11 apps/mdv_utils/MdvGetLatestTime - cleaning up compiler warnings
+38ac24162 apps/radar/RadxDealias - addressing compiler warnings using Codex
+f9d709b74 apps/radar/HawkEdit - addressing compiler warnings using Codex
+63c4df6d4 apps - replacing some unsafe sprintf() calls with safe_snprintf(). Using Codex
+bd88cf404 Refactoring code with Codex - for cases with compiler warnings
+9ce9bd139 libs/toolsa/TaStr class - adding itostr(), ltostr() and dtostr() methods, with codex help
+9657eb0eb Merge branch 'master' of github.com:ncar/lrose-core
+3d3ccc91f apps - cleaning up compile warnings, using patches from codex
+694cdc215 Adding another cmake ignore
+94b9937f7 apps/mdv_utils/src/CwbRadar2Mdv/InputFile.cc - making _convertToString() safe
+b79de2e7b apps/dsserver/src/AcTrack2Symprod/Server.cc - adding missing initialization for loc.alt
+679f720d6 apps/dsserver/src/GenPoly2Symprod/Server.cc - updating to use snprintf() instead of sprintf()
+f3432f463 apps/Radx/Radx2Grid and RadxCartDP - changing default for min_nvalid_for_interp from 3 to 5
+b7ef30822 apps/trec/TrecGauge2Spdb - fixing logical comparison error
+6a4e0d41d Adding apps/ingest/file_repeat_day/simulate_files_realtime.py
+03e68e5b7 Adding apps/ingest/file_repeat_day/simulate_files_realtime.py
+7da24880c apps/didss/FmqTest - adding option to add count and time to output buffer
+93c66b8a1 (a) libs/Fmq FmqDeviceShmem.cc - change shmget() call to use flag of 0666 instead of 06666. (b) In DrawQueue.cc, for strncpy() calls ensure copy length is 1 less than target len, bevause of null
+4e4565835 apps/Radx/Radx2Grid - added parameter option suppress_fields_from_output
+81cd0a8fd libs/Radx - sprintf() -> safe_snprintf() conversions using Codex
+30f589eba libs/rapformats - sprintf() -> safe_snprintf() conversions using Codex
+bb3316cf7 libs/euclid - sprintf() -> safe_snprintf() conversions using Codex
+b808a31ee libs/Spdb - sprintf() -> safe_snprintf() conversions using Codex
+91e99500d libs/Fmq - sprintf() -> safe_snprintf() conversions using Codex
+b0aaa489b libs/Radx - sprintf() -> safe_snprintf() conversions using Codex
+5e69e16ab libs/Radx - sprintf() -> safe_snprintf() conversions using Codex
+61f5f08c4 libs/Radx - sprintf() -> safe_snprintf() conversions using Codex
+a7a190e76 libs/Mdv - sprintf() -> safe_snprintf() conversions using Codex
+daafa64da libs/Mdv - sprintf() -> safe_snprintf() conversions using Codex
+f43be21df libs/Mdv - sprintf() -> safe_snprintf() conversions using Codex
+ccbfec3e7 libs/Spdb and libs/Mdv - sprintf() -> safe_snprintf() conversions using Codex
+3af45f18f libs/Ncxx/NcxxVar.cc - sprintf() -> safe_snprintf() conversions using Codex
+5a9b16ccf libs/Ncxx/Hdf5 - sprintf() -> safe_snprintf() conversions using Codex
+ea1483156 libs/dsdata - sprintf() -> safe_snprintf() conversions using Codex
+bbb1fa8a6 libs/dsserver - sprintf() -> safe_snprintf() conversions using Codex
+89052f8e9 libs/didss - sprintf() -> safe_snprintf() conversions using Codex
+b87315aa3 libs/Ncxx - sprintf() -> safe_snprintf() conversions using Codex
+ec63202b4 libs/Radx - sprintf() -> safe_snprintf() conversions using Codex
+aaaefc4d4 libs/Radx/HaloRadxFile.cc - cleaning up compiler warnings
+6ac961558 libs/toolsa. Converting sprintf() calls to safe_snprintf() templated function, using Codex to patch the files
+9026f505d Adding toolsa/safe_snprintf.hh
+a690d022d libs/dsserver/DsFileIo.cc - vsprintf() -> vnsprintf() using Codex
+1d7e2afe5 libs/toolsa - vsprintf() -> vnsprintf() using Codex
+c26a577b4 libs/Fmq/Fmq.cc - vsprintf() -> vnsprintf() using Codex
+e64263133 libs/didss/LdataInfo - vsprintf() -> vnsprintf() using Codex
+256e096b2 toolsa/LogStream.cc - changing sprintf() to snprintf() and the same for vsprintf()
+938bf3204 Main.cc - removing duplicate trap for SIGHUP
+a5c16d127 In Main.cc of a number of apps, fixed bug in which the static Prog is shadowed by a local variable
+fcd435bee apps/radar/Lucid - checking in changes suggested by codeX
+10f73629c refractt/src/RefractColorScales - adding dataport and compression libs
+b129d2336 Updating CMakeLists for refractt apps
+40747d6d0 libs/Radx: Add 'fill' sweep type
+fc0457a8e apps/refract/CalcMoisture - testing
+6d01161ef Merge branch 'master' into refract_updates
+81e0726cc apps/refract/CalcMoisture - debugging after refactoring
+9a5edd0b1 apps/refractt/RefractCompute - debugging after refactoring
+75ab265a9 apps/refractt/RefractCalib - updating output field names to use statics
+7f5676528 Testing RefractCalib
+e3a31e3dc apps/radar/TsPrint - adding printout of H or V in fast alternating, if nSamples == 1
+2e4e287c7 apps/radar/TsPrint - adding printout of H or V in fast alternating, if nSamples == 1
+d1628bcb0 Cleaning up extra .gitignore files
+1c394c661 apps/radar/TsPrint - adding printout of H or V in fast alternating, if nSamples == 1
+c9fe6d869 Testing apps/refract on pecan data
+04003955c RefractCalib - testing on PECAN
+d8c695fb2 apps/refract/RefractCalib - testing
+46bc42ae4 apps/refract apps - refactoring
+070525fa4 apps/refract/RefractCompute - refactoring
+ecab230a2 apps/refract/RefractCompute - refactoring
+9ad170bde apps/refract/RefractCompute - Input -> Reader
+1b6f7c097 apps/refract/RefractCalib - Input -> Reader
+bc6167580 apps/refract/RefractCalib - Input -> Reader
+e783537da apps/refract/RefractCompute - refactoring
+8fc703eef apps/refract/RefractCompute - refactoring
+42e02c081 apps/refract/RefractCalib - adding -out_path command line arg
+be6e98fd1 apps/refract/CalcNexrad -> apps/refract/NexradA1ToRefract
+913bcc4af apps/refract/CalcMoisture - refactoring triggering
+0c10f8d33 apps/refract/CalcMoisture - refactoring triggering
+3e3994f6c apps/RefractCalib - refactoring to clean up I/O and parameter handling
+035de0877 apps/RefractCalib - computing SNR from DBZ instead of power
+122f3e6a4 Working on updating RefractCalib
+a1b07eccc Working on updating RefractCalib
+b3dcc5c00 Adding RefractColorScales
+2ef845ecc Adding RefractColorScales
+1419a186c Working on updating RefractCalib
+f6a4730b0 Adding apps/refract/RefractColorScales
+cdeab62b9 Cleaning up RefractCalib
+1a2968ad7 Adding comment on issue tracking, in README
+2ac432900 Update README.md
+272389d91 Update links to LROSE wiki and Quickstart guide
+df543d4de Updating docs/download/install_using_homebrew.mac_osx.md for using taps
+1e30aab4b Updating docs/download/install_using_homebrew.mac_osx.md for using taps
+bef3f8e68 libs/dsserver/DestUrlArray load() - adding use of strcspn() to strip trailing cr or newline
+b403ca26d libs/dsserver/DestUrlArray load() - adding use of strcspn() to strip trailing cr or newline
+8cd188ad0 libs/dsserver/DestUrlArray - adding load2() versions from ChatGpt suggestions - will decide later on when to use
+36c9571bd apps/Radx/RadxCartDP - fixing comments
+90fdb313a apps/Radx/RadxCartDP/InterpToCart - adding DP derived fields
+484ca23d3 apps/Radx/RadxCartDP/InterpToCart - adding DP derived fields
+79736dd56 apps/Radx/RadxCartDP - adding derived fields from PID compute
+6373b3247 apps/Radx/RadxCartDP - adding PID scalar compute
+605f01783 apps/Radx/RadxCartDP - adding PID scalar compute
+ac06e4c3c apps/Radx/RadxCartDP - adding PID compute
+699e91f7b libs/Mdv/src/MdvxRemapLut/MdvxRemapInterp, apps/Radx/RadxCartDP - debugging model interpolation
+f809b478b libs/Mdv/MdvxRemapInterp - debugging
+8da6d6f5a libs/Mdv/MdvxRemapInterp - debugging
+5b73f2344 libs/Mdv/src/MdvxRemapLut/MdvxRemapInterp.cc - testing
+c8c4bed6e libs/Mdv/src/MdvxRemapLut/MdvxRemapInterp.cc - testing
+e41c99356 apps/Radx/RadxCartDP - starting initial testing
+2a3a192d6 apps/Radx/RadxCartDP - starting initial testing
+763dc8812 Adding gfs_aws_download.py
+4fe84ba8a apps/Radx/RadxCartDP - computing temp profile
+e4502c5a3 apps/Radx/RadxCartDP - model interpolation
+5c4a35d2b apps/Radx/RadxCartDP - model interpolation
+52533976a libs/Mdv/MdvxRemapInterp - updating
+6e27f06fc apps/Radx/RadxCartDP - under development
+b57cbec9e RadxPidQpe -> RadxCartDP
+90a5b86a9 libs/Mdv - developing MdvxRemapInterp class
+64179ce74 Add sweep mode defs into Dsr for backward compatibility
+346b3d7fa Working on libs/Mdv/MdvxRemapInterp
+c1eeda852 Working on libs/Mdv/MdvxRemapInterp
+a95e81b33 Working on libs/Mdv/MdvxRemapInterp
+b1e88bf49 Working on libs/Mdv/MdvxRemapInterp
+7f2dec31d Running CreateCmakeLists
+a9e141b70 Working on libs/Mdv/MdvxRemapInterp class
+8ac0ef92e Working on libs/Mdv/MdvxRemapInterp class
+434be1b26 Working on libs/Mdv/MdvxRemapInterp class
+9d96a0e22 Developing libs/Mdv Mdvx class MdvxRemapInterp
+7db08acff Developing libs/Mdv Mdvx class MdvxRemapInterp
+c28ac5a4b MdvxRemapLut class - adding comments
+5f9d63aa5 Merge branch 'master' of github.com:ncar/lrose-core
+6936b8733 apps/scripts/src/GetAwsRadar.py - changing bucketURL to http://unidata-nexrad-level2.s3.amazonaws.com
+54dbdc199 CartPidQpe - adding model data ingest
+046219fc2 CartPidQpe - adding model data ingest
+b78fee237 CartPidQpe - changing class names
+e721b0e00 CartPidQpe - changing class names
+f873452af CartPidQpe - changing class names
+dcfe19a26 CartPidQpe - changing class names
+95ba97b82 apps/Radx/CartPidQpe - dev in progress
+9beaaf5ac libs/radar/iwrf - add block fields to pulse header
+477328f50 apps/Radx/CartPidQpe - working on paramdef
+4e5b491dc apps/Radx/CartPidQpe - working on paramdef
+f45223f6d apps/Radx/CartPidQpe - working on paramdef
+b53531a79 apps/radar/Pid2Grid -> CartPidQpe
+67a0a144e apps/radar/Pid2Grid -> CartPidQpe
+723273928 apps/radar/Pid2Grid -> CartPidQpe
+aa2f773e2 apps/radar/TsUdp2Fmq : add compiler check
+e7afe072f Adding apps/radar/src/RadarCal/scripts/run_RFStrengthPlot.nexrad*
+465f5469d Adding apps/radar/src/RadarCal/scripts/run_RFStrengthPlot.nexrad*
+e5b705086 libs/Mdv/MdvxField.hh - adding getVolWritable() method to return non-const pointer
+c07806d52 apps/radar/src/RadarCal/scripts/RFStrengthPlot.py
+f479bdc8d apps/radar/src/RadarCal/scripts/RFStrengthPlot.py
+2053125c7 apps/radar/src/RadarCal/scripts/RFStrengthPlot.py
+8798cd97a apps/radar/RadarCal - adding run_RFStrengthPlot.xpol.ppi_360 script
+5c5fdb48b apps/radar/RadarCal - adding run_RFStrengthPlot.xpol.ppi_360 script
+37787d79c Adding run_RFStrengthPlot.spol.ppi_360, run_RFStrengthPlot.spol.sector_30
+b38074767 Adding apps/radar/RadarCal/run_RFStrengthPlot.hcr
+e734898dc Adding apps/radar/src/RadarCal/RFStrengthPlot.py
+319974185 Adding apps/radar/src/RadarCal/RFStrengthPlot.py
+c7ddf903b Adding apps/radar/src/RadarCal/RFStrengthPlot.py
+cc2d23339 Adding apps/radar/src/RadarCal/RFStrengthPlot.py
+6e63eea5f Adding apps/radar/src/RadarCal/RFStrengthPlot.py
+1f10b546e Adding apps/radar/TsCalAuto/scripts/CalPlot.py
+faccadf6e Adding docs/apps/lrose_app_table.md
+de4a34fe6 Adding docs/apps/lrose_app_table.md
+b9dab6616 apps/radar/TsAscope - add power plot
+556cd209c apps/radar/TsUdp2Fmq - add a print
+4e4dcb87b apps/radar/TsUdp2Fmq - Initial revision
+0491ef91b Merge branch 'master' of github.com:ncar/lrose-core
+428341c12 apps/radar/Pid2Grid - updating to latest API for Ecco
+538f8685d Adding docs/images/laguna_rose.png
+4595fcba5 Merge branch 'master' of github.com:ncar/lrose-core
+9585a1a15 Saving libs/Ncxx/NcxxWriteMult.cc - source code ideas for distributed writes for NetCDF files
+02f72b04c ReleaseNotes_20250811.md
+a98502058 ReleaseNotes_20250811.md
+277165100 Adding release notes for ReleaseNotes_20250811
+f8543ee40 Adding /apps/radar/src/EccoStats/testing/CIDD.stats.titan_censor
+af93aeb11 Adding Radx2Awips

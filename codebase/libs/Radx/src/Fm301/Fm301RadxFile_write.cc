@@ -283,7 +283,7 @@ int Fm301RadxFile::_writeSweepToDir(const RadxVol &vol,
   char fileName[BUFSIZ];
   if (_writeFileNameMode == FILENAME_WITH_START_AND_END_TIMES) {
     safe_snprintf(fileName,
-                  "cfrad2.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+                  "fm301.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
                   "_to_%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
                   "_%s_v%d_s%.2d_%s%.2f_%s.nc",
                   startTime.getYear(), startTime.getMonth(), startTime.getDay(),
@@ -298,7 +298,7 @@ int Fm301RadxFile::_writeSweepToDir(const RadxVol &vol,
                   scanType.c_str());
   } else {
     safe_snprintf(fileName,
-                  "cfrad2.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
+                  "fm301.%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d"
                   "_%s_v%d_s%.2d_%s%.2f_%s.nc",
                   fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
                   fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
@@ -596,12 +596,12 @@ void Fm301RadxFile::_addGlobalAttributes()
 
   // Add required CF global attributes
   
-  _convention = CfRadial2Conventions;
+  _convention = CfConvention;
   _file.addGlobAttr(CONVENTIONS, _convention);
   
   // Version
 
-  _version = CfRadial2Version;
+  _version = WmoCfProfile;
 
   // if (_writeVol->getVersion().size() > 0) {
   //   _version = _writeVol->getVersion();
@@ -648,13 +648,11 @@ void Fm301RadxFile::_addGlobalAttributes()
   
   RadxTime startTime(_writeVol->getStartTimeSecs());
   _file.addGlobAttr(TIME_COVERAGE_START, startTime.getW3cStr());
-  // _file.addGlobAttr(START_DATETIME, startTime.getW3cStr());
   startTime += _writeVol->getStartNanoSecs() / 1.0e9;
   _file.addGlobAttr(START_TIME, startTime.asStringDashed(3));
 
   RadxTime endTime(_writeVol->getEndTimeSecs());
   _file.addGlobAttr(TIME_COVERAGE_END, endTime.getW3cStr());
-  // _file.addGlobAttr(END_DATETIME, endTime.getW3cStr());
   endTime += _writeVol->getEndNanoSecs() / 1.0e9;
   _file.addGlobAttr(END_TIME, endTime.asStringDashed(3));
 
@@ -1382,7 +1380,7 @@ void Fm301RadxFile::_addSweeps()
     // create name
   
     char name[128];
-    safe_snprintf(name, "sweep_%.4d", isweep + 1);
+    safe_snprintf(name, "sweep_%d", isweep + 1);
     _sweepGroupNames.push_back(name);
 
     if (_debug) {
@@ -3364,7 +3362,7 @@ string Fm301RadxFile::_computeWritePath(const RadxVol &vol,
     volNumStr[0] = '\0'; // NULL str
   }
 
-  string prefix = "cfrad2.";
+  string prefix = "fm301.";
   if (_writeFileNamePrefix.size() > 0) {
     prefix = _writeFileNamePrefix;
   }

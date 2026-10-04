@@ -110,8 +110,8 @@ public:
     FILE_FORMAT_NSSL_MRD,     ///< NSSL MRD format for NOAA aircraft tail radars
     FILE_FORMAT_NOXP_NC,      ///< netcdf for OU NOXP
     FILE_FORMAT_EDGE_NC,      ///< EEC EDGE netcdf format
-    // FILE_FORMAT_NCXX,      ///< NetCDF CF RADIAL using Ncxx Classes
     FILE_FORMAT_CFRADIAL2,    ///< NetCDF CF RADIAL2
+    FILE_FORMAT_FM301,        ///< WMO FM301
     FILE_FORMAT_CFARR,        ///< Chilbolton radars
     FILE_FORMAT_NIMROD,       ///< UK Met Office Polar NIMROD
     FILE_FORMAT_NOAA_FSL,     ///< NOAA Forecast Systems Lab NetCDF
@@ -244,7 +244,8 @@ public:
   void setFileFormat(file_format_t val) {
     _fileFormat = val;
     if (val == FILE_FORMAT_CFRADIAL ||
-        val == FILE_FORMAT_CFRADIAL2) {
+        val == FILE_FORMAT_CFRADIAL2 ||
+        val == FILE_FORMAT_FM301) {
       setNcFormat(NETCDF4);
     }
   }

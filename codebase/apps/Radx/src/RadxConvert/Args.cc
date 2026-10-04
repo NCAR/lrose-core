@@ -217,10 +217,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "netcdf_style = NETCDF4;");
       TDRP_add_override(&override, tmp_str);
       
-    // } else if (!strcmp(argv[i], "-ncxx")) {
+    } else if (!strcmp(argv[i], "-fm301")) {
       
-    //   sprintf(tmp_str, "output_format = OUTPUT_FORMAT_NCXX;");
-    //   TDRP_add_override(&override, tmp_str);
+      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_FM301;");
+      TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-dorade")) {
       
@@ -1007,6 +1007,10 @@ void Args::_usage(ostream &out)
       << "  [ -end \"yyyy mm dd hh mm ss\"] end time\n"
       << "     Sets mode to ARCHIVE\n"
       << "\n"
+      << "  [ -exclude_field ? ] Exclude the specified field from the data set\n"
+      << "     Use multiple -exclude_field args to exclude multiple fields\n"
+      << "     If not specified, all fields will be included\n"
+      << "\n"
       << "  [ -f, -paths ? ] set file paths\n"
       << "     Sets mode to FILELIST\n"
       << "\n"
@@ -1015,10 +1019,6 @@ void Args::_usage(ostream &out)
       << "     Use multiple -field args for multiple fields\n"
       << "     If not specified, all fields will be used\n"
       << "\n"
-      << "  [ -exclude_field ? ] Exclude the specified field from the data set\n"
-      << "     Use multiple -exclude_field args to exclude multiple fields\n"
-      << "     If not specified, all fields will be included\n"
-      << "\n"
       << "  [ -finest_geom ] remap to finest range geometry\n"
       << "\n"
       << "  [ -fixed_angle ? ] set single fixed_angle\n"
@@ -1026,6 +1026,8 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -fixed_angle_max ? ] set max fixed_angle\n"
       << "     use '-fixed_ang' for setting minimum\n"
+      << "\n"
+      << "  [ -fm301 ] convert to WMO FM301 netcdf\n"
       << "\n"
       << "  [ -foray ] convert to FORAY-1 netcdf\n"
       << "\n"

@@ -59,8 +59,8 @@ Fm301RadxFile::Fm301RadxFile() : RadxFile(), RadxFm301Str()
   
 {
 
-  _convention = CfRadial2Conventions;
-  _version = CfRadial2Version;
+  _convention = CfConvention;
+  _version = WmoCfProfile;
 
   _ncFormat = NETCDF4;
 
@@ -219,7 +219,7 @@ bool Fm301RadxFile::isFm301(const string &path)
     _file.open(path, NcxxFile::read);
   } catch (NcxxException& e) {
     if (_verbose) {
-      cerr << "DEBUG - not CfRadial file: " << path << endl;
+      cerr << "DEBUG - cannot open FM301 file: " << path << endl;
     }
     return false;
   }
@@ -231,7 +231,7 @@ bool Fm301RadxFile::isFm301(const string &path)
   } catch (NcxxException& e) {
     _file.close();
     if (_verbose) {
-      cerr << "DEBUG - not CfRadial2 file" << endl;
+      cerr << "DEBUG - wrong dimensions for FM301 file" << endl;
       cerr << _errStr << endl;
     }
     return false;
@@ -244,14 +244,14 @@ bool Fm301RadxFile::isFm301(const string &path)
   } catch (NcxxException& e) {
     _file.close();
     if (_verbose) {
-      cerr << "DEBUG - not CfRadial2 file" << endl;
+      cerr << "DEBUG - wrong global attributes, not FM301 file" << endl;
       cerr << _errStr << endl;
     }
     return false;
   }
 
   // file has the correct dimensions and attributes,
-  // so it is a CfRadial2 file
+  // so it is an FM301 file
 
   _file.close();
   return true;

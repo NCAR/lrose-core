@@ -690,14 +690,12 @@ void Fm301RadxFile::_readGlobalAttributes()
     err.addErrStr("  Cannot find conventions attribute");
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
-  if (_convention.find(CfRadial2Conventions) == string::npos) {
-    if (_convention.find("Cf/Radial") == string::npos) {
-      NcxxErrStr err;
-      err.addErrStr("ERROR - Fm301RadxFile::_readGlobalAttributes");
-      err.addErrStr("  Invalid Conventions attribute: ", _convention);
-      err.addErrStr("  Should be 'Cf/Radial'");
-      throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
-    }
+  if (_convention.find(CfConvention) == string::npos) {
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Fm301RadxFile::_readGlobalAttributes");
+    err.addErrStr("  Invalid Conventions attribute: ", _convention);
+    err.addErrStr("  Should be 'Cf/Radial'");
+    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
 
   // check for version
