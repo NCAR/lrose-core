@@ -153,7 +153,6 @@ else(APPLE)
 # build shared library
   add_library (rapmath SHARED ${SRCS})
 endif(APPLE)
-set_target_properties(rapmath PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

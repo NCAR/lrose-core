@@ -94,7 +94,6 @@ else(APPLE)
 # build shared library
   add_library (Refract SHARED ${SRCS})
 endif(APPLE)
-set_target_properties(Refract PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

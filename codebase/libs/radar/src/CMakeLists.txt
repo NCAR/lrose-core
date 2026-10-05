@@ -169,7 +169,6 @@ else(APPLE)
 # build shared library
   add_library (radar SHARED ${SRCS})
 endif(APPLE)
-set_target_properties(radar PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

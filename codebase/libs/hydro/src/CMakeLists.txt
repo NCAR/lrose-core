@@ -89,7 +89,6 @@ else(APPLE)
 # build shared library
   add_library (hydro SHARED ${SRCS})
 endif(APPLE)
-set_target_properties(hydro PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

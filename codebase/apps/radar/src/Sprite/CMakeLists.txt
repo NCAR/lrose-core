@@ -173,6 +173,7 @@ include_directories(${Qt6Network_INCLUDE_DIRS})
 include_directories(${Qt6Qml_INCLUDE_DIRS})
 endif(Qt5_FOUND)
 
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 # link directories
 
 link_directories(${CMAKE_INSTALL_PREFIX}/lib)

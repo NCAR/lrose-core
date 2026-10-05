@@ -89,6 +89,7 @@ else()
   #add_compile_options(-I/usr/include)
   
 endif(DEFINED MAMBA_BUILD)
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 # link directories
 
 link_directories(${CMAKE_INSTALL_PREFIX}/lib)

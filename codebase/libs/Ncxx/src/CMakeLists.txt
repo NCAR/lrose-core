@@ -147,7 +147,6 @@ else(APPLE)
 # build shared library
   add_library (Ncxx SHARED ${SRCS})
 endif(APPLE)
-set_target_properties(Ncxx PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

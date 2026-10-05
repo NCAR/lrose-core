@@ -177,7 +177,6 @@ else(APPLE)
 # build shared library
   add_library (Radx SHARED ${SRCS})
 endif(APPLE)
-set_target_properties(Radx PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

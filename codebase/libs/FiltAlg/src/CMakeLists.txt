@@ -125,7 +125,6 @@ else(APPLE)
 # build shared library
   add_library (FiltAlg SHARED ${SRCS})
 endif(APPLE)
-set_target_properties(FiltAlg PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

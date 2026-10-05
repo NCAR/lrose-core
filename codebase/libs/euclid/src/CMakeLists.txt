@@ -295,7 +295,6 @@ else(APPLE)
 # build shared library
   add_library (euclid SHARED ${SRCS})
 endif(APPLE)
-set_target_properties(euclid PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

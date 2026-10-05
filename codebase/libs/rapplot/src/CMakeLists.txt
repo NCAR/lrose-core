@@ -93,7 +93,6 @@ else(APPLE)
 # build shared library
   add_library (rapplot SHARED ${SRCS})
 endif(APPLE)
-set_target_properties(rapplot PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 

@@ -111,7 +111,6 @@ else(APPLE)
 # build shared library
   add_library (Spdb SHARED ${SRCS})
 endif(APPLE)
-set_target_properties(Spdb PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # install
 
