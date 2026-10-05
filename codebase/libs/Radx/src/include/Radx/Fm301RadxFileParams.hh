@@ -68,11 +68,13 @@ public:
   typedef struct {
     char* input_field_name;
     char* output_field_name;
+    char* source;
   } field_name_translation_t;
 
   typedef struct {
     char* output_field_name;
     char* standard_name;
+    char* long_name;
     char* units;
     char* wmo__parameter_uri;
     char* wmo__parameter_name;
