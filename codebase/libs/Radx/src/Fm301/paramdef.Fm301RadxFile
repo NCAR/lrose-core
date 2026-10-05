@@ -100,14 +100,14 @@ typedef struct {
   string wmo_parameter_name;
 } field_attribute_t;
 
-paramdef struct field_name_translation_t {
+paramdef struct field_attribute_t {
   p_default = {
     { "DBZH", "radar_equivalent_reflectivity_factor_h", "dBZ", "unknown", "unknown" },
-    { "VRADH", "radial_velocity_of_scatterers_away_from_instrument", "", "unknown", "unknown"" },
+    { "VRADH", "radial_velocity_of_scatterers_away_from_instrument", "", "unknown", "unknown" },
     { "WRADH", "radar_doppler_spectrum_width_h", "m/s", "unknown", "unknown" },
     { "REC", "radar_scatterer_classification", "", "unknown", "unknown" }
   };
-p_descr = "Attribute specification for selected output field variables.";
-p_help = "If the string is empty, the existing attribute will be unchanged.";
+  p_descr = "Attribute specification for selected output field variables.";
+  p_help = "If the string is empty, the existing attribute will be unchanged.";
 } field_attributes[];
 
