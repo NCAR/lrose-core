@@ -73,10 +73,25 @@ typedef struct {
 
 paramdef struct field_name_translation_t {
   p_default = {
-    { "DBZ", "DBZH" },
-    { "VEL", "VRADH" },
-    { "WIDTH", "WRADH" },
-    { "PID", "REC" }
+    {
+      input_field_name = "DBZ",
+      output_field_name = "DBZH"
+    }
+    ,
+    {
+      input_field_name = "VEL",
+      output_field_name = "VRADH"
+    }
+    ,
+    {
+      input_field_name = "WIDTH",
+      output_field_name = "WRADH"
+    }
+    ,
+    {
+      input_field_name = "PID",
+      output_field_name = "REC"
+    }
   };
   p_descr = "Specified translation of input field names to output field names.";
   p_help = "This translation occurs FIRST, followed by augmenting the field attribute - see below.";
@@ -96,16 +111,43 @@ typedef struct {
   string output_field_name;
   string standard_name;
   string units;
-  string wmo_parameter_uri;
-  string wmo_parameter_name;
+  string wmo__parameter_uri;
+  string wmo__parameter_name;
 } field_attribute_t;
 
 paramdef struct field_attribute_t {
   p_default = {
-    { "DBZH", "radar_equivalent_reflectivity_factor_h", "dBZ", "unknown", "unknown" },
-    { "VRADH", "radial_velocity_of_scatterers_away_from_instrument", "", "unknown", "unknown" },
-    { "WRADH", "radar_doppler_spectrum_width_h", "m/s", "unknown", "unknown" },
-    { "REC", "radar_scatterer_classification", "", "unknown", "unknown" }
+    {
+      output_field_name = "DBZH",
+      standard_name = "radar_equivalent_reflectivity_factor_h",
+      units = "dBZ",
+      wmo__parameter_uri = "unknown",
+      wmo__parameter_name = "unknown"
+    }
+    ,
+    {
+      output_field_name = "VRADH",
+      standard_name = "radial_velocity_of_scatterers_away_from_instrument",
+      units = "m/s",
+      wmo__parameter_uri = "unknown",
+      wmo__parameter_name = "unknown"
+    }
+    ,
+    {
+      output_field_name = "WRADH",
+      standard_name = "radar_doppler_spectrum_width_h",
+      units = "m/s",
+      wmo__parameter_uri = "unknown",
+      wmo__parameter_name = "unknown"
+    }
+    ,
+    {
+      output_field_name = "REC",
+      standard_name = "radar_scatterer_classification",
+      units = "",
+      wmo__parameter_uri = "unknown",
+      wmo__parameter_name = "unknown"
+    }
   };
   p_descr = "Attribute specification for selected output field variables.";
   p_help = "If the string is empty, the existing attribute will be unchanged.";

@@ -74,8 +74,8 @@ public:
     char* output_field_name;
     char* standard_name;
     char* units;
-    char* wmo_parameter_uri;
-    char* wmo_parameter_name;
+    char* wmo__parameter_uri;
+    char* wmo__parameter_name;
   } field_attribute_t;
 
   ///////////////////////////

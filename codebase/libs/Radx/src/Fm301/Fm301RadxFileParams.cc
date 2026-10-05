@@ -768,15 +768,15 @@
       tt->struct_def.fields[2].rel_offset = 
         (char *) &_field_attributes->units - (char *) _field_attributes;
       tt->struct_def.fields[3].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[3].fname = tdrpStrDup("wmo_parameter_uri");
+      tt->struct_def.fields[3].fname = tdrpStrDup("wmo__parameter_uri");
       tt->struct_def.fields[3].ptype = STRING_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_field_attributes->wmo_parameter_uri - (char *) _field_attributes;
+        (char *) &_field_attributes->wmo__parameter_uri - (char *) _field_attributes;
       tt->struct_def.fields[4].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[4].fname = tdrpStrDup("wmo_parameter_name");
+      tt->struct_def.fields[4].fname = tdrpStrDup("wmo__parameter_name");
       tt->struct_def.fields[4].ptype = STRING_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_field_attributes->wmo_parameter_name - (char *) _field_attributes;
+        (char *) &_field_attributes->wmo__parameter_name - (char *) _field_attributes;
     tt->n_struct_vals = 20;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
@@ -787,7 +787,7 @@
       tt->struct_vals[4].s = tdrpStrDup("unknown");
       tt->struct_vals[5].s = tdrpStrDup("VRADH");
       tt->struct_vals[6].s = tdrpStrDup("radial_velocity_of_scatterers_away_from_instrument");
-      tt->struct_vals[7].s = tdrpStrDup("");
+      tt->struct_vals[7].s = tdrpStrDup("m/s");
       tt->struct_vals[8].s = tdrpStrDup("unknown");
       tt->struct_vals[9].s = tdrpStrDup("unknown");
       tt->struct_vals[10].s = tdrpStrDup("WRADH");
