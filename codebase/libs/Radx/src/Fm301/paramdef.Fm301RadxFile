@@ -1,0 +1,113 @@
+/*********************************************************
+ * parameter definitions for Fm301RadxFile lib module
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * October 2026
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "These parameters allow the user to control how FM301 files are written.";
+}
+
+commentdef {
+  p_header = "STATION IDENTIIFICATION";
+}
+
+paramdef string {
+  p_default = "";
+  p_descr = "WIGOS station identifier.";
+  p_descr = "Left empty if no WIGOS identifier has been assigned.";
+} wmo__wsi;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Traditional WMO identifier.";
+  p_descr = "Left empty if no WMO identifier has been assigned.";
+} wmo__id;
+
+commentdef {
+  p_header = "GLOBAL ATTRIBUTES";
+}
+
+paramdef string {
+  p_default = "CF-1.8, WMO CF-1.0";
+  p_descr = "NetCDF CF convention version.";
+  p_descr = "If empty, the default will be used.";
+} CF_convention;
+
+paramdef string {
+  p_default = "FM 301-2022";
+  p_descr = "WMO CF profile.";
+  p_descr = "If empty, the default will be used.";
+} wmo__cf_profile;
+
+paramdef string {
+  p_default = "unknown";
+  p_descr = "WMO data category.";
+  p_descr = "If empty, the default will be used.";
+} wmo__data_category;
+
+paramdef string {
+  p_default = "unknown";
+  p_descr = "WMO data policy.";
+  p_descr = "If empty, the default will be used.";
+} wmo__data_policy;
+
+commentdef {
+  p_header = "FIELD NAME TRANSLATION";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to translate input field names to legal FM301 output names.";
+  p_descr = "Only the specified names are translated. The others are left unchanged.";
+} translate_field_names;
+
+typedef struct {
+  string input_field_name;
+  string output_field_name;
+} field_name_translation_t;
+
+paramdef struct field_name_translation_t {
+  p_default = {
+    { "DBZ", "DBZH" },
+    { "VEL", "VRADH" },
+    { "WIDTH", "WRADH" },
+    { "PID", "REC" }
+  };
+  p_descr = "Specified translation of input field names to output field names.";
+  p_help = "This translation occurs FIRST, followed by augmenting the field attribute - see below.";
+} field_name_translations[];
+
+commentdef {
+  p_header = "FIELD ATTRIBUTE AUGMENTATION";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to augment the attribute attached to each field.";
+  p_descr = "This step is peformed AFTER the field name translation. i.e. this table applies to the output field names.";
+} augment_field_attribute;
+
+typedef struct {
+  string output_field_name;
+  string standard_name;
+  string units;
+  string wmo_parameter_uri;
+  string wmo_parameter_name;
+} field_attribute_t;
+
+paramdef struct field_name_translation_t {
+  p_default = {
+    { "DBZH", "radar_equivalent_reflectivity_factor_h", "dBZ", "unknown", "unknown" },
+    { "VRADH", "radial_velocity_of_scatterers_away_from_instrument", "", "unknown", "unknown"" },
+    { "WRADH", "radar_doppler_spectrum_width_h", "m/s", "unknown", "unknown" },
+    { "REC", "radar_scatterer_classification", "", "unknown", "unknown" }
+  };
+p_descr = "Attribute specification for selected output field variables.";
+p_help = "If the string is empty, the existing attribute will be unchanged.";
+} field_attributes[];
+
