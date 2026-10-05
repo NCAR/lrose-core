@@ -105,33 +105,33 @@ int main(int argc, char *argv[])
                 exit(1);
         }
  
-addr_len = sizeof sendaddr;
-
- if ((numbytes = recvfrom(sockfd, buf, sizeof buf, 0,
-              	(struct sockaddr *)&sendaddr, (socklen_t *)&addr_len)) == -1)
-        	{
-       			perror("recvfrom");
-      			exit(1);
-   		}		
-		
+        addr_len = sizeof sendaddr;
+        
+        if ((numbytes = recvfrom(sockfd, buf, sizeof buf, 0,
+                                 (struct sockaddr *)&sendaddr, (socklen_t *)&addr_len)) == -1)
+        {
+          perror("recvfrom");
+          exit(1);
+        }		
+	
         
 	while (1)
 	{
-        	/*
-		if ((numbytes = recvfrom(sockfd, buf, sizeof buf, 0,
-              	(struct sockaddr *)&sendaddr, (socklen_t *)&addr_len)) == -1)
-        	{
-       			perror("recvfrom");
-      			exit(1);
-   		}		
-		*/
+          /*
+            if ((numbytes = recvfrom(sockfd, buf, sizeof buf, 0,
+            (struct sockaddr *)&sendaddr, (socklen_t *)&addr_len)) == -1)
+            {
+            perror("recvfrom");
+            exit(1);
+            }		
+          */
           n=read(sockfd, buf, sizeof(buf));
-		len = strlen (buf);
-		fwrite (buf, len,1,p); 	
+          len = strlen (buf);
+          fwrite (buf, len,1,p); 	
 	}
 	
-
-
+        
+        
         //printf("%s",buf);
  	fclose (p); 
         return 0;
