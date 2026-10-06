@@ -38,7 +38,7 @@ Homebrew now gets the install formula files from:
 Run homebrew to install the package you want.
 
 The following are your options:
-
+    
 ```
   brew install NCAR/lrose/lrose-core
   brew install NCAR/lrose/lrose-fractl
@@ -47,6 +47,12 @@ The following are your options:
 ```
 
 ```lrose-core``` is a dependency for the other packages. So install it first.
+
+If you already have these packages installed, you can upgrade with:
+
+```
+  brew upgrade
+```
 
 While homebrew is building the package, it creates log files so you can track the progress.
 
