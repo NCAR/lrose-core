@@ -829,6 +829,8 @@ public:
 
   netcdf_style_t netcdf_style;
 
+  char* FM301_params_file_path;
+
   tdrp_bool_t output_native_byte_order;
 
   tdrp_bool_t output_compressed;
@@ -920,7 +922,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[216];
+  mutable TDRPtable _table[217];
 
   const char *_className;
 

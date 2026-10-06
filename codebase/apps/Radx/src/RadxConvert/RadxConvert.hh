@@ -31,7 +31,7 @@
 // Jan 2010
 //
 ///////////////////////////////////////////////////////////////
-
+\
 #ifndef RadxConvert_HH
 #define RadxConvert_HH
 
@@ -40,6 +40,7 @@
 #include <string>
 #include <set>
 #include <Radx/Radx.hh>
+#include <Radx/Fm301RadxFileParams.hh>
 class RadxVol;
 class RadxFile;
 class RadxRay;
@@ -74,6 +75,7 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
+  Fm301RadxFileParams _fm301Params;
   set<string> _readPaths;
 
   vector<VarTransform *> _varTrans;
@@ -81,6 +83,7 @@ private:
   int _volNum;
   int _nWarnCensorPrint;
 
+  void _printParamsFm301();
   int _runFilelist();
   int _runArchive();
   int _runRealtimeWithLdata();

@@ -59,8 +59,13 @@ public:
   // public data
   
   tdrp_override_t override;
+  bool tdrpDebug;
+
   time_t startTime, endTime;
   vector<string> inputFileList;
+
+  bool printParamsFm301;
+  string printParamsFm301Mode;
 
 protected:
   

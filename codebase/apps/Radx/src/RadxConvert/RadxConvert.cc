@@ -89,6 +89,27 @@ RadxConvert::RadxConvert(int argc, char **argv)
     return;
   }
 
+  // read params for FM301
+
+  if (strstr(_params.FM301_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_fm301Params.load(_params.FM301_params_file_path,
+                          NULL, true, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for FM301: "
+           << _params.FM301_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // print params for KDP then exit
+
+  if (_args.printParamsFm301) {
+    _printParamsFm301();
+    exit(0);
+  }
+
   // check on overriding radar location
 
   if (_params.override_radar_location) {
@@ -164,6 +185,54 @@ RadxConvert::~RadxConvert()
   // unregister process
 
   PMU_auto_unregister();
+
+}
+
+//////////////////////////////////////////////////
+// Print params for FM301
+
+void RadxConvert::_printParamsFm301()
+{
+
+  if (_params.debug) {
+    cerr << "Reading FM301 params from file: " << _params.FM301_params_file_path << endl;
+  }
+
+  // do we need to expand environment variables?
+
+  bool expandEnvVars = false;
+  if (_args.printParamsFm301Mode.find("expand") != string::npos) {
+    expandEnvVars = true;
+  }
+
+  // read in FM301 params if applicable
+
+  if (strstr(_params.FM301_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_fm301Params.load(_params.FM301_params_file_path,
+                          NULL, expandEnvVars, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for Fm301Filt: "
+           << _params.FM301_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
+  // set print mode
+
+  tdrp_print_mode_t printMode = PRINT_LONG;
+  if (_args.printParamsFm301Mode.find("short") == 0) {
+    printMode = PRINT_SHORT;
+  } else if (_args.printParamsFm301Mode.find("norm") == 0) {
+    printMode = PRINT_NORM;
+  } else if (_args.printParamsFm301Mode.find("verbose") == 0) {
+    printMode = PRINT_VERBOSE;
+  }
+
+  // do the print to stdout
+
+  _fm301Params.print(stdout, printMode);
 
 }
 

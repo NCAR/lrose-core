@@ -42,8 +42,10 @@ using namespace std;
 Args::Args ()
 {
   TDRP_init_override(&override);
+  tdrpDebug = false;
   startTime = 0;
   endTime = 0;
+  printParamsFm301 = false;
 }
 
 // Destructor
@@ -98,6 +100,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
       
       sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
+      
+    } else if (!strcmp(argv[i], "-trdp_debug")) {
+      
+      tdrpDebug = true;
       
     } else if (!strcmp(argv[i], "-instance")) {
       
@@ -869,8 +875,24 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-params_fm301")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "FM301_params_file_path = \"%s\";", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
+    } else if (!strcmp(argv[i], "-print_params_fm301")) {
+
+      printParamsFm301 = true;
+      if (i < argc - 1) {
+	printParamsFm301Mode = argv[++i];
+      }
+
     }
-    
+	
   } // i
 
   // set fields if specified
@@ -1212,5 +1234,13 @@ void Args::_usage(ostream &out)
       << endl;
 
   Params::usage(out);
+  
+  out << endl;
+  out << "FM301-specific parameters:" << endl;
+  out << "   [ -params_fm301 ] specify FM301 params file path" << endl;
+  out << "     otherwise it is set in the main params file" << endl;
+  out << "   [ -print_params_fm301 [mode]] print FM301 params" << endl;
+  out << "     see modes from -print_params above" << endl;
+  out << endl;
   
 }

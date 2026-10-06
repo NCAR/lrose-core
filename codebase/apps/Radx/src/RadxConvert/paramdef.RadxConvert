@@ -1216,6 +1216,12 @@ paramdef enum netcdf_style_t {
   p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
 } netcdf_style;
 
+paramdef string {
+  p_default = "use-defaults";
+  p_descr = "Path for parameters for FM301 output.";
+  p_help = "If set to use-defaults, no parameter file will be read in, and the default parameters will be used.";
+} FM301_params_file_path;
+
 commentdef {
   p_header = "OUTPUT BYTE-SWAPPING and COMPRESSION";
 }

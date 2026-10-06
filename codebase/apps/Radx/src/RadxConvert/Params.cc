@@ -2975,6 +2975,18 @@
     tt->single_val.e = NETCDF4;
     tt++;
     
+    // Parameter 'FM301_params_file_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("FM301_params_file_path");
+    tt->descr = tdrpStrDup("Path for parameters for FM301 output.");
+    tt->help = tdrpStrDup("If set to use-defaults, no parameter file will be read in, and the default parameters will be used.");
+    tt->val_offset = (char *) &FM301_params_file_path - &_start_;
+    tt->single_val.s = tdrpStrDup("use-defaults");
+    tt++;
+    
     // Parameter 'Comment 26'
     
     memset(tt, 0, sizeof(TDRPtable));
