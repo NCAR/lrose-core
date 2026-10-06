@@ -265,6 +265,14 @@ void RadxVol::copyMeta(const RadxVol &rhs)
   _debug = rhs._debug;
 
   _convention = rhs._convention;
+  _subconventions = rhs._subconventions;
+
+  _wmoWsi = rhs._wmoWsi;
+  _wmoId = rhs._wmoId;
+  _wmoCfProfile = rhs._wmoCfProfile;
+  _wmoDataCategory = rhs._wmoDataCategory;
+  _wmoDataPolicy = rhs._wmoDataPolicy;
+
   _version = rhs._version;
   _title = rhs._title;
   _institution = rhs._institution;
@@ -273,7 +281,7 @@ void RadxVol::copyMeta(const RadxVol &rhs)
   _history = rhs._history;
   _comment = rhs._comment;
   _statusXml = rhs._statusXml;
-  
+
   _volNum = rhs._volNum;
 
   _scanName = rhs._scanName;
@@ -411,6 +419,14 @@ void RadxVol::clear()
   _predomSweepModeFromAngles = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
 
   _convention.clear();
+  _subconventions.clear();
+
+  _wmoWsi.clear();
+  _wmoId.clear();
+  _wmoCfProfile.clear();
+  _wmoDataCategory.clear();
+  _wmoDataPolicy.clear();
+
   _version.clear();
   _title.clear();
   _institution.clear();
@@ -1870,6 +1886,14 @@ void RadxVol::print(ostream &out) const
   
   out << "=============== RadxVol ===============" << endl;
   out << "  convention: " << _convention << endl;
+  out << "  subconventions: " << _subconventions << endl;
+
+  out << "  wmo__wsi: " << _wmoWsi << endl;
+  out << "  wmo__id: " << _wmoId << endl;
+  out << "  wmo__cf_profile: " << _wmoCfProfile << endl;
+  out << "  wmo__data_category: " << _wmoDataCategory << endl;
+  out << "  wmo__data_policy: " << _wmoDataPolicy << endl;
+
   out << "  version: " << _version << endl;
   out << "  title: " << _title << endl;
   out << "  institution: " << _institution << endl;
@@ -1877,9 +1901,11 @@ void RadxVol::print(ostream &out) const
   out << "  source: " << _source << endl;
   out << "  history: " << _history << endl;
   out << "  comment: " << _comment << endl;
+
   out << "  volNum: " << _volNum << endl;
   out << "  scanName: " << _scanName << endl;
   out << "  scanId(VCP): " << _scanId << endl;
+
 
   _platform.print(out);
 
@@ -7630,6 +7656,12 @@ void RadxVol::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
   xml.clear();
   xml += RadxXml::writeStartTag("RadxVol", level);
   xml += RadxXml::writeString("convention", level + 1, _convention);
+  xml += RadxXml::writeString("subconventions", level + 1, _subconventions);
+  xml += RadxXml::writeString("wmo__wsi", level + 1, _wmoWsi);
+  xml += RadxXml::writeString("wmo__id", level + 1, _wmoId);
+  xml += RadxXml::writeString("wmo__cf_profile", level + 1, _wmoCfProfile);
+  xml += RadxXml::writeString("wmo__data_category", level + 1, _wmoDataCategory);
+  xml += RadxXml::writeString("wmo__data_policy", level + 1, _wmoDataPolicy);
   xml += RadxXml::writeString("version", level + 1, _version);
   xml += RadxXml::writeString("title", level + 1, _title);
   xml += RadxXml::writeString("institution", level + 1, _institution);
@@ -7704,6 +7736,12 @@ int RadxVol::_setMetaStringsFromXml(const char *xml,
   }
 
   RadxXml::readString(contents, "convention", _convention);
+  RadxXml::readString(contents, "subconventions", _subconventions);
+  RadxXml::readString(contents, "wmo__wsi", _wmoWsi);
+  RadxXml::readString(contents, "wmo__id", _wmoId);
+  RadxXml::readString(contents, "wmo__cf_profile", _wmoCfProfile);
+  RadxXml::readString(contents, "wmo__data_category", _wmoDataCategory);
+  RadxXml::readString(contents, "wmo__data_policy", _wmoDataPolicy);
   RadxXml::readString(contents, "version", _version);
   RadxXml::readString(contents, "title", _title);
   RadxXml::readString(contents, "institution", _institution);

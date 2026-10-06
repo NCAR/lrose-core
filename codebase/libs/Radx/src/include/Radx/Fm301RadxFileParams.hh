@@ -391,7 +391,7 @@ public:
   field_name_translation_t *_field_name_translations;
   int field_name_translations_n;
 
-  tdrp_bool_t augment_field_attribute;
+  tdrp_bool_t augment_field_attributes;
 
   field_attribute_t *_field_attributes;
   int field_attributes_n;

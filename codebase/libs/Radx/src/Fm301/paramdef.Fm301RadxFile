@@ -444,7 +444,7 @@ paramdef boolean {
   p_default = true;
   p_descr = "Option to augment the attributes attached to each field.";
   p_descr = "This step is performed AFTER the field name translation. I.e. this table applies to the output field names.";
-} augment_field_attribute;
+} augment_field_attributes;
 
 typedef struct {
   string output_field_name;

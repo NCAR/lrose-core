@@ -159,6 +159,14 @@ public:
 
   void setSubConventions(const string &val) { _subconventions = val; }
 
+  /// Set the WMO attributes
+
+  void setWmoWsi(const string &val) { _wmoWsi = val; }
+  void setWmoId(const string &val) { _wmoId = val; }
+  void setWmoCfProfile(const string &val) { _wmoCfProfile = val; }
+  void setWmoDataCategory(const string &val) { _wmoDataCategory = val; }
+  void setWmoDataPolicy(const string &val) { _wmoDataPolicy = val; }
+
   /// Set the volume version, if available. Use this for the project name.
 
   void setVersion(const string &val) { _version = val; }
@@ -1332,6 +1340,14 @@ public:
 
   inline const string &getSubConventions() const { return _subconventions; }
 
+  // get WMO attributes
+
+  inline const string &getWmoWsi() const { return _wmoWsi; }
+  inline const string &getWmoId() const { return _wmoId; }
+  inline const string &getWmoCfProfile() const { return _wmoCfProfile; }
+  inline const string &getWmoDataCategory() const { return _wmoDataCategory; }
+  inline const string &getWmoDataPolicy() const { return _wmoDataPolicy; }
+  
   /// Get version. May be used for project name.
 
   inline const string &getVersion() const { return _version; }
@@ -1965,6 +1981,17 @@ private:
 
   string _convention;  // from CF
   string _subconventions;  // from CF
+
+  // WMO specific attributes (from FM301)
+
+  string _wmoWsi;          // WIGOS station identifier
+  string _wmoId;           // Traditional WMO identifier
+  string _wmoCfProfile;    // e.g. FM 301-2022
+  string _wmoDataCategory;
+  string _wmoDataPolicy;
+
+  // other attributes
+  
   string _version;     // from CF
   string _title;       // from CF
   string _institution; // from CF
@@ -1975,6 +2002,7 @@ private:
   string _author;      // person generating the files
   string _driver;      // tool used to generate the file
   string _created;     // when data set was created
+
   string _origFormat;  // format of file read in
   string _statusXml;   // generic status specific to instrument
 

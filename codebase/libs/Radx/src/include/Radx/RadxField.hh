@@ -160,6 +160,11 @@ public:
 
   void setStandardName(const string &val) { _standardName = val; }
 
+  /// Set WMO attributes
+
+  void setWmoParameterName(const string &val) { _wmoParameterName = val; }
+  void setWmoParameterUri(const string &val) { _wmoParameterUri = val; }
+
   /// Set legend XML
   /// This is intended for 'discrete' fields - i.e. those which
   /// take on a select set of values - e.g. PID. The legend
@@ -708,6 +713,11 @@ public:
   
   const string &getStandardName() const { return _standardName; }
 
+  /// Get WMO attributes
+  
+  const string &getWmoParameterName() const { return _wmoParameterName; }
+  const string &getWmoParameterUri() const { return _wmoParameterUri; }
+
   /// Get units for field.
   
   const string &getUnits() const { return _units; }
@@ -1097,6 +1107,10 @@ private:
   string _longName;
   string _standardName;
   string _units;
+
+  string _wmoParameterName;
+  string _wmoParameterUri;
+
   string _legendXml;
   string _thresholdingXml;
   string _comment;

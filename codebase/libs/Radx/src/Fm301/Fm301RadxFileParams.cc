@@ -878,15 +878,15 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'augment_field_attribute'
+    // Parameter 'augment_field_attributes'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("augment_field_attribute");
+    tt->param_name = tdrpStrDup("augment_field_attributes");
     tt->descr = tdrpStrDup("Option to augment the attributes attached to each field.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &augment_field_attribute - &_start_;
+    tt->val_offset = (char *) &augment_field_attributes - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
