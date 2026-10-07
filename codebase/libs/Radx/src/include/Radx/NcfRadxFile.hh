@@ -591,6 +591,7 @@ private:
   
   string _fieldName, _fieldUnits;
   string _fieldStandardName, _fieldLongName;
+  string _fieldWmoParameterName, _fieldWmoParameterUri;
   string _fieldCommentStr;
   string _fieldAncillaryVariablesStr;
   string _fieldLegendXml, _fieldThresholdingXml;
@@ -658,6 +659,8 @@ private:
                             string &units,
                             string &standardName,
                             string &longName,
+                            string &wmoParamaterName,
+                            string &wmoParameterUri,
                             string &commentStr,
                             string &ancillaryVariablesStr,
                             string &legendXml,

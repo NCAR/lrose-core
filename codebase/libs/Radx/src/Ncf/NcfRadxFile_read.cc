@@ -44,6 +44,7 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxStr.hh>
+#include <Radx/RadxFm301Str.hh>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -2748,6 +2749,7 @@ int NcfRadxFile::_readNormalFields(bool metaOnly)
     _readFieldAttributes(var,
                          _fieldName, _fieldUnits,
                          _fieldStandardName, _fieldLongName,
+                         _fieldWmoParameterName, _fieldWmoParameterUri,
                          _fieldCommentStr,
                          _fieldAncillaryVariablesStr,
                          _fieldLegendXml, _fieldThresholdingXml,
@@ -2897,6 +2899,7 @@ int NcfRadxFile::_readQualifierFields(bool metaOnly)
     _readFieldAttributes(var,
                          _fieldName, _fieldUnits,
                          _fieldStandardName, _fieldLongName,
+                         _fieldWmoParameterName, _fieldWmoParameterUri,
                          _fieldCommentStr,
                          _fieldAncillaryVariablesStr,
                          _fieldLegendXml, _fieldThresholdingXml,
@@ -2983,6 +2986,8 @@ void NcfRadxFile::_readFieldAttributes(Nc3Var *var,
                                        string &units,
                                        string &standardName,
                                        string &longName,
+                                       string &wmoParameterName,
+                                       string &wmoParameterUri,
                                        string &commentStr,
                                        string &ancillaryVariablesStr,
                                        string &legendXml,
@@ -3026,6 +3031,22 @@ void NcfRadxFile::_readFieldAttributes(Nc3Var *var,
   if (longNameAtt != NULL) {
     longName = Nc3xFile::asString(longNameAtt);
     delete longNameAtt;
+  }
+  
+  // wmo parameter name and uri
+  
+  wmoParameterName = "unknown";
+  Nc3Att *wmoParameterNameAtt = var->get_att(RadxFm301Str::WMO__PARAMETER_NAME);
+  if (wmoParameterNameAtt != NULL) {
+    wmoParameterName = Nc3xFile::asString(wmoParameterNameAtt);
+    delete wmoParameterNameAtt;
+  }
+  
+  wmoParameterUri = "unknown";
+  Nc3Att *wmoParameterUriAtt = var->get_att(RadxFm301Str::WMO__PARAMETER_URI);
+  if (wmoParameterUriAtt != NULL) {
+    wmoParameterUri = Nc3xFile::asString(wmoParameterUriAtt);
+    delete wmoParameterUriAtt;
   }
   
   // units
@@ -3168,6 +3189,8 @@ void NcfRadxFile::_setFieldAttributes(RadxField *field,
 {
 
   field->setStandardName(_fieldStandardName);
+  field->setWmoParameterName(_fieldWmoParameterName);
+  field->setWmoParameterUri(_fieldWmoParameterUri);
   field->setLongName(_fieldLongName);
   if (_fieldCommentStr.size() > 0) {
     field->setComment(_fieldCommentStr);
