@@ -374,9 +374,9 @@ NcxxGroup NcxxGroup::addGroup(const string& name) const {
 
 
 
-// /////////////
+///////////////////////////////////////////////////////
 // NcxxVar-related accessors
-// /////////////
+///////////////////////////////////////////////////////
 
 // Get the number of NcxxVar objects in this group.
 int NcxxGroup::getVarCount(NcxxGroup::Location location) const {
@@ -421,6 +421,27 @@ int NcxxGroup::getVarCount(NcxxGroup::Location location) const {
     }
   }
   return nvars;
+}
+
+// Get the collection of NcxxVar objects, in the order in which they are stored.
+
+vector<NcxxVar> NcxxGroup::getVarsInOrder() const
+{
+
+  vector<NcxxVar> ncVars;
+  int varCount = getVarCount();
+  
+  if (varCount) {
+    vector<int> varids(varCount);
+    ncxxCheck(nc_inq_varids(myId, NULL, &varids[0]),
+              __FILE__, __LINE__,
+              "NcxxGroup::getVarsInOrder()", getName());
+    for (int i = 0; i < varCount; i++) {
+      ncVars.push_back(NcxxVar(*this, varids[i]));
+    }
+  }
+  
+  return ncVars;
 }
 
 // Get the collection of NcxxVar objects.

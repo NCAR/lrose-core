@@ -226,7 +226,11 @@ public:
     \return         Number of variables.
   */
   int getVarCount(NcxxGroup::Location location = Current) const;
-
+  
+  // Get the collection of NcxxVar objects, in the order in which they are stored.
+  
+  vector<NcxxVar> getVarsInOrder() const;
+    
   /*!
     Get the collection of NcxxVar objects.
     \param location Enumeration type controlling the groups to search.

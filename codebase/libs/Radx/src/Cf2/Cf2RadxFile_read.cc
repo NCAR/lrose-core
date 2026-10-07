@@ -2390,12 +2390,12 @@ void Cf2RadxFile::_readFieldVariables(bool metaOnly)
 
   // loop through the variables, adding data fields as appropriate
 
-  const multimap<string, NcxxVar> &vars = _sweepGroup.getVars();
+  const vector<NcxxVar> &vars = _sweepGroup.getVarsInOrder();
 
-  for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
+  for (vector<NcxxVar>::const_iterator iter = vars.begin();
        iter != vars.end(); iter++) {
 
-    NcxxVar var = iter->second;
+    NcxxVar var = *iter;
     if (var.isNull()) {
       continue;
     }
@@ -2501,12 +2501,12 @@ void Cf2RadxFile::_readQualifierVariables(bool metaOnly)
 
   // loop through the variables, adding data fields as appropriate
   
-  const multimap<string, NcxxVar> &vars = _sweepGroup.getVars();
+  const vector<NcxxVar> &vars = _sweepGroup.getVarsInOrder();
   
-  for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
+  for (vector<NcxxVar>::const_iterator iter = vars.begin();
        iter != vars.end(); iter++) {
     
-    NcxxVar var = iter->second;
+    NcxxVar var = *iter;
     if (var.isNull()) {
       continue;
     }
