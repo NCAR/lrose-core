@@ -8,19 +8,13 @@
 
 * **apps/radar/HcrMomentsCombine** - new application for combining HCR moment data from multiple operating modes.
 
-* **apps/radar/TsUdp2Fmq** - new application for receiving radar time-series data over UDP and writing the data to an FMQ.
-
-* **apps/Radx/Radx2Awips** - new application for producing AWIPS-compatible radar products.
-
 * **apps/radar/RadarCal/RFStrengthPlot.py** - new plotting support for radar calibration and RF signal-strength analysis.
 
 # Major application updates
 
 * **apps/Radx/RadxKdp** - updated to support the substantially revised KDP processing library, including regression, FIR and FFT-based PHIDP filtering, self-consistency processing, phase-shift-on-backscatter correction, attenuation correction and PHIDP unfolding. Added additional testing configurations and fixed-angle processing limits.
 
-* **apps/Radx/RadxConvert** - adding support for the WMO FM301 radar data exchange format.
-
-* **apps/radar/Sprite** - adding time-series reflection (TSR) clutter filtering and associated diagnostic displays.
+* **apps/Radx/RadxConvert** - starting to add support for the WMO FM301 radar data exchange format. This will be available in the next release.
 
 * **apps/radar/HawkEye** - adding optional filtering of rays by scan name.
 
@@ -33,8 +27,6 @@
 * **apps/titan/EsdAcIngest and apps/ingest/AcData2Spdb** - improved TCP input handling to detect server disconnects and reconnect automatically. EsdAcIngest also includes a websocket-to-TCP bridge.
 
 * **apps/ingest/NWSsoundingIngest** - adding `get_sounding.py` for retrieving sounding data.
-
-* **apps/ingest/file_repeat_day** - adding `simulate_files_realtime.py` for replaying files in simulated real time.
 
 * **apps/Radx/RadxMergeVols** - fixing volume output that had inadvertently been disabled during testing.
 
@@ -54,13 +46,9 @@
 
 * **libs/radar/KdpQuadFit** - new polynomial-fitting support for KDP processing.
 
-* **libs/radar/RadarFftDouble** - adding double-precision FFT support.
-
 * **libs/radar/RadarFft** - adding mutex protection around FFTW initialization and cleanup for thread-safe use.
 
 # Radar moments and time-series processing
-
-* **libs/radar/RadarMoments and ClutFilter** - adding time-series reflection (TSR) clutter filtering. The implementation supports reflected time series to reduce edge effects associated with FFT filtering.
 
 * **libs/radar/RadarTimeSeriesSim** - new radar time-series simulation library for generating synthetic weather and clutter signals for algorithm development and testing.
 
@@ -76,11 +64,11 @@
 
 # Radx and MDV libraries
 
-* **libs/Radx** - adding support for the WMO FM301 radar data exchange format, including FM301 field-name handling.
+* **libs/Radx** - beginning to add support for the WMO FM301 radar data exchange format, including FM301 field-name handling. This will be available in the next release.
 
 * **libs/Radx** - adding `fill` sweep type, scan-name support in RadxRay diagnostics, and fixes for Gematronik volume numbering and CfRadial2 latitude/longitude output.
 
-* **libs/Mdv** - adding MdvxRemapInterp for interpolation of model fields and new functions for safe initialization of MDV structures.
+* **libs/Mdv** - working on MdvxRemapInterp for interpolation of model fields and new functions for safe initialization of MDV structures.
 
 * **libs/Mdv/MdvxField** - adding writable access to volume data.
 
@@ -112,15 +100,13 @@
 
 * Added `build/cmake/run_cmake` scripts and updated CMakeLists for new and modified applications.
 
-* Continued improvements to macOS builds and Homebrew support.
+* Continued improvements to macOS builds and Homebrew support. The brew build now uses casks.
 
 # Documentation
 
 * Updated top-level README installation and build instructions.
 
 * Updated package download and installation documentation, including macOS Homebrew installation.
-
-* Updated build documentation to use AlmaLinux in place of CentOS.
 
 * Updated links to the LROSE Wiki and Quickstart Guide.
 
