@@ -184,6 +184,12 @@ fractl will be installed as:
 To upgrade:
 
 ```
+  brew upgrade
+```
+
+or:
+
+```
   brew uninstall lrose-fractl
   brew install NCAR/lrose/lrose-fractl
 ```
@@ -213,6 +219,12 @@ vortrac will be installed as:
 To upgrade:
 
 ```
+  brew upgrade
+```
+
+or:
+
+```
   brew uninstall lrose-vortrac
   brew install NCAR/lrose/lrose-vortrac
 ```
@@ -240,6 +252,12 @@ samurai will be installed as:
 ```
 
 To upgrade:
+
+```
+  brew upgrade
+```
+
+or:
 
 ```
   brew uninstall lrose-samurai
