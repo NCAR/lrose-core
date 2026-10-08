@@ -597,30 +597,31 @@ void Fm301RadxFile::_addGlobalAttributes()
   // Add required CF global attributes
   
   _conventions = CfConvention;
+  if (_writeVol->getWmoWsi().size() > 0) {
   _file.addGlobAttr(CONVENTIONS, _conventions);
 
   // Add WMO global attributes if set
   
-  if (_readVol->getWmoWsi().size() > 0) {
-    _file.addGlobAttr(WMO__WSI, _readVol->getWmoWsi());
+  if (_writeVol->getWmoWsi().size() > 0) {
+    _file.addGlobAttr(WMO__WSI, _writeVol->getWmoWsi());
   }
-  if (_readVol->getWmoId().size() > 0) {
-    _file.addGlobAttr(WMO__ID, _readVol->getWmoId());
+  if (_writeVol->getWmoId().size() > 0) {
+    _file.addGlobAttr(WMO__ID, _writeVol->getWmoId());
   }
-  if (_readVol->getWmoCfProfile().size() > 0) {
-    _file.addGlobAttr(WMO__CF_PROFILE, _readVol->getWmoCfProfile());
+  if (_writeVol->getWmoCfProfile().size() > 0) {
+    _file.addGlobAttr(WMO__CF_PROFILE, _writeVol->getWmoCfProfile());
   }
-  if (_readVol->getWmoDataCategory().size() > 0) {
-    _file.addGlobAttr(WMO__DATA_CATEGORY, _readVol->getWmoDataCategory());
+  if (_writeVol->getWmoDataCategory().size() > 0) {
+    _file.addGlobAttr(WMO__DATA_CATEGORY, _writeVol->getWmoDataCategory());
   }
-  if (_readVol->getWmoDataPolicy().size() > 0) {
-    _file.addGlobAttr(WMO__DATA_POLICY, _readVol->getWmoDataPolicy());
+  if (_writeVol->getWmoDataPolicy().size() > 0) {
+    _file.addGlobAttr(WMO__DATA_POLICY, _writeVol->getWmoDataPolicy());
   }
-  if (_readVol->getWmoOriginatingCentre().size() > 0) {
-    _file.addGlobAttr(WMO__ORIGINATING_CENTRE, _readVol->getWmoOriginatingCentre());
+  if (_writeVol->getWmoOriginatingCentre().size() > 0) {
+    _file.addGlobAttr(WMO__ORIGINATING_CENTRE, _writeVol->getWmoOriginatingCentre());
   }
-  if (_readVol->getWmoOriginatingSubCentre().size() > 0) {
-    _file.addGlobAttr(WMO__ORIGINATING_SUB_CENTRE, _readVol->getWmoOriginatingSubCentre());
+  if (_writeVol->getWmoOriginatingSubCentre().size() > 0) {
+    _file.addGlobAttr(WMO__ORIGINATING_SUB_CENTRE, _writeVol->getWmoOriginatingSubCentre());
   }
   
   // Version
