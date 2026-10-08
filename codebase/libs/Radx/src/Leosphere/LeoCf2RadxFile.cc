@@ -3474,32 +3474,6 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
                                    vector<double> rangeKm)
  {
 
-   /*
-   //--
-   //const multimap<string, NcxxVar> &vars = _sweepGroup.getVars();
-
-   //for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
-   //     iter != vars.end(); iter++) {
-
-   //NcxxVar var = iter->second;
-   //  if (var.isNull()) {
-   //    continue;
-   //  }
-     string name = var.getName();
-     int numDims = var.getDimCount();
-     if (numDims != 2) {
-       continue;
-     }
-     // check that we have the correct dimensions
-     const NcxxDim &timeDim = var.getDim(0);
-     const NcxxDim &rangeDim = var.getDim(1);
-     if (timeDim != _timeDimSweep || rangeDim != _rangeDimSweep) {
-       continue;
-     }
-
-     //--
-     */
-
    NcxxVar rangeVar = group.getVar(RANGE);
    NcxxVar timeVar = group.getVar(TIME);
    if (rangeVar.isNull() || rangeVar.numVals() < 1) {
@@ -3612,32 +3586,6 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
  void LeoCf2RadxFile::_readSweepGateIndex(NcxxGroup &group, NcxxDim &dim,
                                    vector<double> rangeKm)
  {
-
-   /*
-   //--
-   //const multimap<string, NcxxVar> &vars = _sweepGroup.getVars();
-
-   //for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
-   //     iter != vars.end(); iter++) {
-
-   //NcxxVar var = iter->second;
-   //  if (var.isNull()) {
-   //    continue;
-   //  }
-     string name = var.getName();
-     int numDims = var.getDimCount();
-     if (numDims != 2) {
-       continue;
-     }
-     // check that we have the correct dimensions
-     const NcxxDim &timeDim = var.getDim(0);
-     const NcxxDim &rangeDim = var.getDim(1);
-     if (timeDim != _timeDimSweep || rangeDim != _rangeDimSweep) {
-       continue;
-     }
-
-     //--
-     */
 
    NcxxVar rangeVar = group.getVar(RANGE); // "gate_index"); // RANGE);
    if (rangeVar.isNull() || rangeVar.numVals() < 1) {
@@ -4289,12 +4237,12 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    // loop through the variables, adding data fields as appropriate
 
-   const multimap<string, NcxxVar> &vars = _sweepGroup.getVars();
-
-   for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
-        iter != vars.end(); iter++) {
-
-     NcxxVar var = iter->second;
+  const vector<NcxxVar> &vars = _sweepGroup.getVarsInOrder();
+   
+  for (vector<NcxxVar>::const_iterator iter = vars.begin();
+       iter != vars.end(); iter++) {
+     
+     NcxxVar var = *iter;
      if (var.isNull()) {
        continue;
      }
