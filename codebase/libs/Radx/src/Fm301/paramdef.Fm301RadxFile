@@ -13,22 +13,6 @@ commentdef {
 }
 
 commentdef {
-  p_header = "STATION IDENTIIFICATION";
-}
-
-paramdef string {
-  p_default = "";
-  p_descr = "WIGOS station identifier.";
-  p_descr = "Left empty if no WIGOS identifier has been assigned.";
-} wmo__wsi;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Traditional WMO identifier.";
-  p_descr = "Left empty if no WMO identifier has been assigned.";
-} wmo__id;
-
-commentdef {
   p_header = "GLOBAL ATTRIBUTES";
 }
 

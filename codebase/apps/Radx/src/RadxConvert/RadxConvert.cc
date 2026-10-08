@@ -284,8 +284,6 @@ int RadxConvert::_runFilelist()
       // read input file
       int jret = _readFile(inputPath, vol);
       if (jret == 0) {
-        // finalize the volume
-        _finalizeVol(vol);
         // write the volume out
         if (_writeVol(vol)) {
           cerr << "ERROR - RadxConvert::_runFileList" << endl;
@@ -335,10 +333,6 @@ int RadxConvert::_runFilelist()
         cerr << "==>> read in file: " << paths[ii] << endl;
       }
     }
-    
-    // finalize the volume
-    
-    _finalizeVol(vol);
     
     // write the volume out
     if (_writeVol(vol)) {
@@ -398,8 +392,6 @@ int RadxConvert::_runArchive()
     // read input file
     int jret = _readFile(paths[ii], vol);
     if (jret == 0) {
-      // finalize the volume
-      _finalizeVol(vol);
       // write the volume out
       if (_writeVol(vol)) {
         cerr << "ERROR - RadxConvert::_runArchive" << endl;
@@ -446,8 +438,6 @@ int RadxConvert::_runRealtimeWithLdata()
     // read input file
     int jret = _readFile(path, vol);
     if (jret == 0) {
-      // finalize the volume
-      _finalizeVol(vol);
       // write the volume out
       if (_writeVol(vol)) {
         cerr << "ERROR - RadxConvert::_runRealtimeWithLdata" << endl;
@@ -514,8 +504,6 @@ int RadxConvert::_runRealtimeNoLdata()
       
       int jret = _readFile(path, vol);
       if (jret == 0) {
-        // finalize the volume
-        _finalizeVol(vol);
         // write the volume out
         if (_writeVol(vol)) {
           cerr << "ERROR - RadxConvert::_runRealtimeNoLdata" << endl;
@@ -1561,6 +1549,26 @@ void RadxConvert::_setGlobalAttr(RadxVol &vol)
     vol.setSubConventions(_params.subconvention_override);
   }
 
+  if (strlen(_params.wmo__wsi) > 0) {
+    vol.setWmoWsi(_params.wmo__wsi);
+  }
+
+  if (strlen(_params.wmo__id) > 0) {
+    vol.setWmoId(_params.wmo__id);
+  }
+
+  if (strlen(_params.wmo__cf_profile) > 0) {
+    vol.setWmoCfProfile(_params.wmo__cf_profile);
+  }
+
+  if (strlen(_params.wmo__data_category) > 0) {
+    vol.setWmoDataCategory(_params.wmo__data_category);
+  }
+
+  if (strlen(_params.wmo__data_policy) > 0) {
+    vol.setWmoDataPolicy(_params.wmo__data_policy);
+  }
+
   if (strlen(_params.version_override) > 0) {
     vol.setVersion(_params.version_override);
   }
@@ -1630,6 +1638,10 @@ void RadxConvert::_setGlobalAttr(RadxVol &vol)
 int RadxConvert::_writeVol(RadxVol &vol)
 {
 
+  // finalize the volume metadata
+  
+  _finalizeVol(vol);
+  
   // output file
 
   GenericRadxFile outFile;

@@ -599,6 +599,8 @@ void Fm301RadxFile::_addGlobalAttributes()
   _conventions = CfConvention;
   _file.addGlobAttr(CONVENTIONS, _conventions);
 
+  // Add WMO global attributes if set
+  
   if (_readVol->getWmoWsi().size() > 0) {
     _file.addGlobAttr(WMO__WSI, _readVol->getWmoWsi());
   }
@@ -614,15 +616,16 @@ void Fm301RadxFile::_addGlobalAttributes()
   if (_readVol->getWmoDataPolicy().size() > 0) {
     _file.addGlobAttr(WMO__DATA_POLICY, _readVol->getWmoDataPolicy());
   }
+  if (_readVol->getWmoOriginatingCentre().size() > 0) {
+    _file.addGlobAttr(WMO__ORIGINATING_CENTRE, _readVol->getWmoOriginatingCentre());
+  }
+  if (_readVol->getWmoOriginatingSubCentre().size() > 0) {
+    _file.addGlobAttr(WMO__ORIGINATING_SUB_CENTRE, _readVol->getWmoOriginatingSubCentre());
+  }
   
   // Version
 
   _version = WmoCfProfile;
-
-  // if (_writeVol->getVersion().size() > 0) {
-  //   _version = _writeVol->getVersion();
-  // }
-
   _file.addGlobAttr(VERSION, _version);
   
   // info strings

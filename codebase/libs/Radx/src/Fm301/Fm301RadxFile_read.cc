@@ -730,6 +730,18 @@ void Fm301RadxFile::_readGlobalAttributes()
       _readVol->setWmoDataPolicy(att.asString());
     }
   } catch (NcxxException& e) {}
+  try {
+    NcxxGroupAtt att = _file.getAtt(WMO__ORIGINATING_CENTRE);
+    if (!att.isNull()) {
+      _readVol->setWmoOriginatingCentre(att.asString());
+    }
+  } catch (NcxxException& e) {}
+  try {
+    NcxxGroupAtt att = _file.getAtt(WMO__ORIGINATING_SUB_CENTRE);
+    if (!att.isNull()) {
+      _readVol->setWmoOriginatingSubCentre(att.asString());
+    }
+  } catch (NcxxException& e) {}
 
   // check for version
   

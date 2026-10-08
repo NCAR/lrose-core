@@ -166,6 +166,8 @@ public:
   void setWmoCfProfile(const string &val) { _wmoCfProfile = val; }
   void setWmoDataCategory(const string &val) { _wmoDataCategory = val; }
   void setWmoDataPolicy(const string &val) { _wmoDataPolicy = val; }
+  void setWmoOriginatingCentre(const string &val) { _wmoOriginatingCentre = val; }
+  void setWmoOriginatingSubCentre(const string &val) { _wmoOriginatingSubCentre = val; }
 
   /// Set the volume version, if available. Use this for the project name.
 
@@ -1347,6 +1349,8 @@ public:
   inline const string &getWmoCfProfile() const { return _wmoCfProfile; }
   inline const string &getWmoDataCategory() const { return _wmoDataCategory; }
   inline const string &getWmoDataPolicy() const { return _wmoDataPolicy; }
+  inline const string &getWmoOriginatingCentre() const { return _wmoOriginatingCentre; }
+  inline const string &getWmoOriginatingSubCentre() const { return _wmoOriginatingSubCentre; }
   
   /// Get version. May be used for project name.
 
@@ -1989,6 +1993,8 @@ private:
   string _wmoCfProfile;    // e.g. FM 301-2022
   string _wmoDataCategory;
   string _wmoDataPolicy;
+  string _wmoOriginatingCentre;
+  string _wmoOriginatingSubCentre;
 
   // other attributes
   

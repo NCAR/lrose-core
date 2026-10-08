@@ -566,39 +566,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 1");
-    tt->comment_hdr = tdrpStrDup("STATION IDENTIIFICATION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'wmo__wsi'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("wmo__wsi");
-    tt->descr = tdrpStrDup("WIGOS station identifier.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wmo__wsi - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'wmo__id'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("wmo__id");
-    tt->descr = tdrpStrDup("Traditional WMO identifier.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wmo__id - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 2'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 2");
     tt->comment_hdr = tdrpStrDup("GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -651,11 +618,11 @@
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 2");
     tt->comment_hdr = tdrpStrDup("FIELD NAME TRANSLATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -869,11 +836,11 @@
       tt->struct_vals[158].s = tdrpStrDup("ODIM / common");
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("FIELD ATTRIBUTE AUGMENTATION");
     tt->comment_text = tdrpStrDup("");
     tt++;

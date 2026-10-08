@@ -374,10 +374,6 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
-  char* wmo__wsi;
-
-  char* wmo__id;
-
   char* CF_convention;
 
   char* wmo__cf_profile;
@@ -403,7 +399,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[16];
+  mutable TDRPtable _table[13];
 
   const char *_className;
 
