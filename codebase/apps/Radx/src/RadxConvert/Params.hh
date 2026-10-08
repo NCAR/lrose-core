@@ -831,16 +831,6 @@ public:
 
   char* FM301_params_file_path;
 
-  char* wmo__wsi;
-
-  char* wmo__id;
-
-  char* wmo__cf_profile;
-
-  char* wmo__data_category;
-
-  char* wmo__data_policy;
-
   tdrp_bool_t output_native_byte_order;
 
   tdrp_bool_t output_compressed;
@@ -932,7 +922,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[223];
+  mutable TDRPtable _table[217];
 
   const char *_className;
 

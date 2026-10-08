@@ -2992,75 +2992,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 26");
-    tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY WMO GLOBAL ATTRIBUTES");
-    tt->comment_text = tdrpStrDup("Mostly used when writing FM301 files. But can also be set on CFRADIAL and CFRADIAL2 files.");
-    tt++;
-    
-    // Parameter 'wmo__wsi'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("wmo__wsi");
-    tt->descr = tdrpStrDup("WIGOS station identifier.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wmo__wsi - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'wmo__id'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("wmo__id");
-    tt->descr = tdrpStrDup("Traditional WMO identifier.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wmo__id - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'wmo__cf_profile'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("wmo__cf_profile");
-    tt->descr = tdrpStrDup("WMO CF profile.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wmo__cf_profile - &_start_;
-    tt->single_val.s = tdrpStrDup("FM 301-2022");
-    tt++;
-    
-    // Parameter 'wmo__data_category'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("wmo__data_category");
-    tt->descr = tdrpStrDup("WMO data category.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wmo__data_category - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'wmo__data_policy'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("wmo__data_policy");
-    tt->descr = tdrpStrDup("WMO data policy.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wmo__data_policy - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'Comment 27'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3089,11 +3020,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3122,11 +3053,11 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 29'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 29");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3485,11 +3416,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 30'
+    // Parameter 'Comment 29'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 30");
+    tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("SEPARATING VOLUMES BY TYPE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3566,11 +3497,11 @@
     tt->single_val.s = tdrpStrDup("sun");
     tt++;
     
-    // Parameter 'Comment 31'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 31");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE MISSING VALUES");
     tt->comment_text = tdrpStrDup("Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n");
     tt++;

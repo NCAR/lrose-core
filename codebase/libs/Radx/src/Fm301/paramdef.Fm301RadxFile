@@ -23,22 +23,42 @@ paramdef string {
 } CF_convention;
 
 paramdef string {
+  p_default = "";
+  p_descr = "WIGOS station identifier.";
+  p_descr = "Left empty if no WIGOS identifier has been assigned.";
+} wmo__wsi;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Traditional WMO identifier.";
+  p_descr = "Left empty if no WMO identifier has been assigned.";
+} wmo__id;
+
+paramdef string {
   p_default = "FM 301-2022";
   p_descr = "WMO CF profile.";
   p_descr = "If empty, the default will be used.";
 } wmo__cf_profile;
 
 paramdef string {
-  p_default = "unknown";
+  p_default = "";
   p_descr = "WMO data category.";
-  p_descr = "If empty, the default will be used.";
 } wmo__data_category;
 
 paramdef string {
-  p_default = "unknown";
+  p_default = "";
   p_descr = "WMO data policy.";
-  p_descr = "If empty, the default will be used.";
 } wmo__data_policy;
+
+paramdef string {
+  p_default = "";
+  p_descr = "WMO originating centre.";
+} wmo__originating_centre;
+
+paramdef string {
+  p_default = "";
+  p_descr = "WMO originating sub-centre.";
+} wmo__originating_sub_centre;
 
 commentdef {
   p_header = "FIELD NAME TRANSLATION";

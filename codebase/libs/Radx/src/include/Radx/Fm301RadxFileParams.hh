@@ -376,11 +376,19 @@ public:
 
   char* CF_convention;
 
+  char* wmo__wsi;
+
+  char* wmo__id;
+
   char* wmo__cf_profile;
 
   char* wmo__data_category;
 
   char* wmo__data_policy;
+
+  char* wmo__originating_centre;
+
+  char* wmo__originating_sub_centre;
 
   tdrp_bool_t translate_field_names;
 
@@ -399,7 +407,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[13];
+  mutable TDRPtable _table[17];
 
   const char *_className;
 

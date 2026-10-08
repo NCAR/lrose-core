@@ -582,6 +582,30 @@
     tt->single_val.s = tdrpStrDup("CF-1.8, WMO CF-1.0");
     tt++;
     
+    // Parameter 'wmo__wsi'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("wmo__wsi");
+    tt->descr = tdrpStrDup("WIGOS station identifier.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wmo__wsi - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'wmo__id'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("wmo__id");
+    tt->descr = tdrpStrDup("Traditional WMO identifier.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wmo__id - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'wmo__cf_profile'
     // ctype is 'char*'
     
@@ -603,7 +627,7 @@
     tt->descr = tdrpStrDup("WMO data category.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &wmo__data_category - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'wmo__data_policy'
@@ -615,7 +639,31 @@
     tt->descr = tdrpStrDup("WMO data policy.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &wmo__data_policy - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'wmo__originating_centre'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("wmo__originating_centre");
+    tt->descr = tdrpStrDup("WMO originating centre.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wmo__originating_centre - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'wmo__originating_sub_centre'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("wmo__originating_sub_centre");
+    tt->descr = tdrpStrDup("WMO originating sub-centre.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &wmo__originating_sub_centre - &_start_;
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'Comment 2'

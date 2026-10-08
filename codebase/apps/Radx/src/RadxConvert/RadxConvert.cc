@@ -1549,24 +1549,32 @@ void RadxConvert::_setGlobalAttr(RadxVol &vol)
     vol.setSubConventions(_params.subconvention_override);
   }
 
-  if (strlen(_params.wmo__wsi) > 0) {
-    vol.setWmoWsi(_params.wmo__wsi);
+  if (strlen(_fm301Params.wmo__wsi) > 0) {
+    vol.setWmoWsi(_fm301Params.wmo__wsi);
   }
 
-  if (strlen(_params.wmo__id) > 0) {
-    vol.setWmoId(_params.wmo__id);
+  if (strlen(_fm301Params.wmo__id) > 0) {
+    vol.setWmoId(_fm301Params.wmo__id);
   }
 
-  if (strlen(_params.wmo__cf_profile) > 0) {
-    vol.setWmoCfProfile(_params.wmo__cf_profile);
+  if (strlen(_fm301Params.wmo__cf_profile) > 0) {
+    vol.setWmoCfProfile(_fm301Params.wmo__cf_profile);
   }
 
-  if (strlen(_params.wmo__data_category) > 0) {
-    vol.setWmoDataCategory(_params.wmo__data_category);
+  if (strlen(_fm301Params.wmo__data_category) > 0) {
+    vol.setWmoDataCategory(_fm301Params.wmo__data_category);
+  }
+  
+  if (strlen(_fm301Params.wmo__data_policy) > 0) {
+    vol.setWmoDataPolicy(_fm301Params.wmo__data_policy);
   }
 
-  if (strlen(_params.wmo__data_policy) > 0) {
-    vol.setWmoDataPolicy(_params.wmo__data_policy);
+  if (strlen(_fm301Params.wmo__originating_centre) > 0) {
+    vol.setWmoOriginatingCentre(_fm301Params.wmo__originating_centre);
+  }
+
+  if (strlen(_fm301Params.wmo__originating_sub_centre) > 0) {
+    vol.setWmoOriginatingCentre(_fm301Params.wmo__originating_sub_centre);
   }
 
   if (strlen(_params.version_override) > 0) {
