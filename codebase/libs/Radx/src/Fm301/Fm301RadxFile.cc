@@ -59,7 +59,7 @@ Fm301RadxFile::Fm301RadxFile() : RadxFile(), RadxFm301Str()
   
 {
 
-  _convention = CfConvention;
+  _conventions = CfConvention;
   _version = WmoCfProfile;
 
   _ncFormat = NETCDF4;
@@ -99,7 +99,7 @@ void Fm301RadxFile::clear()
   _georefsActive = false;
   _correctionsActive = false;
 
-  _convention.clear();
+  _conventions.clear();
   _version.clear();
   _title.clear();
   _institution.clear();

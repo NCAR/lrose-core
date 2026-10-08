@@ -596,8 +596,24 @@ void Fm301RadxFile::_addGlobalAttributes()
 
   // Add required CF global attributes
   
-  _convention = CfConvention;
-  _file.addGlobAttr(CONVENTIONS, _convention);
+  _conventions = CfConvention;
+  _file.addGlobAttr(CONVENTIONS, _conventions);
+
+  if (_readVol->getWmoWsi().size() > 0) {
+    _file.addGlobAttr(WMO__WSI, _readVol->getWmoWsi());
+  }
+  if (_readVol->getWmoId().size() > 0) {
+    _file.addGlobAttr(WMO__ID, _readVol->getWmoId());
+  }
+  if (_readVol->getWmoCfProfile().size() > 0) {
+    _file.addGlobAttr(WMO__CF_PROFILE, _readVol->getWmoCfProfile());
+  }
+  if (_readVol->getWmoDataCategory().size() > 0) {
+    _file.addGlobAttr(WMO__DATA_CATEGORY, _readVol->getWmoDataCategory());
+  }
+  if (_readVol->getWmoDataPolicy().size() > 0) {
+    _file.addGlobAttr(WMO__DATA_POLICY, _readVol->getWmoDataPolicy());
+  }
   
   // Version
 
@@ -2682,6 +2698,12 @@ NcxxVar Fm301RadxFile::_createFieldVar(const RadxField &field,
       } else {
         var.putAtt(STANDARD_NAME, field.getStandardName());
       }
+    }
+    if (field.getWmoParameterName().size() > 0) {
+      var.putAtt(WMO__PARAMETER_NAME, field.getWmoParameterName());
+    }
+    if (field.getWmoParameterUri().size() > 0) {
+      var.putAtt(WMO__PARAMETER_URI, field.getWmoParameterUri());
     }
     var.putAtt(UNITS, field.getUnits());
     if (field.getLegendXml().size() > 0) {

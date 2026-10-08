@@ -683,20 +683,53 @@ void Fm301RadxFile::_readGlobalAttributes()
 
   try {
     NcxxGroupAtt att = _file.getAtt(CONVENTIONS);
-    _convention = att.asString();
+    _conventions = att.asString();
   } catch (NcxxException& e) {
     NcxxErrStr err;
     err.addErrStr("ERROR - Fm301RadxFile::_readGlobalAttributes");
     err.addErrStr("  Cannot find conventions attribute");
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
-  if (_convention.find(CfConvention) == string::npos) {
+  if (_conventions.find(CfConvention) == string::npos) {
     NcxxErrStr err;
     err.addErrStr("ERROR - Fm301RadxFile::_readGlobalAttributes");
-    err.addErrStr("  Invalid Conventions attribute: ", _convention);
+    err.addErrStr("  Invalid Conventions attribute: ", _conventions);
     err.addErrStr("  Should be 'Cf/Radial'");
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
+
+  // read WMO attributes
+
+  try {
+    NcxxGroupAtt att = _file.getAtt(WMO__WSI);
+    if (!att.isNull()) {
+      _readVol->setWmoWsi(att.asString());
+    }
+  } catch (NcxxException& e) {}
+  try {
+    NcxxGroupAtt att = _file.getAtt(WMO__ID);
+    if (!att.isNull()) {
+      _readVol->setWmoId(att.asString());
+    }
+  } catch (NcxxException& e) {}
+  try {
+    NcxxGroupAtt att = _file.getAtt(WMO__CF_PROFILE);
+    if (!att.isNull()) {
+      _readVol->setWmoCfProfile(att.asString());
+    }
+  } catch (NcxxException& e) {}
+  try {
+    NcxxGroupAtt att = _file.getAtt(WMO__DATA_CATEGORY);
+    if (!att.isNull()) {
+      _readVol->setWmoDataCategory(att.asString());
+    }
+  } catch (NcxxException& e) {}
+  try {
+    NcxxGroupAtt att = _file.getAtt(WMO__DATA_POLICY);
+    if (!att.isNull()) {
+      _readVol->setWmoDataPolicy(att.asString());
+    }
+  } catch (NcxxException& e) {}
 
   // check for version
   
@@ -2613,58 +2646,86 @@ void Fm301RadxFile::_readFieldAttributes(const NcxxVar &var)
   
   _fieldStandardName.clear();
   try {
-    NcxxVarAtt standardNameAtt = var.getAtt(STANDARD_NAME);
-    if (!standardNameAtt.isNull()) {
-      _fieldStandardName = standardNameAtt.asString();
+    NcxxVarAtt att = var.getAtt(STANDARD_NAME);
+    if (!att.isNull()) {
+      _fieldStandardName = att.asString();
+    }
+  } catch (NcxxException& e) {
+  }
+  
+  _fieldWmoParameterName.clear();
+  try {
+    NcxxVarAtt att = var.getAtt(WMO__PARAMETER_NAME);
+    if (!att.isNull()) {
+      _fieldWmoParameterName = att.asString();
+    }
+  } catch (NcxxException& e) {
+  }
+  
+  _fieldWmoParameterUri.clear();
+  try {
+    NcxxVarAtt att = var.getAtt(WMO__PARAMETER_URI);
+    if (!att.isNull()) {
+      _fieldWmoParameterUri = att.asString();
     }
   } catch (NcxxException& e) {
   }
   
   _fieldLongName.clear();
   try {
-    NcxxVarAtt longNameAtt = var.getAtt(LONG_NAME);
-    _fieldLongName = longNameAtt.asString();
+    NcxxVarAtt att = var.getAtt(LONG_NAME);
+    if (!att.isNull()) {
+      _fieldLongName = att.asString();
+    }
   } catch (NcxxException& e) {
   }
   
   _fieldUnits.clear();
   try {
-    NcxxVarAtt unitsAtt = var.getAtt(UNITS);
-    _fieldUnits = unitsAtt.asString();
+    NcxxVarAtt att = var.getAtt(UNITS);
+    if (!att.isNull()) {
+      _fieldUnits = att.asString();
+    }
   } catch (NcxxException& e) {
   }
   
   _fieldCommentStr.clear();
   try {
-    NcxxVarAtt fieldCommentAtt = var.getAtt(COMMENT);
-    _fieldCommentStr = fieldCommentAtt.asString();
+    NcxxVarAtt att = var.getAtt(COMMENT);
+    if (!att.isNull()) {
+      _fieldCommentStr = att.asString();
+    }
   } catch (NcxxException& e) {
   }
   
   _fieldLegendXml.clear();
   try {
-    NcxxVarAtt legendXmlAtt = var.getAtt(LEGEND_XML);
-    if (!legendXmlAtt.isNull()) {
-      _fieldLegendXml = legendXmlAtt.asString();
+    NcxxVarAtt att = var.getAtt(LEGEND_XML);
+    if (!att.isNull()) {
+      _fieldLegendXml = att.asString();
     }
   } catch (NcxxException& e) {
   }
   
   _fieldThresholdingXml.clear();
   try {
-    NcxxVarAtt thresholdingXmlAtt = var.getAtt(THRESHOLDING_XML);
-    _fieldThresholdingXml = thresholdingXmlAtt.asString();
+    NcxxVarAtt att = var.getAtt(THRESHOLDING_XML);
+    if (!att.isNull()) {
+      _fieldThresholdingXml = att.asString();
+    }
   } catch (NcxxException& e) {
   }
   
   _fieldSamplingRatio = 1.0;
   try {
-    NcxxVarAtt samplingRatioAtt = var.getAtt(SAMPLING_RATIO);
-    vector<float> vals;
-    try {
-      samplingRatioAtt.getValues(vals);
-      _fieldSamplingRatio = vals[0];
-    } catch (NcxxException& e) {
+    NcxxVarAtt att = var.getAtt(SAMPLING_RATIO);
+    if (!att.isNull()) {
+      vector<float> vals;
+      try {
+        att.getValues(vals);
+        _fieldSamplingRatio = vals[0];
+      } catch (NcxxException& e) {
+      }
     }
   } catch (NcxxException& e) {
   }
@@ -2673,12 +2734,14 @@ void Fm301RadxFile::_readFieldAttributes(const NcxxVar &var)
   
   _fieldIsDiscrete = false;
   try {
-    NcxxVarAtt isDiscreteAtt = var.getAtt(IS_DISCRETE);
-    string isDiscreteStr = isDiscreteAtt.asString();
-    if (isDiscreteStr == "true"
-        || isDiscreteStr == "TRUE"
-        || isDiscreteStr == "True") {
-      _fieldIsDiscrete = true;
+    NcxxVarAtt att = var.getAtt(IS_DISCRETE);
+    if (!att.isNull()) {
+      string isDiscreteStr = att.asString();
+      if (isDiscreteStr == "true"
+          || isDiscreteStr == "TRUE"
+          || isDiscreteStr == "True") {
+        _fieldIsDiscrete = true;
+      }
     }
   } catch (NcxxException& e) {
   }
@@ -2687,19 +2750,23 @@ void Fm301RadxFile::_readFieldAttributes(const NcxxVar &var)
   
   _fieldFlagValues.clear();
   try {
-    NcxxVarAtt flagValuesAtt = var.getAtt(FLAG_VALUES);
-    flagValuesAtt.getValues(_fieldFlagValues);
-    _fieldIsDiscrete = true;
+    NcxxVarAtt att = var.getAtt(FLAG_VALUES);
+    if (!att.isNull()) {
+      att.getValues(_fieldFlagValues);
+      _fieldIsDiscrete = true;
+    }
   } catch (NcxxException& e) {
   }
   
   _fieldFlagMeanings.clear();
   try {
-    NcxxVarAtt flagMeaningsAtt = var.getAtt(FLAG_MEANINGS);
-    string flagMeaningsStr;
-    flagMeaningsAtt.getValues(flagMeaningsStr);
-    RadxStr::tokenize(flagMeaningsStr, " ", _fieldFlagMeanings);
-    _fieldIsDiscrete = true;
+    NcxxVarAtt att = var.getAtt(FLAG_MEANINGS);
+    if (!att.isNull()) {
+      string flagMeaningsStr;
+      att.getValues(flagMeaningsStr);
+      RadxStr::tokenize(flagMeaningsStr, " ", _fieldFlagMeanings);
+      _fieldIsDiscrete = true;
+    }
   } catch (NcxxException& e) {
   }
   
@@ -2743,10 +2810,10 @@ void Fm301RadxFile::_readFieldAttributes(const NcxxVar &var)
   
   _fieldOffset = 0.0;
   try {
-    NcxxVarAtt offsetAtt = var.getAtt(ADD_OFFSET);
+    NcxxVarAtt att = var.getAtt(ADD_OFFSET);
     vector<double> vals;
     try {
-      offsetAtt.getValues(vals);
+      att.getValues(vals);
       _fieldOffset = vals[0];
     } catch (NcxxException& e) {
     }
@@ -2755,10 +2822,10 @@ void Fm301RadxFile::_readFieldAttributes(const NcxxVar &var)
   
   _fieldScale = 1.0;
   try {
-    NcxxVarAtt scaleAtt = var.getAtt(SCALE_FACTOR);
+    NcxxVarAtt att = var.getAtt(SCALE_FACTOR);
     vector<double> vals;
     try {
-      scaleAtt.getValues(vals);
+      att.getValues(vals);
       _fieldScale = vals[0];
     } catch (NcxxException& e) {
     }
@@ -3481,7 +3548,7 @@ void Fm301RadxFile::_loadReadVolume()
     _readVol->setRadarReceiverBandwidthMhz(_radarRxBandwidthHz); // missing
   }
 
-  _readVol->setConvention(_convention);
+  _readVol->setConvention(_conventions);
   _readVol->setVersion(_version);
   _readVol->setTitle(_title);
   _readVol->setSource(_source);

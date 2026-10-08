@@ -180,7 +180,7 @@ private:
   
   // format version
 
-  string _convention;
+  string _conventions;
   string _version;
   
   // netcdf file
@@ -350,6 +350,7 @@ private:
   
   string _fieldName, _fieldUnits;
   string _fieldStandardName, _fieldLongName;
+  string _fieldWmoParameterName, _fieldWmoParameterUri;
   string _fieldCommentStr;
   string _fieldLegendXml, _fieldThresholdingXml;
   double _fieldSamplingRatio;
