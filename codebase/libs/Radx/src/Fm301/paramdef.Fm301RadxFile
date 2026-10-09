@@ -90,12 +90,6 @@ paramdef struct field_name_translation_t {
     }
     ,
     {
-      input_field_name = "ZDR",
-      fm301_field_name = "DBZH",
-      source = "LROSE / common"
-    }
-    ,
-    {
       input_field_name = "REF",
       fm301_field_name = "DBZH",
       source = "NEXRAD"

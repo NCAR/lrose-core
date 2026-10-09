@@ -1409,6 +1409,10 @@ void Fm301RadxFile::_addSweeps()
     // rename fields to valid FM301 names
 
     _renameSweepFieldsToFm301(isweep, sweepVol);
+
+    // set the attributes based on FM301 field names
+    
+    _setFm301Attributes(isweep, sweepVol);
     
     // create name
   
@@ -3502,6 +3506,70 @@ void Fm301RadxFile::_renameSweepFieldsToFm301(int sweepNum, RadxVol &sweepVol)
           fm301NameUsed.insert(fm301Name);
           fld.setName(fm301Name);
         }
+      }
+
+    }
+
+  } // ii
+
+
+}
+    
+///////////////////////////////////////////////////////
+// add WMO field attributes based on FM301 field names
+
+void Fm301RadxFile::_setFm301Attributes(int sweepNum, RadxVol &sweepVol)
+
+{
+
+  const Fm301RadxFileParams *params = sweepVol.getFm301Params();
+  
+  vector<RadxField *> fields = sweepVol.getFields();
+  
+  for (size_t ii = 0; ii < fields.size(); ii++) {
+    
+    RadxField &fld = *fields[ii];
+    string fldName(fld.getName());
+
+    bool isFm301Field = false;
+    for (int jj = 0; jj < params->field_attributes_n; jj++) {
+      
+      Fm301RadxFileParams::field_attribute_t &attr = params->_field_attributes[jj];
+      
+      string fm301Name(attr.fm301_field_name);
+
+      if (fm301Name == fldName) {
+        
+        string standardName(attr.standard_name);
+        string longName(attr.long_name);
+        string units(attr.units);
+        string wmoParameterUri(attr.wmo__parameter_uri);
+        string wmoParameterName(attr.wmo__parameter_name);
+        
+        if (standardName.size() > 0) {
+          fld.setStandardName(standardName);
+        }
+        if (longName.size() > 0) {
+          fld.setLongName(longName);
+        }
+        if (units.size() > 0) {
+          fld.setUnits(units);
+        }
+        if (wmoParameterUri.size() > 0) {
+          fld.setWmoParameterUri(wmoParameterUri);
+        }
+        if (wmoParameterName.size() > 0) {
+          fld.setWmoParameterName(wmoParameterName);
+        }
+
+        isFm301Field = true;
+        break;
+        
+      }
+
+      if (!isFm301Field) {
+        fld.setWmoParameterUri("non-standard-fm301-field");
+        fld.setWmoParameterName("non-standard-fm301-field");
       }
 
     }
