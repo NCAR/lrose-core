@@ -46,6 +46,7 @@
 #include <Radx/RadxField.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxTime.hh>
+#include <Radx/Fm301RadxFileParams.hh>
 class RadxSweep;
 class RadxRay;
 class RadxRcalib;
@@ -161,6 +162,10 @@ public:
 
   /// Set the WMO attributes
 
+  void setFm301Params(const Fm301RadxFileParams *val)
+  {
+    _fm301Params = val;
+  }
   void setWmoWsi(const string &val) { _wmoWsi = val; }
   void setWmoId(const string &val) { _wmoId = val; }
   void setWmoCfProfile(const string &val) { _wmoCfProfile = val; }
@@ -1344,6 +1349,7 @@ public:
 
   // get WMO attributes
 
+  const Fm301RadxFileParams *getFm301Params() const { return _fm301Params; }
   inline const string &getWmoWsi() const { return _wmoWsi; }
   inline const string &getWmoId() const { return _wmoId; }
   inline const string &getWmoCfProfile() const { return _wmoCfProfile; }
@@ -1988,6 +1994,8 @@ private:
 
   // WMO specific attributes (from FM301)
 
+  const Fm301RadxFileParams *_fm301Params;
+  
   string _wmoWsi;          // WIGOS station identifier
   string _wmoId;           // Traditional WMO identifier
   string _wmoCfProfile;    // e.g. FM 301-2022

@@ -72,7 +72,7 @@ paramdef boolean {
 
 typedef struct {
   string input_field_name;
-  string output_field_name;
+  string fm301_field_name;
   string source;
 } field_name_translation_t;
 
@@ -85,43 +85,49 @@ paramdef struct field_name_translation_t {
 
     {
       input_field_name = "DBZ",
-      output_field_name = "DBZH",
+      fm301_field_name = "DBZH",
+      source = "LROSE / common"
+    }
+    ,
+    {
+      input_field_name = "ZDR",
+      fm301_field_name = "DBZH",
       source = "LROSE / common"
     }
     ,
     {
       input_field_name = "REF",
-      output_field_name = "DBZH",
+      fm301_field_name = "DBZH",
       source = "NEXRAD"
     }
     ,
     {
       input_field_name = "Z",
-      output_field_name = "DBZH",
+      fm301_field_name = "DBZH",
       source = "Vaisala/IRIS; EEC"
     }
     ,
     {
       input_field_name = "dBZ",
-      output_field_name = "DBZH",
+      fm301_field_name = "DBZH",
       source = "Leonardo/Rainbow"
     }
     ,
     {
       input_field_name = "zh",
-      output_field_name = "DBZH",
+      fm301_field_name = "DBZH",
       source = "GAMIC"
     }
     ,
     {
       input_field_name = "DB_DBZ",
-      output_field_name = "DBZH",
+      fm301_field_name = "DBZH",
       source = "Vaisala/IRIS"
     }
     ,
     {
       input_field_name = "DB_DBZ2",
-      output_field_name = "DBZH",
+      fm301_field_name = "DBZH",
       source = "Vaisala/IRIS"
     }
     ,
@@ -130,13 +136,13 @@ paramdef struct field_name_translation_t {
 
     {
       input_field_name = "dBZv",
-      output_field_name = "DBZV",
+      fm301_field_name = "DBZV",
       source = "Leonardo/Rainbow"
     }
     ,
     {
       input_field_name = "zv",
-      output_field_name = "DBZV",
+      fm301_field_name = "DBZV",
       source = "GAMIC"
     }
     ,
@@ -145,43 +151,43 @@ paramdef struct field_name_translation_t {
 
     {
       input_field_name = "T",
-      output_field_name = "DBTH",
+      fm301_field_name = "DBTH",
       source = "Vaisala/IRIS"
     }
     ,
     {
       input_field_name = "UZ",
-      output_field_name = "DBTH",
+      fm301_field_name = "DBTH",
       source = "EEC"
     }
     ,
     {
       input_field_name = "dBuZ",
-      output_field_name = "DBTH",
+      fm301_field_name = "DBTH",
       source = "Leonardo/Rainbow"
     }
     ,
     {
       input_field_name = "uh",
-      output_field_name = "DBTH",
+      fm301_field_name = "DBTH",
       source = "GAMIC"
     }
     ,
     {
       input_field_name = "uzh",
-      output_field_name = "DBTH",
+      fm301_field_name = "DBTH",
       source = "GAMIC"
     }
     ,
     {
       input_field_name = "DB_DBT",
-      output_field_name = "DBTH",
+      fm301_field_name = "DBTH",
       source = "Vaisala/IRIS"
     }
     ,
     {
       input_field_name = "DB_DBT2",
-      output_field_name = "DBTH",
+      fm301_field_name = "DBTH",
       source = "Vaisala/IRIS"
     }
     ,
@@ -190,19 +196,19 @@ paramdef struct field_name_translation_t {
 
     {
       input_field_name = "dBuZv",
-      output_field_name = "DBTV",
+      fm301_field_name = "DBTV",
       source = "Leonardo/Rainbow"
     }
     ,
     {
       input_field_name = "uv",
-      output_field_name = "DBTV",
+      fm301_field_name = "DBTV",
       source = "GAMIC"
     }
     ,
     {
       input_field_name = "uzv",
-      output_field_name = "DBTV",
+      fm301_field_name = "DBTV",
       source = "GAMIC"
     }
     ,
@@ -211,37 +217,37 @@ paramdef struct field_name_translation_t {
 
     {
       input_field_name = "VEL",
-      output_field_name = "VRADH",
+      fm301_field_name = "VRADH",
       source = "NEXRAD / common"
     }
     ,
     {
       input_field_name = "V",
-      output_field_name = "VRADH",
+      fm301_field_name = "VRADH",
       source = "Vaisala/IRIS; Leonardo/Rainbow; EEC"
     }
     ,
     {
       input_field_name = "vh",
-      output_field_name = "VRADH",
+      fm301_field_name = "VRADH",
       source = "GAMIC"
     }
     ,
     {
       input_field_name = "DB_VEL",
-      output_field_name = "VRADH",
+      fm301_field_name = "VRADH",
       source = "Vaisala/IRIS"
     }
     ,
     {
       input_field_name = "DB_VEL2",
-      output_field_name = "VRADH",
+      fm301_field_name = "VRADH",
       source = "Vaisala/IRIS"
     }
     ,
     {
       input_field_name = "vv",
-      output_field_name = "VRADV",
+      fm301_field_name = "VRADV",
       source = "GAMIC"
     }
     ,
@@ -250,43 +256,43 @@ paramdef struct field_name_translation_t {
 
     {
       input_field_name = "WIDTH",
-      output_field_name = "WRADH",
+      fm301_field_name = "WRADH",
       source = "common"
     }
     ,
     {
       input_field_name = "SW",
-      output_field_name = "WRADH",
+      fm301_field_name = "WRADH",
       source = "NEXRAD"
     }
     ,
     {
       input_field_name = "W",
-      output_field_name = "WRADH",
+      fm301_field_name = "WRADH",
       source = "Vaisala/IRIS; Leonardo/Rainbow; EEC"
     }
     ,
     {
       input_field_name = "wh",
-      output_field_name = "WRADH",
+      fm301_field_name = "WRADH",
       source = "GAMIC"
     }
     ,
     {
       input_field_name = "DB_WIDTH",
-      output_field_name = "WRADH",
+      fm301_field_name = "WRADH",
       source = "Vaisala/IRIS"
     }
     ,
     {
       input_field_name = "DB_WIDTH2",
-      output_field_name = "WRADH",
+      fm301_field_name = "WRADH",
       source = "Vaisala/IRIS"
     }
     ,
     {
       input_field_name = "wv",
-      output_field_name = "WRADV",
+      fm301_field_name = "WRADV",
       source = "GAMIC"
     }
     ,
@@ -295,19 +301,19 @@ paramdef struct field_name_translation_t {
 
     {
       input_field_name = "zdr",
-      output_field_name = "ZDR",
+      fm301_field_name = "ZDR",
       source = "GAMIC"
     }
     ,
     {
       input_field_name = "DB_ZDR",
-      output_field_name = "ZDR",
+      fm301_field_name = "ZDR",
       source = "Vaisala/IRIS"
     }
     ,
     {
       input_field_name = "DB_ZDR2",
-      output_field_name = "ZDR",
+      fm301_field_name = "ZDR",
       source = "Vaisala/IRIS"
     }
     ,
@@ -316,31 +322,31 @@ paramdef struct field_name_translation_t {
 
     {
       input_field_name = "PHI",
-      output_field_name = "PHIDP",
+      fm301_field_name = "PHIDP",
       source = "NEXRAD"
     }
     ,
     {
       input_field_name = "PhiDP",
-      output_field_name = "PHIDP",
+      fm301_field_name = "PHIDP",
       source = "Leonardo/Rainbow; EEC"
     }
     ,
     {
       input_field_name = "phidp",
-      output_field_name = "PHIDP",
+      fm301_field_name = "PHIDP",
       source = "GAMIC"
     }
     ,
     {
       input_field_name = "DB_PHIDP",
-      output_field_name = "PHIDP",
+      fm301_field_name = "PHIDP",
       source = "Vaisala/IRIS"
     }
     ,
     {
       input_field_name = "DB_PHIDP2",
-      output_field_name = "PHIDP",
+      fm301_field_name = "PHIDP",
       source = "Vaisala/IRIS"
     }
     ,
@@ -349,19 +355,19 @@ paramdef struct field_name_translation_t {
 
     {
       input_field_name = "kdp",
-      output_field_name = "KDP",
+      fm301_field_name = "KDP",
       source = "GAMIC"
     }
     ,
     {
       input_field_name = "DB_KDP",
-      output_field_name = "KDP",
+      fm301_field_name = "KDP",
       source = "Vaisala/IRIS"
     }
     ,
     {
       input_field_name = "DB_KDP2",
-      output_field_name = "KDP",
+      fm301_field_name = "KDP",
       source = "Vaisala/IRIS"
     }
     ,
@@ -370,31 +376,31 @@ paramdef struct field_name_translation_t {
 
     {
       input_field_name = "RHO",
-      output_field_name = "RHOHV",
+      fm301_field_name = "RHOHV",
       source = "NEXRAD"
     }
     ,
     {
       input_field_name = "RhoHV",
-      output_field_name = "RHOHV",
+      fm301_field_name = "RHOHV",
       source = "Leonardo/Rainbow; EEC"
     }
     ,
     {
       input_field_name = "rhohv",
-      output_field_name = "RHOHV",
+      fm301_field_name = "RHOHV",
       source = "GAMIC"
     }
     ,
     {
       input_field_name = "DB_RHOHV",
-      output_field_name = "RHOHV",
+      fm301_field_name = "RHOHV",
       source = "Vaisala/IRIS"
     }
     ,
     {
       input_field_name = "DB_RHOHV2",
-      output_field_name = "RHOHV",
+      fm301_field_name = "RHOHV",
       source = "Vaisala/IRIS"
     }
     ,
@@ -403,19 +409,19 @@ paramdef struct field_name_translation_t {
 
     {
       input_field_name = "ldr",
-      output_field_name = "LDR",
+      fm301_field_name = "LDR",
       source = "GAMIC"
     }
     ,
     {
       input_field_name = "DB_LDRH",
-      output_field_name = "LDRH",
+      fm301_field_name = "LDRH",
       source = "Vaisala/IRIS"
     }
     ,
     {
       input_field_name = "DB_LDRH2",
-      output_field_name = "LDRH",
+      fm301_field_name = "LDRH",
       source = "Vaisala/IRIS"
     }
     ,
@@ -424,13 +430,13 @@ paramdef struct field_name_translation_t {
 
     {
       input_field_name = "PID",
-      output_field_name = "REC",
+      fm301_field_name = "REC",
       source = "LROSE / common"
     }
     ,
     {
       input_field_name = "CLASS",
-      output_field_name = "REC",
+      fm301_field_name = "REC",
       source = "ODIM / common"
     }
 
@@ -451,7 +457,7 @@ paramdef boolean {
 } augment_field_attributes;
 
 typedef struct {
-  string output_field_name;
+  string fm301_field_name;
   string standard_name;
   string long_name;
   string units;
@@ -462,7 +468,7 @@ typedef struct {
 paramdef struct field_attribute_t {
   p_default = {
     {
-      output_field_name = "DBZH",
+      fm301_field_name = "DBZH",
       standard_name = "radar_equivalent_reflectivity_factor_h",
       long_name = "Equivalent reflectivity factor H",
       units = "dBZ",
@@ -471,7 +477,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "DBZV",
+      fm301_field_name = "DBZV",
       standard_name = "radar_equivalent_reflectivity_factor_v",
       long_name = "Equivalent reflectivity factor V",
       units = "dBZ",
@@ -480,7 +486,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "ZH",
+      fm301_field_name = "ZH",
       standard_name = "radar_linear_equivalent_reflectivity_factor_h",
       long_name = "Linear equivalent reflectivity factor H",
       units = "mm6 m-3",
@@ -489,7 +495,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "ZV",
+      fm301_field_name = "ZV",
       standard_name = "radar_linear_equivalent_reflectivity_factor_v",
       long_name = "Linear equivalent reflectivity factor V",
       units = "mm6 m-3",
@@ -498,7 +504,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "DBTH",
+      fm301_field_name = "DBTH",
       standard_name = "radar_equivalent_reflectivity_factor_h",
       long_name = "Total power H (uncorrected reflectivity)",
       units = "dBZ",
@@ -507,7 +513,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "DBTV",
+      fm301_field_name = "DBTV",
       standard_name = "radar_equivalent_reflectivity_factor_v",
       long_name = "Total power V (uncorrected reflectivity)",
       units = "dBZ",
@@ -516,7 +522,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "TH",
+      fm301_field_name = "TH",
       standard_name = "radar_linear_equivalent_reflectivity_factor_h",
       long_name = "Linear total power H (uncorrected reflectivity)",
       units = "mm6 m-3",
@@ -525,7 +531,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "TV",
+      fm301_field_name = "TV",
       standard_name = "radar_linear_equivalent_reflectivity_factor_v",
       long_name = "Linear total power V (uncorrected reflectivity)",
       units = "mm6 m-3",
@@ -534,7 +540,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "VRADH",
+      fm301_field_name = "VRADH",
       standard_name = "radial_velocity_of_scatterers_away_from_instrument_h",
       long_name = "Radial velocity of scatterers away from instrument H",
       units = "m/s",
@@ -543,7 +549,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "VRADV",
+      fm301_field_name = "VRADV",
       standard_name = "radial_velocity_of_scatterers_away_from_instrument_v",
       long_name = "Radial velocity of scatterers away from instrument V",
       units = "m/s",
@@ -552,7 +558,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "WRADH",
+      fm301_field_name = "WRADH",
       standard_name = "radar_doppler_spectrum_width_h",
       long_name = "Doppler spectrum width H",
       units = "m/s",
@@ -561,7 +567,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "WRADV",
+      fm301_field_name = "WRADV",
       standard_name = "radar_doppler_spectrum_width_v",
       long_name = "Doppler spectrum width V",
       units = "m/s",
@@ -570,7 +576,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "ZDR",
+      fm301_field_name = "ZDR",
       standard_name = "radar_differential_reflectivity_hv",
       long_name = "Log differential reflectivity H/V",
       units = "dB",
@@ -579,7 +585,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "LDR",
+      fm301_field_name = "LDR",
       standard_name = "radar_linear_depolarization_ratio",
       long_name = "Log-linear depolarization ratio HV",
       units = "dB",
@@ -588,7 +594,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "LDRH",
+      fm301_field_name = "LDRH",
       standard_name = "radar_linear_depolarization_ratio_h",
       long_name = "Log-linear depolarization ratio H",
       units = "dB",
@@ -597,7 +603,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "LDRV",
+      fm301_field_name = "LDRV",
       standard_name = "radar_linear_depolarization_ratio_v",
       long_name = "Log-linear depolarization ratio V",
       units = "dB",
@@ -606,7 +612,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "PHIDP",
+      fm301_field_name = "PHIDP",
       standard_name = "radar_differential_phase_hv",
       long_name = "Differential phase HV",
       units = "degrees",
@@ -615,7 +621,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "KDP",
+      fm301_field_name = "KDP",
       standard_name = "radar_specific_differential_phase_hv",
       long_name = "Specific differential phase HV",
       units = "degrees/km",
@@ -624,7 +630,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "PHIHX",
+      fm301_field_name = "PHIHX",
       standard_name = "radar_differential_phase_copolar_h_crosspolar_v",
       long_name = "Cross-polar differential phase",
       units = "degrees",
@@ -633,7 +639,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "RHOHV",
+      fm301_field_name = "RHOHV",
       standard_name = "radar_correlation_coefficient_hv",
       long_name = "Correlation coefficient HV",
       units = "1",
@@ -642,7 +648,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "RHOHX",
+      fm301_field_name = "RHOHX",
       standard_name = "radar_correlation_coefficient_copolar_h_crosspolar_v",
       long_name = "Co-to-cross polar correlation coefficient",
       units = "1",
@@ -651,7 +657,7 @@ paramdef struct field_attribute_t {
     }
     ,
     {
-      output_field_name = "REC",
+      fm301_field_name = "REC",
       standard_name = "radar_scatterer_classification",
       long_name = "Radar echo classification",
       units = "",

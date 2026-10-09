@@ -702,43 +702,43 @@ void Fm301RadxFile::_readGlobalAttributes()
 
   try {
     NcxxGroupAtt att = _file.getAtt(WMO__WSI);
-    if (!att.isNull()) {
+    if (!att.isNull() && _readVol) {
       _readVol->setWmoWsi(att.asString());
     }
   } catch (NcxxException& e) {}
   try {
     NcxxGroupAtt att = _file.getAtt(WMO__ID);
-    if (!att.isNull()) {
+    if (!att.isNull() && _readVol) {
       _readVol->setWmoId(att.asString());
     }
   } catch (NcxxException& e) {}
   try {
     NcxxGroupAtt att = _file.getAtt(WMO__CF_PROFILE);
-    if (!att.isNull()) {
+    if (!att.isNull() && _readVol) {
       _readVol->setWmoCfProfile(att.asString());
     }
   } catch (NcxxException& e) {}
   try {
     NcxxGroupAtt att = _file.getAtt(WMO__DATA_CATEGORY);
-    if (!att.isNull()) {
+    if (!att.isNull() && _readVol) {
       _readVol->setWmoDataCategory(att.asString());
     }
   } catch (NcxxException& e) {}
   try {
     NcxxGroupAtt att = _file.getAtt(WMO__DATA_POLICY);
-    if (!att.isNull()) {
+    if (!att.isNull() && _readVol) {
       _readVol->setWmoDataPolicy(att.asString());
     }
   } catch (NcxxException& e) {}
   try {
     NcxxGroupAtt att = _file.getAtt(WMO__ORIGINATING_CENTRE);
-    if (!att.isNull()) {
+    if (!att.isNull() && _readVol) {
       _readVol->setWmoOriginatingCentre(att.asString());
     }
   } catch (NcxxException& e) {}
   try {
     NcxxGroupAtt att = _file.getAtt(WMO__ORIGINATING_SUB_CENTRE);
-    if (!att.isNull()) {
+    if (!att.isNull() && _readVol) {
       _readVol->setWmoOriginatingSubCentre(att.asString());
     }
   } catch (NcxxException& e) {}

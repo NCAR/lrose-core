@@ -1376,7 +1376,14 @@ void Cf2RadxFile::_addSweeps()
     RadxSweep *sweep = sweeps[isweep];
     RadxVol sweepVol(*_writeVol, sweep->getSweepNumber());
 
+    // make the geometry constant
+    // set the number of gates to be constant
+    
+    sweepVol.remapToPredomGeom();
+    sweepVol.setNGatesConstant();
+    
     // convert fields from rays to 2-D arrays
+
     sweepVol.loadFieldsFromRays(true);
     
     // create name
@@ -1579,11 +1586,8 @@ void Cf2RadxFile::_addSweepVariables(const RadxSweep *sweep,
   const vector<RadxRay *> &rays = sweepVol.getRays();
   size_t nRays = sweepVol.getNRays(); 
   
-  // make the geometry constant
-  // set the number of gates to be constant
+  // get geometry
 
-  sweepVol.remapToPredomGeom();
-  sweepVol.setNGatesConstant();
   double startRangeKm = sweepVol.getStartRangeKm();
   double gateSpacingKm = sweepVol.getGateSpacingKm();
   
@@ -2536,34 +2540,22 @@ void Cf2RadxFile::_addSweepFields(const RadxSweep *sweep,
     cerr << "Cf2RadxFile::_addSweepFields()" << endl;
   }
 
-  // loop through the list of unique fields names in this volume
+  // loop through the fields in this sweep
+  
+  for (size_t ifield = 0; ifield < sweepVol.getFields().size(); ifield++) {
 
-  vector<string> uniqueFieldNames =
-    sweepVol.getUniqueFieldNameList(Radx::FIELD_RETRIEVAL_ALL);
-
-  for (size_t ifield = 0; ifield < uniqueFieldNames.size(); ifield++) {
-      
-    const string &name = uniqueFieldNames[ifield];
+    const RadxField *fld = sweepVol.getFields()[ifield];
+    const string &name = fld->getName();
+    
     if (name.size() == 0) {
       // invalid field name
       continue;
     }
-    if (isRayMetaName(name)) {
-      // metadata ray variable
-      continue;
-    }
-
+    
     // make copy of the field
 
-    RadxField *copy = sweepVol.copyField(name);
-    if (copy == NULL) {
-      if (_debug) {
-        cerr << "  ... cannot find field: " << name
-             << " .... skipping" << endl;
-      }
-      continue;
-    }
-
+    RadxField *copy = new RadxField(*fld);
+    
     // create the variable
     
     NcxxVar var;

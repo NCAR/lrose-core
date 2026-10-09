@@ -94,9 +94,9 @@ RadxConvert::RadxConvert(int argc, char **argv)
   if (strstr(_params.FM301_params_file_path, "use-defaults") == NULL) {
     // not using defaults
     if (_fm301Params.load(_params.FM301_params_file_path,
-                          NULL, true, _args.tdrpDebug)) {
+                          _args.fm301Override.list, true, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
-      cerr << "Cannot read params file for FM301: "
+      cerr << "Cannot load params file for FM301: "
            << _params.FM301_params_file_path << endl;
       OK = FALSE;
       return;
@@ -1549,6 +1549,8 @@ void RadxConvert::_setGlobalAttr(RadxVol &vol)
     vol.setSubConventions(_params.subconvention_override);
   }
 
+  vol.setFm301Params(&_fm301Params);
+  
   if (strlen(_fm301Params.wmo__wsi) > 0) {
     vol.setWmoWsi(_fm301Params.wmo__wsi);
   }

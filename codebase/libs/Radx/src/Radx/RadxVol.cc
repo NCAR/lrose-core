@@ -164,13 +164,14 @@ void RadxVol::_init()
 {
 
   _debug = false;
-  _cfactors = NULL;
+  _cfactors = nullptr;
   _searchRays.resize(_searchAngleN);
+  _fm301Params = nullptr;
 
   clear();
   
   for (int ii = 0; ii < _searchAngleN; ii++) {
-    _searchRays[ii] = NULL;
+    _searchRays[ii] = nullptr;
   }
 
   // set strings for sweep modes
@@ -268,6 +269,7 @@ void RadxVol::copyMeta(const RadxVol &rhs)
   _convention = rhs._convention;
   _subconventions = rhs._subconventions;
 
+  _fm301Params = rhs._fm301Params;
   _wmoWsi = rhs._wmoWsi;
   _wmoId = rhs._wmoId;
   _wmoCfProfile = rhs._wmoCfProfile;
@@ -323,10 +325,10 @@ void RadxVol::copyMeta(const RadxVol &rhs)
   // correction factors
 
   clearCfactors();
-  if (rhs._cfactors != NULL) {
+  if (rhs._cfactors != nullptr) {
     _cfactors = new RadxCfactors(*rhs._cfactors);
   } else {
-    _cfactors = NULL;
+    _cfactors = nullptr;
   }
 
   // ray search
@@ -457,7 +459,7 @@ void RadxVol::clear()
   _rayTimesIncrease = true;
 
   for (int ii = 0; ii < _searchAngleN; ii++) {
-    _searchRays[ii] = NULL;
+    _searchRays[ii] = nullptr;
   }
 
   clearRays();
@@ -953,10 +955,12 @@ vector<string> RadxVol::getUniqueFieldNameList(Radx::FieldRetrieval_t rtype) con
 
   // find the set of field names
 
-  set<string> nameSet;
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
-    const RadxRay &ray = *_rays[iray];
-    vector<RadxField *> flds = ray.getFields(rtype);
+  if (_fields.size() > 0) {
+
+    // use fields on vol
+
+    set<string> nameSet;
+    vector<RadxField *> flds = getFields(rtype);
     for (size_t ifield = 0; ifield < flds.size(); ifield++) {
       string name = flds[ifield]->getName();
       pair<set<string>::const_iterator, bool> ret = nameSet.insert(name);
@@ -965,6 +969,25 @@ vector<string> RadxVol::getUniqueFieldNameList(Radx::FieldRetrieval_t rtype) con
         fieldNames.push_back(name);
       }
     }
+    
+  } else {
+
+    // use fields on rays
+    
+    set<string> nameSet;
+    for (size_t iray = 0; iray < _rays.size(); iray++) {
+      const RadxRay &ray = *_rays[iray];
+      vector<RadxField *> flds = ray.getFields(rtype);
+      for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+        string name = flds[ifield]->getName();
+        pair<set<string>::const_iterator, bool> ret = nameSet.insert(name);
+        if (ret.second == true) {
+          // field name not previously in set, so add to vector
+          fieldNames.push_back(name);
+        }
+      }
+    }
+
   }
 
   return fieldNames;
@@ -979,18 +1002,35 @@ set<string> RadxVol::getUniqueFieldNameSet(Radx::FieldRetrieval_t rtype) const
 
 {
   
+  set<string> nameSet;
+  
   // find the set of field names
 
-  set<string> nameSet;
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
-    const RadxRay &ray = *_rays[iray];
-    vector<RadxField *> flds = ray.getFields(rtype);
+  if (_fields.size() > 0) {
+
+    // use fields on vol
+
+    vector<RadxField *> flds = getFields(rtype);
     for (size_t ifield = 0; ifield < flds.size(); ifield++) {
       string name = flds[ifield]->getName();
       nameSet.insert(name);
     }
-  }
 
+  } else {
+
+    // use fields on rays
+
+    for (size_t iray = 0; iray < _rays.size(); iray++) {
+      const RadxRay &ray = *_rays[iray];
+      vector<RadxField *> flds = ray.getFields(rtype);
+      for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+        string name = flds[ifield]->getName();
+        nameSet.insert(name);
+      }
+    }
+
+  }
+    
   return nameSet;
 
 }
@@ -1153,7 +1193,7 @@ void RadxVol::setFieldsToUniformType(Radx::DataType_t dataType)
 //////////////////////////////////////////////////////////////////
 /// Get a field from a ray, given the name.
 /// Find the first available field on a suitable ray.
-/// Returns field pointer on success, NULL on failure.
+/// Returns field pointer on success, nullptr on failure.
 
 const RadxField *RadxVol::getFieldFromRay(const string &name) const
 
@@ -1169,7 +1209,7 @@ const RadxField *RadxVol::getFieldFromRay(const string &name) const
     }
   }
 
-  return NULL;
+  return nullptr;
 
 }
 
@@ -1230,7 +1270,7 @@ void RadxVol::loadFieldsFromRays(bool nFieldsConstantPerRay /* = false */)
 
   for (size_t ii = 0; ii < fieldNames.size(); ii++) {
     RadxField *field = copyField(fieldNames[ii]);
-    if (field != NULL) {
+    if (field != nullptr) {
       addField(field);
     }
   } // ii
@@ -1244,7 +1284,7 @@ void RadxVol::loadFieldsFromRays(bool nFieldsConstantPerRay /* = false */)
     for (size_t iray = 0; iray < _rays.size(); iray++) {
       RadxRay &ray = *_rays[iray];
       RadxField *rayField = ray.getField(field.getName());
-      if (rayField != NULL) {
+      if (rayField != nullptr) {
         size_t nGates;
         const void *data = field.getData(iray, nGates);
         rayField->setDataRemote(field, data, nGates);
@@ -1416,7 +1456,7 @@ void RadxVol::setRayFieldPointers()
 ///
 /// This forms a contiguous field from the ray data.
 ///
-/// Returns a pointer to the field on success, NULL on failure.
+/// Returns a pointer to the field on success, nullptr on failure.
 
 RadxField *RadxVol::copyField(const string &fieldName) const
   
@@ -1425,31 +1465,31 @@ RadxField *RadxVol::copyField(const string &fieldName) const
   // check we have data
   
   if (_rays.size() < 1) {
-    return NULL;
+    return nullptr;
   }
   
   // create the field
   // use the first available field in any ray as a template
   
-  RadxField *copy = NULL;
+  RadxField *copy = nullptr;
   
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     const RadxRay &ray = *_rays[iray];
     const RadxField *rayField = ray.getField(fieldName);
-    if (rayField != NULL) {
+    if (rayField != nullptr) {
       // create new field using name, units and type
       copy = new RadxField(rayField->getName(), rayField->getUnits());
       copy->copyMetaData(*rayField);
       break;
     }
-    if (copy != NULL) {
+    if (copy != nullptr) {
       break;
     }
   } // iray
   
-  if (copy == NULL) {
+  if (copy == nullptr) {
     // no suitable field
-    return NULL;
+    return nullptr;
   }
 
   // check if the fields on the rays are uniform -
@@ -1462,7 +1502,7 @@ RadxField *RadxVol::copyField(const string &fieldName) const
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     const RadxRay &ray = *_rays[iray];
     const RadxField *rayField = ray.getField(fieldName);
-    if (rayField == NULL) {
+    if (rayField == nullptr) {
       continue;
     }
     if (rayField->getDataType() != dataType) {
@@ -1499,7 +1539,7 @@ RadxField *RadxVol::copyField(const string &fieldName) const
       if (copy->getIsRayQualifier()) {
         nData = 1;
       }
-      if (rfld == NULL) {
+      if (rfld == nullptr) {
         copy->addDataMissing(nData);
       } else {
         RadxField rcopy(*rfld);
@@ -1541,7 +1581,7 @@ RadxField *RadxVol::copyField(const string &fieldName) const
         nData = 1;
       }
       RadxField *rfld = ray.getField(fieldName);
-      if (rfld == NULL) {
+      if (rfld == nullptr) {
         copy->addDataMissing(nData);
       } else {
         RadxField rcopy(*rfld);
@@ -1567,7 +1607,7 @@ RadxField *RadxVol::copyField(const string &fieldName) const
         nData = 1;
       }
       RadxField *rfld = ray.getField(fieldName);
-      if (rfld == NULL) {
+      if (rfld == nullptr) {
         copy->addDataMissing(nData);
       } else {
         RadxField rcopy(*rfld);
@@ -1870,7 +1910,7 @@ void RadxVol::clearCfactors()
   if (_cfactors) {
     delete _cfactors;
   }
-  _cfactors = NULL;
+  _cfactors = nullptr;
 }
 
 /////////////////////////////////////////////////////////
@@ -1989,7 +2029,7 @@ void RadxVol::print(ostream &out) const
     for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
       string fieldName = fieldNames[ifield];
       const RadxField *fld = getFieldFromRay(fieldName);
-      if (fld != NULL) {
+      if (fld != nullptr) {
         out << "===== NOTE: Field is from first ray =====" << endl;
         fld->print(out);
         out << "=========================================" << endl;
@@ -3249,7 +3289,7 @@ void RadxVol::applyTimeOffsetSecs(double offsetSecs)
 
   // update history
 
-  time_t now = time(NULL);
+  time_t now = time(nullptr);
   char note[1024];
   safe_snprintf(note, "Applying time offset (secs): %g, mod time %s\n",
                 offsetSecs, RadxTime::strm(now).c_str());
@@ -3284,7 +3324,7 @@ void RadxVol::applyAzimuthOffset(double offset)
 
   // update history
 
-  time_t now = time(NULL);
+  time_t now = time(nullptr);
   char note[1024];
   safe_snprintf(note, "Applying azimuth offset: %g, mod time %s\n",
                 offset, RadxTime::strm(now).c_str());
@@ -3315,7 +3355,7 @@ void RadxVol::applyElevationOffset(double offset)
 
   // update history
 
-  time_t now = time(NULL);
+  time_t now = time(nullptr);
   char note[1024];
   safe_snprintf(note, "Applying elevation offset: %g, mod time %s\n",
                 offset, RadxTime::strm(now).c_str());
@@ -3334,7 +3374,7 @@ void RadxVol::setFixedAngleDeg(int sweepNum, double fixedAngle)
   // get sweep
 
   RadxSweep *sweep = getSweepByNumber(sweepNum);
-  if (sweep == NULL) {
+  if (sweep == nullptr) {
     cerr << "WARNING - RadxVol::setFixedAngleDeg" << endl;
     cerr << "  Trying to set fixed angle: " << fixedAngle << endl;
     cerr << "  on sweepNumber: " << sweepNum << endl;
@@ -3579,7 +3619,7 @@ void RadxVol::loadSweepInfoFromRays()
 
   clearSweeps();
   int prevSweepNum = -9999;
-  RadxSweep *sweep = NULL;
+  RadxSweep *sweep = nullptr;
   int rayIndex = 0;
 
   // do we need to fill in sweep numbers?
@@ -4427,7 +4467,7 @@ void RadxVol::estimateSweepNyquistFromVel(const string &velFieldName)
     for (size_t iray = startIndex; iray <= endIndex; iray++) {
       const RadxRay &ray = *_rays[iray];
       const RadxField *velField = ray.getField(velFieldName);
-      if (velField != NULL) {
+      if (velField != nullptr) {
         RadxField velf(*velField);
         velf.convertToFl32();
         const Radx::fl32 *vel = velf.getDataFl32();
@@ -4440,7 +4480,7 @@ void RadxVol::estimateSweepNyquistFromVel(const string &velFieldName)
             }
           } // if (vel[igate] != miss)
         } // igate
-      } // if (velField != NULL)
+      } // if (velField != nullptr)
     } // iray
 
     if (maxAbsVel > 0) {
@@ -5032,7 +5072,7 @@ double RadxVol::getWavelengthCm() const
 
 ////////////////////////////////////////////////////////////
 // get sweep by sweep number (not the index)
-// returns NULL on failure
+// returns nullptr on failure
 
 const RadxSweep *RadxVol::getSweepByNumber(int sweepNum) const
 
@@ -5042,7 +5082,7 @@ const RadxSweep *RadxVol::getSweepByNumber(int sweepNum) const
       return _sweeps[ii];
     }
   } // ii
-  return NULL;
+  return nullptr;
 }
 
 RadxSweep *RadxVol::getSweepByNumber(int sweepNum)
@@ -5052,19 +5092,19 @@ RadxSweep *RadxVol::getSweepByNumber(int sweepNum)
       return _sweeps[ii];
     }
   } // ii
-  return NULL;
+  return nullptr;
 }
 
 ////////////////////////////////////////////////////////////
 // get sweep by fixed angle
 // returns sweep closest to fixed angle
-// returns NULL on failure
+// returns nullptr on failure
 
 const RadxSweep *RadxVol::getSweepByFixedAngle(double requestedAngle) const
   
 {
   if (_sweeps.size() < 1) {
-    return NULL;
+    return nullptr;
   }
   double minDiff = 9999.0;
   int sweepNum = -1;
@@ -5087,7 +5127,7 @@ RadxSweep *RadxVol::getSweepByFixedAngle(double requestedAngle)
   
 {
   if (_sweeps.size() < 1) {
-    return NULL;
+    return nullptr;
   }
   double minDiff = 9999.0;
   int sweepNum = -1;
@@ -5127,7 +5167,7 @@ bool RadxVol::checkAllSweepRaysInTransition(int sweepNum) const
 
 {
   const RadxSweep *sweep = getSweepByNumber(sweepNum);
-  if (sweep == NULL) {
+  if (sweep == nullptr) {
     return false;
   }
   return checkAllSweepRaysInTransition(sweep);
@@ -5662,7 +5702,7 @@ void RadxVol::convertField(const string &name,
 /// that can be missing for valid statistics. Should be between 0 and 1.
 /// If the min is not met, the result is set to missing.
 /// 
-/// Returns NULL if no rays are present in the volume.
+/// Returns nullptr if no rays are present in the volume.
 /// Otherwise, returns ray containing results.
 
 RadxRay *RadxVol::computeFieldStats
@@ -5675,7 +5715,7 @@ RadxRay *RadxVol::computeFieldStats
   // check we have some data
 
   if (_rays.size() == 0) {
-    return NULL;
+    return nullptr;
   }
 
   // remap rays to predominant geometry
@@ -5701,7 +5741,7 @@ RadxRay *RadxVol::computeFieldStats
   vector<string> fieldNames = getUniqueFieldNameList(Radx::FIELD_RETRIEVAL_ALL);
   if (fieldNames.size() < 1) {
     delete result;
-    return NULL;
+    return nullptr;
   }
   for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
 
@@ -5710,7 +5750,7 @@ RadxRay *RadxVol::computeFieldStats
     // assemble vector of this field on the ray
 
     RadxField *fieldRay0 = _rays[0]->getField(fieldName);
-    if (fieldRay0 == NULL) {
+    if (fieldRay0 == nullptr) {
       // field missing, so don't add this field
       continue;
     }
@@ -5718,7 +5758,7 @@ RadxRay *RadxVol::computeFieldStats
     vector<const RadxField *> rayFields;
     for (size_t iray = 0; iray < _rays.size(); iray++) {
       RadxField *rayField = _rays[iray]->getField(fieldName);
-      if (rayField != NULL) {
+      if (rayField != nullptr) {
         rayFields.push_back(rayField);
       }
     }
@@ -5735,7 +5775,7 @@ RadxRay *RadxVol::computeFieldStats
     }
     RadxField *statsField = 
       fieldRay0->computeDwellField(method, rayFields, maxFractionMissing);
-    if (statsField != NULL) {
+    if (statsField != nullptr) {
       result->addField(statsField);
     }
 
@@ -6058,7 +6098,7 @@ void RadxVol::_getNexradSweepActions(vector<NexradSweepAction> &actions)
   bool isDualPol = false;
   for (size_t iray = 0; iray < _rays.size(); iray++) {
     const RadxRay *ray = _rays[iray];
-    if (ray->getField("ZDR") != NULL) {
+    if (ray->getField("ZDR") != nullptr) {
       isDualPol = true;
       break;
     }
@@ -6089,13 +6129,13 @@ void RadxVol::_getNexradSweepActions(vector<NexradSweepAction> &actions)
     for (size_t iray = startRayIndex; iray <= endRayIndex; iray++) {
       const RadxRay *ray = _rays[iray];
       nRays++;
-      if (ray->getField("REF") != NULL) {
+      if (ray->getField("REF") != nullptr) {
         nREF++;
       }
-      if (ray->getField("VEL") != NULL) {
+      if (ray->getField("VEL") != nullptr) {
         nVEL++;
       }
-      if (ray->getField("ZDR") != NULL) {
+      if (ray->getField("ZDR") != nullptr) {
         nZDR++;
       }
     } // iray
@@ -6294,7 +6334,7 @@ void RadxVol::_addFieldsFromDopplerSweep(RadxSweep *sweepNonDop,
 
     int angleIndex = _getSearchAngleIndex(angle);
     const RadxRay *rayDoppler = _searchRays[angleIndex];
-    if (rayDoppler != NULL) {
+    if (rayDoppler != nullptr) {
 
       // got a valid ray in doppler
       // loop through the fields in the doppler
@@ -6309,14 +6349,14 @@ void RadxVol::_addFieldsFromDopplerSweep(RadxSweep *sweepNonDop,
         // copy it from the doppler to the nonDop
         
         RadxField *fldNonDop = rayNonDop->getField(dopplerName);
-        if (fldNonDop == NULL) {
+        if (fldNonDop == nullptr) {
           RadxField *fldCopy = new RadxField(*dopplerFld);
           rayNonDop->addField(fldCopy);
           if (_debug && iray == sweepNonDop->getStartRayIndex()) {
             cerr << "DEBUG - copying missing field to nonDop: "
                  << dopplerName << endl;
           }
-        } // if (fldNonDop == NULL)
+        } // if (fldNonDop == nullptr)
         
       } // ifield
 
@@ -6327,7 +6367,7 @@ void RadxVol::_addFieldsFromDopplerSweep(RadxSweep *sweepNonDop,
       rayNonDop->setNyquistMps(rayDoppler->getNyquistMps());
       rayNonDop->setIsLongRange(false);
       
-    } // if (rayDoppler != NULL)
+    } // if (rayDoppler != nullptr)
 
   } // iray
 
@@ -6763,7 +6803,7 @@ int RadxVol::loadPseudoRhis()
         continue;
       }
       RadxSweep *sweep = _sweeps[isweep];
-      RadxRay *bestRay = NULL;
+      RadxRay *bestRay = nullptr;
       double minDeltaAz = 9999.0;
       for (size_t jray = sweep->getStartRayIndex(); 
            jray <= sweep->getEndRayIndex(); jray++) {
@@ -6777,7 +6817,7 @@ int RadxVol::loadPseudoRhis()
           minDeltaAz = deltaAz;
         }
       } // jray
-      if (bestRay != NULL) {
+      if (bestRay != nullptr) {
         rhi->addRay(bestRay);
       }
     } // isweep;
@@ -6869,7 +6909,7 @@ int RadxVol::load2DFieldFromRays(const vector<RadxRay *> &rays,
   size_t maxNGates = 0;
   for (size_t iray = 0; iray < rays.size(); iray++) {
     const RadxRay *ray = rays[iray];
-    if (ray->getField(fieldName) != NULL) {
+    if (ray->getField(fieldName) != nullptr) {
       fieldFound = true;
       if (ray->getNGates() > maxNGates) {
         maxNGates = ray->getNGates();
@@ -6902,7 +6942,7 @@ int RadxVol::load2DFieldFromRays(const vector<RadxRay *> &rays,
     RadxRay *ray = rays[iray];
     size_t nGates = ray->getNGates();
     RadxField *fld = ray->getField(fieldName);
-    if (fld == NULL) {
+    if (fld == nullptr) {
       continue;
     }
     fld->convertToFl32();
@@ -6939,7 +6979,7 @@ int RadxVol::load2DFieldFromRays(const vector<RadxRay *> &rays,
   size_t maxNGates = 0;
   for (size_t iray = 0; iray < rays.size(); iray++) {
     const RadxRay *ray = rays[iray];
-    if (ray->getField(fieldName) != NULL) {
+    if (ray->getField(fieldName) != nullptr) {
       fieldFound = true;
       if (ray->getNGates() > maxNGates) {
         maxNGates = ray->getNGates();
@@ -6972,7 +7012,7 @@ int RadxVol::load2DFieldFromRays(const vector<RadxRay *> &rays,
     RadxRay *ray = rays[iray];
     size_t nGates = ray->getNGates();
     RadxField *fld = ray->getField(fieldName);
-    if (fld == NULL) {
+    if (fld == nullptr) {
       continue;
     }
     fld->convertToSi32();
@@ -7027,7 +7067,7 @@ int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::fl32> &array,
 
     RadxField *fld = ray->getField(fieldName);
 
-    if (fld == NULL) {
+    if (fld == nullptr) {
       // field does not exist, create it
       fld = new RadxField(fieldName, units);
       fld->setTypeFl32(missingValue);
@@ -7084,7 +7124,7 @@ int RadxVol::loadRaysFrom2DField(const RadxArray2D<Radx::si32> &array,
 
     RadxField *fld = ray->getField(fieldName);
 
-    if (fld == NULL) {
+    if (fld == nullptr) {
       // field does not exist, create it
       fld = new RadxField(fieldName, units);
       fld->setTypeSi32(missingValue, 1.0, 0.0);
@@ -7112,10 +7152,10 @@ int RadxVol::_setupAngleSearch(const RadxSweep *sweep)
   
 {
 
-  // init rays to NULL - i.e. no match
+  // init rays to nullptr - i.e. no match
   
   for (int ii = 0; ii < _searchAngleN; ii++) {
-    _searchRays[ii] = NULL;
+    _searchRays[ii] = nullptr;
   }
 
   // set the sweep pointers
@@ -7182,14 +7222,14 @@ int RadxVol::_setupAngleSearch(const RadxSweep *sweep)
   for (int ii = 0; ii < _searchAngleN; ii++) {
     // find active index
     const RadxRay *rayii = _searchRays[ii];
-    if (rayii != NULL) {
+    if (rayii != nullptr) {
       if (firstIndex < 0) {
         firstIndex = ii;
       }
       // find next active index
       for (int jj = ii + 1; jj < _searchAngleN; jj++) {
         const RadxRay *rayjj = _searchRays[jj];
-        if (rayjj != NULL) {
+        if (rayjj != nullptr) {
           lastIndex = jj;
           _populateSearchRays(ii, jj);
           ii = jj - 1;
@@ -7402,7 +7442,7 @@ void RadxVol::serialize(RadxMsg &msg)
 
   // add correction factors part if needed
   
-  if (_cfactors != NULL) {
+  if (_cfactors != nullptr) {
     RadxMsg cfactorsMsg;
     _cfactors->serialize(cfactorsMsg);
     cfactorsMsg.assemble();
@@ -7456,7 +7496,7 @@ int RadxVol::deserialize(const RadxMsg &msg)
   // get the metadata strings
 
   const RadxMsg::Part *metaStringPart = msg.getPartByType(_metaStringsPartId);
-  if (metaStringPart == NULL) {
+  if (metaStringPart == nullptr) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxVol::deserialize" << endl;
     cerr << "  No metadata string part in message" << endl;
@@ -7480,7 +7520,7 @@ int RadxVol::deserialize(const RadxMsg &msg)
   // get the metadata numbers
   
   const RadxMsg::Part *metaNumsPart = msg.getPartByType(_metaNumbersPartId);
-  if (metaNumsPart == NULL) {
+  if (metaNumsPart == nullptr) {
     cerr << "=======================================" << endl;
     cerr << "ERROR - RadxVol::deserialize" << endl;
     cerr << "  No metadata numbers part in message" << endl;
@@ -7501,7 +7541,7 @@ int RadxVol::deserialize(const RadxMsg &msg)
   // get platform
   
   const RadxMsg::Part *platformPart = msg.getPartByType(_platformPartId);
-  if (platformPart != NULL) {
+  if (platformPart != nullptr) {
     RadxMsg platformMsg;
     platformMsg.disassemble(platformPart->getBuf(), platformPart->getLength());
     if (_platform.deserialize(platformMsg)) {
@@ -7595,7 +7635,7 @@ int RadxVol::deserialize(const RadxMsg &msg)
   // get cfactors if available
   
   const RadxMsg::Part *cfactorsPart = msg.getPartByType(_cfactorsPartId);
-  if (cfactorsPart != NULL) {
+  if (cfactorsPart != nullptr) {
     RadxMsg cfactorsMsg;
     cfactorsMsg.disassemble(cfactorsPart->getBuf(), cfactorsPart->getLength());
     if (_cfactors) {
@@ -7609,7 +7649,7 @@ int RadxVol::deserialize(const RadxMsg &msg)
       cfactorsMsg.printHeader(cerr, "  ");
       cerr << "=======================================" << endl;
       delete _cfactors;
-      _cfactors = NULL;
+      _cfactors = nullptr;
       return -1;
     }
   }
@@ -7759,7 +7799,7 @@ int RadxVol::_setMetaStringsFromXml(const char *xml,
 
 {
 
-  // check for NULL
+  // check for nullptr
   
   if (xml[bufLen - 1] != '\0') {
     cerr << "=======================================" << endl;
@@ -7955,7 +7995,7 @@ void RadxVol::censorRangeRing(double minRingRangeKm,
     // get the censoring field
 
     RadxField *cfld = ray->getField(checkFieldName);
-    if (cfld == NULL) {
+    if (cfld == nullptr) {
       continue;
     }
     size_t nGates = ray->getNGates();
@@ -8045,7 +8085,7 @@ void RadxVol::censorRangeRing(double minRingRangeKm,
       // get the censoring field
       
       RadxField *fld = ray->getField(censorFieldNames[ifld]);
-      if (fld == NULL) {
+      if (fld == nullptr) {
         continue;
       }
     

@@ -52,6 +52,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <algorithm>
+#include <set>
 using namespace std;
 
 /////////////////////////////////////////////////////////
@@ -597,8 +598,9 @@ void Fm301RadxFile::_addGlobalAttributes()
   // Add required CF global attributes
   
   _conventions = CfConvention;
-  if (_writeVol->getWmoWsi().size() > 0) {
-  _file.addGlobAttr(CONVENTIONS, _conventions);
+  if (_conventions.size() > 0) {
+    _file.addGlobAttr(CONVENTIONS, _conventions);
+  }
 
   // Add WMO global attributes if set
   
@@ -625,7 +627,7 @@ void Fm301RadxFile::_addGlobalAttributes()
   }
   
   // Version
-
+  
   _version = WmoCfProfile;
   _file.addGlobAttr(VERSION, _version);
   
@@ -816,7 +818,7 @@ void Fm301RadxFile::_addGlobalAttributes()
     _addErrStr("ERROR - Fm301RadxFile::_addGlobalAttributes");
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
-
+  
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1394,13 +1396,25 @@ void Fm301RadxFile::_addSweeps()
     RadxSweep *sweep = sweeps[isweep];
     RadxVol sweepVol(*_writeVol, sweep->getSweepNumber());
 
+    // make the geometry constant
+    // set the number of gates to be constant
+    
+    sweepVol.remapToPredomGeom();
+    sweepVol.setNGatesConstant();
+    
     // convert fields from rays to 2-D arrays
+    
     sweepVol.loadFieldsFromRays(true);
+
+    // rename fields to valid FM301 names
+
+    _renameSweepFieldsToFm301(isweep, sweepVol);
     
     // create name
   
     char name[128];
     safe_snprintf(name, "sweep_%d", isweep + 1);
+
     _sweepGroupNames.push_back(name);
 
     if (_debug) {
@@ -1600,8 +1614,6 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
   // make the geometry constant
   // set the number of gates to be constant
 
-  sweepVol.remapToPredomGeom();
-  sweepVol.setNGatesConstant();
   double startRangeKm = sweepVol.getStartRangeKm();
   double gateSpacingKm = sweepVol.getGateSpacingKm();
   
@@ -2549,38 +2561,26 @@ void Fm301RadxFile::_addSweepFields(const RadxSweep *sweep,
                                     NcxxDim &rangeDim)
   
 {
-  
+
   if (_verbose) {
     cerr << "Fm301RadxFile::_addSweepFields()" << endl;
   }
 
-  // loop through the list of unique fields names in this volume
+  // loop through the fields in this sweep
+  
+  for (size_t ifield = 0; ifield < sweepVol.getFields().size(); ifield++) {
 
-  vector<string> uniqueFieldNames =
-    sweepVol.getUniqueFieldNameList(Radx::FIELD_RETRIEVAL_ALL);
-
-  for (size_t ifield = 0; ifield < uniqueFieldNames.size(); ifield++) {
-      
-    const string &name = uniqueFieldNames[ifield];
+    const RadxField *fld = sweepVol.getFields()[ifield];
+    const string &name = fld->getName();
+    
     if (name.size() == 0) {
       // invalid field name
       continue;
     }
-    if (isRayMetaName(name)) {
-      // metadata ray variable
-      continue;
-    }
-
+    
     // make copy of the field
 
-    RadxField *copy = sweepVol.copyField(name);
-    if (copy == NULL) {
-      if (_debug) {
-        cerr << "  ... cannot find field: " << name
-             << " .... skipping" << endl;
-      }
-      continue;
-    }
+    RadxField *copy = new RadxField(*fld);
 
     // create the variable
     
@@ -3472,3 +3472,42 @@ string Fm301RadxFile::_computeWritePath(const RadxVol &vol,
   return outPath;
 
 }
+
+////////////////////////////////////////////////////
+// rename fields to valid FM301 names
+
+void Fm301RadxFile::_renameSweepFieldsToFm301(int sweepNum, RadxVol &sweepVol)
+
+{
+
+  const Fm301RadxFileParams *params = sweepVol.getFm301Params();
+  
+  vector<RadxField *> fields = sweepVol.getFields();
+  set<string> fm301NameUsed;
+  
+  for (size_t ii = 0; ii < fields.size(); ii++) {
+
+    RadxField &fld = *fields[ii];
+    string fldName(fld.getName());
+    
+    for (int jj = 0; jj < params->field_name_translations_n; jj++) {
+      
+      Fm301RadxFileParams::field_name_translation_t &trans = params->_field_name_translations[jj];
+      
+      string inputName(trans.input_field_name);
+      string fm301Name(trans.fm301_field_name);
+
+      if (inputName == fldName) {
+        if (fm301NameUsed.find(fm301Name) == fm301NameUsed.end()) {
+          fm301NameUsed.insert(fm301Name);
+          fld.setName(fm301Name);
+        }
+      }
+
+    }
+
+  } // ii
+
+
+}
+    

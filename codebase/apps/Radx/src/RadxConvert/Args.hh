@@ -66,6 +66,7 @@ public:
 
   bool printParamsFm301;
   string printParamsFm301Mode;
+  tdrp_override_t fm301Override;
 
 protected:
   

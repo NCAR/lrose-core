@@ -553,6 +553,8 @@ private:
                            int fileMillisecs,
                            const string &dir);
 
+  void _renameSweepFieldsToFm301(int sweepNum, RadxVol &sweepVol);
+
 };
 
 #endif
