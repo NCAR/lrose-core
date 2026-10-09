@@ -819,6 +819,8 @@ void Fm301RadxFile::_addGlobalAttributes()
 
 }
 
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // Add top-level dims
 // throws exception on error
