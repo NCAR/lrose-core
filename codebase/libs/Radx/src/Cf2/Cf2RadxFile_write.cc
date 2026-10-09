@@ -3348,11 +3348,19 @@ string Cf2RadxFile::_computeWritePath(const RadxVol &vol,
     }
   }
 
+  string scanId;
+  if (_writeScanIdInFileName) {
+        scanId += "_";
+        scanId += to_string(vol.getScanId());
+  }
+
   string scanName;
-  if (vol.getScanName().size() > 0) {
-    if (strcasestr(vol.getScanName().c_str(), "default") == NULL) {
-      scanName += "_";
-      scanName += vol.getScanName();
+  if (_writeScanNameInFileName) {
+    if (vol.getScanName().size() > 0) {
+      if (strcasestr(vol.getScanName().c_str(), "default") == NULL) {
+        scanName += "_";
+        scanName += vol.getScanName();
+      }
     }
   }
 
@@ -3362,6 +3370,14 @@ string Cf2RadxFile::_computeWritePath(const RadxVol &vol,
     safe_snprintf(volNumStr, "_v%d", volNum);
   } else {
     volNumStr[0] = '\0'; // NULL str
+  }
+
+  string rangeResolution = "";
+  if (_writeRangeResolutionInFileName) {
+    if (vol.getRangeResolution().size() > 0) {
+      rangeResolution.append("_");
+      rangeResolution.append(vol.getRangeResolution());
+    }
   }
 
   string prefix = "cfrad2.";
@@ -3396,7 +3412,7 @@ string Cf2RadxFile::_computeWritePath(const RadxVol &vol,
                   "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
                   "_to_%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
                   "%s%s%s"
-                  "%s%s%s.nc",
+                  "%s%s%s%s%s.nc",
                   prefix.c_str(),
                   startTime.getYear(), startTime.getMonth(), startTime.getDay(),
                   dateTimeConnector,
@@ -3407,7 +3423,8 @@ string Cf2RadxFile::_computeWritePath(const RadxVol &vol,
                   endTime.getHour(), endTime.getMin(), endTime.getSec(),
                   endSubsecsStr,
                   instName.c_str(), siteName.c_str(), volNumStr,
-                  scanName.c_str(), scanType.c_str(), suffix.c_str());
+                  scanName.c_str(), scanId.c_str(), scanType.c_str(),
+                  rangeResolution.c_str(), suffix.c_str());
 
   } else {
     
@@ -3421,14 +3438,15 @@ string Cf2RadxFile::_computeWritePath(const RadxVol &vol,
     safe_snprintf(fileName,
                   "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
                   "%s%s%s"
-                  "%s%s%s.nc",
+                  "%s%s%s%s%s.nc",
                   prefix.c_str(),
                   fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
                   dateTimeConnector,
                   fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
                   fileSubsecsStr,
                   instName.c_str(), siteName.c_str(), volNumStr,
-                  scanName.c_str(), scanType.c_str(), suffix.c_str());
+                  scanName.c_str(), scanId.c_str(), scanType.c_str(),
+                  rangeResolution.c_str(), suffix.c_str());
 
   }
 
