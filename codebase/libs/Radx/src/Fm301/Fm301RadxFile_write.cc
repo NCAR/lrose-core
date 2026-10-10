@@ -3349,125 +3349,43 @@ string Fm301RadxFile::_computeWritePath(const RadxVol &vol,
 {
 
   // compute path
-  
-  string scanType;
-  if (_writeScanTypeInFileName) {
-    scanType = "_SUR";
-    if (_writeVol->getSweeps().size() > 0) {
-      Radx::SweepMode_t predomSweepMode = _writeVol->getPredomSweepMode();
-      scanType = "_";
-      scanType += Radx::sweepModeToShortStr(predomSweepMode);
-    }
-  }
 
-  string instName;
-  if (_writeInstrNameInFileName) {
-    if (vol.getInstrumentName().size() > 0) {
-      instName = "_";
-      instName += vol.getInstrumentName();
-    }
-  }
-
-  string siteName;
-  if (_writeSiteNameInFileName) {
-    if (vol.getSiteName().size() > 0) {
-      siteName = "_";
-      siteName += vol.getSiteName();
-    }
-  }
-
-  string scanName;
-  if (vol.getScanName().size() > 0) {
-    if (strcasestr(vol.getScanName().c_str(), "default") == NULL) {
-      scanName += "_";
-      scanName += vol.getScanName();
-    }
-  }
-
-  int volNum = vol.getVolumeNumber();
-  char volNumStr[1024];
-  if (_writeVolNumInFileName && volNum >= 0) {
-    safe_snprintf(volNumStr, "_v%d", volNum);
+  string wmoWsi;
+  if (_writeVol->getWmoWsi().size() > 0) {
+    wmoWsi = _writeVol->getWmoWsi() + ".";
+  } else if (_writeVol->getWmoId().size() > 0) {
+    wmoWsi = _writeVol->getWmoId() + ".";
   } else {
-    volNumStr[0] = '\0'; // NULL str
+    if (vol.getInstrumentName().size() > 0) {
+      wmoWsi = vol.getInstrumentName() + ".";
+    } else {
+      wmoWsi = "Unknown.";
+    }
   }
-
-  string prefix = "fm301.";
-  if (_writeFileNamePrefix.size() > 0) {
-    prefix = _writeFileNamePrefix;
-  }
-
-  string suffix = "";
+  
+  string suffix = "fm301";
   if (_writeFileNameSuffix.size() > 0) {
     suffix = _writeFileNameSuffix;
   }
-
-  char dateTimeConnector = '_';
-  if (_writeHyphenInDateTime) {
-    dateTimeConnector = '-';
-  }
+  
+  string product = "vol";
 
   char fileName[BUFSIZ];
-  if (_writeFileNameMode == FILENAME_WITH_START_AND_END_TIMES) {
-
-    char startSubsecsStr[64];
-    char endSubsecsStr[64];
-    if (_writeSubsecsInFileName) {
-      safe_snprintf(startSubsecsStr, ".%.3d", startMillisecs);
-      safe_snprintf(endSubsecsStr, ".%.3d", endMillisecs);
-    } else {
-      startSubsecsStr[0] = '\0';
-      endSubsecsStr[0] = '\0';
-    }
-
-    safe_snprintf(fileName,
-                  "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-                  "_to_%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-                  "%s%s%s"
-                  "%s%s%s.nc",
-                  prefix.c_str(),
-                  startTime.getYear(), startTime.getMonth(), startTime.getDay(),
-                  dateTimeConnector,
-                  startTime.getHour(), startTime.getMin(), startTime.getSec(),
-                  startSubsecsStr,
-                  endTime.getYear(), endTime.getMonth(), endTime.getDay(),
-                  dateTimeConnector,
-                  endTime.getHour(), endTime.getMin(), endTime.getSec(),
-                  endSubsecsStr,
-                  instName.c_str(), siteName.c_str(), volNumStr,
-                  scanName.c_str(), scanType.c_str(), suffix.c_str());
-
-  } else {
-    
-    char fileSubsecsStr[64];
-    if (_writeSubsecsInFileName) {
-      safe_snprintf(fileSubsecsStr, ".%.3d", fileMillisecs);
-    } else {
-      fileSubsecsStr[0] = '\0';
-    }
-
-    safe_snprintf(fileName,
-                  "%s%.4d%.2d%.2d%c%.2d%.2d%.2d%s"
-                  "%s%s%s"
-                  "%s%s%s.nc",
-                  prefix.c_str(),
-                  fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
-                  dateTimeConnector,
-                  fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
-                  fileSubsecsStr,
-                  instName.c_str(), siteName.c_str(), volNumStr,
-                  scanName.c_str(), scanType.c_str(), suffix.c_str());
-
-  }
+  safe_snprintf(fileName,
+                "%s%.4d%.2d%.2dT%.2d%.2d%.2dZ.%s.%s.nc",
+                wmoWsi.c_str(),
+                fileTime.getYear(), fileTime.getMonth(), fileTime.getDay(),
+                fileTime.getHour(), fileTime.getMin(), fileTime.getSec(),
+                product.c_str(), suffix.c_str());
 
   // make sure the file name is valid - i.e. no / or whitespace
-
+  
   for (size_t ii = 0; ii < strlen(fileName); ii++) {
     if (isspace(fileName[ii]) || fileName[ii] == '/') {
       fileName[ii] = '_';
     }
   }
-
+  
   // construct path
 
   string outPath(dir);
