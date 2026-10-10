@@ -3576,6 +3576,5 @@ void Fm301RadxFile::_setFm301Attributes(int sweepNum, RadxVol &sweepVol)
 
   } // ii
 
-
 }
     
