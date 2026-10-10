@@ -3568,7 +3568,7 @@ void Fm301RadxFile::_setFm301Attributes(int sweepNum, RadxVol &sweepVol)
       }
 
       if (!isFm301Field) {
-        fld.setWmoParameterUri("non-standard-fm301-name");
+        fld.setWmoParameterUri("");
         fld.setWmoParameterName("non-standard-fm301-name");
       }
 
