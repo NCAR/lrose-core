@@ -46,7 +46,6 @@ Args::Args ()
   startTime = 0;
   endTime = 0;
   printParamsFm301 = false;
-  TDRP_init_override(&fm301Override);
 }
 
 // Destructor
@@ -895,15 +894,13 @@ int Args::parse (int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-wmoWsi")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "wmo__wsi = \"%s\";", argv[++i]);
-	TDRP_add_override(&fm301Override, tmp_str);
+        wmoWsi = argv[++i];
       }
-	
+      
     } else if (!strcmp(argv[i], "-wmoId")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "wmo__id = \"%s\";", argv[++i]);
-	TDRP_add_override(&fm301Override, tmp_str);
+        wmoId = argv[++i];
       }
 	
     }

@@ -94,13 +94,23 @@ RadxConvert::RadxConvert(int argc, char **argv)
   if (strstr(_params.FM301_params_file_path, "use-defaults") == NULL) {
     // not using defaults
     if (_fm301Params.load(_params.FM301_params_file_path,
-                          _args.fm301Override.list, true, _args.tdrpDebug)) {
+                          nullptr, true, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot load params file for FM301: "
            << _params.FM301_params_file_path << endl;
       OK = FALSE;
       return;
     }
+  }
+
+  // override WSI and ID if set
+  if (_args.wmoWsi.size() > 0) {
+    TDRP_str_replace(&_fm301Params.wmo__wsi, _args.wmoWsi.c_str());
+    _fm301Params.sync();
+  }
+  if (_args.wmoId.size() > 0) {
+    TDRP_str_replace(&_fm301Params.wmo__id, _args.wmoId.c_str());
+    _fm301Params.sync();
   }
 
   // print params for KDP then exit
@@ -199,24 +209,35 @@ void RadxConvert::_printParamsFm301()
   }
 
   // do we need to expand environment variables?
-
+  
   bool expandEnvVars = false;
   if (_args.printParamsFm301Mode.find("expand") != string::npos) {
     expandEnvVars = true;
   }
 
   // read in FM301 params if applicable
-
+  
   if (strstr(_params.FM301_params_file_path, "use-defaults") == NULL) {
     // not using defaults
     if (_fm301Params.load(_params.FM301_params_file_path,
-                          NULL, expandEnvVars, _args.tdrpDebug)) {
+                          nullptr,
+                          expandEnvVars, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for Fm301Filt: "
            << _params.FM301_params_file_path << endl;
       OK = FALSE;
       return;
     }
+  }
+
+  // override WSI and ID if set
+  if (_args.wmoWsi.size() > 0) {
+    TDRP_str_replace(&_fm301Params.wmo__wsi, _args.wmoWsi.c_str());
+    _fm301Params.sync();
+  }
+  if (_args.wmoId.size() > 0) {
+    TDRP_str_replace(&_fm301Params.wmo__id, _args.wmoId.c_str());
+    _fm301Params.sync();
   }
 
   // set print mode
@@ -229,11 +250,11 @@ void RadxConvert::_printParamsFm301()
   } else if (_args.printParamsFm301Mode.find("verbose") == 0) {
     printMode = PRINT_VERBOSE;
   }
-
+  
   // do the print to stdout
 
   _fm301Params.print(stdout, printMode);
-
+  
 }
 
 //////////////////////////////////////////////////
