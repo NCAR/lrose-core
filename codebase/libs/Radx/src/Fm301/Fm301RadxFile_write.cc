@@ -2800,10 +2800,11 @@ NcxxVar Fm301RadxFile::_createFieldVar(const RadxField &field,
     } // switch
 
     var.putAtt(GRID_MAPPING, GRID_MAPPING);
-    if (rangeDim != NULL) {
-      var.putAtt(COORDINATES, "time range");
+    bool isRhi = _writeVol->checkIsRhi();
+    if (isRhi) {
+      var.putAtt(COORDINATES, "azimuth elevation range");
     } else {
-      var.putAtt(COORDINATES, "time");
+      var.putAtt(COORDINATES, "elevation azimuth range");
     }
     
     // set compression
