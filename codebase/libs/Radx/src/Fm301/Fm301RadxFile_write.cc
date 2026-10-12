@@ -3502,6 +3502,7 @@ void Fm301RadxFile::_setFm301Attributes(int sweepNum, RadxVol &sweepVol)
           fld.setLongName(longName);
         }
         if (!units.empty()) {
+#ifdef NOTNOW
           // Attribute augmentation cannot convert the field's data.
           if (!fld.getUnits().empty() && fld.getUnits() != units) {
             _addErrStr("ERROR - Fm301RadxFile::_setFm301Attributes");
@@ -3510,6 +3511,7 @@ void Fm301RadxFile::_setFm301Attributes(int sweepNum, RadxVol &sweepVol)
             _addErrStr("  Requested units: ", units);
             throw(NcxxException(getErrStr(), __FILE__, __LINE__));
           }
+#endif
           fld.setUnits(units);
         }
         if (wmoParameterUri.size() > 0) {
