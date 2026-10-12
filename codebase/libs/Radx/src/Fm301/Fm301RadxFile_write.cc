@@ -1422,7 +1422,7 @@ void Fm301RadxFile::_addSweeps()
     _sweepGroupNames.push_back(name);
 
     if (_debug) {
-      cerr << "adding sweep: " << name << endl;
+      cerr << "adding sweep: " << name << " fields:";
     }
 
     // add group
@@ -2580,6 +2580,14 @@ void Fm301RadxFile::_addSweepFields(const RadxSweep *sweep,
     if (name.size() == 0) {
       // invalid field name
       continue;
+    }
+    
+    if (_debug) {
+      if (ifield < sweepVol.getFields().size() - 1) {
+        cerr << " " << name << ",";
+      } else {
+        cerr << " " << name << endl;
+      }
     }
     
     // make copy of the field

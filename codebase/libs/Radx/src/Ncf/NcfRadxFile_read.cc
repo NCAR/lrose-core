@@ -3035,14 +3035,14 @@ void NcfRadxFile::_readFieldAttributes(Nc3Var *var,
   
   // wmo parameter name and uri
   
-  wmoParameterName = "unknown";
+  wmoParameterName = "";
   Nc3Att *wmoParameterNameAtt = var->get_att(RadxFm301Str::WMO__PARAMETER_NAME);
   if (wmoParameterNameAtt != NULL) {
     wmoParameterName = Nc3xFile::asString(wmoParameterNameAtt);
     delete wmoParameterNameAtt;
   }
   
-  wmoParameterUri = "unknown";
+  wmoParameterUri = "";
   Nc3Att *wmoParameterUriAtt = var->get_att(RadxFm301Str::WMO__PARAMETER_URI);
   if (wmoParameterUriAtt != NULL) {
     wmoParameterUri = Nc3xFile::asString(wmoParameterUriAtt);

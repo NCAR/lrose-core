@@ -34,6 +34,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/Cf2RadxFile.hh>
+#include <Radx/RadxFm301Str.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
@@ -699,6 +700,51 @@ void Cf2RadxFile::_readGlobalAttributes()
       throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
     }
   }
+
+  // read WMO attributes
+
+  try {
+    NcxxGroupAtt att = _file.getAtt(RadxFm301Str::WMO__WSI);
+    if (!att.isNull() && _readVol) {
+      _readVol->setWmoWsi(att.asString());
+    }
+  } catch (NcxxException& e) {}
+  try {
+    NcxxGroupAtt att = _file.getAtt(RadxFm301Str::WMO__ID);
+    if (!att.isNull() && _readVol) {
+      _readVol->setWmoId(att.asString());
+    }
+  } catch (NcxxException& e) {}
+  try {
+    NcxxGroupAtt att = _file.getAtt(RadxFm301Str::WMO__CF_PROFILE);
+    if (!att.isNull() && _readVol) {
+      _readVol->setWmoCfProfile(att.asString());
+    }
+  } catch (NcxxException& e) {}
+  try {
+    NcxxGroupAtt att = _file.getAtt(RadxFm301Str::WMO__DATA_CATEGORY);
+    if (!att.isNull() && _readVol) {
+      _readVol->setWmoDataCategory(att.asString());
+    }
+  } catch (NcxxException& e) {}
+  try {
+    NcxxGroupAtt att = _file.getAtt(RadxFm301Str::WMO__DATA_POLICY);
+    if (!att.isNull() && _readVol) {
+      _readVol->setWmoDataPolicy(att.asString());
+    }
+  } catch (NcxxException& e) {}
+  try {
+    NcxxGroupAtt att = _file.getAtt(RadxFm301Str::WMO__ORIGINATING_CENTRE);
+    if (!att.isNull() && _readVol) {
+      _readVol->setWmoOriginatingCentre(att.asString());
+    }
+  } catch (NcxxException& e) {}
+  try {
+    NcxxGroupAtt att = _file.getAtt(RadxFm301Str::WMO__ORIGINATING_SUB_CENTRE);
+    if (!att.isNull() && _readVol) {
+      _readVol->setWmoOriginatingSubCentre(att.asString());
+    }
+  } catch (NcxxException& e) {}
 
   // check for version
   
@@ -2618,6 +2664,24 @@ void Cf2RadxFile::_readFieldAttributes(const NcxxVar &var)
     NcxxVarAtt standardNameAtt = var.getAtt(STANDARD_NAME);
     if (!standardNameAtt.isNull()) {
       _fieldStandardName = standardNameAtt.asString();
+    }
+  } catch (NcxxException& e) {
+  }
+  
+  _fieldWmoParameterName.clear();
+  try {
+    NcxxVarAtt att = var.getAtt(RadxFm301Str::WMO__PARAMETER_NAME);
+    if (!att.isNull()) {
+      _fieldWmoParameterName = att.asString();
+    }
+  } catch (NcxxException& e) {
+  }
+  
+  _fieldWmoParameterUri.clear();
+  try {
+    NcxxVarAtt att = var.getAtt(RadxFm301Str::WMO__PARAMETER_URI);
+    if (!att.isNull()) {
+      _fieldWmoParameterUri = att.asString();
     }
   } catch (NcxxException& e) {
   }
