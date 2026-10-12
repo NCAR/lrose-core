@@ -286,13 +286,17 @@ int Fm301RadxFile::getTimeFromPath(const string &path, RadxTime &rtime)
   
   while (start < end - 6) {
     int year, month, day, hour, min, sec;
-    if (sscanf(start, "%4d%2d%2d_%2d%2d%2d",
+    if (sscanf(start, "%4d%2d%2dT%2d%2d%2dZ",
+               &year, &month, &day, &hour, &min, &sec) == 6 ||
+        sscanf(start, "%4d%2d%2d_%2d%2d%2d",
                &year, &month, &day, &hour, &min, &sec) == 6) {
       if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
-        return -1;
+        start++;
+        continue;
       }
       if (hour < 0 || hour > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
-        return -1;
+        start++;
+        continue;
       }
       rtime.set(year, month, day, hour, min, sec);
       return 0;

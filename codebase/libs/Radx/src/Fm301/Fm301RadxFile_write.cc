@@ -339,6 +339,17 @@ int Fm301RadxFile::writeToPath(const RadxVol &vol,
 {
 
   clearErrStr();
+  if (vol.getFm301Params() == NULL) {
+    _addErrStr("ERROR - Fm301RadxFile::writeToPath");
+    _addErrStr("  FM301 parameters are required; call RadxVol::setFm301Params().");
+    return -1;
+  }
+  if (!vol.getWmoCfProfile().empty() &&
+      vol.getWmoCfProfile() != WmoCfProfile) {
+    _addErrStr("ERROR - Fm301RadxFile::writeToPath");
+    _addErrStr("  Unsupported WMO CF profile: ", vol.getWmoCfProfile());
+    return -1;
+  }
   _writeVol = &vol;
   _pathInUse = path;
   vol.setPathInUse(_pathInUse);
@@ -610,9 +621,7 @@ void Fm301RadxFile::_addGlobalAttributes()
   if (_writeVol->getWmoId().size() > 0) {
     _file.addGlobAttr(WMO__ID, _writeVol->getWmoId());
   }
-  if (_writeVol->getWmoCfProfile().size() > 0) {
-    _file.addGlobAttr(WMO__CF_PROFILE, _writeVol->getWmoCfProfile());
-  }
+  _file.addGlobAttr(WMO__CF_PROFILE, WmoCfProfile);
   if (_writeVol->getWmoDataCategory().size() > 0) {
     _file.addGlobAttr(WMO__DATA_CATEGORY, _writeVol->getWmoDataCategory());
   }
@@ -3412,9 +3421,16 @@ void Fm301RadxFile::_renameSweepFieldsToFm301(int sweepNum, RadxVol &sweepVol)
 {
 
   const Fm301RadxFileParams *params = sweepVol.getFm301Params();
-  
+  if (params == NULL || !params->translate_field_names) {
+    return;
+  }
+
   vector<RadxField *> fields = sweepVol.getFields();
+  // Reserve original names as well as names assigned by translation.
   set<string> fm301NameUsed;
+  for (size_t ii = 0; ii < fields.size(); ii++) {
+    fm301NameUsed.insert(fields[ii]->getName());
+  }
   
   for (size_t ii = 0; ii < fields.size(); ii++) {
 
@@ -3429,10 +3445,13 @@ void Fm301RadxFile::_renameSweepFieldsToFm301(int sweepNum, RadxVol &sweepVol)
       string fm301Name(trans.fm301_field_name);
 
       if (inputName == fldName) {
-        if (fm301NameUsed.find(fm301Name) == fm301NameUsed.end()) {
+        if (!fm301Name.empty() &&
+            fm301NameUsed.find(fm301Name) == fm301NameUsed.end()) {
           fm301NameUsed.insert(fm301Name);
           fld.setName(fm301Name);
         }
+        // First matching translation wins, including on a collision.
+        break;
       }
 
     }
@@ -3450,7 +3469,10 @@ void Fm301RadxFile::_setFm301Attributes(int sweepNum, RadxVol &sweepVol)
 {
 
   const Fm301RadxFileParams *params = sweepVol.getFm301Params();
-  
+  if (params == NULL || !params->augment_field_attributes) {
+    return;
+  }
+
   vector<RadxField *> fields = sweepVol.getFields();
   
   for (size_t ii = 0; ii < fields.size(); ii++) {
@@ -3479,7 +3501,15 @@ void Fm301RadxFile::_setFm301Attributes(int sweepNum, RadxVol &sweepVol)
         if (longName.size() > 0) {
           fld.setLongName(longName);
         }
-        if (units.size() > 0) {
+        if (!units.empty()) {
+          // Attribute augmentation cannot convert the field's data.
+          if (!fld.getUnits().empty() && fld.getUnits() != units) {
+            _addErrStr("ERROR - Fm301RadxFile::_setFm301Attributes");
+            _addErrStr("  Incompatible units for field: ", fldName);
+            _addErrStr("  Input units: ", fld.getUnits());
+            _addErrStr("  Requested units: ", units);
+            throw(NcxxException(getErrStr(), __FILE__, __LINE__));
+          }
           fld.setUnits(units);
         }
         if (wmoParameterUri.size() > 0) {
@@ -3494,11 +3524,11 @@ void Fm301RadxFile::_setFm301Attributes(int sweepNum, RadxVol &sweepVol)
         
       }
 
-      if (!isFm301Field) {
-        fld.setWmoParameterUri("");
-        fld.setWmoParameterName("non-standard-fm301-name");
-      }
+    }
 
+    if (!isFm301Field) {
+      fld.setWmoParameterUri("");
+      fld.setWmoParameterName("non-standard-fm301-name");
     }
 
   } // ii

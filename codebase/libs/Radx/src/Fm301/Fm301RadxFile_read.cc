@@ -690,11 +690,22 @@ void Fm301RadxFile::_readGlobalAttributes()
     err.addErrStr("  Cannot find conventions attribute");
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
-  if (_conventions.find(CfConvention) == string::npos) {
+  // Preserve the embedded space in the WMO convention name while
+  // accepting comma- or whitespace-separated convention lists.
+  string conventionList = _conventions;
+  size_t wmoPos = 0;
+  while ((wmoPos = conventionList.find("WMO CF-1.0", wmoPos)) != string::npos) {
+    conventionList.replace(wmoPos, 10, "WMO_CF-1.0");
+    wmoPos += 10;
+  }
+  vector<string> conventions;
+  RadxStr::tokenize(conventionList, ", \t\r\n", conventions);
+  if (find(conventions.begin(), conventions.end(), "CF-1.8") == conventions.end() ||
+      find(conventions.begin(), conventions.end(), "WMO_CF-1.0") == conventions.end()) {
     NcxxErrStr err;
     err.addErrStr("ERROR - Fm301RadxFile::_readGlobalAttributes");
     err.addErrStr("  Invalid Conventions attribute: ", _conventions);
-    err.addErrStr("  Should be 'Cf/Radial'");
+    err.addErrStr("  Expected CF-1.8 and WMO CF-1.0 conventions");
     throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
   }
 
@@ -712,12 +723,17 @@ void Fm301RadxFile::_readGlobalAttributes()
       _readVol->setWmoId(att.asString());
     }
   } catch (NcxxException& e) {}
-  try {
-    NcxxGroupAtt att = _file.getAtt(WMO__CF_PROFILE);
-    if (!att.isNull() && _readVol) {
-      _readVol->setWmoCfProfile(att.asString());
-    }
-  } catch (NcxxException& e) {}
+  // The profile identifies this format; Conventions alone is insufficient.
+  NcxxGroupAtt profileAtt = _file.getAtt(WMO__CF_PROFILE);
+  if (profileAtt.isNull() || profileAtt.asString() != WmoCfProfile) {
+    NcxxErrStr err;
+    err.addErrStr("ERROR - Fm301RadxFile::_readGlobalAttributes");
+    err.addErrStr("  Expected wmo__cf_profile: ", WmoCfProfile);
+    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  }
+  if (_readVol) {
+    _readVol->setWmoCfProfile(profileAtt.asString());
+  }
   try {
     NcxxGroupAtt att = _file.getAtt(WMO__DATA_CATEGORY);
     if (!att.isNull() && _readVol) {
@@ -743,29 +759,17 @@ void Fm301RadxFile::_readGlobalAttributes()
     }
   } catch (NcxxException& e) {}
 
-  // check for version
-  
-  try {
-    NcxxGroupAtt att = _file.getAtt(VERSION);
-    _version = att.asString();
-  } catch (NcxxException& e) {
-    NcxxErrStr err;
-    err.addErrStr("ERROR - Fm301RadxFile::_readGlobalAttributes");
-    err.addErrStr("  Cannot find version attribute");
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
-  }
-  if (_version.size() < 1 ||
-      _version.find("2") == string::npos) {
-    NcxxErrStr err;
-    err.addErrStr("ERROR - Fm301RadxFile::_readGlobalAttributes");
-    err.addErrStr("  Invalid version: ", _version);
-    err.addErrStr("  Should be 2.x");
-    throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
+  // Version is informational. Recognition uses the WMO profile above,
+  // rather than the CfRadial2 version-number check.
+  _version.clear();
+  NcxxGroupAtt versionAtt = _file.getAtt(VERSION);
+  if (!versionAtt.isNull()) {
+    _version = versionAtt.asString();
   }
 
   // Loop through the global attributes, use the ones which make sense
 
-  _origFormat = "CFRADIAL2"; // default
+  _origFormat = "FM301"; // default
   _instrumentName = "unknown";
 
   multimap<string,NcxxGroupAtt> atts = _file.getAtts();
