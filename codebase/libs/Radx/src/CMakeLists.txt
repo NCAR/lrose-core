@@ -92,6 +92,7 @@ set (SRCS
       ./Dorade/DoradeData.cc
       ./Dorade/DoradeRadxFile.cc
       ./EEC/EdgeNcRadxFile.cc
+      ./Fm301/Fm301RadxFileParams.cc
       ./Fm301/Fm301RadxFile.cc
       ./Fm301/Fm301RadxFile_read.cc
       ./Fm301/Fm301RadxFile_write.cc

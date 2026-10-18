@@ -590,6 +590,18 @@ def writeCMakeListsCodebase(dir):
     fo.write('\n')
     fo.write('cmake_minimum_required(VERSION 3.7)\n')
     fo.write('\n')
+
+    # Default to Release build type unless explicitly specified
+
+    fo.write('# Default to Release build type unless specified on command line\n\n')
+    fo.write('if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)\n')
+    fo.write('  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the build type" FORCE)\n')
+    fo.write('endif()\n')
+    fo.write('\n')
+
+    # master project
+
+    fo.write('# master project name\n\n')
     fo.write('project (lrose-core)\n')
     fo.write('\n')
 

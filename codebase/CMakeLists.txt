@@ -10,6 +10,14 @@
 
 cmake_minimum_required(VERSION 3.7)
 
+# Default to Release build type unless specified on command line
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the build type" FORCE)
+endif()
+
+# master project name
+
 project (lrose-core)
 
 # set policy CMP0100 so that AUTOMOC finds .hh files
@@ -197,9 +205,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB ")
 # Set RPATH so that executablefinds lrose libraries without needing LD_LIBRARY_PATH
 
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags")

@@ -27,6 +27,7 @@ HDRS = \
 	../include/Radx/Fm301RadxFile.hh
 
 CPPC_SRCS = \
+	Fm301RadxFileParams.cc \
 	Fm301RadxFile.cc \
 	Fm301RadxFile_read.cc \
 	Fm301RadxFile_write.cc \
@@ -41,6 +42,14 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_lib_module_targets
 #
 # local targets
 #
+
+Fm301RadxFileParams.cc: paramdef.Fm301RadxFile
+	tdrp_gen -f paramdef.Fm301RadxFile -c++ -class Fm301RadxFileParams -lib Radx -add_ncar_copyright
+	/bin/mv -f Fm301RadxFileParams.hh ../include/Radx
+
+clean_tdrp:
+	$(RM) Fm301RadxFileParams.cc ../include/Radx/Fm301RadxFileParams.hh
+
 
 depend: depend_generic
 
