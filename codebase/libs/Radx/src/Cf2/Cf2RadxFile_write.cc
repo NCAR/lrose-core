@@ -34,6 +34,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include <Radx/Cf2RadxFile.hh>
+#include <Radx/RadxFm301Str.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
@@ -599,14 +600,38 @@ void Cf2RadxFile::_addGlobalAttributes()
   _convention = CfRadial2Conventions;
   _file.addGlobAttr(CONVENTIONS, _convention);
   
+  // Add WMO global attributes if set
+  
+  if (_writeVol->getWmoWsi().size() > 0) {
+    _file.addGlobAttr(RadxFm301Str::WMO__WSI, _writeVol->getWmoWsi());
+  }
+  if (_writeVol->getWmoId().size() > 0) {
+    _file.addGlobAttr(RadxFm301Str::WMO__ID, _writeVol->getWmoId());
+  }
+  if (_writeVol->getWmoCfProfile().size() > 0) {
+    _file.addGlobAttr(RadxFm301Str::WMO__CF_PROFILE,
+                      _writeVol->getWmoCfProfile());
+  }
+  if (_writeVol->getWmoDataCategory().size() > 0) {
+    _file.addGlobAttr(RadxFm301Str::WMO__DATA_CATEGORY,
+                      _writeVol->getWmoDataCategory());
+  }
+  if (_writeVol->getWmoDataPolicy().size() > 0) {
+    _file.addGlobAttr(RadxFm301Str::WMO__DATA_POLICY,
+                      _writeVol->getWmoDataPolicy());
+  }
+  if (_writeVol->getWmoOriginatingCentre().size() > 0) {
+    _file.addGlobAttr(RadxFm301Str::WMO__ORIGINATING_CENTRE,
+                      _writeVol->getWmoOriginatingCentre());
+  }
+  if (_writeVol->getWmoOriginatingSubCentre().size() > 0) {
+    _file.addGlobAttr(RadxFm301Str::WMO__ORIGINATING_SUB_CENTRE,
+                      _writeVol->getWmoOriginatingSubCentre());
+  }
+  
   // Version
 
   _version = CfRadial2Version;
-
-  // if (_writeVol->getVersion().size() > 0) {
-  //   _version = _writeVol->getVersion();
-  // }
-
   _file.addGlobAttr(VERSION, _version);
   
   // info strings
@@ -1393,7 +1418,7 @@ void Cf2RadxFile::_addSweeps()
     _sweepGroupNames.push_back(name);
 
     if (_debug) {
-      cerr << "adding sweep: " << name << endl;
+      cerr << "adding sweep: " << name << " fields:";
     }
 
     // add group
@@ -2551,6 +2576,14 @@ void Cf2RadxFile::_addSweepFields(const RadxSweep *sweep,
       // invalid field name
       continue;
     }
+
+    if (_debug) {
+      if (ifield < sweepVol.getFields().size() - 1) {
+        cerr << " " << name << ",";
+      } else {
+        cerr << " " << name << endl;
+      }
+    }
     
     // make copy of the field
 
@@ -2676,6 +2709,12 @@ NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
       } else {
         var.putAtt(STANDARD_NAME, field.getStandardName());
       }
+    }
+    if (field.getWmoParameterName().size() > 0) {
+      var.putAtt(RadxFm301Str::WMO__PARAMETER_NAME, field.getWmoParameterName());
+    }
+    if (field.getWmoParameterUri().size() > 0) {
+      var.putAtt(RadxFm301Str::WMO__PARAMETER_URI, field.getWmoParameterUri());
     }
     var.putAtt(UNITS, field.getUnits());
     if (field.getLegendXml().size() > 0) {
