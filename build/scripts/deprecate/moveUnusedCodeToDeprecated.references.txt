@@ -1,0 +1,303 @@
+Explicit references to candidate paths
+======================================
+
+These literal path references do not affect build-graph selection, but
+documentation or auxiliary scripts may need updating after the move.
+
+codebase/apps/Radx/src/CartBeamBlock
+  .gitignore
+
+codebase/apps/Radx/src/GroundEchoStats
+  .gitignore
+
+codebase/apps/Radx/src/RadxTest
+  .gitignore
+
+codebase/apps/Radx/src/TestRadxMsg
+  .gitignore
+
+codebase/apps/didss/src/Binet2Dsr
+  .gitignore
+
+codebase/apps/didss/src/DsFmq2Tape
+  .gitignore
+
+codebase/apps/didss/src/Dsr2File
+  .gitignore
+
+codebase/apps/didss/src/Dsr2Mdv
+  .gitignore
+
+codebase/apps/didss/src/Dsr2MdvLookup
+  .gitignore
+
+codebase/apps/didss/src/Dsr2Sweep
+  .gitignore
+
+codebase/apps/didss/src/HiqDos2Dsr
+  .gitignore
+
+codebase/apps/didss/src/Tdwr2Dsr
+  .gitignore
+
+codebase/apps/didss/src/Udp2Tcp
+  .gitignore
+
+codebase/apps/didss/src/edge2dsr
+  .gitignore
+
+codebase/apps/didss/src/edgeRead
+  .gitignore
+
+codebase/apps/didss/src/kavltg2spdb
+  .gitignore
+
+codebase/apps/dsserver/src/NcMdvServer
+  .gitignore
+
+codebase/apps/dsserver/src/StnAscii2Symprod
+  .gitignore
+
+codebase/apps/filedist
+  .gitignore
+
+codebase/apps/ingest/src/Amdar2Spdb
+  .gitignore
+
+codebase/apps/ingest/src/AsciiPosn2Spdb
+  .gitignore
+
+codebase/apps/ingest/src/Bprp2Dsr
+  .gitignore
+
+codebase/apps/ingest/src/Dorade2Dsr
+  .gitignore
+
+codebase/apps/ingest/src/Dorade2DsrArchiveDriver
+  .gitignore
+
+codebase/apps/ingest/src/GemScan2Dsr
+  .gitignore
+
+codebase/apps/ingest/src/Grib2toNc
+  .gitignore
+
+codebase/apps/ingest/src/Metreport2Spdb
+  .gitignore
+
+codebase/apps/ingest/src/OdimHdf5ToMdv
+  .gitignore
+
+codebase/apps/ingest/src/Sigmet2Dsr
+  .gitignore
+
+codebase/apps/ingest/src/SigmetRaw2Dsr
+  .gitignore
+
+codebase/apps/ingest/src/SigmetUdp2Dsr
+  .gitignore
+
+codebase/apps/ingest/src/Taf2Spdb
+  .gitignore
+
+codebase/apps/ingest/src/radar2Dsr
+  .gitignore
+
+codebase/apps/interp/src/surf_interp
+  .gitignore
+
+codebase/apps/mdv_utils/src/Affirm
+  .gitignore
+
+codebase/apps/mdv_utils/src/CreateTestMdv
+  .gitignore
+
+codebase/apps/mdv_utils/src/KochSurface2Mdv
+  .gitignore
+
+codebase/apps/mdv_utils/src/LatLonBIL2Mdv
+  .gitignore
+
+codebase/apps/mdv_utils/src/MaliSat2Mdv
+  .gitignore
+
+codebase/apps/mdv_utils/src/Mdv2NewZealand
+  .gitignore
+
+codebase/apps/mdv_utils/src/Mdv2Raob
+  .gitignore
+
+codebase/apps/mdv_utils/src/Mdv2ZebraNetCDF
+  .gitignore
+
+codebase/apps/mdv_utils/src/MdvExtract1Point
+  .gitignore
+
+codebase/apps/mdv_utils/src/MdvGetMostRecentTime
+  .gitignore
+
+codebase/apps/mdv_utils/src/MdvGridDiagnostic
+  .gitignore
+
+codebase/apps/mdv_utils/src/MdvHeaders2Xml
+  .gitignore
+
+codebase/apps/mdv_utils/src/NsslNetCDF2Mdv
+  .gitignore
+
+codebase/apps/mdv_utils/src/distBetweenTwoPoints
+  .gitignore
+
+codebase/apps/mdv_utils/src/print_mdv
+  .gitignore
+
+codebase/apps/mm5
+  .gitignore
+
+codebase/apps/radar/src/CP2Udp2Fmq
+  .gitignore
+
+codebase/apps/radar/src/CartSim
+  .gitignore
+
+codebase/apps/radar/src/Dsr2CP2Mom
+  .gitignore
+
+codebase/apps/radar/src/HsrlMon
+  .gitignore
+
+codebase/apps/radar/src/HsrlSim
+  .gitignore
+
+codebase/apps/radar/src/HsrlTcp2Fmq
+  .gitignore
+
+codebase/apps/radar/src/IpsAscope
+  .gitignore
+
+codebase/apps/radar/src/JamesDealias
+  .gitignore
+
+codebase/apps/radar/src/MdvPartRain
+  .gitignore
+
+codebase/apps/radar/src/Mpd2Radx
+  .gitignore
+
+codebase/apps/radar/src/PartRain
+  .gitignore
+
+codebase/apps/radar/src/PidZdrStats
+  .gitignore
+
+codebase/apps/radar/src/REPoH
+  .gitignore
+
+codebase/apps/radar/src/StormShapeSim
+  .gitignore
+
+codebase/apps/radar/src/TsAscope
+  .gitignore
+
+codebase/apps/spdb_server
+  .gitignore
+
+codebase/apps/spdb_utils/src/AcPolygonStats
+  .gitignore
+
+codebase/apps/spdb_utils/src/AdvectPolygon
+  .gitignore
+
+codebase/apps/spdb_utils/src/AverageSpdbSndg
+  .gitignore
+
+codebase/apps/spdb_utils/src/FixStationAltitudes
+  .gitignore
+
+codebase/apps/spdb_utils/src/GenPoly2Mdv
+  .gitignore
+
+codebase/apps/spdb_utils/src/Hash
+  .gitignore
+
+codebase/apps/spdb_utils/src/Sigmet2Mdv
+  .gitignore
+
+codebase/apps/spdb_utils/src/Sndg2Ascii
+  .gitignore
+
+codebase/apps/spdb_utils/src/SpdbBdry2Axf
+  .gitignore
+
+codebase/apps/spdb_utils/src/SpdbMultSim
+  .gitignore
+
+codebase/apps/spdb_utils/src/SpdbXmlPut
+  .gitignore
+
+codebase/apps/spdb_utils/src/StationCompare
+  .gitignore
+
+codebase/apps/spdb_utils/src/WxStn2Table
+  .gitignore
+
+codebase/apps/spdb_utils/src/spdbIntervalCount
+  .gitignore
+
+codebase/apps/spdb_utils/src/spdbLatencies
+  .gitignore
+
+codebase/apps/spdb_utils/src/station2ascii
+  .gitignore
+
+codebase/apps/spol/src/SpolDishTemp2Spdb
+  .gitignore
+
+codebase/apps/spol/src/SpolWarnSms
+  .gitignore
+
+codebase/apps/symprod
+  .gitignore
+
+codebase/apps/tdrp/src/TdrpSingleton
+  .gitignore
+
+codebase/apps/titan/src/Alenia2Mom
+  .gitignore
+
+codebase/apps/titan/src/ClutterTableGenerate
+  .gitignore
+
+codebase/apps/titan/src/Radx2Esd
+  .gitignore
+
+codebase/apps/titan/src/TitanLite
+  .gitignore
+
+codebase/apps/titan/src/acmg_acpos_filter
+  .gitignore
+
+codebase/apps/titan/src/ascii_to_xgraph
+  .gitignore
+
+codebase/apps/titan/src/cart_convert
+  .gitignore
+
+codebase/apps/titan/src/forecast_monitor
+  .gitignore
+
+codebase/apps/titan/src/rtiming
+  .gitignore
+
+codebase/apps/titan/src/suncal
+  .gitignore
+
+codebase/apps/titan/src/track_grid_stats
+  .gitignore
+
+codebase/apps/titan/src/tracks_to_ascii
+  .gitignore
+
+codebase/apps/xpol/src/XpolScanControl
+  .gitignore
+

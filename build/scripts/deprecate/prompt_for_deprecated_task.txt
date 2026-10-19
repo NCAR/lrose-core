@@ -1,0 +1,16 @@
+lrose-core is built using cmake.
+
+The CMakeLists.txt files are created by:
+
+  build/cmake/createCMakeLists.py
+
+which crawls the tree looking for Makefiles, of the old style. These Makefiles include files from build/make_include.
+
+So it the Makefiles that control which source code files are actually used in the build. There is quite a lot of code (in libs as well as apps) that is not actively used in the build.
+
+I am considering created a directory called deprecated, at the same level as codebase. What I would like to do is move the unused code into deprecated, using a tree that mirrors the source code tree in codebase.
+
+Can you take a look through and let me know what you think is a good strategy?
+
+Perhaps the best option would be for you to create a script for me, that includes 'mkdir ...' commands to create the deprecated tree and 'git mv ...' to move the unused code into the deprecated tree.
+
