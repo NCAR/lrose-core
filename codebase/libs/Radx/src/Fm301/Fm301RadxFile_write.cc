@@ -1426,7 +1426,7 @@ void Fm301RadxFile::_addSweeps()
     // create name
   
     char name[128];
-    safe_snprintf(name, "sweep_%d", isweep + 1);
+    safe_snprintf(name, "sweep_%d", isweep);
 
     _sweepGroupNames.push_back(name);
 
