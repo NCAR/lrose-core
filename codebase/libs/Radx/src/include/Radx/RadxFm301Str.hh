@@ -76,6 +76,11 @@ public:
   static constexpr const char* WMO__UPDATE_SEQUENCE_NUMBER = "wmo__update_sequence_number";
   static constexpr const char* WMO__WSI = "wmo__wsi";
 
+  static constexpr const char* METRES = "metres";
+  static constexpr const char* METRES_BETWEEN_GATES = "metres_between_gates";
+  static constexpr const char* METRES_PER_SECOND = "metres per second";
+  static constexpr const char* METRES_TO_CENTER_OF_FIRST_GATE = "metres_to_center_of_first_gate";
+  
 private:
 
 };

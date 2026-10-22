@@ -867,27 +867,29 @@ void Fm301RadxFile::_addRootScalarVariables()
   // start time
   
   {
-    NcxxVar var =
-      _file.addVar(TIME_COVERAGE_START, "", TIME_COVERAGE_START_LONG,
-                   ncxxString, "", true);
-    var.putAtt(COMMENT,
-               "ray times are relative to start time in secs");
     RadxTime startTime(_writeVol->getStartTimeSecs());
-    var.putStringScalar(startTime.getW3cStr());
+    NcxxVar var = _file.addVar(TIME_COVERAGE_START, TIME,
+                               TIME_COVERAGE_START_LONG,
+                               ncxxDouble, "", true);
+    var.putAtt(CALENDAR, "standard");
+    var.putAtt(UNITS, SECS_SINCE_JAN1_1970);
+    var.putAtt(COMMENT, startTime.getW3cStr());
+    var.putVal(startTime.utime());
   }
     
   // end time
 
   {
-    NcxxVar var =
-      _file.addVar(TIME_COVERAGE_END, "", TIME_COVERAGE_END_LONG,
-                   ncxxString, "", true);
-    var.putAtt(COMMENT,
-               "ray times are relative to start time in secs");
     RadxTime endTime(_writeVol->getEndTimeSecs());
-    var.putStringScalar(endTime.getW3cStr());
+    NcxxVar var = _file.addVar(TIME_COVERAGE_END, TIME,
+                               TIME_COVERAGE_END_LONG,
+                               ncxxDouble, "", true);
+    var.putAtt(CALENDAR, "standard");
+    var.putAtt(UNITS, SECS_SINCE_JAN1_1970);
+    var.putAtt(COMMENT, endTime.getW3cStr());
+    var.putVal(endTime.utime());
   }
-
+    
   // volume number
 
   {
@@ -904,7 +906,6 @@ void Fm301RadxFile::_addRootScalarVariables()
     NcxxVar var = _file.addVar(INSTRUMENT_TYPE, "", INSTRUMENT_TYPE_LONG,
                                ncxxString, "", true);
     var.putAtt(OPTIONS, Radx::instrumentTypeOptions());
-    // var.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
     string instrumentType =
       Radx::instrumentTypeToStr(_writeVol->getInstrumentType());
     var.putStringScalar(instrumentType);
@@ -963,7 +964,6 @@ void Fm301RadxFile::_addRadarParameters()
     NcxxVar var =
       rparamsGroup.addVar(RADAR_ANTENNA_GAIN_H, "", RADAR_ANTENNA_GAIN_H_LONG,
                           ncxxFloat, DB, true);
-    // var.putAtt(META_GROUP, RADAR_PARAMETERS);
     var.putVal((float) _writeVol->getRadarAntennaGainDbH());
   }
   
@@ -973,7 +973,6 @@ void Fm301RadxFile::_addRadarParameters()
     NcxxVar var =
       rparamsGroup.addVar(RADAR_ANTENNA_GAIN_V, "", RADAR_ANTENNA_GAIN_V_LONG,
                           ncxxFloat, DB, true);
-    // var.putAtt(META_GROUP, RADAR_PARAMETERS);
     var.putVal((float) _writeVol->getRadarAntennaGainDbV());
   }
   
@@ -983,7 +982,6 @@ void Fm301RadxFile::_addRadarParameters()
     NcxxVar var =
       rparamsGroup.addVar(RADAR_BEAM_WIDTH_H, "", RADAR_BEAM_WIDTH_H_LONG,
                           ncxxFloat, DEGREES, true);
-    // var.putAtt(META_GROUP, RADAR_PARAMETERS);
     var.putVal((float) _writeVol->getRadarBeamWidthDegH());
   }
   
@@ -993,7 +991,6 @@ void Fm301RadxFile::_addRadarParameters()
     NcxxVar var =
       rparamsGroup.addVar(RADAR_BEAM_WIDTH_V, "", RADAR_BEAM_WIDTH_V_LONG,
                           ncxxFloat, DEGREES, true);
-    // var.putAtt(META_GROUP, RADAR_PARAMETERS);
     var.putVal((float) _writeVol->getRadarBeamWidthDegV());
   }
   
@@ -1003,7 +1000,6 @@ void Fm301RadxFile::_addRadarParameters()
     NcxxVar var =
       rparamsGroup.addVar(RADAR_RX_BANDWIDTH, "", RADAR_RX_BANDWIDTH_LONG,
                           ncxxFloat, HZ, true);
-    // var.putAtt(META_GROUP, RADAR_PARAMETERS);
     float bandwidthHz = _writeVol->getRadarReceiverBandwidthMhz();
     if (bandwidthHz < 0) {
       bandwidthHz = Radx::missingMetaFloat;
@@ -1037,7 +1033,6 @@ void Fm301RadxFile::_addLidarParameters()
       lparamsGroup.addVar(LIDAR_CONSTANT, "",
                           LIDAR_CONSTANT_LONG,
                           ncxxFloat, DB, true);
-    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarConstant());
   }
   
@@ -1046,7 +1041,6 @@ void Fm301RadxFile::_addLidarParameters()
       lparamsGroup.addVar(LIDAR_PULSE_ENERGY, "",
                           LIDAR_PULSE_ENERGY_LONG,
                           ncxxFloat, JOULES, true);
-    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarPulseEnergyJ());
   }
   
@@ -1055,7 +1049,6 @@ void Fm301RadxFile::_addLidarParameters()
       lparamsGroup.addVar(LIDAR_PEAK_POWER, "",
                           LIDAR_PEAK_POWER_LONG,
                           ncxxFloat, WATTS, true);
-    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarPeakPowerW());
   }
   
@@ -1064,7 +1057,6 @@ void Fm301RadxFile::_addLidarParameters()
       lparamsGroup.addVar(LIDAR_APERTURE_DIAMETER, "",
                           LIDAR_APERTURE_DIAMETER_LONG,
                           ncxxFloat, CM, true);
-    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarApertureDiamCm());
   }
   
@@ -1073,7 +1065,6 @@ void Fm301RadxFile::_addLidarParameters()
       lparamsGroup.addVar(LIDAR_APERTURE_EFFICIENCY, "", 
                           LIDAR_APERTURE_EFFICIENCY_LONG,
                           ncxxFloat, PERCENT, true);
-    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarApertureEfficiency());
   }
 
@@ -1082,7 +1073,6 @@ void Fm301RadxFile::_addLidarParameters()
       lparamsGroup.addVar(LIDAR_FIELD_OF_VIEW, "",
                           LIDAR_FIELD_OF_VIEW_LONG,
                           ncxxFloat, MRAD, true);
-    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarFieldOfViewMrad());
   }
   
@@ -1090,7 +1080,6 @@ void Fm301RadxFile::_addLidarParameters()
     NcxxVar var =
       lparamsGroup.addVar(LIDAR_BEAM_DIVERGENCE,
                           "", LIDAR_BEAM_DIVERGENCE_LONG, ncxxFloat, MRAD, true);
-    // var.putAtt(META_GROUP, LIDAR_PARAMETERS);
     var.putVal((float) _writeVol->getLidarBeamDivergenceMrad());
   }
   
@@ -1160,7 +1149,7 @@ void Fm301RadxFile::_addGeorefCorrections()
     NcxxVar var =
       group.addVar(RANGE_CORRECTION, "",
                    RANGE_CORRECTION_LONG,
-                   ncxxFloat, METERS, true);
+                   ncxxFloat, METRES, true);
     var.putVal((float) cfac->getRangeCorr());
   }
   
@@ -1184,7 +1173,7 @@ void Fm301RadxFile::_addGeorefCorrections()
     NcxxVar var =
       group.addVar(PRESSURE_ALTITUDE_CORRECTION, "",
                    PRESSURE_ALTITUDE_CORRECTION_LONG,
-                   ncxxFloat, METERS, true);
+                   ncxxFloat, METRES, true);
     var.putVal((float) cfac->getPressureAltCorr());
   }
   
@@ -1192,7 +1181,7 @@ void Fm301RadxFile::_addGeorefCorrections()
     NcxxVar var =
       group.addVar(ALTITUDE_CORRECTION, "",
                    ALTITUDE_CORRECTION_LONG,
-                   ncxxFloat, METERS, true);
+                   ncxxFloat, METRES, true);
     var.putVal((float) cfac->getAltitudeCorr());
   }
 
@@ -1200,7 +1189,7 @@ void Fm301RadxFile::_addGeorefCorrections()
     NcxxVar var =
       group.addVar(EASTWARD_VELOCITY_CORRECTION, "",
                    EASTWARD_VELOCITY_CORRECTION_LONG, 
-                   ncxxFloat, METERS_PER_SECOND, true);
+                   ncxxFloat, METRES_PER_SECOND, true);
     var.putVal((float) cfac->getEwVelCorr());
   }
     
@@ -1208,7 +1197,7 @@ void Fm301RadxFile::_addGeorefCorrections()
     NcxxVar var =
       group.addVar(NORTHWARD_VELOCITY_CORRECTION, "",
                    NORTHWARD_VELOCITY_CORRECTION_LONG,
-                   ncxxFloat, METERS_PER_SECOND, true);
+                   ncxxFloat, METRES_PER_SECOND, true);
     var.putVal((float) cfac->getNsVelCorr());
   }
   
@@ -1216,7 +1205,7 @@ void Fm301RadxFile::_addGeorefCorrections()
     NcxxVar var =
       group.addVar(VERTICAL_VELOCITY_CORRECTION, "",
                    VERTICAL_VELOCITY_CORRECTION_LONG,
-                   ncxxFloat, METERS_PER_SECOND, true);
+                   ncxxFloat, METRES_PER_SECOND, true);
     var.putVal((float) cfac->getVertVelCorr());
   }
   
@@ -1332,7 +1321,7 @@ void Fm301RadxFile::_addLocation()
   {
     NcxxVar var = 
       _file.addVar(ALTITUDE, "", ALTITUDE_LONG,
-                   ncxxDouble, METERS, true);
+                   ncxxDouble, METRES, true);
     var.putAtt(POSITIVE, UP);
     var.putVal(altitudeM);
   }
@@ -1342,7 +1331,7 @@ void Fm301RadxFile::_addLocation()
   {
     NcxxVar var = 
       _file.addVar(ALTITUDE_AGL, "", ALTITUDE_AGL_LONG,
-                   ncxxDouble, METERS, true);
+                   ncxxDouble, METRES, true);
     var.putAtt(POSITIVE, UP);
     var.putVal(altitudeAglM);
   }
@@ -1672,16 +1661,16 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
 
   NcxxVar startRangeVar =
     sweepGroup.addVar(START_RANGE, "", "range_to_center_of_first_gate",
-                      ncxxFloat, METERS, true);
-  startRangeVar.putAtt(UNITS, METERS);
+                      ncxxFloat, METRES, true);
+  startRangeVar.putAtt(UNITS, METRES);
   startRangeVar.putVal((float) (startRangeKm * 1000.0));
   
   // gate spacing
 
   NcxxVar gateSpacingVar =
     sweepGroup.addVar(RAY_GATE_SPACING, "", "spacing_between_gate_centers",
-                      ncxxFloat, METERS, true);
-  gateSpacingVar.putAtt(UNITS, METERS);
+                      ncxxFloat, METRES, true);
+  gateSpacingVar.putAtt(UNITS, METRES);
   gateSpacingVar.putVal((float) (gateSpacingKm * 1000.0));
 
   // add range coordinate variable
@@ -1689,11 +1678,11 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
   NcxxVar rangeVar = sweepGroup.addVar(RANGE, ncxxFloat, rangeDim);
   rangeVar.putAtt(LONG_NAME, RANGE_LONG);
   rangeVar.putAtt(LONG_NAME, "Range from instrument to center of gate");
-  rangeVar.putAtt(UNITS, METERS);
+  rangeVar.putAtt(UNITS, METRES);
   rangeVar.putAtt(SPACING_IS_CONSTANT, "true");
-  rangeVar.addScalarAttr(METERS_TO_CENTER_OF_FIRST_GATE,
+  rangeVar.addScalarAttr(METRES_TO_CENTER_OF_FIRST_GATE,
                          (float) startRangeKm * 1000.0);
-  rangeVar.addScalarAttr(METERS_BETWEEN_GATES, 
+  rangeVar.addScalarAttr(METRES_BETWEEN_GATES, 
                          (float) gateSpacingKm * 1000.0);
   double rangeKm = startRangeKm;
   RadxArray<float> rangeM_;
@@ -1730,7 +1719,6 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
   NcxxVar pulseWidthVar = 
     sweepGroup.addVar(PULSE_WIDTH, "", PULSE_WIDTH_LONG,
                       ncxxFloat, timeDim, SECONDS, true);
-  // pulseWidthVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     if (rays[iray]->getPulseWidthUsec() > 0) {
       fvals[iray] = rays[iray]->getPulseWidthUsec() * 1.0e-6;
@@ -1745,7 +1733,6 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
   NcxxVar prtVar = 
     sweepGroup.addVar(PRT, "", PRT_LONG,
                       ncxxFloat, timeDim, SECONDS, true);
-  // prtVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     fvals[iray] = rays[iray]->getPrtSec();
   }
@@ -1756,7 +1743,6 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
   NcxxVar prtRatioVar = 
     sweepGroup.addVar(PRT_RATIO, "", PRT_RATIO_LONG,
                       ncxxFloat, timeDim, SECONDS, true);
-  // prtRatioVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     fvals[iray] = rays[iray]->getPrtRatio();
   }
@@ -1766,8 +1752,7 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
   
   NcxxVar nyquistVar = 
     sweepGroup.addVar(NYQUIST_VELOCITY, "", NYQUIST_VELOCITY_LONG, 
-                      ncxxFloat, timeDim, METERS_PER_SECOND, true);
-  // nyquistVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+                      ncxxFloat, timeDim, METRES_PER_SECOND, true);
   for (size_t iray = 0; iray < nRays; iray++) {
     fvals[iray] = rays[iray]->getNyquistMps();
   }
@@ -1777,8 +1762,7 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
   
   NcxxVar unambigRangeVar = 
     sweepGroup.addVar(UNAMBIGUOUS_RANGE, "", UNAMBIGUOUS_RANGE_LONG,
-                      ncxxFloat, timeDim, METERS, true);
-  // unambigRangeVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
+                      ncxxFloat, timeDim, METRES, true);
   for (size_t iray = 0; iray < nRays; iray++) {
     if (rays[iray]->getUnambigRangeKm() > 0) {
       fvals[iray] = rays[iray]->getUnambigRangeKm() * 1000.0;
@@ -1823,7 +1807,6 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
   NcxxVar nSamplesVar = 
     sweepGroup.addVar(N_SAMPLES, "", N_SAMPLES_LONG,
                       ncxxInt, timeDim, "", true);
-  // nSamplesVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     ivals[iray] = rays[iray]->getNSamples();
   }
@@ -2045,14 +2028,14 @@ void Fm301RadxFile::_addSweepGeorefs(RadxVol &sweepVol,
     
     NcxxVar altitudeVar = 
       georefGroup.addVar(ALTITUDE, "", ALTITUDE_LONG,
-                         ncxxDouble, timeDim, METERS, true);
+                         ncxxDouble, timeDim, METRES, true);
     altitudeVar.putAtt(POSITIVE, UP);
     for (size_t iray = 0; iray < rays.size(); iray++) {
       const RadxGeoref *geo = rays[iray]->getGeoreference();
       if (geo) {
         double altKm = geo->getAltitudeKmMsl();
         if (altKm > -9990) {
-          dvals[iray] = altKm * 1000.0; // meters
+          dvals[iray] = altKm * 1000.0; // metres
         } else {
           dvals[iray] = Radx::missingMetaDouble;
         }
@@ -2066,14 +2049,14 @@ void Fm301RadxFile::_addSweepGeorefs(RadxVol &sweepVol,
 
     NcxxVar altitudeAglVar = 
       georefGroup.addVar(ALTITUDE_AGL, "", ALTITUDE_AGL_LONG,
-                         ncxxDouble, timeDim, METERS, true);
+                         ncxxDouble, timeDim, METRES, true);
     altitudeAglVar.putAtt(POSITIVE, UP);
     for (size_t iray = 0; iray < rays.size(); iray++) {
       const RadxGeoref *geo = rays[iray]->getGeoreference();
       if (geo) {
         double altKm = geo->getAltitudeKmAgl();
         if (altKm > -9990) {
-          dvals[iray] = altKm * 1000.0; // meters
+          dvals[iray] = altKm * 1000.0; // metres
         } else {
           dvals[iray] = Radx::missingMetaDouble;
         }
@@ -2243,7 +2226,7 @@ void Fm301RadxFile::_addSweepGeorefs(RadxVol &sweepVol,
     if (_geoCount.getEwVelocity() > 0) {
       NcxxVar var = 
         georefGroup.addVar(EASTWARD_VELOCITY, "", EASTWARD_VELOCITY_LONG,
-                           ncxxFloat, timeDim, METERS_PER_SECOND, true);
+                           ncxxFloat, timeDim, METRES_PER_SECOND, true);
       // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
@@ -2261,7 +2244,7 @@ void Fm301RadxFile::_addSweepGeorefs(RadxVol &sweepVol,
     if (_geoCount.getNsVelocity() > 0) {
       NcxxVar var = 
         georefGroup.addVar(NORTHWARD_VELOCITY, "", NORTHWARD_VELOCITY_LONG,
-                           ncxxFloat, timeDim, METERS_PER_SECOND, true);
+                           ncxxFloat, timeDim, METRES_PER_SECOND, true);
       // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
@@ -2279,7 +2262,7 @@ void Fm301RadxFile::_addSweepGeorefs(RadxVol &sweepVol,
     if (_geoCount.getVertVelocity() > 0) {
       NcxxVar var = 
         georefGroup.addVar(VERTICAL_VELOCITY, "", VERTICAL_VELOCITY_LONG,
-                           ncxxFloat, timeDim, METERS_PER_SECOND, true);
+                           ncxxFloat, timeDim, METRES_PER_SECOND, true);
       // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
@@ -2297,7 +2280,7 @@ void Fm301RadxFile::_addSweepGeorefs(RadxVol &sweepVol,
     if (_geoCount.getEwWind() > 0) {
       NcxxVar var = 
         georefGroup.addVar(EASTWARD_WIND, "", EASTWARD_WIND_LONG,
-                           ncxxFloat, timeDim, METERS_PER_SECOND, true);
+                           ncxxFloat, timeDim, METRES_PER_SECOND, true);
       // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
@@ -2315,7 +2298,7 @@ void Fm301RadxFile::_addSweepGeorefs(RadxVol &sweepVol,
     if (_geoCount.getNsWind() > 0) {
       NcxxVar var = 
         georefGroup.addVar(NORTHWARD_WIND, "", NORTHWARD_WIND_LONG,
-                           ncxxFloat, timeDim, METERS_PER_SECOND, true);
+                           ncxxFloat, timeDim, METRES_PER_SECOND, true);
       // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
@@ -2333,7 +2316,7 @@ void Fm301RadxFile::_addSweepGeorefs(RadxVol &sweepVol,
     if (_geoCount.getVertWind() > 0) {
       NcxxVar var = 
         georefGroup.addVar(VERTICAL_WIND, "", VERTICAL_WIND_LONG,
-                           ncxxFloat, timeDim, METERS_PER_SECOND, true);
+                           ncxxFloat, timeDim, METRES_PER_SECOND, true);
       // var.putAtt(META_GROUP, PLATFORM_VELOCITY);
       for (size_t iray = 0; iray < rays.size(); iray++) {
         const RadxGeoref *geo = rays[iray]->getGeoreference();
@@ -2478,7 +2461,6 @@ void Fm301RadxFile::_addSweepMon(RadxVol &sweepVol,
     monGroup.addVar(RADAR_MEASURED_TRANSMIT_POWER_H, "", 
                     RADAR_MEASURED_TRANSMIT_POWER_H_LONG,
                     ncxxFloat, timeDim, DBM, true);
-  // xmitPowerHVar.putAtt(META_GROUP, RADAR_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     fvals[iray] = _checkMissingFloat(rays[iray]->getMeasXmitPowerDbmH());
   }
@@ -2488,7 +2470,6 @@ void Fm301RadxFile::_addSweepMon(RadxVol &sweepVol,
     monGroup.addVar(RADAR_MEASURED_TRANSMIT_POWER_V, "", 
                     RADAR_MEASURED_TRANSMIT_POWER_V_LONG,
                     ncxxFloat, timeDim, DBM, true);
-  // xmitPowerVVar.putAtt(META_GROUP, RADAR_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     fvals[iray] = _checkMissingFloat(rays[iray]->getMeasXmitPowerDbmV());
   }
@@ -2503,7 +2484,6 @@ void Fm301RadxFile::_addSweepMon(RadxVol &sweepVol,
   NcxxVar scanRateVar = 
     monGroup.addVar(SCAN_RATE, "", SCAN_RATE_LONG, 
                     ncxxFloat, timeDim, DEGREES_PER_SECOND, true);
-  // scanRateVar.putAtt(META_GROUP, INSTRUMENT_PARAMETERS);
   for (size_t iray = 0; iray < nRays; iray++) {
     fvals[iray] = rays[iray]->getTrueScanRateDegPerSec();
   }
@@ -2518,7 +2498,6 @@ void Fm301RadxFile::_addSweepMon(RadxVol &sweepVol,
       monGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_HC, "", 
                       RADAR_ESTIMATED_NOISE_DBM_HC_LONG,
                       ncxxFloat, timeDim, DBM, true);
-    // estNoiseDbmHcVar.putAtt(META_GROUP, RADAR_PARAMETERS);
     for (size_t iray = 0; iray < nRays; iray++) {
       fvals[iray] = rays[iray]->getEstimatedNoiseDbmHc();
     }
@@ -2530,7 +2509,6 @@ void Fm301RadxFile::_addSweepMon(RadxVol &sweepVol,
       monGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_VC, "", 
                       RADAR_ESTIMATED_NOISE_DBM_VC_LONG,
                       ncxxFloat, timeDim, DBM, true);
-    // estNoiseDbmVcVar.putAtt(META_GROUP, RADAR_PARAMETERS);
     for (size_t iray = 0; iray < nRays; iray++) {
       fvals[iray] = rays[iray]->getEstimatedNoiseDbmVc();
     }
@@ -2542,7 +2520,6 @@ void Fm301RadxFile::_addSweepMon(RadxVol &sweepVol,
       monGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_HX, "", 
                       RADAR_ESTIMATED_NOISE_DBM_HX_LONG,
                       ncxxFloat, timeDim, DBM, true);
-    // estNoiseDbmHxVar.putAtt(META_GROUP, RADAR_PARAMETERS);
     for (size_t iray = 0; iray < nRays; iray++) {
       fvals[iray] = rays[iray]->getEstimatedNoiseDbmHx();
     }
@@ -2554,7 +2531,6 @@ void Fm301RadxFile::_addSweepMon(RadxVol &sweepVol,
       monGroup.addVar(RADAR_ESTIMATED_NOISE_DBM_VX, "", 
                       RADAR_ESTIMATED_NOISE_DBM_VX_LONG,
                       ncxxFloat, timeDim, DBM, true);
-    // estNoiseDbmVxVar.putAtt(META_GROUP, RADAR_PARAMETERS);
     for (size_t iray = 0; iray < nRays; iray++) {
       fvals[iray] = rays[iray]->getEstimatedNoiseDbmVx();
     }

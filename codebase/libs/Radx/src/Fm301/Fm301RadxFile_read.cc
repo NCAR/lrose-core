@@ -1987,7 +1987,7 @@ void Fm301RadxFile::_readSweepRange(NcxxGroup &group, NcxxDim &dim,
       continue;
     }
 
-    if (att.getName().find(METERS_TO_CENTER_OF_FIRST_GATE) != string::npos) {
+    if (att.getName().find(METRES_TO_CENTER_OF_FIRST_GATE) != string::npos) {
       vector<double> vals;
       try {
         att.getValues(vals);
@@ -1996,7 +1996,7 @@ void Fm301RadxFile::_readSweepRange(NcxxGroup &group, NcxxDim &dim,
       }
     }
 
-    if (att.getName().find(METERS_BETWEEN_GATES) != string::npos) {
+    if (att.getName().find(METRES_BETWEEN_GATES) != string::npos) {
       vector<double> vals;
       try {
         att.getValues(vals);
@@ -2207,7 +2207,7 @@ void Fm301RadxFile::_readGeorefVariables()
   _readRayVar(georefGroup, _timeDimSweep, GEOREF_UNIT_NUM, _geoUnitNum, false);
   _readRayVar(georefGroup, _timeDimSweep, GEOREF_UNIT_ID, _geoUnitId, false);
 
-  _readRayVar(georefGroup, _timeDimSweep, ALTITUDE_AGL, _geoAltitudeAgl, false); // meters
+  _readRayVar(georefGroup, _timeDimSweep, ALTITUDE_AGL, _geoAltitudeAgl, false); // metres
 
   _readRayVar(georefGroup, _timeDimSweep, EASTWARD_VELOCITY, _geoEwVelocity, false);
   _readRayVar(georefGroup, _timeDimSweep, NORTHWARD_VELOCITY, _geoNsVelocity, false);
