@@ -246,7 +246,7 @@ void TimeControl::_populateGui()
   realtimeFrameLayout->addWidget(_realtimeSelector, 0,
                                  Qt::AlignBottom | Qt::AlignCenter);
   
-#if QT_VERSION >= 0x067000
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
   connect(_realtimeSelector, &QCheckBox::checkStateChanged, this,
           &TimeControl::_setRealtime);
 #else
@@ -275,14 +275,14 @@ void TimeControl::_populateGui()
   sweepFrameLayout->addWidget(_sweepSelector, 0,
                               Qt::AlignBottom | Qt::AlignCenter);
   
-#if QT_VERSION >= 0x067000
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
   connect(_sweepSelector, &QCheckBox::checkStateChanged, this,
           &TimeControl::_setSweep);
 #else
   connect(_sweepSelector, &QCheckBox::stateChanged, this,
           &TimeControl::_setSweep);
 #endif
-  
+
   // loop dwell (msecs)
   
   QFrame *loopDwellFrame = new QFrame(timeUpper);
