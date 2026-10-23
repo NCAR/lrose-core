@@ -2826,36 +2826,65 @@ NcxxVar Fm301RadxFile::_createFieldVar(const RadxField &field,
         break;
       }
       case NcxxType::nc_INT: {
+
         var.addScalarAttr(FILL_VALUE, (int) field.getMissingSi32());
         var.addScalarAttr(SCALE_FACTOR, (float) field.getScale());
         var.addScalarAttr(ADD_OFFSET, (float) field.getOffset());
-        vector<int> validRange{
-          (int) field.getMinValidValue(),
-          (int) field.getMaxValidValue()
+
+        // get min and max valid values
+        double minVal = (field.getMinValidValue() - field.getOffset()) / field.getScale();
+        double maxVal = (field.getMaxValidValue() - field.getOffset()) / field.getScale();
+        // constrain to within int32 range
+        minVal = std::clamp(minVal, double(INT32_MIN), double(INT32_MAX));
+        maxVal = std::clamp(maxVal, double(INT32_MIN), double(INT32_MAX));
+        // construct valid range vector
+        vector<int32_t> validRange {
+          static_cast<int32_t>(minVal), static_cast<int32_t>(maxVal)
         };
+        // put the attribute
         var.putAtt(VALID_RANGE, NcxxType::nc_INT, validRange.size(), validRange.data());
+        
         break;
+
       }
       case NcxxType::nc_SHORT: {
         var.addScalarAttr(FILL_VALUE, (short) field.getMissingSi16());
         var.addScalarAttr(SCALE_FACTOR, (float) field.getScale());
         var.addScalarAttr(ADD_OFFSET, (float) field.getOffset());
-        vector<short> validRange{
-          (short) field.getMinValidValue(),
-          (short) field.getMaxValidValue()
+
+        // get min and max valid values
+        double minVal = (field.getMinValidValue() - field.getOffset()) / field.getScale();
+        double maxVal = (field.getMaxValidValue() - field.getOffset()) / field.getScale();
+        // constrain to within int16 range
+        minVal = std::clamp(minVal, double(INT16_MIN), double(INT16_MAX));
+        maxVal = std::clamp(maxVal, double(INT16_MIN), double(INT16_MAX));
+        // construct valid range vector
+        vector<int16_t> validRange {
+          static_cast<int16_t>(minVal), static_cast<int16_t>(maxVal)
         };
+        // put the attribute
         var.putAtt(VALID_RANGE, NcxxType::nc_SHORT, validRange.size(), validRange.data());
+        
         break;
       }
       case NcxxType::nc_BYTE: {
         var.addScalarAttr(FILL_VALUE, (signed char) field.getMissingSi08());
         var.addScalarAttr(SCALE_FACTOR, (float) field.getScale());
         var.addScalarAttr(ADD_OFFSET, (float) field.getOffset());
-        vector<signed char> validRange{
-          (signed char) field.getMinValidValue(),
-          (signed char) field.getMaxValidValue()
+
+        // get min and max valid values
+        double minVal = (field.getMinValidValue() - field.getOffset()) / field.getScale();
+        double maxVal = (field.getMaxValidValue() - field.getOffset()) / field.getScale();
+        // constrain to within int8 range
+        minVal = std::clamp(minVal, double(INT8_MIN), double(INT8_MAX));
+        maxVal = std::clamp(maxVal, double(INT8_MIN), double(INT8_MAX));
+        // construct valid range vector
+        vector<int8_t> validRange {
+          static_cast<int8_t>(minVal), static_cast<int8_t>(maxVal)
         };
+        // put the attribute
         var.putAtt(VALID_RANGE, NcxxType::nc_BYTE, validRange.size(), validRange.data());
+        
         break;
       }
     } // switch
