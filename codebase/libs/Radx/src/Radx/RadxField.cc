@@ -168,6 +168,9 @@ void RadxField::_init()
   _minVal = Radx::missingMetaDouble;
   _maxVal = Radx::missingMetaDouble;
 
+  _minValidVal = Radx::missingMetaDouble;
+  _maxValidVal = Radx::missingMetaDouble;
+
   _setMissingToDefaults();
   _buf.clear();
   _data = NULL;
@@ -261,6 +264,9 @@ RadxField &RadxField::_copy(const RadxField &rhs)
   _minVal = rhs._minVal;
   _maxVal = rhs._maxVal;
   
+  _minValidVal = rhs._minValidVal;
+  _maxValidVal = rhs._maxValidVal;
+  
   return *this;
   
 }
@@ -277,6 +283,8 @@ void RadxField::clearData()
   _dataIsLocal = true;
   _minVal = Radx::missingMetaDouble;
   _maxVal = Radx::missingMetaDouble;
+  _minValidVal = Radx::missingMetaDouble;
+  _maxValidVal = Radx::missingMetaDouble;
   clearPacking();
 
 }
@@ -1332,8 +1340,12 @@ void RadxField::setDataRemote(const RadxField &other,
 
   _dataType = other._dataType;
   _byteWidth = other._byteWidth;
+
   _minVal = other._minVal;
   _maxVal = other._maxVal;
+  _minValidVal = other._minValidVal;
+  _maxValidVal = other._maxValidVal;
+
   _missingFl64 = other._missingFl64;
   _missingFl32 = other._missingFl32;
   _missingSi32 = other._missingSi32;

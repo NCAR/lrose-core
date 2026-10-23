@@ -112,6 +112,7 @@ public:
   static constexpr const char* DEGREES_EAST = "degrees_east";
   static constexpr const char* DEGREES_NORTH = "degrees_north";
   static constexpr const char* DEGREES_PER_SECOND = "degrees per second";
+  static constexpr const char* DEGREES_PER_SECOND_SHORT = "degrees/s";
   static constexpr const char* DIELECTRIC_FACTOR_USED = "dielectric_factor_used";
   static constexpr const char* DORADE = "dorade";
   static constexpr const char* DOWN = "down";
@@ -154,6 +155,7 @@ public:
   static constexpr const char* HEADING = "heading";
   static constexpr const char* HEADING_CHANGE_RATE = "heading_change_rate";
   static constexpr const char* HEADING_CORRECTION = "heading_correction";
+  static constexpr const char* HEIGHT_ABOVE_REFERENCE_ELLIPSOID = "height_above_reference_ellipsoid";
   static constexpr const char* HISTORY = "history";
   static constexpr const char* HZ = "s-1";
   static constexpr const char* INDEX_VAR_NAME = "index_var_name";
@@ -253,6 +255,7 @@ public:
   static constexpr const char* RADAR_MEASURED_TRANSMIT_POWER_V = "measured_transmit_power_v";
   static constexpr const char* RADAR_PARAMETERS = "radar_parameters";
   static constexpr const char* RADAR_RX_BANDWIDTH = "radar_rx_bandwidth";
+  static constexpr const char* RADIATION_FREQUENCY = "radiation_frequency";
   static constexpr const char* RANGE = "range";
   static constexpr const char* RANGE_CORRECTION = "range_correction";
   static constexpr const char* RAYS_ARE_INDEXED = "rays_are_indexed";

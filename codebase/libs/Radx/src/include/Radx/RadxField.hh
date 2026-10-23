@@ -332,6 +332,11 @@ public:
                    double scale,
                    double offset);
 
+  /// Set min and max valid values
+
+  void setMinValidVal(double val) { _minValidVal = val; }
+  void setMaxValidVal(double val) { _maxValidVal = val; }
+
   //@}
   
   /// \name Add ray of data
@@ -789,6 +794,11 @@ public:
 
   double getMaxValue() const { return _maxVal; }
 
+  /// Get minumum and maximum valid values
+
+  double getMinValidValue() const { return _minValidVal; }
+  double getMaxValidValue() const { return _maxValidVal; }
+
   /// Get sampling ratio.
   ///
   /// Sometimes the number of samples used to compute different
@@ -1160,6 +1170,11 @@ private:
 
   mutable double _minVal;
   mutable double _maxVal;
+
+  // max and min valid values in field
+
+  mutable double _minValidVal;
+  mutable double _maxValidVal;
 
   // actual missing value in use, by type
 

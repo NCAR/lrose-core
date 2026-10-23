@@ -79,6 +79,7 @@ public:
   static constexpr const char* METRES = "metres";
   static constexpr const char* METRES_BETWEEN_GATES = "metres_between_gates";
   static constexpr const char* METRES_PER_SECOND = "metres per second";
+  static constexpr const char* METRES_PER_SECOND_SHORT = "metres/s";
   static constexpr const char* METRES_TO_CENTER_OF_FIRST_GATE = "metres_to_center_of_first_gate";
   
 private:

@@ -457,6 +457,8 @@ typedef struct {
   string units;
   string wmo__parameter_uri;
   string wmo__parameter_name;
+  double min_valid_val;
+  double max_valid_val;
 } field_attribute_t;
 
 paramdef struct field_attribute_t {
@@ -466,8 +468,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_equivalent_reflectivity_factor_h",
       long_name = "Equivalent reflectivity factor H",
       units = "dBZ",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -60,
+      max_valid_val = 90
     }
     ,
     {
@@ -475,8 +479,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_equivalent_reflectivity_factor_v",
       long_name = "Equivalent reflectivity factor V",
       units = "dBZ",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -60,
+      max_valid_val = 90
     }
     ,
     {
@@ -484,8 +490,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_linear_equivalent_reflectivity_factor_h",
       long_name = "Linear equivalent reflectivity factor H",
       units = "mm6 m-3",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = 0,
+      max_valid_val = 1.0e9
     }
     ,
     {
@@ -493,8 +501,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_linear_equivalent_reflectivity_factor_v",
       long_name = "Linear equivalent reflectivity factor V",
       units = "mm6 m-3",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = 0,
+      max_valid_val = 1.0e9
     }
     ,
     {
@@ -502,8 +512,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_equivalent_reflectivity_factor_h",
       long_name = "Total power H (uncorrected reflectivity)",
       units = "dBZ",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -60,
+      max_valid_val = 90
     }
     ,
     {
@@ -511,8 +523,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_equivalent_reflectivity_factor_v",
       long_name = "Total power V (uncorrected reflectivity)",
       units = "dBZ",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -60,
+      max_valid_val = 90
     }
     ,
     {
@@ -520,8 +534,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_linear_equivalent_reflectivity_factor_h",
       long_name = "Linear total power H (uncorrected reflectivity)",
       units = "mm6 m-3",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = 0,
+      max_valid_val = 1.0e9
     }
     ,
     {
@@ -529,8 +545,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_linear_equivalent_reflectivity_factor_v",
       long_name = "Linear total power V (uncorrected reflectivity)",
       units = "mm6 m-3",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = 0,
+      max_valid_val = 1.0e9
     }
     ,
     {
@@ -538,8 +556,10 @@ paramdef struct field_attribute_t {
       standard_name = "radial_velocity_of_scatterers_away_from_instrument_h",
       long_name = "Radial velocity of scatterers away from instrument H",
       units = "m/s",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -300,
+      max_valid_val = 300
     }
     ,
     {
@@ -547,8 +567,10 @@ paramdef struct field_attribute_t {
       standard_name = "radial_velocity_of_scatterers_away_from_instrument_v",
       long_name = "Radial velocity of scatterers away from instrument V",
       units = "m/s",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -300,
+      max_valid_val = 300
     }
     ,
     {
@@ -556,8 +578,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_doppler_spectrum_width_h",
       long_name = "Doppler spectrum width H",
       units = "m/s",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = 0,
+      max_valid_val = 100
     }
     ,
     {
@@ -565,8 +589,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_doppler_spectrum_width_v",
       long_name = "Doppler spectrum width V",
       units = "m/s",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = 0,
+      max_valid_val = 100
     }
     ,
     {
@@ -574,8 +600,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_differential_reflectivity_hv",
       long_name = "Log differential reflectivity H/V",
       units = "dB",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -10,
+      max_valid_val = 20
     }
     ,
     {
@@ -583,8 +611,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_linear_depolarization_ratio",
       long_name = "Log-linear depolarization ratio HV",
       units = "dB",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -50,
+      max_valid_val = 50
     }
     ,
     {
@@ -592,8 +622,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_linear_depolarization_ratio_h",
       long_name = "Log-linear depolarization ratio H",
       units = "dB",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -50,
+      max_valid_val = 50
     }
     ,
     {
@@ -601,8 +633,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_linear_depolarization_ratio_v",
       long_name = "Log-linear depolarization ratio V",
       units = "dB",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -50,
+      max_valid_val = 50
     }
     ,
     {
@@ -610,8 +644,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_differential_phase_hv",
       long_name = "Differential phase HV",
       units = "degrees",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -360,
+      max_valid_val = 360
     }
     ,
     {
@@ -619,8 +655,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_specific_differential_phase_hv",
       long_name = "Specific differential phase HV",
       units = "degrees/km",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -20,
+      max_valid_val = 50
     }
     ,
     {
@@ -628,26 +666,32 @@ paramdef struct field_attribute_t {
       standard_name = "radar_differential_phase_copolar_h_crosspolar_v",
       long_name = "Cross-polar differential phase",
       units = "degrees",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = -360,
+      max_valid_val = 360
     }
     ,
     {
       fm301_field_name = "RHOHV",
       standard_name = "radar_correlation_coefficient_hv",
       long_name = "Correlation coefficient HV",
-      units = "1",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      units = "",
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = 0,
+      max_valid_val = 1
     }
     ,
     {
       fm301_field_name = "RHOHX",
       standard_name = "radar_correlation_coefficient_copolar_h_crosspolar_v",
       long_name = "Co-to-cross polar correlation coefficient",
-      units = "1",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      units = "",
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = 0,
+      max_valid_val = 1
     }
     ,
     {
@@ -655,8 +699,10 @@ paramdef struct field_attribute_t {
       standard_name = "radar_scatterer_classification",
       long_name = "Radar echo classification",
       units = "",
-      wmo__parameter_uri = "unknown",
-      wmo__parameter_name = "unknown"
+      wmo__parameter_uri = "None",
+      wmo__parameter_name = "None",
+      min_valid_val = 0,
+      max_valid_val = 9999
     }
   };
   p_descr = "Attribute specification for selected output field variables.";

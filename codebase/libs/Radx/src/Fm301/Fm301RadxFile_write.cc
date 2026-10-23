@@ -624,9 +624,13 @@ void Fm301RadxFile::_addGlobalAttributes()
   _file.addGlobAttr(WMO__CF_PROFILE, WmoCfProfile);
   if (_writeVol->getWmoDataCategory().size() > 0) {
     _file.addGlobAttr(WMO__DATA_CATEGORY, _writeVol->getWmoDataCategory());
+  } else {
+    _file.addGlobAttr(WMO__DATA_CATEGORY, "None");
   }
   if (_writeVol->getWmoDataPolicy().size() > 0) {
     _file.addGlobAttr(WMO__DATA_POLICY, _writeVol->getWmoDataPolicy());
+  } else {
+    _file.addGlobAttr(WMO__DATA_POLICY, "recommended");
   }
   if (_writeVol->getWmoOriginatingCentre().size() > 0) {
     _file.addGlobAttr(WMO__ORIGINATING_CENTRE, _writeVol->getWmoOriginatingCentre());
@@ -1103,15 +1107,42 @@ void Fm301RadxFile::_addFrequency(NcxxGroup &group)
   }
   
   NcxxVar var =
-    group.addVar(FREQUENCY, "", FREQUENCY_LONG,
+    group.addVar(FREQUENCY, RADIATION_FREQUENCY, FREQUENCY_LONG,
                  ncxxFloat, _frequencyDim, HZ, true);
-
+  var.putAtt(STANDARD_NAME, RADIATION_FREQUENCY);
+  
   RadxArray<float> fvals_;
   float *fvals = fvals_.alloc(nFreq);
   for (size_t ii = 0; ii < nFreq; ii++) {
     fvals[ii] = frequency[ii];
   }
   var.putVal(fvals);
+
+}
+
+//////////////////////////////////////////////
+// add a single frequency
+// if not available, write 0
+// throws exception on error
+
+void Fm301RadxFile::_addSingleFrequency(NcxxGroup &group)
+{
+  
+  const vector<double> &frequency = _writeVol->getFrequencyHz();
+  size_t nFreq = frequency.size();
+  double missingVal = 0.0;
+  double freq;
+  if (nFreq < 1) {
+    freq = missingVal;
+  } else {
+    freq = frequency[0];
+  }
+  
+  NcxxVar var =
+    group.addVar(FREQUENCY, RADIATION_FREQUENCY, FREQUENCY_LONG,
+                 ncxxFloat, HZ, true);
+  
+  var.putVal(freq);
 
 }
 
@@ -1305,6 +1336,7 @@ void Fm301RadxFile::_addLocation()
       _file.addVar(LATITUDE, "", LATITUDE_LONG,
                    ncxxDouble, DEGREES_NORTH, true);
     var.putVal(latitude);
+    var.putAtt(STANDARD_NAME, LATITUDE);
   }
   
   // longitude
@@ -1314,6 +1346,7 @@ void Fm301RadxFile::_addLocation()
       _file.addVar(LONGITUDE, "", LONGITUDE_LONG,
                    ncxxDouble, DEGREES_EAST, true);
     var.putVal(longitude);
+    var.putAtt(STANDARD_NAME, LONGITUDE);
   }
   
   // altitude MSL
@@ -1323,6 +1356,7 @@ void Fm301RadxFile::_addLocation()
       _file.addVar(ALTITUDE, "", ALTITUDE_LONG,
                    ncxxDouble, METRES, true);
     var.putAtt(POSITIVE, UP);
+    var.putAtt(STANDARD_NAME, HEIGHT_ABOVE_REFERENCE_ELLIPSOID);
     var.putVal(altitudeM);
   }
   
@@ -1526,7 +1560,7 @@ void Fm301RadxFile::_addSweeps()
   // save sweep fixed angles at root level
   
   try {
-    NcxxVar var = _file.addVar(SWEEP_FIXED_ANGLE, "", SWEEP_FIXED_ANGLE_LONG, 
+    NcxxVar var = _file.addVar(FIXED_ANGLE, FIXED_ANGLE, "", 
                                ncxxFloat, _sweepDim, DEGREES, true);
     RadxArray<float> fvals_;
     float *fvals = fvals_.alloc(nSweeps);
@@ -1676,9 +1710,10 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
   // add range coordinate variable
   
   NcxxVar rangeVar = sweepGroup.addVar(RANGE, ncxxFloat, rangeDim);
-  rangeVar.putAtt(LONG_NAME, RANGE_LONG);
-  rangeVar.putAtt(LONG_NAME, "Range from instrument to center of gate");
+  rangeVar.putAtt(STANDARD_NAME, "projection_range_coordinate");
+  rangeVar.putAtt(LONG_NAME, "range_to_measurement_volume");
   rangeVar.putAtt(UNITS, METRES);
+  rangeVar.putAtt(AXIS, "radial_range_coordinate");
   rangeVar.putAtt(SPACING_IS_CONSTANT, "true");
   rangeVar.addScalarAttr(METRES_TO_CENTER_OF_FIRST_GATE,
                          (float) startRangeKm * 1000.0);
@@ -1696,19 +1731,25 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
   // elevation
   
   NcxxVar elVar =
-    sweepGroup.addVar(ELEVATION, "", ELEVATION_LONG,
+    sweepGroup.addVar(ELEVATION,
+                      "sensor_to_target_elevation_angle",
+                      "Elevation angle from horizontal plane",
                       ncxxFloat, timeDim, DEGREES, true);
+  elVar.putAtt(AXIS, "radial_elevation_coordinate");
   for (size_t iray = 0; iray < nRays; iray++) {
     fvals[iray] =  rays[iray]->getElevationDeg();
   }
-  // elVar.putAtt(POSITIVE, UP);
+  elVar.putAtt(POSITIVE, UP);
   elVar.putVal(fvals);
 
   // azimuth 
 
   NcxxVar azVar = 
-    sweepGroup.addVar(AZIMUTH, "", AZIMUTH_LONG,
+    sweepGroup.addVar(AZIMUTH,
+                      "sensor_to_target_azimuth_angle",
+                      "Azimuth angle from true north",
                       ncxxFloat, timeDim, DEGREES, true);
+  azVar.putAtt(AXIS, "radial_azimuth_coordinate");
   for (size_t iray = 0; iray < nRays; iray++) {
     fvals[iray] = rays[iray]->getAzimuthDeg();
   }
@@ -1751,8 +1792,10 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
   // nyquist
   
   NcxxVar nyquistVar = 
-    sweepGroup.addVar(NYQUIST_VELOCITY, "", NYQUIST_VELOCITY_LONG, 
-                      ncxxFloat, timeDim, METRES_PER_SECOND, true);
+    sweepGroup.addVar(NYQUIST_VELOCITY, NYQUIST_VELOCITY_LONG,
+                      NYQUIST_VELOCITY_LONG, 
+                      ncxxFloat, timeDim,
+                      METRES_PER_SECOND_SHORT, true);
   for (size_t iray = 0; iray < nRays; iray++) {
     fvals[iray] = rays[iray]->getNyquistMps();
   }
@@ -1826,7 +1869,7 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
     }
     calIndexVar.putVal(ivals);
   }
-  
+
 }
 
 //////////////////////////////////////////////
@@ -1896,11 +1939,10 @@ void Fm301RadxFile::_addSweepScalars(const RadxSweep *sweep,
   }
 
   // target scan rate
-  if ( sweep->getTargetScanRateDegPerSec() >= 0) {
+  if (sweep->getTargetScanRateDegPerSec() >= 0) {
     NcxxVar var = 
       sweepGroup.addVar(TARGET_SCAN_RATE, "", TARGET_SCAN_RATE_LONG,
-                        ncxxFloat, "", true);
-    var.putAtt(UNITS, DEGREES_PER_SECOND);
+                        ncxxFloat, DEGREES_PER_SECOND_SHORT, true);
     var.putVal((float) sweep->getTargetScanRateDegPerSec());
   }
 
@@ -1927,6 +1969,10 @@ void Fm301RadxFile::_addSweepScalars(const RadxSweep *sweep,
     var.putVal((float) sweep->getAngleResDeg());
   }
 
+  // frequency
+  
+  _addSingleFrequency(sweepGroup);
+  
   // intermediate frequency
   if (sweep->getIntermedFreqHz() > 0) {
     NcxxVar var = 
@@ -2765,29 +2811,51 @@ NcxxVar Fm301RadxFile::_createFieldVar(const RadxField &field,
     switch (ncType.getTypeClass()) {
       case NcxxType::nc_DOUBLE: {
         var.addScalarAttr(FILL_VALUE, (double) field.getMissingFl64());
+        vector<double> validRange{ field.getMinValidValue(), field.getMaxValidValue() };
+        var.putAtt(VALID_RANGE, NcxxType::nc_DOUBLE, validRange.size(), validRange.data());
         break;
       }
       case NcxxType::nc_FLOAT:
       default: {
         var.addScalarAttr(FILL_VALUE, (float) field.getMissingFl32());
+        vector<float> validRange{
+          (float) field.getMinValidValue(),
+          (float) field.getMaxValidValue()
+        };
+        var.putAtt(VALID_RANGE, NcxxType::nc_FLOAT, validRange.size(), validRange.data());
         break;
       }
       case NcxxType::nc_INT: {
         var.addScalarAttr(FILL_VALUE, (int) field.getMissingSi32());
         var.addScalarAttr(SCALE_FACTOR, (float) field.getScale());
         var.addScalarAttr(ADD_OFFSET, (float) field.getOffset());
+        vector<int> validRange{
+          (int) field.getMinValidValue(),
+          (int) field.getMaxValidValue()
+        };
+        var.putAtt(VALID_RANGE, NcxxType::nc_INT, validRange.size(), validRange.data());
         break;
       }
       case NcxxType::nc_SHORT: {
         var.addScalarAttr(FILL_VALUE, (short) field.getMissingSi16());
         var.addScalarAttr(SCALE_FACTOR, (float) field.getScale());
         var.addScalarAttr(ADD_OFFSET, (float) field.getOffset());
+        vector<short> validRange{
+          (short) field.getMinValidValue(),
+          (short) field.getMaxValidValue()
+        };
+        var.putAtt(VALID_RANGE, NcxxType::nc_SHORT, validRange.size(), validRange.data());
         break;
       }
       case NcxxType::nc_BYTE: {
         var.addScalarAttr(FILL_VALUE, (signed char) field.getMissingSi08());
         var.addScalarAttr(SCALE_FACTOR, (float) field.getScale());
         var.addScalarAttr(ADD_OFFSET, (float) field.getOffset());
+        vector<signed char> validRange{
+          (signed char) field.getMinValidValue(),
+          (signed char) field.getMaxValidValue()
+        };
+        var.putAtt(VALID_RANGE, NcxxType::nc_BYTE, validRange.size(), validRange.data());
         break;
       }
     } // switch
@@ -3496,6 +3564,9 @@ void Fm301RadxFile::_setFm301Attributes(int sweepNum, RadxVol &sweepVol)
         if (wmoParameterName.size() > 0) {
           fld.setWmoParameterName(wmoParameterName);
         }
+
+        fld.setMinValidVal(attr.min_valid_val);
+        fld.setMaxValidVal(attr.max_valid_val);
 
         isFm301Field = true;
         break;

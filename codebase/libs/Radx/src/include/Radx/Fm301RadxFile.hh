@@ -486,6 +486,7 @@ private:
   void _addLidarParameters();
   
   void _addFrequency(NcxxGroup &group);
+  void _addSingleFrequency(NcxxGroup &group);
   void _addGeorefCorrections();
   void _addLocation();
   void _addProjection();
