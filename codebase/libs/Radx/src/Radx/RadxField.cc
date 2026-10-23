@@ -197,7 +197,7 @@ RadxField &RadxField::copyMetaData(const RadxField &rhs)
   _longName = rhs._longName;
   _standardName = rhs._standardName;
   _wmoParameterName = rhs._wmoParameterName;
-  _wmoParameterUri = rhs._wmoParameterUri;
+  _wmoParameterUrl = rhs._wmoParameterUrl;
   _units = rhs._units;
   _legendXml = rhs._legendXml;
   _thresholdingXml = rhs._thresholdingXml;
@@ -2985,8 +2985,8 @@ void RadxField::print(ostream &out) const
   if (_wmoParameterName.size() > 0) {
     out << "  wmoParameterName: " << _wmoParameterName << endl;
   }
-  if (_wmoParameterUri.size() > 0) {
-    out << "  wmoParameterUri: " << _wmoParameterUri << endl;
+  if (_wmoParameterUrl.size() > 0) {
+    out << "  wmoParameterUrl: " << _wmoParameterUrl << endl;
   }
   if (_comment.size() > 0) {
     out << "  comment: " << _comment << endl;
@@ -4107,7 +4107,7 @@ void RadxField::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
   xml += RadxXml::writeString("longName", level + 1, _longName);
   xml += RadxXml::writeString("standardName", level + 1, _standardName);
   xml += RadxXml::writeString("wmoParameterName", level + 1, _wmoParameterName);
-  xml += RadxXml::writeString("wmoParameterUri", level + 1, _wmoParameterUri);
+  xml += RadxXml::writeString("wmoParameterUrl", level + 1, _wmoParameterUrl);
   xml += RadxXml::writeString("units", level + 1, _units);
   xml += RadxXml::writeString("legendXml", level + 1, _legendXml);
   xml += RadxXml::writeString("thresholdingXml", level + 1, _thresholdingXml);
@@ -4168,10 +4168,10 @@ int RadxField::_setMetaStringsFromXml(const char *xml,
     iret = -1;
   }
   if (RadxXml::readString(contents, "wmoParameterName", _wmoParameterName)) {
-    _wmoParameterName = "unknown";
+    _wmoParameterName = "None";
   }
-  if (RadxXml::readString(contents, "wmoParameterUri", _wmoParameterUri)) {
-    _wmoParameterUri = "unknown";
+  if (RadxXml::readString(contents, "wmoParameterUrl", _wmoParameterUrl)) {
+    _wmoParameterUrl = "None";
   }
   if (RadxXml::readString(contents, "units", _units)) {
     missingTags.push_back("units");

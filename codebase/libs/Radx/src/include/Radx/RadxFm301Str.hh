@@ -72,7 +72,7 @@ public:
   static constexpr const char* WMO__ORIGINATING_CENTRE = "wmo__originating_centre";
   static constexpr const char* WMO__ORIGINATING_SUB_CENTRE = "wmo__originating_sub_centre";
   static constexpr const char* WMO__PARAMETER_NAME = "wmo__parameter_name";
-  static constexpr const char* WMO__PARAMETER_URI = "wmo__parameter_uri";
+  static constexpr const char* WMO__PARAMETER_URL = "wmo__parameter_url";
   static constexpr const char* WMO__UPDATE_SEQUENCE_NUMBER = "wmo__update_sequence_number";
   static constexpr const char* WMO__WSI = "wmo__wsi";
 

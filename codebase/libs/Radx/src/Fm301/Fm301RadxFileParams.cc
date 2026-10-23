@@ -912,7 +912,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("field_attributes");
     tt->descr = tdrpStrDup("Attribute specification for selected output field variables.");
-    tt->help = tdrpStrDup("If a string is empty, the existing attribute will be unchanged. The well-known radar moment names, standard_name values and long_name values follow FM301 Table 301-9. wmo__parameter_uri and wmo__parameter_name are placeholders until the applicable WMO radar parameter registry values are identified.");
+    tt->help = tdrpStrDup("If a string is empty, the existing attribute will be unchanged. The well-known radar moment names, standard_name values and long_name values follow FM301 Table 301-9. wmo__parameter_url and wmo__parameter_name are placeholders until the applicable WMO radar parameter registry values are identified.");
     tt->array_offset = (char *) &_field_attributes - &_start_;
     tt->array_n_offset = (char *) &field_attributes_n - &_start_;
     tt->is_array = TRUE;
@@ -944,10 +944,10 @@
       tt->struct_def.fields[3].rel_offset = 
         (char *) &_field_attributes->units - (char *) _field_attributes;
       tt->struct_def.fields[4].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[4].fname = tdrpStrDup("wmo__parameter_uri");
+      tt->struct_def.fields[4].fname = tdrpStrDup("wmo__parameter_url");
       tt->struct_def.fields[4].ptype = STRING_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_field_attributes->wmo__parameter_uri - (char *) _field_attributes;
+        (char *) &_field_attributes->wmo__parameter_url - (char *) _field_attributes;
       tt->struct_def.fields[5].ftype = tdrpStrDup("string");
       tt->struct_def.fields[5].fname = tdrpStrDup("wmo__parameter_name");
       tt->struct_def.fields[5].ptype = STRING_TYPE;

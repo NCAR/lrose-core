@@ -2677,11 +2677,11 @@ void Cf2RadxFile::_readFieldAttributes(const NcxxVar &var)
   } catch (NcxxException& e) {
   }
   
-  _fieldWmoParameterUri.clear();
+  _fieldWmoParameterUrl.clear();
   try {
-    NcxxVarAtt att = var.getAtt(RadxFm301Str::WMO__PARAMETER_URI);
+    NcxxVarAtt att = var.getAtt(RadxFm301Str::WMO__PARAMETER_URL);
     if (!att.isNull()) {
-      _fieldWmoParameterUri = att.asString();
+      _fieldWmoParameterUrl = att.asString();
     }
   } catch (NcxxException& e) {
   }

@@ -163,7 +163,7 @@ public:
   /// Set WMO attributes
 
   void setWmoParameterName(const string &val) { _wmoParameterName = val; }
-  void setWmoParameterUri(const string &val) { _wmoParameterUri = val; }
+  void setWmoParameterUrl(const string &val) { _wmoParameterUrl = val; }
 
   /// Set legend XML
   /// This is intended for 'discrete' fields - i.e. those which
@@ -721,7 +721,7 @@ public:
   /// Get WMO attributes
   
   const string &getWmoParameterName() const { return _wmoParameterName; }
-  const string &getWmoParameterUri() const { return _wmoParameterUri; }
+  const string &getWmoParameterUrl() const { return _wmoParameterUrl; }
 
   /// Get units for field.
   
@@ -1119,7 +1119,7 @@ private:
   string _units;
 
   string _wmoParameterName;
-  string _wmoParameterUri;
+  string _wmoParameterUrl;
 
   string _legendXml;
   string _thresholdingXml;

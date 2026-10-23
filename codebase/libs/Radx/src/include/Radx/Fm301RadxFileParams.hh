@@ -76,7 +76,7 @@ public:
     char* standard_name;
     char* long_name;
     char* units;
-    char* wmo__parameter_uri;
+    char* wmo__parameter_url;
     char* wmo__parameter_name;
     double min_valid_val;
     double max_valid_val;

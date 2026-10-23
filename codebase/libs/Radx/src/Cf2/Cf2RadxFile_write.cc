@@ -2713,8 +2713,8 @@ NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
     if (field.getWmoParameterName().size() > 0) {
       var.putAtt(RadxFm301Str::WMO__PARAMETER_NAME, field.getWmoParameterName());
     }
-    if (field.getWmoParameterUri().size() > 0) {
-      var.putAtt(RadxFm301Str::WMO__PARAMETER_URI, field.getWmoParameterUri());
+    if (field.getWmoParameterUrl().size() > 0) {
+      var.putAtt(RadxFm301Str::WMO__PARAMETER_URL, field.getWmoParameterUrl());
     }
     var.putAtt(UNITS, field.getUnits());
     if (field.getLegendXml().size() > 0) {

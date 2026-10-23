@@ -1716,9 +1716,9 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
   rangeVar.putAtt(AXIS, "radial_range_coordinate");
   rangeVar.putAtt(SPACING_IS_CONSTANT, "true");
   rangeVar.addScalarAttr(METRES_TO_CENTER_OF_FIRST_GATE,
-                         (float) startRangeKm * 1000.0);
+                         (float) (startRangeKm * 1000.0));
   rangeVar.addScalarAttr(METRES_BETWEEN_GATES, 
-                         (float) gateSpacingKm * 1000.0);
+                         (float) (gateSpacingKm * 1000.0));
   double rangeKm = startRangeKm;
   RadxArray<float> rangeM_;
   float *rangeM = rangeM_.alloc(rangeDim.getSize());
@@ -1754,6 +1754,13 @@ void Fm301RadxFile::_addSweepVariables(const RadxSweep *sweep,
     fvals[iray] = rays[iray]->getAzimuthDeg();
   }
   azVar.putVal(fvals);
+
+  // fixed angle
+  
+  NcxxVar fixedAngleVar =
+    sweepGroup.addVar(FIXED_ANGLE, FIXED_ANGLE, "Expected sweep angle", 
+                      ncxxFloat, DEGREES, true);
+  fixedAngleVar.putVal((float) sweep->getFixedAngleDeg());
   
   // pulse width
 
@@ -2749,8 +2756,8 @@ NcxxVar Fm301RadxFile::_createFieldVar(const RadxField &field,
     if (field.getWmoParameterName().size() > 0) {
       var.putAtt(WMO__PARAMETER_NAME, field.getWmoParameterName());
     }
-    if (field.getWmoParameterUri().size() > 0) {
-      var.putAtt(WMO__PARAMETER_URI, field.getWmoParameterUri());
+    if (field.getWmoParameterUrl().size() > 0) {
+      var.putAtt(WMO__PARAMETER_URL, field.getWmoParameterUrl());
     }
     var.putAtt(UNITS, field.getUnits());
     if (field.getLegendXml().size() > 0) {
@@ -3565,7 +3572,7 @@ void Fm301RadxFile::_setFm301Attributes(int sweepNum, RadxVol &sweepVol)
         string standardName(attr.standard_name);
         string longName(attr.long_name);
         string units(attr.units);
-        string wmoParameterUri(attr.wmo__parameter_uri);
+        string wmoParameterUrl(attr.wmo__parameter_url);
         string wmoParameterName(attr.wmo__parameter_name);
         
         if (standardName.size() > 0) {
@@ -3587,8 +3594,8 @@ void Fm301RadxFile::_setFm301Attributes(int sweepNum, RadxVol &sweepVol)
 #endif
           fld.setUnits(units);
         }
-        if (wmoParameterUri.size() > 0) {
-          fld.setWmoParameterUri(wmoParameterUri);
+        if (wmoParameterUrl.size() > 0) {
+          fld.setWmoParameterUrl(wmoParameterUrl);
         }
         if (wmoParameterName.size() > 0) {
           fld.setWmoParameterName(wmoParameterName);
@@ -3605,7 +3612,7 @@ void Fm301RadxFile::_setFm301Attributes(int sweepNum, RadxVol &sweepVol)
     }
 
     if (!isFm301Field) {
-      fld.setWmoParameterUri("");
+      fld.setWmoParameterUrl("");
       fld.setWmoParameterName("non-standard-fm301-name");
     }
 

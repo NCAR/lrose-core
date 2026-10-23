@@ -352,7 +352,7 @@ private:
   
   string _fieldName, _fieldUnits;
   string _fieldStandardName, _fieldLongName;
-  string _fieldWmoParameterName, _fieldWmoParameterUri;
+  string _fieldWmoParameterName, _fieldWmoParameterUrl;
   string _fieldCommentStr;
   string _fieldLegendXml, _fieldThresholdingXml;
   double _fieldSamplingRatio;
