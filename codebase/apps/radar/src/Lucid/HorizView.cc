@@ -1078,9 +1078,14 @@ int HorizView::_renderGrid(int page,
 
   // plot legends
 
-  vector<string> legendText;
-  legendText.push_back("This is a test legend");
-  _zoom->drawLegendsTopLeft(legendText);
+  if (mr != nullptr) {
+    char line[2048];
+    snprintf(line, 2048,
+             "%s", mr->fieldLabel().c_str());
+    vector<string> legendText;
+    legendText.push_back(line);
+    _zoom->drawLegends(legendText, _params.horiz_main_legend_pos);
+  }
   
   return Constants::CIDD_SUCCESS;
 }

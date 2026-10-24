@@ -34,8 +34,8 @@
 // METEROLOGICAL DATA record info - for each data field
 ///////////////////////////////////////////////////////////////
 
-#ifndef MET_RECORD_HH
-#define MET_RECORD_HH
+#ifndef MDV_READER_HH
+#define MDV_READER_HH
 
 #include <QObject>
 #include <QMutex>

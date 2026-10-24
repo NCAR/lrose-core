@@ -1211,31 +1211,43 @@ string MdvReader::fieldLabel()
   string tlabel =
     h_date.strfTime(_params.label_time_format, !_params.use_local_timestamps);
 
+  char vertLabel[256];
+  vertLabel[0] = '\0';
+  if (plane < (int) vert.size() - 1) {
+    if(units_label_sects == "FL") {
+      snprintf(vertLabel, 256,"%03.0f",
+               vert[plane].cent);
+    } else {
+      snprintf(vertLabel, 256 , "%g",
+               vert[plane].cent);
+    }
+  }
+  
   char label[2048];
   label[0] = '\0';
   
   if(composite_mode == FALSE) {
     // Check for surface fields 
-    if(((vert[plane].cent == 0.0) && (h_fhdr.grid_dz == 0)) ||
+    if((plane > (int) vert.size() - 1) ||
+       ((vert[plane].cent == 0.0) && (h_fhdr.grid_dz == 0)) ||
        h_fhdr.vlevel_type == Mdvx::VERT_TYPE_SURFACE ||
        h_fhdr.vlevel_type == Mdvx::VERT_TYPE_COMPOSITE ||
        ds_fhdr.nz == 1) {  
-      //snprintf(label,"%s At Surface %s",
       snprintf(label,2048,"%s: %s",
                legend_name.c_str(),
                tlabel.c_str());
     } else {
       // Reverse order of label and value if units are "FL" 
       if(units_label_sects == "FL") {
-        snprintf(label, 2048, "%s: %s %03.0f %s",
+        snprintf(label, 2048, "%s: %s %s %s",
                  legend_name.c_str(),
                  units_label_sects.c_str(),
-                 vert[plane].cent,
+                 vertLabel,
                  tlabel.c_str());
-      }else {
-        snprintf(label,2048,"%s: %g %s %s",
+      } else {
+        snprintf(label,2048,"%s: %s %s %s",
                  legend_name.c_str(),
-                 vert[plane].cent,
+                 vertLabel,
                  units_label_sects.c_str(),
                  tlabel.c_str());
       }
@@ -1245,11 +1257,6 @@ string MdvReader::fieldLabel()
              legend_name.c_str(),
              tlabel.c_str());
   }
-  
-  /* If data is Forecast, add a  label */
-  // if( h_mhdr.data_collection_type == Mdvx::DATA_FORECAST) {
-  //   strcat(label," FORECAST Gen");
-  // }
   
   return label;
   

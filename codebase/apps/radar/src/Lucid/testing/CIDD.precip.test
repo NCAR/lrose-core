@@ -689,7 +689,7 @@ cidd.latlon_mode:        0
 # Set the format for the time strings. See 'man strftime' for format options.
 # Can add additional text as part of the Time string.
 # Default is: "%m/%d/%Y %H:%M:%S"
-cidd.label_time_format:  %m/%d/%Y %H:%M:%S
+cidd.label_time_format:  %Y/%m/%d %H:%M:%S
 
 # Plot a Legend for each Grid overlay; 0=Off, 1=On
 cidd.layer_legends_on: 1  

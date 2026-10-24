@@ -427,10 +427,14 @@ public:
     
   void drawYAxisLabelLeft(QPainter &painter, const string &label);
 
+  // draw legends
+  
+  void drawLegends(const vector<string> &legends,
+                   Params::legend_pos_t &pos);
+
   // Legends at top left
     
   void drawLegendsTopLeft(QPainter &painter, const vector<string> &legends);
-  void drawLegendsTopLeft(const vector<string> &legends);
 
   // Legends at top right
     

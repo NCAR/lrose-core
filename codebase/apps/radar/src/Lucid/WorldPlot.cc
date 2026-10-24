@@ -1214,34 +1214,6 @@ void WorldPlot::drawLegendsTopLeft(QPainter &painter,
 
 }
 
-void WorldPlot::drawLegendsTopLeft(const vector<string> &legends) 
-
-{
-
-  if (legends.size() < 1) {
-    return;
-  }
-  
-  // check we have an image
-
-  if (_gridImage == nullptr) {
-    cerr << "ERROR - WorldPlot::drawLegendsTopLeft" << endl;
-    cerr << "  _gridImage is null" << endl;
-    cerr << "  legend text: ";
-    for (size_t ii = 0; ii < legends.size(); ii++) {
-      cerr << "  line " << ii << ": " << legends[ii] << endl;
-    }
-  }
-
-  QPainter painter(_gridImage);
-  QPen pen;
-  pen.setColor(_params.horiz_legend_color);
-  painter.setPen(pen);
-  
-  drawLegendsTopLeft(painter, legends);
-  
-}
-
 ///////////////////////	
 // Legends at top right
     
@@ -1332,6 +1304,52 @@ void WorldPlot::drawLegendsBottomRight(QPainter &painter,
   }
 
   painter.restore();
+
+}
+
+/////////////////	
+// draw legends
+    
+void WorldPlot::drawLegends(const vector<string> &legends,
+                            Params::legend_pos_t &pos) 
+
+{
+
+  if (legends.size() < 1) {
+    return;
+  }
+  
+  // check we have an image
+
+  if (_gridImage == nullptr) {
+    cerr << "ERROR - WorldPlot::drawLegendsTopLeft" << endl;
+    cerr << "  _gridImage is null" << endl;
+    cerr << "  legend text: ";
+    for (size_t ii = 0; ii < legends.size(); ii++) {
+      cerr << "  line " << ii << ": " << legends[ii] << endl;
+    }
+  }
+
+  QPainter painter(_gridImage);
+  QPen pen;
+  pen.setColor(_params.horiz_legend_color);
+  painter.setPen(pen);
+  
+  switch (pos) {
+    case Params::LEGEND_TOP_RIGHT:
+      drawLegendsTopRight(painter, legends);
+      break;
+    case Params::LEGEND_BOTTOM_LEFT:
+      drawLegendsBottomLeft(painter, legends);
+      break;
+    case Params::LEGEND_BOTTOM_RIGHT:
+      drawLegendsBottomRight(painter, legends);
+      break;
+    case Params::LEGEND_TOP_LEFT:
+    default:
+      drawLegendsTopLeft(painter, legends);
+      break;
+  }
 
 }
 
