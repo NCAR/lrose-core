@@ -430,6 +430,7 @@ public:
   // Legends at top left
     
   void drawLegendsTopLeft(QPainter &painter, const vector<string> &legends);
+  void drawLegendsTopLeft(const vector<string> &legends);
 
   // Legends at top right
     

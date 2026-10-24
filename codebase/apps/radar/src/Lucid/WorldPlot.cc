@@ -1214,6 +1214,34 @@ void WorldPlot::drawLegendsTopLeft(QPainter &painter,
 
 }
 
+void WorldPlot::drawLegendsTopLeft(const vector<string> &legends) 
+
+{
+
+  if (legends.size() < 1) {
+    return;
+  }
+  
+  // check we have an image
+
+  if (_gridImage == nullptr) {
+    cerr << "ERROR - WorldPlot::drawLegendsTopLeft" << endl;
+    cerr << "  _gridImage is null" << endl;
+    cerr << "  legend text: ";
+    for (size_t ii = 0; ii < legends.size(); ii++) {
+      cerr << "  line " << ii << ": " << legends[ii] << endl;
+    }
+  }
+
+  QPainter painter(_gridImage);
+  QPen pen;
+  pen.setColor(_params.horiz_legend_color);
+  painter.setPen(pen);
+  
+  drawLegendsTopLeft(painter, legends);
+  
+}
+
 ///////////////////////	
 // Legends at top right
     
