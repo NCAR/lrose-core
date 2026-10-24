@@ -3004,7 +3004,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Font size of legends (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &horiz_legend_font_size - &_start_;
-    tt->single_val.i = 8;
+    tt->single_val.i = 10;
     tt++;
     
     // Parameter 'horiz_title_color'
@@ -3331,7 +3331,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Font size of legends (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vert_legend_font_size - &_start_;
-    tt->single_val.i = 8;
+    tt->single_val.i = 10;
     tt++;
     
     // Parameter 'vert_title_color'

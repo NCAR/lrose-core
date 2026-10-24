@@ -1276,7 +1276,7 @@ paramdef boolean {
 } horiz_tick_values_inside;
 
 paramdef int {
-  p_default = 8;
+  p_default = 10;
   p_descr = "Font size of legends (pixels).";
 } horiz_legend_font_size;
 
@@ -1427,7 +1427,7 @@ paramdef boolean {
 } vert_tick_values_inside;
 
 paramdef int {
-  p_default = 8;
+  p_default = 10;
   p_descr = "Font size of legends (pixels).";
 } vert_legend_font_size;
 
