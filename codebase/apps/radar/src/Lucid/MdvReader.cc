@@ -1213,7 +1213,7 @@ string MdvReader::fieldLabel()
 
   char vertLabel[256];
   vertLabel[0] = '\0';
-  if (plane < (int) vert.size() - 1) {
+  if (plane < (int) vert.size()) {
     if(units_label_sects == "FL") {
       snprintf(vertLabel, 256,"%03.0f",
                vert[plane].cent);
