@@ -119,8 +119,12 @@ HorizView::HorizView(QWidget* parent,
 
   _initZooms();
 
-  // timer??
-  //fires every 50ms. used for boundary editor to
+  // set mouse tracking so we see move events
+  
+  setMouseTracking(true);
+
+  // timer ??
+  // fires every 50ms. used for boundary editor to
   // (1) detect shift key down (changes cursor)
   // (2) get notified if user zooms in or out so the boundary can be rescaled
   // startTimer(50);
@@ -159,8 +163,10 @@ void HorizView::timerEvent(QTimerEvent *event)
 
   bool doUpdate = false;
   this->setCursor(Qt::ArrowCursor);
-  
+
+  cerr << "111111111111111111111111111" << endl;
   if (doUpdate) {  //only update if something has changed
+    cerr << "3333333333333333333333333333" << endl;
     update();
   }
 }
@@ -197,6 +203,8 @@ void HorizView::_printNow(int ndecimals,
 void HorizView::paintEvent(QPaintEvent *event)
 {
 
+  cerr << "PPPPPPPPPPPPPPPPPPPPPPPPPP" << endl;
+  
   int fieldNum = _gd.h_win.page;
 
   // render data grids to grid image in WorldPlot
@@ -1264,10 +1272,20 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
   QPointF pos(e->pos());
 #endif
 
-  int x = pos.x();
-  int y = pos.y();
-  int deltaX = x - _mousePressX;
-  int deltaY = y - _mousePressY;
+  int xx = pos.x();
+  int yy = pos.y();
+  int deltaX = xx - _mousePressX;
+  int deltaY = yy - _mousePressY;
+
+  {
+    cerr << "mmmmmmmmmmmmmmmmmmmmmmmmmmmm" << endl;
+    double mouseX = _zoom->getXWorld(xx);
+    double mouseY = _zoom->getYWorld(yy);
+    double lat, lon;
+    _proj.xy2latlon(mouseX, mouseY, lat, lon);
+    cerr << "mmmmmmmm x, y, lat, lon: " << mouseX << ", "
+         << mouseY << ", " << lat << ", " << lon << endl;
+  }
 
   // Make the rubberband aspect ratio match that
   // of the window
