@@ -2179,12 +2179,12 @@ void Ncf2MdvTrans::_loadRayLookup(const RadxVol &vol,
     for (int ii = 0; ii < _nAngles; ii++) {
       if (copy[ii] >= 0) {
         int jj = ii - kk;
-        jj = ii + kk;
         if (jj >= 0) {
           if (rayLut[jj] < 0) {
             rayLut[jj] = copy[ii];
           }
         }
+        jj = ii + kk;
         if (jj < _nAngles) {
           if (rayLut[jj] < 0) {
             rayLut[jj] = copy[ii];
