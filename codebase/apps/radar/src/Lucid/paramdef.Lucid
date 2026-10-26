@@ -405,6 +405,12 @@ paramdef string {
   p_help = "The format of each line is:  ID, LAT, LON, ALT(m), TYPE.";
 } station_loc_url;
 
+paramdef int {
+  p_default = 10;
+  p_descr = "Maximum size of the field data queue.";
+  p_help = "A number of fields are saved to provide data for user clicks and examining data values.";
+} field_data_queue_max_size;
+
 commentdef {
   p_header = "</DATA_RETRIEVAL>";
 }

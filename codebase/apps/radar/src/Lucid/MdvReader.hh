@@ -64,7 +64,7 @@ public:
 
   // constructor
   
-  MdvReader(QObject* parent = nullptr);
+  MdvReader(QObject* parent);
 
   // is the data valid?
   
@@ -230,6 +230,33 @@ public:
   // color scale
   
   ColorMap colorMap;
+
+  // copy of field data, saved for later
+  
+  class FieldCopy {
+  public:
+    FieldCopy(const string &fieldName_,
+              const Mdvx::master_header_t &mhdr_,
+              const Mdvx::field_header_t &fhdr_,
+              const Mdvx::vlevel_header_t &vhdr_,
+              const MdvxProj &proj_,
+              const vector<fl32> &fl32_data_):
+            fieldName(fieldName_),
+            mhdr(mhdr_),
+            fhdr(fhdr_),
+            vhdr(vhdr_),
+            proj(proj_),
+            fl32_data(fl32_data_)
+    {
+      fieldName = fhdr.field_name;
+    }
+    string fieldName;
+    Mdvx::master_header_t mhdr;
+    Mdvx::field_header_t fhdr;
+    Mdvx::vlevel_header_t vhdr;
+    MdvxProj proj;
+    vector<fl32> fl32_data;
+  };
 
 public slots:
   void readDoneH();

@@ -672,6 +672,8 @@ public:
 
   char* station_loc_url;
 
+  int field_data_queue_max_size;
+
   char* map_urls;
 
   tdrp_bool_t maps_enabled_at_startup;
@@ -1354,7 +1356,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[426];
+  mutable TDRPtable _table[427];
 
   const char *_className;
 

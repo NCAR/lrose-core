@@ -1262,9 +1262,22 @@ void GuiManager::_setField(int value)
 void GuiManager::_checkAndReadH(MdvReader *mr)
 {
 
-  // check for state change
+  // check for state change, except field
   
-  bool stateChanged = _checkForStateChange();
+  bool stateHasChanged = _checkForStateChange();
+
+  // clear field data if non-field state has changed
+  
+  if (stateHasChanged) {
+    _horiz->clearFieldDataQueue();
+  }
+  
+  // check for field change
+  
+  if (_fieldHasChanged) {
+    stateHasChanged = true;
+    _fieldHasChanged = false;
+  }
   
   // get new data if needed - data is retrieved in a thread
   
@@ -1273,7 +1286,7 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
     frameIndex = _gd.movie.num_frames - 1;
   }
 
-  if (stateChanged) {
+  if (stateHasChanged) {
     mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
                           _vlevelManager.getRequestedLevel(),
                           _gd.h_win.page);
@@ -1311,11 +1324,6 @@ bool GuiManager::_checkForStateChange()
 
   bool stateHasChanged = false;
 
-  if (_fieldHasChanged) {
-    stateHasChanged = true;
-    _fieldHasChanged = false;
-  }
-  
   // zoom change?
   
   if (_horiz->checkForZoomChange()) {
@@ -1325,8 +1333,8 @@ bool GuiManager::_checkForStateChange()
   // vlevel change?
   
   if (_vlevelHasChanged) {
-    stateHasChanged = true;
     _vlevelHasChanged = false;
+    stateHasChanged = true;
   }
 
   // time change
@@ -1338,15 +1346,15 @@ bool GuiManager::_checkForStateChange()
   // resize?
 
   if (_resized) {
-    stateHasChanged = true;
     _resized = false;
+    stateHasChanged = true;
   }
 
   // overlays?
 
   if (_overlaysHaveChanged) {
-    stateHasChanged = true;
     _overlaysHaveChanged = false;
+    stateHasChanged = true;
   }
 
   return stateHasChanged;

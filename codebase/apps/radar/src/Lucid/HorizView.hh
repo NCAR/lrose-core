@@ -38,6 +38,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 
 #include <QDialog>
 #include <QWidget>
@@ -139,6 +140,10 @@ class DLL_EXPORT HorizView : public QWidget
 
   void setFont();
   virtual void informationMessage();
+
+  // clear the field data queue
+  
+  void clearFieldDataQueue();
 
   ////////////////
   // Qt signals //
@@ -263,6 +268,10 @@ class DLL_EXPORT HorizView : public QWidget
 
   MdvxProj _proj;
 
+  // saved copy of field data
+
+  deque<MdvReader::FieldCopy> _fieldDataQueue;
+
   ///////////////////////
   // Protected methods //
   ///////////////////////
@@ -316,12 +325,16 @@ class DLL_EXPORT HorizView : public QWidget
   int _controlRenderGrid(int page,
                          time_t start_time, time_t end_time);
   
-  int _renderGrid(int page,
-                  MdvReader *mr,
-                  time_t start_time, time_t end_time,
-                  bool is_overlay_field);
+  int _renderFieldGrid(int page,
+                       MdvReader *mr,
+                       time_t start_time, time_t end_time,
+                       bool is_overlay_field);
   
   void _doRenderInvalidImages(int index, VertView *vert);
+
+  // save field data to queue
+
+  void _saveFieldDataToQueue(int fieldNum);
 
   // debug prints
   

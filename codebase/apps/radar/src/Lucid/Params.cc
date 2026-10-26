@@ -1278,6 +1278,18 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("http://www.rap.ucar.edu/maps/Taiwan_stations.dat");
     tt++;
     
+    // Parameter 'field_data_queue_max_size'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("field_data_queue_max_size");
+    tt->descr = tdrpStrDup("Maximum size of the field data queue.");
+    tt->help = tdrpStrDup("A number of fields are saved to provide data for user clicks and examining data values.");
+    tt->val_offset = (char *) &field_data_queue_max_size - &_start_;
+    tt->single_val.i = 10;
+    tt++;
+    
     // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));

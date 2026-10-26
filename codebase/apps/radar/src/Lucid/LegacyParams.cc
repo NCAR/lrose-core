@@ -73,7 +73,10 @@ LegacyParams::~LegacyParams()
 void LegacyParams::clear()
 {
   _plist.clear();
-  _paramsBuf = NULL;
+  if (_paramsBuf) {
+    free(_paramsBuf);
+    _paramsBuf = NULL;
+  }
   _paramsBufLen = 0;
 }
 

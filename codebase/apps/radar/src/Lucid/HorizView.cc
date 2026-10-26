@@ -127,7 +127,7 @@ HorizView::HorizView(QWidget* parent,
   // fires every 50ms. used for boundary editor to
   // (1) detect shift key down (changes cursor)
   // (2) get notified if user zooms in or out so the boundary can be rescaled
-  // startTimer(50);
+  // startTimer(5000);
 
 }
 
@@ -164,13 +164,52 @@ void HorizView::timerEvent(QTimerEvent *event)
   bool doUpdate = false;
   this->setCursor(Qt::ArrowCursor);
 
-  cerr << "111111111111111111111111111" << endl;
+  cerr << "111111111111111111111111111 HorizView::timerEvent" << endl;
   if (doUpdate) {  //only update if something has changed
-    cerr << "3333333333333333333333333333" << endl;
+    cerr << "3333333333333333333333333333 HorizView::timerEvent" << endl;
     update();
   }
 }
 
+////////////////////////////////////////////////////////////////////////
+// save field data to queue
+
+void HorizView::_saveFieldDataToQueue(int fieldNum)
+{
+  
+  MdvReader *mr = _gd.mread[fieldNum];
+  string fieldName = mr->h_fhdr.field_name;
+  
+  // remove any existing entry with the same name
+  
+  for (auto ii = _fieldDataQueue.begin(); ii != _fieldDataQueue.end(); ii++) {
+    if (ii->fieldName == fieldName) {
+      _fieldDataQueue.erase(ii);
+      break;
+    }
+  } // ii
+
+  // check for queue size
+
+  while ((int) _fieldDataQueue.size() >= _params.field_data_queue_max_size) {
+    _fieldDataQueue.pop_back();
+  }
+  
+  // push field data onto front of queue
+
+  _fieldDataQueue.push_front(MdvReader::FieldCopy(fieldName,
+                                                  mr->h_mhdr,
+                                                  mr->h_fhdr,
+                                                  mr->h_vhdr,
+                                                  mr->proj,
+                                                  mr->h_fl32_data));
+
+}
+
+void HorizView::clearFieldDataQueue()
+{
+  _fieldDataQueue.clear();
+}
 
 /*************************************************************************
  * print current time - for debugging
@@ -203,8 +242,6 @@ void HorizView::_printNow(int ndecimals,
 void HorizView::paintEvent(QPaintEvent *event)
 {
 
-  cerr << "PPPPPPPPPPPPPPPPPPPPPPPPPP" << endl;
-  
   int fieldNum = _gd.h_win.page;
 
   // render data grids to grid image in WorldPlot
@@ -514,6 +551,10 @@ void HorizView::triggerGridRendering(int page, int index)
   _renderFramePage = page;
   _renderFrameIndex = index;
 
+  // save field data to queue
+
+  _saveFieldDataToQueue(page);
+
   // render data grids to grid image in WorldPlot
   
   _renderGrids();
@@ -542,7 +583,7 @@ void HorizView::setRenderInvalidImages(int index, VertView *vert)
 }
   
 /*************************************************************************
- * _renderGrid()
+ * _renderGrids()
  */
 
 void HorizView::_renderGrids()
@@ -739,7 +780,7 @@ int HorizView::_controlRenderGrid(int page,
 
   // RENDER the LAND_USE field first
   if(_gd.layers.earth.landuse_active && _gd.layers.earth.land_use != NULL) {
-    _renderGrid(page, _gd.layers.earth.land_use, start_time, end_time,1);
+    _renderFieldGrid(page, _gd.layers.earth.land_use, start_time, end_time,1);
     // render_grid(xid,_gd.layers.earth.land_use,start_time,end_time,1);
   }
 
@@ -762,7 +803,7 @@ int HorizView::_controlRenderGrid(int page,
       }
 #endif
     } else {
-      _renderGrid(page, mr, start_time, end_time, 0);
+      _renderFieldGrid(page, mr, start_time, end_time, 0);
     }
     if(_gd.layers.earth.terrain_active &&
        (mr->ds_fhdr.nz > 1) &&
@@ -778,7 +819,7 @@ int HorizView::_controlRenderGrid(int page,
   /* Render each of the gridded_overlay fields */
   for(int i=0; i < Constants::NUM_GRID_LAYERS; i++) {
     if(_gd.layers.overlay_field_on[i] && _gd.mread[_gd.layers.overlay_field[i]] != NULL) {
-      _renderGrid(page, _gd.mread[_gd.layers.overlay_field[i]],start_time,end_time,1);
+      _renderFieldGrid(page, _gd.mread[_gd.layers.overlay_field[i]],start_time,end_time,1);
       // render_grid(xid,_gd.mread[_gd.layers.overlay_field[i]],start_time,end_time,1);
     }
   }
@@ -802,7 +843,7 @@ int HorizView::_controlRenderGrid(int page,
       }
 #endif
     } else {
-      _renderGrid(page, mr, start_time, end_time, 0);
+      _renderFieldGrid(page, mr, start_time, end_time, 0);
       // render_grid(xid,mr,start_time,end_time,0);
     }
     if(_gd.layers.earth.terrain_active && 
@@ -882,11 +923,12 @@ int HorizView::_controlRenderGrid(int page,
  *    Returns 1 on success, 0 on failure
  */
 
-int HorizView::_renderGrid(int page,
-                           MdvReader *mr,
-                           time_t start_time,
-                           time_t end_time,
-                           bool is_overlay_field)
+int HorizView::_renderFieldGrid(int page,
+                                MdvReader *mr,
+                                time_t start_time,
+                                time_t end_time,
+                                bool is_overlay_field)
+  
 {
   
   if (mr == NULL) {
@@ -1285,6 +1327,30 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
     _proj.xy2latlon(mouseX, mouseY, lat, lon);
     cerr << "mmmmmmmm x, y, lat, lon: " << mouseX << ", "
          << mouseY << ", " << lat << ", " << lon << endl;
+    // if (_fieldDataQueue.size() > 0) {
+    //   MdvReader::FieldCopy &fld = _fieldDataQueue[0];
+    //   cerr << "FFFFFFFFFF fieldName: " << fld.fieldName << endl;
+    //   int gridIx, gridIy;
+    //   fld.proj.latlon2xyIndex(lat, lon, gridIx, gridIy);
+    //   cerr << "FFFFFFFFFF grid ix, iy: " << gridIx << ", " << gridIy << endl;
+    //   Mdvx::field_header_t &fhdr = fld.fhdr;
+    //   int64_t index = gridIy * fhdr.nx + gridIx;
+    //   double val = fld.fl32_data[index];
+    //   cerr << "VVVVVVVVVVVVVV val: " << val << endl;
+    // }
+    for (auto ii = _fieldDataQueue.begin(); ii != _fieldDataQueue.end(); ii++) {
+      const MdvReader::FieldCopy &fld = *ii;
+      int gridIx, gridIy;
+      fld.proj.latlon2xyIndex(lat, lon, gridIx, gridIy);
+      const Mdvx::field_header_t &fhdr = fld.fhdr;
+      double val = -9999;
+      if (gridIx >= 0 && gridIx < fhdr.nx &&
+          gridIy >= 0 && gridIy < fhdr.ny) {
+        int64_t index = (int64_t)gridIy * fhdr.nx + gridIx;
+        val = fld.fl32_data[index];
+      }
+      cerr << "FFFFFFFFFF fieldName, val: " << fld.fieldName << ", " << val << endl;
+    } // ii
   }
 
   // Make the rubberband aspect ratio match that
@@ -1293,13 +1359,17 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
   double aspectRatio =
     (double) _zoom->getPlotHeight() / (double) _zoom->getPlotWidth();
   
-  double dx = fabs(deltaY / aspectRatio);
-  double dy = fabs(dx * aspectRatio);
-
+  double dx = std::max(fabs((double)deltaX),
+                       fabs((double)deltaY) / aspectRatio);
+  double dy = dx * aspectRatio;
+  
+  // double dx = fabs(deltaY / aspectRatio);
+  // double dy = fabs(dx * aspectRatio);
+  
   // Preserve the signs
 
-  dx *= fabs(deltaX)/deltaX;
-  dy *= fabs(deltaY)/deltaY;
+  if (deltaX < 0) dx = -dx;
+  if (deltaY < 0) dy = -dy;
 
   int moveX = (int) floor(dx + 0.5);
   int moveY = (int) floor(dy + 0.5);

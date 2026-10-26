@@ -157,6 +157,8 @@ Lucid::Lucid(int argc, char **argv) :
     return;
   }
 
+  _initShared(); /* Initialize Shared memory based communications */
+  
   // init process mapper registration
   
   if (_params.register_with_procmap) {
@@ -248,8 +250,6 @@ int Lucid::_initDataSpace()
   // initialize shared memory
   
   PMU_auto_register("Initializing SHMEM");
-  _initShared(); /* Initialize Shared memory based communications */
-  
   
   // html mode
   
@@ -820,7 +820,7 @@ int Lucid::_initGrids()
     
     /* get space for data info */
     
-    _gd.mread[ifld] = new MdvReader;
+    _gd.mread[ifld] = new MdvReader(this);
     MdvReader *mread = _gd.mread[ifld]; 
     
     mread->legend_name = fld.legend_label;
@@ -1004,14 +1004,14 @@ void Lucid::_initWinds()
 
     // initialize the components
 
-    lwind.wind_u = new MdvReader;
+    lwind.wind_u = new MdvReader(this);
     _initWindComponent(lwind.wind_u, windp, true, false, false);
 
-    lwind.wind_v = new MdvReader;
+    lwind.wind_v = new MdvReader(this);
     _initWindComponent(lwind.wind_v, windp, false, true, false);
 
     if(strncasecmp(windp.w_field_name, "None", 4) != 0) {
-      lwind.wind_w = new MdvReader;
+      lwind.wind_w = new MdvReader(this);
       _initWindComponent(lwind.wind_w, windp, false, false, true);
     } else {
       lwind.wind_w = NULL;
@@ -1105,7 +1105,7 @@ void Lucid::_initTerrain()
   if (strlen(_params.terrain_url) > 0) {
     
     _gd.layers.earth.terrain_active = 1;
-    _gd.layers.earth.terr = new MdvReader;
+    _gd.layers.earth.terr = new MdvReader(this);
     if(_gd.layers.earth.terr == NULL) {
       fprintf(stderr,"Cannot allocate space for terrain data\n");
       exit(-1);
@@ -1128,7 +1128,7 @@ void Lucid::_initTerrain()
   if (strlen(_params.landuse_url) > 0) {
 
     _gd.layers.earth.landuse_active = (_params.landuse_active == true)? 1: 0;
-    _gd.layers.earth.land_use = new MdvReader;
+    _gd.layers.earth.land_use = new MdvReader(this);
     if(_gd.layers.earth.land_use == NULL) {
       fprintf(stderr,"Cannot allocate space for land_use data\n");
       exit(-1);
@@ -1225,7 +1225,7 @@ void Lucid::_initRouteWinds()
 
   if(strlen(_params.route_u_url) > 1) {
 
-    MdvReader *mr = new MdvReader;
+    MdvReader *mr = new MdvReader(this);
     if(mr == NULL) {
       fprintf(stderr,"Unable to allocate space for Route U Wind\n");
       perror("cidd_init::_initRouteWinds");
@@ -1258,7 +1258,7 @@ void Lucid::_initRouteWinds()
   
   if(strlen(_params.route_v_url) > 1) {
     
-    MdvReader *mr = new MdvReader;
+    MdvReader *mr = new MdvReader(this);
     if(mr == NULL) {
       fprintf(stderr,"Unable to allocate space for Route V Wind\n");
       perror("cidd_init::_initRouteWinds");
