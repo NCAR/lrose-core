@@ -903,12 +903,15 @@ int Ncf2MdvTrans::_addDataFields()
   _validTimes.clear();
   
   // loop through the variables, adding data fields as appropriate
-
+  
   int fieldNum = 0;
   for (int ivar = 0; ivar < _ncFile->num_vars(); ivar++) {
-    if (_addOneField(_ncFile->get_var(ivar), fieldNum)) {
+    Nc3Var* var = _ncFile->get_var(ivar);
+    if(var == NULL)
+      continue;
+    int status = _addOneField(var, fieldNum);
+    if(status)
       return -1;
-    }
   }
   if (_mdv->getNFields() < 1) {
     TaStr::AddStr(_errStr, "ERROR - Ncf2MdvTrans::_addDataFields");
@@ -1608,12 +1611,14 @@ string Ncf2MdvTrans::_getGlobalAttrXml()
       continue;
     }
 
-    // TODO - fix this for STRING values
-    
-    if (att->values() != NULL) {
+    if (att->num_vals() > 0) {
       char *val = att->as_string(0);
-      xml += TaXml::writeString(att->name(), 1, val);
-      delete[] val;
+      if(val && strlen(val)) {
+        xml += TaXml::writeString(att->name(), 1, val);
+      }
+      if (val) {
+        delete[] val;
+      }
     } else {
       xml += TaXml::writeString(att->name(), 1, "unknown");
     }
@@ -1698,9 +1703,7 @@ string Ncf2MdvTrans::asString(const Nc3TypedComponent *component,
   
 {
 
-  // TODO - fix this for STRING values
-
-  if (component->values() != NULL) {
+  if (component && component->num_vals() > 0) { 
     const char* strc = component->as_string(index);
     string strs(strc);
     delete[] strc;
