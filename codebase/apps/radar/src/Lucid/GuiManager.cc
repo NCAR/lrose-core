@@ -613,6 +613,16 @@ void GuiManager::_createActions()
   _saveFileAct->setStatusTip(tr("Save File"));
   connect(_saveFileAct, &QAction::triggered, this, &GuiManager::_saveFile);
 
+  // unzoom
+  
+  _zoomOutAct = new QAction(tr("Unzoom"), this);
+  _zoomOutAct->setStatusTip(tr("Unzoom all the way"));
+  _zoomOutAct->setEnabled(false);
+  
+  _zoomBackAct = new QAction(tr("Zoom back"), this);
+  _zoomBackAct->setStatusTip(tr("Unzoom to previous view"));
+  _zoomBackAct->setEnabled(false);
+
   // show grids
 
   _gridsAct = new QAction(tr("Grids"), this);
@@ -701,6 +711,7 @@ void GuiManager::_createMenus()
   
   _zoomsMenu = menuBar()->addMenu(tr("Zooms"));
   _populateZoomsMenu();
+  menuBar()->addAction(_zoomOutAct);
   
   // time selector
   
@@ -922,16 +933,14 @@ void GuiManager::_populateZoomsMenu()
 
   _zoomsActionGroup = new QActionGroup(_zoomsMenu);
   _zoomsActionGroup->setExclusive(true);
+
+  // unzoom all of the way
   
-  _zoomOutAct = new QAction(tr("Zoom out"), this);
-  _zoomOutAct->setStatusTip(tr("Unzoom all the way"));
-  _zoomOutAct->setEnabled(false);
   connect(_zoomOutAct, &QAction::triggered, this, &GuiManager::_zoomOut);
   _zoomsMenu->addAction(_zoomOutAct);
+
+  // unzoom by 1 level
   
-  _zoomBackAct = new QAction(tr("Zoom back"), this);
-  _zoomBackAct->setStatusTip(tr("Unzoom to previous view"));
-  _zoomBackAct->setEnabled(false);
   connect(_zoomBackAct, &QAction::triggered, this, &GuiManager::_zoomBack);
   _zoomsMenu->addAction(_zoomBackAct);
   
