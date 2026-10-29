@@ -1872,6 +1872,7 @@ int RadxFile::aggregateFromPaths(const vector<string> &paths,
   
   if (readFromPath(paths[0], vol)) {
     _addErrStr("ERROR - RadxFile::aggregateFromPaths");
+    vol.clear();
     return -1;
   }
   
@@ -1902,6 +1903,8 @@ int RadxFile::aggregateFromPaths(const vector<string> &paths,
 
     if (readFromPath(paths[ipath], latestVol)) {
       _addErrStr("ERROR - RadxFile::aggregateFromPaths");
+      latestVol.clear();
+      vol.clear();
       return -1;
     }
 

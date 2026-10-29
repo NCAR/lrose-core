@@ -967,10 +967,13 @@ Nc3Values* Nc3Var::values( void ) const
       break;
     case nc3NoType:
     default:
+      delete valp;
       return 0;
   }
-  if (status != NC_NOERR)
+  if (status != NC_NOERR) {
+    delete valp;
     return 0;
+  }
   return valp;
 }
 
