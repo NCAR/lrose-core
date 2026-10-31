@@ -111,6 +111,8 @@ HorizView::HorizView(QWidget* parent,
   _zoomChanged = true;
   _sizeChanged = true;
 
+  _showValue = false;
+
   // initialize the horiz projection
   
   _initProjection();
@@ -118,10 +120,6 @@ HorizView::HorizView(QWidget* parent,
   // initialize zooms
 
   _initZooms();
-
-  // set mouse tracking so we see move events
-  
-  setMouseTracking(true);
 
   // timer ??
   // fires every 50ms. used for boundary editor to
@@ -340,13 +338,24 @@ void HorizView::paintEvent(QPaintEvent *event)
     }
     _manager.setTitleBarStr(titleStr);
 
-    _manager.showClick();
+    _manager.showClickDialog();
              
   }
 
   _sizeChanged = false;
   _zoomChanged = false;
 
+}
+
+////////////////////////
+// set show value flag
+
+void HorizView::setShowValue(bool state)
+
+{
+  _showValue = state;
+  // set mouse track state
+  setMouseTracking(_showValue);
 }
 
 /*************************************************************************

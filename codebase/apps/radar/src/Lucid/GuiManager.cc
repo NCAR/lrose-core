@@ -572,11 +572,6 @@ void GuiManager::_createActions()
   connect(_showFieldMenuAct, &QAction::triggered,
           this, &GuiManager::_showFieldMenu);
   
-  // show user click in dialog
-  _showClickAct = new QAction(tr("Values"), this);
-  _showClickAct->setStatusTip(tr("Show click value dialog"));
-  connect(_showClickAct, &QAction::triggered, this, &GuiManager::showClick);
-
   // show time control window
   _showTimeControlAct = new QAction(tr("Movie"), this);
   _showTimeControlAct->setStatusTip(tr("Show time control window"));
@@ -645,10 +640,28 @@ void GuiManager::_createActions()
   _dataRingsAct->setChecked(_params.plot_range_rings_from_data);
   connect(_dataRingsAct, &QAction::triggered, _horiz, &HorizView::setRingsDataDriven);
   
+  // show values in data window
+
+  _showValueAct = new QAction(tr("Show values"), this);
+  _showValueAct->setStatusTip(tr("Show values in data window"));
+  _showValueAct->setCheckable(true);
+  _showValueAct->setChecked(false);
+  connect(_showValueAct, &QAction::triggered, this, &GuiManager::_showValue);
+
+  // show user click in dialog
+
+  _showClickAct = new QAction(tr("Show click"), this);
+  _showClickAct->setStatusTip(tr("Show click value dialog"));
+  _showClickAct->setCheckable(true);
+  _showClickAct->setChecked(false);
+  connect(_showClickAct, &QAction::triggered, this, &GuiManager::showClickDialog);
+
   // show VERT window
 
   _showVertAct = new QAction(tr("Show VERT Window"), this);
   _showVertAct->setStatusTip(tr("Show the VERT Window"));
+  _showVertAct->setCheckable(true);
+  _showVertAct->setChecked(false);
   connect(_showVertAct, &QAction::triggered, _vertWindow, &VertView::show);
 
   // howto and about
@@ -722,9 +735,13 @@ void GuiManager::_createMenus()
   _overlaysMenu = menuBar()->addMenu(tr("Overlays"));
   _populateOverlaysMenu();
 
+  // add show menu
+  
+  _showMenu = menuBar()->addMenu(tr("Show"));
+  _populateShowMenu();
+
   // misc actions
   
-  menuBar()->addAction(_showClickAct);
   menuBar()->addAction(_reloadAct);
 
   _helpMenu = menuBar()->addMenu(tr("Help"));
@@ -998,7 +1015,18 @@ void GuiManager::_populateOverlaysMenu()
   _overlaysMenu->addAction(_fixedRingsAct);
   _overlaysMenu->addAction(_dataRingsAct);
   _overlaysMenu->addSeparator();
-  _overlaysMenu->addAction(_showVertAct);
+
+}
+
+/////////////////////////////////////////////////////////////
+// populate show menu
+
+void GuiManager::_populateShowMenu()
+{
+
+  _showMenu->addAction(_showValueAct);
+  _showMenu->addAction(_showClickAct);
+  _showMenu->addAction(_showVertAct);
 
 }
 
@@ -2562,10 +2590,11 @@ void GuiManager::_setText(char *text,
 
 /////////////////////////////
 // show data at click point
-// TODO: check HawkEye for example
 
-void GuiManager::showClick()
+void GuiManager::showClickDialog()
 {
+
+  cerr << "CCCCCCCCCCCCCC showClick: " << _showClickAct->isChecked() << endl;
 #ifdef NOTNOW
   if (_clickReportDialog) {
     if (_clickReportDialog->isVisible()) {
@@ -2583,6 +2612,24 @@ void GuiManager::showClick()
     }
   }
 #endif
+}
+
+/////////////////////////////
+// show value in data plot
+
+void GuiManager::_showValue()
+
+{
+  _horiz->setShowValue(_showValueAct->isChecked());
+}
+
+/////////////////////////////
+// vert window has closed
+
+void GuiManager::vertWindowClosed(QCloseEvent *event)
+
+{
+  _showVertAct->setChecked(false);
 }
 
 /////////////////////////////////////////////////////

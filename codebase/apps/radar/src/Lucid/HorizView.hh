@@ -86,8 +86,8 @@ class DLL_EXPORT HorizView : public QWidget
    * @param[in] params   TDRP parameters.
    */
   
-  HorizView(QWidget* parent,
-            GuiManager &manager);
+  explicit HorizView(QWidget* parent,
+                     GuiManager &manager);
 
   // Destructor.
 
@@ -112,6 +112,10 @@ class DLL_EXPORT HorizView : public QWidget
   void clearCustomZooms() { _customZooms.clear(); }
   void setZoomIndex(int zoomIndex);
   bool checkForZoomChange();
+  
+  // show values
+
+  void setShowValue(bool state);
   
   // react to click point from remote display - Sprite
   // redraw the click point cursor
@@ -238,6 +242,11 @@ class DLL_EXPORT HorizView : public QWidget
   
   ScaledLabel _scaledLabel;
 
+  // show values
+
+  bool _showValue;
+  
+  // show click point
   // Last X,Y location of the mouse during mouse move events; used for
   // panning.
 

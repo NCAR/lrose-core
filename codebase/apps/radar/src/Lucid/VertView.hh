@@ -83,9 +83,9 @@ class DLL_EXPORT VertView : public QWidget
    * @param[in] params   TDRP parameters.
    */
 
-  VertView(QWidget* parent, 
-           const GuiManager &manager,
-           const VertManager &vertWindow);
+  explicit VertView(QWidget* parent, 
+                    const GuiManager &manager,
+                    const VertManager &vertWindow);
 
   /**
    * @brief Destructor.

@@ -38,7 +38,7 @@ using namespace std;
 
 VertManager::VertManager(GuiManager *manager):
         QMainWindow(manager),
-        _manager(manager),
+        _guiManager(manager),
         _params(Params::Instance()),
         _gd(GlobalData::Instance())
         
@@ -131,7 +131,14 @@ void VertManager::resizeEvent(QResizeEvent *event)
 void VertManager::keyPressEvent(QKeyEvent * e)
 {
   // pass event up to GuiManager
-  _manager->keyPressEvent(e);
+  _guiManager->keyPressEvent(e);
+}
+
+////////////////////////////////////////////////////////////////
+void VertManager::closeEvent(QCloseEvent * e)
+{
+  // pass event up to GuiManager
+  _guiManager->vertWindowClosed(e);
 }
 
 // Protected methods
@@ -267,7 +274,7 @@ void VertManager::_createStatusPanel(const int label_font_size)
 
 void VertManager::setAzimuth(const double azimuth)
 {
-  if (_manager->getArchiveMode()) {
+  if (_guiManager->getArchiveMode()) {
     _azValue->setText("-----");
     _azValue->setEnabled(false);
   } else {
@@ -284,7 +291,7 @@ void VertManager::setAzimuth(const double azimuth)
 
 void VertManager::setElevation(const double elevation)
 {
-  if (_manager->getArchiveMode()) {
+  if (_guiManager->getArchiveMode()) {
     _elevValue->setText("-----");
     _elevValue->setEnabled(false);
   } else {

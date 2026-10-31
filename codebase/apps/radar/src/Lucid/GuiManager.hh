@@ -141,7 +141,8 @@ public:
 
 public slots:
 
-  void showClick();
+  void showClickDialog();
+  void vertWindowClosed(QCloseEvent *event);
   
 signals:
 
@@ -195,13 +196,21 @@ private:
 
   QMenu *_fileMenu;
   QMenu *_timeMenu;
-  QMenu *_overlaysMenu;
   QMenu *_helpMenu;
 
   // actions
 
+  QAction *_openFileAct;
+  QAction *_saveFileAct;
+  QAction *_saveImageAct;
+
   QAction *_showFieldMenuAct;
   QAction *_showTimeControlAct;
+
+  QAction *_showValueAct;
+  QAction *_showClickAct;
+  QAction *_showBoundaryEditorAct;
+
   QAction *_gridsAct;
   QAction *_fixedRingsAct;
   QAction *_dataRingsAct;
@@ -212,14 +221,10 @@ private:
   QAction *_zoomBackAct;
   QAction *_zoomOutAct;
   QAction *_reloadAct;
-  QAction *_showClickAct;
-  QAction *_showBoundaryEditorAct;
+
   QAction *_howtoAct;
   QAction *_aboutAct;
   QAction *_aboutQtAct;
-  QAction *_openFileAct;
-  QAction *_saveFileAct;
-  QAction *_saveImageAct;
 
   // fields
   
@@ -245,13 +250,12 @@ private:
   
   bool _fieldHasChanged;
 
-  // maps and overlays
+  // maps
 
   QMenu *_mapsMenu;
   QAction *_mapsEnabledAct;
   vector<MapMenuItem *> _mapMenuItems;
   bool _mapsEnabled;
-  bool _overlaysHaveChanged;
   
   // winds
 
@@ -279,7 +283,16 @@ private:
   
   TimeControl *_timeControl;
   bool _timeControlPlaced;
+
+  // overlays menu
   
+  QMenu *_overlaysMenu;
+  bool _overlaysHaveChanged;
+
+  // show menu
+  
+  QMenu *_showMenu;
+
   // creating images in archive mode
   
   vector<string> _archiveFileList;
@@ -324,6 +337,7 @@ private:
   void _populateWindsMenu();
   void _populateZoomsMenu();
   void _populateOverlaysMenu();
+  void _populateShowMenu();
 
   // field menu
 
@@ -368,13 +382,16 @@ private slots:
   // Qt slots //
   //////////////
 
-  void _howto();
-  void _about();
-  void _zoomBack();
-  void _zoomOut();
-  void _refresh();
+  // file menu
+  
   void _openFile();
   void _saveFile();
+  void _refresh();
+
+  // help menu
+  
+  void _howto();
+  void _about();
 
   // resize event
   
@@ -402,7 +419,16 @@ private slots:
 
   void _showTimeControl();
   void _placeTimeControl();
+  
+  // zoom menu
+  
+  void _zoomBack();
+  void _zoomOut();
 
+  // show menu
+
+  void _showValue();
+  
   // images
 
   void _saveImageToFile(bool interactive = true);
@@ -419,6 +445,7 @@ private slots:
   // void _showFileChooserDialog();
   
   // context editing
+  
   void ShowContextMenu(const QPoint &pos);
   
 };

@@ -69,7 +69,7 @@ public:
    * @param[in] parent   The parent widget.
    */
   
-  VertManager(GuiManager *manager);
+  explicit VertManager(GuiManager *manager);
 
   /**
    * @brief Destructor
@@ -117,6 +117,8 @@ public slots:
 
   void resize();
 
+               
+
 private slots:
   
   // override
@@ -146,7 +148,7 @@ protected:
 
   // the polar manager that created this window
 
-  GuiManager *_manager;
+  GuiManager *_guiManager;
 
   Params &_params;
   GlobalData &_gd;
@@ -217,16 +219,16 @@ protected:
 
   QAction *_gridsAct;
 
-
   ///////////////////////
   // Protected methods //
   ///////////////////////
 
   // override event handling
 
-  virtual void keyPressEvent(QKeyEvent* event);
-  virtual void resizeEvent(QResizeEvent *event);
-
+  void keyPressEvent(QKeyEvent* event) override;
+  void resizeEvent(QResizeEvent *event) override;
+  void closeEvent(QCloseEvent *event) override;
+  
   /**
    * @brief Create the actions for the menu bar menus on this window.
    *
