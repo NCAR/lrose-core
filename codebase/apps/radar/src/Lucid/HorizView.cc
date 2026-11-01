@@ -89,6 +89,7 @@ HorizView::HorizView(QWidget* parent,
   _zoomCornerY = 0;
 
   _pointClicked = false;
+  _haveClickLocation = false;
   _worldClickX = 0.0;
   _worldClickY = 0.0;
   _worldClickLat = 0.0;
@@ -205,6 +206,10 @@ void HorizView::_saveFieldDataToQueue(int fieldNum)
                                                   mr->h_vhdr,
                                                   mr->proj,
                                                   mr->h_fl32_data));
+
+  // A field selection replaces or augments the queue used by the click
+  // dialog.  Refresh the existing report in place at the last click location.
+  _updateClickReport();
 
   // Refresh an existing hover report when a newly displayed field replaces
   // or augments the saved data beneath a stationary cursor.
@@ -477,6 +482,33 @@ vector<ClickReportField> HorizView::_getFieldValues(double lat,
   }
 
   return values;
+}
+
+////////////////////////////////////////////////////////
+// refresh the report at the latest click location
+
+void HorizView::_updateClickReport()
+{
+  if (!_haveClickLocation || _fieldDataQueue.empty()) {
+    return;
+  }
+
+  const MdvReader::FieldCopy &primaryField = _fieldDataQueue.front();
+  ClickReport report;
+  report.dataTime = primaryField.mhdr.time_centroid;
+  report.latitude = _worldClickLat;
+  report.longitude = _worldClickLon;
+  report.x = _worldClickX;
+  report.y = _worldClickY;
+  report.xyUnits =
+    (_proj.getProjType() == Mdvx::PROJ_LATLON) ? "deg" : "km";
+  if (primaryField.fhdr.nz > 0) {
+    report.height = primaryField.vhdr.level[0];
+    report.heightUnits =
+      Mdvx::vertTypeZUnits(primaryField.fhdr.vlevel_type);
+  }
+  report.fields = _getFieldValues(_worldClickLat, _worldClickLon);
+  _manager.updateClickReport(report);
 }
 
 ////////////////////////////////////////////////////////
@@ -1583,29 +1615,13 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     _worldClickX = _worldReleaseX;
     _worldClickY = _worldReleaseY;
     _proj.xy2latlon(_worldClickX, _worldClickY, _worldClickLat, _worldClickLon);
+    _haveClickLocation = true;
     _manager.setOverlaysHaveChanged(true);
 
     // Build the report from the primary field's actual returned metadata and
     // sample every cached field at the same geographic point.
-    if (!_fieldDataQueue.empty()) {
-      const MdvReader::FieldCopy &primaryField = _fieldDataQueue.front();
-      ClickReport report;
-      report.dataTime = primaryField.mhdr.time_centroid;
-      report.latitude = _worldClickLat;
-      report.longitude = _worldClickLon;
-      report.x = _worldClickX;
-      report.y = _worldClickY;
-      report.xyUnits =
-        (_proj.getProjType() == Mdvx::PROJ_LATLON) ? "deg" : "km";
-      if (primaryField.fhdr.nz > 0) {
-        report.height = primaryField.vhdr.level[0];
-        report.heightUnits =
-          Mdvx::vertTypeZUnits(primaryField.fhdr.vlevel_type);
-      }
-      report.fields = _getFieldValues(_worldClickLat, _worldClickLon);
-      _manager.updateClickReport(report);
-      _manager.showClickDialog();
-    }
+    _updateClickReport();
+    _manager.showClickDialog();
     
     // Emit a signal to indicate that the click location has changed
 

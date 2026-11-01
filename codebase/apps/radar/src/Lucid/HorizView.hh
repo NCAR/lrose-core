@@ -255,6 +255,7 @@ class DLL_EXPORT HorizView : public QWidget
   // panning.
 
   bool _pointClicked;
+  bool _haveClickLocation;
   int _mousePressX, _mousePressY;
   int _mouseReleaseX, _mouseReleaseY;
   int _zoomCornerX, _zoomCornerY;
@@ -360,6 +361,10 @@ class DLL_EXPORT HorizView : public QWidget
   // sample all cached fields at a geographic location
 
   vector<ClickReportField> _getFieldValues(double lat, double lon) const;
+
+  // refresh the report for the latest click from the current field queue
+
+  void _updateClickReport();
 
   // draw the transient data-value overlay
 
