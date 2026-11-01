@@ -75,7 +75,7 @@ GlobalData::GlobalData()
 
   num_datafields = 0;   
   num_menu_fields = 0;  
-  num_field_menu_cols = 0;  
+  num_field_menu_cols = 1;
   num_map_overlays = 0; 
   num_render_heights = 0;
   num_cache_zooms = 0;

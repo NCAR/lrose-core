@@ -39,6 +39,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QSet>
 
 #include <toolsa/DateTime.hh>
 #include <toolsa/mem.h>
@@ -55,6 +56,8 @@
 
 class MdvReader;
 class ReadVolH;
+class QThread;
+class QTimer;
 
 class MdvReader : public QObject {
 
@@ -65,6 +68,10 @@ public:
   // constructor
   
   MdvReader(QObject* parent);
+
+  // destructor
+
+  ~MdvReader() override;
 
   // is the data valid?
   
@@ -259,7 +266,7 @@ public:
   };
 
 public slots:
-  void readDoneH();
+  void readDoneH(int readStatus);
 
 private:
 
@@ -287,9 +294,18 @@ private:
   double _vLevel;
   bool _readBusyH;
 
+  // horizontal read thread and retry state
+
+  QSet<QThread *> _readThreadsH;
+  QTimer *_retryTimerH;
+  int _retryCountH;
+  bool _shuttingDown;
+
   // private methods
 
   int _handleHorizReadDone();
+
+  void _scheduleRetryH();
   
   bool _checkRequestChangedH(const DateTime &midTime, double vLevel);
   bool _checkRequestChangedV(const DateTime &midTime);
@@ -340,7 +356,7 @@ public slots:
   void doRead();
   
 signals:
-  void readDone();
+  void readDone(int readStatus);
 
 private:
   MdvReader* _mr;

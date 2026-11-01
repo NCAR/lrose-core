@@ -2176,7 +2176,9 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Set this parameter to force the field menu pop-up to this many columns.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &num_field_menu_cols - &_start_;
-    tt->single_val.i = 0;
+    tt->has_min = TRUE;
+    tt->min_val.i = 1;
+    tt->single_val.i = 1;
     tt++;
     
     // Parameter 'one_click_rhi'

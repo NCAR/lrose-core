@@ -887,7 +887,8 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 0;
+  p_default = 1;
+  p_min = 1;
   p_descr = "Set this parameter to force the field menu pop-up to this many columns.";
   p_help = "";
 } num_field_menu_cols;

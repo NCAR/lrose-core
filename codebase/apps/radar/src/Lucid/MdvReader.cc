@@ -35,12 +35,14 @@
 #include "MdvReader.hh"
 #include "TimeControl.hh"
 
+#include <algorithm>
 #include <cmath>
 #include <QCoreApplication>
 #include <QThread>
 #include <QObject>
 #include <QDebug>
 #include <QMutexLocker>
+#include <QTimer>
 
 #include <toolsa/str.h>
 
@@ -48,6 +50,7 @@
 // constructor
 
 MdvReader::MdvReader(QObject* parent) :
+        QObject(parent),
         _params(Params::Instance()),
         _gd(GlobalData::Instance()),
         _lucid(*parent)
@@ -121,6 +124,42 @@ MdvReader::MdvReader(QObject* parent) :
   _vLevel = 0;
   _readBusyH = false;
 
+  _retryCountH = 0;
+  _shuttingDown = false;
+  _retryTimerH = new QTimer(this);
+  _retryTimerH->setSingleShot(true);
+  connect(_retryTimerH, &QTimer::timeout, this, [this]() {
+    if (!_shuttingDown && !_readBusyH) {
+      startReadVolH();
+    }
+  });
+
+}
+
+////////////////////////////////////////////////
+// destructor
+
+MdvReader::~MdvReader()
+{
+  _shuttingDown = true;
+  _retryTimerH->stop();
+
+  // getHorizPlane() currently operates directly on this MdvReader.  Do not
+  // allow the object to be destroyed until every outstanding read has
+  // returned.  quit() stops each thread's event loop after the blocking MDV
+  // request completes; the request timeout therefore bounds this wait.
+
+  const QSet<QThread *> threads = _readThreadsH;
+  for (QThread *thread : threads) {
+    disconnect(thread, nullptr, this, nullptr);
+    thread->requestInterruption();
+    thread->quit();
+  }
+  for (QThread *thread : threads) {
+    thread->wait();
+    delete thread;
+  }
+  _readThreadsH.clear();
 }
 
 /**********************************************************************
@@ -133,6 +172,12 @@ void MdvReader::requestHorizPlane(const DateTime &midTime,
                                   double vLevel,
                                   int page)
 {
+
+  // This is a new user request, so cancel a pending retry and restart the
+  // backoff sequence for the new request details.
+
+  _retryTimerH->stop();
+  _retryCountH = 0;
 
   _setValidH(false);
   _setNewH(false);
@@ -1102,14 +1147,17 @@ ReadVolH::ReadVolH(MdvReader* parentObject, QObject* parent) :
 void ReadVolH::doRead() {
   cerr << "ReadVolH thread started. Parent object:" << _mr << endl;
   int iret = _mr->getHorizPlane();
-  cerr << "ReadVolH returned, iret: " << ", " << iret << endl;
-  emit readDone();
+  cerr << "ReadVolH returned, iret: " << iret << endl;
+  emit readDone(iret);
 }
 
 //////////////////////////////
 // start H vol read in thread
 
 void MdvReader::startReadVolH() {
+  if (_shuttingDown) {
+    return;
+  }
   if (_readBusyH) {
     cerr << "readVolH() is already in progress. Ignoring new request." << endl;
     return;
@@ -1117,32 +1165,71 @@ void MdvReader::startReadVolH() {
   _readBusyH = true;
   ReadVolH* worker = new ReadVolH(this); // Pass the current object as reference
   QThread* thread = new QThread;
+  _readThreadsH.insert(thread);
   worker->moveToThread(thread);
   // Connect signals and slots
   connect(thread, &QThread::started, worker, &ReadVolH::doRead);
   connect(worker, &ReadVolH::readDone, this, &MdvReader::readDoneH);
-  connect(worker, &ReadVolH::readDone, thread, &QThread::quit);
+  connect(worker, &ReadVolH::readDone, thread, &QThread::quit,
+          Qt::DirectConnection);
   connect(thread, &QThread::finished, worker, &ReadVolH::deleteLater);
-  connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+  connect(thread, &QThread::finished, this, [this, thread]() {
+    _readThreadsH.remove(thread);
+    thread->deleteLater();
+  });
   thread->start();
 }
 
 ////////////////////////
 // done with H vol read
 
-void MdvReader::readDoneH()
+void MdvReader::readDoneH(int readStatus)
 {
-  int iret = _handleHorizReadDone();
+  int iret = readStatus;
+  if (iret == 0) {
+    iret = _handleHorizReadDone();
+  }
   if (iret || !h_data_valid) {
     _setValidH(false);
     _setNewH(false);
     _readBusyH = false;
+    _scheduleRetryH();
     return;
   }
   _setValidH(iret_h_mdvx_read == 0);
   _setNewH(true);
   cerr << "readDone in ReadVolH worker thread" << endl;
   _readBusyH = false;
+  _retryCountH = 0;
+}
+
+////////////////////////////////////////////////////////
+// schedule a retry of the most recent horizontal request
+
+void MdvReader::_scheduleRetryH()
+{
+  if (_shuttingDown) {
+    return;
+  }
+
+  // Retry indefinitely, but cap the delay so a transient outage recovers
+  // without requiring another GUI state change and a long outage does not
+  // cause a tight request loop.
+
+  static const int retryDelaysMsecs[] = {
+    1000, 2000, 5000, 10000, 30000
+  };
+  static const int nRetryDelays =
+    sizeof(retryDelaysMsecs) / sizeof(retryDelaysMsecs[0]);
+  const int delayIndex = std::min(_retryCountH, nRetryDelays - 1);
+  const int delayMsecs = retryDelaysMsecs[delayIndex];
+  _retryCountH++;
+
+  if (_gd.debug) {
+    cerr << "MdvReader: horizontal read failed for " << field_label
+         << "; retrying in " << delayMsecs << " ms" << endl;
+  }
+  _retryTimerH->start(delayMsecs);
 }
 
 /*****************************************************************
