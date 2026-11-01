@@ -294,7 +294,11 @@ private:
   double _vLevel;
   bool _readBusyH;
 
-  // horizontal read thread and retry state
+  // Horizontal MDV reads are performed by short-lived worker threads.  Keep
+  // track of every thread because the worker calls back into this MdvReader;
+  // destruction must wait until those calls have returned.  Failed reads are
+  // retried from the Qt event loop using a single-shot timer, with the most
+  // recent request details still stored in this object.
 
   QSet<QThread *> _readThreadsH;
   QTimer *_retryTimerH;

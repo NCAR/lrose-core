@@ -124,6 +124,10 @@ MdvReader::MdvReader(QObject* parent) :
   _vLevel = 0;
   _readBusyH = false;
 
+  // Use a Qt timer for retries so the MdvReader remains responsive between
+  // attempts.  The timer belongs to this object and therefore fires on the
+  // main Qt thread, where it is safe to start and account for another worker.
+
   _retryCountH = 0;
   _shuttingDown = false;
   _retryTimerH = new QTimer(this);
@@ -1163,11 +1167,22 @@ void MdvReader::startReadVolH() {
     return;
   }
   _readBusyH = true;
+
+  // Each request gets its own worker and thread.  The worker performs the
+  // blocking MDV call, while all interpretation of the result remains on the
+  // MdvReader's Qt thread.  Retain the QThread until it finishes so shutdown
+  // can wait for any worker that still refers to this MdvReader.
+
   ReadVolH* worker = new ReadVolH(this); // Pass the current object as reference
   QThread* thread = new QThread;
   _readThreadsH.insert(thread);
   worker->moveToThread(thread);
-  // Connect signals and slots
+
+  // Stop the worker event loop as soon as the blocking read returns.  The
+  // direct connection is intentional: it does not depend on the MdvReader's
+  // event loop processing the completion signal first.  Object deletion and
+  // removal from the tracked set occur after the thread has actually stopped.
+
   connect(thread, &QThread::started, worker, &ReadVolH::doRead);
   connect(worker, &ReadVolH::readDone, this, &MdvReader::readDoneH);
   connect(worker, &ReadVolH::readDone, thread, &QThread::quit,
@@ -1185,6 +1200,11 @@ void MdvReader::startReadVolH() {
 
 void MdvReader::readDoneH(int readStatus)
 {
+  // A successful worker read has produced raw MDV data that still needs to be
+  // installed in the display state on this Qt thread.  If either phase fails,
+  // leave the data invalid and retry the same stored request.  A subsequent
+  // user request will replace those details and restart the backoff sequence.
+
   int iret = readStatus;
   if (iret == 0) {
     iret = _handleHorizReadDone();
