@@ -183,6 +183,7 @@ void VlevelSelector::paintEvent(QPaintEvent* e)
     case Mdvx::VERT_TYPE_THETA:
       titles.push_back("Theta");
       writeValue = true;
+      break;
     case Mdvx::VERT_TYPE_ELEV:
     case Mdvx::VERT_VARIABLE_ELEV:
       titles.push_back("Elevation");
@@ -308,7 +309,8 @@ void VlevelSelector::keyPressEvent(QKeyEvent * e)
   
   if (key == Qt::Key_Up) {
     
-    if (_vlevelManager.getSelectedIndex() > 0) {
+    if (_vlevelManager.getSelectedIndex() <
+        (int) _vlevelManager.getNLevels() - 1) {
       if (_params.debug) {
         cerr << "VlevelSelector clicked up arrow, go up a vlevel" << endl;
       }
@@ -318,7 +320,7 @@ void VlevelSelector::keyPressEvent(QKeyEvent * e)
 
   } else if (key == Qt::Key_Down) {
 
-    if (_vlevelManager.getSelectedIndex() < (int) _vlevelManager.getNLevels() - 1) {
+    if (_vlevelManager.getSelectedIndex() > 0) {
       if (_params.debug) {
         cerr << "VlevelSelector clicked down arrow, go down a vlevel" << endl;
       }

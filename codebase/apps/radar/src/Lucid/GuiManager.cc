@@ -416,24 +416,14 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     _timeControl->goFwd1();
     
   } else if (key == Qt::Key_Up) {
-    
-    if (_vlevelManager.getSelectedIndex() > 0) {
-      if (_params.debug) {
-        cerr << "Clicked up arrow, go up a vlevel" << endl;
-      }
-      _vlevelSelector->keyPressEvent(e);
-      // _changeVlevelRadioButton(-1);
-    }
+
+    // Keep vlevel navigation and its boundary checks in the selector so the
+    // behavior is identical whether the selector or main window has focus.
+    _vlevelSelector->keyPressEvent(e);
     
   } else if (key == Qt::Key_Down) {
-    
-    if (_vlevelManager.getSelectedIndex() < (int) _vlevelManager.getNLevels() - 1) {
-      if (_params.debug) {
-        cerr << "Clicked down arrow, go down a vlevel" << endl;
-      }
-      _vlevelSelector->keyPressEvent(e);
-      // _changeVlevelRadioButton(+1);
-    }
+
+    _vlevelSelector->keyPressEvent(e);
     
   }
 

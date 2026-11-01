@@ -145,8 +145,21 @@ void VlevelManager::set(const MdvReader &mread)
   if (nz > MDV64_MAX_VLEVELS) {
     nz = MDV64_MAX_VLEVELS;
   }
+
+  // Keep the manager's levels in ascending numeric order.  MDV files may
+  // store pressure and other coordinates in descending order, but the
+  // selector and the min/max accessors rely on a consistent ordering.
+
+  if (nz > 1 && mread.ds_vhdr.level[0] > mread.ds_vhdr.level[nz - 1]) {
+    _orderReversed = true;
+  }
+
   for (int iz = 0; iz < nz; iz++) {
-    _levels.push_back(mread.ds_vhdr.level[iz]);
+    int dataIndex = iz;
+    if (_orderReversed) {
+      dataIndex = nz - 1 - iz;
+    }
+    _levels.push_back(mread.ds_vhdr.level[dataIndex]);
   }
 
   // set selected index
@@ -221,6 +234,10 @@ void VlevelManager::incrementIndex(int incr)
 
   _selectedIndex += incr;
   _checkConsistent();
+
+  // Keyboard navigation selects a concrete available level.  Keep the
+  // request value synchronized so the following data read uses that level.
+  _requestedLevel = _levels[_selectedIndex];
   
 }
 
@@ -232,25 +249,17 @@ void VlevelManager::incrementIndex(int incr)
 double VlevelManager::getLevel(int index /* = -1*/) const 
 {
 
-  // return level for requested index, if supplied
-  
-  if (index >= 0 && index < (int) _levels.size()) {
-    return _levels[index];
-  }
-
-  // check for bounds
+  // A negative index requests the current selection.
   
   if (index < 0) {
-    return _levels[0];
+    return _levels[_selectedIndex];
   }
   
   if (index >= (int) _levels.size()) {
     return _levels[_levels.size()-1];
   }
 
-  // return val selected
-  
-  return _levels[_selectedIndex];
+  return _levels[index];
 
 }
 
