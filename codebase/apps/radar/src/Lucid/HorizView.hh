@@ -57,6 +57,7 @@
 
 #include "GlobalData.hh"
 #include "Params.hh"
+#include "ClickReport.hh"
 
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
@@ -355,6 +356,10 @@ class DLL_EXPORT HorizView : public QWidget
   // update the transient data-value overlay for a cursor position
 
   void _updateMouseValue(int mouseX, int mouseY);
+
+  // sample all cached fields at a geographic location
+
+  vector<ClickReportField> _getFieldValues(double lat, double lon) const;
 
   // draw the transient data-value overlay
 

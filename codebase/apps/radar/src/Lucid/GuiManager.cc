@@ -139,6 +139,18 @@ GuiManager::GuiManager() :
   _horizFrame = NULL;
   _horiz = NULL;
 
+  _clickReportDialog = NULL;
+  _clickReportDialogLayout = NULL;
+  _clickDate = NULL;
+  _clickTime = NULL;
+  _clickLatitude = NULL;
+  _clickLongitude = NULL;
+  _clickHeight = NULL;
+  _clickX = NULL;
+  _clickY = NULL;
+  _clickFieldsTable = NULL;
+  _clickReportPlaced = false;
+
   _vertWindow = NULL;
   _vert = NULL;
 
@@ -538,8 +550,8 @@ void GuiManager::_setupWindows()
   move(pos);
   show();
 
-  // set up field status dialog
-  // _createClickReportDialog();
+  // set up click report dialog
+  _createClickReportDialog();
 
   // createBoundaryEditorDialog();
 
@@ -548,6 +560,83 @@ void GuiManager::_setupWindows()
   // }
   // _setVlevelPanelVisibility();
 
+}
+
+///////////////////////////////////////////////////////
+// create the click report dialog
+
+void GuiManager::_createClickReportDialog()
+{
+  _clickReportDialog = new QDialog(this);
+  _clickReportDialog->setWindowTitle("Click report");
+  _clickReportDialog->setMinimumSize(210, 280);
+
+  _clickReportDialogLayout = new QGridLayout(_clickReportDialog);
+  _clickReportDialogLayout->setVerticalSpacing(5);
+
+  // Keep the metadata names at their natural width and give remaining space
+  // to the values.  Allowing both columns to stretch creates a large empty gap
+  // between them and makes the dialog appear wider than its content requires.
+  _clickReportDialogLayout->setColumnStretch(0, 0);
+  _clickReportDialogLayout->setColumnStretch(1, 1);
+
+  int row = 0;
+  QLabel *locationHeader = new QLabel("CLICK POINT DATA", _clickReportDialog);
+  _clickReportDialogLayout->addWidget(locationHeader, row++, 0, 1, 2,
+                                      Qt::AlignCenter);
+
+  _clickDate = _addClickReportRow("Date", row++);
+  _clickTime = _addClickReportRow("Time", row++);
+  _clickLatitude = _addClickReportRow("Latitude", row++);
+  _clickLongitude = _addClickReportRow("Longitude", row++);
+  _clickHeight = _addClickReportRow("Height", row++);
+  _clickX = _addClickReportRow("X", row++);
+  _clickY = _addClickReportRow("Y", row++);
+
+  QLabel *fieldsHeader = new QLabel("FIELD VALUES", _clickReportDialog);
+  _clickReportDialogLayout->addWidget(fieldsHeader, row++, 0, 1, 2,
+                                      Qt::AlignCenter);
+
+  // Field availability follows the user's display history, so use a table
+  // that can be rebuilt for each click instead of fixed rows.
+  _clickFieldsTable = new QTableWidget(_clickReportDialog);
+  _clickFieldsTable->setColumnCount(3);
+  _clickFieldsTable->setHorizontalHeaderLabels
+    (QStringList() << "Name" << "Value" << "Units");
+  _clickFieldsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  _clickFieldsTable->setSelectionMode(QAbstractItemView::NoSelection);
+  _clickFieldsTable->setMinimumWidth(0);
+  _clickFieldsTable->setSizeAdjustPolicy
+    (QAbstractScrollArea::AdjustToContents);
+  _clickFieldsTable->verticalHeader()->setVisible(false);
+  _clickFieldsTable->horizontalHeader()->setSectionResizeMode
+    (QHeaderView::ResizeToContents);
+  _clickFieldsTable->horizontalHeader()->setStretchLastSection(false);
+  _clickReportDialogLayout->addWidget(_clickFieldsTable, row, 0, 1, 2);
+
+  // Closing the dialog directly must leave the checkable Show action in the
+  // same state as the window it controls.
+  connect(_clickReportDialog, &QDialog::finished, this, [this]() {
+    _showClickAct->setChecked(false);
+  });
+
+  _clickReportDialog->hide();
+  _clickReportDialog->resize(230, 340);
+}
+
+///////////////////////////////////////////////////////
+// add one metadata row to the click report dialog
+
+QLabel *GuiManager::_addClickReportRow(const string &name, int row)
+{
+  QLabel *nameLabel = new QLabel(name.c_str(), _clickReportDialog);
+  nameLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+  _clickReportDialogLayout->addWidget(nameLabel, row, 0, Qt::AlignLeft);
+
+  QLabel *valueLabel = new QLabel("----", _clickReportDialog);
+  valueLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+  _clickReportDialogLayout->addWidget(valueLabel, row, 1, Qt::AlignLeft);
+  return valueLabel;
 }
 
 //////////////////////////////
@@ -2579,29 +2668,78 @@ void GuiManager::_setText(char *text,
 }
 
 /////////////////////////////
+// update data at the latest click point
+
+void GuiManager::updateClickReport(const ClickReport &report)
+{
+  if (!_clickReportDialog) {
+    return;
+  }
+
+  DateTime dataTime(report.dataTime);
+  char text[256];
+  snprintf(text, sizeof(text), "%.4d/%.2d/%.2d",
+           dataTime.getYear(), dataTime.getMonth(), dataTime.getDay());
+  _clickDate->setText(text);
+  snprintf(text, sizeof(text), "%.2d:%.2d:%.2d UTC",
+           dataTime.getHour(), dataTime.getMin(), dataTime.getSec());
+  _clickTime->setText(text);
+
+  snprintf(text, sizeof(text), "%.5f deg", report.latitude);
+  _clickLatitude->setText(text);
+  snprintf(text, sizeof(text), "%.5f deg", report.longitude);
+  _clickLongitude->setText(text);
+  snprintf(text, sizeof(text), "%g %s", report.height,
+           report.heightUnits.c_str());
+  _clickHeight->setText(text);
+  snprintf(text, sizeof(text), "%g %s", report.x, report.xyUnits.c_str());
+  _clickX->setText(text);
+  snprintf(text, sizeof(text), "%g %s", report.y, report.xyUnits.c_str());
+  _clickY->setText(text);
+
+  _clickFieldsTable->setRowCount(report.fields.size());
+  for (size_t ii = 0; ii < report.fields.size(); ii++) {
+    const ClickReportField &field = report.fields[ii];
+    QTableWidgetItem *nameItem =
+      new QTableWidgetItem(field.name.c_str());
+    snprintf(text, sizeof(text), "%g", field.value);
+    QTableWidgetItem *valueItem = new QTableWidgetItem(text);
+    valueItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    QTableWidgetItem *unitsItem =
+      new QTableWidgetItem(field.units.c_str());
+    _clickFieldsTable->setItem(ii, 0, nameItem);
+    _clickFieldsTable->setItem(ii, 1, valueItem);
+    _clickFieldsTable->setItem(ii, 2, unitsItem);
+  }
+  _clickFieldsTable->resizeColumnsToContents();
+  _clickFieldsTable->resizeRowsToContents();
+}
+
+/////////////////////////////
 // show data at click point
 
 void GuiManager::showClickDialog()
 {
 
-  cerr << "CCCCCCCCCCCCCC showClick: " << _showClickAct->isChecked() << endl;
-#ifdef NOTNOW
-  if (_clickReportDialog) {
-    if (_clickReportDialog->isVisible()) {
-      _clickReportDialog->setVisible(false);
-    } else {
-      if (_clickReportDialog->x() == 0 &&
-          _clickReportDialog->y() == 0) {
-        QPoint pos;
-        pos.setX(x() + width() + 5);
-        pos.setY(y());
-        _clickReportDialog->move(pos);
-      }
-      _clickReportDialog->setVisible(true);
-      _clickReportDialog->raise();
-    }
+  if (!_clickReportDialog) {
+    return;
   }
-#endif
+
+  // The checkable action is the source of truth.  Click updates may call this
+  // repeatedly, so visibility must not be toggled on each new report.
+  if (_showClickAct->isChecked()) {
+    if (!_clickReportPlaced) {
+      QPoint pos;
+      pos.setX(x() + width() + 5);
+      pos.setY(y());
+      _clickReportDialog->move(pos);
+      _clickReportPlaced = true;
+    }
+    _clickReportDialog->show();
+    _clickReportDialog->raise();
+  } else {
+    _clickReportDialog->hide();
+  }
 }
 
 /////////////////////////////

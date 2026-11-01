@@ -61,6 +61,7 @@ HDRS = \
 	Croutes_P.hh \
 	Csyprod_P.hh \
 	Cterrain_P.hh \
+	ClickReport.hh \
 	FieldTableItem.hh \
 	HorizView.hh \
 	LegacyParams.hh \

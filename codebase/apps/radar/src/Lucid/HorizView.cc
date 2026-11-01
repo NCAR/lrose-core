@@ -357,8 +357,6 @@ void HorizView::paintEvent(QPaintEvent *event)
                _worldClickLat, _worldClickLon, _worldClickX, _worldClickY);
     }
     _manager.setTitleBarStr(titleStr);
-
-    _manager.showClickDialog();
              
   }
 
@@ -414,6 +412,31 @@ void HorizView::_updateMouseValue(int mouseX, int mouseY)
   double lat, lon;
   _proj.xy2latlon(worldX, worldY, lat, lon);
 
+  const vector<ClickReportField> fields = _getFieldValues(lat, lon);
+  for (const ClickReportField &field : fields) {
+    char line[1024];
+    snprintf(line, sizeof(line), "%s: %g", field.name.c_str(), field.value);
+    if (!_mouseValueText.empty()) {
+      _mouseValueText += "\n";
+    }
+    _mouseValueText += line;
+  }
+
+  if (!_mouseValueText.empty()) {
+    _mouseValueX = mouseX;
+    _mouseValueY = mouseY;
+    _mouseValueVisible = true;
+  }
+}
+
+////////////////////////////////////////////////////////
+// sample the saved fields at a geographic location
+
+vector<ClickReportField> HorizView::_getFieldValues(double lat,
+                                                    double lon) const
+{
+  vector<ClickReportField> values;
+
   // The queue retains recently displayed fields, potentially with different
   // projections.  Locate the cursor independently in each saved grid.
   for (const MdvReader::FieldCopy &field : _fieldDataQueue) {
@@ -446,19 +469,14 @@ void HorizView::_updateMouseValue(int mouseX, int mouseY)
       value = 0.0;
     }
 
-    char line[1024];
-    snprintf(line, sizeof(line), "%s: %g", field.fieldName.c_str(), value);
-    if (!_mouseValueText.empty()) {
-      _mouseValueText += "\n";
-    }
-    _mouseValueText += line;
+    ClickReportField reportField;
+    reportField.name = field.fieldName;
+    reportField.units = fhdr.units;
+    reportField.value = value;
+    values.push_back(reportField);
   }
 
-  if (!_mouseValueText.empty()) {
-    _mouseValueX = mouseX;
-    _mouseValueY = mouseY;
-    _mouseValueVisible = true;
-  }
+  return values;
 }
 
 ////////////////////////////////////////////////////////
@@ -1566,6 +1584,28 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     _worldClickY = _worldReleaseY;
     _proj.xy2latlon(_worldClickX, _worldClickY, _worldClickLat, _worldClickLon);
     _manager.setOverlaysHaveChanged(true);
+
+    // Build the report from the primary field's actual returned metadata and
+    // sample every cached field at the same geographic point.
+    if (!_fieldDataQueue.empty()) {
+      const MdvReader::FieldCopy &primaryField = _fieldDataQueue.front();
+      ClickReport report;
+      report.dataTime = primaryField.mhdr.time_centroid;
+      report.latitude = _worldClickLat;
+      report.longitude = _worldClickLon;
+      report.x = _worldClickX;
+      report.y = _worldClickY;
+      report.xyUnits =
+        (_proj.getProjType() == Mdvx::PROJ_LATLON) ? "deg" : "km";
+      if (primaryField.fhdr.nz > 0) {
+        report.height = primaryField.vhdr.level[0];
+        report.heightUnits =
+          Mdvx::vertTypeZUnits(primaryField.fhdr.vlevel_type);
+      }
+      report.fields = _getFieldValues(_worldClickLat, _worldClickLon);
+      _manager.updateClickReport(report);
+      _manager.showClickDialog();
+    }
     
     // Emit a signal to indicate that the click location has changed
 

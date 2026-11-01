@@ -48,6 +48,7 @@
 #include "GlobalData.hh"
 #include "Params.hh"
 #include "VlevelManager.hh"
+#include "ClickReport.hh"
 
 #include <QMainWindow>
 #include <QListWidgetItem>
@@ -132,6 +133,10 @@ public:
   // set title bar str
   
   void setTitleBarStr(const string &titleStr);
+
+  // update the click report from a horizontal-view selection
+
+  void updateClickReport(const ClickReport &report);
   
   // override event handling
 
@@ -293,6 +298,20 @@ private:
   
   QMenu *_showMenu;
 
+  // click location report dialog
+
+  QDialog *_clickReportDialog;
+  QGridLayout *_clickReportDialogLayout;
+  QLabel *_clickDate;
+  QLabel *_clickTime;
+  QLabel *_clickLatitude;
+  QLabel *_clickLongitude;
+  QLabel *_clickHeight;
+  QLabel *_clickX;
+  QLabel *_clickY;
+  QTableWidget *_clickFieldsTable;
+  bool _clickReportPlaced;
+
   // creating images in archive mode
   
   vector<string> _archiveFileList;
@@ -338,6 +357,8 @@ private:
   void _populateZoomsMenu();
   void _populateOverlaysMenu();
   void _populateShowMenu();
+  void _createClickReportDialog();
+  QLabel *_addClickReportRow(const string &name, int row);
 
   // field menu
 
