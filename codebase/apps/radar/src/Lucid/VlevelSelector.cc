@@ -55,6 +55,10 @@ VlevelSelector::VlevelSelector(int width,
   _world.setTopMargin(_params.vlevel_selector_top_margin);
   _world.setBottomMargin(_params.vlevel_selector_bottom_margin);
 
+  // This widget uses WorldPlot only as a vertical coordinate transform.  Do
+  // not let the map-oriented aspect correction expand the requested Y range.
+  _world.setPreserveAspectRatio(false);
+
   _world.setAxisTextMargin(_params.vlevel_selector_axis_text_margin);
   _world.setYAxisTickLen(_params.vlevel_selector_axis_tick_len);
   _world.setYNTicksIdeal(_params.vlevel_selector_n_ticks_ideal);

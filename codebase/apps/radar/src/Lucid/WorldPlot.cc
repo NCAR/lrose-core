@@ -71,6 +71,8 @@ WorldPlot::WorldPlot() :
   _xPixOffset = 0;
   _yPixOffset = 0;
 
+  _preserveAspectRatio = true;
+
   _xMinWorld = 0;
   _xMaxWorld = 1;
   _yMinWorld = 0;
@@ -186,6 +188,7 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _yPixOffset = rhs._yPixOffset;
 
   _proj = rhs._proj;
+  _preserveAspectRatio = rhs._preserveAspectRatio;
   
   _xMinWorld = rhs._xMinWorld;
   _xMaxWorld = rhs._xMaxWorld;
@@ -280,6 +283,15 @@ void WorldPlot::setWindowGeom(int width,
 
   updatePixelScales();
 
+}
+
+///////////////////////////////////////////////////////
+// configure whether X and Y use a common scale
+
+void WorldPlot::setPreserveAspectRatio(bool state)
+{
+  _preserveAspectRatio = state;
+  updatePixelScales();
 }
 
 ///////////////////////////////////////////////////////
@@ -2394,6 +2406,14 @@ void WorldPlot::_computeTransform()
 
 void WorldPlot::updatePixelScales()
 {
+
+  // Map plots require a common X/Y scale to avoid distortion.  Axis-only
+  // plots instead need their requested limits preserved exactly.
+
+  if (!_preserveAspectRatio) {
+    _computeTransform();
+    return;
+  }
 
   // compute pixel space transform
 

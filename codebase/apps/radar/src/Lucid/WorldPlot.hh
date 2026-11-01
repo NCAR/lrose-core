@@ -93,6 +93,8 @@ public:
   // side effect - recomputes transform
 
   void setProjection(const MdvxProj &proj) { _proj = proj; }
+
+  void setPreserveAspectRatio(bool state);
      
   void setWorldLimits(double xMinWorld,
                       double yMinWorld,
@@ -645,6 +647,8 @@ private:
   // projection if applicable
 
   MdvxProj _proj;
+
+  bool _preserveAspectRatio;
   
   // world coord limits of data area
 
