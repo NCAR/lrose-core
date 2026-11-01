@@ -492,33 +492,69 @@ int MdvReader::_handleHorizReadDone()
     ds_vhdr = *(hfld->getVlevelHeaderFile());
   }
     
-  // Compute the vertical levels 
+  // Compute the vertical extent represented by each level.  Neighboring
+  // levels define the bounds for a multi-level field, but a single-level field
+  // has no neighbor from which to infer its thickness.  In that case use a
+  // valid grid spacing if one was supplied; otherwise retain a zero-thickness
+  // interval at the level center rather than inventing an extent.
+
+  if (ds_fhdr.nz <= 0 || h_fhdr.nz <= 0) {
+    cerr << "ERROR - MdvReader::_handleHorizReadDone" << endl;
+    cerr << "  MDV field has no vertical levels" << endl;
+    vert.clear();
+    return -1;
+  }
+
   plane = 0;
   vert.resize(ds_fhdr.nz);
-  for(int ii = 0; ii < ds_fhdr.nz; ii++) { 
-    // Find out which plane we received
-    if(ds_vhdr.level[ii] == h_vhdr.level[0]) plane = ii;
-    if(ii == 0) { // Lowest plane 
-      double delta = (ds_vhdr.level[ii+1] - ds_vhdr.level[ii]) / 2.0;
-      vert[ii].min = ds_vhdr.level[0] - delta;
-      vert[ii].cent = ds_vhdr.level[0];
-      vert[ii].max = ds_vhdr.level[0] + delta;
-      
-    } else if (ii == ds_fhdr.nz -1) { // highest plane
-      double delta = (ds_vhdr.level[ii] - ds_vhdr.level[ii-1]) / 2.0;
-      vert[ii].min = ds_vhdr.level[ii] - delta;
-      vert[ii].cent = ds_vhdr.level[ii];
-      vert[ii].max = ds_vhdr.level[ii] + delta;
-        
-    } else { // Middle planes
-      double delta = (ds_vhdr.level[ii] - ds_vhdr.level[ii-1]) / 2.0;
-      vert[ii].min = ds_vhdr.level[ii] - delta;
-      vert[ii].cent = ds_vhdr.level[ii];
-        
-      delta = (ds_vhdr.level[ii+1] - ds_vhdr.level[ii]) / 2.0;
-      vert[ii].max = ds_vhdr.level[ii] + delta;
+
+  if (ds_fhdr.nz == 1) {
+    const double center = ds_vhdr.level[0];
+    double halfWidth = 0.0;
+    if (std::isfinite(ds_fhdr.grid_dz) && ds_fhdr.grid_dz > 0.0) {
+      halfWidth = ds_fhdr.grid_dz / 2.0;
     }
-  } // ii
+    vert[0].min = center - halfWidth;
+    vert[0].cent = center;
+    vert[0].max = center + halfWidth;
+  } else {
+    for (int ii = 0; ii < ds_fhdr.nz; ii++) {
+      if (ii == 0) { // Lowest plane
+        double delta = (ds_vhdr.level[ii+1] - ds_vhdr.level[ii]) / 2.0;
+        vert[ii].min = ds_vhdr.level[0] - delta;
+        vert[ii].cent = ds_vhdr.level[0];
+        vert[ii].max = ds_vhdr.level[0] + delta;
+
+      } else if (ii == ds_fhdr.nz -1) { // highest plane
+        double delta = (ds_vhdr.level[ii] - ds_vhdr.level[ii-1]) / 2.0;
+        vert[ii].min = ds_vhdr.level[ii] - delta;
+        vert[ii].cent = ds_vhdr.level[ii];
+        vert[ii].max = ds_vhdr.level[ii] + delta;
+
+      } else { // Middle planes
+        double delta = (ds_vhdr.level[ii] - ds_vhdr.level[ii-1]) / 2.0;
+        vert[ii].min = ds_vhdr.level[ii] - delta;
+        vert[ii].cent = ds_vhdr.level[ii];
+
+        delta = (ds_vhdr.level[ii+1] - ds_vhdr.level[ii]) / 2.0;
+        vert[ii].max = ds_vhdr.level[ii] + delta;
+      }
+    } // ii
+  }
+
+  // Select the returned plane by proximity.  MDV level values may have passed
+  // through different floating-point representations, so exact equality can
+  // incorrectly leave the selection at plane zero.
+
+  const double returnedLevel = h_vhdr.level[0];
+  double minLevelDifference = fabs(ds_vhdr.level[0] - returnedLevel);
+  for (int ii = 1; ii < ds_fhdr.nz; ii++) {
+    const double levelDifference = fabs(ds_vhdr.level[ii] - returnedLevel);
+    if (levelDifference < minLevelDifference) {
+      minLevelDifference = levelDifference;
+      plane = ii;
+    }
+  }
     
   // Record the dimensional Units of the volume
   
