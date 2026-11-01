@@ -245,6 +245,9 @@ class DLL_EXPORT HorizView : public QWidget
   // show values
 
   bool _showValue;
+  bool _mouseValueVisible;
+  int _mouseValueX, _mouseValueY;
+  string _mouseValueText;
   
   // show click point
   // Last X,Y location of the mouse during mouse move events; used for
@@ -288,6 +291,10 @@ class DLL_EXPORT HorizView : public QWidget
   // Capture mouse move event for panning/zooming.
 
   virtual void mouseMoveEvent(QMouseEvent* event) override;
+
+  // Remove the transient value overlay when the cursor leaves the canvas.
+
+  virtual void leaveEvent(QEvent* event) override;
 
   // Capture mouse press event which signals the start of
   // panning/zooming.
@@ -344,6 +351,14 @@ class DLL_EXPORT HorizView : public QWidget
   // save field data to queue
 
   void _saveFieldDataToQueue(int fieldNum);
+
+  // update the transient data-value overlay for a cursor position
+
+  void _updateMouseValue(int mouseX, int mouseY);
+
+  // draw the transient data-value overlay
+
+  void _drawMouseValue(QPainter &painter);
 
   // debug prints
   

@@ -39,6 +39,7 @@
 #include <QRect>
 #include <QPainterPath>
 #include <algorithm>
+#include <cmath>
 
 #include <iostream>
 #include <iomanip>
@@ -112,6 +113,9 @@ HorizView::HorizView(QWidget* parent,
   _sizeChanged = true;
 
   _showValue = false;
+  _mouseValueVisible = false;
+  _mouseValueX = 0;
+  _mouseValueY = 0;
 
   // initialize the horiz projection
   
@@ -202,11 +206,20 @@ void HorizView::_saveFieldDataToQueue(int fieldNum)
                                                   mr->proj,
                                                   mr->h_fl32_data));
 
+  // Refresh an existing hover report when a newly displayed field replaces
+  // or augments the saved data beneath a stationary cursor.
+  if (_showValue && _mouseValueVisible) {
+    _updateMouseValue(_mouseValueX, _mouseValueY);
+  }
+
 }
 
 void HorizView::clearFieldDataQueue()
 {
   _fieldDataQueue.clear();
+  _mouseValueVisible = false;
+  _mouseValueText.clear();
+  update();
 }
 
 /*************************************************************************
@@ -305,6 +318,13 @@ void HorizView::paintEvent(QPaintEvent *event)
   
   painter.setPen(_params.foreground_color);
   _zoom->drawTitleTopCenter(painter, _params.horiz_frame_label);
+
+  // Draw cursor values directly on the widget so they remain transient rather
+  // than becoming part of the cached data or map images.
+
+  if (_showValue && _mouseValueVisible) {
+    _drawMouseValue(painter);
+  }
   
   // click point cross hairs
   
@@ -354,8 +374,139 @@ void HorizView::setShowValue(bool state)
 
 {
   _showValue = state;
-  // set mouse track state
   setMouseTracking(_showValue);
+
+  // Disabling the feature must also erase the last transient report.
+  if (!_showValue) {
+    _mouseValueVisible = false;
+    _mouseValueText.clear();
+  }
+  update();
+}
+
+////////////////////////////////////////////////////////
+// update the value report at the current cursor position
+
+void HorizView::_updateMouseValue(int mouseX, int mouseY)
+{
+  _mouseValueVisible = false;
+  _mouseValueText.clear();
+
+  if (!_showValue || _fieldDataQueue.empty()) {
+    return;
+  }
+
+  const int plotLeft = std::min(_zoom->getXMinPixel(),
+                                _zoom->getXMaxPixel());
+  const int plotRight = std::max(_zoom->getXMinPixel(),
+                                 _zoom->getXMaxPixel());
+  const int plotTop = std::min(_zoom->getYMinPixel(),
+                               _zoom->getYMaxPixel());
+  const int plotBottom = std::max(_zoom->getYMinPixel(),
+                                  _zoom->getYMaxPixel());
+  if (mouseX < plotLeft || mouseX > plotRight ||
+      mouseY < plotTop || mouseY > plotBottom) {
+    return;
+  }
+
+  const double worldX = _zoom->getXWorld(mouseX);
+  const double worldY = _zoom->getYWorld(mouseY);
+  double lat, lon;
+  _proj.xy2latlon(worldX, worldY, lat, lon);
+
+  // The queue retains recently displayed fields, potentially with different
+  // projections.  Locate the cursor independently in each saved grid.
+  for (const MdvReader::FieldCopy &field : _fieldDataQueue) {
+    int gridX, gridY;
+    field.proj.latlon2xyIndex(lat, lon, gridX, gridY);
+    const Mdvx::field_header_t &fhdr = field.fhdr;
+    if (gridX < 0 || gridX >= fhdr.nx ||
+        gridY < 0 || gridY >= fhdr.ny) {
+      continue;
+    }
+
+    const int64_t dataIndex = (int64_t) gridY * fhdr.nx + gridX;
+    if (dataIndex < 0 || dataIndex >= (int64_t) field.fl32_data.size()) {
+      continue;
+    }
+
+    double value = field.fl32_data[dataIndex];
+    if (!std::isfinite(value) ||
+        value == fhdr.missing_data_value ||
+        value == fhdr.bad_data_value) {
+      continue;
+    }
+    if (fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
+      value = exp(value);
+    }
+    if (!std::isfinite(value)) {
+      continue;
+    }
+    if (fabs(value) < 0.0001) {
+      value = 0.0;
+    }
+
+    char line[1024];
+    snprintf(line, sizeof(line), "%s: %g", field.fieldName.c_str(), value);
+    if (!_mouseValueText.empty()) {
+      _mouseValueText += "\n";
+    }
+    _mouseValueText += line;
+  }
+
+  if (!_mouseValueText.empty()) {
+    _mouseValueX = mouseX;
+    _mouseValueY = mouseY;
+    _mouseValueVisible = true;
+  }
+}
+
+////////////////////////////////////////////////////////
+// draw the value report beside the cursor
+
+void HorizView::_drawMouseValue(QPainter &painter)
+{
+  const int padding = 3;
+  const int cursorOffset = 8;
+  const int plotLeft = std::min(_zoom->getXMinPixel(),
+                                _zoom->getXMaxPixel());
+  const int plotRight = std::max(_zoom->getXMinPixel(),
+                                 _zoom->getXMaxPixel());
+  const int plotTop = std::min(_zoom->getYMinPixel(),
+                               _zoom->getYMaxPixel());
+  const int plotBottom = std::max(_zoom->getYMinPixel(),
+                                  _zoom->getYMaxPixel());
+
+  const QString label = QString::fromStdString(_mouseValueText);
+  const int textFlags = Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip;
+  QRect textBounds = painter.fontMetrics().boundingRect
+    (QRect(0, 0, plotRight - plotLeft + 1, plotBottom - plotTop + 1),
+     textFlags, label);
+  const int boxWidth = textBounds.width() + 2 * padding;
+  const int boxHeight = textBounds.height() + 2 * padding;
+
+  int boxX = _mouseValueX + cursorOffset;
+  if (boxX + boxWidth > plotRight) {
+    boxX = _mouseValueX - cursorOffset - boxWidth;
+  }
+  int boxY = _mouseValueY - cursorOffset - boxHeight;
+  if (boxY < plotTop) {
+    boxY = _mouseValueY + cursorOffset;
+  }
+  boxX = std::max(plotLeft,
+                  std::min(boxX, std::max(plotLeft,
+                                          plotRight - boxWidth + 1)));
+  boxY = std::max(plotTop,
+                  std::min(boxY, std::max(plotTop,
+                                          plotBottom - boxHeight + 1)));
+
+  QRect box(boxX, boxY, boxWidth, boxHeight);
+  QColor background(_params.background_color);
+  background.setAlpha(210);
+  painter.fillRect(box, background);
+  painter.setPen(_params.foreground_color);
+  painter.drawText(box.adjusted(padding, padding, -padding, -padding),
+                   textFlags, label);
 }
 
 /*************************************************************************
@@ -1328,38 +1479,9 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
   int deltaX = xx - _mousePressX;
   int deltaY = yy - _mousePressY;
 
-  {
-    cerr << "mmmmmmmmmmmmmmmmmmmmmmmmmmmm" << endl;
-    double mouseX = _zoom->getXWorld(xx);
-    double mouseY = _zoom->getYWorld(yy);
-    double lat, lon;
-    _proj.xy2latlon(mouseX, mouseY, lat, lon);
-    cerr << "mmmmmmmm x, y, lat, lon: " << mouseX << ", "
-         << mouseY << ", " << lat << ", " << lon << endl;
-    // if (_fieldDataQueue.size() > 0) {
-    //   MdvReader::FieldCopy &fld = _fieldDataQueue[0];
-    //   cerr << "FFFFFFFFFF fieldName: " << fld.fieldName << endl;
-    //   int gridIx, gridIy;
-    //   fld.proj.latlon2xyIndex(lat, lon, gridIx, gridIy);
-    //   cerr << "FFFFFFFFFF grid ix, iy: " << gridIx << ", " << gridIy << endl;
-    //   Mdvx::field_header_t &fhdr = fld.fhdr;
-    //   int64_t index = gridIy * fhdr.nx + gridIx;
-    //   double val = fld.fl32_data[index];
-    //   cerr << "VVVVVVVVVVVVVV val: " << val << endl;
-    // }
-    for (auto ii = _fieldDataQueue.begin(); ii != _fieldDataQueue.end(); ii++) {
-      const MdvReader::FieldCopy &fld = *ii;
-      int gridIx, gridIy;
-      fld.proj.latlon2xyIndex(lat, lon, gridIx, gridIy);
-      const Mdvx::field_header_t &fhdr = fld.fhdr;
-      double val = -9999;
-      if (gridIx >= 0 && gridIx < fhdr.nx &&
-          gridIy >= 0 && gridIy < fhdr.ny) {
-        int64_t index = (int64_t)gridIy * fhdr.nx + gridIx;
-        val = fld.fl32_data[index];
-      }
-      cerr << "FFFFFFFFFF fieldName, val: " << fld.fieldName << ", " << val << endl;
-    } // ii
+  if (_showValue) {
+    _updateMouseValue(xx, yy);
+    update();
   }
 
   // Make the rubberband aspect ratio match that
@@ -1394,6 +1516,17 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
     _rubberBand->setGeometry(newRect);
   }
 
+}
+
+////////////////////////////////////////////////////////
+// clear the cursor value when leaving the canvas
+
+void HorizView::leaveEvent(QEvent *event)
+{
+  _mouseValueVisible = false;
+  _mouseValueText.clear();
+  update();
+  QWidget::leaveEvent(event);
 }
 
 /*************************************************************************
