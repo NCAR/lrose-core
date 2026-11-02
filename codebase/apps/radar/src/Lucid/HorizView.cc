@@ -48,6 +48,35 @@
 
 using namespace std;
 
+namespace {
+
+////////////////////////////////////////////////////////
+// normalize physical buttons and single-button alternatives
+
+Qt::MouseButton effectiveButton(const QMouseEvent *event)
+{
+  const Qt::MouseButton button = event->button();
+  const Qt::KeyboardModifiers modifiers = event->modifiers();
+
+  if (button == Qt::LeftButton) {
+    if (modifiers & Qt::AltModifier) {
+      return Qt::MiddleButton;
+    }
+#ifdef Q_OS_MACOS
+    // Qt normally translates a macOS Control-click to a right-click.  The
+    // MetaModifier check covers platforms/input devices which leave it as a
+    // modified left-click (Qt maps the Mac Control key to MetaModifier).
+    if (modifiers & Qt::MetaModifier) {
+      return Qt::RightButton;
+    }
+#endif
+  }
+
+  return button;
+}
+
+} // namespace
+
 HorizView::HorizView(QWidget* parent,
                      GuiManager &manager) :
         QWidget(parent),
@@ -84,6 +113,7 @@ HorizView::HorizView(QWidget* parent,
   _mousePressY = 0;
   _mouseReleaseX = 0;
   _mouseReleaseY = 0;
+  _activeMouseButton = Qt::NoButton;
 
   _zoomCornerX = 0;
   _zoomCornerY = 0;
@@ -1489,7 +1519,9 @@ void HorizView::mousePressEvent(QMouseEvent *e)
   QPointF pos(e->pos());
 #endif
 
-  if (e->button() == Qt::RightButton) {
+  _activeMouseButton = effectiveButton(e);
+
+  if (_activeMouseButton == Qt::RightButton) {
     
     //-------
 
@@ -1541,6 +1573,14 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
   if (_showValue) {
     _updateMouseValue(xx, yy);
     update();
+  }
+
+  // Mouse tracking also delivers moves with no gesture in progress.  Right
+  // clicks are handled by the context menu and must not create a zoom band.
+
+  if (_activeMouseButton == Qt::NoButton ||
+      _activeMouseButton == Qt::RightButton) {
+    return;
   }
 
   // Make the rubberband aspect ratio match that
@@ -1595,6 +1635,20 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 {
 
   _pointClicked = false;
+
+  // Use the button normalized at press time.  In particular, an Option-drag
+  // remains a middle-button gesture even if Option is released first.
+
+  const Qt::MouseButton gestureButton = _activeMouseButton;
+  _activeMouseButton = Qt::NoButton;
+
+  if (gestureButton == Qt::NoButton ||
+      gestureButton == Qt::RightButton) {
+    if (_rubberBand) {
+      _rubberBand->hide();
+    }
+    return;
+  }
 
   // If the mouse hasn't moved much, assume we are clicking rather than
   // zooming

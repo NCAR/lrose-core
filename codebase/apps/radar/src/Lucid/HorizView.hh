@@ -259,6 +259,11 @@ class DLL_EXPORT HorizView : public QWidget
   int _mousePressX, _mousePressY;
   int _mouseReleaseX, _mouseReleaseY;
   int _zoomCornerX, _zoomCornerY;
+
+  // Preserve the normalized button for the lifetime of a gesture so changing
+  // modifiers during a drag cannot change the selected interaction.
+
+  Qt::MouseButton _activeMouseButton;
   
   // Location world of the latest click point.
   
