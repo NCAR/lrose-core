@@ -352,8 +352,8 @@ void VertView::_setGridSpacing()
   double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
   double yRange = _zoomWorld.getYMaxWorld() - _zoomWorld.getYMinWorld();
 
-  _xGridSpacing = _getSpacing(xRange);
-  _yGridSpacing = _getSpacing(yRange);
+  _xGridSpacing = _getSpacing(xRange, _zoomWorld.getPlotWidth());
+  _yGridSpacing = _getSpacing(yRange, _zoomWorld.getPlotHeight());
 
 }
 
@@ -361,26 +361,34 @@ void VertView::_setGridSpacing()
  * Get spacing for a given distance range
  */
 
-double VertView::_getSpacing(double range)
+double VertView::_getSpacing(double range, int pixelExtent)
 {
 
-  if (range <= 1.0) {
-    return 0.1;
-  } else if (range <= 2.0) {
-    return 0.2;
-  } else if (range <= 5.0) {
-    return 0.5;
-  } else if (range <= 10.0) {
+  if (range <= 0.0) {
     return 1.0;
-  } else if (range <= 20.0) {
-    return 2.0;
-  } else if (range <= 50.0) {
-    return 5.0;
-  } else if (range <= 100.0) {
-    return 10.0;
-  } else {
-    return 20.0;
   }
+
+  // Keep adjacent labels roughly 50 pixels apart, then round to familiar
+  // 1/2/5 intervals.  This makes long routes readable and also adapts when
+  // the window is resized or the user zooms.
+  const double targetPixels = 50.0;
+  const double targetIntervals =
+    std::max(1.0, pixelExtent / targetPixels);
+  const double rawSpacing = range / targetIntervals;
+  const double magnitude = pow(10.0, floor(log10(rawSpacing)));
+  const double normalized = rawSpacing / magnitude;
+
+  double niceNormalized = 1.0;
+  if (normalized < 1.5) {
+    niceNormalized = 1.0;
+  } else if (normalized < 3.0) {
+    niceNormalized = 2.0;
+  } else if (normalized < 7.0) {
+    niceNormalized = 5.0;
+  } else {
+    niceNormalized = 10.0;
+  }
+  return niceNormalized * magnitude;
 
 }
 
@@ -448,8 +456,13 @@ void VertView::_drawOverlays(QPainter &painter)
   // draw the color scale
 
   if (_sectionReader != nullptr) {
+    // The compact vertical window needs the scale shifted into its plot area,
+    // while its units sit above the highest numeric label instead of
+    // competing with it.
     _zoomWorld.drawColorScale(_sectionReader->colorMap, painter,
-                              _params.label_font_size);
+                              _params.horiz_axis_label_font_size,
+                              -_params.vert_top_margin,
+                              -_params.vert_top_margin);
     _zoomWorld.drawTitleTopCenter(painter,
                                   _sectionReader->v_fhdr.field_name);
   }

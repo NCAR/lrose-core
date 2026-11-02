@@ -448,7 +448,7 @@ class DLL_EXPORT VertView : public QWidget
    */
 
   virtual void _setGridSpacing();
-  double _getSpacing(double range);
+  double _getSpacing(double range, int pixelExtent);
 
   // Compute the limits of the ray angles
   
