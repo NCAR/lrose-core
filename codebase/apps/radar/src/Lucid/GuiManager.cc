@@ -553,6 +553,12 @@ void GuiManager::_setupWindows()
   move(pos);
   show();
 
+  // move vert window relative to main window
+  
+  QPoint posRelMainWindow = getTopRightPos();
+  cerr << "SSSSSSSSSS TTTTTTTTTTTT: " << posRelMainWindow.x() << ", " << posRelMainWindow.y() << endl;
+  _vert->move(getTopRightPos());
+
   // set up click report dialog
   _createClickReportDialog();
 
@@ -1247,10 +1253,28 @@ void GuiManager::_showFieldMenu()
 }
 
 /////////////////////////////////////
+// get (x, y) of top right corner
+// for placing child windows
+
+QPoint GuiManager::getTopRightPos()
+{
+  
+  int margin = (frameGeometry().width() - geometry().width()) / 2;
+  int titleBarHt = frameGeometry().height() - geometry().height() - margin;
+  QPoint pos;
+  pos.setX(x() + (frameGeometry().width()));
+  pos.setY(y() + titleBarHt);
+
+  return pos;
+
+}
+
+/////////////////////////////////////
 // place the field menu
 
 void GuiManager::_placeFieldMenu()
 {
+
   if (!_fieldMenu) {
     return;
   }
@@ -1259,12 +1283,7 @@ void GuiManager::_placeFieldMenu()
     return;
   }
   
-  int margin = (frameGeometry().width() - geometry().width()) / 2;
-  int titleBarHt = frameGeometry().height() - geometry().height() - margin;
-  QPoint pos;
-  pos.setX(x() + (frameGeometry().width()));
-  pos.setY(y() + titleBarHt);
-  _fieldMenu->move(pos);
+  _fieldMenu->move(getTopRightPos());
 
   _fieldMenuPlaced = true;
 

@@ -850,6 +850,10 @@ public:
 
   int horiz_plot_height;
 
+  int horiz_window_min_width;
+
+  int horiz_window_min_height;
+
   int horiz_color_scale_width;
 
   int vert_window_x_pos;
@@ -860,13 +864,11 @@ public:
 
   int vert_plot_height;
 
-  int horiz_window_min_width;
-
-  int horiz_window_min_height;
-
   int vert_window_min_width;
 
   int vert_window_min_height;
+
+  int vert_color_scale_width;
 
   char* label_time_format;
 
@@ -966,14 +968,6 @@ public:
 
   char* vert_grid_color;
 
-  int vert_window_width;
-
-  int vert_window_height;
-
-  int vert_window_start_x;
-
-  int vert_window_start_y;
-
   int vert_top_margin2;
 
   int vert_bottom_margin;
@@ -987,8 +981,6 @@ public:
   int vert_text_margin;
 
   double vert_max_height_km;
-
-  int vert_color_scale_width;
 
   tdrp_bool_t vert_grids_on_at_startup;
 
@@ -1356,7 +1348,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[427];
+  mutable TDRPtable _table[425];
 
   const char *_className;
 

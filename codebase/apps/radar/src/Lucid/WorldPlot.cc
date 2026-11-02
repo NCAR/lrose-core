@@ -2495,17 +2495,7 @@ void WorldPlot::updatePixelScales()
 
 }
 
-/////////////////////////////////////////////////////
-// draw the color scale
-
-void WorldPlot::drawColorScale(const ColorMap &colorMap,
-                               QPainter &painter,
-                               int scaleFontSize)
-{
-  drawColorScale(colorMap, painter, scaleFontSize, 0, 0);
-}
-
-/////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 // draw the color scale with caller-specific vertical placement
 
 void WorldPlot::drawColorScale(const ColorMap &colorMap,
@@ -2519,10 +2509,12 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
   
   int pltHt = _plotHeight;
+
   // The right margin separates the plot axis from the independently reserved
   // color-scale strip.  Keep a small inset within that strip so swatches and
   // labels do not run into the edge of the drawing surface.
-  const int scalePadding = 3;
+
+  const int scalePadding = 5;
   int width = std::max(1, _colorScaleWidth - 2 * scalePadding);
   int xStart = _xPixOffset + _widthPixels - _colorScaleWidth + scalePadding;
 

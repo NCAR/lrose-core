@@ -565,12 +565,9 @@ public:
 
   void drawColorScale(const ColorMap &colorMap,
                       QPainter &painter,
-                      int scaleFontSize);
-  void drawColorScale(const ColorMap &colorMap,
-                      QPainter &painter,
-                      int scaleFontSize,
-                      int scaleYOffset,
-                      int unitsYOffset);
+                      int scaleFontSize = 8,
+                      int scaleYOffset = 0,
+                      int unitsYOffset = 0);
   
   // adjust X and Y pixel scales to minimize distortion
   

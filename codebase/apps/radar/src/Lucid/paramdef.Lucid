@@ -1076,7 +1076,7 @@ commentdef {
 }
 
 commentdef {
-  p_header = "<WINDOWS>";
+  p_header = "<HORIZ VIEW WINDOWS>";
 }
 
 paramdef int {
@@ -1103,18 +1103,38 @@ paramdef int {
 } horiz_plot_height;
 
 paramdef int {
+  p_default = 600;
+  p_descr = "Minimum width of main window (pixels).";
+  p_help = "The user cannot shrink the main window smaller than this.";
+} horiz_window_min_width;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Minimum height of main window (pixels).";
+  p_help = "The user cannot shrink the main window smaller than this.";
+} horiz_window_min_height;
+
+paramdef int {
   p_default = 40;
   p_descr = "Width of color scale (pixels).";
 } horiz_color_scale_width;
 
+commentdef {
+  p_header = "</HORIZ VIEW WINDOWS>";
+}
+
+commentdef {
+  p_header = "<VERT VIEW WINDOWS>";
+}
+
 paramdef int {
-  p_default = -1;
+  p_default = 2000;
   p_descr = "Startup X for vertical view window (pixels).";
   p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards. If -1 the position will be automatically determined.";
 } vert_window_x_pos;
 
 paramdef int {
-  p_default = -1;
+  p_default = 2000;
   p_descr = "Startup Y for vertical view window (pixels).";
   p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right. If -1 the position will be automatically determined.";
 } vert_window_y_pos;
@@ -1132,18 +1152,6 @@ paramdef int {
 
 paramdef int {
   p_default = 600;
-  p_descr = "Minimum width of main window (pixels).";
-  p_help = "The user cannot shrink the main window smaller than this.";
-} horiz_window_min_width;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "Minimum height of main window (pixels).";
-  p_help = "The user cannot shrink the main window smaller than this.";
-} horiz_window_min_height;
-
-paramdef int {
-  p_default = 600;
   p_descr = "Minimum width of vertical window (pixels).";
   p_help = "The user cannot shrink the vertical window smaller than this.";
 } vert_window_min_width;
@@ -1154,8 +1162,13 @@ paramdef int {
   p_help = "The user cannot shrink the vertical window smaller than this.";
 } vert_window_min_height;
 
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of color scale (pixels).";
+} vert_color_scale_width;
+
 commentdef {
-  p_header = "</WINDOWS>";
+  p_header = "</VERT VIEW WINDOWS>";
 }
 
 commentdef {
@@ -1454,26 +1467,6 @@ paramdef string {
 } vert_grid_color;
 
 paramdef int {
-  p_default = 500;
-  p_descr = "Startup width of VERT window (pixels).";
-} vert_window_width;
-
-paramdef int {
-  p_default = 500;
-  p_descr = "Startup height of VERT window (pixels).";
-} vert_window_height;
-
-paramdef int {
-  p_default = 1100;
-  p_descr = "Startup X for VERT window (pixels).";
-} vert_window_start_x;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Startup Y for VERT window (pixels).";
-} vert_window_start_y;
-
-paramdef int {
   p_default = 20;
   p_descr = "Height of top margin in VERT mode (pixels).";
   p_help = "Titles go in the top margin.";
@@ -1518,11 +1511,6 @@ paramdef double {
   p_descr = "Max height of data in VERT window (km).";
   p_descr = "This can be adjusted interactively.";
 } vert_max_height_km;
-
-paramdef int {
-  p_default = 40;
-  p_descr = "Width of color scale for VERT window (pixels).";
-} vert_color_scale_width;
 
 paramdef boolean {
   p_default = true;

@@ -1465,12 +1465,6 @@ int LegacyParams::_readMainParams()
 
   // vertical section
   
-  int vertXpos = _getLong("cidd.vert_default_x_pos", -1, false);
-  fprintf(_tdrpFile, "vert_window_x_pos = %d;\n", vertXpos);
-  
-  int vertYpos = _getLong("cidd.vert_default_y_pos", -1, false);
-  fprintf(_tdrpFile, "vert_window_y_pos = %d;\n", vertYpos);
-  
   int vertWidth = _getLong("cidd.vert_default_width", 400, false);
   fprintf(_tdrpFile, "vert_plot_width = %d;\n", vertWidth);
 

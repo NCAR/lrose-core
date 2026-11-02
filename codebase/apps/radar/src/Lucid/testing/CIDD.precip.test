@@ -746,10 +746,10 @@ cidd.horiz_right_margin:      10
 
 cidd.vert_min_height:        120
 cidd.vert_min_width:         120
-cidd.vert_default_height:    440
-cidd.vert_default_width:     600
+cidd.vert_default_height:    700
+cidd.vert_default_width:     900
 
-cidd.vert_top_margin:        40
+cidd.vert_top_margin:        20
 cidd.vert_bot_margin:        20
 cidd.vert_left_margin:       20
 cidd.vert_right_margin:      30

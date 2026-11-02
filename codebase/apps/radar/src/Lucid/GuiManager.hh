@@ -145,6 +145,10 @@ public:
   virtual void resizeEvent(QResizeEvent * event) override;
   virtual void keyPressEvent(QKeyEvent* event) override;
 
+  // get pos at top right of main window
+
+  QPoint getTopRightPos();
+
 public slots:
 
   void showClickDialog();

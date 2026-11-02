@@ -53,7 +53,7 @@ VertManager::VertManager(GuiManager *manager):
 
   _vertTopFrame = new QFrame(_main);
   _vertTopFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
+  
   // create VERT view
   
   _vertView = new VertView(_vertTopFrame, *manager, *this);
@@ -88,8 +88,12 @@ VertManager::VertManager(GuiManager *manager):
 
   setWindowTitle(tr("VERT"));
   setMinimumSize(200, 200);
-  setGeometry(_params.vert_window_start_x, _params.vert_window_start_y,
-	      _params.vert_window_width, _params.vert_window_height);
+  QPoint posRelMainWindow = _guiManager->getTopRightPos();
+  cerr << "XXXXXXXXXXX YYYYYYYYYYYY: " << posRelMainWindow.x() << ", " << posRelMainWindow.y() << endl;
+  setGeometry(posRelMainWindow.x(), posRelMainWindow.y(),
+	      _params.vert_plot_width + _params.vert_color_scale_width,
+              _params.vert_plot_height);
+
 }
 
 
