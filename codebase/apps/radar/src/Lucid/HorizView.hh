@@ -375,6 +375,10 @@ class DLL_EXPORT HorizView : public QWidget
 
   void _drawMouseValue(QPainter &painter);
 
+  // pan the current view by a completed middle-button drag
+
+  void _panView(int mouseReleaseX, int mouseReleaseY);
+
   // debug prints
   
   void _printNow(int ndecimals, ostream &out);

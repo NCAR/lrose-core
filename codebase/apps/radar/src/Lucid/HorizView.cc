@@ -1521,31 +1521,21 @@ void HorizView::mousePressEvent(QMouseEvent *e)
 
   _activeMouseButton = effectiveButton(e);
 
+  _mousePressX = pos.x();
+  _mousePressY = pos.y();
+  _worldPressX = _zoom->getXWorld(_mousePressX);
+  _worldPressY = _zoom->getYWorld(_mousePressY);
+
   if (_activeMouseButton == Qt::RightButton) {
-    
-    //-------
-
-    _mousePressX = pos.x();
-    _mousePressY = pos.y();
-
-    _worldPressX = _zoom->getXWorld(_mousePressX);
-    _worldPressY = _zoom->getYWorld(_mousePressY);
-
     emit customContextMenuRequested(pos.toPoint()); // , closestRay);
-
-  } else {
-
+  } else if (_activeMouseButton == Qt::LeftButton) {
     if (!_rubberBand) {
       _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
     }
     _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
     _rubberBand->show();
-
-    _mousePressX = pos.x();
-    _mousePressY = pos.y();
-
-    _worldPressX = _zoom->getXWorld(_mousePressX);
-    _worldPressY = _zoom->getYWorld(_mousePressY);
+  } else if (_activeMouseButton == Qt::MiddleButton) {
+    setCursor(Qt::ClosedHandCursor);
   }
 }
 
@@ -1580,6 +1570,10 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
 
   if (_activeMouseButton == Qt::NoButton ||
       _activeMouseButton == Qt::RightButton) {
+    return;
+  }
+
+  if (_activeMouseButton == Qt::MiddleButton) {
     return;
   }
 
@@ -1636,20 +1630,6 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 
   _pointClicked = false;
 
-  // Use the button normalized at press time.  In particular, an Option-drag
-  // remains a middle-button gesture even if Option is released first.
-
-  const Qt::MouseButton gestureButton = _activeMouseButton;
-  _activeMouseButton = Qt::NoButton;
-
-  if (gestureButton == Qt::NoButton ||
-      gestureButton == Qt::RightButton) {
-    if (_rubberBand) {
-      _rubberBand->hide();
-    }
-    return;
-  }
-
   // If the mouse hasn't moved much, assume we are clicking rather than
   // zooming
 
@@ -1658,6 +1638,25 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 #else
   QPointF pos(e->pos());
 #endif
+
+  // Use the button normalized at press time.  In particular, an Option-drag
+  // remains a middle-button gesture even if Option is released first.
+
+  const Qt::MouseButton gestureButton = _activeMouseButton;
+  _activeMouseButton = Qt::NoButton;
+
+  if (gestureButton == Qt::MiddleButton) {
+    unsetCursor();
+    _panView(pos.x(), pos.y());
+    return;
+  }
+  if (gestureButton == Qt::NoButton ||
+      gestureButton == Qt::RightButton) {
+    if (_rubberBand) {
+      _rubberBand->hide();
+    }
+    return;
+  }
 
   _mouseReleaseX = pos.x();
   _mouseReleaseY = pos.y();
@@ -1735,6 +1734,71 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     _rubberBand->hide();
   }
   
+}
+
+////////////////////////////////////////////////////////
+// pan the current view using a middle-button drag
+
+void HorizView::_panView(int mouseReleaseX, int mouseReleaseY)
+{
+  const int deltaPixelsX = mouseReleaseX - _mousePressX;
+  const int deltaPixelsY = mouseReleaseY - _mousePressY;
+  if (abs(deltaPixelsX) <= 5 && abs(deltaPixelsY) <= 5) {
+    return;
+  }
+
+  const double worldReleaseX = _zoom->getXWorld(mouseReleaseX);
+  const double worldReleaseY = _zoom->getYWorld(mouseReleaseY);
+  const double shiftX = _worldPressX - worldReleaseX;
+  const double shiftY = _worldPressY - worldReleaseY;
+
+  double minX = _zoom->getXMinWorld() + shiftX;
+  double maxX = _zoom->getXMaxWorld() + shiftX;
+  double minY = _zoom->getYMinWorld() + shiftY;
+  double maxY = _zoom->getYMaxWorld() + shiftY;
+
+  // Preserve the current span at domain edges, matching CIDD's pan behavior.
+  // A view as large as the permitted domain cannot be panned on that axis.
+
+  auto constrainToDomain = [](double domainMin, double domainMax,
+                              double &viewMin, double &viewMax) {
+    const double viewSpan = viewMax - viewMin;
+    const double domainSpan = domainMax - domainMin;
+    if (viewSpan >= domainSpan) {
+      viewMin = domainMin;
+      viewMax = domainMax;
+    } else if (viewMax > domainMax) {
+      viewMin -= viewMax - domainMax;
+      viewMax = domainMax;
+    } else if (viewMin < domainMin) {
+      viewMax += domainMin - viewMin;
+      viewMin = domainMin;
+    }
+  };
+
+  constrainToDomain(_gd.h_win.min_x, _gd.h_win.max_x, minX, maxX);
+  constrainToDomain(_gd.h_win.min_y, _gd.h_win.max_y, minY, maxY);
+
+  if (minX == _zoom->getXMinWorld() && maxX == _zoom->getXMaxWorld() &&
+      minY == _zoom->getYMinWorld() && maxY == _zoom->getYMaxWorld()) {
+    return;
+  }
+
+  // Store pans in the custom-view history so Zoom Back reverses them in the
+  // same predictable sequence as rubber-band zooms.
+
+  char panName[1024];
+  snprintf(panName, 1024, "saved-pan-%d", (int) _customZooms.size());
+  WorldPlot pannedView(*_zoom);
+  pannedView.setName(panName);
+  pannedView.setWorldLimits(minX, minY, maxX, maxY);
+  _customZooms.push_back(pannedView);
+  _zoom = &_customZooms.back();
+
+  _updateGlobalCurrentZoom();
+  _zoomChanged = true;
+  _manager.enableUnzoomButtons(true);
+  update();
 }
 
 /*************************************************************************
