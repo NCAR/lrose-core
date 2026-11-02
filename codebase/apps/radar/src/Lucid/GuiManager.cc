@@ -1316,6 +1316,14 @@ void GuiManager::_fieldTableCellClicked(int row, int col)
   _gd.h_win.page = _fieldNum;
 
   _fieldHasChanged = true;
+
+  // A completed route describes display geometry rather than a particular
+  // field.  Reuse it so the vertical view follows the horizontal field
+  // selection without requiring the user to draw the section again.
+
+  if (_vsectionRoute.size() >= 2) {
+    _requestVerticalSection();
+  }
   
 }
 
@@ -2780,6 +2788,62 @@ void GuiManager::_verticalRouteCompleted(const VsectionRoute &route)
            << endl;
     }
   }
+
+  _requestVerticalSection();
+}
+
+/////////////////////////////////////////////////////////////
+// request the retained route for the currently selected field
+
+void GuiManager::_requestVerticalSection()
+{
+  if (_vsectionRoute.size() < 2 ||
+      _gd.h_win.page < 0 || _gd.h_win.page >= _gd.num_datafields) {
+    return;
+  }
+
+  WayPts wayPts;
+  for (const VsectionRoute::Point &point : _vsectionRoute.points()) {
+    wayPts.addPoint(point.lat, point.lon);
+  }
+
+  MdvReader *reader = _gd.mread[_gd.h_win.page];
+  connect(reader, &MdvReader::verticalReadComplete,
+          this, &GuiManager::_verticalReadComplete,
+          Qt::UniqueConnection);
+  statusBar()->showMessage("Requesting vertical section");
+  reader->requestVertSection(_timeControl->getSelectedTime(),
+                             _gd.h_win.page, wayPts);
+}
+
+/////////////////////////////////////////////////////////////
+// display a completed vertical-section read
+
+void GuiManager::_verticalReadComplete(MdvReader *reader)
+{
+  // Vertical reads run independently for each field.  Ignore a result from a
+  // field which was superseded while its request was in flight; the selected
+  // field has its own request pending (or has already completed).
+
+  if (_gd.h_win.page < 0 || _gd.h_win.page >= _gd.num_datafields ||
+      reader != _gd.mread[_gd.h_win.page]) {
+    return;
+  }
+
+  if (reader == nullptr || !reader->isValidV()) {
+    statusBar()->showMessage("Vertical section data are not available", 5000);
+    return;
+  }
+
+  _vert->setSection(reader);
+  _vertWindow->setSectionInfo(reader->v_fhdr.field_name,
+                              reader->v_date,
+                              reader->getVertTotalLengthKm());
+  _showVertAct->setChecked(true);
+  _vertWindow->show();
+  _vertWindow->raise();
+  _vertWindow->activateWindow();
+  statusBar()->showMessage("Vertical section ready", 5000);
 }
 
 /////////////////////////////

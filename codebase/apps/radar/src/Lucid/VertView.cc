@@ -51,6 +51,7 @@
 #include "VertView.hh"
 #include "VertManager.hh"
 #include "GlobalData.hh"
+#include "MdvReader.hh"
 
 using namespace std;
 
@@ -70,7 +71,8 @@ VertView::VertView(QWidget* parent,
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
         _gridsEnabled(false),
-        _rubberBand(0)
+        _rubberBand(0),
+        _sectionReader(nullptr)
         
 {
   
@@ -166,7 +168,31 @@ void VertView::configureWorldCoords(int zoomLevel)
   _fullWorld.setName("VertView-full");
   _fullWorld.setWindowGeom(width(), height(), 0, 0);
   
-  _fullWorld.setWorldLimits(0.0, 0.0, 100.0, _maxHeightKm);
+  double xMax = 100.0;
+  double yMin = 0.0;
+  double yMax = _maxHeightKm;
+  if (_sectionReader != nullptr && _sectionReader->isValidV()) {
+    xMax = _sectionReader->getVertTotalLengthKm();
+    if (xMax <= 0.0) {
+      xMax = (_sectionReader->v_fhdr.nx - 1) *
+             _sectionReader->v_fhdr.grid_dx;
+    }
+    const vector<double> edges = _computeVerticalEdges();
+    if (edges.size() >= 2) {
+      const auto limits = std::minmax_element(edges.begin(), edges.end());
+      yMin = *limits.first;
+      yMax = *limits.second;
+    }
+  }
+  if (xMax <= 0.0) {
+    xMax = 1.0;
+  }
+  if (yMax <= yMin) {
+    yMax = yMin + 1.0;
+  }
+
+  _fullWorld.setPreserveAspectRatio(false);
+  _fullWorld.setWorldLimits(0.0, yMin, xMax, yMax);
   
   _fullWorld.setLeftMargin(leftMargin);
   _fullWorld.setRightMargin(rightMargin);
@@ -385,9 +411,6 @@ void VertView::_drawOverlays(QPainter &painter)
   double xMin = _zoomWorld.getXMinWorld();
   double yMin = _zoomWorld.getYMinWorld();
   
-  double xMax = _zoomWorld.getXMaxWorld();
-  double yMax = _zoomWorld.getYMaxWorld();
-  
   QFont font = painter.font();
   font.setPointSizeF(_params.vert_label_font_size);
   painter.setFont(font);
@@ -395,28 +418,15 @@ void VertView::_drawOverlays(QPainter &painter)
   _zoomWorld.specifyXTicks(xMin, _xGridSpacing);
   _zoomWorld.specifyYTicks(yMin, _yGridSpacing);
 
-  _zoomWorld.drawAxisTop(painter, "km", true, true, true, true);
-  _zoomWorld.drawAxisBottom(painter, "km", true, true, true, true);
+  _zoomWorld.drawAxisTop(painter, "km", true, true, true, _gridsEnabled);
+  _zoomWorld.drawAxisBottom(painter, "km", true, true, true, false);
   
-  _zoomWorld.drawAxisLeft(painter, "km", true, true, true, true);
-  _zoomWorld.drawAxisRight(painter, "km", true, true, true, true);
+  const string verticalUnits = _verticalUnits.empty() ? "km" : _verticalUnits;
+  _zoomWorld.drawAxisLeft(painter, verticalUnits, true, true, true,
+                          _gridsEnabled);
+  _zoomWorld.drawAxisRight(painter, verticalUnits, true, true, true,
+                           false);
     
-  // Draw the grid
-  
-  if (_xGridSpacing > 0.0 && _gridsEnabled)  {
-
-    const vector<double> &topTicks = _zoomWorld.getTopTicks();
-    for (size_t ii = 0; ii < topTicks.size(); ii++) {
-      _zoomWorld.drawLine(painter, topTicks[ii], yMin, topTicks[ii], yMax);
-    }
-
-    const vector<double> &rightTicks = _zoomWorld.getRightTicks();
-    for (size_t ii = 0; ii < rightTicks.size(); ii++) {
-      _zoomWorld.drawLine(painter, xMin, rightTicks[ii], xMax, rightTicks[ii]);
-    }
-
-  }
-  
   // click point cross hairs
   
   if (_pointClicked) {
@@ -437,9 +447,12 @@ void VertView::_drawOverlays(QPainter &painter)
 
   // draw the color scale
 
-  int fieldNum = _gd.h_win.page;
-  const ColorMap &colorMap(_gd.mread[fieldNum]->colorMap);
-  _zoomWorld.drawColorScale(colorMap, painter, _params.label_font_size);
+  if (_sectionReader != nullptr) {
+    _zoomWorld.drawColorScale(_sectionReader->colorMap, painter,
+                              _params.label_font_size);
+    _zoomWorld.drawTitleTopCenter(painter,
+                                  _sectionReader->v_fhdr.field_name);
+  }
   
   // add legends with time, field name and elevation angle
 
@@ -582,6 +595,7 @@ void VertView::clear()
   // }
   // _vertBeams.clear();
   _pointClicked = false;
+  _sectionReader = nullptr;
   
   // Now rerender the images
   
@@ -621,22 +635,6 @@ void VertView::unzoomView()
  */
 void VertView::updatePixelScales()
 {
-
-  cerr << "==>> hhhhhh VertView::updatePixelScales() <<==" << endl;
-
-}
-
-/*************************************************************************
- * resize()
- */
-
-void VertView::resize(const int width, const int height)
-{
-  
-  setGeometry(0, 0, width, height);
-  _resetWorld(width, height);
-  _refreshImages();
-
 }
 
 /*************************************************************************
@@ -647,13 +645,114 @@ void VertView::paintEvent(QPaintEvent *event)
 {
 
   QPainter painter(this);
-  painter.save();
-  painter.eraseRect(0, 0, width(), height());
-  _zoomWorld.setClippingOn(painter);
-  // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
-  painter.restore();
+  painter.fillRect(rect(), _backgroundBrush);
+  _drawSection(painter);
   _drawOverlays(painter);
 
+}
+
+/////////////////////////////////////////////////////////////
+// install a gridded MDV vertical section
+
+void VertView::setSection(const MdvReader *reader)
+{
+  _sectionReader = reader;
+  _verticalUnits.clear();
+  if (_sectionReader != nullptr) {
+    _verticalUnits = Mdvx::vertTypeZUnits(_sectionReader->v_fhdr.vlevel_type);
+  }
+  _savedZooms.clear();
+  configureWorldCoords();
+  update();
+}
+
+/////////////////////////////////////////////////////////////
+// compute cell edges from the MDV vertical-level centers
+
+vector<double> VertView::_computeVerticalEdges() const
+{
+  vector<double> edges;
+  if (_sectionReader == nullptr || _sectionReader->v_fhdr.nz <= 0) {
+    return edges;
+  }
+
+  const int nz = _sectionReader->v_fhdr.nz;
+  edges.resize(nz + 1);
+  if (nz == 1) {
+    double halfWidth = fabs(_sectionReader->v_fhdr.grid_dz) / 2.0;
+    if (halfWidth == 0.0) {
+      halfWidth = 0.5;
+    }
+    edges[0] = _sectionReader->v_vhdr.level[0] - halfWidth;
+    edges[1] = _sectionReader->v_vhdr.level[0] + halfWidth;
+    return edges;
+  }
+
+  // MDV levels need not be uniformly spaced.  Midpoints preserve the extent
+  // represented by each returned level without inventing a uniform grid.
+
+  edges[0] = _sectionReader->v_vhdr.level[0] -
+             (_sectionReader->v_vhdr.level[1] -
+              _sectionReader->v_vhdr.level[0]) / 2.0;
+  for (int iz = 1; iz < nz; ++iz) {
+    edges[iz] = (_sectionReader->v_vhdr.level[iz - 1] +
+                 _sectionReader->v_vhdr.level[iz]) / 2.0;
+  }
+  edges[nz] = _sectionReader->v_vhdr.level[nz - 1] +
+              (_sectionReader->v_vhdr.level[nz - 1] -
+               _sectionReader->v_vhdr.level[nz - 2]) / 2.0;
+  return edges;
+}
+
+/////////////////////////////////////////////////////////////
+// render the MDV section as colored cells
+
+void VertView::_drawSection(QPainter &painter)
+{
+  if (_sectionReader == nullptr || !_sectionReader->isValidV()) {
+    return;
+  }
+
+  const int nx = _sectionReader->v_fhdr.nx;
+  const int nz = _sectionReader->v_fhdr.nz;
+  if (nx <= 0 || nz <= 0 ||
+      _sectionReader->v_fl32_data.size() != (size_t) nx * (size_t) nz) {
+    return;
+  }
+
+  const vector<double> yEdges = _computeVerticalEdges();
+  const double totalLength = _fullWorld.getXMaxWorld();
+  const double dx = _sectionReader->v_fhdr.grid_dx;
+  const fl32 missing = _sectionReader->v_fhdr.missing_data_value;
+  const fl32 bad = _sectionReader->v_fhdr.bad_data_value;
+
+  painter.save();
+  _zoomWorld.setClippingOn(painter);
+  painter.setPen(Qt::NoPen);
+
+  for (int iz = 0; iz < nz; ++iz) {
+    for (int ix = 0; ix < nx; ++ix) {
+      const fl32 value = _sectionReader->v_fl32_data[iz * nx + ix];
+      if (value == missing || value == bad || !std::isfinite(value)) {
+        continue;
+      }
+
+      const double x0 = (ix == 0) ? 0.0 :
+                        _sectionReader->v_fhdr.grid_minx +
+                        (ix - 0.5) * dx;
+      const double x1 = (ix == nx - 1) ? totalLength :
+                        _sectionReader->v_fhdr.grid_minx +
+                        (ix + 0.5) * dx;
+      const QPointF p0 = _zoomWorld.getPixelPointF(x0, yEdges[iz]);
+      const QPointF p1 = _zoomWorld.getPixelPointF(x1, yEdges[iz + 1]);
+      QRectF cell(p0, p1);
+      cell = cell.normalized();
+      cell.adjust(0.0, 0.0, 1.0, 1.0);
+      painter.fillRect(cell, *_sectionReader->colorMap.dataBrush(value));
+    }
+  }
+
+  painter.restore();
 }
 
 /*************************************************************************
@@ -943,7 +1042,6 @@ void VertView::displayImage(const size_t field_num)
   if (field_num != _selectedField) {
     return;
   }
-  cerr << "DISPLAY IMAGE" << endl;
   update();
 }
 
@@ -1106,10 +1204,13 @@ void VertView::smartBrush(int xPixel, int yPixel)
  * resizeEvent()
  */
 
-void VertView::resizeEvent(QResizeEvent * e)
+void VertView::resizeEvent(QResizeEvent *event)
 {
-  cerr << "RRRRRRRRRRRRRRRRRR width, height: " << width() << ", " << height() << endl;
-  _resetWorld(width(), height());
+  QWidget::resizeEvent(event);
+
+  // Rebuild the world-to-pixel transform from the geometry assigned by the
+  // layout so data, grids, and labels all cover the same drawable area.
+  _resetWorld(event->size().width(), event->size().height());
   updatePixelScales();
   _refreshImages();
   update();

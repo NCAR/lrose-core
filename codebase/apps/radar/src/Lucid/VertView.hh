@@ -61,6 +61,7 @@
 
 class GuiManager;
 class VertManager;
+class MdvReader;
 
 // Widget for vertical display.
 
@@ -128,6 +129,11 @@ class DLL_EXPORT VertView : public QWidget
 
   virtual void updatePixelScales();
 
+  // Install the latest MDV vertical section.  MdvReader is owned for the
+  // lifetime of the application; this view retains a non-owning pointer.
+
+  void setSection(const MdvReader *reader);
+
   // render frame based on movie index
   
   int renderVMovieFrame(int index, QPainter &painter);
@@ -187,14 +193,6 @@ class DLL_EXPORT VertView : public QWidget
   ////////////////
 
   void locationClicked(double xkm, double ykm, const RadxRay *closestRay);
-
-  /**
-   * @brief Signal emitted when we have processed several beams.  This signal
-   *        tells the RHI window that it can do a resize to fix the widget
-   *        sizing problem that we have on startup.
-   */
-
-  void severalBeamsProcessed();
   
   //////////////
   // Qt slots //
@@ -238,13 +236,6 @@ class DLL_EXPORT VertView : public QWidget
    */
 
   void zoomBackView();
-
-  /**
-   * @brief Resize the window.
-   *
-   */
-
-  void resize(const int width, const int height);
 
   /**
    * @brief Set grids visibility.
@@ -416,6 +407,11 @@ class DLL_EXPORT VertView : public QWidget
   QTransform _zoomTransform;
   WorldPlot _zoomWorld;
   vector<WorldPlot> _savedZooms;
+
+  // Current gridded MDV vertical section.
+
+  const MdvReader *_sectionReader;
+  string _verticalUnits;
   
   ///////////////////////
   // Protected methods //
@@ -433,6 +429,8 @@ class DLL_EXPORT VertView : public QWidget
    */
 
   virtual void _drawOverlays(QPainter &painter);
+  void _drawSection(QPainter &painter);
+  vector<double> _computeVerticalEdges() const;
 
   /**
    * @brief Initialize the full window transform to use for the widget.

@@ -45,6 +45,17 @@
 #include <QTimer>
 
 #include <toolsa/str.h>
+#include <toolsa/pjg.h>
+
+namespace {
+
+// The NetCDF/HDF5 libraries used by Radx on this platform are not built for
+// concurrent access.  All MdvReader instances share this lock so horizontal
+// and vertical workers cannot enter those libraries at the same time.
+
+QMutex mdvLibraryReadMutex;
+
+}
 
 ///////////////////////////////////////////////
 // constructor
@@ -123,6 +134,11 @@ MdvReader::MdvReader(QObject* parent) :
   _timeListValid = false;
   _vLevel = 0;
   _readBusyH = false;
+  _vertSampleSpacingKm = 0.0;
+  _vertTotalLengthKm = 0.0;
+  _vertGeneration = 0;
+
+  qRegisterMetaType<VertReadResultPtr>("VertReadResultPtr");
 
   // Use a Qt timer for retries so the MdvReader remains responsive between
   // attempts.  The timer belongs to this object and therefore fires on the
@@ -164,6 +180,22 @@ MdvReader::~MdvReader()
     delete thread;
   }
   _readThreadsH.clear();
+
+  // Vertical workers own their request and result, but their completion
+  // signals still target this object.  Wait for them so shutdown cannot leave
+  // a live thread behind after Qt has torn down the receiver.
+
+  const QSet<QThread *> vertThreads = _readThreadsV;
+  for (QThread *thread : vertThreads) {
+    disconnect(thread, nullptr, this, nullptr);
+    thread->requestInterruption();
+    thread->quit();
+  }
+  for (QThread *thread : vertThreads) {
+    thread->wait();
+    delete thread;
+  }
+  _readThreadsV.clear();
 }
 
 /**********************************************************************
@@ -222,6 +254,7 @@ void MdvReader::requestHorizPlane(const DateTime &midTime,
 
 int MdvReader::getHorizPlane()
 {
+  QMutexLocker libraryReadLock(&mdvLibraryReadMutex);
   
   // initialize
   
@@ -656,81 +689,47 @@ bool MdvReader::_checkRequestChangedH(const DateTime &midTime,
  */
 
 int MdvReader::requestVertSection(const DateTime &midTime,
-                                  int page)
+                                  int page,
+                                  const WayPts &wayPts)
 {
-
-#ifdef NOTYET
-  
-  // Construct URL, check is valid.
-  
-  string fullUrl(_getFullUrl());
-  DsURL URL(fullUrl);
-  if(URL.isValid() != TRUE) {
-    v_data_valid = 1;
+  if (wayPts.getNPoints() < 2) {
+    cerr << "ERROR - MdvReader::requestVertSection" << endl;
+    cerr << "  At least two waypoints are required" << endl;
     return -1;
   }
-  URL.getURLStr();
-  
-  // add field to request
-  
-  string fieldName(_getFieldName());
-  v_mdvx->clearRead(); 
-  v_mdvx->addReadField(fieldName);
-  if(_gd.debug1) {
-    fprintf(stderr, "Get MDVX Vert Plane - page : %d  -  %s\n", page, fullUrl.c_str());
-  }
 
-  // time
-  
-  _midTime = midTime;
   DateTime reqTime;
   _computeReqTime(midTime, reqTime);
 
-  // set read time
+  VertReadRequest request;
+  request.requestTime = reqTime;
+  request.url = _getFullUrl();
+  request.fieldName = _getFieldName();
+  request.wayPts = wayPts;
+  request.page = page;
+  request.generation = ++_vertGeneration;
+  request.gatherMode = _params.gather_data_mode;
+  request.searchMarginSecs = (int) (60 * time_allowance);
+  request.modelRunTime = _gd.model_run_time;
+  request.isForecast =
+    (_gd.model_run_time != 0 &&
+     h_mhdr.data_collection_type == Mdvx::DATA_FORECAST);
+  request.requestCompressedData = _params.request_compressed_data;
+  request.requestGzipCompression = _params.request_gzip_vol_compression;
 
-  _setReadTimes(fullUrl, reqTime, v_mdvx);
+  _setValidV(false);
+  _setNewV(false);
+  v_data_valid = 0;
 
-  // other settings
-  
-  v_mdvx->setReadEncodingType(Mdvx::ENCODING_ASIS);
-  v_mdvx->setReadCompressionType(Mdvx::COMPRESSION_ASIS);
-  
-  if(_params.request_compressed_data) {
-    if(_params.request_gzip_vol_compression) {
-      v_mdvx->setReadCompressionType(Mdvx::COMPRESSION_GZIP_VOL);
-    } else {
-      v_mdvx->setReadCompressionType(Mdvx::COMPRESSION_ZLIB);
-    }
+  if (_gd.debug1) {
+    cerr << "Get MDVX vertical section" << endl;
+    cerr << "  page: " << page << endl;
+    cerr << "  URL: " << request.url << endl;
+    cerr << "  field: " << request.fieldName << endl;
+    cerr << "  waypoints: " << wayPts.getNPoints() << endl;
   }
-  
-  int num_way_points = _gd.h_win.route.num_segments + 1;
 
-  for(int ii = 0; ii < num_way_points; ii++) {
-    double tlat, tlon;
-    _gd.proj.xy2latlon(_gd.h_win.route.x_world[ii],
-                      _gd.h_win.route.y_world[ii],
-                      tlat, tlon);
-    v_mdvx->addReadWayPt(tlat,tlon);
-    if (ii == 0) {
-      // lat1 = tlat;
-      // lon1 = tlon;
-    } else if (ii == num_way_points - 1) {
-      // lat2 = tlat;
-      // lon2 = tlon;
-    }
-    
-    if(_gd.debug1) {
-      fprintf(stderr,"Way pt Lat, Lon, Len: %g, %g, %g\n",
-              tlat, tlon, _gd.h_win.route.seg_length[ii]);
-    }
-    
-  } // ii
-
-  // Initiate the request
-  v_mdvx->readVsection();
-
-#endif
-  
+  _startReadVolV(request);
   return 0;
 }
 
@@ -1286,6 +1285,240 @@ void MdvReader::_scheduleRetryH()
          << "; retrying in " << delayMsecs << " ms" << endl;
   }
   _retryTimerH->start(delayMsecs);
+}
+
+///////////////////////////////////////////////
+// Worker for a vertical-section read
+
+ReadVolV::ReadVolV(const VertReadRequest &request, QObject *parent) :
+        QObject(parent),
+        _request(request)
+{
+}
+
+void ReadVolV::doRead()
+{
+  QMutexLocker libraryReadLock(&mdvLibraryReadMutex);
+
+  VertReadResultPtr result = std::make_shared<VertReadResult>();
+  result->status = -1;
+  result->page = _request.page;
+  result->generation = _request.generation;
+  result->sampleSpacingKm = 0.0;
+  result->totalLengthKm = 0.0;
+  MEM_zero(result->mhdr);
+  MEM_zero(result->fhdr);
+  MEM_zero(result->vhdr);
+
+  DsURL url(_request.url);
+  if (!url.isValid()) {
+    result->error = "Invalid MDV URL: " + _request.url;
+    emit readDone(result);
+    return;
+  }
+
+  DsMdvx mdvx;
+  mdvx.clearRead();
+  mdvx.addReadField(_request.fieldName);
+
+  // Match the horizontal gather policy using only values captured when the
+  // request was made.  The worker must not consult mutable movie or field
+  // state while a blocking server request is in progress.
+
+  switch (_request.gatherMode) {
+    case Params::FIRST_BEFORE_END_OF_FRAME:
+      if (_request.isForecast) {
+        mdvx.setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
+                         _request.url,
+                         _request.searchMarginSecs,
+                         _request.modelRunTime,
+                         _request.requestTime.utime() -
+                         _request.modelRunTime);
+      } else {
+        mdvx.setReadTime(Mdvx::READ_FIRST_BEFORE,
+                         _request.url,
+                         _request.searchMarginSecs,
+                         _request.requestTime.utime() + 1, 0);
+      }
+      break;
+
+    case Params::FIRST_AFTER_START_OF_FRAME:
+      if (_request.isForecast) {
+        mdvx.setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
+                         _request.url,
+                         _request.searchMarginSecs,
+                         _request.modelRunTime,
+                         _request.requestTime.utime() -
+                         _request.modelRunTime);
+      } else {
+        mdvx.setReadTime(Mdvx::READ_FIRST_AFTER,
+                         _request.url,
+                         _request.searchMarginSecs,
+                         _request.requestTime.utime() - 1, 0);
+      }
+      break;
+
+    case Params::CLOSEST_TO_FRAME_CENTER:
+    default:
+      if (_request.isForecast) {
+        mdvx.setReadTime(Mdvx::READ_SPECIFIED_FORECAST,
+                         _request.url,
+                         _request.searchMarginSecs,
+                         _request.modelRunTime,
+                         _request.requestTime.utime() -
+                         _request.modelRunTime);
+      } else {
+        mdvx.setReadTime(Mdvx::READ_CLOSEST,
+                         _request.url,
+                         _request.searchMarginSecs,
+                         _request.requestTime.utime());
+      }
+      break;
+  }
+
+  mdvx.setReadEncodingType(Mdvx::ENCODING_ASIS);
+  mdvx.setReadCompressionType(Mdvx::COMPRESSION_ASIS);
+  if (_request.requestCompressedData) {
+    mdvx.setReadCompressionType(_request.requestGzipCompression ?
+                                Mdvx::COMPRESSION_GZIP_VOL :
+                                Mdvx::COMPRESSION_ZLIB);
+  }
+
+  for (size_t ii = 0; ii < _request.wayPts.getNPoints(); ++ii) {
+    double lat = 0.0;
+    double lon = 0.0;
+    _request.wayPts.getPoint(ii, lat, lon);
+    mdvx.addReadWayPt(lat, lon);
+  }
+
+  if (mdvx.readVsection()) {
+    result->error = mdvx.getErrStr();
+    emit readDone(result);
+    return;
+  }
+
+  MdvxField *field = mdvx.getFieldByNum(0);
+  if (field == nullptr) {
+    result->error = "Vertical-section response did not contain the requested field";
+    emit readDone(result);
+    return;
+  }
+  if (field->convertType(Mdvx::ENCODING_FLOAT32,
+                         Mdvx::COMPRESSION_NONE)) {
+    result->error = field->getErrStr();
+    emit readDone(result);
+    return;
+  }
+
+  result->mhdr = mdvx.getMasterHeader();
+  result->fhdr = field->getFieldHeader();
+  result->vhdr = field->getVlevelHeader();
+  const size_t nPoints = (size_t) result->fhdr.nx *
+                         (size_t) result->fhdr.ny *
+                         (size_t) result->fhdr.nz;
+  result->data.resize(nPoints);
+  memcpy(result->data.data(), field->getVol(), nPoints * sizeof(fl32));
+
+  const vector<Mdvx::vsect_waypt_t> &returned = mdvx.getVsectWayPts();
+  for (const Mdvx::vsect_waypt_t &point : returned) {
+    result->returnedWayPts.addPoint(point.lat, point.lon);
+  }
+  if (result->returnedWayPts.getNPoints() < 2) {
+    result->returnedWayPts = _request.wayPts;
+  }
+  result->segments = mdvx.getVsectSegments();
+  result->sampleSpacingKm = mdvx.getVsectDxKm();
+  result->totalLengthKm = mdvx.getvsectTotalLength();
+  if (result->totalLengthKm <= 0.0) {
+    for (const Mdvx::vsect_segment_t &segment : result->segments) {
+      result->totalLengthKm += segment.length;
+    }
+  }
+  if (result->totalLengthKm <= 0.0) {
+    for (size_t ii = 1; ii < result->returnedWayPts.getNPoints(); ++ii) {
+      double lat0 = 0.0;
+      double lon0 = 0.0;
+      double lat1 = 0.0;
+      double lon1 = 0.0;
+      double segmentLengthKm = 0.0;
+      double azimuthDeg = 0.0;
+      result->returnedWayPts.getPoint(ii - 1, lat0, lon0);
+      result->returnedWayPts.getPoint(ii, lat1, lon1);
+      PJGLatLon2RTheta(lat0, lon0, lat1, lon1,
+                      &segmentLengthKm, &azimuthDeg);
+      result->totalLengthKm += segmentLengthKm;
+    }
+  }
+  result->status = 0;
+  emit readDone(result);
+}
+
+////////////////////////////////////////////////////////
+// start a self-contained vertical-section worker
+
+void MdvReader::_startReadVolV(const VertReadRequest &request)
+{
+  if (_shuttingDown) {
+    return;
+  }
+
+  ReadVolV *worker = new ReadVolV(request);
+  QThread *thread = new QThread;
+  _readThreadsV.insert(thread);
+  worker->moveToThread(thread);
+
+  connect(thread, &QThread::started, worker, &ReadVolV::doRead);
+  connect(worker, &ReadVolV::readDone, this, &MdvReader::readDoneV);
+  connect(worker, &ReadVolV::readDone, thread, &QThread::quit,
+          Qt::DirectConnection);
+  connect(thread, &QThread::finished, worker, &ReadVolV::deleteLater);
+  connect(thread, &QThread::finished, this, [this, thread]() {
+    _readThreadsV.remove(thread);
+    thread->deleteLater();
+  });
+  thread->start();
+}
+
+////////////////////////////////////////////////////////
+// install the newest vertical-section result on the GUI thread
+
+void MdvReader::readDoneV(VertReadResultPtr result)
+{
+  if (!result || result->generation != _vertGeneration) {
+    return;
+  }
+
+  if (result->status != 0) {
+    cerr << "ERROR - MdvReader vertical-section read failed for "
+         << field_label << endl;
+    if (!result->error.empty()) {
+      cerr << result->error << endl;
+    }
+    v_data_valid = 0;
+    _setValidV(false);
+    _setNewV(true);
+    emit verticalReadComplete(this);
+    return;
+  }
+
+  // Replace the complete section atomically from the GUI thread.  VertView
+  // will never observe headers from one request with data from another.
+
+  v_mhdr = result->mhdr;
+  v_fhdr = result->fhdr;
+  v_vhdr = result->vhdr;
+  v_fl32_data = std::move(result->data);
+  _vertWayPts = result->returnedWayPts;
+  _vertSegments = std::move(result->segments);
+  _vertSampleSpacingKm = result->sampleSpacingKm;
+  _vertTotalLengthKm = result->totalLengthKm;
+  v_date.set(v_mhdr.time_centroid);
+  vunits_label_cols = "km";
+  vunits_label_sects = Mdvx::vertTypeZUnits(v_fhdr.vlevel_type);
+  v_data_valid = 1;
+  _setValidV(true);
+  _setNewV(true);
+  emit verticalReadComplete(this);
 }
 
 /*****************************************************************

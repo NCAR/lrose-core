@@ -100,45 +100,21 @@ public:
 
   void setRadarName(const string &radar_name);
 
+  // Update the section identity shown with the separate vertical window.
+
+  void setSectionInfo(const string &fieldName,
+                      const DateTime &validTime,
+                      double routeLengthKm);
+
   // enable the zoom button - called by VertView
   
   void enableZoomButton() const;
-
-public slots:
-
-  //////////////
-  // Qt slots //
-  //////////////
-
-  /**
-   * @brief Method called by the main program on the first timer event to
-   *        ask the window to resize.
-   */
-
-  void resize();
-
-               
 
 private slots:
   
   // override
   
   virtual void _unzoom();
-  
-signals:
-
-  ////////////////
-  // Qt signals //
-  ////////////////
-
-  /**
-   * @brief Signal emitted when the window is resized.
-   *
-   * @param[in] width    The new width of the window.
-   * @param[in] height   The new height of the window.
-   */
-
-  void windowResized(const int width, const int height);
   
 protected:
 
@@ -226,7 +202,6 @@ protected:
   // override event handling
 
   void keyPressEvent(QKeyEvent* event) override;
-  void resizeEvent(QResizeEvent *event) override;
   void closeEvent(QCloseEvent *event) override;
   
   /**

@@ -40,6 +40,9 @@
 #include <QObject>
 #include <QMutex>
 #include <QSet>
+#include <QMetaType>
+
+#include <memory>
 
 #include <toolsa/DateTime.hh>
 #include <toolsa/mem.h>
@@ -56,8 +59,46 @@
 
 class MdvReader;
 class ReadVolH;
+class ReadVolV;
 class QThread;
 class QTimer;
+
+// Vertical reads use self-contained request and result objects.  The blocking
+// worker never mutates MdvReader, so horizontal and vertical requests can be
+// in flight together without sharing transient request state.
+
+struct VertReadRequest {
+  DateTime requestTime;
+  string url;
+  string fieldName;
+  WayPts wayPts;
+  int page;
+  int generation;
+  int gatherMode;
+  int searchMarginSecs;
+  time_t modelRunTime;
+  bool isForecast;
+  bool requestCompressedData;
+  bool requestGzipCompression;
+};
+
+struct VertReadResult {
+  int status;
+  int page;
+  int generation;
+  string error;
+  Mdvx::master_header_t mhdr;
+  Mdvx::field_header_t fhdr;
+  Mdvx::vlevel_header_t vhdr;
+  vector<fl32> data;
+  WayPts returnedWayPts;
+  vector<Mdvx::vsect_segment_t> segments;
+  double sampleSpacingKm;
+  double totalLengthKm;
+};
+
+using VertReadResultPtr = std::shared_ptr<VertReadResult>;
+Q_DECLARE_METATYPE(VertReadResultPtr)
 
 class MdvReader : public QObject {
 
@@ -106,7 +147,15 @@ public:
   // Get data for a vert section
 
   int requestVertSection(const DateTime &midTime,
-                         int page);
+                         int page,
+                         const WayPts &wayPts);
+
+  const WayPts &getVertWayPts() const { return _vertWayPts; }
+  const vector<Mdvx::vsect_segment_t> &getVertSegments() const {
+    return _vertSegments;
+  }
+  double getVertSampleSpacingKm() const { return _vertSampleSpacingKm; }
+  double getVertTotalLengthKm() const { return _vertTotalLengthKm; }
   
   // perform the vol read for Horiz
 
@@ -265,8 +314,12 @@ public:
     vector<fl32> fl32_data;
   };
 
+signals:
+  void verticalReadComplete(MdvReader *reader);
+
 public slots:
   void readDoneH(int readStatus);
+  void readDoneV(VertReadResultPtr result);
 
 private:
 
@@ -282,7 +335,6 @@ private:
   DateTime _timeReq;
   LatLonBox _zoomBoxReq;                 // horiz data
   double _vLevelReq;                     // horiz data
-  WayPts _wayPtsReq;                     // vert section data
   
   bool _validH, _validV;
   mutable bool _newH, _newV;
@@ -301,18 +353,30 @@ private:
   // recent request details still stored in this object.
 
   QSet<QThread *> _readThreadsH;
+  QSet<QThread *> _readThreadsV;
   QTimer *_retryTimerH;
   int _retryCountH;
   bool _shuttingDown;
+
+  // Geometry returned by MDV can differ slightly from the requested route.
+  // Preserve the returned definition with the data so rendering and labels
+  // describe the section which was actually sampled.
+
+  WayPts _vertWayPts;
+  vector<Mdvx::vsect_segment_t> _vertSegments;
+  double _vertSampleSpacingKm;
+  double _vertTotalLengthKm;
+  int _vertGeneration;
 
   // private methods
 
   int _handleHorizReadDone();
 
   void _scheduleRetryH();
+
+  void _startReadVolV(const VertReadRequest &request);
   
   bool _checkRequestChangedH(const DateTime &midTime, double vLevel);
-  bool _checkRequestChangedV(const DateTime &midTime);
 
   void _computeReqTime(const DateTime &midTime,
                        DateTime &reqTime);
@@ -364,6 +428,29 @@ signals:
 
 private:
   MdvReader* _mr;
+
+};
+
+// Worker for a vertical-section read.  It owns the complete request and emits
+// an owned result; its lifetime is therefore independent of MdvReader.
+
+class ReadVolV : public QObject {
+
+  Q_OBJECT
+
+public:
+
+  explicit ReadVolV(const VertReadRequest &request,
+                    QObject *parent = nullptr);
+
+public slots:
+  void doRead();
+
+signals:
+  void readDone(VertReadResultPtr result);
+
+private:
+  VertReadRequest _request;
 
 };
 

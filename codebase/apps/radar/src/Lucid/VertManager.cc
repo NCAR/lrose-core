@@ -25,6 +25,7 @@
 
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QVBoxLayout>
 
 #include "GuiManager.hh"
 #include "VertManager.hh"
@@ -55,21 +56,16 @@ VertManager::VertManager(GuiManager *manager):
 
   // create VERT view
   
-  _vertView = new VertView(_main, *manager, *this);
+  _vertView = new VertView(_vertTopFrame, *manager, *this);
   _vertView->setGrids(_params.vert_grids_on_at_startup);
-  _vertView->setParent(_vertTopFrame);
-  
-  // Connect the window resize signal to the VERT view resize() method.
 
-  connect(this, SIGNAL(windowResized(const int, const int)),
-	  _vertView, SLOT(resize(const int, const int)));
-  
-  // Connect the first beam recieved view from the VertView object to the
-  // resize() method so that we resize the window after processing several
-  // VERT beams.  This is done to get around a window resizing problem at
-  // startup.
+  // Let Qt propagate the frame's final geometry to the rendering widget.
+  // The inherited HawkEye code used a one-time resize workaround, which could
+  // leave this child at its small construction size when the window opened.
 
-  connect(_vertView, SIGNAL(severalBeamsProcessed()), this, SLOT(resize()));
+  QVBoxLayout *vertLayout = new QVBoxLayout(_vertTopFrame);
+  vertLayout->setContentsMargins(0, 0, 0, 0);
+  vertLayout->addWidget(_vertView);
   
   // Create the status panel
   
@@ -104,26 +100,6 @@ VertManager::VertManager(GuiManager *manager):
 VertManager::~VertManager()
 {
 
-}
-
-
-/*************************************************************************
- * resize()
- */
-
-void VertManager::resize()
-{
-  emit windowResized(_vertTopFrame->width(), _vertTopFrame->height());
-}
-
-
-/*************************************************************************
- * resizeEvent()
- */
-
-void VertManager::resizeEvent(QResizeEvent *event)
-{
-  resize();
 }
 
 
@@ -201,9 +177,7 @@ void VertManager::_unzoom()
 void VertManager::_createMenus()
 {
   _overlaysMenu = menuBar()->addMenu(tr("&Overlays"));
-  _overlaysMenu->addAction(_ringsAct);
   _overlaysMenu->addAction(_gridsAct);
-  _overlaysMenu->addAction(_azLinesAct);
   _overlaysMenu->addSeparator();
 
   menuBar()->addAction(_unzoomAct);
@@ -231,31 +205,30 @@ void VertManager::_createStatusPanel(const int label_font_size)
   int fsize = label_font_size + 2;
   font.setPixelSize(fsize);
 
-  // Elevation
+  // The HawkEye window reported radar angles here.  For an MDV cross section,
+  // field identity and route length are the persistent context the user needs.
 
   QLabel *elev_label = new QLabel(_statusPanel);
-  elev_label->setText("Elevation ");
+  elev_label->setText("Field ");
   elev_label->setFont(font);
   // layout->addWidget(elev_label, 0, Qt::AlignLeft);
   layout->addWidget(elev_label, 0, 0, Qt::AlignLeft);
   
   _elevValue = new QLabel(_statusPanel);
-  _elevValue->setText("9999.99");
+  _elevValue->setText("-----");
   _elevValue->setFont(font);
   _elevValue->setMinimumWidth(_elevValue->width());
   // layout->addWidget(_elevValue, 0, Qt::AlignRight);
   layout->addWidget(_elevValue, 0, 1, Qt::AlignRight);
   
-  // Azimuth
-
   QLabel *az_label = new QLabel(_statusPanel);
-  az_label->setText("Azimuth ");
+  az_label->setText("Route length ");
   az_label->setFont(font);
   // layout->addWidget(az_label, 0, Qt::AlignLeft);
   layout->addWidget(az_label, 0, 2, Qt::AlignLeft);
   
   _azValue = new QLabel(_statusPanel);
-  _azValue->setText("9999.99");
+  _azValue->setText("-----");
   _azValue->setFont(font);
   _azValue->setMinimumWidth(_azValue->width());
   // layout->addWidget(_azValue, 0, Qt::AlignRight);
@@ -312,5 +285,20 @@ void VertManager::setRadarName(const string &radar_name)
 {
   string window_title = "VERT -- " + radar_name;
   setWindowTitle(tr(window_title.c_str()));
+}
+
+/////////////////////////////////////////////////////////////
+// update the displayed vertical-section identity
+
+void VertManager::setSectionInfo(const string &fieldName,
+                                 const DateTime &validTime,
+                                 double routeLengthKm)
+{
+  _elevValue->setText(QString::fromStdString(fieldName));
+  _azValue->setText(QString("%1 km").arg(routeLengthKm, 0, 'f', 1));
+
+  const string title = "Vertical section -- " + fieldName + " -- " +
+                       validTime.asString(3);
+  setWindowTitle(QString::fromStdString(title));
 }
 

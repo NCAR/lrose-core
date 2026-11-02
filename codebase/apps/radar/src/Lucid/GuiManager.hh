@@ -399,6 +399,7 @@ private:
   
   void _autoCreateFunc();
   void _setField(int value);
+  void _requestVerticalSection();
   void _setDisplayTime(time_t utime);
   void _setEndFrame(int num_frames);
   void _updateMoviePopup();
@@ -459,6 +460,7 @@ private slots:
   // retain a completed route for the forthcoming MDV vertical-section read
 
   void _verticalRouteCompleted(const VsectionRoute &route);
+  void _verticalReadComplete(MdvReader *reader);
   
   // images
 
