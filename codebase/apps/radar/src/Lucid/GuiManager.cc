@@ -547,9 +547,7 @@ void GuiManager::_setupWindows()
   
   // set location on screen
 
-  QPoint pos;
-  pos.setX(_params.horiz_window_x_pos);
-  pos.setY(_params.horiz_window_y_pos);
+  QPoint pos(_params.horiz_window_x_pos, _params.horiz_window_y_pos);
   move(pos);
   show();
 
@@ -1261,9 +1259,7 @@ QPoint GuiManager::getTopRightPos()
   
   int margin = (frameGeometry().width() - geometry().width()) / 2;
   int titleBarHt = frameGeometry().height() - geometry().height() - margin;
-  QPoint pos;
-  pos.setX(x() + (frameGeometry().width()));
-  pos.setY(y() + titleBarHt);
+  QPoint pos(x() + (frameGeometry().width()), y() + titleBarHt);
 
   return pos;
 
