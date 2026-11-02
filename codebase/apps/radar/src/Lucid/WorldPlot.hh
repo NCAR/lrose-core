@@ -588,6 +588,14 @@ public:
                            time_t start_time,
                            time_t end_time,
                            bool is_overlay_field);
+
+  // render filled contours for either matching or differing projections
+
+  void renderFilledContours(int fieldNum,
+                            MdvReader *mr,
+                            time_t start_time,
+                            time_t end_time,
+                            bool is_overlay_field);
   
   // render a data grid for polar radar data
   // returns QImage* - owned by this object

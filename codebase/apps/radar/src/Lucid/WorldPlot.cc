@@ -46,6 +46,8 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/sincos.h>
 #include <toolsa/pjg_flat.h>
+#include <Mdv/MdvxContour.hh>
+#include <Mdv/MdvxField.hh>
 #include <qtplot/ColorMap.hh>
 #include "WorldPlot.hh"
 
@@ -3136,6 +3138,168 @@ void WorldPlot::renderGridDistorted(int fieldNum,
   } // iy
   
   // fill margins with background color
+
+  fillMargins(painter, _params.background_color);
+
+}
+
+//////////////////////////////////////////////////////////
+// render filled contours
+// handles both matching and differing data/display projections
+
+void WorldPlot::renderFilledContours(int fieldNum,
+                                     MdvReader *mr,
+                                     time_t start_time,
+                                     time_t end_time,
+                                     bool is_overlay_field)
+
+{
+  const PjgMath &dataMath = mr->proj.getPjgMath();
+  const PjgMath &displayMath = _proj.getPjgMath();
+  const bool distorted = (dataMath != displayMath);
+
+  const int nx = mr->h_fhdr.nx;
+  const int ny = mr->h_fhdr.ny;
+  const vector<ColorMap::CmapEntry> &entries = mr->colorMap.getEntries();
+
+  // ColorMap's lookup table starts at the first entry minimum and changes
+  // color at each entry maximum.  getTransitions() is only populated while
+  // interpolating incomplete XML maps, so derive the persistent boundaries
+  // from the entries themselves to keep contours consistent with dataBrush().
+
+  vector<double> contourValues;
+  if (!entries.empty()) {
+    contourValues.push_back(entries[0].minVal);
+    for (size_t ii = 0; ii < entries.size(); ii++) {
+      contourValues.push_back(entries[ii].maxVal);
+    }
+  }
+
+  // Filled contours need at least one grid cell and a strictly increasing
+  // boundary for every color interval.  Fall back to cell rendering if a
+  // color map cannot provide that topology rather than leaving a blank plot.
+
+  const size_t expectedDataSize = (size_t) nx * (size_t) ny;
+  bool contourGeometryValid = (nx >= 2 && ny >= 2 &&
+                               mr->h_fl32_data.size() == expectedDataSize &&
+                               contourValues.size() == entries.size() + 1);
+  for (size_t ii = 1; ii < contourValues.size(); ii++) {
+    if (!std::isfinite(contourValues[ii - 1]) ||
+        !std::isfinite(contourValues[ii]) ||
+        contourValues[ii] <= contourValues[ii - 1]) {
+      contourGeometryValid = false;
+      break;
+    }
+  }
+  if (!contourGeometryValid) {
+    if (distorted) {
+      renderGridDistorted(fieldNum, mr, start_time, end_time,
+                          is_overlay_field);
+    } else {
+      renderGridRect(fieldNum, mr, start_time, end_time,
+                     is_overlay_field);
+    }
+    return;
+  }
+
+  vector<fl32> contourData = mr->h_fl32_data;
+  const fl32 missing = mr->h_fhdr.missing_data_value;
+  const fl32 bad = mr->h_fhdr.bad_data_value;
+  const fl32 minDataValue = mr->h_fhdr.min_value;
+
+  // MdvxContour treats missing and bad values as holes.  Normalize bad data
+  // to the missing sentinel first because its log transform only preserves
+  // the missing sentinel; the legacy mapping options can instead place either
+  // sentinel at the bottom of the data range when continuity is desired.
+
+  for (size_t ii = 0; ii < contourData.size(); ii++) {
+    if (contourData[ii] == bad) {
+      contourData[ii] = _params.map_bad_to_min_value ? minDataValue : missing;
+    }
+    if (contourData[ii] == missing && _params.map_missing_to_min_value) {
+      contourData[ii] = minDataValue;
+    }
+  }
+
+  // The reader releases its DsMdvx volume after preserving this plane.  Give
+  // the contour library an owned, uncompressed FLOAT32 field so its internal
+  // plane copy and any MDV transform remain independent of later requests.
+
+  Mdvx::field_header_t contourHeader = mr->h_fhdr;
+  contourHeader.nz = 1;
+  contourHeader.encoding_type = Mdvx::ENCODING_FLOAT32;
+  contourHeader.compression_type = Mdvx::COMPRESSION_NONE;
+  contourHeader.data_element_nbytes = sizeof(fl32);
+  contourHeader.volume_size = nx * ny * sizeof(fl32);
+  MdvxField contourField(contourHeader, mr->h_vhdr, contourData.data());
+
+  MdvxContour contours;
+  for (size_t ii = 0; ii < contourValues.size(); ii++) {
+    contours.addVal(contourValues[ii]);
+  }
+  if (contours.computeTriangles(contourField)) {
+    cerr << "ERROR - WorldPlot::renderFilledContours" << endl;
+    cerr << "  Cannot compute filled contour triangles" << endl;
+    if (distorted) {
+      renderGridDistorted(fieldNum, mr, start_time, end_time,
+                          is_overlay_field);
+    } else {
+      renderGridRect(fieldNum, mr, start_time, end_time,
+                     is_overlay_field);
+    }
+    return;
+  }
+
+  _createImage(_gridImage);
+  QPainter painter(_gridImage);
+  fillCanvas(painter, _params.background_color);
+
+  // Contour vertices are expressed in the data projection.  Transform only
+  // at this final drawing boundary so the same contour topology serves both
+  // rectangular grids and grids distorted by the display projection.
+
+  const vector<MdvxContourLevel> &levels = contours.getLevels();
+  const QBrush backgroundBrush(_params.background_color);
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth, _plotHeight);
+  for (size_t ilevel = 0; ilevel < levels.size(); ilevel++) {
+    const MdvxContourLevel &level = levels[ilevel];
+    if (level.index < 0) {
+      continue;
+    }
+
+    // Levels are cumulative and are painted from low to high.  The contour
+    // library marks the synthetic level above the color scale as extra; paint
+    // it back to the background so out-of-range data remains transparent to
+    // the grid layer instead of inheriting the highest valid color.
+
+    const QBrush *levelBrush = &backgroundBrush;
+    if (!level.extra && level.index < (int) entries.size()) {
+      levelBrush = entries[level.index].brush;
+    }
+    if (levelBrush == nullptr) {
+      continue;
+    }
+
+    QPainterPath levelPath;
+    for (size_t itri = 0; itri < level.triangles.size(); itri++) {
+      const MdvxContourTriangle &triangle = level.triangles[itri];
+      QPolygonF polygon;
+      for (int ivert = 0; ivert < 3; ivert++) {
+        double xx = triangle.vertex[ivert].x;
+        double yy = triangle.vertex[ivert].y;
+        if (distorted) {
+          double lat, lon;
+          mr->proj.xy2latlon(xx, yy, lat, lon);
+          _proj.latlon2xy(lat, lon, xx, yy);
+        }
+        polygon << getPixelPointF(xx, yy);
+      }
+      levelPath.addPolygon(polygon);
+    }
+    painter.fillPath(levelPath, *levelBrush);
+  }
+  painter.restore();
 
   fillMargins(painter, _params.background_color);
 
