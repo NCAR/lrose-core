@@ -2759,9 +2759,11 @@ void WorldPlot::renderGridRect(int fieldNum,
       if (fval == miss || fval == bad) {
         continue;
       }
-      if (!mr->colorMap.withinValidRange(fval)) {
-        continue;
-      }
+      // if (!mr->colorMap.withinValidRange(fval)) {
+      //   continue;
+      // }
+      // dataBrush() saturates values outside the scale so valid data always
+      // receives either an interior color or the nearest endpoint color.
       const QBrush *brush = mr->colorMap.dataBrush(fval);
       double xx = vertices[iy+1][ix].x();
       double yy = vertices[iy+1][ix].y();
@@ -3124,9 +3126,10 @@ void WorldPlot::renderGridDistorted(int fieldNum,
       if (fval == miss || fval == bad) {
         continue;
       }
-      if (!mr->colorMap.withinValidRange(fval)) {
-        continue;
-      }
+      // if (!mr->colorMap.withinValidRange(fval)) {
+      //   continue;
+      // }
+      // Keep out-of-range data visible using the nearest endpoint color.
       const QBrush *brush = mr->colorMap.dataBrush(fval);
       QVector<QPointF> points;
       points.push_back(vertices[iy][ix]);
@@ -3219,6 +3222,37 @@ void WorldPlot::renderFilledContours(int fieldNum,
     if (contourData[ii] == missing && _params.map_missing_to_min_value) {
       contourData[ii] = minDataValue;
     }
+  }
+
+  // Extend only the outer contour boundaries to the valid data extrema.  The
+  // interior color transitions remain unchanged, while values beyond the
+  // configured scale are absorbed into its bottom or top color interval.
+
+  bool haveValidData = false;
+  double validDataMin = 0.0;
+  double validDataMax = 0.0;
+  for (size_t ii = 0; ii < contourData.size(); ii++) {
+    if (contourData[ii] == missing) {
+      continue;
+    }
+    double value = contourData[ii];
+    if (mr->h_fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
+      value = exp(value);
+    }
+    if (!std::isfinite(value)) {
+      continue;
+    }
+    if (!haveValidData) {
+      validDataMin = validDataMax = value;
+      haveValidData = true;
+    } else {
+      validDataMin = MIN(validDataMin, value);
+      validDataMax = MAX(validDataMax, value);
+    }
+  }
+  if (haveValidData) {
+    contourValues.front() = MIN(contourValues.front(), validDataMin);
+    contourValues.back() = MAX(contourValues.back(), validDataMax);
   }
 
   // The reader releases its DsMdvx volume after preserving this plane.  Give
@@ -3384,9 +3418,10 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
       if (fval == miss || fval == bad) {
         continue;
       }
-      if (!mr->colorMap.withinValidRange(fval)) {
-        continue;
-      }
+      // if (!mr->colorMap.withinValidRange(fval)) {
+      //   continue;
+      // }
+      // Keep out-of-range data visible using the nearest endpoint color.
       const QBrush *brush = mr->colorMap.dataBrush(fval);
       QVector<QPointF> points;
       points.push_back(vertices[iy][ix]);
