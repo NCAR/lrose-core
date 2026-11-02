@@ -114,6 +114,9 @@ HorizView::HorizView(QWidget* parent,
   _mouseReleaseX = 0;
   _mouseReleaseY = 0;
   _activeMouseButton = Qt::NoButton;
+  _panPreviewActive = false;
+  _panPreviewX = 0;
+  _panPreviewY = 0;
 
   _zoomCornerX = 0;
   _zoomCornerY = 0;
@@ -304,10 +307,23 @@ void HorizView::paintEvent(QPaintEvent *event)
   //   _renderInvalidImages = false;
   // }
   
-  // copy rendered grid and map images into this widget
+  // Copy the cached data layers into the widget.  During a pan gesture these
+  // images are translated only for visual feedback; world limits and data
+  // requests remain unchanged until the button is released.
   
   QPainter painter(this);
   painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+
+  painter.save();
+  if (_panPreviewActive) {
+    const QRect plotRect(_zoom->getXMinPixel(), _zoom->getYMaxPixel(),
+                         _zoom->getPlotWidth(), _zoom->getPlotHeight());
+    painter.setClipRect(plotRect);
+    painter.fillRect(plotRect, QColor(_params.background_color));
+    painter.translate(_panPreviewX - _mousePressX,
+                      _panPreviewY - _mousePressY);
+  }
+
   if (_gridsReady && _mapsReady) {
     painter.drawImage(0, 0, *_zoom->getGridImage());
     painter.drawImage(0, 0, *_zoom->getMapsImage());
@@ -320,6 +336,7 @@ void HorizView::paintEvent(QPaintEvent *event)
     _zoom->drawRangeRingsHoriz(fieldNum, mr);
     painter.drawImage(0, 0, *_zoom->getRingsImage());
   }
+  painter.restore();
   
   // set axis areas to background color
   
@@ -1535,6 +1552,10 @@ void HorizView::mousePressEvent(QMouseEvent *e)
     _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
     _rubberBand->show();
   } else if (_activeMouseButton == Qt::MiddleButton) {
+    _panPreviewActive = true;
+    _panPreviewX = _mousePressX;
+    _panPreviewY = _mousePressY;
+    _mouseValueVisible = false;
     setCursor(Qt::ClosedHandCursor);
   }
 }
@@ -1560,7 +1581,7 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
   int deltaX = xx - _mousePressX;
   int deltaY = yy - _mousePressY;
 
-  if (_showValue) {
+  if (_showValue && _activeMouseButton != Qt::MiddleButton) {
     _updateMouseValue(xx, yy);
     update();
   }
@@ -1574,6 +1595,9 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
   }
 
   if (_activeMouseButton == Qt::MiddleButton) {
+    _panPreviewX = xx;
+    _panPreviewY = yy;
+    update();
     return;
   }
 
@@ -1646,8 +1670,13 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
   _activeMouseButton = Qt::NoButton;
 
   if (gestureButton == Qt::MiddleButton) {
+    _panPreviewActive = false;
     unsetCursor();
     _panView(pos.x(), pos.y());
+    if (_showValue) {
+      _updateMouseValue(pos.x(), pos.y());
+    }
+    update();
     return;
   }
   if (gestureButton == Qt::NoButton ||

@@ -264,6 +264,8 @@ class DLL_EXPORT HorizView : public QWidget
   // modifiers during a drag cannot change the selected interaction.
 
   Qt::MouseButton _activeMouseButton;
+  bool _panPreviewActive;
+  int _panPreviewX, _panPreviewY;
   
   // Location world of the latest click point.
   
