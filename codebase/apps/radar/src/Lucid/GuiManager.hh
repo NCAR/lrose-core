@@ -49,6 +49,7 @@
 #include "Params.hh"
 #include "VlevelManager.hh"
 #include "ClickReport.hh"
+#include "VsectionRoute.hh"
 
 #include <QMainWindow>
 #include <QListWidgetItem>
@@ -180,6 +181,11 @@ private:
   VertView *_vert;
   bool _vertWindowDisplayed;
   bool _vertMode;
+
+  // Keep the most recently completed route independently of the canvas so a
+  // later field or time change can request the same vertical section.
+
+  VsectionRoute _vsectionRoute;
   
   // times for data
 
@@ -449,6 +455,10 @@ private slots:
   // show menu
 
   void _showValue();
+
+  // retain a completed route for the forthcoming MDV vertical-section read
+
+  void _verticalRouteCompleted(const VsectionRoute &route);
   
   // images
 

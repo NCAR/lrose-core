@@ -480,6 +480,9 @@ void GuiManager::_setupWindows()
   // configure the HORIZ
 
   _horiz = new HorizView(_horizFrame, *this);
+
+  connect(_horiz, &HorizView::verticalRouteCompleted,
+          this, &GuiManager::_verticalRouteCompleted);
   
   // Create the VERT window
 
@@ -2751,6 +2754,34 @@ void GuiManager::_showValue()
   _horiz->setShowValue(_showValueAct->isChecked());
 }
 
+/////////////////////////////////////////////////////////////
+// retain a completed vertical-section route
+
+void GuiManager::_verticalRouteCompleted(const VsectionRoute &route)
+{
+  _vsectionRoute = route;
+
+  char message[256];
+  snprintf(message, sizeof(message),
+           "Vertical section route: %zu points, %.1f km",
+           route.size(), route.totalLengthKm());
+  statusBar()->showMessage(message, 5000);
+
+  if (_params.debug || _params.route_debug != Params::ROUTE_DEBUG_OFF) {
+    cerr << "Vertical section route completed" << endl;
+    cerr << "  points: " << route.size() << endl;
+    cerr << "  total length km: " << route.totalLengthKm() << endl;
+    const vector<VsectionRoute::Point> &points = route.points();
+    for (size_t ii = 0; ii < points.size(); ++ii) {
+      cerr << "  waypoint " << ii
+           << ": lat, lon = " << points[ii].lat << ", " << points[ii].lon
+           << "; x, y = " << points[ii].x << ", " << points[ii].y
+           << "; distance km = " << points[ii].cumulativeDistanceKm
+           << endl;
+    }
+  }
+}
+
 /////////////////////////////
 // vert window has closed
 
@@ -2776,6 +2807,11 @@ void GuiManager::_howto()
   text += "You can also use the arrow keys to select different fields\n";
   text += "\n";
   text += "Click in main window to get field data at a point.\n";
+  text += "\n";
+  text += "Right-drag to start a vertical-section route.\n";
+  text += "Right-click to add segments and double-click to finish.\n";
+  text += "Use Backspace to remove a point or Escape to cancel.\n";
+  text += "Use Shift-right-click for the context menu.\n";
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
 

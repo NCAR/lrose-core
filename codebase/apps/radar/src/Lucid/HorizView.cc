@@ -36,6 +36,7 @@
 #include <QLayout>
 #include <QMessageBox>
 #include <QErrorMessage>
+#include <QKeyEvent>
 #include <QRect>
 #include <QPainterPath>
 #include <algorithm>
@@ -101,6 +102,7 @@ HorizView::HorizView(QWidget* parent,
   // Allow the size_t type to be passed to slots
 
   qRegisterMetaType<size_t>("size_t");
+  qRegisterMetaType<VsectionRoute>("VsectionRoute");
 
   // init other values
 
@@ -117,6 +119,9 @@ HorizView::HorizView(QWidget* parent,
   _panPreviewActive = false;
   _panPreviewX = 0;
   _panPreviewY = 0;
+  _vsectionRouteEditing = false;
+  _vsectionPreviewX = 0;
+  _vsectionPreviewY = 0;
 
   _zoomCornerX = 0;
   _zoomCornerY = 0;
@@ -371,6 +376,12 @@ void HorizView::paintEvent(QPaintEvent *event)
   painter.setPen(_params.foreground_color);
   _zoom->drawTitleTopCenter(painter, _params.horiz_frame_label);
 
+  // Keep the selected route as a widget overlay rather than baking it into a
+  // cached data layer.  It therefore remains visible while fields rerender and
+  // can be transformed again whenever the view changes.
+
+  _drawVsectionRoute(painter);
+
   // Draw cursor values directly on the widget so they remain transient rather
   // than becoming part of the cached data or map images.
 
@@ -424,7 +435,7 @@ void HorizView::setShowValue(bool state)
 
 {
   _showValue = state;
-  setMouseTracking(_showValue);
+  setMouseTracking(_showValue || _vsectionRouteEditing);
 
   // Disabling the feature must also erase the last transient report.
   if (!_showValue) {
@@ -1544,7 +1555,25 @@ void HorizView::mousePressEvent(QMouseEvent *e)
   _worldPressY = _zoom->getYWorld(_mousePressY);
 
   if (_activeMouseButton == Qt::RightButton) {
-    emit customContextMenuRequested(pos.toPoint()); // , closestRay);
+    if (e->modifiers() & Qt::ShiftModifier) {
+      // Ordinary right-button gestures belong to vertical-section selection.
+      // Retain access to the existing context menu through an explicit
+      // modifier so the two interactions cannot become ambiguous.
+      _activeMouseButton = Qt::NoButton;
+      emit customContextMenuRequested(pos.toPoint());
+      return;
+    }
+
+    setFocus(Qt::MouseFocusReason);
+    if (!_vsectionRouteEditing) {
+      _vsectionRoute.clear();
+      _vsectionRouteEditing =
+        _appendVsectionRoutePoint(pos.x(), pos.y());
+      setMouseTracking(_showValue || _vsectionRouteEditing);
+    }
+    _vsectionPreviewX = pos.x();
+    _vsectionPreviewY = pos.y();
+    update();
   } else if (_activeMouseButton == Qt::LeftButton) {
     if (!_rubberBand) {
       _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
@@ -1581,13 +1610,19 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
   int deltaX = xx - _mousePressX;
   int deltaY = yy - _mousePressY;
 
+  if (_vsectionRouteEditing) {
+    _vsectionPreviewX = xx;
+    _vsectionPreviewY = yy;
+    update();
+  }
+
   if (_showValue && _activeMouseButton != Qt::MiddleButton) {
     _updateMouseValue(xx, yy);
     update();
   }
 
   // Mouse tracking also delivers moves with no gesture in progress.  Right
-  // clicks are handled by the context menu and must not create a zoom band.
+  // gestures edit the section route and must not create a zoom band.
 
   if (_activeMouseButton == Qt::NoButton ||
       _activeMouseButton == Qt::RightButton) {
@@ -1679,8 +1714,16 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     update();
     return;
   }
-  if (gestureButton == Qt::NoButton ||
-      gestureButton == Qt::RightButton) {
+  if (gestureButton == Qt::RightButton) {
+    if (_vsectionRouteEditing) {
+      _vsectionPreviewX = pos.x();
+      _vsectionPreviewY = pos.y();
+      _appendVsectionRoutePoint(pos.x(), pos.y());
+      update();
+    }
+    return;
+  }
+  if (gestureButton == Qt::NoButton) {
     if (_rubberBand) {
       _rubberBand->hide();
     }
@@ -1763,6 +1806,177 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     _rubberBand->hide();
   }
   
+}
+
+/*
+ * mouseDoubleClickEvent()
+ */
+
+void HorizView::mouseDoubleClickEvent(QMouseEvent *e)
+{
+  if (effectiveButton(e) != Qt::RightButton ||
+      (e->modifiers() & Qt::ShiftModifier)) {
+    QWidget::mouseDoubleClickEvent(e);
+    return;
+  }
+
+#if QT_VERSION >= 0x060000
+  const QPointF pos(e->position());
+#else
+  const QPointF pos(e->pos());
+#endif
+
+  if (_vsectionRouteEditing) {
+    _appendVsectionRoutePoint(pos.x(), pos.y());
+    _completeVsectionRoute();
+  }
+  _activeMouseButton = Qt::NoButton;
+  e->accept();
+}
+
+/*
+ * keyPressEvent()
+ */
+
+void HorizView::keyPressEvent(QKeyEvent *e)
+{
+  if (_vsectionRouteEditing && e->key() == Qt::Key_Escape) {
+    _cancelVsectionRoute();
+    e->accept();
+    return;
+  }
+
+  if (_vsectionRouteEditing && e->key() == Qt::Key_Backspace) {
+    _vsectionRoute.removeLast();
+    if (_vsectionRoute.empty()) {
+      _cancelVsectionRoute();
+    } else {
+      _vsectionPreviewX = _zoom->getIxPixel(_vsectionRoute.back().x);
+      _vsectionPreviewY = _zoom->getIyPixel(_vsectionRoute.back().y);
+      update();
+    }
+    e->accept();
+    return;
+  }
+
+  QWidget::keyPressEvent(e);
+}
+
+////////////////////////////////////////////////////////
+// append a route point if it is inside the plot and distinct
+
+bool HorizView::_appendVsectionRoutePoint(int mouseX, int mouseY)
+{
+  const int plotLeft = std::min(_zoom->getXMinPixel(),
+                                _zoom->getXMaxPixel());
+  const int plotRight = std::max(_zoom->getXMinPixel(),
+                                 _zoom->getXMaxPixel());
+  const int plotTop = std::min(_zoom->getYMinPixel(),
+                               _zoom->getYMaxPixel());
+  const int plotBottom = std::max(_zoom->getYMinPixel(),
+                                  _zoom->getYMaxPixel());
+  if (mouseX < plotLeft || mouseX > plotRight ||
+      mouseY < plotTop || mouseY > plotBottom) {
+    return false;
+  }
+
+  // A double-click and a stationary press/release can deliver the same point
+  // more than once.  Apply the tolerance in screen space so it has consistent
+  // interaction behavior at every zoom level.
+
+  if (!_vsectionRoute.empty()) {
+    const int lastX = _zoom->getIxPixel(_vsectionRoute.back().x);
+    const int lastY = _zoom->getIyPixel(_vsectionRoute.back().y);
+    if (std::hypot(mouseX - lastX, mouseY - lastY) <= 5.0) {
+      return false;
+    }
+  }
+
+  const double x = _zoom->getXWorld(mouseX);
+  const double y = _zoom->getYWorld(mouseY);
+  double lat = 0.0;
+  double lon = 0.0;
+  _proj.xy2latlon(x, y, lat, lon);
+  _vsectionRoute.append(x, y, lat, lon);
+  return true;
+}
+
+////////////////////////////////////////////////////////
+// cancel the route currently being constructed
+
+void HorizView::_cancelVsectionRoute()
+{
+  _vsectionRoute.clear();
+  _vsectionRouteEditing = false;
+  _activeMouseButton = Qt::NoButton;
+  setMouseTracking(_showValue);
+  update();
+}
+
+////////////////////////////////////////////////////////
+// publish a completed route
+
+void HorizView::_completeVsectionRoute()
+{
+  if (_vsectionRoute.size() < 2) {
+    return;
+  }
+
+  _vsectionRouteEditing = false;
+  setMouseTracking(_showValue);
+  emit verticalRouteCompleted(_vsectionRoute);
+  update();
+}
+
+////////////////////////////////////////////////////////
+// draw the committed route and its live extension
+
+void HorizView::_drawVsectionRoute(QPainter &painter)
+{
+  if (_vsectionRoute.empty()) {
+    return;
+  }
+
+  painter.save();
+  const QRect plotRect(std::min(_zoom->getXMinPixel(), _zoom->getXMaxPixel()),
+                       std::min(_zoom->getYMinPixel(), _zoom->getYMaxPixel()),
+                       std::abs(_zoom->getPlotWidth()),
+                       std::abs(_zoom->getPlotHeight()));
+  painter.setClipRect(plotRect);
+  if (_panPreviewActive) {
+    painter.translate(_panPreviewX - _mousePressX,
+                      _panPreviewY - _mousePressY);
+  }
+
+  QPen routePen(QColor(_params.route_path_color));
+  routePen.setWidth(2);
+  routePen.setCapStyle(Qt::RoundCap);
+  routePen.setJoinStyle(Qt::RoundJoin);
+  painter.setPen(routePen);
+
+  QPainterPath path;
+  const std::vector<VsectionRoute::Point> &points = _vsectionRoute.points();
+  path.moveTo(_zoom->getPixelPointF(points[0].x, points[0].y));
+  for (size_t ii = 1; ii < points.size(); ++ii) {
+    path.lineTo(_zoom->getPixelPointF(points[ii].x, points[ii].y));
+  }
+  painter.drawPath(path);
+
+  painter.setBrush(QColor(_params.route_path_color));
+  for (const VsectionRoute::Point &point : points) {
+    const QPointF pixel = _zoom->getPixelPointF(point.x, point.y);
+    painter.drawEllipse(pixel, 3.0, 3.0);
+  }
+
+  if (_vsectionRouteEditing) {
+    routePen.setStyle(Qt::DashLine);
+    painter.setPen(routePen);
+    const QPointF last = _zoom->getPixelPointF(points.back().x,
+                                                points.back().y);
+    painter.drawLine(last, QPointF(_vsectionPreviewX, _vsectionPreviewY));
+  }
+
+  painter.restore();
 }
 
 ////////////////////////////////////////////////////////

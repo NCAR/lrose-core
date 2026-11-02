@@ -80,6 +80,7 @@ HDRS = \
 	VertView.hh \
 	VertManager.hh \
 	VlevelManager.hh \
+	VsectionRoute.hh \
 	VlevelSelector.hh \
 	WayPts.hh \
 	WindMenuItem.hh \
@@ -124,6 +125,7 @@ NORM_SRCS = \
 	SymprodRenderObj.cc \
 	TimeList.cc \
 	VlevelManager.cc \
+	VsectionRoute.cc \
 	WayPts.cc \
 	WorldPlot.cc \
 	XyBox.cc

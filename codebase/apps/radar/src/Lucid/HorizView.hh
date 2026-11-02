@@ -62,6 +62,7 @@
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
 #include "XyBox.hh"
+#include "VsectionRoute.hh"
 
 class GuiManager;
 class VertView;
@@ -157,6 +158,7 @@ class DLL_EXPORT HorizView : public QWidget
  signals:
  
   void locationClicked(double xkm, double ykm);
+  void verticalRouteCompleted(const VsectionRoute &route);
 
   //////////////
   // Qt slots //
@@ -266,6 +268,13 @@ class DLL_EXPORT HorizView : public QWidget
   Qt::MouseButton _activeMouseButton;
   bool _panPreviewActive;
   int _panPreviewX, _panPreviewY;
+
+  // Route coordinates remain in display-world and geographic space so the
+  // selected section continues to line up after a zoom, pan or resize.
+
+  VsectionRoute _vsectionRoute;
+  bool _vsectionRouteEditing;
+  int _vsectionPreviewX, _vsectionPreviewY;
   
   // Location world of the latest click point.
   
@@ -314,6 +323,14 @@ class DLL_EXPORT HorizView : public QWidget
   // panning/zooming.
 
   virtual void mouseReleaseEvent(QMouseEvent* event) override;
+
+  // A double right-click completes the current vertical-section route.
+
+  virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
+
+  // Escape cancels route construction; Backspace removes its last point.
+
+  virtual void keyPressEvent(QKeyEvent* event) override;
 
   // Handle a resize event. A timer is used to prevent refreshes until
   // the resize is finished.
@@ -376,6 +393,13 @@ class DLL_EXPORT HorizView : public QWidget
   // draw the transient data-value overlay
 
   void _drawMouseValue(QPainter &painter);
+
+  // edit and draw the vertical-section route
+
+  bool _appendVsectionRoutePoint(int mouseX, int mouseY);
+  void _cancelVsectionRoute();
+  void _completeVsectionRoute();
+  void _drawVsectionRoute(QPainter &painter);
 
   // pan the current view by a completed middle-button drag
 
