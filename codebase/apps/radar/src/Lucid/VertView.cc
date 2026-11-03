@@ -121,7 +121,7 @@ VertView::VertView(QWidget* parent,
   
   // initialize world view
   
-  _maxHeightKm = _params.vert_max_height_km;
+  _maxHeightKm = _params.max_ht_km;
   _xGridSpacing = 0.0;
   _yGridSpacing = 0.0;
 
@@ -168,7 +168,7 @@ void VertView::configureWorldCoords(int zoomLevel)
   _fullWorld.setWindowGeom(width(), height(), 0, 0);
   
   double xMax = 100.0;
-  double yMin = 0.0;
+  double yMin = _params.min_ht_km;
   double yMax = _maxHeightKm;
   if (_sectionReader != nullptr && _sectionReader->isValidV()) {
     xMax = _sectionReader->getVertTotalLengthKm();
@@ -176,11 +176,15 @@ void VertView::configureWorldCoords(int zoomLevel)
       xMax = (_sectionReader->v_fhdr.nx - 1) *
              _sectionReader->v_fhdr.grid_dx;
     }
-    const vector<double> edges = _computeVerticalEdges();
-    if (edges.size() >= 2) {
-      const auto limits = std::minmax_element(edges.begin(), edges.end());
-      yMin = *limits.first;
-      yMax = *limits.second;
+    // Height limits are in km MSL. Preserve native limits for sections whose
+    // vertical coordinate uses other units, such as pressure or elevation.
+    if (_sectionReader->v_fhdr.vlevel_type != Mdvx::VERT_TYPE_Z) {
+      const vector<double> edges = _computeVerticalEdges();
+      if (edges.size() >= 2) {
+        const auto limits = std::minmax_element(edges.begin(), edges.end());
+        yMin = *limits.first;
+        yMax = *limits.second;
+      }
     }
   }
   if (xMax <= 0.0) {
