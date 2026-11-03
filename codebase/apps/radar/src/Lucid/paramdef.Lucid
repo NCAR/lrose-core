@@ -1128,13 +1128,13 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 2000;
+  p_default = -1;
   p_descr = "Startup X for vertical view window (pixels).";
   p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards. If -1 the position will be automatically determined.";
 } vert_window_x_pos;
 
 paramdef int {
-  p_default = 2000;
+  p_default = -1;
   p_descr = "Startup Y for vertical view window (pixels).";
   p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right. If -1 the position will be automatically determined.";
 } vert_window_y_pos;

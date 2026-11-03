@@ -2694,7 +2694,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Startup X for vertical view window (pixels).");
     tt->help = tdrpStrDup("This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards. If -1 the position will be automatically determined.");
     tt->val_offset = (char *) &vert_window_x_pos - &_start_;
-    tt->single_val.i = 2000;
+    tt->single_val.i = -1;
     tt++;
     
     // Parameter 'vert_window_y_pos'
@@ -2706,7 +2706,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Startup Y for vertical view window (pixels).");
     tt->help = tdrpStrDup("This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right. If -1 the position will be automatically determined.");
     tt->val_offset = (char *) &vert_window_y_pos - &_start_;
-    tt->single_val.i = 2000;
+    tt->single_val.i = -1;
     tt++;
     
     // Parameter 'vert_plot_width'
