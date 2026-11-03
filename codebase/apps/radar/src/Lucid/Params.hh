@@ -984,7 +984,9 @@ public:
 
   double vert_max_height_km;
 
-  tdrp_bool_t vert_grids_on_at_startup;
+  tdrp_bool_t vert_ht_grid_on_at_startup;
+
+  tdrp_bool_t vert_distance_grid_on_at_startup;
 
   legend_pos_t vert_main_legend_pos;
 
@@ -1350,7 +1352,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[422];
+  mutable TDRPtable _table[423];
 
   const char *_className;
 

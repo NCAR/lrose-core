@@ -1503,8 +1503,13 @@ paramdef double {
 
 paramdef boolean {
   p_default = true;
-  p_descr = "Set VERT grids overlay on at startup.";
-} vert_grids_on_at_startup;
+  p_descr = "Set VERT X-axis grid overlay on at startup.";
+} vert_ht_grid_on_at_startup;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Set VERT Y-axis grid overlay on at startup.";
+} vert_distance_grid_on_at_startup;
 
 paramdef enum legend_pos_t {
   p_default = LEGEND_TOP_LEFT;

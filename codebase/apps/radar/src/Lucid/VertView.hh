@@ -238,12 +238,13 @@ class DLL_EXPORT VertView : public QWidget
   void zoomBackView();
 
   /**
-   * @brief Set grids visibility.
+   * @brief Set height and distance grid visibility independently.
    *
    * @param[in] enabled   True to show them, false otherwise.
    */
 
-  void setGrids(const bool enabled);
+  void setHeightGrid(const bool enabled);
+  void setDistanceGrid(const bool enabled);
 
   // context menu
   
@@ -318,10 +319,11 @@ class DLL_EXPORT VertView : public QWidget
   QBrush _backgroundBrush;
 
   /**
-   * @brief True if the grids display is enabled.
+   * @brief Independent visibility for horizontal height and vertical distance lines.
    */
   
-  bool _gridsEnabled;
+  bool _heightGridEnabled;
+  bool _distanceGridEnabled;
 
   /**
    * @brief This will create labels wiith nicely scaled values and

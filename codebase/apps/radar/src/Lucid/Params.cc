@@ -3474,15 +3474,27 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.d = 25;
     tt++;
     
-    // Parameter 'vert_grids_on_at_startup'
+    // Parameter 'vert_ht_grid_on_at_startup'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("vert_grids_on_at_startup");
-    tt->descr = tdrpStrDup("Set VERT grids overlay on at startup.");
+    tt->param_name = tdrpStrDup("vert_ht_grid_on_at_startup");
+    tt->descr = tdrpStrDup("Set VERT X-axis grid overlay on at startup.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_grids_on_at_startup - &_start_;
+    tt->val_offset = (char *) &vert_ht_grid_on_at_startup - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'vert_distance_grid_on_at_startup'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("vert_distance_grid_on_at_startup");
+    tt->descr = tdrpStrDup("Set VERT Y-axis grid overlay on at startup.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vert_distance_grid_on_at_startup - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     

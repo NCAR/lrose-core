@@ -1498,7 +1498,7 @@ int LegacyParams::_readMainParams()
   int vertLeftMargin = _getLong("cidd.vert_left_margin", 40, false);
   fprintf(_tdrpFile, "vert_left_margin = %d;\n", vertLeftMargin * 1);
   
-  int vertRightMargin = _getLong("cidd.vert_right_margin", 40, false);
+  // int vertRightMargin = _getLong("cidd.vert_right_margin", 40, false);
   fprintf(_tdrpFile, "vert_right_margin = %d;\n", 0);
   
   // _getLong("cidd.vert_top_margin", 20);

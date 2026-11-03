@@ -69,7 +69,8 @@ VertView::VertView(QWidget* parent,
         _vertWindow(vertWindow),
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
-        _gridsEnabled(false),
+        _heightGridEnabled(_params.vert_ht_grid_on_at_startup),
+        _distanceGridEnabled(_params.vert_distance_grid_on_at_startup),
         _rubberBand(0),
         _sectionReader(nullptr)
         
@@ -117,7 +118,6 @@ VertView::VertView(QWidget* parent,
   
   _colorScaleWidth = _params.vert_color_scale_width;
 
-  setGrids(_params.vert_grids_on_at_startup);
   
   // initialize world view
   
@@ -428,15 +428,45 @@ void VertView::_drawOverlays(QPainter &painter)
   _zoomWorld.specifyXTicks(xMin, _xGridSpacing);
   _zoomWorld.specifyYTicks(yMin, _yGridSpacing);
 
-  _zoomWorld.drawAxisTop(painter, "km", true, true, false, _gridsEnabled,
+  // X ticks produce distance lines; Y ticks produce height lines.
+  _zoomWorld.drawAxisTop(painter, "km", true, true, false, _distanceGridEnabled,
                          false);
   _zoomWorld.drawAxisBottom(painter, "km", true, true, true, false);
   
   const string verticalUnits = _verticalUnits.empty() ? "km" : _verticalUnits;
   _zoomWorld.drawAxisLeft(painter, verticalUnits, true, true, true,
-                          _gridsEnabled);
+                          _heightGridEnabled);
   _zoomWorld.drawAxisRight(painter, verticalUnits, true, true, false,
                            false);
+
+  // Segment lengths describe the returned route in the same cumulative
+  // kilometer coordinates as the section. Mark only internal joins, and
+  // clip them to the current zoom so they never cross the axis margins.
+  if (_sectionReader != nullptr && _sectionReader->isValidV()) {
+    const vector<Mdvx::vsect_segment_t> &segments =
+      _sectionReader->getVertSegments();
+    painter.save();
+    _zoomWorld.setClippingOn(painter);
+    QPen boundaryPen(QColor(_params.vert_axes_color));
+    boundaryPen.setWidth(2);
+    boundaryPen.setCosmetic(true);
+    painter.setPen(boundaryPen);
+    double distanceKm = 0.0;
+    for (size_t ii = 0; ii + 1 < segments.size(); ++ii) {
+      distanceKm += segments[ii].length;
+      if (!std::isfinite(distanceKm)) {
+        break;
+      }
+      if (distanceKm <= _zoomWorld.getXMinWorld() ||
+          distanceKm >= _zoomWorld.getXMaxWorld()) {
+        continue;
+      }
+      const double xPixel = _zoomWorld.getXPixel(distanceKm);
+      painter.drawLine(QLineF(xPixel, _zoomWorld.getYMaxPixel(),
+                              xPixel, _zoomWorld.getYMinPixel()));
+    }
+    painter.restore();
+  }
     
   // click point cross hairs
   
@@ -1166,12 +1196,18 @@ void VertView::zoomBackView()
 
 
 /*************************************************************************
- * setGrids()
+ * setHeightGrid()
  */
 
-void VertView::setGrids(const bool enabled)
+void VertView::setHeightGrid(const bool enabled)
 {
-  _gridsEnabled = enabled;
+  _heightGridEnabled = enabled;
+  update();
+}
+
+void VertView::setDistanceGrid(const bool enabled)
+{
+  _distanceGridEnabled = enabled;
   update();
 }
 

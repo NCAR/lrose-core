@@ -57,7 +57,6 @@ VertManager::VertManager(GuiManager *manager):
   // create VERT view
   
   _vertView = new VertView(_vertTopFrame, *manager, *this);
-  _vertView->setGrids(_params.vert_grids_on_at_startup);
 
   // Let Qt propagate the frame's final geometry to the rendering widget.
   // The inherited HawkEye code used a one-time resize workaround, which could
@@ -133,12 +132,17 @@ void VertManager::_createActions(VertView *vert)
   // connect(_ringsAct, SIGNAL(triggered(bool)),
   //         vert, SLOT(setRings(bool)));
 
-  _gridsAct = new QAction(tr("Grids"), this);
-  _gridsAct->setStatusTip(tr("Turn range grids on/off"));
-  _gridsAct->setCheckable(true);
-  _gridsAct->setChecked(_params.vert_grids_on_at_startup);
-  connect(_gridsAct, SIGNAL(triggered(bool)),
-	  vert, SLOT(setGrids(bool)));
+  _heightGridAct = new QAction(tr("Height Grid"), this);
+  _heightGridAct->setStatusTip(tr("Turn horizontal height grid lines on/off"));
+  _heightGridAct->setCheckable(true);
+  _heightGridAct->setChecked(_params.vert_ht_grid_on_at_startup);
+  connect(_heightGridAct, &QAction::toggled, vert, &VertView::setHeightGrid);
+
+  _distanceGridAct = new QAction(tr("Distance Grid"), this);
+  _distanceGridAct->setStatusTip(tr("Turn vertical distance grid lines on/off"));
+  _distanceGridAct->setCheckable(true);
+  _distanceGridAct->setChecked(_params.vert_distance_grid_on_at_startup);
+  connect(_distanceGridAct, &QAction::toggled, vert, &VertView::setDistanceGrid);
 
   _azLinesAct = new QAction(tr("Az Lines"), this);
   _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
@@ -178,7 +182,8 @@ void VertManager::_unzoom()
 void VertManager::_createMenus()
 {
   _overlaysMenu = menuBar()->addMenu(tr("&Overlays"));
-  _overlaysMenu->addAction(_gridsAct);
+  _overlaysMenu->addAction(_heightGridAct);
+  _overlaysMenu->addAction(_distanceGridAct);
   _overlaysMenu->addSeparator();
 
   menuBar()->addAction(_unzoomAct);

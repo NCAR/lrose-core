@@ -190,10 +190,11 @@ protected:
   QAction *_azLinesAct;
 
   /**
-   * @brief Action for turning grid lines on and off.
+   * @brief Actions for independently controlling height and distance grids.
    */
 
-  QAction *_gridsAct;
+  QAction *_heightGridAct;
+  QAction *_distanceGridAct;
 
   ///////////////////////
   // Protected methods //
