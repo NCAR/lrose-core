@@ -2742,9 +2742,11 @@ void WorldPlot::renderGridRect(int fieldNum,
   _createImage(_gridImage);
   QPainter painter(_gridImage);
 
-  // fill with background color
+  // Missing cells and areas outside the data domain use the missing color.
+  // Margins are restored to the background after rendering the data.
   
-  fillCanvas(painter, _params.background_color);
+  fillCanvas(painter, string(_params.missing_data_color) == "transparent" ?
+             _params.background_color : _params.missing_data_color);
    
   // the data projection type and plot projection type are the same
   // so we can use the (x,y) locations unchanged
@@ -2781,7 +2783,7 @@ void WorldPlot::renderGridRect(int fieldNum,
   for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
     for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
       fl32 fval = *val;
-      if (fval == miss || fval == bad) {
+      if (fval == miss || fval == bad || !std::isfinite(fval)) {
         continue;
       }
       // if (!mr->colorMap.withinValidRange(fval)) {
@@ -3089,9 +3091,10 @@ void WorldPlot::renderGridDistorted(int fieldNum,
   _createImage(_gridImage);
   QPainter painter(_gridImage);
   
-  // fill with background color
+  // Initialize missing data inside the plot; margins are restored below.
   
-  fillCanvas(painter, _params.background_color);
+  fillCanvas(painter, string(_params.missing_data_color) == "transparent" ?
+             _params.background_color : _params.missing_data_color);
    
   // the data projection type and plot projection type are not the same
   // so we need to compute the lat/lon of each corner of the grid cells
@@ -3148,7 +3151,7 @@ void WorldPlot::renderGridDistorted(int fieldNum,
   for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
     for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
       fl32 fval = *val;
-      if (fval == miss || fval == bad) {
+      if (fval == miss || fval == bad || !std::isfinite(fval)) {
         continue;
       }
       // if (!mr->colorMap.withinValidRange(fval)) {
@@ -3311,14 +3314,16 @@ void WorldPlot::renderFilledContours(int fieldNum,
 
   _createImage(_gridImage);
   QPainter painter(_gridImage);
-  fillCanvas(painter, _params.background_color);
+  const char *missingColor = string(_params.missing_data_color) == "transparent" ?
+    _params.background_color : _params.missing_data_color;
+  fillCanvas(painter, missingColor);
 
   // Contour vertices are expressed in the data projection.  Transform only
   // at this final drawing boundary so the same contour topology serves both
   // rectangular grids and grids distorted by the display projection.
 
   const vector<MdvxContourLevel> &levels = contours.getLevels();
-  const QBrush backgroundBrush(_params.background_color);
+  const QBrush missingBrush{QColor(missingColor)};
   painter.save();
   painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth, _plotHeight);
   for (size_t ilevel = 0; ilevel < levels.size(); ilevel++) {
@@ -3329,10 +3334,10 @@ void WorldPlot::renderFilledContours(int fieldNum,
 
     // Levels are cumulative and are painted from low to high.  The contour
     // library marks the synthetic level above the color scale as extra; paint
-    // it back to the background so out-of-range data remains transparent to
-    // the grid layer instead of inheriting the highest valid color.
+    // it back to the missing color instead of inheriting the highest valid
+    // color. Margins retain their separate background fill.
 
-    const QBrush *levelBrush = &backgroundBrush;
+    const QBrush *levelBrush = &missingBrush;
     if (!level.extra && level.index < (int) entries.size()) {
       levelBrush = entries[level.index].brush;
     }
@@ -3380,9 +3385,10 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
   _createImage(_gridImage);
   QPainter painter(_gridImage);
   
-  // fill with background color
+  // Initialize missing data inside the plot; margins are restored below.
   
-  fillCanvas(painter, _params.background_color);
+  fillCanvas(painter, string(_params.missing_data_color) == "transparent" ?
+             _params.background_color : _params.missing_data_color);
    
   // the data projection type and plot projection type are not the same
   // so we need to compute the lat/lon of each corner of the grid cells
@@ -3440,7 +3446,7 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
   for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
     for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
       fl32 fval = *val;
-      if (fval == miss || fval == bad) {
+      if (fval == miss || fval == bad || !std::isfinite(fval)) {
         continue;
       }
       // if (!mr->colorMap.withinValidRange(fval)) {

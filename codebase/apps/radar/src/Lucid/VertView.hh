@@ -405,6 +405,8 @@ class DLL_EXPORT VertView : public QWidget
 
   virtual void _drawOverlays(QPainter &painter);
   void _drawSection(QPainter &painter);
+  void _drawSectionCells(QPainter &painter);
+  bool _drawSectionContours(QPainter &painter);
   vector<double> _computeVerticalEdges() const;
 
   /**

@@ -324,7 +324,9 @@ void HorizView::paintEvent(QPaintEvent *event)
     const QRect plotRect(_zoom->getXMinPixel(), _zoom->getYMaxPixel(),
                          _zoom->getPlotWidth(), _zoom->getPlotHeight());
     painter.setClipRect(plotRect);
-    painter.fillRect(plotRect, QColor(_params.background_color));
+    painter.fillRect(plotRect,
+                     QColor(string(_params.missing_data_color) == "transparent" ?
+                            _params.background_color : _params.missing_data_color));
     painter.translate(_panPreviewX - _mousePressX,
                       _panPreviewY - _mousePressY);
   }

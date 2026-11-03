@@ -32,6 +32,7 @@
 #include <QBrush>
 #include <QPalette>
 #include <QPaintEngine>
+#include <QPainterPath>
 #include <QPen>
 #include <QResizeEvent>
 #include <QStylePainter>
@@ -46,6 +47,8 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/uusleep.h>
 #include <toolsa/LogStream.hh>
+#include <Mdv/MdvxContour.hh>
+#include <Mdv/MdvxField.hh>
 
 #include "GuiManager.hh"
 #include "VertView.hh"
@@ -715,7 +718,7 @@ vector<double> VertView::_computeVerticalEdges() const
 }
 
 /////////////////////////////////////////////////////////////
-// render the MDV section as colored cells
+// render the MDV section using the selected field's rendering mode
 
 void VertView::_drawSection(QPainter &painter)
 {
@@ -730,6 +733,33 @@ void VertView::_drawSection(QPainter &painter)
     return;
   }
 
+  // Both cell and contour renderers leave missing data unpainted. Initialize
+  // only the plot area so these holes use the missing color while margins
+  // and axes retain the widget background.
+  if (string(_params.missing_data_color) != "transparent") {
+    painter.save();
+    _zoomWorld.setClippingOn(painter);
+    painter.fillRect(rect(), QColor(_params.missing_data_color));
+    painter.restore();
+  }
+
+  if (_sectionReader->render_method == FILLED_CONTOURS ||
+      _sectionReader->render_method == DYNAMIC_CONTOURS) {
+    if (_drawSectionContours(painter)) {
+      return;
+    }
+  }
+
+  _drawSectionCells(painter);
+}
+
+/////////////////////////////////////////////////////////////
+// render the MDV section as colored cells
+
+void VertView::_drawSectionCells(QPainter &painter)
+{
+  const int nx = _sectionReader->v_fhdr.nx;
+  const int nz = _sectionReader->v_fhdr.nz;
   const vector<double> yEdges = _computeVerticalEdges();
   const double totalLength = _fullWorld.getXMaxWorld();
   const double dx = _sectionReader->v_fhdr.grid_dx;
@@ -765,6 +795,135 @@ void VertView::_drawSection(QPainter &painter)
   }
 
   painter.restore();
+}
+
+/////////////////////////////////////////////////////////////
+// render the MDV section as filled polygon contours
+
+bool VertView::_drawSectionContours(QPainter &painter)
+{
+  const int nx = _sectionReader->v_fhdr.nx;
+  const int nz = _sectionReader->v_fhdr.nz;
+  const vector<ColorMap::CmapEntry> &entries =
+    _sectionReader->colorMap.getEntries();
+
+  vector<double> contourValues;
+  if (!entries.empty()) {
+    contourValues.push_back(entries[0].minVal);
+    for (const ColorMap::CmapEntry &entry : entries) {
+      contourValues.push_back(entry.maxVal);
+    }
+  }
+
+  bool geometryValid = nx >= 2 && nz >= 2 &&
+    _sectionReader->v_fhdr.proj_type == Mdvx::PROJ_VSECTION &&
+    contourValues.size() == entries.size() + 1;
+  for (size_t ii = 1; ii < contourValues.size(); ++ii) {
+    if (!std::isfinite(contourValues[ii - 1]) ||
+        !std::isfinite(contourValues[ii]) ||
+        contourValues[ii] <= contourValues[ii - 1]) {
+      geometryValid = false;
+      break;
+    }
+  }
+  if (!geometryValid) {
+    return false;
+  }
+
+  vector<fl32> contourData = _sectionReader->v_fl32_data;
+  const fl32 missing = _sectionReader->v_fhdr.missing_data_value;
+  const fl32 bad = _sectionReader->v_fhdr.bad_data_value;
+  const fl32 minDataValue = _sectionReader->v_fhdr.min_value;
+
+  // Match horizontal contour behavior: missing values remain holes unless
+  // the mapping parameters explicitly place them at the data minimum.
+  for (fl32 &value : contourData) {
+    if (value == bad) {
+      value = _params.map_bad_to_min_value ? minDataValue : missing;
+    }
+    if (value == missing && _params.map_missing_to_min_value) {
+      value = minDataValue;
+    }
+  }
+
+  bool haveValidData = false;
+  double validDataMax = 0.0;
+  for (fl32 value : contourData) {
+    if (value == missing) {
+      continue;
+    }
+    double displayValue = value;
+    if (_sectionReader->v_fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
+      displayValue = exp(displayValue);
+    }
+    if (!std::isfinite(displayValue)) {
+      continue;
+    }
+    if (!haveValidData) {
+      validDataMax = displayValue;
+      haveValidData = true;
+    } else {
+      validDataMax = MAX(validDataMax, displayValue);
+    }
+  }
+  if (haveValidData) {
+    // Keep the lower color boundary as a physical contour. Extending it to
+    // the data minimum colors weak model reflectivity all the way to the
+    // model top instead of leaving the region below the scale unfilled.
+    contourValues.back() = MAX(contourValues.back(), validDataMax);
+  }
+
+  // Preserve the vertical-section projection: MdvxContour treats nz as its Y
+  // dimension and uses vlevel_header.level[] for nonuniform row coordinates.
+  Mdvx::field_header_t contourHeader = _sectionReader->v_fhdr;
+  contourHeader.encoding_type = Mdvx::ENCODING_FLOAT32;
+  contourHeader.compression_type = Mdvx::COMPRESSION_NONE;
+  contourHeader.data_element_nbytes = sizeof(fl32);
+  contourHeader.volume_size = nx * contourHeader.ny * nz * sizeof(fl32);
+  MdvxField contourField(contourHeader, _sectionReader->v_vhdr,
+                         contourData.data());
+
+  MdvxContour contours;
+  for (double value : contourValues) {
+    contours.addVal(value);
+  }
+  if (contours.computeTriangles(contourField)) {
+    cerr << "ERROR - VertView::_drawSectionContours" << endl;
+    cerr << "  Cannot compute filled contour triangles; using cells" << endl;
+    return false;
+  }
+
+  const QBrush backgroundBrush(_params.background_color);
+  painter.save();
+  _zoomWorld.setClippingOn(painter);
+  painter.setPen(Qt::NoPen);
+  for (const MdvxContourLevel &level : contours.getLevels()) {
+    if (level.index < 0) {
+      continue;
+    }
+
+    const QBrush *levelBrush = &backgroundBrush;
+    if (!level.extra && level.index < (int) entries.size()) {
+      levelBrush = entries[level.index].brush;
+    }
+    if (levelBrush == nullptr) {
+      continue;
+    }
+
+    QPainterPath levelPath;
+    for (const MdvxContourTriangle &triangle : level.triangles) {
+      QPolygonF polygon;
+      for (int ivert = 0; ivert < 3; ++ivert) {
+        const double x = triangle.vertex[ivert].x;
+        const double y = triangle.vertex[ivert].y;
+        polygon << _zoomWorld.getPixelPointF(x, y);
+      }
+      levelPath.addPolygon(polygon);
+    }
+    painter.fillPath(levelPath, *levelBrush);
+  }
+  painter.restore();
+  return true;
 }
 
 /*************************************************************************
