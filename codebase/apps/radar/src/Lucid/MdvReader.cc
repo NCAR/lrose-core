@@ -1547,7 +1547,7 @@ void MdvReader::_autoscaleVcm(Valcolormap_t *vcm, double min, double max)
  * VLEVEL_LABEL: Return an appropriate units label for a field's
  *               vertical coordinate system
  */                  
-string MdvReader::vlevelLabel()
+string MdvReader::vlevelLabel() const
 {
   switch(h_fhdr.vlevel_type)  {
     case Mdvx::VERT_TYPE_SIGMA_P:
@@ -1575,10 +1575,10 @@ string MdvReader::vlevelLabel()
 }
 
 /**********************************************************************
- * FIELD_LABEL: Return a Label string for a field 
+ * FIELD_LABEL: Return a Label string for a field in horiz window
  */
 
-string MdvReader::fieldLabel()
+string MdvReader::fieldLabelHoriz() const
 {
 
   
@@ -1638,10 +1638,36 @@ string MdvReader::fieldLabel()
   
 }
 
+/**********************************************************************
+ * FIELD_LABEL: Return a Label string for a field in vert window
+ */
+
+string MdvReader::fieldLabelVert() const
+{
+
+  
+  // Convert time to a string
+  
+  string tlabel =
+    v_date.strfTime(_params.label_time_format, !_params.use_local_timestamps);
+  
+  char label[2048];
+  label[0] = '\0';
+  
+  snprintf(label,2048,"%s - %s (%s) %s",
+           _params.vert_title_prefix,
+           legend_name.c_str(),
+           v_fhdr.units,
+           tlabel.c_str());
+
+  return label;
+  
+}
+
 /*************************************************************************
  * HEIGHT_LABEL: Return the height label
  */
-string MdvReader::heightLabel()
+string MdvReader::heightLabel() const
 {
 
   static char label[1024];

@@ -354,7 +354,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   if (_proj.getProjType() == Mdvx::PROJ_LATLON) {
     projUnits = "deg";
   }
-  _zoom->setYAxisLabelsInside(_params.vert_tick_values_inside);
+  _zoom->setYAxisLabelsInside(_params.horiz_tick_values_inside);
   _zoom->setXAxisLabelsInside(_params.horiz_tick_values_inside);
   _zoom->setAxisLineColor(_params.horiz_axes_color);
   _zoom->setAxisTextColor(_params.horiz_axes_color);
@@ -1408,7 +1408,7 @@ int HorizView::_renderFieldGrid(int page,
   if (mr != nullptr) {
     char line[2048];
     snprintf(line, 2048,
-             "%s", mr->fieldLabel().c_str());
+             "%s", mr->fieldLabelHoriz().c_str());
     vector<string> legendText;
     legendText.push_back(line);
     _zoom->drawLegends(legendText, _params.horiz_main_legend_pos);

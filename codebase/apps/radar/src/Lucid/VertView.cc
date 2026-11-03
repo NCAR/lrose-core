@@ -55,10 +55,6 @@
 
 using namespace std;
 
-const double VertView::SIN_45 = sin(45.0 * DEG_TO_RAD);
-const double VertView::SIN_30 = sin(30.0 * DEG_TO_RAD);
-const double VertView::COS_30 = cos(30.0 * DEG_TO_RAD);
-
 VertView::VertView(QWidget* parent,
                    const GuiManager &manager,
                    const VertManager &vertWindow) :
@@ -197,7 +193,7 @@ void VertView::configureWorldCoords(int zoomLevel)
   _fullWorld.setLeftMargin(leftMargin);
   _fullWorld.setRightMargin(rightMargin);
   _fullWorld.setTopMargin(topMargin);
-  _fullWorld.setBottomMargin(bottomMargin);
+  _fullWorld.setBottomMargin(bottomMargin * 2);
   _fullWorld.setTitleTextMargin(titleTextMargin);
   _fullWorld.setLegendTextMargin(legendTextMargin);
   _fullWorld.setAxisTextMargin(axisTextMargin);
@@ -217,6 +213,9 @@ void VertView::configureWorldCoords(int zoomLevel)
   _fullWorld.setAxisLineColor(_params.vert_axes_color);
   _fullWorld.setAxisTextColor(_params.vert_axes_color);
   _fullWorld.setGridColor(_params.vert_grid_color);
+
+  _fullWorld.setYAxisLabelsInside(_params.vert_tick_values_inside);
+  _fullWorld.setXAxisLabelsInside(_params.vert_tick_values_inside);
 
   _zoomWorld = _fullWorld;
   _zoomWorld.setName("VertView-zoomed");
@@ -426,14 +425,14 @@ void VertView::_drawOverlays(QPainter &painter)
   _zoomWorld.specifyXTicks(xMin, _xGridSpacing);
   _zoomWorld.specifyYTicks(yMin, _yGridSpacing);
 
-  _zoomWorld.drawAxisTop(painter, "km", true, true, true, _gridsEnabled,
+  _zoomWorld.drawAxisTop(painter, "km", true, true, false, _gridsEnabled,
                          false);
   _zoomWorld.drawAxisBottom(painter, "km", true, true, true, false);
   
   const string verticalUnits = _verticalUnits.empty() ? "km" : _verticalUnits;
   _zoomWorld.drawAxisLeft(painter, verticalUnits, true, true, true,
                           _gridsEnabled);
-  _zoomWorld.drawAxisRight(painter, verticalUnits, true, true, true,
+  _zoomWorld.drawAxisRight(painter, verticalUnits, true, true, false,
                            false);
     
   // click point cross hairs
@@ -462,8 +461,7 @@ void VertView::_drawOverlays(QPainter &painter)
     // competing with it.
     _zoomWorld.drawColorScale(_sectionReader->colorMap, painter,
                               _params.horiz_axis_label_font_size);
-    _zoomWorld.drawTitleTopCenter(painter,
-                                  _sectionReader->v_fhdr.field_name);
+    _zoomWorld.drawTitleTopCenter(painter, _sectionReader->fieldLabelVert());
   }
   
   // add legends with time, field name and elevation angle
@@ -742,25 +740,27 @@ void VertView::_drawSection(QPainter &painter)
   _zoomWorld.setClippingOn(painter);
   painter.setPen(Qt::NoPen);
 
-  for (int iz = 0; iz < nz; ++iz) {
-    for (int ix = 0; ix < nx; ++ix) {
-      const fl32 value = _sectionReader->v_fl32_data[iz * nx + ix];
-      if (value == missing || value == bad || !std::isfinite(value)) {
-        continue;
+  if (nz > 1) {
+    for (int iz = 0; iz < nz; ++iz) {
+      for (int ix = 0; ix < nx; ++ix) {
+        const fl32 value = _sectionReader->v_fl32_data[iz * nx + ix];
+        if (value == missing || value == bad || !std::isfinite(value)) {
+          continue;
+        }
+        
+        const double x0 = (ix == 0) ? 0.0 :
+          _sectionReader->v_fhdr.grid_minx +
+          (ix - 0.5) * dx;
+        const double x1 = (ix == nx - 1) ? totalLength :
+          _sectionReader->v_fhdr.grid_minx +
+          (ix + 0.5) * dx;
+        const QPointF p0 = _zoomWorld.getPixelPointF(x0, yEdges[iz]);
+        const QPointF p1 = _zoomWorld.getPixelPointF(x1, yEdges[iz + 1]);
+        QRectF cell(p0, p1);
+        cell = cell.normalized();
+        cell.adjust(0.0, 0.0, 1.0, 1.0);
+        painter.fillRect(cell, *_sectionReader->colorMap.dataBrush(value));
       }
-
-      const double x0 = (ix == 0) ? 0.0 :
-                        _sectionReader->v_fhdr.grid_minx +
-                        (ix - 0.5) * dx;
-      const double x1 = (ix == nx - 1) ? totalLength :
-                        _sectionReader->v_fhdr.grid_minx +
-                        (ix + 0.5) * dx;
-      const QPointF p0 = _zoomWorld.getPixelPointF(x0, yEdges[iz]);
-      const QPointF p1 = _zoomWorld.getPixelPointF(x1, yEdges[iz + 1]);
-      QRectF cell(p0, p1);
-      cell = cell.normalized();
-      cell.adjust(0.0, 0.0, 1.0, 1.0);
-      painter.fillRect(cell, *_sectionReader->colorMap.dataBrush(value));
     }
   }
 

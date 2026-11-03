@@ -163,9 +163,10 @@ public:
 
   // get labels for legends
   
-  string vlevelLabel();
-  string fieldLabel();
-  string heightLabel();
+  string vlevelLabel() const;
+  string fieldLabelHoriz() const;
+  string fieldLabelVert() const;
+  string heightLabel() const;
   
   // public data members
   

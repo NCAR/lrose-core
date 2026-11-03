@@ -618,14 +618,14 @@ int Lucid::_initDataSpace()
   //////////////////////////////////////////
   // heights
   
-  _gd.h_win.min_ht = _params.min_ht;
-  _gd.h_win.max_ht = _params.max_ht;
+  _gd.h_win.min_ht = _params.min_ht_km;
+  _gd.h_win.max_ht = _params.max_ht_km;
 
   // Otherwise set in the command line arguments
 
   if(_gd.num_render_heights == 0) {
-    _gd.h_win.cur_ht = _params.start_ht;
-    _gd.selected_ht = _params.start_ht;
+    _gd.h_win.cur_ht = _params.start_ht_km;
+    _gd.selected_ht = _params.start_ht_km;
   }
 
   /////////////////////////////////////////////

@@ -1076,7 +1076,7 @@ commentdef {
 }
 
 commentdef {
-  p_header = "<HORIZ VIEW WINDOWS>";
+  p_header = "<HORIZ_VIEW>";
 }
 
 paramdef int {
@@ -1118,62 +1118,6 @@ paramdef int {
   p_default = 40;
   p_descr = "Width of color scale (pixels).";
 } horiz_color_scale_width;
-
-commentdef {
-  p_header = "</HORIZ VIEW WINDOWS>";
-}
-
-commentdef {
-  p_header = "<VERT VIEW WINDOWS>";
-}
-
-paramdef int {
-  p_default = -1;
-  p_descr = "Startup X for vertical view window (pixels).";
-  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards. If -1 the position will be automatically determined.";
-} vert_window_x_pos;
-
-paramdef int {
-  p_default = -1;
-  p_descr = "Startup Y for vertical view window (pixels).";
-  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right. If -1 the position will be automatically determined.";
-} vert_window_y_pos;
-
-paramdef int {
-  p_default = 1000;
-  p_descr = "Startup width of vertical plot (pixels).";
-  p_help = "This is for the plot only. It does not include color scale width.";
-} vert_plot_width;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Startup height of vertical plot (pixels).";
-} vert_plot_height;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "Minimum width of vertical window (pixels).";
-  p_help = "The user cannot shrink the vertical window smaller than this.";
-} vert_window_min_width;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "Minimum height of vertical window (pixels).";
-  p_help = "The user cannot shrink the vertical window smaller than this.";
-} vert_window_min_height;
-
-paramdef int {
-  p_default = 40;
-  p_descr = "Width of color scale (pixels).";
-} vert_color_scale_width;
-
-commentdef {
-  p_header = "</VERT VIEW WINDOWS>";
-}
-
-commentdef {
-  p_header = "<HORIZ_VIEW>";
-}
 
 paramdef string {
   p_default = "%Y/%m/%d %H:%M:%S";
@@ -1350,28 +1294,73 @@ commentdef {
   p_header = "<VERT_VIEW>";
 }
 
-commentdef {
-  p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
-  p_text = " All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0";
-}
-
 paramdef double {
   p_default = 0;
   p_descr = "Minimum ht of cross section.";
-  p_help = "";
-} min_ht;
+  p_help = "This refers to the height of the data, in km, MSL.";
+} min_ht_km;
 
 paramdef double {
   p_default = 30;
   p_descr = "Maximum ht of cross section.";
-  p_help = "";
-} max_ht;
+  p_help = "This refers to the height of the data, in km, MSL.";
+} max_ht_km;
 
 paramdef double {
   p_default = 0;
   p_descr = "Starting height of horizontal view.";
-  p_help = "";
-} start_ht;
+  p_help = "This refers to the height of the data, in km, MSL.";
+} start_ht_km;
+
+paramdef string {
+  p_default = "Vertical section:";
+  p_descr = "Prefix for title in vertical section window.";
+} vert_title_prefix;
+
+paramdef int {
+  p_default = -1;
+  p_descr = "Startup X for vertical view window (pixels).";
+  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards. If -1 the position will be automatically determined.";
+} vert_window_x_pos;
+
+paramdef int {
+  p_default = -1;
+  p_descr = "Startup Y for vertical view window (pixels).";
+  p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right. If -1 the position will be automatically determined.";
+} vert_window_y_pos;
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "Startup width of vertical plot (pixels).";
+  p_help = "This is for the plot only. It does not include color scale width.";
+} vert_plot_width;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Startup height of vertical plot (pixels).";
+} vert_plot_height;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Minimum width of vertical window (pixels).";
+  p_help = "The user cannot shrink the vertical window smaller than this.";
+} vert_window_min_width;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Minimum height of vertical window (pixels).";
+  p_help = "The user cannot shrink the vertical window smaller than this.";
+} vert_window_min_height;
+
+paramdef int {
+  p_default = 40;
+  p_descr = "Width of color scale (pixels).";
+} vert_color_scale_width;
+
+commentdef {
+  p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
+  p_text = " All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0";
+}
 
 paramdef int {
   p_default = 20;

@@ -170,7 +170,7 @@ GuiManager::GuiManager() :
   _prevFieldTableCol = -1;
   _prevFieldTableRow = -1;
 
-  _vlevelManager.requestLevel(_params.start_ht);
+  _vlevelManager.requestLevel(_params.start_ht_km);
   _vlevelHasChanged = true;
   
   _overlaysHaveChanged = true;

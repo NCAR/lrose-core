@@ -856,20 +856,6 @@ public:
 
   int horiz_color_scale_width;
 
-  int vert_window_x_pos;
-
-  int vert_window_y_pos;
-
-  int vert_plot_width;
-
-  int vert_plot_height;
-
-  int vert_window_min_width;
-
-  int vert_window_min_height;
-
-  int vert_color_scale_width;
-
   char* label_time_format;
 
   char* frame_range_time_format;
@@ -928,11 +914,27 @@ public:
 
   double horiz_rendering_beam_width;
 
-  double min_ht;
+  double min_ht_km;
 
-  double max_ht;
+  double max_ht_km;
 
-  double start_ht;
+  double start_ht_km;
+
+  char* vert_title_prefix;
+
+  int vert_window_x_pos;
+
+  int vert_window_y_pos;
+
+  int vert_plot_width;
+
+  int vert_plot_height;
+
+  int vert_window_min_width;
+
+  int vert_window_min_height;
+
+  int vert_color_scale_width;
 
   int vert_top_margin;
 
@@ -1348,7 +1350,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[425];
+  mutable TDRPtable _table[422];
 
   const char *_className;
 

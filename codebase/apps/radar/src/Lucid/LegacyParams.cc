@@ -1319,9 +1319,15 @@ int LegacyParams::_readMainParams()
   fprintf(_tdrpFile, "// </ZOOMS>\n");
   
   // vert axis
-  _getDouble("cidd.min_ht", 0.0);
-  _getDouble("cidd.max_ht", 30.0);
-  _getDouble("cidd.start_ht", 0.0);
+
+  double minHt = _getDouble("cidd.min_ht", 0.0, false);
+  fprintf(_tdrpFile, "min_ht_km = %g;\n", minHt);
+
+  double maxHt = _getDouble("cidd.max_ht", 0.0, false);
+  fprintf(_tdrpFile, "max_ht_km = %g;\n", maxHt);
+
+  double startHt = _getDouble("cidd.start_ht", 0.0, false);
+  fprintf(_tdrpFile, "start_ht_km = %g;\n", startHt);
 
   // maps
 
@@ -1483,10 +1489,22 @@ int LegacyParams::_readMainParams()
   int vertMinHeight = _getLong("cidd.vert_min_height", 400, false);
   fprintf(_tdrpFile, "vert_window_min_height = %d;\n", vertMinHeight);
   
-  _getLong("cidd.vert_top_margin", 20);
-  _getLong("cidd.vert_bot_margin", 20);
-  _getLong("cidd.vert_left_margin", 20);
-  _getLong("cidd.vert_right_margin", 80);
+  int vertTopMargin = _getLong("cidd.vert_top_margin", 40, false);
+  fprintf(_tdrpFile, "vert_top_margin = %d;\n", vertTopMargin * 1);
+  
+  int vertBotMargin = _getLong("cidd.vert_bot_margin", 40, false);
+  fprintf(_tdrpFile, "vert_bot_margin = %d;\n", vertBotMargin * 1);
+  
+  int vertLeftMargin = _getLong("cidd.vert_left_margin", 40, false);
+  fprintf(_tdrpFile, "vert_left_margin = %d;\n", vertLeftMargin * 1);
+  
+  int vertRightMargin = _getLong("cidd.vert_right_margin", 40, false);
+  fprintf(_tdrpFile, "vert_right_margin = %d;\n", 0);
+  
+  // _getLong("cidd.vert_top_margin", 20);
+  // _getLong("cidd.vert_bot_margin", 20);
+  // _getLong("cidd.vert_left_margin", 20);
+  // _getLong("cidd.vert_right_margin", 80);
 
   // _getLong("cidd.vert_legends_start_x", 0);
   // _getLong("cidd.vert_legends_start_y", 0);
