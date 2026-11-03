@@ -1695,6 +1695,17 @@ void WorldPlot::drawAxisTop(QPainter &painter,
                             bool doTicks,
                             bool doLabels,
                             bool doGrid)
+{
+  drawAxisTop(painter, units, doLine, doTicks, doLabels, doGrid, true);
+}
+
+void WorldPlot::drawAxisTop(QPainter &painter,
+                            const string &units,
+                            bool doLine,
+                            bool doTicks,
+                            bool doLabels,
+                            bool doGrid,
+                            bool doTickLabels)
 
 {
 	
@@ -1776,7 +1787,7 @@ void WorldPlot::drawAxisTop(QPainter &painter,
       qreal labelY = unitsY - 2;
       QRectF bRect2(labelX, labelY,
                     labelRect.width() + 2, labelRect.height() + 5);
-      if (doLabels) {
+      if (doLabels && doTickLabels) {
         painter.setPen(textColor);
         painter.drawText(bRect2, Qt::AlignCenter, label.c_str());
       }

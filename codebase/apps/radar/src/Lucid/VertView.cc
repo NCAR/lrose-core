@@ -426,7 +426,8 @@ void VertView::_drawOverlays(QPainter &painter)
   _zoomWorld.specifyXTicks(xMin, _xGridSpacing);
   _zoomWorld.specifyYTicks(yMin, _yGridSpacing);
 
-  _zoomWorld.drawAxisTop(painter, "km", true, true, true, _gridsEnabled);
+  _zoomWorld.drawAxisTop(painter, "km", true, true, true, _gridsEnabled,
+                         false);
   _zoomWorld.drawAxisBottom(painter, "km", true, true, true, false);
   
   const string verticalUnits = _verticalUnits.empty() ? "km" : _verticalUnits;

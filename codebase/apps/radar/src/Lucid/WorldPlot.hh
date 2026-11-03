@@ -482,6 +482,13 @@ public:
                    bool doTicks,
                    bool doLabels,
                    bool doGrid);
+  void drawAxisTop(QPainter &painter,
+                   const string &units,
+                   bool doLine,
+                   bool doTicks,
+                   bool doLabels,
+                   bool doGrid,
+                   bool doTickLabels);
   
   // draw range axes left and right, for bscan
   

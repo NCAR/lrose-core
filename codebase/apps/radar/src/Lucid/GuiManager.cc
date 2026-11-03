@@ -2862,7 +2862,7 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
   }
 
   _vert->setSection(reader);
-  _vertWindow->setSectionInfo(reader->v_fhdr.field_name,
+  _vertWindow->setSectionInfo(_params._fields[_gd.h_win.page].field_name,
                               reader->v_date,
                               reader->getVertTotalLengthKm());
   _showVertAct->setChecked(true);
