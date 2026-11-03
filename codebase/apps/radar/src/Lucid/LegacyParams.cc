@@ -1450,14 +1450,20 @@ int LegacyParams::_readMainParams()
   fprintf(_tdrpFile, "horiz_plot_width = %d;\n", horizWidth);
   fprintf(_tdrpFile, "horiz_plot_height = %d;\n", horizHeight);
   
-  // int rightMargin = _getLong("cidd.horiz_right_margin", 60, false);
-  // fprintf(_tdrpFile, "horiz_color_scale_width = %d;\n", rightMargin);
+  int horizRightMargin = _getLong("cidd.horiz_right_margin", 60, false);
+  // fprintf(_tdrpFile, "horiz_color_scale_width = %d;\n", (horizRightMargin * 2) / 3);
+  fprintf(_tdrpFile, "horiz_color_scale_width = %d;\n", horizRightMargin);
+  fprintf(_tdrpFile, "vert_color_scale_width = %d;\n", horizRightMargin);
+  
+  // int vertRightMargin = _getLong("cidd.vert_right_margin", 40, false);
+  // // fprintf(_tdrpFile, "vert_color_scale_width = %d;\n", (vertRightMargin * 2) / 3);
+  // fprintf(_tdrpFile, "vert_color_scale_width = %d;\n", vertRightMargin);
   
   _getLong("cidd.horiz_top_margin", 20);
   _getLong("cidd.horiz_bot_margin", 20);
   _getLong("cidd.horiz_left_margin", 20);
   // int rightMargin = _getLong("cidd.horiz_right_margin", 80.0, false);
-  fprintf(_tdrpFile, "horiz_right_margin = %d;\n", 6);
+  // fprintf(_tdrpFile, "horiz_right_margin = %d;\n", 6);
 
   // _getLong("cidd.horiz_legends_start_x", 0);
   // _getLong("cidd.horiz_legends_start_y", 0);
