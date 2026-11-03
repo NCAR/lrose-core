@@ -551,11 +551,22 @@ void GuiManager::_setupWindows()
   move(pos);
   show();
 
-  // move vert window relative to main window
-  
-  QPoint posRelMainWindow = getTopRightPos();
-  cerr << "SSSSSSSSSS TTTTTTTTTTTT: " << posRelMainWindow.x() << ", " << posRelMainWindow.y() << endl;
-  _vert->move(getTopRightPos());
+  // Resolve automatic placement only after the main window has its final
+  // frame geometry. Each configured coordinate can override its fallback
+  // independently.
+
+  int vertX = _params.vert_window_x_pos;
+  int vertY = _params.vert_window_y_pos;
+  if (vertX == -1) {
+    // Leave enough space for both window-manager borders to remain visible.
+    constexpr int vertWindowGap = 5;
+    vertX = frameGeometry().right() + 1 + vertWindowGap;
+  }
+  if (vertY == -1) {
+    vertY = frameGeometry().top();
+  }
+  _vertWindow->resize(_vertWindow->width(), height());
+  _vertWindow->move(vertX, vertY);
 
   // set up click report dialog
   _createClickReportDialog();
