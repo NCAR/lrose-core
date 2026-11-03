@@ -223,7 +223,7 @@ void VertManager::_createStatusPanel(const int label_font_size)
   layout->addWidget(_elevValue, 0, 1, Qt::AlignRight);
   
   QLabel *az_label = new QLabel(_statusPanel);
-  az_label->setText("Route length ");
+  az_label->setText("Vsection length ");
   az_label->setFont(font);
   // layout->addWidget(az_label, 0, Qt::AlignLeft);
   layout->addWidget(az_label, 0, 2, Qt::AlignLeft);
