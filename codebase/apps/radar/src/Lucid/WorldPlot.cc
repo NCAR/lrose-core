@@ -2501,14 +2501,13 @@ void WorldPlot::updatePixelScales()
 void WorldPlot::drawColorScale(const ColorMap &colorMap,
                                QPainter &painter,
                                int scaleFontSize,
-                               int scaleYOffset,
-                               int unitsYOffset)
+                               int scaleYOffset)
   
 {
-
+  
   const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
   
-  int pltHt = _plotHeight;
+  int pltHt = _heightPixels;
 
   // The right margin separates the plot axis from the independently reserved
   // color-scale strip.  Keep a small inset within that strip so swatches and
@@ -2518,18 +2517,18 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   int width = std::max(1, _colorScaleWidth - 2 * scalePadding);
   int xStart = _xPixOffset + _widthPixels - _colorScaleWidth + scalePadding;
 
-  // Callers can fit the scale to specialized layouts without changing the
-  // established placement used by the main horizontal window.
-  int yStart = _topMargin + _yMaxPixel + scaleFontSize + scaleYOffset;
-  size_t nHts = cmap.size() + 1; // leave some space at top and bottom
-  double patchHt = (double)(pltHt) / nHts;
+  // Compute the patch heights for the color scale values
+  
+  size_t nBlocks = cmap.size() + 2; // leave space at top and bottom, and for units
+  double patchHt = (double)(pltHt) / nBlocks;
   int iPatchHt = (int) patchHt;
-
+  int yStart = iPatchHt * 2 + scaleYOffset;
+  
   // compute y locations of the color patches
   
   vector<double> topY;
   for (size_t ii = 0; ii < cmap.size(); ii++) {
-    double yy = yStart + pltHt - (int) ((ii + 2) * patchHt + (patchHt / 2));
+    double yy = pltHt - (int) ((ii + 1) * patchHt + (patchHt / 2));
     topY.push_back(yy);
   } // ii
   
@@ -2578,10 +2577,14 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   painter.save();
 
   // scale the font
-  
+
+  double fontSize = scaleFontSize;
+  if (fontSize > patchHt / 3.0) {
+    fontSize = patchHt / 3.0;
+  }
   QFont defaultFont = painter.font();
   QFont scaledFont(defaultFont);
-  scaledFont.setPointSizeF(scaleFontSize);
+  scaledFont.setPointSizeF(fontSize);
   painter.setFont(scaledFont);
   
   // add labels
@@ -2649,12 +2652,12 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   if (units.size() > 0) {
     
     QFont ufont(painter.font());
-    ufont.setPointSizeF(scaleFontSize);
+    ufont.setPointSizeF(fontSize);
     painter.setFont(ufont);
     painter.setBackgroundMode(Qt::TransparentMode);
     
     QRect tRect(painter.fontMetrics().tightBoundingRect(units.c_str()));
-    int iyy = (int) (topY[cmap.size()-1] - patchHt * 1.0) + unitsYOffset;
+    int iyy = (int) (topY[cmap.size()-1] - patchHt * 1.0);
     int ixx = xStart;
     QString qunits(units.c_str());
     painter.drawText(ixx, iyy, width, tRect.height() + 6, 

@@ -460,9 +460,7 @@ void VertView::_drawOverlays(QPainter &painter)
     // while its units sit above the highest numeric label instead of
     // competing with it.
     _zoomWorld.drawColorScale(_sectionReader->colorMap, painter,
-                              _params.horiz_axis_label_font_size, 0, 0);
-                              // _params.vert_top_margin / 2,
-                              // - _params.vert_top_margin / 2);
+                              _params.horiz_axis_label_font_size);
     _zoomWorld.drawTitleTopCenter(painter,
                                   _sectionReader->v_fhdr.field_name);
   }
