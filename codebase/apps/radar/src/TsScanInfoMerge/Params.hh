@@ -397,6 +397,8 @@ public:
 
   tdrp_bool_t merge_angles;
 
+  tdrp_bool_t preserve_ts_processing;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -404,7 +406,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[19];
+  mutable TDRPtable _table[20];
 
   const char *_className;
 

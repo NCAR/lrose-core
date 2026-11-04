@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./ScanInfo2TsFmq
+ * TDRP params for ScanInfo2TsFmq
  **********************************************************************/
 
 //======================================================================
@@ -63,7 +63,6 @@ register_with_procmap = FALSE;
 //
 // Type: string
 
-// udp_bind_address = "0.0.0.0";
 udp_bind_address = "127.0.0.1";
 
 ///////////// udp_ascii_port //////////////////////////
@@ -111,6 +110,25 @@ output_fmq_size = 100000000;
 // Type: int
 
 output_fmq_nslots = 5000;
+
+//======================================================================
+//
+// CORRECT THE SWEEP NUMBER.
+//
+//======================================================================
+ 
+///////////// zero_sweep_number_at_start_of_vol ///////
+//
+// Option to correct the sweep number relative to the start of a volume.
+//
+// Some controllers set the sweep number to always increase, without 
+//   resetting to 0 when a new volume starts. If this parameter is TRUE, 
+//   the sweep number will be corrected so that it is zero at the start of 
+//   each volume.
+//
+// Type: boolean
+
+zero_sweep_number_at_start_of_vol = TRUE;
 
 //======================================================================
 //

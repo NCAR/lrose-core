@@ -120,6 +120,7 @@ private:
 
   bool _haveScanState;
   ScanTelemetry _prevScanState;
+  int _volumeStartSweepNum;
   int _outputVolumeNum;
   int _outputSweepNum;
 
@@ -128,7 +129,7 @@ private:
   int _openUdpSocket();
   int _readDatagram(string &datagram, bool &timedOut);
   bool _decodeTelemetry(const string &datagram, ScanTelemetry &telemetry,
-                        string &error) const;
+                        string &error);
   bool _validateTelemetry(const ScanTelemetry &telemetry,
                           string &error) const;
   int _processTelemetry(ScanTelemetry telemetry);

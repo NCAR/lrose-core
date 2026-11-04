@@ -772,6 +772,18 @@
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'preserve_ts_processing'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("preserve_ts_processing");
+    tt->descr = tdrpStrDup("Option to preserve time-series processing metadata from the slave.");
+    tt->help = tdrpStrDup("If true, IWRF_TS_PROCESSING packets from the slave pass through unchanged. If false, they are replaced by the latest packet from the master, preserving legacy behavior.");
+    tt->val_offset = (char *) &preserve_ts_processing - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

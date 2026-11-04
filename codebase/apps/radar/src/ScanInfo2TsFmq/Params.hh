@@ -384,6 +384,8 @@ public:
 
   int output_fmq_nslots;
 
+  tdrp_bool_t zero_sweep_number_at_start_of_vol;
+
   int n_messages_per_write;
 
   int data_mapper_report_interval;
@@ -399,7 +401,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[18];
+  mutable TDRPtable _table[20];
 
   const char *_className;
 

@@ -400,7 +400,15 @@ int TsScanInfoMerge::_mergeAndWriteUsingTime()
     
   if (_params.merge_scan_info) {
     slaveHdr.scan_mode = latestHdr.scan_mode;
-    slaveHdr.follow_mode = latestHdr.follow_mode;
+    const bool slaveFollowModeValid =
+      slaveHdr.follow_mode > IWRF_FOLLOW_MODE_NOT_SET &&
+      slaveHdr.follow_mode < IWRF_FOLLOW_MODE_LAST;
+    const bool masterFollowModeValid =
+      latestHdr.follow_mode > IWRF_FOLLOW_MODE_NOT_SET &&
+      latestHdr.follow_mode < IWRF_FOLLOW_MODE_LAST;
+    if (!slaveFollowModeValid && masterFollowModeValid) {
+      slaveHdr.follow_mode = latestHdr.follow_mode;
+    }
     slaveHdr.volume_num = latestHdr.volume_num;
     slaveHdr.sweep_num = latestHdr.sweep_num;
     slaveHdr.antenna_transition = latestHdr.antenna_transition;
@@ -602,13 +610,13 @@ int TsScanInfoMerge::_readSlave()
                sizeof(iwrf_scan_segment_t));
         break;
       }
-      // case IWRF_TS_PROCESSING_ID: {
-      //   if (_params.use_ts_processing_from_master) {
-      //     memcpy(copy, _masterReader->getLatestTsProc(),
-      //            sizeof(iwrf_ts_processing_t));
-      //   }
-      //   break;
-      // }
+      case IWRF_TS_PROCESSING_ID: {
+        if (!_params.preserve_ts_processing) {
+          memcpy(copy, _masterReader->getLatestTsProc(),
+                 sizeof(iwrf_ts_processing_t));
+        }
+        break;
+      }
       default: {}
     }
 

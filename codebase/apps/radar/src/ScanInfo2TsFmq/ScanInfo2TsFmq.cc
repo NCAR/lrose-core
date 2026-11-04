@@ -68,6 +68,7 @@ ScanInfo2TsFmq::ScanInfo2TsFmq(int argc, char **argv) :
         _lastReceiveTime(0),
         _staleEventWritten(false),
         _haveScanState(false),
+        _volumeStartSweepNum(0),
         _outputVolumeNum(-1),
         _outputSweepNum(-1)
 {
@@ -301,9 +302,13 @@ int ScanInfo2TsFmq::_readDatagram(string &datagram, bool &timedOut)
 
 bool ScanInfo2TsFmq::_decodeTelemetry(const string &datagram,
                                       ScanTelemetry &telemetry,
-                                      string &error) const
+                                      string &error)
 {
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "datagram: " << datagram << endl;
+  }
+  
   map<string, string> fields;
   string::size_type begin = 0;
   while (begin <= datagram.size()) {
@@ -360,6 +365,16 @@ bool ScanInfo2TsFmq::_decodeTelemetry(const string &datagram,
   telemetry.inTransition = transition != 0;
   telemetry.scanName = fields.find("scan") == fields.end() ?
     string() : fields["scan"];
+
+  // Match the established TsTcp2Fmq convention: the controller's sweep
+  // number may increase continuously, while IWRF sweep numbers restart at
+  // zero for each volume. Normalize before detecting or publishing state.
+  if (!_haveScanState || telemetry.volumeNum != _prevScanState.volumeNum) {
+    _volumeStartSweepNum = telemetry.sweepNum;
+  }
+  if (_params.zero_sweep_number_at_start_of_vol) {
+    telemetry.sweepNum -= _volumeStartSweepNum;
+  }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Telemetry entry:" << endl;
@@ -520,6 +535,7 @@ int ScanInfo2TsFmq::_processTelemetry(ScanTelemetry telemetry)
   static const double metadataIntervalSecs = 1.0;
 
   const bool firstSample = !_haveScanState;
+
   const bool scanChanged = _scanStateChanged(telemetry);
   const bool metadataDue = firstSample ||
     telemetry.time - _lastMetadataTime >= metadataIntervalSecs;

@@ -703,6 +703,27 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("CORRECT THE SWEEP NUMBER");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'zero_sweep_number_at_start_of_vol'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("zero_sweep_number_at_start_of_vol");
+    tt->descr = tdrpStrDup("Option to correct the sweep number relative to the start of a volume.");
+    tt->help = tdrpStrDup("Some controllers set the sweep number to always increase, without resetting to 0 when a new volume starts. If this parameter is TRUE, the sweep number will be corrected so that it is zero at the start of each volume.");
+    tt->val_offset = (char *) &zero_sweep_number_at_start_of_vol - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OUTPUT FMQ MESSAGE DETAILS");
     tt->comment_text = tdrpStrDup("The output messages are written to the FMQ. To improve performance, each message contains a number of messages.");
     tt++;

@@ -109,3 +109,9 @@ paramdef boolean {
   p_help = "If false, the angles will not be merged, and the angles in the slave will be unchanged.";
 } merge_angles;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to preserve time-series processing metadata from the slave.";
+  p_help = "If true, IWRF_TS_PROCESSING packets from the slave pass through unchanged. If false, they are replaced by the latest packet from the master, preserving legacy behavior.";
+} preserve_ts_processing;
+
