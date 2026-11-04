@@ -52,6 +52,7 @@
 #include <unistd.h>
 
 #include <radar/iwrf_functions.hh>
+#include <toolsa/MemBuf.hh>
 #include <toolsa/pmu.h>
 
 using namespace std;
@@ -516,18 +517,26 @@ void ScanInfo2TsFmq::_copyString(char *dest, size_t destLen,
 int ScanInfo2TsFmq::_processTelemetry(ScanTelemetry telemetry)
 {
 
+  static const double metadataIntervalSecs = 1.0;
+
   const bool firstSample = !_haveScanState;
   const bool scanChanged = _scanStateChanged(telemetry);
+  const bool metadataDue = firstSample ||
+    telemetry.time - _lastMetadataTime >= metadataIntervalSecs;
 
-  if (firstSample) {
-    _addStartupInfo(telemetry);
-  } else if (scanChanged) {
-    // Keep the old state ahead of its replacement even if a batch happens to
-    // be partially filled when the controller announces a new scan state.
-
+  // Start metadata and changed scan state in a fresh FMQ message. A reader
+  // joining at the tail must never encounter a pulse before its bootstrap
+  // metadata, even when an earlier pulse batch is only partially filled.
+  if (!firstSample && (metadataDue || scanChanged)) {
     if (_writeToOutputFmq(true)) {
       return -1;
     }
+  }
+
+  if (metadataDue) {
+    _addReaderMetadata(telemetry);
+    _lastMetadataTime = telemetry.time;
+  } else if (scanChanged) {
     _addScanSegment(telemetry);
   }
 
@@ -537,7 +546,7 @@ int ScanInfo2TsFmq::_processTelemetry(ScanTelemetry telemetry)
   _outputVolumeNum = telemetry.volumeNum;
   _outputSweepNum = telemetry.sweepNum;
 
-  if (firstSample || scanChanged) {
+  if (metadataDue || scanChanged) {
     return _writeToOutputFmq(true);
   }
   return _writeToOutputFmq();
@@ -582,9 +591,9 @@ bool ScanInfo2TsFmq::_scanStateChanged(
 }
 
 ////////////////////////////////////////////////////
-// Add metadata required before the first pulse
+// Add the complete metadata set required before a reader can return pulses
 
-void ScanInfo2TsFmq::_addStartupInfo(const ScanTelemetry &telemetry)
+void ScanInfo2TsFmq::_addReaderMetadata(const ScanTelemetry &telemetry)
 {
   iwrf_radar_info_t radarInfo;
   iwrf_radar_info_init(radarInfo);
@@ -619,7 +628,7 @@ void ScanInfo2TsFmq::_addScanSegment(const ScanTelemetry &telemetry)
 }
 
 ///////////////////////////////////////////////////////
-// Add a header-only pulse carrying angles and scan state
+// Add a synthetic pulse carrying angles and scan state
 
 void ScanInfo2TsFmq::_addPulse(const ScanTelemetry &telemetry)
 {
@@ -640,7 +649,22 @@ void ScanInfo2TsFmq::_addPulse(const ScanTelemetry &telemetry)
     pulse.fixed_el = telemetry.fixedAngle;
   }
 
-  _outputMsg.addPart(IWRF_PULSE_HEADER_ID, sizeof(pulse), &pulse);
+  // Some general IWRF consumers assume every pulse has gate zero. The scan
+  // stream has no measured signal, so attach one zero-valued dummy IQ gate
+  // rather than exposing a null data array to those readers.
+  const fl32 dummyIq[2] = {0.0, 0.0};
+  pulse.n_gates = 1;
+  pulse.n_channels = 1;
+  pulse.iq_encoding = IWRF_IQ_ENCODING_FL32;
+  pulse.n_data = 2;
+  pulse.iq_offset[0] = 0;
+  pulse.packet.len_bytes = sizeof(pulse) + sizeof(dummyIq);
+
+  MemBuf pulseBuf;
+  pulseBuf.add(&pulse, sizeof(pulse));
+  pulseBuf.add(dummyIq, sizeof(dummyIq));
+  _outputMsg.addPart(IWRF_PULSE_HEADER_ID, pulseBuf.getLen(),
+                     pulseBuf.getPtr());
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
     iwrf_pulse_header_print(stderr, pulse);

@@ -112,6 +112,7 @@ private:
   si64 _packetSeqNum;
   si64 _pulseSeqNum;
   DateTime _prevTelemetryTime;
+  DateTime _lastMetadataTime;
   time_t _lastReceiveTime;
   bool _staleEventWritten;
 
@@ -149,7 +150,7 @@ private:
 
   // assembling IWRF packets
 
-  void _addStartupInfo(const ScanTelemetry &telemetry);
+  void _addReaderMetadata(const ScanTelemetry &telemetry);
   void _addScanSegment(const ScanTelemetry &telemetry);
   void _addPulse(const ScanTelemetry &telemetry);
   void _setPacketTimeAndSequence(iwrf_packet_info_t &packet,
