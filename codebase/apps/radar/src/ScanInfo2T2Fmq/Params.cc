@@ -620,18 +620,6 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'do_not_register_on_read'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("do_not_register_on_read");
-    tt->descr = tdrpStrDup("Option to only register with the process mapper during the write.");
-    tt->help = tdrpStrDup("Sometimes the reader keeps registering, but no data is being written to the FMQ. If this parameter is true, we only register with procmap during the write. So if no writes are occurring, no registrations will occur and the auto_restarter will kill and restart this application. This makes it robust when the reading hangs for some reason.");
-    tt->val_offset = (char *) &do_not_register_on_read - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -670,39 +658,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("TCP DETAILS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'ts_tcp_server_host'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ts_tcp_server_host");
-    tt->descr = tdrpStrDup("Host name on which time series server is running.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ts_tcp_server_host - &_start_;
-    tt->single_val.s = tdrpStrDup("localhost");
-    tt++;
-    
-    // Parameter 'ts_tcp_server_port'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("ts_tcp_server_port");
-    tt->descr = tdrpStrDup("TCP/IP port on which time series server is running.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ts_tcp_server_port - &_start_;
-    tt->single_val.i = 12000;
-    tt++;
-    
-    // Parameter 'Comment 4'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("FMQ DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -716,7 +671,7 @@
     tt->descr = tdrpStrDup("Path to output FMQ.");
     tt->help = tdrpStrDup("The FMQ consists of 2 files, ??.buf and ??.stat.");
     tt->val_offset = (char *) &output_fmq_path - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/fmq/ts");
+    tt->single_val.s = tdrpStrDup("/tmp/fmq/ScanInfo");
     tt++;
     
     // Parameter 'output_fmq_size'
@@ -740,205 +695,28 @@
     tt->descr = tdrpStrDup("Number of slots in the output FMQ.");
     tt->help = tdrpStrDup("The number of slots corresponds to the maximum number of messages which may be written to the buffer before overwrites occur. However, overwrites may occur sooner if the size is not set large enough.");
     tt->val_offset = (char *) &output_fmq_nslots - &_start_;
-    tt->single_val.i = 500;
+    tt->single_val.i = 5000;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("CORRECT THE SWEEP NUMBER");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'zero_sweep_number_at_start_of_vol'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("zero_sweep_number_at_start_of_vol");
-    tt->descr = tdrpStrDup("Option to correct the sweep number relative to the start of a volume.");
-    tt->help = tdrpStrDup("Some radars set the sweep number to always increase, without resetting to 0 when a new volume starts. If this parameter is TRUE, the sweep number will be corrected so that it is zero at the start of each volume.");
-    tt->val_offset = (char *) &zero_sweep_number_at_start_of_vol - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("RADAR POSITION - Mobile Radar Support");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'update_position'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("update_position");
-    tt->descr = tdrpStrDup("Option to update the radar's position from info in a position file");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &update_position - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'position_file_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("position_file_path");
-    tt->descr = tdrpStrDup("Path Mobile Radar position and heading file");
-    tt->help = tdrpStrDup("This file contains records: Heading Lat Lon Altitude(m) Time(YYYYMMDD.HHMMSS)");
-    tt->val_offset = (char *) &position_file_path - &_start_;
-    tt->single_val.s = tdrpStrDup("/var/log/positions");
-    tt++;
-    
-    // Parameter 'position_check_interval'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("position_check_interval");
-    tt->descr = tdrpStrDup("Interval at which to check on position file changes (secs).");
-    tt->help = tdrpStrDup("The position file will be checked at this interval, and if it has changed the new position information will be read in.");
-    tt->val_offset = (char *) &position_check_interval - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("SWEEP NUMBER");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'delay_sweep_num_change_in_sector_scan'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("delay_sweep_num_change_in_sector_scan");
-    tt->descr = tdrpStrDup("Option to delay the change of the sweep number in sector scan mode.");
-    tt->help = tdrpStrDup("On some systems (e.g. those which use a PMAC) the scan flags are updated at the start of the antenna transition. This means that the entire transition is included in the new sweep. If this parameter is set to TRUE, and the scan mode is SECTOR, the sweep num change is delayed until the antenna  changes direction. This means that the first half of the transition will be flagged as the previous sweep, and the second half as the next sweep. In non-sector mode, this parameter is ignored.");
-    tt->val_offset = (char *) &delay_sweep_num_change_in_sector_scan - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("OVERRIDE CALIBRATION");
-    tt->comment_text = tdrpStrDup("Limited calibration information is passed down from the drx. This option allows you to override this calibration information with that from a file on disk.");
-    tt++;
-    
-    // Parameter 'override_calibration'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_calibration");
-    tt->descr = tdrpStrDup("Option to override calibration, with values from local xml file.");
-    tt->help = tdrpStrDup("If true, the calibration will be read in from an xml file. Calibration packets arriving from the drx will be replaced with the local information.");
-    tt->val_offset = (char *) &override_calibration - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'cal_xml_file_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("cal_xml_file_path");
-    tt->descr = tdrpStrDup("File path for calibration to be used for override.");
-    tt->help = tdrpStrDup("See 'override_calibration'.");
-    tt->val_offset = (char *) &cal_xml_file_path - &_start_;
-    tt->single_val.s = tdrpStrDup("./cal.xml");
-    tt++;
-    
-    // Parameter 'Comment 9'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("IQ DATA SCALING");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'apply_scale'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_scale");
-    tt->descr = tdrpStrDup("Option to apply a scale and bias to each I and Q value before writing.");
-    tt->help = tdrpStrDup("NOTE - this only applies to IQ data stored as FLOAT-32s.");
-    tt->val_offset = (char *) &apply_scale - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'scale'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("scale");
-    tt->descr = tdrpStrDup("Scale constant for I and Q data.");
-    tt->help = tdrpStrDup("Applies if apply_scale == TRUE. Value written = Value_in * scale + bias.");
-    tt->val_offset = (char *) &scale - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'bias'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("bias");
-    tt->descr = tdrpStrDup("Bias for I and Q data.");
-    tt->help = tdrpStrDup("Applies if apply_scale == TRUE. Value written = Value_in * scale + bias.");
-    tt->val_offset = (char *) &bias - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'Comment 10'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("OUTPUT FMQ MESSAGE DETAILS");
-    tt->comment_text = tdrpStrDup("The output messages are written to the FMQ. To improve performance, each message contains a number of time series pulses.");
+    tt->comment_text = tdrpStrDup("The output messages are written to the FMQ. To improve performance, each message contains a number of messages.");
     tt++;
     
-    // Parameter 'n_pulses_per_message'
+    // Parameter 'n_messages_per_write'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_pulses_per_message");
-    tt->descr = tdrpStrDup("Number of pulses per output message.");
-    tt->help = tdrpStrDup("The actual number will sometimes be 1 less than this, because an info data part may will be written once in a while.");
-    tt->val_offset = (char *) &n_pulses_per_message - &_start_;
-    tt->single_val.i = 200;
-    tt++;
-    
-    // Parameter 'n_pulses_per_power_info'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_pulses_per_power_info");
-    tt->descr = tdrpStrDup("The xmit_power packet will be written each time this number of pulses is written.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &n_pulses_per_power_info - &_start_;
-    tt->single_val.i = 1000;
+    tt->param_name = tdrpStrDup("n_messages_per_write");
+    tt->descr = tdrpStrDup("Maximum number of IWRF parts per output message.");
+    tt->help = tdrpStrDup("A small value limits scan-information latency. Scan state changes are always flushed immediately.");
+    tt->val_offset = (char *) &n_messages_per_write - &_start_;
+    tt->single_val.i = 1;
     tt++;
     
     // Parameter 'data_mapper_report_interval'
@@ -975,60 +753,6 @@
     tt->help = tdrpStrDup("See 'write_end_of_vol_when_data_stops'");
     tt->val_offset = (char *) &nsecs_no_data_for_end_of_vol - &_start_;
     tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'Comment 11'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("IGNORE PULSES IF TIME GOES BACKWARDS");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'ignore_pulse_if_time_goes_backwards'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ignore_pulse_if_time_goes_backwards");
-    tt->descr = tdrpStrDup("This applies to older version of the HIQ.");
-    tt->help = tdrpStrDup("If true, check that the time goes forwards. If not, ignore the pulse.");
-    tt->val_offset = (char *) &ignore_pulse_if_time_goes_backwards - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 12'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
-    tt->comment_hdr = tdrpStrDup("ANGLE DEBUGGING");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'compute_azimuth_from_time'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_azimuth_from_time");
-    tt->descr = tdrpStrDup("Option to override the azimuth based on time.");
-    tt->help = tdrpStrDup("This is intended for trouble-shooting. If this is set to true, the azimuth is set to a value computed from the time.");
-    tt->val_offset = (char *) &compute_azimuth_from_time - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'simulated_secs_per_rev'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("simulated_secs_per_rev");
-    tt->descr = tdrpStrDup("Simulated seconds per revolution.");
-    tt->help = tdrpStrDup("The simulated azimuth will be 0 at the start of each revolution.");
-    tt->val_offset = (char *) &simulated_secs_per_rev - &_start_;
-    tt->single_val.i = 6;
     tt++;
     
     // trailing entry has param_name set to NULL

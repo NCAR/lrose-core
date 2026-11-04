@@ -21,11 +21,11 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+//
 // ScanInfo2TsFmq.hh
 //
-// Mike Dixon, EOL, NCAR
-// P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Nov 2026
 //
@@ -40,18 +40,14 @@
 #define ScanInfo2TsFmq_HH
 
 #include <string>
-#include <vector>
-#include <cstdio>
+#include <sys/types.h>
 
 #include "Args.hh"
 #include "Params.hh"
-#include <toolsa/Socket.hh>
 #include <Fmq/DsFmq.hh>
-#include <toolsa/MemBuf.hh>
-#include <toolsa/ushmem.h>
 #include <didss/DsMessage.hh>
-#include <radar/syscon_to_spol.h>
-#include <radar/IwrfCalib.hh>
+#include <radar/iwrf_data.h>
+#include <toolsa/DateTime.hh>
 
 using namespace std;
 
@@ -59,7 +55,7 @@ using namespace std;
 // This class
 
 class ScanInfo2TsFmq {
-  
+
 public:
 
   // constructor
@@ -67,10 +63,10 @@ public:
   ScanInfo2TsFmq(int argc, char **argv);
 
   // destructor
-  
+
   ~ScanInfo2TsFmq();
 
-  // run 
+  // run
 
   int Run();
 
@@ -79,108 +75,91 @@ public:
   bool isOK;
 
 protected:
-  
+
 private:
+
+  // decoded UDP telemetry
+
+  struct ScanTelemetry {
+    DateTime time;
+    double azimuth;
+    double elevation;
+    int scanType;
+    int volumeNum;
+    int sweepNum;
+    double fixedAngle;
+    bool inTransition;
+    string scanName;
+  };
 
   string _progName;
   Args _args;
   char *_paramsPath;
   Params _params;
 
-  // heartbeat function for reading
+  // UDP input socket. This object owns the descriptor from bind through
+  // shutdown, so it is closed only by the destructor.
 
-  Socket::heartbeat_t _heartBeatFunc;
-
-  // tcp input socket
-
-  Socket _sock;
-  bool _sockTimedOut;
-  int _timedOutCount;
-  bool _unknownMsgId;
-  int _unknownCount;
-
-  // input message
-
-  MemBuf _inputBuf;
-  si32 _packetId;
-  si32 _packetLen;
+  int _udpFd;
 
   // output message and FMQ
-  // we conbine a number of packets into a message before
-  // writing to the FMQ
 
   DsFmq _outputFmq;
   DsMessage _outputMsg;
-  
-  // calibration info
 
-  IwrfCalib _calib;
+  // packet sequence numbers and input time
 
-  // Pulse count
+  si64 _packetSeqNum;
+  si64 _pulseSeqNum;
+  DateTime _prevTelemetryTime;
+  time_t _lastReceiveTime;
+  bool _staleEventWritten;
 
-  int _pulseCount;
+  // current scan state
 
-  // time
-  
-  double _prevPulseTime;
+  bool _haveScanState;
+  ScanTelemetry _prevScanState;
+  int _outputVolumeNum;
+  int _outputSweepNum;
 
-  // volume number
+  // reading and decoding UDP data
 
-  int _prevVolNum;
-  int _volNum;
+  int _openUdpSocket();
+  int _readDatagram(string &datagram, bool &timedOut);
+  bool _decodeTelemetry(const string &datagram, ScanTelemetry &telemetry,
+                        string &error) const;
+  bool _validateTelemetry(const ScanTelemetry &telemetry,
+                          string &error) const;
+  int _processTelemetry(ScanTelemetry telemetry);
 
-  // sweep number
-  
-  int _sweepNum;
-  int _volStartSweepNum;
-  
-  // delaying sweep number till change in dirn
+  // parsing helpers
 
-  bool _sweepNumChangeInit;
-  bool _sweepNumChangeInProgress;
-  int _sweepNumOld;
-  double _sweepNumAzOld;
-  double _sweepNumTransDirn;
+  string _trim(const string &input) const;
+  bool _parseTime(const string &text, DateTime &value,
+                  string &error) const;
+  bool _parseDouble(const string &text, double &value) const;
+  bool _parseInt(const string &text, int &value) const;
+  void _copyString(char *dest, size_t destLen,
+                   const string &source) const;
 
-  // position update
+  // managing scan state
 
-  double _radarLatitude;
-  double _radarLongitude;
-  double _radarAltitude;
-  double _vehicleHeading;
+  int _scanMode(const ScanTelemetry &telemetry) const;
+  bool _scanStateChanged(const ScanTelemetry &telemetry) const;
 
-  time_t _posnLastChecked;
-  time_t _posnLastModified;
+  // assembling IWRF packets
 
-  // print warning on scaling
+  void _addStartupInfo(const ScanTelemetry &telemetry);
+  void _addScanSegment(const ScanTelemetry &telemetry);
+  void _addPulse(const ScanTelemetry &telemetry);
+  void _setPacketTimeAndSequence(iwrf_packet_info_t &packet,
+                                 const DateTime &time);
 
-  bool _scaleWarningPrinted;
-
-  // reading data
-
-  int _readFromServer();
-  int _readMessage();
-  int _readTcpPacket();
-
-  // modifying meta data
-
-  void _modifySweepNumber(iwrf_pulse_header_t &pHdr);
-  void _modifyRadarLocation(iwrf_radar_info_t &ri);
-  void _modifyAzFromHeading(iwrf_pulse_header_t &pHdr);
-  void _setAzFromTime(iwrf_pulse_header_t &pHdr);
-  bool _checkTimeGoesForward(iwrf_pulse_header_t &pHdr);
-  void _handleCalibration();
-
-  void _delaySweepNumChange(iwrf_pulse_header_t &pHdr);
-  int _loadPosition();
- 
-  // write to FMQ
+  // writing to the FMQ
 
   int _openOutputFmq();
   int _writeToOutputFmq(bool force = false);
   int _writeEndOfVol();
-  void _applyIQScale();
-
 };
 
 #endif

@@ -374,15 +374,9 @@ public:
 
   tdrp_bool_t register_with_procmap;
 
-  tdrp_bool_t do_not_register_on_read;
-
   char* udp_bind_address;
 
   int udp_ascii_port;
-
-  char* ts_tcp_server_host;
-
-  int ts_tcp_server_port;
 
   char* output_fmq_path;
 
@@ -390,41 +384,13 @@ public:
 
   int output_fmq_nslots;
 
-  tdrp_bool_t zero_sweep_number_at_start_of_vol;
-
-  tdrp_bool_t update_position;
-
-  char* position_file_path;
-
-  int position_check_interval;
-
-  tdrp_bool_t delay_sweep_num_change_in_sector_scan;
-
-  tdrp_bool_t override_calibration;
-
-  char* cal_xml_file_path;
-
-  tdrp_bool_t apply_scale;
-
-  double scale;
-
-  double bias;
-
-  int n_pulses_per_message;
-
-  int n_pulses_per_power_info;
+  int n_messages_per_write;
 
   int data_mapper_report_interval;
 
   tdrp_bool_t write_end_of_vol_when_data_stops;
 
   int nsecs_no_data_for_end_of_vol;
-
-  tdrp_bool_t ignore_pulse_if_time_goes_backwards;
-
-  tdrp_bool_t compute_azimuth_from_time;
-
-  int simulated_secs_per_rev;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -433,7 +399,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[43];
+  mutable TDRPtable _table[18];
 
   const char *_className;
 

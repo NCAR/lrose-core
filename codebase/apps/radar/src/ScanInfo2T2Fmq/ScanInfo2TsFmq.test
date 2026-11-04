@@ -1,0 +1,163 @@
+/**********************************************************************
+ * TDRP params for ./ScanInfo2TsFmq
+ **********************************************************************/
+
+//======================================================================
+//
+// ScanInfo2Fmq reads scan information via UDP. It then writes the 
+//   appropriate packets to a time series FMQ.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+// Type: string
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+//
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+//
+// Type: boolean
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// UDP DETAILS.
+//
+//======================================================================
+ 
+///////////// udp_bind_address ////////////////////////
+//
+// IP bind address for listening for UDP packets.
+//
+// Type: string
+
+// udp_bind_address = "0.0.0.0";
+udp_bind_address = "127.0.0.1";
+
+///////////// udp_ascii_port //////////////////////////
+//
+// UDP port from which to read UDP ascii packets.
+//
+// Type: int
+
+udp_ascii_port = 55001;
+
+//======================================================================
+//
+// FMQ DETAILS.
+//
+//======================================================================
+ 
+///////////// output_fmq_path /////////////////////////
+//
+// Path to output FMQ.
+//
+// The FMQ consists of 2 files, ??.buf and ??.stat.
+//
+// Type: string
+
+output_fmq_path = "/tmp/fmq/ScanInfo";
+
+///////////// output_fmq_size /////////////////////////
+//
+// Size of output FMQ, in bytes.
+//
+// This is the total size of the output FMQ buffer.
+//
+// Type: int
+
+output_fmq_size = 100000000;
+
+///////////// output_fmq_nslots ///////////////////////
+//
+// Number of slots in the output FMQ.
+//
+// The number of slots corresponds to the maximum number of messages 
+//   which may be written to the buffer before overwrites occur. However, 
+//   overwrites may occur sooner if the size is not set large enough.
+//
+// Type: int
+
+output_fmq_nslots = 5000;
+
+//======================================================================
+//
+// OUTPUT FMQ MESSAGE DETAILS.
+//
+// The output messages are written to the FMQ. To improve performance, 
+//   each message contains a number of messages.
+//
+//======================================================================
+ 
+///////////// n_messages_per_write ////////////////////
+//
+// Maximum number of IWRF parts per output message.
+//
+// A small value limits scan-information latency. Scan state changes are 
+//   always flushed immediately.
+//
+// Type: int
+
+n_messages_per_write = 1;
+
+///////////// data_mapper_report_interval /////////////
+//
+// Number of seconds between reports to DataMapper.
+//
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQ is written to. If <= 0, registration will not be performed.
+//
+// Type: int
+
+data_mapper_report_interval = 5;
+
+///////////// write_end_of_vol_when_data_stops ////////
+//
+// Write end of vol event when data stops.
+//
+// Type: boolean
+
+write_end_of_vol_when_data_stops = FALSE;
+
+///////////// nsecs_no_data_for_end_of_vol ////////////
+//
+// Number of secs before writing end of vol.
+//
+// See 'write_end_of_vol_when_data_stops'.
+//
+// Type: int
+
+nsecs_no_data_for_end_of_vol = 5;
+
