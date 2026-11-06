@@ -448,6 +448,20 @@ void HorizView::setShowValue(bool state)
 }
 
 ////////////////////////////////////////////////////////
+// set vertical-section route selection mode
+
+void HorizView::setSingleSegmentVsection(bool enabled)
+{
+  _params.single_segment_vsection = enabled ? pTRUE : pFALSE;
+
+  // A partial route was created under the previous interaction contract.
+  // Discard it rather than interpreting its existing points in the new mode.
+  if (_vsectionRouteEditing) {
+    _cancelVsectionRoute();
+  }
+}
+
+////////////////////////////////////////////////////////
 // update the value report at the current cursor position
 
 void HorizView::_updateMouseValue(int mouseX, int mouseY)

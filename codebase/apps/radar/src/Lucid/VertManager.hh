@@ -110,6 +110,10 @@ public:
   
   void enableZoomButton() const;
 
+signals:
+
+  void singleSegmentVsectionChanged(bool enabled);
+
 private slots:
   
   // override
@@ -147,6 +151,7 @@ protected:
    */
 
   QMenu *_overlaysMenu;
+  QMenu *_configurationMenu;
 
   /**
    * @brief The status panel frame.
@@ -195,6 +200,10 @@ protected:
 
   QAction *_heightGridAct;
   QAction *_distanceGridAct;
+
+  // Checked for single-segment selection; unchecked for multi-segment routes.
+
+  QAction *_singleSegmentVsectionAct;
 
   ///////////////////////
   // Protected methods //

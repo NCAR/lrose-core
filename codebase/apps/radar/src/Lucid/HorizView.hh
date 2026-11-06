@@ -165,6 +165,10 @@ class DLL_EXPORT HorizView : public QWidget
   //////////////
 
  public slots:
+
+  // Select whether a right-button drag completes the vertical section.
+
+  void setSingleSegmentVsection(bool enabled);
    
   // go back to prev zoom
 

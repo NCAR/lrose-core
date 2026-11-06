@@ -488,6 +488,8 @@ void GuiManager::_setupWindows()
 
   _vertWindow = new VertManager(this);
   _vertWindow->setRadarName("unknown");
+  connect(_vertWindow, &VertManager::singleSegmentVsectionChanged,
+          _horiz, &HorizView::setSingleSegmentVsection);
   
   // set pointer to the vertWidget
   

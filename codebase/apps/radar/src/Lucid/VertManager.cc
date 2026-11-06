@@ -162,6 +162,20 @@ void VertManager::_createActions(VertView *vert)
   _unzoomAct->setEnabled(false);
   connect(_unzoomAct, SIGNAL(triggered()), this, SLOT(_unzoom()));
 
+  _singleSegmentVsectionAct =
+    new QAction(tr("Single-segment selection"), this);
+  _singleSegmentVsectionAct->setStatusTip(
+    tr("Complete a vertical section after one right-button drag"));
+  _singleSegmentVsectionAct->setCheckable(true);
+  _singleSegmentVsectionAct->setChecked(_params.single_segment_vsection);
+  connect(_singleSegmentVsectionAct, &QAction::toggled,
+          this, [this](bool enabled) {
+            // Keep the runtime parameter authoritative so the selection code
+            // and help text immediately reflect the menu state.
+            _params.single_segment_vsection = enabled ? pTRUE : pFALSE;
+            emit singleSegmentVsectionChanged(enabled);
+          });
+
 }
 
 //////////////////////////////////////////////////
@@ -191,6 +205,9 @@ void VertManager::_createMenus()
   _overlaysMenu->addAction(_heightGridAct);
   _overlaysMenu->addAction(_distanceGridAct);
   _overlaysMenu->addSeparator();
+
+  _configurationMenu = menuBar()->addMenu(tr("&Configuration"));
+  _configurationMenu->addAction(_singleSegmentVsectionAct);
 
   menuBar()->addAction(_unzoomAct);
 }
