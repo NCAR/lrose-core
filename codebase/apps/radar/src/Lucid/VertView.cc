@@ -69,8 +69,8 @@ VertView::VertView(QWidget* parent,
         _vertWindow(vertWindow),
         _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
-        _heightGridEnabled(_params.vert_ht_grid_on_at_startup),
-        _distanceGridEnabled(_params.vert_distance_grid_on_at_startup),
+        _heightGridEnabled(_params.vsection_ht_grid_on_at_startup),
+        _distanceGridEnabled(_params.vsection_distance_grid_on_at_startup),
         _rubberBand(0),
         _sectionReader(nullptr)
         
@@ -116,7 +116,7 @@ VertView::VertView(QWidget* parent,
   _prevAz = -9999.0;
   _prevTime.setToZero();
   
-  _colorScaleWidth = _params.vert_color_scale_width;
+  _colorScaleWidth = _params.vsection_color_scale_width;
 
   
   // initialize world view
@@ -153,16 +153,16 @@ void VertView::configureWorldCoords(int zoomLevel)
   
   // set world view
 
-  int leftMargin = _params.vert_left_margin;
-  int rightMargin = _params.vert_right_margin;
-  int topMargin = _params.vert_top_margin;
-  int bottomMargin = _params.vert_bottom_margin;
-  int colorScaleWidth = _params.vert_color_scale_width;
-  int axisTickLen = _params.vert_axis_tick_len;
-  int nTicksIdeal = _params.vert_n_ticks_ideal;
-  int titleTextMargin = _params.vert_title_text_margin;
-  int legendTextMargin = _params.vert_legend_text_margin;
-  int axisTextMargin = _params.vert_axis_text_margin;
+  int leftMargin = _params.vsection_left_margin;
+  int rightMargin = _params.vsection_right_margin;
+  int topMargin = _params.vsection_top_margin;
+  int bottomMargin = _params.vsection_bottom_margin;
+  int colorScaleWidth = _params.vsection_color_scale_width;
+  int axisTickLen = _params.vsection_axis_tick_len;
+  int nTicksIdeal = _params.vsection_n_ticks_ideal;
+  int titleTextMargin = _params.vsection_title_text_margin;
+  int legendTextMargin = _params.vsection_legend_text_margin;
+  int axisTextMargin = _params.vsection_axis_text_margin;
   
   _fullWorld.setName("VertView-full");
   _fullWorld.setWindowGeom(width(), height(), 0, 0);
@@ -211,18 +211,18 @@ void VertView::configureWorldCoords(int zoomLevel)
   _fullWorld.setYAxisTickLen(axisTickLen);
   _fullWorld.setYNTicksIdeal(nTicksIdeal);
 
-  _fullWorld.setTitleFontSize(_params.vert_title_font_size);
-  _fullWorld.setAxisLabelFontSize(_params.vert_axis_label_font_size);
-  _fullWorld.setTickValuesFontSize(_params.vert_tick_values_font_size);
-  _fullWorld.setLegendFontSize(_params.vert_legend_font_size);
+  _fullWorld.setTitleFontSize(_params.vsection_title_font_size);
+  _fullWorld.setAxisLabelFontSize(_params.vsection_axis_label_font_size);
+  _fullWorld.setTickValuesFontSize(_params.vsection_tick_values_font_size);
+  _fullWorld.setLegendFontSize(_params.vsection_legend_font_size);
 
-  _fullWorld.setTitleColor(_params.vert_title_color);
-  _fullWorld.setAxisLineColor(_params.vert_axes_color);
-  _fullWorld.setAxisTextColor(_params.vert_axes_color);
-  _fullWorld.setGridColor(_params.vert_grid_color);
+  _fullWorld.setTitleColor(_params.vsection_title_color);
+  _fullWorld.setAxisLineColor(_params.vsection_axes_color);
+  _fullWorld.setAxisTextColor(_params.vsection_axes_color);
+  _fullWorld.setGridColor(_params.vsection_grid_color);
 
-  _fullWorld.setYAxisLabelsInside(_params.vert_tick_values_inside);
-  _fullWorld.setXAxisLabelsInside(_params.vert_tick_values_inside);
+  _fullWorld.setYAxisLabelsInside(_params.vsection_tick_values_inside);
+  _fullWorld.setXAxisLabelsInside(_params.vsection_tick_values_inside);
 
   _zoomWorld = _fullWorld;
   _zoomWorld.setName("VertView-zoomed");
@@ -418,7 +418,7 @@ void VertView::_drawOverlays(QPainter &painter)
 
   // painter.setWindow(_zoomWindow);
   
-  painter.setPen(_params.vert_grid_color);
+  painter.setPen(_params.vsection_grid_color);
 
   // Draw the axes
 
@@ -426,7 +426,7 @@ void VertView::_drawOverlays(QPainter &painter)
   double yMin = _zoomWorld.getYMinWorld();
   
   QFont font = painter.font();
-  font.setPointSizeF(_params.vert_label_font_size);
+  font.setPointSizeF(_params.vsection_label_font_size);
   painter.setFont(font);
   
   _zoomWorld.specifyXTicks(xMin, _xGridSpacing);
@@ -451,7 +451,7 @@ void VertView::_drawOverlays(QPainter &painter)
       _sectionReader->getVertSegments();
     painter.save();
     _zoomWorld.setClippingOn(painter);
-    QPen boundaryPen(QColor(_params.vert_axes_color));
+    QPen boundaryPen(QColor(_params.vsection_axes_color));
     boundaryPen.setWidth(2);
     boundaryPen.setCosmetic(true);
     painter.setPen(boundaryPen);

@@ -1291,7 +1291,7 @@ commentdef {
 }
 
 commentdef {
-  p_header = "<VERT_VIEW>";
+  p_header = "<VSECTION_VIEW>";
 }
 
 paramdef double {
@@ -1315,47 +1315,47 @@ paramdef double {
 paramdef string {
   p_default = "Vertical section:";
   p_descr = "Prefix for title in vertical section window.";
-} vert_title_prefix;
+} vsection_title_prefix;
 
 paramdef int {
   p_default = -1;
   p_descr = "Startup X for vertical view window (pixels).";
   p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards. If -1 the position will be automatically determined.";
-} vert_window_x_pos;
+} vsection_window_x_pos;
 
 paramdef int {
   p_default = -1;
   p_descr = "Startup Y for vertical view window (pixels).";
   p_help = "This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right. If -1 the position will be automatically determined.";
-} vert_window_y_pos;
+} vsection_window_y_pos;
 
 paramdef int {
   p_default = 1000;
   p_descr = "Startup width of vertical plot (pixels).";
   p_help = "This is for the plot only. It does not include color scale width.";
-} vert_plot_width;
+} vsection_plot_width;
 
 paramdef int {
   p_default = 600;
   p_descr = "Startup height of vertical plot (pixels).";
-} vert_plot_height;
+} vsection_plot_height;
 
 paramdef int {
   p_default = 600;
   p_descr = "Minimum width of vertical window (pixels).";
   p_help = "The user cannot shrink the vertical window smaller than this.";
-} vert_window_min_width;
+} vsection_window_min_width;
 
 paramdef int {
   p_default = 400;
   p_descr = "Minimum height of vertical window (pixels).";
   p_help = "The user cannot shrink the vertical window smaller than this.";
-} vert_window_min_height;
+} vsection_window_min_height;
 
 paramdef int {
   p_default = 40;
   p_descr = "Width of color scale (pixels).";
-} vert_color_scale_width;
+} vsection_color_scale_width;
 
 commentdef {
   p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
@@ -1366,177 +1366,177 @@ paramdef int {
   p_default = 20;
   p_descr = "Height of top margin (pixels).";
   p_help = "Size of top margin for vert section window.";
-} vert_top_margin;
+} vsection_top_margin;
 
 paramdef int {
   p_default = 20;
   p_descr = "Height of bottom margin (pixels).";
   p_help = "Size of bottom margin for vert section window.";
-} vert_bot_margin;
+} vsection_bot_margin;
 
 paramdef int {
   p_default = 20;
   p_descr = "Width of left margin (pixels).";
   p_help = "Size of left margin for vert section window.";
-} vert_left_margin;
+} vsection_left_margin;
 
 paramdef int {
   p_default = 80;
   p_descr = "Width of right margin (pixels).";
   p_help = "Size of right margin for vert section window.";
-} vert_right_margin;
+} vsection_right_margin;
 
 paramdef int {
   p_default = 5;
   p_descr = "Width of title text margin (pixels).";
   p_help = "Size of title test margin for vert window.";
-} vert_title_text_margin;
+} vsection_title_text_margin;
 
 paramdef int {
   p_default = 5;
   p_descr = "Width of legend text margin (pixels).";
   p_help = "Size of legend test margin for vert window.";
-} vert_legend_text_margin;
+} vsection_legend_text_margin;
 
 paramdef int {
   p_default = 5;
   p_descr = "Width of axis text margin (pixels).";
   p_help = "Size of axis test margin for vert window.";
-} vert_axis_text_margin;
+} vsection_axis_text_margin;
 
 paramdef int {
   p_default = 7;
   p_descr = "Length of ticks on axes (pixels).";
-} vert_axis_tick_len;
+} vsection_axis_tick_len;
 
 paramdef int {
   p_default = 7;
   p_descr = "Ideal number of ticks on axes.";
-} vert_n_ticks_ideal;
+} vsection_n_ticks_ideal;
 
 paramdef int {
   p_default = 12;
   p_descr = "Font size of center title (pixels).";
-} vert_title_font_size;
+} vsection_title_font_size;
 
 paramdef int {
   p_default = 10;
   p_descr = "Font size of axis labels in vert (pixels).";
-} vert_axis_label_font_size;
+} vsection_axis_label_font_size;
 
 paramdef int {
   p_default = 8;
   p_descr = "Font size of tick values (pixels).";
-} vert_tick_values_font_size;
+} vsection_tick_values_font_size;
 
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Draw tick value labels inside the plot.";
   p_help = "If FALSE the value labels will be drawn in the margins.";
-} vert_tick_values_inside;
+} vsection_tick_values_inside;
 
 paramdef int {
   p_default = 10;
   p_descr = "Font size of legends (pixels).";
-} vert_legend_font_size;
+} vsection_legend_font_size;
 
 paramdef string {
   p_default = "white";
   p_descr = "Color for title text.";
-} vert_title_color;
+} vsection_title_color;
 
 paramdef string {
   p_default = "white";
   p_descr = "Color for axes.";
-} vert_axes_color;
+} vsection_axes_color;
 
 paramdef string {
   p_default = "white";
   p_descr = "Color for grid (if plotted).";
-} vert_grid_color;
+} vsection_grid_color;
 
 paramdef int {
   p_default = 20;
   p_descr = "Height of top margin in VERT mode (pixels).";
   p_help = "Titles go in the top margin.";
-} vert_top_margin2;
+} vsection_top_margin2;
 
 paramdef int {
   p_default = 20;
   p_descr = "Height of bottom margin in VERT mode (pixels).";
   p_help = "Time scale goes in the bottom margin.";
-} vert_bottom_margin;
+} vsection_bottom_margin;
 
 paramdef int {
   p_default = 20;
   p_descr = "Width of left margin in VERT mode (pixels).";
   p_help = "Height scale goes in the left margin.";
-} vert_left_margin2;
+} vsection_left_margin2;
 
 paramdef int {
   p_default = 20;
   p_descr = "Width of right margin in VERT mode (pixels).";
   p_help = "Height scale goes in the right margin.";
-} vert_right_margin2;
+} vsection_right_margin2;
 
 paramdef int {
   p_default = 8;
   p_descr = "Font size for labels on range rings (pixels).";
-} vert_label_font_size;
+} vsection_label_font_size;
 
 paramdef int {
   p_default = 5;
   p_descr = "Margin around some text (pixels).";
-} vert_text_margin;
+} vsection_text_margin;
 
 // paramdef double {
 //   p_default = 1.0;
 //   p_descr = "Aspect ratio (width/height) of VERT window.";
 //   p_descr = "Set to -1 to allow aspect ratio to vary as the VERT window is resized.";
-// } vert_aspect_ratio;
+// } vsection_aspect_ratio;
 
 paramdef double {
   p_default = 25.0;
   p_descr = "Max height of data in VERT window (km).";
   p_descr = "This can be adjusted interactively.";
-} vert_max_height_km;
+} vsection_max_height_km;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Set VERT X-axis grid overlay on at startup.";
-} vert_ht_grid_on_at_startup;
+} vsection_ht_grid_on_at_startup;
 
 paramdef boolean {
   p_default = true;
   p_descr = "Set VERT Y-axis grid overlay on at startup.";
-} vert_distance_grid_on_at_startup;
+} vsection_distance_grid_on_at_startup;
 
 paramdef enum legend_pos_t {
   p_default = LEGEND_TOP_LEFT;
   p_descr = "Position of main legend in the VERT plot window";
   p_help = "This include time, field name and elevation angle.";
-} vert_main_legend_pos;
+} vsection_main_legend_pos;
 
 paramdef int {
   p_default = 360;
   p_descr = "Size of the queue for VERT beams.";
   p_help = "After the queue reaches this size, older beams are discarded.";
-} vert_beam_queue_size;
+} vsection_beam_queue_size;
 
 paramdef boolean {
   p_default = false;
   p_descr = "Option to override the azimuth beam width for rendering.";
   p_help = "Normally Lucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
-} vert_override_rendering_beam_width;
+} vsection_override_rendering_beam_width;
 
 paramdef double {
   p_default = 1.0;
   p_descr = "Rendering beam width, if override is active.";
-  p_help = "See 'vert_override_rendering_beam_width'";
-} vert_rendering_beam_width;
+  p_help = "See 'vsection_override_rendering_beam_width'";
+} vsection_rendering_beam_width;
 
 commentdef {
-  p_header = "</VERT_VIEW>";
+  p_header = "</VSECTION_VIEW>";
 }
 
 commentdef {
@@ -2768,19 +2768,19 @@ paramdef string {
   p_default = "/tmp/cidd_vert_image_dir";
   p_descr = "Image directory for vert images.";
   p_help = "Note - this is initially set to image_dir";
-} vert_image_dir;
+} vsection_image_dir;
 
 paramdef string {
   p_default = "cidd_vert_view.png";
   p_descr = "The default file name until reset by the user.";
   p_help = "Appends other info automatically.";
-} vert_image_fname;
+} vsection_image_fname;
 
 paramdef string {
   p_default = "convert_image.csh";
   p_descr = "Command to be run after image is created.";
   p_help = "Note that this is initially set to 'image_convert_script'.";
-} vert_image_command;
+} vsection_image_command;
 
 paramdef boolean {
   p_default = FALSE;

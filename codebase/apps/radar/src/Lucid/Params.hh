@@ -920,81 +920,81 @@ public:
 
   double start_ht_km;
 
-  char* vert_title_prefix;
+  char* vsection_title_prefix;
 
-  int vert_window_x_pos;
+  int vsection_window_x_pos;
 
-  int vert_window_y_pos;
+  int vsection_window_y_pos;
 
-  int vert_plot_width;
+  int vsection_plot_width;
 
-  int vert_plot_height;
+  int vsection_plot_height;
 
-  int vert_window_min_width;
+  int vsection_window_min_width;
 
-  int vert_window_min_height;
+  int vsection_window_min_height;
 
-  int vert_color_scale_width;
+  int vsection_color_scale_width;
 
-  int vert_top_margin;
+  int vsection_top_margin;
 
-  int vert_bot_margin;
+  int vsection_bot_margin;
 
-  int vert_left_margin;
+  int vsection_left_margin;
 
-  int vert_right_margin;
+  int vsection_right_margin;
 
-  int vert_title_text_margin;
+  int vsection_title_text_margin;
 
-  int vert_legend_text_margin;
+  int vsection_legend_text_margin;
 
-  int vert_axis_text_margin;
+  int vsection_axis_text_margin;
 
-  int vert_axis_tick_len;
+  int vsection_axis_tick_len;
 
-  int vert_n_ticks_ideal;
+  int vsection_n_ticks_ideal;
 
-  int vert_title_font_size;
+  int vsection_title_font_size;
 
-  int vert_axis_label_font_size;
+  int vsection_axis_label_font_size;
 
-  int vert_tick_values_font_size;
+  int vsection_tick_values_font_size;
 
-  tdrp_bool_t vert_tick_values_inside;
+  tdrp_bool_t vsection_tick_values_inside;
 
-  int vert_legend_font_size;
+  int vsection_legend_font_size;
 
-  char* vert_title_color;
+  char* vsection_title_color;
 
-  char* vert_axes_color;
+  char* vsection_axes_color;
 
-  char* vert_grid_color;
+  char* vsection_grid_color;
 
-  int vert_top_margin2;
+  int vsection_top_margin2;
 
-  int vert_bottom_margin;
+  int vsection_bottom_margin;
 
-  int vert_left_margin2;
+  int vsection_left_margin2;
 
-  int vert_right_margin2;
+  int vsection_right_margin2;
 
-  int vert_label_font_size;
+  int vsection_label_font_size;
 
-  int vert_text_margin;
+  int vsection_text_margin;
 
-  double vert_max_height_km;
+  double vsection_max_height_km;
 
-  tdrp_bool_t vert_ht_grid_on_at_startup;
+  tdrp_bool_t vsection_ht_grid_on_at_startup;
 
-  tdrp_bool_t vert_distance_grid_on_at_startup;
+  tdrp_bool_t vsection_distance_grid_on_at_startup;
 
-  legend_pos_t vert_main_legend_pos;
+  legend_pos_t vsection_main_legend_pos;
 
-  int vert_beam_queue_size;
+  int vsection_beam_queue_size;
 
-  tdrp_bool_t vert_override_rendering_beam_width;
+  tdrp_bool_t vsection_override_rendering_beam_width;
 
-  double vert_rendering_beam_width;
+  double vsection_rendering_beam_width;
 
   char* foreground_color;
 
@@ -1275,11 +1275,11 @@ public:
 
   char* horiz_image_command;
 
-  char* vert_image_dir;
+  char* vsection_image_dir;
 
-  char* vert_image_fname;
+  char* vsection_image_fname;
 
-  char* vert_image_command;
+  char* vsection_image_command;
 
   tdrp_bool_t output_geo_xml;
 

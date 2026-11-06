@@ -264,8 +264,8 @@ int Lucid::_initDataSpace()
   STRcopy(_gd.h_win.image_fname, _params.horiz_image_fname, MAX_PATH_LEN);
   STRcopy(_gd.h_win.image_command, _params.horiz_image_command, MAX_PATH_LEN);
 
-  STRcopy(_gd.v_win.image_fname, _params.vert_image_fname, MAX_PATH_LEN);
-  STRcopy(_gd.v_win.image_command, _params.vert_image_command, MAX_PATH_LEN);
+  STRcopy(_gd.v_win.image_fname, _params.vsection_image_fname, MAX_PATH_LEN);
+  STRcopy(_gd.v_win.image_command, _params.vsection_image_command, MAX_PATH_LEN);
 
   // If individual horiz and vert scripts have not been set
   // use the general one.

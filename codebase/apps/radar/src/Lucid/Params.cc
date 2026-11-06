@@ -3041,7 +3041,7 @@ Params *Params::_instance = (Params *) NULL;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 25");
-    tt->comment_hdr = tdrpStrDup("<VERT_VIEW>");
+    tt->comment_hdr = tdrpStrDup("<VSECTION_VIEW>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -3081,99 +3081,99 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'vert_title_prefix'
+    // Parameter 'vsection_title_prefix'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vert_title_prefix");
+    tt->param_name = tdrpStrDup("vsection_title_prefix");
     tt->descr = tdrpStrDup("Prefix for title in vertical section window.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_title_prefix - &_start_;
+    tt->val_offset = (char *) &vsection_title_prefix - &_start_;
     tt->single_val.s = tdrpStrDup("Vertical section:");
     tt++;
     
-    // Parameter 'vert_window_x_pos'
+    // Parameter 'vsection_window_x_pos'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_window_x_pos");
+    tt->param_name = tdrpStrDup("vsection_window_x_pos");
     tt->descr = tdrpStrDup("Startup X for vertical view window (pixels).");
     tt->help = tdrpStrDup("This is relative to the top left corner of the screen, which is (0,0). In screen coordinates x is positive downwards. If -1 the position will be automatically determined.");
-    tt->val_offset = (char *) &vert_window_x_pos - &_start_;
+    tt->val_offset = (char *) &vsection_window_x_pos - &_start_;
     tt->single_val.i = -1;
     tt++;
     
-    // Parameter 'vert_window_y_pos'
+    // Parameter 'vsection_window_y_pos'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_window_y_pos");
+    tt->param_name = tdrpStrDup("vsection_window_y_pos");
     tt->descr = tdrpStrDup("Startup Y for vertical view window (pixels).");
     tt->help = tdrpStrDup("This is relative to the top left corner of the screen, which is (0,0). In screen coordinates y is positive to the right. If -1 the position will be automatically determined.");
-    tt->val_offset = (char *) &vert_window_y_pos - &_start_;
+    tt->val_offset = (char *) &vsection_window_y_pos - &_start_;
     tt->single_val.i = -1;
     tt++;
     
-    // Parameter 'vert_plot_width'
+    // Parameter 'vsection_plot_width'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_plot_width");
+    tt->param_name = tdrpStrDup("vsection_plot_width");
     tt->descr = tdrpStrDup("Startup width of vertical plot (pixels).");
     tt->help = tdrpStrDup("This is for the plot only. It does not include color scale width.");
-    tt->val_offset = (char *) &vert_plot_width - &_start_;
+    tt->val_offset = (char *) &vsection_plot_width - &_start_;
     tt->single_val.i = 1000;
     tt++;
     
-    // Parameter 'vert_plot_height'
+    // Parameter 'vsection_plot_height'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_plot_height");
+    tt->param_name = tdrpStrDup("vsection_plot_height");
     tt->descr = tdrpStrDup("Startup height of vertical plot (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_plot_height - &_start_;
+    tt->val_offset = (char *) &vsection_plot_height - &_start_;
     tt->single_val.i = 600;
     tt++;
     
-    // Parameter 'vert_window_min_width'
+    // Parameter 'vsection_window_min_width'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_window_min_width");
+    tt->param_name = tdrpStrDup("vsection_window_min_width");
     tt->descr = tdrpStrDup("Minimum width of vertical window (pixels).");
     tt->help = tdrpStrDup("The user cannot shrink the vertical window smaller than this.");
-    tt->val_offset = (char *) &vert_window_min_width - &_start_;
+    tt->val_offset = (char *) &vsection_window_min_width - &_start_;
     tt->single_val.i = 600;
     tt++;
     
-    // Parameter 'vert_window_min_height'
+    // Parameter 'vsection_window_min_height'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_window_min_height");
+    tt->param_name = tdrpStrDup("vsection_window_min_height");
     tt->descr = tdrpStrDup("Minimum height of vertical window (pixels).");
     tt->help = tdrpStrDup("The user cannot shrink the vertical window smaller than this.");
-    tt->val_offset = (char *) &vert_window_min_height - &_start_;
+    tt->val_offset = (char *) &vsection_window_min_height - &_start_;
     tt->single_val.i = 400;
     tt++;
     
-    // Parameter 'vert_color_scale_width'
+    // Parameter 'vsection_color_scale_width'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_color_scale_width");
+    tt->param_name = tdrpStrDup("vsection_color_scale_width");
     tt->descr = tdrpStrDup("Width of color scale (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_color_scale_width - &_start_;
+    tt->val_offset = (char *) &vsection_color_scale_width - &_start_;
     tt->single_val.i = 40;
     tt++;
     
@@ -3186,327 +3186,327 @@ Params *Params::_instance = (Params *) NULL;
     tt->comment_text = tdrpStrDup(" All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0");
     tt++;
     
-    // Parameter 'vert_top_margin'
+    // Parameter 'vsection_top_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_top_margin");
+    tt->param_name = tdrpStrDup("vsection_top_margin");
     tt->descr = tdrpStrDup("Height of top margin (pixels).");
     tt->help = tdrpStrDup("Size of top margin for vert section window.");
-    tt->val_offset = (char *) &vert_top_margin - &_start_;
+    tt->val_offset = (char *) &vsection_top_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'vert_bot_margin'
+    // Parameter 'vsection_bot_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_bot_margin");
+    tt->param_name = tdrpStrDup("vsection_bot_margin");
     tt->descr = tdrpStrDup("Height of bottom margin (pixels).");
     tt->help = tdrpStrDup("Size of bottom margin for vert section window.");
-    tt->val_offset = (char *) &vert_bot_margin - &_start_;
+    tt->val_offset = (char *) &vsection_bot_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'vert_left_margin'
+    // Parameter 'vsection_left_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_left_margin");
+    tt->param_name = tdrpStrDup("vsection_left_margin");
     tt->descr = tdrpStrDup("Width of left margin (pixels).");
     tt->help = tdrpStrDup("Size of left margin for vert section window.");
-    tt->val_offset = (char *) &vert_left_margin - &_start_;
+    tt->val_offset = (char *) &vsection_left_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'vert_right_margin'
+    // Parameter 'vsection_right_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_right_margin");
+    tt->param_name = tdrpStrDup("vsection_right_margin");
     tt->descr = tdrpStrDup("Width of right margin (pixels).");
     tt->help = tdrpStrDup("Size of right margin for vert section window.");
-    tt->val_offset = (char *) &vert_right_margin - &_start_;
+    tt->val_offset = (char *) &vsection_right_margin - &_start_;
     tt->single_val.i = 80;
     tt++;
     
-    // Parameter 'vert_title_text_margin'
+    // Parameter 'vsection_title_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_title_text_margin");
+    tt->param_name = tdrpStrDup("vsection_title_text_margin");
     tt->descr = tdrpStrDup("Width of title text margin (pixels).");
     tt->help = tdrpStrDup("Size of title test margin for vert window.");
-    tt->val_offset = (char *) &vert_title_text_margin - &_start_;
+    tt->val_offset = (char *) &vsection_title_text_margin - &_start_;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'vert_legend_text_margin'
+    // Parameter 'vsection_legend_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_legend_text_margin");
+    tt->param_name = tdrpStrDup("vsection_legend_text_margin");
     tt->descr = tdrpStrDup("Width of legend text margin (pixels).");
     tt->help = tdrpStrDup("Size of legend test margin for vert window.");
-    tt->val_offset = (char *) &vert_legend_text_margin - &_start_;
+    tt->val_offset = (char *) &vsection_legend_text_margin - &_start_;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'vert_axis_text_margin'
+    // Parameter 'vsection_axis_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_axis_text_margin");
+    tt->param_name = tdrpStrDup("vsection_axis_text_margin");
     tt->descr = tdrpStrDup("Width of axis text margin (pixels).");
     tt->help = tdrpStrDup("Size of axis test margin for vert window.");
-    tt->val_offset = (char *) &vert_axis_text_margin - &_start_;
+    tt->val_offset = (char *) &vsection_axis_text_margin - &_start_;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'vert_axis_tick_len'
+    // Parameter 'vsection_axis_tick_len'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_axis_tick_len");
+    tt->param_name = tdrpStrDup("vsection_axis_tick_len");
     tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_axis_tick_len - &_start_;
+    tt->val_offset = (char *) &vsection_axis_tick_len - &_start_;
     tt->single_val.i = 7;
     tt++;
     
-    // Parameter 'vert_n_ticks_ideal'
+    // Parameter 'vsection_n_ticks_ideal'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_n_ticks_ideal");
+    tt->param_name = tdrpStrDup("vsection_n_ticks_ideal");
     tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_n_ticks_ideal - &_start_;
+    tt->val_offset = (char *) &vsection_n_ticks_ideal - &_start_;
     tt->single_val.i = 7;
     tt++;
     
-    // Parameter 'vert_title_font_size'
+    // Parameter 'vsection_title_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_title_font_size");
+    tt->param_name = tdrpStrDup("vsection_title_font_size");
     tt->descr = tdrpStrDup("Font size of center title (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_title_font_size - &_start_;
+    tt->val_offset = (char *) &vsection_title_font_size - &_start_;
     tt->single_val.i = 12;
     tt++;
     
-    // Parameter 'vert_axis_label_font_size'
+    // Parameter 'vsection_axis_label_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_axis_label_font_size");
+    tt->param_name = tdrpStrDup("vsection_axis_label_font_size");
     tt->descr = tdrpStrDup("Font size of axis labels in vert (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_axis_label_font_size - &_start_;
+    tt->val_offset = (char *) &vsection_axis_label_font_size - &_start_;
     tt->single_val.i = 10;
     tt++;
     
-    // Parameter 'vert_tick_values_font_size'
+    // Parameter 'vsection_tick_values_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_tick_values_font_size");
+    tt->param_name = tdrpStrDup("vsection_tick_values_font_size");
     tt->descr = tdrpStrDup("Font size of tick values (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_tick_values_font_size - &_start_;
+    tt->val_offset = (char *) &vsection_tick_values_font_size - &_start_;
     tt->single_val.i = 8;
     tt++;
     
-    // Parameter 'vert_tick_values_inside'
+    // Parameter 'vsection_tick_values_inside'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("vert_tick_values_inside");
+    tt->param_name = tdrpStrDup("vsection_tick_values_inside");
     tt->descr = tdrpStrDup("Draw tick value labels inside the plot.");
     tt->help = tdrpStrDup("If FALSE the value labels will be drawn in the margins.");
-    tt->val_offset = (char *) &vert_tick_values_inside - &_start_;
+    tt->val_offset = (char *) &vsection_tick_values_inside - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'vert_legend_font_size'
+    // Parameter 'vsection_legend_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_legend_font_size");
+    tt->param_name = tdrpStrDup("vsection_legend_font_size");
     tt->descr = tdrpStrDup("Font size of legends (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_legend_font_size - &_start_;
+    tt->val_offset = (char *) &vsection_legend_font_size - &_start_;
     tt->single_val.i = 10;
     tt++;
     
-    // Parameter 'vert_title_color'
+    // Parameter 'vsection_title_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vert_title_color");
+    tt->param_name = tdrpStrDup("vsection_title_color");
     tt->descr = tdrpStrDup("Color for title text.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_title_color - &_start_;
+    tt->val_offset = (char *) &vsection_title_color - &_start_;
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'vert_axes_color'
+    // Parameter 'vsection_axes_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vert_axes_color");
+    tt->param_name = tdrpStrDup("vsection_axes_color");
     tt->descr = tdrpStrDup("Color for axes.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_axes_color - &_start_;
+    tt->val_offset = (char *) &vsection_axes_color - &_start_;
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'vert_grid_color'
+    // Parameter 'vsection_grid_color'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vert_grid_color");
+    tt->param_name = tdrpStrDup("vsection_grid_color");
     tt->descr = tdrpStrDup("Color for grid (if plotted).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_grid_color - &_start_;
+    tt->val_offset = (char *) &vsection_grid_color - &_start_;
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'vert_top_margin2'
+    // Parameter 'vsection_top_margin2'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_top_margin2");
+    tt->param_name = tdrpStrDup("vsection_top_margin2");
     tt->descr = tdrpStrDup("Height of top margin in VERT mode (pixels).");
     tt->help = tdrpStrDup("Titles go in the top margin.");
-    tt->val_offset = (char *) &vert_top_margin2 - &_start_;
+    tt->val_offset = (char *) &vsection_top_margin2 - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'vert_bottom_margin'
+    // Parameter 'vsection_bottom_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_bottom_margin");
+    tt->param_name = tdrpStrDup("vsection_bottom_margin");
     tt->descr = tdrpStrDup("Height of bottom margin in VERT mode (pixels).");
     tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
-    tt->val_offset = (char *) &vert_bottom_margin - &_start_;
+    tt->val_offset = (char *) &vsection_bottom_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'vert_left_margin2'
+    // Parameter 'vsection_left_margin2'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_left_margin2");
+    tt->param_name = tdrpStrDup("vsection_left_margin2");
     tt->descr = tdrpStrDup("Width of left margin in VERT mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the left margin.");
-    tt->val_offset = (char *) &vert_left_margin2 - &_start_;
+    tt->val_offset = (char *) &vsection_left_margin2 - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'vert_right_margin2'
+    // Parameter 'vsection_right_margin2'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_right_margin2");
+    tt->param_name = tdrpStrDup("vsection_right_margin2");
     tt->descr = tdrpStrDup("Width of right margin in VERT mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the right margin.");
-    tt->val_offset = (char *) &vert_right_margin2 - &_start_;
+    tt->val_offset = (char *) &vsection_right_margin2 - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'vert_label_font_size'
+    // Parameter 'vsection_label_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_label_font_size");
+    tt->param_name = tdrpStrDup("vsection_label_font_size");
     tt->descr = tdrpStrDup("Font size for labels on range rings (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_label_font_size - &_start_;
+    tt->val_offset = (char *) &vsection_label_font_size - &_start_;
     tt->single_val.i = 8;
     tt++;
     
-    // Parameter 'vert_text_margin'
+    // Parameter 'vsection_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_text_margin");
+    tt->param_name = tdrpStrDup("vsection_text_margin");
     tt->descr = tdrpStrDup("Margin around some text (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_text_margin - &_start_;
+    tt->val_offset = (char *) &vsection_text_margin - &_start_;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'vert_max_height_km'
+    // Parameter 'vsection_max_height_km'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("vert_max_height_km");
+    tt->param_name = tdrpStrDup("vsection_max_height_km");
     tt->descr = tdrpStrDup("Max height of data in VERT window (km).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_max_height_km - &_start_;
+    tt->val_offset = (char *) &vsection_max_height_km - &_start_;
     tt->single_val.d = 25;
     tt++;
     
-    // Parameter 'vert_ht_grid_on_at_startup'
+    // Parameter 'vsection_ht_grid_on_at_startup'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("vert_ht_grid_on_at_startup");
+    tt->param_name = tdrpStrDup("vsection_ht_grid_on_at_startup");
     tt->descr = tdrpStrDup("Set VERT X-axis grid overlay on at startup.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_ht_grid_on_at_startup - &_start_;
+    tt->val_offset = (char *) &vsection_ht_grid_on_at_startup - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'vert_distance_grid_on_at_startup'
+    // Parameter 'vsection_distance_grid_on_at_startup'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("vert_distance_grid_on_at_startup");
+    tt->param_name = tdrpStrDup("vsection_distance_grid_on_at_startup");
     tt->descr = tdrpStrDup("Set VERT Y-axis grid overlay on at startup.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_distance_grid_on_at_startup - &_start_;
+    tt->val_offset = (char *) &vsection_distance_grid_on_at_startup - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'vert_main_legend_pos'
+    // Parameter 'vsection_main_legend_pos'
     // ctype is '_legend_pos_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("vert_main_legend_pos");
+    tt->param_name = tdrpStrDup("vsection_main_legend_pos");
     tt->descr = tdrpStrDup("Position of main legend in the VERT plot window");
     tt->help = tdrpStrDup("This include time, field name and elevation angle.");
-    tt->val_offset = (char *) &vert_main_legend_pos - &_start_;
+    tt->val_offset = (char *) &vsection_main_legend_pos - &_start_;
     tt->enum_def.name = tdrpStrDup("legend_pos_t");
     tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
@@ -3522,39 +3522,39 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
-    // Parameter 'vert_beam_queue_size'
+    // Parameter 'vsection_beam_queue_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_beam_queue_size");
+    tt->param_name = tdrpStrDup("vsection_beam_queue_size");
     tt->descr = tdrpStrDup("Size of the queue for VERT beams.");
     tt->help = tdrpStrDup("After the queue reaches this size, older beams are discarded.");
-    tt->val_offset = (char *) &vert_beam_queue_size - &_start_;
+    tt->val_offset = (char *) &vsection_beam_queue_size - &_start_;
     tt->single_val.i = 360;
     tt++;
     
-    // Parameter 'vert_override_rendering_beam_width'
+    // Parameter 'vsection_override_rendering_beam_width'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("vert_override_rendering_beam_width");
+    tt->param_name = tdrpStrDup("vsection_override_rendering_beam_width");
     tt->descr = tdrpStrDup("Option to override the azimuth beam width for rendering.");
     tt->help = tdrpStrDup("Normally Lucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.");
-    tt->val_offset = (char *) &vert_override_rendering_beam_width - &_start_;
+    tt->val_offset = (char *) &vsection_override_rendering_beam_width - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'vert_rendering_beam_width'
+    // Parameter 'vsection_rendering_beam_width'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("vert_rendering_beam_width");
+    tt->param_name = tdrpStrDup("vsection_rendering_beam_width");
     tt->descr = tdrpStrDup("Rendering beam width, if override is active.");
-    tt->help = tdrpStrDup("See 'vert_override_rendering_beam_width'");
-    tt->val_offset = (char *) &vert_rendering_beam_width - &_start_;
+    tt->help = tdrpStrDup("See 'vsection_override_rendering_beam_width'");
+    tt->val_offset = (char *) &vsection_rendering_beam_width - &_start_;
     tt->single_val.d = 1;
     tt++;
     
@@ -3563,7 +3563,7 @@ Params *Params::_instance = (Params *) NULL;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 27");
-    tt->comment_hdr = tdrpStrDup("</VERT_VIEW>");
+    tt->comment_hdr = tdrpStrDup("</VSECTION_VIEW>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -5819,39 +5819,39 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("convert_image.csh");
     tt++;
     
-    // Parameter 'vert_image_dir'
+    // Parameter 'vsection_image_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vert_image_dir");
+    tt->param_name = tdrpStrDup("vsection_image_dir");
     tt->descr = tdrpStrDup("Image directory for vert images.");
     tt->help = tdrpStrDup("Note - this is initially set to image_dir");
-    tt->val_offset = (char *) &vert_image_dir - &_start_;
+    tt->val_offset = (char *) &vsection_image_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/cidd_vert_image_dir");
     tt++;
     
-    // Parameter 'vert_image_fname'
+    // Parameter 'vsection_image_fname'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vert_image_fname");
+    tt->param_name = tdrpStrDup("vsection_image_fname");
     tt->descr = tdrpStrDup("The default file name until reset by the user.");
     tt->help = tdrpStrDup("Appends other info automatically.");
-    tt->val_offset = (char *) &vert_image_fname - &_start_;
+    tt->val_offset = (char *) &vsection_image_fname - &_start_;
     tt->single_val.s = tdrpStrDup("cidd_vert_view.png");
     tt++;
     
-    // Parameter 'vert_image_command'
+    // Parameter 'vsection_image_command'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vert_image_command");
+    tt->param_name = tdrpStrDup("vsection_image_command");
     tt->descr = tdrpStrDup("Command to be run after image is created.");
     tt->help = tdrpStrDup("Note that this is initially set to 'image_convert_script'.");
-    tt->val_offset = (char *) &vert_image_command - &_start_;
+    tt->val_offset = (char *) &vsection_image_command - &_start_;
     tt->single_val.s = tdrpStrDup("convert_image.csh");
     tt++;
     

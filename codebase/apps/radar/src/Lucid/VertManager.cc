@@ -86,15 +86,15 @@ VertManager::VertManager(GuiManager *manager):
   // Set the window attributes.
 
   setWindowTitle(tr("VERT"));
-  setMinimumSize(_params.vert_window_min_width,
-                 _params.vert_window_min_height);
+  setMinimumSize(_params.vsection_window_min_width,
+                 _params.vsection_window_min_height);
 
   // Keep the vertical window's startup geometry independent of the main
   // window. The color scale has its own width parameter, while the configured
   // vertical plot height is used directly as the initial window height.
 
-  resize(_params.vert_plot_width + _params.vert_color_scale_width,
-         _params.vert_plot_height);
+  resize(_params.vsection_plot_width + _params.vsection_color_scale_width,
+         _params.vsection_plot_height);
 
 }
 
@@ -141,13 +141,13 @@ void VertManager::_createActions(VertView *vert)
   _heightGridAct = new QAction(tr("Height Grid"), this);
   _heightGridAct->setStatusTip(tr("Turn horizontal height grid lines on/off"));
   _heightGridAct->setCheckable(true);
-  _heightGridAct->setChecked(_params.vert_ht_grid_on_at_startup);
+  _heightGridAct->setChecked(_params.vsection_ht_grid_on_at_startup);
   connect(_heightGridAct, &QAction::toggled, vert, &VertView::setHeightGrid);
 
   _distanceGridAct = new QAction(tr("Distance Grid"), this);
   _distanceGridAct->setStatusTip(tr("Turn vertical distance grid lines on/off"));
   _distanceGridAct->setCheckable(true);
-  _distanceGridAct->setChecked(_params.vert_distance_grid_on_at_startup);
+  _distanceGridAct->setChecked(_params.vsection_distance_grid_on_at_startup);
   connect(_distanceGridAct, &QAction::toggled, vert, &VertView::setDistanceGrid);
 
   _azLinesAct = new QAction(tr("Az Lines"), this);

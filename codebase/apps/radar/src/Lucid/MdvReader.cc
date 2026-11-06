@@ -1655,7 +1655,7 @@ string MdvReader::fieldLabelVert() const
   label[0] = '\0';
   
   snprintf(label,2048,"%s - %s (%s) %s",
-           _params.vert_title_prefix,
+           _params.vsection_title_prefix,
            legend_name.c_str(),
            v_fhdr.units,
            tlabel.c_str());

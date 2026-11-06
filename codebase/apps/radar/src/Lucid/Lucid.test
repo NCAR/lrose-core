@@ -2693,7 +2693,7 @@ vert_window_start_x = 1100;
 
 vert_window_start_y = 0;
 
-///////////// vert_top_margin2 ////////////////////////
+///////////// vsection_top_margin2 ////////////////////////
 //
 // Height of top margin in VERT mode (pixels).
 //
@@ -2703,9 +2703,9 @@ vert_window_start_y = 0;
 // Type: int
 //
 
-vert_top_margin2 = 20;
+vsection_top_margin2 = 20;
 
-///////////// vert_bottom_margin //////////////////////
+///////////// vsection_bottom_margin //////////////////////
 //
 // Height of bottom margin in VERT mode (pixels).
 //
@@ -2715,9 +2715,9 @@ vert_top_margin2 = 20;
 // Type: int
 //
 
-vert_bottom_margin = 20;
+vsection_bottom_margin = 20;
 
-///////////// vert_left_margin2 ///////////////////////
+///////////// vsection_left_margin2 ///////////////////////
 //
 // Width of left margin in VERT mode (pixels).
 //
@@ -2727,9 +2727,9 @@ vert_bottom_margin = 20;
 // Type: int
 //
 
-vert_left_margin2 = 20;
+vsection_left_margin2 = 20;
 
-///////////// vert_right_margin2 //////////////////////
+///////////// vsection_right_margin2 //////////////////////
 //
 // Width of right margin in VERT mode (pixels).
 //
@@ -2739,9 +2739,9 @@ vert_left_margin2 = 20;
 // Type: int
 //
 
-vert_right_margin2 = 20;
+vsection_right_margin2 = 20;
 
-///////////// vert_label_font_size ////////////////////
+///////////// vsection_label_font_size ////////////////////
 //
 // Font size for labels on range rings (pixels).
 //
@@ -2749,9 +2749,9 @@ vert_right_margin2 = 20;
 // Type: int
 //
 
-vert_label_font_size = 8;
+vsection_label_font_size = 8;
 
-///////////// vert_axis_tick_len //////////////////////
+///////////// vsection_axis_tick_len //////////////////////
 //
 // Length of ticks on axes (pixels).
 //
@@ -2759,9 +2759,9 @@ vert_label_font_size = 8;
 // Type: int
 //
 
-vert_axis_tick_len = 7;
+vsection_axis_tick_len = 7;
 
-///////////// vert_n_ticks_ideal //////////////////////
+///////////// vsection_n_ticks_ideal //////////////////////
 //
 // Ideal number of ticks on axes.
 //
@@ -2769,9 +2769,9 @@ vert_axis_tick_len = 7;
 // Type: int
 //
 
-vert_n_ticks_ideal = 7;
+vsection_n_ticks_ideal = 7;
 
-///////////// vert_text_margin ////////////////////////
+///////////// vsection_text_margin ////////////////////////
 //
 // Margin around some text (pixels).
 //
@@ -2779,7 +2779,7 @@ vert_n_ticks_ideal = 7;
 // Type: int
 //
 
-vert_text_margin = 5;
+vsection_text_margin = 5;
 
 ///////////// vert_display_180_degrees ////////////////
 //
@@ -2802,7 +2802,7 @@ vert_display_180_degrees = FALSE;
 
 vert_aspect_ratio = 1;
 
-///////////// vert_max_height_km //////////////////////
+///////////// vsection_max_height_km //////////////////////
 //
 // Max height of data in VERT window (km).
 //
@@ -2810,9 +2810,9 @@ vert_aspect_ratio = 1;
 // Type: double
 //
 
-vert_max_height_km = 25;
+vsection_max_height_km = 25;
 
-///////////// vert_color_scale_width //////////////////
+///////////// vsection_color_scale_width //////////////////
 //
 // Width of color scale for VERT window (pixels).
 //
@@ -2820,7 +2820,7 @@ vert_max_height_km = 25;
 // Type: int
 //
 
-vert_color_scale_width = 40;
+vsection_color_scale_width = 40;
 
 ///////////// vert_grids_on_at_startup ////////////////
 //
@@ -2852,7 +2852,7 @@ vert_range_rings_on_at_startup = TRUE;
 
 vert_elevation_lines_on_at_startup = FALSE;
 
-///////////// vert_main_legend_pos ////////////////////
+///////////// vsection_main_legend_pos ////////////////////
 //
 // Position of main legend in the VERT plot window.
 //
@@ -2867,9 +2867,9 @@ vert_elevation_lines_on_at_startup = FALSE;
 //     LEGEND_BOTTOM_RIGHT
 //
 
-vert_main_legend_pos = LEGEND_TOP_LEFT;
+vsection_main_legend_pos = LEGEND_TOP_LEFT;
 
-///////////// vert_beam_queue_size ////////////////////
+///////////// vsection_beam_queue_size ////////////////////
 //
 // Size of the queue for VERT beams.
 //
@@ -2879,9 +2879,9 @@ vert_main_legend_pos = LEGEND_TOP_LEFT;
 // Type: int
 //
 
-vert_beam_queue_size = 360;
+vsection_beam_queue_size = 360;
 
-///////////// vert_override_rendering_beam_width //////
+///////////// vsection_override_rendering_beam_width //////
 //
 // Option to override the azimuth beam width for rendering.
 //
@@ -2893,19 +2893,19 @@ vert_beam_queue_size = 360;
 // Type: boolean
 //
 
-vert_override_rendering_beam_width = FALSE;
+vsection_override_rendering_beam_width = FALSE;
 
-///////////// vert_rendering_beam_width ///////////////
+///////////// vsection_rendering_beam_width ///////////////
 //
 // Rendering beam width, if override is active.
 //
-// See 'vert_override_rendering_beam_width'.
+// See 'vsection_override_rendering_beam_width'.
 //
 //
 // Type: double
 //
 
-vert_rendering_beam_width = 1;
+vsection_rendering_beam_width = 1;
 
 //======================================================================
 //
@@ -5368,7 +5368,7 @@ horiz_image_fname = "cidd_horiz_view.png";
 
 horiz_image_command = "convert_image.csh";
 
-///////////// vert_image_dir //////////////////////////
+///////////// vsection_image_dir //////////////////////////
 //
 // Image directory for vert images.
 //
@@ -5378,9 +5378,9 @@ horiz_image_command = "convert_image.csh";
 // Type: string
 //
 
-vert_image_dir = "/tmp";
+vsection_image_dir = "/tmp";
 
-///////////// vert_image_fname ////////////////////////
+///////////// vsection_image_fname ////////////////////////
 //
 // The default file name until reset by the user.
 //
@@ -5390,9 +5390,9 @@ vert_image_dir = "/tmp";
 // Type: string
 //
 
-vert_image_fname = "CV";
+vsection_image_fname = "CV";
 
-///////////// vert_image_command //////////////////////
+///////////// vsection_image_command //////////////////////
 //
 // Command to be run after image is created.
 //
@@ -5402,7 +5402,7 @@ vert_image_fname = "CV";
 // Type: string
 //
 
-vert_image_command = "convert_image.csh";
+vsection_image_command = "convert_image.csh";
 
 ///////////// output_geo_xml //////////////////////////
 //
@@ -6752,7 +6752,7 @@ horiz_left_margin = 20;
 
 horiz_right_margin = 60;
 
-///////////// vert_top_margin /////////////////////////
+///////////// vsection_top_margin /////////////////////////
 //
 // Height of top margin (pixels).
 //
@@ -6762,9 +6762,9 @@ horiz_right_margin = 60;
 // Type: int
 //
 
-vert_top_margin = 20;
+vsection_top_margin = 20;
 
-///////////// vert_bot_margin /////////////////////////
+///////////// vsection_bot_margin /////////////////////////
 //
 // Height of bottom margin (pixels).
 //
@@ -6774,9 +6774,9 @@ vert_top_margin = 20;
 // Type: int
 //
 
-vert_bot_margin = 20;
+vsection_bot_margin = 20;
 
-///////////// vert_left_margin ////////////////////////
+///////////// vsection_left_margin ////////////////////////
 //
 // Width of left margin (pixels).
 //
@@ -6786,9 +6786,9 @@ vert_bot_margin = 20;
 // Type: int
 //
 
-vert_left_margin = 20;
+vsection_left_margin = 20;
 
-///////////// vert_right_margin ///////////////////////
+///////////// vsection_right_margin ///////////////////////
 //
 // Width of right margin (pixels).
 //
@@ -6798,7 +6798,7 @@ vert_left_margin = 20;
 // Type: int
 //
 
-vert_right_margin = 30;
+vsection_right_margin = 30;
 
 //======================================================================
 //

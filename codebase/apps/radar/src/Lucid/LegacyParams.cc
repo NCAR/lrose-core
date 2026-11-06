@@ -1147,9 +1147,12 @@ int LegacyParams::_readMainParams()
   _getString("cidd.horiz_image_dir", "/tmp/cidd_horiz_image_dir");
   _getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
   _getString("cidd.horiz_image_command", "");
-  _getString("cidd.vert_image_dir", "/tmp/cidd_vert_image_dir");
-  _getString("cidd.vert_image_fname", "cidd_vert_view.png");
-  _getString("cidd.vert_image_command", "");
+  _getString("cidd.vert_image_dir", "/tmp/cidd_vert_image_dir", true,
+             "vsection_image_dir");
+  _getString("cidd.vert_image_fname", "cidd_vert_view.png", true,
+             "vsection_image_fname");
+  _getString("cidd.vert_image_command", "", true,
+             "vsection_image_command");
   _getBoolean("cidd.output_geo_xml", 0);
   _getBoolean("cidd.use_latlon_in_geo_xml", 0);
 
@@ -1364,7 +1367,8 @@ int LegacyParams::_readMainParams()
   _getString("cidd.height_indicator_color", "red");
   _getString("cidd.range_ring_color", "grey", true, "range_rings_color");
   _getString("cidd.range_ring_color", "grey", true, "horiz_grid_color");
-  _getString("cidd.range_ring_color", "grey", true, "vert_grid_color");
+  _getString("cidd.range_ring_color", "grey", true,
+             "vsection_grid_color");
   _getString("cidd.missing_data_color","transparent");
   _getString("cidd.bad_data_color","transparent");
 
@@ -1459,11 +1463,11 @@ int LegacyParams::_readMainParams()
   int horizRightMargin = _getLong("cidd.horiz_right_margin", 60, false);
   // fprintf(_tdrpFile, "horiz_color_scale_width = %d;\n", (horizRightMargin * 2) / 3);
   fprintf(_tdrpFile, "horiz_color_scale_width = %d;\n", horizRightMargin);
-  fprintf(_tdrpFile, "vert_color_scale_width = %d;\n", horizRightMargin);
+  fprintf(_tdrpFile, "vsection_color_scale_width = %d;\n", horizRightMargin);
   
   // int vertRightMargin = _getLong("cidd.vert_right_margin", 40, false);
-  // // fprintf(_tdrpFile, "vert_color_scale_width = %d;\n", (vertRightMargin * 2) / 3);
-  // fprintf(_tdrpFile, "vert_color_scale_width = %d;\n", vertRightMargin);
+  // // fprintf(_tdrpFile, "vsection_color_scale_width = %d;\n", (vertRightMargin * 2) / 3);
+  // fprintf(_tdrpFile, "vsection_color_scale_width = %d;\n", vertRightMargin);
   
   _getLong("cidd.horiz_top_margin", 20);
   _getLong("cidd.horiz_bot_margin", 20);
@@ -1475,31 +1479,32 @@ int LegacyParams::_readMainParams()
   // _getLong("cidd.horiz_legends_start_y", 0);
   // _getLong("cidd.horiz_legends_delta_y", 0);
 
-  // vertical section
+  // Preserve the old CIDD keys on input while writing the less ambiguous
+  // vsection_* names used by Lucid's TDRP interface.
   
   int vertWidth = _getLong("cidd.vert_default_width", 400, false);
-  fprintf(_tdrpFile, "vert_plot_width = %d;\n", vertWidth);
+  fprintf(_tdrpFile, "vsection_plot_width = %d;\n", vertWidth);
 
   int vertHeight = _getLong("cidd.vert_default_height", 400, false);
-  fprintf(_tdrpFile, "vert_plot_height = %d;\n", vertHeight);
+  fprintf(_tdrpFile, "vsection_plot_height = %d;\n", vertHeight);
 
   int vertMinWidth = _getLong("cidd.vert_min_width", 400, false);
-  fprintf(_tdrpFile, "vert_window_min_width = %d;\n", vertMinWidth);
+  fprintf(_tdrpFile, "vsection_window_min_width = %d;\n", vertMinWidth);
   
   int vertMinHeight = _getLong("cidd.vert_min_height", 400, false);
-  fprintf(_tdrpFile, "vert_window_min_height = %d;\n", vertMinHeight);
+  fprintf(_tdrpFile, "vsection_window_min_height = %d;\n", vertMinHeight);
   
   int vertTopMargin = _getLong("cidd.vert_top_margin", 40, false);
-  fprintf(_tdrpFile, "vert_top_margin = %d;\n", vertTopMargin * 1);
+  fprintf(_tdrpFile, "vsection_top_margin = %d;\n", vertTopMargin * 1);
   
   int vertBotMargin = _getLong("cidd.vert_bot_margin", 40, false);
-  fprintf(_tdrpFile, "vert_bot_margin = %d;\n", vertBotMargin * 1);
+  fprintf(_tdrpFile, "vsection_bot_margin = %d;\n", vertBotMargin * 1);
   
   int vertLeftMargin = _getLong("cidd.vert_left_margin", 40, false);
-  fprintf(_tdrpFile, "vert_left_margin = %d;\n", vertLeftMargin * 1);
+  fprintf(_tdrpFile, "vsection_left_margin = %d;\n", vertLeftMargin * 1);
   
   // int vertRightMargin = _getLong("cidd.vert_right_margin", 40, false);
-  fprintf(_tdrpFile, "vert_right_margin = %d;\n", 0);
+  fprintf(_tdrpFile, "vsection_right_margin = %d;\n", 0);
   
   // _getLong("cidd.vert_top_margin", 20);
   // _getLong("cidd.vert_bot_margin", 20);

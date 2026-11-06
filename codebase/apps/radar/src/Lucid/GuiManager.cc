@@ -555,8 +555,8 @@ void GuiManager::_setupWindows()
   // frame geometry. Each configured coordinate can override its fallback
   // independently.
 
-  int vertX = _params.vert_window_x_pos;
-  int vertY = _params.vert_window_y_pos;
+  int vertX = _params.vsection_window_x_pos;
+  int vertY = _params.vsection_window_y_pos;
   if (vertX == -1) {
     // Leave enough space for both window-manager borders to remain visible.
     constexpr int vertWindowGap = 5;
