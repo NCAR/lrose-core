@@ -93,7 +93,7 @@ class DLL_EXPORT VertView : public QWidget
    */
 
   virtual ~VertView();
-  
+
   /**
    * @brief Configure the CartWidget for world coords
    */

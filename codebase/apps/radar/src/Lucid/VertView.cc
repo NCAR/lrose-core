@@ -1346,27 +1346,11 @@ void VertView::mouseMoveEvent(QMouseEvent * e)
 
   int x = pos.x();
   int y = pos.y();
-  int deltaX = x - _mousePressX;
-  int deltaY = y - _mousePressY;
+  const int moveX = x - _mousePressX;
+  const int moveY = y - _mousePressY;
 
-  // Make the rubberband aspect ratio match that
-  // of the window
-
-  // double dx = fabs(deltaY * _aspectRatio);
-  // double dy = fabs(dx / _aspectRatio);
-  double dx = fabs(deltaY);
-  double dy = fabs(dx);
-
-  // Preserve the signs
-
-  dx *= fabs(deltaX)/deltaX;
-  dy *= fabs(deltaY)/deltaY;
-
-  int moveX = (int) floor(dx + 0.5);
-  int moveY = (int) floor(dy + 0.5);
-
-  moveX = deltaX;
-  moveY = deltaY;
+  // Vertical sections have independent distance and height scales. Preserve
+  // the user's drag rectangle instead of imposing a display aspect ratio.
   
   QRect newRect = QRect(_mousePressX, _mousePressY, moveX, moveY);
 

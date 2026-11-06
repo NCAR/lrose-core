@@ -565,7 +565,6 @@ void GuiManager::_setupWindows()
   if (vertY == -1) {
     vertY = frameGeometry().top();
   }
-  _vertWindow->resize(_vertWindow->width(), height());
   _vertWindow->move(vertX, vertY);
 
   // set up click report dialog

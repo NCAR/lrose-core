@@ -86,7 +86,13 @@ VertManager::VertManager(GuiManager *manager):
   // Set the window attributes.
 
   setWindowTitle(tr("VERT"));
-  setMinimumSize(200, 200);
+  setMinimumSize(_params.vert_window_min_width,
+                 _params.vert_window_min_height);
+
+  // Keep the vertical window's startup geometry independent of the main
+  // window. The color scale has its own width parameter, while the configured
+  // vertical plot height is used directly as the initial window height.
+
   resize(_params.vert_plot_width + _params.vert_color_scale_width,
          _params.vert_plot_height);
 
