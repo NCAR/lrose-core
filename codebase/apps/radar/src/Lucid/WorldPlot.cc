@@ -2783,14 +2783,10 @@ void WorldPlot::renderGridRect(int fieldNum,
   for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
     for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
       fl32 fval = *val;
-      if (fval == miss || fval == bad || !std::isfinite(fval)) {
+      if (fval == miss || fval == bad || !std::isfinite(fval) ||
+          !mr->colorMap.withinValidRange(fval)) {
         continue;
       }
-      // if (!mr->colorMap.withinValidRange(fval)) {
-      //   continue;
-      // }
-      // dataBrush() saturates values outside the scale so valid data always
-      // receives either an interior color or the nearest endpoint color.
       const QBrush *brush = mr->colorMap.dataBrush(fval);
       double xx = vertices[iy+1][ix].x();
       double yy = vertices[iy+1][ix].y();
@@ -3151,13 +3147,10 @@ void WorldPlot::renderGridDistorted(int fieldNum,
   for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
     for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
       fl32 fval = *val;
-      if (fval == miss || fval == bad || !std::isfinite(fval)) {
+      if (fval == miss || fval == bad || !std::isfinite(fval) ||
+          !mr->colorMap.withinValidRange(fval)) {
         continue;
       }
-      // if (!mr->colorMap.withinValidRange(fval)) {
-      //   continue;
-      // }
-      // Keep out-of-range data visible using the nearest endpoint color.
       const QBrush *brush = mr->colorMap.dataBrush(fval);
       QVector<QPointF> points;
       points.push_back(vertices[iy][ix]);
@@ -3236,51 +3229,25 @@ void WorldPlot::renderFilledContours(int fieldNum,
   vector<fl32> contourData = mr->h_fl32_data;
   const fl32 missing = mr->h_fhdr.missing_data_value;
   const fl32 bad = mr->h_fhdr.bad_data_value;
-  const fl32 minDataValue = mr->h_fhdr.min_value;
 
-  // MdvxContour treats missing and bad values as holes.  Normalize bad data
-  // to the missing sentinel first because its log transform only preserves
-  // the missing sentinel; the legacy mapping options can instead place either
-  // sentinel at the bottom of the data range when continuity is desired.
+  // Keep horizontal and vertical rendering consistent: missing, bad,
+  // non-finite, and out-of-scale values all remain unpainted. The configured
+  // missing color beneath the contours will therefore show through, and a
+  // color scale can be widened explicitly when those values should be shown.
 
-  for (size_t ii = 0; ii < contourData.size(); ii++) {
-    if (contourData[ii] == bad) {
-      contourData[ii] = _params.map_bad_to_min_value ? minDataValue : missing;
-    }
-    if (contourData[ii] == missing && _params.map_missing_to_min_value) {
-      contourData[ii] = minDataValue;
-    }
-  }
-
-  // Extend only the outer contour boundaries to the valid data extrema.  The
-  // interior color transitions remain unchanged, while values beyond the
-  // configured scale are absorbed into its bottom or top color interval.
-
-  bool haveValidData = false;
-  double validDataMin = 0.0;
-  double validDataMax = 0.0;
-  for (size_t ii = 0; ii < contourData.size(); ii++) {
-    if (contourData[ii] == missing) {
+  for (fl32 &value : contourData) {
+    if (!std::isfinite(value) || value == missing || value == bad) {
+      value = missing;
       continue;
     }
-    double value = contourData[ii];
+    double displayValue = value;
     if (mr->h_fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
-      value = exp(value);
+      displayValue = exp(displayValue);
     }
-    if (!std::isfinite(value)) {
-      continue;
+    if (!std::isfinite(displayValue) ||
+        !mr->colorMap.withinValidRange(displayValue)) {
+      value = missing;
     }
-    if (!haveValidData) {
-      validDataMin = validDataMax = value;
-      haveValidData = true;
-    } else {
-      validDataMin = MIN(validDataMin, value);
-      validDataMax = MAX(validDataMax, value);
-    }
-  }
-  if (haveValidData) {
-    contourValues.front() = MIN(contourValues.front(), validDataMin);
-    contourValues.back() = MAX(contourValues.back(), validDataMax);
   }
 
   // The reader releases its DsMdvx volume after preserving this plane.  Give
@@ -3446,13 +3413,10 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
   for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
     for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
       fl32 fval = *val;
-      if (fval == miss || fval == bad || !std::isfinite(fval)) {
+      if (fval == miss || fval == bad || !std::isfinite(fval) ||
+          !mr->colorMap.withinValidRange(fval)) {
         continue;
       }
-      // if (!mr->colorMap.withinValidRange(fval)) {
-      //   continue;
-      // }
-      // Keep out-of-range data visible using the nearest endpoint color.
       const QBrush *brush = mr->colorMap.dataBrush(fval);
       QVector<QPointF> points;
       points.push_back(vertices[iy][ix]);

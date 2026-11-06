@@ -122,7 +122,7 @@ SPOL_DBMVC_F  SPOL_DBMVC_F   $(HOME)/data/lucid/precip/cfradial/spol/sur&DBMVC_F
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
-SAT_VIS   SAT_VIS   $(HOME)/data/lucid/precip/mdv/himawari_ch03&albedo sat_albedo.colors %  -5   80  5  cart   1 0
+SAT_VIS   SAT_VIS   $(HOME)/data/lucid/precip/mdv/himawari_ch03&albedo sat_albedo_extended.colors %  -5   80  5  cart   1 0
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
@@ -549,7 +549,8 @@ cidd.max_adeg:               360.0
 # List of comma delimited local directories or HTTP URLs to search
 # Searchs . then each directory/URL in order 
 
-cidd.color_file_subdir:   $(HOME)/git/lrose-displays/color_scales,http://front.eol.ucar.edu/color_scales
+cidd.color_file_subdir:   $(HOME)/git/lrose-displays/color_scales
+#cidd.color_file_subdir:   $(HOME)/git/lrose-displays/color_scales,http://front.eol.ucar.edu/color_scales
 cidd.map_file_subdir:     $(HOME)/git/lrose-displays/maps,http://front.eol.ucar.edu/maps
 
 #

@@ -808,7 +808,8 @@ void VertView::_drawSectionCells(QPainter &painter)
     for (int iz = 0; iz < nz; ++iz) {
       for (int ix = 0; ix < nx; ++ix) {
         const fl32 value = _sectionReader->v_fl32_data[iz * nx + ix];
-        if (value == missing || value == bad || !std::isfinite(value)) {
+        if (value == missing || value == bad || !std::isfinite(value) ||
+            !_sectionReader->colorMap.withinValidRange(value)) {
           continue;
         }
         
@@ -867,44 +868,24 @@ bool VertView::_drawSectionContours(QPainter &painter)
   vector<fl32> contourData = _sectionReader->v_fl32_data;
   const fl32 missing = _sectionReader->v_fhdr.missing_data_value;
   const fl32 bad = _sectionReader->v_fhdr.bad_data_value;
-  const fl32 minDataValue = _sectionReader->v_fhdr.min_value;
 
-  // Match horizontal contour behavior: missing values remain holes unless
-  // the mapping parameters explicitly place them at the data minimum.
+  // Values outside the color scale are intentionally treated like missing
+  // data in vertical sections. This prevents weak or sentinel-like values
+  // from filling otherwise empty parts of the cross section with an endpoint
+  // color; individual color scales can be widened when those values matter.
   for (fl32 &value : contourData) {
-    if (value == bad) {
-      value = _params.map_bad_to_min_value ? minDataValue : missing;
-    }
-    if (value == missing && _params.map_missing_to_min_value) {
-      value = minDataValue;
-    }
-  }
-
-  bool haveValidData = false;
-  double validDataMax = 0.0;
-  for (fl32 value : contourData) {
-    if (value == missing) {
+    if (!std::isfinite(value) || value == missing || value == bad) {
+      value = missing;
       continue;
     }
     double displayValue = value;
     if (_sectionReader->v_fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
       displayValue = exp(displayValue);
     }
-    if (!std::isfinite(displayValue)) {
-      continue;
+    if (!std::isfinite(displayValue) ||
+        !_sectionReader->colorMap.withinValidRange(displayValue)) {
+      value = missing;
     }
-    if (!haveValidData) {
-      validDataMax = displayValue;
-      haveValidData = true;
-    } else {
-      validDataMax = MAX(validDataMax, displayValue);
-    }
-  }
-  if (haveValidData) {
-    // Keep the lower color boundary as a physical contour. Extending it to
-    // the data minimum colors weak model reflectivity all the way to the
-    // model top instead of leaving the region below the scale unfilled.
-    contourValues.back() = MAX(contourValues.back(), validDataMax);
   }
 
   // Preserve the vertical-section projection: MdvxContour treats nz as its Y
@@ -927,7 +908,13 @@ bool VertView::_drawSectionContours(QPainter &painter)
     return false;
   }
 
-  const QBrush backgroundBrush(_params.background_color);
+  // Contour holes and the synthetic extra level are not data. Keep them
+  // distinct from valid endpoint colors by painting the configured missing
+  // color. Direct widget rendering uses the background for "transparent".
+  const char *missingColor =
+    string(_params.missing_data_color) == "transparent" ?
+    _params.background_color : _params.missing_data_color;
+  const QBrush missingBrush{QColor(missingColor)};
   painter.save();
   _zoomWorld.setClippingOn(painter);
   painter.setPen(Qt::NoPen);
@@ -936,7 +923,7 @@ bool VertView::_drawSectionContours(QPainter &painter)
       continue;
     }
 
-    const QBrush *levelBrush = &backgroundBrush;
+    const QBrush *levelBrush = &missingBrush;
     if (!level.extra && level.index < (int) entries.size()) {
       levelBrush = entries[level.index].brush;
     }
