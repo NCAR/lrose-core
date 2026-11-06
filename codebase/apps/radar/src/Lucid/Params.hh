@@ -914,6 +914,8 @@ public:
 
   double horiz_rendering_beam_width;
 
+  tdrp_bool_t single_segment_vsection;
+
   double min_ht_km;
 
   double max_ht_km;
@@ -1352,7 +1354,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[423];
+  mutable TDRPtable _table[424];
 
   const char *_className;
 

@@ -2897,9 +2897,13 @@ void GuiManager::_howto()
   text += "\n";
   text += "Click in main window to get field data at a point.\n";
   text += "\n";
-  text += "Right-drag to start a vertical-section route.\n";
-  text += "Right-click to add segments and double-click to finish.\n";
-  text += "Use Backspace to remove a point or Escape to cancel.\n";
+  if (_params.single_segment_vsection) {
+    text += "Right-drag and release to select a vertical section.\n";
+  } else {
+    text += "Right-drag to start a vertical-section route.\n";
+    text += "Right-click to add segments and double-click to finish.\n";
+    text += "Use Backspace to remove a point or Escape to cancel.\n";
+  }
   text += "Use Shift-right-click for the context menu.\n";
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }

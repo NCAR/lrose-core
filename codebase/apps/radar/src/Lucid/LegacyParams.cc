@@ -1763,7 +1763,7 @@ int LegacyParams::_readMainParams()
   _numMenuCols = _getLong("cidd.num_field_menu_cols", 1);
   
   // display modes
-  _getBoolean("cidd.one_click_rhi", 0);
+  _getBoolean("cidd.one_click_rhi", 0, true, "single_segment_vsection");
 
   // canvas events
   _getDouble("cidd.rotate_coarse_adjust",6.0);

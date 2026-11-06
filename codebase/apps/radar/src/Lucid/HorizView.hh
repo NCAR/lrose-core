@@ -324,7 +324,7 @@ class DLL_EXPORT HorizView : public QWidget
 
   virtual void mouseReleaseEvent(QMouseEvent* event) override;
 
-  // A double right-click completes the current vertical-section route.
+  // In multi-segment mode, a double right-click completes the current route.
 
   virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
 

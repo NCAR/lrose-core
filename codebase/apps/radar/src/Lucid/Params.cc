@@ -3045,6 +3045,18 @@ Params *Params::_instance = (Params *) NULL;
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'single_segment_vsection'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("single_segment_vsection");
+    tt->descr = tdrpStrDup("Option to force vertical sections to contain a single segment.");
+    tt->help = tdrpStrDup("If this is true, then you select a vertical section by right-clicking and dragging to draw a single-segment straight line. When you release the mouse button the resulting line defines the location of the vertical section. If this is set to false, then you can create a vertical section with multiple adjacent segments. In that case you right click and drag a series of segments, lifting the mouse button between segments and then rifht clicking again. You finalize the segment selection by double-clicking the right button close to the final point of the last segment.");
+    tt->val_offset = (char *) &single_segment_vsection - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'min_ht_km'
     // ctype is 'double'
     

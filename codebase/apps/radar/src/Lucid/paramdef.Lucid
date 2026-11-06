@@ -1294,6 +1294,12 @@ commentdef {
   p_header = "<VSECTION_VIEW>";
 }
 
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to force vertical sections to contain a single segment.";
+  p_help = "If this is true, then you select a vertical section by right-clicking and dragging to draw a single-segment straight line. When you release the mouse button the resulting line defines the location of the vertical section. If this is set to false, then you can create a vertical section with multiple adjacent segments. In that case you right click and drag a series of segments, lifting the mouse button between segments and then rifht clicking again. You finalize the segment selection by double-clicking the right button close to the final point of the last segment.";
+} single_segment_vsection;
+
 paramdef double {
   p_default = 0;
   p_descr = "Minimum ht of cross section.";

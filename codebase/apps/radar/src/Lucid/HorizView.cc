@@ -1720,8 +1720,22 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     if (_vsectionRouteEditing) {
       _vsectionPreviewX = pos.x();
       _vsectionPreviewY = pos.y();
-      _appendVsectionRoutePoint(pos.x(), pos.y());
-      update();
+      const bool endpointAdded =
+        _appendVsectionRoutePoint(pos.x(), pos.y());
+
+      // Single-segment mode treats one drag as the complete interaction. If
+      // the endpoint is invalid, discard the starting point so a later drag
+      // cannot unintentionally continue it as a multi-segment route.
+
+      if (_params.single_segment_vsection) {
+        if (endpointAdded) {
+          _completeVsectionRoute();
+        } else {
+          _cancelVsectionRoute();
+        }
+      } else {
+        update();
+      }
     }
     return;
   }
@@ -1828,7 +1842,7 @@ void HorizView::mouseDoubleClickEvent(QMouseEvent *e)
   const QPointF pos(e->pos());
 #endif
 
-  if (_vsectionRouteEditing) {
+  if (!_params.single_segment_vsection && _vsectionRouteEditing) {
     _appendVsectionRoutePoint(pos.x(), pos.y());
     _completeVsectionRoute();
   }
