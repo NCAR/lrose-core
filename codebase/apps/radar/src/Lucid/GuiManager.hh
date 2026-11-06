@@ -316,8 +316,11 @@ private:
   QLabel *_clickTime;
   QLabel *_clickLatitude;
   QLabel *_clickLongitude;
+  QLabel *_clickHeightName;
   QLabel *_clickHeight;
+  QLabel *_clickXName;
   QLabel *_clickX;
+  QLabel *_clickYName;
   QLabel *_clickY;
   QTableWidget *_clickFieldsTable;
   bool _clickReportPlaced;
@@ -368,7 +371,8 @@ private:
   void _populateOverlaysMenu();
   void _populateShowMenu();
   void _createClickReportDialog();
-  QLabel *_addClickReportRow(const string &name, int row);
+  QLabel *_addClickReportRow(const string &name, int row,
+                             QLabel **nameLabelOut = nullptr);
 
   // field menu
 

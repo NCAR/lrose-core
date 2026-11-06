@@ -574,8 +574,9 @@ void HorizView::_updateClickReport()
   report.longitude = _worldClickLon;
   report.x = _worldClickX;
   report.y = _worldClickY;
-  report.xyUnits =
+  report.xUnits =
     (_proj.getProjType() == Mdvx::PROJ_LATLON) ? "deg" : "km";
+  report.yUnits = report.xUnits;
   if (primaryField.fhdr.nz > 0) {
     report.height = primaryField.vhdr.level[0];
     report.heightUnits =

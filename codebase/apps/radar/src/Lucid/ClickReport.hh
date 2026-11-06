@@ -35,18 +35,25 @@ struct ClickReportField {
   double value;
 };
 
-// Snapshot of the displayed data at a user-selected horizontal location.
-// Keeping the report independent of the dialog lets HorizView own coordinate
-// sampling while GuiManager remains responsible for presentation.
+// Snapshot of displayed data at a user-selected location. Keeping the report
+// independent of the dialog lets each view own its coordinate sampling while
+// GuiManager remains responsible for presentation.
 struct ClickReport {
   time_t dataTime = 0;
   double latitude = 0.0;
   double longitude = 0.0;
   double height = 0.0;
+  std::string heightLabel = "Height";
   std::string heightUnits;
   double x = 0.0;
   double y = 0.0;
-  std::string xyUnits;
+  std::string xLabel = "X";
+  std::string yLabel = "Y";
+  std::string xUnits;
+  std::string yUnits;
+  bool showHeight = true;
+  bool showX = true;
+  bool showY = true;
   std::vector<ClickReportField> fields;
 };
 

@@ -45,6 +45,7 @@
 #include <QErrorMessage>
 
 #include <toolsa/toolsa_macros.h>
+#include <toolsa/pjg_flat.h>
 #include <toolsa/uusleep.h>
 #include <toolsa/LogStream.hh>
 #include <Mdv/MdvxContour.hh>
@@ -105,6 +106,12 @@ VertView::VertView(QWidget* parent,
   _worldReleaseX = 0.0;
   _worldReleaseY = 0.0;
   _pointClicked = false;
+  _leftDragActive = false;
+  _sectionPixmapDirty = true;
+  _showValue = false;
+  _mouseValueVisible = false;
+  _mouseValueX = 0;
+  _mouseValueY = 0;
   _mousePressX = 0;
   _mousePressY = 0;
   _mouseReleaseX = 0;
@@ -249,40 +256,38 @@ void VertView::mouseReleaseEvent(QMouseEvent *e)
 
   _pointClicked = false;
 
-  QRect rgeom = _rubberBand->geometry();
-
-  // If the mouse hasn't moved much, assume we are clicking rather than
-  // zooming
-
 #if QT_VERSION >= 0x060000
   QPointF pos(e->position());
 #else
   QPointF pos(e->pos());
 #endif
 
+  if (!_leftDragActive || e->button() != Qt::LeftButton) {
+    return;
+  }
+  _leftDragActive = false;
+
   _mouseReleaseX = pos.x();
   _mouseReleaseY = pos.y();
 
-  // get click location in world coords
+  const double deltaX = _mouseReleaseX - _mousePressX;
+  const double deltaY = _mouseReleaseY - _mousePressY;
+  const double distanceMoved = std::hypot(deltaX, deltaY);
 
-  if (rgeom.width() <= 20) {
-    
-    // Emit a signal to indicate that the click location has changed
-    
+  if (distanceMoved <= 20.0) {
     _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
     _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
 
-    double x_km = _worldReleaseX;
-    double y_km = _worldReleaseY;
-    _pointClicked = true;
+    SectionSample sample;
+    if (_sampleSection(_mouseReleaseX, _mouseReleaseY, sample)) {
+      _pointClicked = true;
+      emit clickReportAvailable(_createClickReport(sample));
 
-    // get ray closest to click point
-
-    const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-    
-    // emit signal
-
-    emit locationClicked(x_km, y_km, closestRay);
+      // Retain the legacy signal for any remaining vertical-view consumers.
+      const RadxRay *closestRay =
+        _getClosestRay(_worldReleaseX, _worldReleaseY);
+      emit locationClicked(_worldReleaseX, _worldReleaseY, closestRay);
+    }
   
   } else {
 
@@ -313,6 +318,9 @@ void VertView::mouseReleaseEvent(QMouseEvent *e)
   // hide the rubber band
 
   _rubberBand->hide();
+  if (_showValue) {
+    _updateMouseValue(_mouseReleaseX, _mouseReleaseY);
+  }
   update();
 
 }
@@ -588,6 +596,8 @@ void VertView::_drawOverlays(QPainter &painter)
 void VertView::_refreshImages()
 {
 
+  _sectionPixmapDirty = true;
+
   // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     
   //   FieldRenderer *field = _fieldRenderers[ifield];
@@ -642,6 +652,9 @@ void VertView::clear()
   // }
   // _vertBeams.clear();
   _pointClicked = false;
+  _leftDragActive = false;
+  _mouseValueVisible = false;
+  _mouseValueText.clear();
   _sectionReader = nullptr;
   
   // Now rerender the images
@@ -693,8 +706,23 @@ void VertView::paintEvent(QPaintEvent *event)
 
   QPainter painter(this);
   painter.fillRect(rect(), _backgroundBrush);
-  _drawSection(painter);
+
+  // The section data changes only on a data/geometry refresh. Reusing this
+  // layer keeps cursor-value updates independent of expensive contour
+  // generation while overlays remain responsive to interaction state.
+
+  if (_sectionPixmapDirty || _sectionPixmap.size() != size()) {
+    _sectionPixmap = QPixmap(size());
+    _sectionPixmap.fill(Qt::transparent);
+    QPainter sectionPainter(&_sectionPixmap);
+    _drawSection(sectionPainter);
+    _sectionPixmapDirty = false;
+  }
+  painter.drawPixmap(0, 0, _sectionPixmap);
   _drawOverlays(painter);
+  if (_showValue && _mouseValueVisible) {
+    _drawMouseValue(painter);
+  }
 
 }
 
@@ -704,6 +732,8 @@ void VertView::paintEvent(QPaintEvent *event)
 void VertView::setSection(const MdvReader *reader)
 {
   _sectionReader = reader;
+  _mouseValueVisible = false;
+  _mouseValueText.clear();
   _verticalUnits.clear();
   if (_sectionReader != nullptr) {
     _verticalUnits = Mdvx::vertTypeZUnits(_sectionReader->v_fhdr.vlevel_type);
@@ -711,6 +741,281 @@ void VertView::setSection(const MdvReader *reader)
   _savedZooms.clear();
   configureWorldCoords();
   update();
+}
+
+/////////////////////////////////////////////////////////////
+// sample the underlying vertical-section grid at a widget location
+
+bool VertView::_sampleGridValue(int mouseX, int mouseY,
+                                SectionSample &sample) const
+{
+  if (_sectionReader == nullptr || !_sectionReader->isValidV()) {
+    return false;
+  }
+
+  const int plotLeft = std::min(_zoomWorld.getXMinPixel(),
+                                _zoomWorld.getXMaxPixel());
+  const int plotRight = std::max(_zoomWorld.getXMinPixel(),
+                                 _zoomWorld.getXMaxPixel());
+  const int plotTop = std::min(_zoomWorld.getYMinPixel(),
+                               _zoomWorld.getYMaxPixel());
+  const int plotBottom = std::max(_zoomWorld.getYMinPixel(),
+                                  _zoomWorld.getYMaxPixel());
+  if (mouseX < plotLeft || mouseX > plotRight ||
+      mouseY < plotTop || mouseY > plotBottom) {
+    return false;
+  }
+
+  const int nx = _sectionReader->v_fhdr.nx;
+  const int nz = _sectionReader->v_fhdr.nz;
+  const double dx = _sectionReader->v_fhdr.grid_dx;
+  if (nx <= 0 || nz <= 0 || !std::isfinite(dx) || dx == 0.0 ||
+      _sectionReader->v_fl32_data.size() != (size_t) nx * (size_t) nz) {
+    return false;
+  }
+
+  sample.distanceKm = _zoomWorld.getXWorld(mouseX);
+  sample.verticalCoord = _zoomWorld.getYWorld(mouseY);
+  double totalLengthKm = _sectionReader->getVertTotalLengthKm();
+  if (!std::isfinite(totalLengthKm) || totalLengthKm <= 0.0) {
+    totalLengthKm = (nx - 1) * fabs(dx);
+  }
+  if (!std::isfinite(totalLengthKm) || totalLengthKm <= 0.0 ||
+      sample.distanceKm < 0.0 || sample.distanceKm > totalLengthKm) {
+    return false;
+  }
+  int ix = (int) std::llround
+    ((sample.distanceKm - _sectionReader->v_fhdr.grid_minx) / dx);
+
+  // Rendering extends the first and last sample cells to the route ends.
+  // Apply the same rule so endpoint clicks select visible data rather than
+  // falling one rounded index outside the returned array.
+
+  ix = std::max(0, std::min(ix, nx - 1));
+
+  // Vertical levels may be irregular or descending. The two outer cell edges
+  // bound the grid; computing them directly keeps cursor sampling allocation
+  // free while retaining the same extent used by the renderer.
+
+  double firstEdge;
+  double lastEdge;
+  if (nz == 1) {
+    double halfWidth = fabs(_sectionReader->v_fhdr.grid_dz) / 2.0;
+    if (halfWidth == 0.0) {
+      halfWidth = 0.5;
+    }
+    firstEdge = _sectionReader->v_vhdr.level[0] - halfWidth;
+    lastEdge = _sectionReader->v_vhdr.level[0] + halfWidth;
+  } else {
+    firstEdge = _sectionReader->v_vhdr.level[0] -
+      (_sectionReader->v_vhdr.level[1] -
+       _sectionReader->v_vhdr.level[0]) / 2.0;
+    lastEdge = _sectionReader->v_vhdr.level[nz - 1] +
+      (_sectionReader->v_vhdr.level[nz - 1] -
+       _sectionReader->v_vhdr.level[nz - 2]) / 2.0;
+  }
+  if (sample.verticalCoord < std::min(firstEdge, lastEdge) ||
+      sample.verticalCoord > std::max(firstEdge, lastEdge)) {
+    return false;
+  }
+
+  int iz = 0;
+  double closest = fabs(sample.verticalCoord -
+                        _sectionReader->v_vhdr.level[0]);
+  for (int ii = 1; ii < nz; ++ii) {
+    const double difference = fabs(sample.verticalCoord -
+                                   _sectionReader->v_vhdr.level[ii]);
+    if (difference < closest) {
+      closest = difference;
+      iz = ii;
+    }
+  }
+
+  const fl32 missing = _sectionReader->v_fhdr.missing_data_value;
+  const fl32 bad = _sectionReader->v_fhdr.bad_data_value;
+  double value = _sectionReader->v_fl32_data[iz * nx + ix];
+  if (!std::isfinite(value) || value == missing || value == bad) {
+    return false;
+  }
+  if (_sectionReader->v_fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
+    value = exp(value);
+  }
+  if (!std::isfinite(value)) {
+    return false;
+  }
+  if (fabs(value) < 0.0001) {
+    value = 0.0;
+  }
+  sample.value = value;
+
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
+// add geographic metadata needed only by a click report
+
+bool VertView::_sampleSection(int mouseX, int mouseY,
+                              SectionSample &sample) const
+{
+  if (!_sampleGridValue(mouseX, mouseY, sample)) {
+    return false;
+  }
+  return _routeLocation(sample.distanceKm,
+                        sample.latitude, sample.longitude);
+}
+
+/////////////////////////////////////////////////////////////
+// locate a cumulative section distance along the returned route
+
+bool VertView::_routeLocation(double distanceKm, double &latitude,
+                              double &longitude) const
+{
+  if (_sectionReader == nullptr) {
+    return false;
+  }
+  const WayPts &wayPoints = _sectionReader->getVertWayPts();
+  if (wayPoints.getNPoints() < 2) {
+    return false;
+  }
+
+  double remainingKm = std::max(0.0, distanceKm);
+  const vector<Mdvx::vsect_segment_t> &segments =
+    _sectionReader->getVertSegments();
+  for (size_t ii = 0; ii + 1 < wayPoints.getNPoints(); ++ii) {
+    double startLat, startLon, endLat, endLon;
+    wayPoints.getPoint(ii, startLat, startLon);
+    wayPoints.getPoint(ii + 1, endLat, endLon);
+
+    double lengthKm = 0.0;
+    double azimuthDeg = 0.0;
+    if (ii < segments.size() && std::isfinite(segments[ii].length) &&
+        segments[ii].length > 0.0 &&
+        std::isfinite(segments[ii].azimuth)) {
+      lengthKm = segments[ii].length;
+      azimuthDeg = segments[ii].azimuth;
+    } else {
+      PJGLatLon2RTheta(startLat, startLon, endLat, endLon,
+                      &lengthKm, &azimuthDeg);
+    }
+    if (!std::isfinite(lengthKm) || lengthKm <= 0.0) {
+      continue;
+    }
+
+    if (remainingKm <= lengthKm || ii + 2 == wayPoints.getNPoints()) {
+      PJGLatLonPlusRTheta(startLat, startLon,
+                         std::min(remainingKm, lengthKm), azimuthDeg,
+                         &latitude, &longitude);
+      return std::isfinite(latitude) && std::isfinite(longitude);
+    }
+    remainingKm -= lengthKm;
+  }
+
+  return false;
+}
+
+/////////////////////////////////////////////////////////////
+// create a click report for the current vertical field
+
+ClickReport VertView::_createClickReport(const SectionSample &sample) const
+{
+  ClickReport report;
+  report.dataTime = _sectionReader->v_mhdr.time_centroid;
+  report.latitude = sample.latitude;
+  report.longitude = sample.longitude;
+  report.height = sample.verticalCoord;
+  report.heightLabel =
+    (_sectionReader->v_fhdr.vlevel_type == Mdvx::VERT_TYPE_Z) ?
+    "Height" : "Vertical";
+  report.heightUnits = _verticalUnits;
+  report.x = sample.distanceKm;
+  report.xLabel = "Distance";
+  report.xUnits = "km";
+  report.showY = false;
+
+  ClickReportField field;
+  field.name = _sectionReader->v_fhdr.field_name;
+  field.units = _sectionReader->v_fhdr.units;
+  field.value = sample.value;
+  report.fields.push_back(field);
+  return report;
+}
+
+/////////////////////////////////////////////////////////////
+// update the transient value at the cursor
+
+void VertView::_updateMouseValue(int mouseX, int mouseY)
+{
+  _mouseValueVisible = false;
+  _mouseValueText.clear();
+  if (!_showValue) {
+    return;
+  }
+
+  // Hover reporting deliberately stops at the grid lookup. Route
+  // interpolation is useful for click metadata but is unnecessary work for
+  // every mouse-move event.
+
+  SectionSample sample;
+  if (!_sampleGridValue(mouseX, mouseY, sample)) {
+    return;
+  }
+
+  char text[1024];
+  snprintf(text, sizeof(text), "%s: %g %s",
+           _sectionReader->v_fhdr.field_name, sample.value,
+           _sectionReader->v_fhdr.units);
+  _mouseValueText = text;
+  _mouseValueX = mouseX;
+  _mouseValueY = mouseY;
+  _mouseValueVisible = true;
+}
+
+/////////////////////////////////////////////////////////////
+// draw the transient value beside the cursor
+
+void VertView::_drawMouseValue(QPainter &painter)
+{
+  constexpr int padding = 3;
+  constexpr int cursorOffset = 8;
+  const int plotLeft = std::min(_zoomWorld.getXMinPixel(),
+                                _zoomWorld.getXMaxPixel());
+  const int plotRight = std::max(_zoomWorld.getXMinPixel(),
+                                 _zoomWorld.getXMaxPixel());
+  const int plotTop = std::min(_zoomWorld.getYMinPixel(),
+                               _zoomWorld.getYMaxPixel());
+  const int plotBottom = std::max(_zoomWorld.getYMinPixel(),
+                                  _zoomWorld.getYMaxPixel());
+
+  const QString label = QString::fromStdString(_mouseValueText);
+  const int textFlags = Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip;
+  const QRect bounds = painter.fontMetrics().boundingRect
+    (QRect(0, 0, plotRight - plotLeft + 1, plotBottom - plotTop + 1),
+     textFlags, label);
+  const int boxWidth = bounds.width() + 2 * padding;
+  const int boxHeight = bounds.height() + 2 * padding;
+
+  int boxX = _mouseValueX + cursorOffset;
+  if (boxX + boxWidth > plotRight) {
+    boxX = _mouseValueX - cursorOffset - boxWidth;
+  }
+  int boxY = _mouseValueY - cursorOffset - boxHeight;
+  if (boxY < plotTop) {
+    boxY = _mouseValueY + cursorOffset;
+  }
+  boxX = std::max(plotLeft,
+                  std::min(boxX, std::max(plotLeft,
+                                          plotRight - boxWidth + 1)));
+  boxY = std::max(plotTop,
+                  std::min(boxY, std::max(plotTop,
+                                          plotBottom - boxHeight + 1)));
+
+  const QRect box(boxX, boxY, boxWidth, boxHeight);
+  QColor background(_params.background_color);
+  background.setAlpha(210);
+  painter.fillRect(box, background);
+  painter.setPen(_params.foreground_color);
+  painter.drawText(box.adjusted(padding, padding, -padding, -padding),
+                   textFlags, label);
 }
 
 /////////////////////////////////////////////////////////////
@@ -1202,6 +1507,20 @@ void VertView::setDistanceGrid(const bool enabled)
   update();
 }
 
+////////////////////////////////////////////////////////
+// set show value flag
+
+void VertView::setShowValue(bool enabled)
+{
+  _showValue = enabled;
+  setMouseTracking(_showValue);
+  if (!_showValue) {
+    _mouseValueVisible = false;
+    _mouseValueText.clear();
+  }
+  update();
+}
+
 
 /*************************************************************************
  * turn on archive-style rendering - all fields
@@ -1240,6 +1559,7 @@ void VertView::displayImage(const size_t field_num)
   if (field_num != _selectedField) {
     return;
   }
+  _sectionPixmapDirty = true;
   update();
 }
 
@@ -1301,6 +1621,7 @@ void VertView::mousePressEvent(QMouseEvent *e)
 #endif
 
   if (e->button() == Qt::RightButton) {
+    _leftDragActive = false;
     
     //-------
 
@@ -1312,8 +1633,10 @@ void VertView::mousePressEvent(QMouseEvent *e)
 
     emit customContextMenuRequested(pos.toPoint()); // , closestRay);
 
-  } else {
+  } else if (e->button() == Qt::LeftButton) {
 
+    _leftDragActive = true;
+    _mouseValueVisible = false;
 
     _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
     _rubberBand->show();
@@ -1346,6 +1669,15 @@ void VertView::mouseMoveEvent(QMouseEvent * e)
 
   int x = pos.x();
   int y = pos.y();
+
+  if (_showValue && !_leftDragActive) {
+    _updateMouseValue(x, y);
+    update();
+  }
+  if (!_leftDragActive) {
+    return;
+  }
+
   const int moveX = x - _mousePressX;
   const int moveY = y - _mousePressY;
 
@@ -1360,6 +1692,17 @@ void VertView::mouseMoveEvent(QMouseEvent * e)
   newRect = newRect.normalized();
   _rubberBand->setGeometry(newRect);
 
+}
+
+////////////////////////////////////////////////////////
+// clear the cursor value when leaving the canvas
+
+void VertView::leaveEvent(QEvent *event)
+{
+  _mouseValueVisible = false;
+  _mouseValueText.clear();
+  update();
+  QWidget::leaveEvent(event);
 }
 
 #ifdef NOTNOW

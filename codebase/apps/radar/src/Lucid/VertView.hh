@@ -43,6 +43,7 @@
 #include <QWidget>
 #include <QResizeEvent>
 #include <QImage>
+#include <QPixmap>
 #include <QTimer>
 #include <QRubberBand>
 #include <QPoint>
@@ -56,6 +57,7 @@
 #include "GlobalData.hh"
 #include "Params.hh"
 
+#include "ClickReport.hh"
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
 
@@ -193,6 +195,7 @@ class DLL_EXPORT VertView : public QWidget
   ////////////////
 
   void locationClicked(double xkm, double ykm, const RadxRay *closestRay);
+  void clickReportAvailable(const ClickReport &report);
   
   //////////////
   // Qt slots //
@@ -245,6 +248,10 @@ class DLL_EXPORT VertView : public QWidget
 
   void setHeightGrid(const bool enabled);
   void setDistanceGrid(const bool enabled);
+
+  // Enable or disable the transient value displayed at the cursor.
+
+  void setShowValue(bool enabled);
 
   // context menu
   
@@ -350,6 +357,7 @@ class DLL_EXPORT VertView : public QWidget
    */
 
   bool _pointClicked;
+  bool _leftDragActive;
   int _mousePressX, _mousePressY;
   int _mouseReleaseX, _mouseReleaseY;
   int _zoomCornerX, _zoomCornerY;
@@ -389,6 +397,26 @@ class DLL_EXPORT VertView : public QWidget
 
   const MdvReader *_sectionReader;
   string _verticalUnits;
+
+  // Contour construction is substantially more expensive than the axes and
+  // interactive overlays. Cache the data layer until its data or transform
+  // changes so mouse tracking does not regenerate contour geometry.
+
+  QPixmap _sectionPixmap;
+  bool _sectionPixmapDirty;
+
+  bool _showValue;
+  bool _mouseValueVisible;
+  int _mouseValueX, _mouseValueY;
+  string _mouseValueText;
+
+  struct SectionSample {
+    double distanceKm = 0.0;
+    double verticalCoord = 0.0;
+    double latitude = 0.0;
+    double longitude = 0.0;
+    double value = 0.0;
+  };
   
   ///////////////////////
   // Protected methods //
@@ -410,6 +438,15 @@ class DLL_EXPORT VertView : public QWidget
   void _drawSectionCells(QPainter &painter);
   bool _drawSectionContours(QPainter &painter);
   vector<double> _computeVerticalEdges() const;
+  bool _sampleGridValue(int mouseX, int mouseY,
+                        SectionSample &sample) const;
+  bool _sampleSection(int mouseX, int mouseY,
+                      SectionSample &sample) const;
+  bool _routeLocation(double distanceKm, double &latitude,
+                      double &longitude) const;
+  void _updateMouseValue(int mouseX, int mouseY);
+  void _drawMouseValue(QPainter &painter);
+  ClickReport _createClickReport(const SectionSample &sample) const;
 
   /**
    * @brief Initialize the full window transform to use for the widget.
@@ -475,6 +512,10 @@ class DLL_EXPORT VertView : public QWidget
    */
 
   virtual void mouseReleaseEvent(QMouseEvent* event);
+
+  // Remove the transient value overlay when the cursor leaves the canvas.
+
+  void leaveEvent(QEvent *event) override;
 
   /**
    * @brief Handle a resize event. A timer is used to prevent refreshes until

@@ -145,8 +145,11 @@ GuiManager::GuiManager() :
   _clickTime = NULL;
   _clickLatitude = NULL;
   _clickLongitude = NULL;
+  _clickHeightName = NULL;
   _clickHeight = NULL;
+  _clickXName = NULL;
   _clickX = NULL;
+  _clickYName = NULL;
   _clickY = NULL;
   _clickFieldsTable = NULL;
   _clickReportPlaced = false;
@@ -494,6 +497,11 @@ void GuiManager::_setupWindows()
   // set pointer to the vertWidget
   
   _vert = _vertWindow->getView();
+  connect(_vert, &VertView::clickReportAvailable,
+          this, [this](const ClickReport &report) {
+            updateClickReport(report);
+            showClickDialog();
+          });
   
   // connect slots for location
 
@@ -608,9 +616,9 @@ void GuiManager::_createClickReportDialog()
   _clickTime = _addClickReportRow("Time", row++);
   _clickLatitude = _addClickReportRow("Latitude", row++);
   _clickLongitude = _addClickReportRow("Longitude", row++);
-  _clickHeight = _addClickReportRow("Height", row++);
-  _clickX = _addClickReportRow("X", row++);
-  _clickY = _addClickReportRow("Y", row++);
+  _clickHeight = _addClickReportRow("Height", row++, &_clickHeightName);
+  _clickX = _addClickReportRow("X", row++, &_clickXName);
+  _clickY = _addClickReportRow("Y", row++, &_clickYName);
 
   QLabel *fieldsHeader = new QLabel("FIELD VALUES", _clickReportDialog);
   _clickReportDialogLayout->addWidget(fieldsHeader, row++, 0, 1, 2,
@@ -646,9 +654,13 @@ void GuiManager::_createClickReportDialog()
 ///////////////////////////////////////////////////////
 // add one metadata row to the click report dialog
 
-QLabel *GuiManager::_addClickReportRow(const string &name, int row)
+QLabel *GuiManager::_addClickReportRow(const string &name, int row,
+                                       QLabel **nameLabelOut)
 {
   QLabel *nameLabel = new QLabel(name.c_str(), _clickReportDialog);
+  if (nameLabelOut != nullptr) {
+    *nameLabelOut = nameLabel;
+  }
   nameLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
   _clickReportDialogLayout->addWidget(nameLabel, row, 0, Qt::AlignLeft);
 
@@ -2727,12 +2739,24 @@ void GuiManager::updateClickReport(const ClickReport &report)
   _clickLatitude->setText(text);
   snprintf(text, sizeof(text), "%.5f deg", report.longitude);
   _clickLongitude->setText(text);
+
+  _clickHeightName->setText(report.heightLabel.c_str());
+  _clickHeightName->setVisible(report.showHeight);
+  _clickHeight->setVisible(report.showHeight);
   snprintf(text, sizeof(text), "%g %s", report.height,
            report.heightUnits.c_str());
   _clickHeight->setText(text);
-  snprintf(text, sizeof(text), "%g %s", report.x, report.xyUnits.c_str());
+
+  _clickXName->setText(report.xLabel.c_str());
+  _clickXName->setVisible(report.showX);
+  _clickX->setVisible(report.showX);
+  snprintf(text, sizeof(text), "%g %s", report.x, report.xUnits.c_str());
   _clickX->setText(text);
-  snprintf(text, sizeof(text), "%g %s", report.y, report.xyUnits.c_str());
+
+  _clickYName->setText(report.yLabel.c_str());
+  _clickYName->setVisible(report.showY);
+  _clickY->setVisible(report.showY);
+  snprintf(text, sizeof(text), "%g %s", report.y, report.yUnits.c_str());
   _clickY->setText(text);
 
   _clickFieldsTable->setRowCount(report.fields.size());
@@ -2786,7 +2810,9 @@ void GuiManager::showClickDialog()
 void GuiManager::_showValue()
 
 {
-  _horiz->setShowValue(_showValueAct->isChecked());
+  const bool enabled = _showValueAct->isChecked();
+  _horiz->setShowValue(enabled);
+  _vert->setShowValue(enabled);
 }
 
 /////////////////////////////////////////////////////////////
