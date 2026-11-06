@@ -927,7 +927,6 @@ cidd.show_clock:       0
 # Set to 0 to draw the analogue clock using GMT, 1 = local time.
 cidd.draw_clock_local: 0
 
-cidd.one_click_rhi: 1
 cidd.click_posn_rel_to_origin: 1
 
 #####################################################################################
