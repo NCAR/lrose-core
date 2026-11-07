@@ -770,7 +770,7 @@ cidd.domain_follows_data: 0
 # x_space, y_space in pixels determine allowable space for range ring labels
 cidd.range_ring_x_space:    40
 cidd.range_ring_y_space:    13
-cidd.azmith_interval:       45.0
+cidd.azmith_interval:       30.0
 cidd.azmith_radius:         250.0
 
 # Toggles to turn on/off  Extras features on startup

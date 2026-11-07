@@ -1517,8 +1517,17 @@ int LegacyParams::_readMainParams()
 
   // range rings
 
-  _getBoolean("cidd.range_rings", 0, true, "plot_range_rings_fixed");
-  _getBoolean("cidd.range_ring_follows_data", 1, true, "plot_range_rings_from_data");
+  bool plotRangeRings = _getBoolean("cidd.range_rings", 0, false);
+  bool rangeRingsFollowData = _getBoolean("cidd.range_ring_follows_data", 1, false);
+  if (plotRangeRings) {
+    if (rangeRingsFollowData) {
+      fprintf(_tdrpFile, "plot_range_rings_from_data = TRUE;\n");
+    } else {
+      fprintf(_tdrpFile, "plot_range_rings_fixed = TRUE;\n");
+    }
+  }
+  // _getBoolean("cidd.range_rings", 0, true, "plot_range_rings_from_data");
+  // _getBoolean("cidd.range_ring_follows_data", 1, true, "plot_range_rings_from_data");
   _getBoolean("cidd.range_ring_for_radar_only", 1, true, "range_rings_for_radar_only");
   
   _getLong("cidd.range_ring_x_space", 50);
