@@ -912,10 +912,6 @@ public:
 
   legend_pos_t horiz_main_legend_pos;
 
-  tdrp_bool_t horiz_override_rendering_beam_width;
-
-  double horiz_rendering_beam_width;
-
   tdrp_bool_t single_segment_vsection;
 
   double vsection_min_ht_km;
@@ -976,15 +972,11 @@ public:
 
   int vsection_bottom_margin;
 
-  int vsection_left_margin2;
-
-  int vsection_right_margin2;
-
   int vsection_label_font_size;
 
   int vsection_text_margin;
 
-  double vsection_max_height_km;
+  tdrp_bool_t vsection_plot_selected_horiz_height;
 
   tdrp_bool_t vsection_ht_grid_on_at_startup;
 
@@ -993,10 +985,6 @@ public:
   legend_pos_t vsection_main_legend_pos;
 
   int vsection_beam_queue_size;
-
-  tdrp_bool_t vsection_override_rendering_beam_width;
-
-  double vsection_rendering_beam_width;
 
   char* foreground_color;
 
@@ -1354,7 +1342,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[424];
+  mutable TDRPtable _table[418];
 
   const char *_className;
 

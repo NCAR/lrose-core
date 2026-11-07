@@ -1280,18 +1280,6 @@ paramdef enum legend_pos_t {
   p_help = "This include time, field name and elevation angle.";
 } horiz_main_legend_pos;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the azimuth beam width for rendering.";
-  p_help = "Normally Lucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
-} horiz_override_rendering_beam_width;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Rendering beam width, if override is active.";
-  p_help = "See 'horiz_override_rendering_beam_width'";
-} horiz_rendering_beam_width;
-
 commentdef {
   p_header = "</HORIZ_VIEW>";
 }
@@ -1474,18 +1462,6 @@ paramdef int {
 } vsection_bottom_margin;
 
 paramdef int {
-  p_default = 20;
-  p_descr = "Width of left margin in VERT mode (pixels).";
-  p_help = "Height scale goes in the left margin.";
-} vsection_left_margin2;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Width of right margin in VERT mode (pixels).";
-  p_help = "Height scale goes in the right margin.";
-} vsection_right_margin2;
-
-paramdef int {
   p_default = 8;
   p_descr = "Font size for labels on range rings (pixels).";
 } vsection_label_font_size;
@@ -1495,17 +1471,10 @@ paramdef int {
   p_descr = "Margin around some text (pixels).";
 } vsection_text_margin;
 
-// paramdef double {
-//   p_default = 1.0;
-//   p_descr = "Aspect ratio (width/height) of VERT window.";
-//   p_descr = "Set to -1 to allow aspect ratio to vary as the VERT window is resized.";
-// } vsection_aspect_ratio;
-
-paramdef double {
-  p_default = 25.0;
-  p_descr = "Max height of data in VERT window (km).";
-  p_descr = "This can be adjusted interactively.";
-} vsection_max_height_km;
+paramdef boolean {
+  p_default = false;
+  p_descr = "Show the selected horiz window height.";
+} vsection_plot_selected_horiz_height;
 
 paramdef boolean {
   p_default = true;
@@ -1528,18 +1497,6 @@ paramdef int {
   p_descr = "Size of the queue for VERT beams.";
   p_help = "After the queue reaches this size, older beams are discarded.";
 } vsection_beam_queue_size;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the azimuth beam width for rendering.";
-  p_help = "Normally Lucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
-} vsection_override_rendering_beam_width;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "Rendering beam width, if override is active.";
-  p_help = "See 'vsection_override_rendering_beam_width'";
-} vsection_rendering_beam_width;
 
 commentdef {
   p_header = "</VSECTION_VIEW>";

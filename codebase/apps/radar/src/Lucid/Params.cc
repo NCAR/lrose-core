@@ -3015,30 +3015,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
-    // Parameter 'horiz_override_rendering_beam_width'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("horiz_override_rendering_beam_width");
-    tt->descr = tdrpStrDup("Option to override the azimuth beam width for rendering.");
-    tt->help = tdrpStrDup("Normally Lucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.");
-    tt->val_offset = (char *) &horiz_override_rendering_beam_width - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'horiz_rendering_beam_width'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("horiz_rendering_beam_width");
-    tt->descr = tdrpStrDup("Rendering beam width, if override is active.");
-    tt->help = tdrpStrDup("See 'horiz_override_rendering_beam_width'");
-    tt->val_offset = (char *) &horiz_rendering_beam_width - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
     // Parameter 'Comment 24'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -3426,30 +3402,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'vsection_left_margin2'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vsection_left_margin2");
-    tt->descr = tdrpStrDup("Width of left margin in VERT mode (pixels).");
-    tt->help = tdrpStrDup("Height scale goes in the left margin.");
-    tt->val_offset = (char *) &vsection_left_margin2 - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'vsection_right_margin2'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vsection_right_margin2");
-    tt->descr = tdrpStrDup("Width of right margin in VERT mode (pixels).");
-    tt->help = tdrpStrDup("Height scale goes in the right margin.");
-    tt->val_offset = (char *) &vsection_right_margin2 - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
     // Parameter 'vsection_label_font_size'
     // ctype is 'int'
     
@@ -3474,16 +3426,16 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'vsection_max_height_km'
-    // ctype is 'double'
+    // Parameter 'vsection_plot_selected_horiz_height'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("vsection_max_height_km");
-    tt->descr = tdrpStrDup("Max height of data in VERT window (km).");
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("vsection_plot_selected_horiz_height");
+    tt->descr = tdrpStrDup("Show the selected horiz window height.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vsection_max_height_km - &_start_;
-    tt->single_val.d = 25;
+    tt->val_offset = (char *) &vsection_plot_selected_horiz_height - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'vsection_ht_grid_on_at_startup'
@@ -3544,30 +3496,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->help = tdrpStrDup("After the queue reaches this size, older beams are discarded.");
     tt->val_offset = (char *) &vsection_beam_queue_size - &_start_;
     tt->single_val.i = 360;
-    tt++;
-    
-    // Parameter 'vsection_override_rendering_beam_width'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("vsection_override_rendering_beam_width");
-    tt->descr = tdrpStrDup("Option to override the azimuth beam width for rendering.");
-    tt->help = tdrpStrDup("Normally Lucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.");
-    tt->val_offset = (char *) &vsection_override_rendering_beam_width - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'vsection_rendering_beam_width'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("vsection_rendering_beam_width");
-    tt->descr = tdrpStrDup("Rendering beam width, if override is active.");
-    tt->help = tdrpStrDup("See 'vsection_override_rendering_beam_width'");
-    tt->val_offset = (char *) &vsection_rendering_beam_width - &_start_;
-    tt->single_val.d = 1;
     tt++;
     
     // Parameter 'Comment 27'
