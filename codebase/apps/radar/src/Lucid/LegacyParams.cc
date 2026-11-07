@@ -320,13 +320,6 @@ int LegacyParams::_readFromPath(const char *file_path,
 
   fclose(params_file);
 
-  // debug print
-
-  // for (size_t ii = 0; ii < _plist.size(); ii++) {
-  //   cerr << "name, val: " << _plist[ii].name << ", " << _plist[ii].entry << endl;
-  // } // ii
-  // cerr << "Param list size: " << _plist.size() << endl;
-
   return 0;
 
 }
@@ -767,11 +760,10 @@ const char *LegacyParams::_findTagText(const char *input_buf,
   }
   
   // Clear the string buffers
+
   memset(start_tag,0,TAG_BUF_LEN);
   memset(end_tag,0,TAG_BUF_LEN);
-  
   start_line_no = *text_line_no;
-  
   snprintf(start_tag, TAG_BUF_LEN - 1, "<%s>", tag);
   snprintf(end_tag, TAG_BUF_LEN - 1, "</%s>", tag);
   
@@ -1114,18 +1106,22 @@ int LegacyParams::_readMainParams()
   _getLong("cidd.complex_command_timeout_secs",180);
 
   // movies
+
   _getBoolean("cidd.movie_on", 0);
   _getLong("cidd.movie_delay", 3000, true, "loop_delay_msecs");
   _getLong("cidd.movie_speed_msec", 75, true, "movie_dwell_msecs");
   _getBoolean("cidd.reset_frames", 0);
 
   // model data
+
   _getLong("cidd.model_run_list_hours",24);
 
   // How many idle seconds can elapse before resetting the display
+
   _getLong("cidd.idle_reset_seconds",0);
 
   // image generation in html mode
+
   _getBoolean("cidd.html_mode", 0);
   _runOnceAndExit = _getBoolean("cidd.run_once_and_exit",0);
   _getBoolean("cidd.transparent_images", 0);
@@ -1168,6 +1164,7 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.request_gzip_vol_compression",0);
 
   // projections
+
   string projTypeStr =
     _getString("cidd.projection_type", "CARTESIAN", false, "proj_type_str");
   if (projTypeStr == "CARTESIAN") {
@@ -1219,40 +1216,39 @@ int LegacyParams::_readMainParams()
   }
      
   /* Toggle for enabling a status report window */
+
   _getBoolean("cidd.enable_status_window", 0);
   _getBoolean("cidd.report_clicks_in_status_window", 0);
   _getBoolean("cidd.report_clicks_in_degM_and_nm", 0);
   _getDouble("cidd.magnetic_variation_deg", 0);
   
   /* Toggle for enabling a Save Image Panel */
+
   _getBoolean("cidd.enable_save_image_panel", 0);
 
   // domain limits
+
   _getDouble("cidd.domain_limit_min_x",-10000);
   _getDouble("cidd.domain_limit_max_x",10000);
   _getDouble("cidd.domain_limit_min_y",-10000);
   _getDouble("cidd.domain_limit_max_y",10000);
   
   // origin latitude and longitude
+
   _originLatitude = _getDouble("cidd.origin_latitude", 0.0, false);
   _originLongitude = _getDouble("cidd.origin_longitude", 0.0, false);
-
   fprintf(_tdrpFile, "proj_origin_lat = %g;\n", _originLatitude);
   fprintf(_tdrpFile, "proj_origin_lon = %g;\n", _originLongitude);
 
   // click location on reset
+
   _getDouble("cidd.reset_click_latitude", _originLatitude, false);
   _getDouble("cidd.reset_click_longitude", _originLongitude, false);
-
-  
-  // startup pages
-  // _getLong("cidd.planview_start_page", 1); // subtract 1
-  // _getLong("cidd.xsect_start_page", 1); // subtract 1
 
   // zooms
 
   fprintf(_tdrpFile, "// <ZOOMS>\n");
-
+  
   int startZoomLevel = _getLong("cidd.start_zoom_level", 1, false);
   bool zoomLimitsInLatlon = _getBoolean("cidd.zoom_limits_in_latlon", 0, false);
   if (projTypeStr == "LAT_LON") {
@@ -1317,6 +1313,7 @@ int LegacyParams::_readMainParams()
       fprintf(_tdrpFile, "  ,\n");
     }
   } // izoom
+
   fprintf(_tdrpFile, "};\n");
   _getBoolean("cidd.domain_follows_data", 0, true, "zoom_domain_follows_data");
   fprintf(_tdrpFile, "// </ZOOMS>\n");
@@ -1407,35 +1404,25 @@ int LegacyParams::_readMainParams()
 
   fprintf(_tdrpFile, "// </TIME_CONTROL_GUI>\n");
   
-  /* Toggle for displaying the height Selector in Right Margin */
-  // _getBoolean("cidd.show_height_sel", 1);
-
-  /* Toggle for displaying data access and rendering messages */
-  // _getBoolean("cidd.show_data_messages", 1);
-
-  // mode for writing latlon values
-  // _getLong("cidd.latlon_mode",0);
-
   // time labels
+
   _getString("cidd.label_time_format", "%m/%d/%y %H:%M:%S");
   _getString("cidd.moviestart_time_format", "%H:%M %m/%d/%Y");
   _getString("cidd.frame_range_time_format", "%H:%M");
 
   // Get the on/off state of the extra legend plotting - Force to either 0 or 1
+
   _getBoolean("cidd.layer_legends_on", 1);
   _getBoolean("cidd.cont_legends_on", 1);
   _getBoolean("cidd.wind_legends_on", 1);
 
   /* Toggle for displaying data labels */
+
   _getBoolean("cidd.display_labels", 1);
 
   /* Toggle for displaying the analog clock */
   _getBoolean("cidd.display_ref_lines", 1);
 
-  // margins
-  // _getLong("cidd.top_margin_render_style", 1);
-  // _getLong("cidd.bot_margin_render_style", 1);
-  
   // main window (horiz view)
 
   int horizXpos = _getLong("cidd.horiz_default_x_pos", 0, false);
@@ -1461,23 +1448,14 @@ int LegacyParams::_readMainParams()
   fprintf(_tdrpFile, "horiz_plot_height = %d;\n", horizHeight);
   
   int horizRightMargin = _getLong("cidd.horiz_right_margin", 60, false);
-  // fprintf(_tdrpFile, "horiz_color_scale_width = %d;\n", (horizRightMargin * 2) / 3);
   fprintf(_tdrpFile, "horiz_color_scale_width = %d;\n", horizRightMargin);
   fprintf(_tdrpFile, "vsection_color_scale_width = %d;\n", horizRightMargin);
-  
-  // int vertRightMargin = _getLong("cidd.vert_right_margin", 40, false);
-  // // fprintf(_tdrpFile, "vsection_color_scale_width = %d;\n", (vertRightMargin * 2) / 3);
-  // fprintf(_tdrpFile, "vsection_color_scale_width = %d;\n", vertRightMargin);
   
   _getLong("cidd.horiz_top_margin", 20);
   _getLong("cidd.horiz_bot_margin", 20);
   _getLong("cidd.horiz_left_margin", 20);
   // int rightMargin = _getLong("cidd.horiz_right_margin", 80.0, false);
   // fprintf(_tdrpFile, "horiz_right_margin = %d;\n", 6);
-
-  // _getLong("cidd.horiz_legends_start_x", 0);
-  // _getLong("cidd.horiz_legends_start_y", 0);
-  // _getLong("cidd.horiz_legends_delta_y", 0);
 
   // Preserve the old CIDD keys on input while writing the less ambiguous
   // vsection_* names used by Lucid's TDRP interface.
@@ -1506,15 +1484,6 @@ int LegacyParams::_readMainParams()
   // int vertRightMargin = _getLong("cidd.vert_right_margin", 40, false);
   fprintf(_tdrpFile, "vsection_right_margin = %d;\n", 0);
   
-  // _getLong("cidd.vert_top_margin", 20);
-  // _getLong("cidd.vert_bot_margin", 20);
-  // _getLong("cidd.vert_left_margin", 20);
-  // _getLong("cidd.vert_right_margin", 80);
-
-  // _getLong("cidd.vert_legends_start_x", 0);
-  // _getLong("cidd.vert_legends_start_y", 0);
-  // _getLong("cidd.vert_legends_delta_y", 0);
-
   // range rings
 
   bool plotRangeRings = _getBoolean("cidd.range_rings", 0, false);
@@ -1526,8 +1495,6 @@ int LegacyParams::_readMainParams()
       fprintf(_tdrpFile, "plot_range_rings_fixed = TRUE;\n");
     }
   }
-  // _getBoolean("cidd.range_rings", 0, true, "plot_range_rings_from_data");
-  // _getBoolean("cidd.range_ring_follows_data", 1, true, "plot_range_rings_from_data");
   _getBoolean("cidd.range_ring_for_radar_only", 1, true, "range_rings_for_radar_only");
   
   _getLong("cidd.range_ring_x_space", 50);
@@ -1536,11 +1503,6 @@ int LegacyParams::_readMainParams()
   _getDouble("cidd.range_ring_spacing", -1.0, true, "range_ring_spacing_km");
   _getDouble("cidd.max_ring_range", 1000.0, true, "max_ring_range_km");
   _getDouble("cidd.azmith_interval", 30.0, true, "azimuth_lines_spacing_deg");
-
-  // Toggle for shifting the display origin - Useful for mobile units.
-  // azimuth lines
-  // _getDouble("cidd.azmith_radius", 200.0, true, "azimuth_radius");
-  // _getBoolean("cidd.azmith_lines", 0, true, "azimuth_lines", false);
 
   // winds
   // _getBoolean("cidd.wind_mode", 0);
@@ -1725,56 +1687,33 @@ int LegacyParams::_readMainParams()
   fprintf(_tdrpFile, "// </LAYERS>\n");
   
   // main field on top?
+
   _getBoolean("cidd.draw_main_on_top", 0);
 
   // latest click location
+
   _getBoolean("cidd.mark_latest_click_location", 0);
   _getLong("cidd.latest_click_mark_size", 11);
   _getBoolean("cidd.click_posn_rel_to_origin", 0);
 
-  // fonts
-
-  // fprintf(_tdrpFile, "// <FONTS>\n");
-
-  // _numFonts = _getLong("cidd.num_fonts", 1, false);
-  // _getLong("cidd.font_display_mode",1);
-  
-  // vector<string> fonts;
-  // for(int ii = 0; ii < _numFonts; ii++) {
-  //   char str_buf[1024];
-  //   snprintf(str_buf, 1023, "cidd.font%d", ii + 1);
-  //   string font = _getString(str_buf, "none", false);
-  //   if (font.find("none") == string::npos) {
-  //     fonts.push_back(font);
-  //   }
-  // } // ii
-
-  // fprintf(_tdrpFile, "fonts = {\n");
-  // for(size_t ifont = 0; ifont < fonts.size(); ifont++) {
-  //   string &font = fonts[ifont];
-  //   fprintf(_tdrpFile, "  \"%s\"", font.c_str());
-  //   if (ifont < fonts.size() - 1) {
-  //     fprintf(_tdrpFile, ",\n");
-  //   } else {
-  //     fprintf(_tdrpFile, "\n");
-  //   }
-  // } // ifont
-  // fprintf(_tdrpFile, "};\n");
-  // fprintf(_tdrpFile, "// </FONTS>\n");
-  
   /* Toggle for displaying the analog clock */
+
   _getBoolean("cidd.show_clock", 0);
 
   /* Set the time to display on the analog clock */
+
   _getBoolean("cidd.draw_clock_local", 0);
   
   // field menu - number of columns
+
   _numMenuCols = _getLong("cidd.num_field_menu_cols", 1);
   
   // display modes
+
   _getBoolean("cidd.one_click_rhi", 0, true, "single_segment_vsection");
 
   // canvas events
+
   _getDouble("cidd.rotate_coarse_adjust",6.0);
   _getDouble("cidd.rotate_medium_adjust",2.0);
   _getDouble("cidd.rotate_fine_adjust", 0.5);
@@ -1784,56 +1723,14 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.clip_overlay_fields", 0);
 
   // labels
+
   _getString("cidd.horiz_frame_label", "Lucid");
   _getString("cidd.no_data_message", "NO DATA FOUND (in this area at the selected time)");
   _getString("cidd.status_info_file", "");
   _getString("cidd.help_command", "");
 
-  // ////////////////////////////////////////////////////////
-  // // Bookmarks for a menu of URLS - Index starts at 1
-  
-  // fprintf(_tdrpFile, "// <BOOKMARKS>\n");
-  
-  // _getString("cidd.bookmark_command", "");
-  // _numBookmarks = _getLong("cidd.num_bookmarks", 0, false);
-
-  // // read bookmark labels and urls
-  
-  // vector<Bookmark> bookmarks;
-  // for(int ii = 0; ii < _numBookmarks; ii++) {
-  //   Bookmark bookmark;
-  //   char str_buf[1024];
-  //   snprintf(str_buf, 1023, "cidd.bookmark_label%d", ii + 1);
-  //   bookmark.label = _getString(str_buf, "not_found", false);
-  //   if (bookmark.label.find("not_found") == 0) {
-  //     continue;
-  //   }
-  //   snprintf(str_buf, 1023, "cidd.bookmark%d", ii + 1);
-  //   bookmark.url = _getString(str_buf, "not_found", false);
-  //   if (bookmark.url.find("not_found") == 0) {
-  //     continue;
-  //   }
-  //   bookmarks.push_back(bookmark);
-  // } // i
-
-  // // write to TDRP
-  
-  // fprintf(_tdrpFile, "bookmarks = {\n");
-  // for(size_t ii = 0; ii < bookmarks.size(); ii++) {
-  //   Bookmark &bookmark = bookmarks[ii];
-  //   fprintf(_tdrpFile, "  {\n");
-  //   fprintf(_tdrpFile, "    label = \"%s\",\n", bookmark.label.c_str());
-  //   fprintf(_tdrpFile, "    url = \"%s\"\n", bookmark.url.c_str());
-  //   fprintf(_tdrpFile, "  }\n");
-  //   if (ii < bookmarks.size() - 1) {
-  //     fprintf(_tdrpFile, "  ,\n");
-  //   }
-  // } // izoom
-  // fprintf(_tdrpFile, "};\n");
-  
-  // fprintf(_tdrpFile, "// </BOOKMARKS>\n");
-  
   // image intensity
+
   _getDouble("cidd.image_inten", 0.8);
   _getLong("cidd.inten_levels", 32);
   _getDouble("cidd.data_inten", 1.0);
@@ -2975,22 +2872,6 @@ int LegacyParams::_readRouteWindsTdrp()
   fprintf(_tdrpFile, "route_u_url = \"%s\";\n", routes.u_url);
   fprintf(_tdrpFile, "route_v_url = \"%s\";\n", routes.v_url);
 
-  // fprintf(_tdrpFile, "route_turb_url = \"%s\";\n", routes.turb_url);
-  // fprintf(_tdrpFile, "route_turb_low_thresh = %lg;\n",
-  //         routes.turb_low_thresh);
-  // fprintf(_tdrpFile, "route_turb_mod_thresh = %lg;\n",
-  //         routes.turb_mod_thresh);
-  // fprintf(_tdrpFile, "route_turb_high_thresh = %lg;\n",
-  //         routes.turb_hi_thresh);
-
-  // fprintf(_tdrpFile, "route_icing_url = \"%s\";\n", routes.icing_url);
-  // fprintf(_tdrpFile, "route_icing_low_thresh = %lg;\n",
-  //         routes.icing_low_thresh);
-  // fprintf(_tdrpFile, "route_icing_mod_thresh = %lg;\n",
-  //         routes.icing_mod_thresh);
-  // fprintf(_tdrpFile, "route_icing_high_thresh = %lg;\n",
-  //         routes.icing_hi_thresh);
-  
   fprintf(_tdrpFile, "route_paths = {\n");
   for (int ii = 0; ii < routes.route_paths_n; ii++) {
     fprintf(_tdrpFile, "  \"%s\"", routes._route_paths[ii]);
