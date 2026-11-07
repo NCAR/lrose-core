@@ -47,6 +47,7 @@
 #include <QTimer>
 #include <QRubberBand>
 #include <QPoint>
+#include <QPointF>
 #include <QTransform>
 
 #include <Radx/RadxPlatform.hh>
@@ -372,6 +373,7 @@ class DLL_EXPORT VertView : public QWidget
 
   bool _plotSelectedHorizHeight;
   double _selectedHorizHeightKm;
+  vector<QPointF> _selectedHorizHeightCurve;
 
   struct SectionSample {
     double distanceKm = 0.0;
@@ -405,6 +407,15 @@ class DLL_EXPORT VertView : public QWidget
   void _updateMouseValue(int mouseX, int mouseY);
   void _drawMouseValue(QPainter &painter);
   ClickReport _createClickReport(const SectionSample &sample) const;
+
+  // Build polar-radar beam heights in section-world coordinates only when
+  // the section or selected elevation changes. Repaints then only transform
+  // and draw the cached curve.
+
+  void _rebuildSelectedHorizHeightCurve();
+  void _drawSelectedHorizHeight(QPainter &painter);
+  bool _getRadarLocation(double &latitude, double &longitude,
+                         double &altitudeKm) const;
 
   void _drawOverlays(QPainter &painter);
   void _drawLegends(QPainter &painter);

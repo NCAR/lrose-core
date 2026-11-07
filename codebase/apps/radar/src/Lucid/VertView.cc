@@ -23,6 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
 #include <assert.h>
+#include <algorithm>
 #include <cmath>
 #include <unistd.h>
 #include <iostream>
@@ -439,25 +440,7 @@ void VertView::_drawOverlays(QPainter &painter)
     painter.restore();
   }
 
-  // Use the same visual convention as the section route in the horizontal
-  // view. This is an overlay rather than part of the cached data layer, so a
-  // level change does not force filled contours to be regenerated.
-
-  if (_plotSelectedHorizHeight &&
-      std::isfinite(_selectedHorizHeightKm)) {
-    painter.save();
-    _zoomWorld.setClippingOn(painter);
-    QPen selectedHeightPen(QColor(_params.route_path_color));
-    selectedHeightPen.setWidth(2);
-    selectedHeightPen.setCapStyle(Qt::RoundCap);
-    selectedHeightPen.setJoinStyle(Qt::RoundJoin);
-    painter.setPen(selectedHeightPen);
-    const double yPixel =
-      _zoomWorld.getYPixel(_selectedHorizHeightKm);
-    painter.drawLine(QLineF(_zoomWorld.getXMinPixel(), yPixel,
-                            _zoomWorld.getXMaxPixel(), yPixel));
-    painter.restore();
-  }
+  _drawSelectedHorizHeight(painter);
     
   // click point cross hairs
   
@@ -545,6 +528,7 @@ void VertView::clear()
   _mouseValueVisible = false;
   _mouseValueText.clear();
   _sectionReader = nullptr;
+  _selectedHorizHeightCurve.clear();
   
   // Now rerender the images
   
@@ -640,9 +624,180 @@ void VertView::setSection(const MdvReader *reader)
   if (_sectionReader != nullptr) {
     _verticalUnits = Mdvx::vertTypeZUnits(_sectionReader->v_fhdr.vlevel_type);
   }
+  _rebuildSelectedHorizHeightCurve();
   _savedZooms.clear();
   configureWorldCoords();
   update();
+}
+
+/////////////////////////////////////////////////////////////
+// find a valid radar location for the displayed polar field
+
+bool VertView::_getRadarLocation(double &latitude, double &longitude,
+                                 double &altitudeKm) const
+{
+  if (_sectionReader == nullptr) {
+    return false;
+  }
+
+  // The vertical response normally retains the source sensor metadata. Use
+  // the horizontal volume as a fallback because some servers omit sensor
+  // details while constructing a vertical-section response.
+
+  const auto locationIsValid = [](const Mdvx::master_header_t &mhdr) {
+    return std::isfinite(mhdr.sensor_lat) &&
+      std::isfinite(mhdr.sensor_lon) &&
+      std::isfinite(mhdr.sensor_alt) &&
+      mhdr.sensor_lat >= -90.0 && mhdr.sensor_lat <= 90.0 &&
+      mhdr.sensor_lon >= -360.0 && mhdr.sensor_lon <= 360.0 &&
+      mhdr.sensor_alt > -10.0 && mhdr.sensor_alt < 100.0;
+  };
+
+  const Mdvx::master_header_t *mhdr = nullptr;
+  if (locationIsValid(_sectionReader->v_mhdr)) {
+    mhdr = &_sectionReader->v_mhdr;
+  } else if (locationIsValid(_sectionReader->h_mhdr)) {
+    mhdr = &_sectionReader->h_mhdr;
+  }
+  if (mhdr == nullptr) {
+    return false;
+  }
+
+  latitude = mhdr->sensor_lat;
+  longitude = mhdr->sensor_lon;
+  altitudeKm = mhdr->sensor_alt;
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
+// cache the selected polar beam height along the section route
+
+void VertView::_rebuildSelectedHorizHeightCurve()
+{
+  _selectedHorizHeightCurve.clear();
+  if (_sectionReader == nullptr || !_sectionReader->isValidV() ||
+      _sectionReader->h_fhdr.proj_type != Mdvx::PROJ_POLAR_RADAR ||
+      !std::isfinite(_selectedHorizHeightKm)) {
+    return;
+  }
+
+  double radarLat, radarLon, radarAltitudeKm;
+  if (!_getRadarLocation(radarLat, radarLon, radarAltitudeKm)) {
+    return;
+  }
+
+  const double cosElevation =
+    cos(_selectedHorizHeightKm * DEG_TO_RAD);
+  if (!std::isfinite(cosElevation) || cosElevation <= 1.0e-6) {
+    return;
+  }
+
+  const int nx = _sectionReader->v_fhdr.nx;
+  const double dx = _sectionReader->v_fhdr.grid_dx;
+  double totalLengthKm = _sectionReader->getVertTotalLengthKm();
+  if (nx <= 0 || !std::isfinite(dx)) {
+    return;
+  }
+  if (!std::isfinite(totalLengthKm) || totalLengthKm <= 0.0) {
+    totalLengthKm = (nx - 1) * fabs(dx);
+  }
+  if (!std::isfinite(totalLengthKm) || totalLengthKm <= 0.0) {
+    return;
+  }
+
+  // Include both route endpoints in addition to the grid-column centers so
+  // the reference reaches the displayed section bounds. Sorting also handles
+  // unusual responses whose X spacing is negative.
+
+  vector<double> distancesKm;
+  distancesKm.reserve(nx + 2);
+  distancesKm.push_back(0.0);
+  for (int ix = 0; ix < nx; ++ix) {
+    const double distanceKm = _sectionReader->v_fhdr.grid_minx + ix * dx;
+    if (std::isfinite(distanceKm)) {
+      distancesKm.push_back(std::max(0.0,
+                                     std::min(distanceKm, totalLengthKm)));
+    }
+  }
+  distancesKm.push_back(totalLengthKm);
+  sort(distancesKm.begin(), distancesKm.end());
+  distancesKm.erase(unique(distancesKm.begin(), distancesKm.end()),
+                    distancesKm.end());
+
+  _beamHt.setInstrumentHtKm(radarAltitudeKm);
+  _selectedHorizHeightCurve.reserve(distancesKm.size());
+  for (double distanceKm : distancesKm) {
+    double latitude, longitude;
+    if (!_routeLocation(distanceKm, latitude, longitude)) {
+      _selectedHorizHeightCurve.clear();
+      return;
+    }
+
+    double groundRangeKm, azimuthDeg;
+    PJGLatLon2RTheta(radarLat, radarLon, latitude, longitude,
+                    &groundRangeKm, &azimuthDeg);
+    if (!std::isfinite(groundRangeKm) || groundRangeKm < 0.0) {
+      _selectedHorizHeightCurve.clear();
+      return;
+    }
+    const double slantRangeKm = groundRangeKm / cosElevation;
+    const double beamHeightKm =
+      _beamHt.computeHtKm(_selectedHorizHeightKm, slantRangeKm);
+    if (!std::isfinite(slantRangeKm) || slantRangeKm < 0.0 ||
+        !std::isfinite(beamHeightKm)) {
+      _selectedHorizHeightCurve.clear();
+      return;
+    }
+    _selectedHorizHeightCurve.push_back
+      (QPointF(distanceKm, beamHeightKm));
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// draw the selected horizontal level as a line or polar beam curve
+
+void VertView::_drawSelectedHorizHeight(QPainter &painter)
+{
+  if (_sectionReader == nullptr || !_sectionReader->isValidV() ||
+      !_plotSelectedHorizHeight ||
+      !std::isfinite(_selectedHorizHeightKm)) {
+    return;
+  }
+
+  const bool polarRadar = _sectionReader != nullptr &&
+    _sectionReader->h_fhdr.proj_type == Mdvx::PROJ_POLAR_RADAR;
+  if (polarRadar && _selectedHorizHeightCurve.size() < 2) {
+    // Do not fall back to a constant line: for a polar field the selected
+    // value is an elevation angle, and a missing radar location makes its
+    // corresponding height unknown.
+    return;
+  }
+
+  painter.save();
+  _zoomWorld.setClippingOn(painter);
+  QPen selectedHeightPen(QColor(_params.route_path_color));
+  selectedHeightPen.setWidth(2);
+  selectedHeightPen.setCapStyle(Qt::RoundCap);
+  selectedHeightPen.setJoinStyle(Qt::RoundJoin);
+  painter.setPen(selectedHeightPen);
+
+  if (polarRadar) {
+    QPainterPath path;
+    path.moveTo(_zoomWorld.getPixelPointF
+                (_selectedHorizHeightCurve[0].x(),
+                 _selectedHorizHeightCurve[0].y()));
+    for (size_t ii = 1; ii < _selectedHorizHeightCurve.size(); ++ii) {
+      path.lineTo(_zoomWorld.getPixelPointF
+                  (_selectedHorizHeightCurve[ii].x(),
+                   _selectedHorizHeightCurve[ii].y()));
+    }
+    painter.drawPath(path);
+  } else {
+    const double yPixel = _zoomWorld.getYPixel(_selectedHorizHeightKm);
+    painter.drawLine(QLineF(_zoomWorld.getXMinPixel(), yPixel,
+                            _zoomWorld.getXMaxPixel(), yPixel));
+  }
+  painter.restore();
 }
 
 /////////////////////////////////////////////////////////////
@@ -1244,6 +1399,7 @@ void VertView::setSelectedHorizHeight(double heightKm)
     return;
   }
   _selectedHorizHeightKm = heightKm;
+  _rebuildSelectedHorizHeightCurve();
   update();
 }
 
