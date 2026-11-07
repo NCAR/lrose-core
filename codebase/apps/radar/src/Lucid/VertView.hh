@@ -114,6 +114,10 @@ class DLL_EXPORT VertView : public QWidget
 
   void activateRealtimeRendering();
 
+  // set the route length
+  
+  void setRouteLengthKm(double val) { _routeLengthKm = val; }
+  
   /**
    * @brief Select the field to display.
    *
@@ -282,6 +286,10 @@ class DLL_EXPORT VertView : public QWidget
   
   const VertManager &_vertWindow;
 
+  // route length
+  
+  double _routeLengthKm;
+
   // angles and times in archive mode
 
   DateTime _plotStartTime;
@@ -433,7 +441,6 @@ class DLL_EXPORT VertView : public QWidget
    * @param[in] painter    Painter to use for rendering.
    */
 
-  virtual void _drawOverlays(QPainter &painter);
   void _drawSection(QPainter &painter);
   void _drawSectionCells(QPainter &painter);
   bool _drawSectionContours(QPainter &painter);
@@ -447,6 +454,9 @@ class DLL_EXPORT VertView : public QWidget
   void _updateMouseValue(int mouseX, int mouseY);
   void _drawMouseValue(QPainter &painter);
   ClickReport _createClickReport(const SectionSample &sample) const;
+
+  void _drawOverlays(QPainter &painter);
+  void _drawLegends(QPainter &painter);
 
   /**
    * @brief Initialize the full window transform to use for the widget.

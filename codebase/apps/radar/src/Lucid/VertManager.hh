@@ -77,28 +77,9 @@ public:
 
   virtual ~VertManager();
   
-  // get the VERT widget
+  // get the VertView widget
 
   VertView *getView() { return _vertView; }
-
-  /**
-   * @brief Set the azimuth value displayed in the window.
-   */
-
-  void setAzimuth(const double azimuth);
-
-  /**
-   * @brief Set the elevation value displayed in the window.
-   */
-
-  void setElevation(const double elevation);
-
-  /**
-   * @brief Set the radar name.  The name is included as part of the window
-   *        title.
-   */
-
-  void setRadarName(const string &radar_name);
 
   // Update the section identity shown with the separate vertical window.
 
@@ -133,6 +114,10 @@ protected:
   Params &_params;
   GlobalData &_gd;
 
+  string _fieldName;
+  DateTime _validTime;
+  double _routeLengthKm;
+  
   /**
    * @brief The main frame for the window.
    */
@@ -153,25 +138,6 @@ protected:
   QMenu *_overlaysMenu;
   QMenu *_configurationMenu;
 
-  /**
-   * @brief The status panel frame.
-   */
-
-  QFrame *_statusPanel;
-  
-  /**
-   * @brief The elevation value label.
-   */
-
-  QLabel *_elevValue;
-  
-  /**
-   * @brief The azimuth value label.
-   */
-
-  QLabel *_azValue;
-  
-
   ///////////////////////
   // Protected actions //
   ///////////////////////
@@ -181,18 +147,6 @@ protected:
    */
 
   QAction *_unzoomAct;
-
-  /**
-   * @brief Action for turning range rings on and off.
-   */
-
-  QAction *_ringsAct;
-
-  /**
-   * @brief Action for turning azimuth lines on and off.
-   */
-
-  QAction *_azLinesAct;
 
   /**
    * @brief Actions for independently controlling height and distance grids.
@@ -225,16 +179,8 @@ protected:
   /**
    * @brief Create the menus for the menu bar on this window.
    */
-
-  void _createMenus();
   
-  /**
-   * @brief Create the status panel.
-   *
-   * @param[in] label_font_size  The label font size from the parameter file.
-   */
-
-  void _createStatusPanel(const int label_font_size);
+  void _createMenus();
   
 };
 

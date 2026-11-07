@@ -490,7 +490,6 @@ void GuiManager::_setupWindows()
   // Create the VERT window
 
   _vertWindow = new VertManager(this);
-  _vertWindow->setRadarName("unknown");
   connect(_vertWindow, &VertManager::singleSegmentVsectionChanged,
           _horiz, &HorizView::setSingleSegmentVsection);
   

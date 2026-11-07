@@ -498,94 +498,47 @@ void VertView::_drawOverlays(QPainter &painter)
   
   painter.restore();
 
-  // draw the color scale
+}
 
-  if (_sectionReader != nullptr) {
-    // The compact vertical window needs the scale shifted into its plot area,
-    // while its units sit above the highest numeric label instead of
-    // competing with it.
-    _zoomWorld.drawColorScale(_sectionReader->colorMap, painter,
-                              _params.horiz_axis_label_font_size);
-    _zoomWorld.drawTitleTopCenter(painter, _sectionReader->fieldLabelVert());
-  }
-  
+/*************************************************************************
+ * _drawLegends()
+ */
+
+void VertView::_drawLegends(QPainter &painter)
+{
+
   // add legends with time, field name and elevation angle
-
-#ifdef NOTNOW
   
-  if (_archiveMode) {
+  vector<string> legends;
+  char text[1024];
     
-    vector<string> legends;
-    char text[1024];
+  // route distance
+  
+  snprintf(text, 1024, "Vsection length (km): %g", _routeLengthKm);
+  legends.push_back(text);
     
-    // time legend
+  painter.save();
+  painter.setPen(QColor(_params.text_color));
+  // painter.setBrush(Qt::black);
+  // painter.setBackgroundMode(Qt::OpaqueMode);
+  
+  switch (_params.vsection_main_legend_pos) {
+    case Params::LEGEND_TOP_LEFT:
+      _zoomWorld.drawLegendsTopLeft(painter, legends);
+      break;
+    case Params::LEGEND_TOP_RIGHT:
+      _zoomWorld.drawLegendsTopRight(painter, legends);
+      break;
+    case Params::LEGEND_BOTTOM_LEFT:
+      _zoomWorld.drawLegendsBottomLeft(painter, legends);
+      break;
+    case Params::LEGEND_BOTTOM_RIGHT:
+      _zoomWorld.drawLegendsBottomRight(painter, legends);
+      break;
+    default: {}
+  }
 
-    snprintf(text, 1024, "Start time: %s", _plotStartTime.asString(3).c_str());
-    legends.push_back(text);
-    
-    // radar and site name legend
-
-    string radarName("unknown");
-    // string radarName(_platform.getInstrumentName());
-    // if (_params.override_radar_name) {
-    //   radarName = _params.radar_name;
-    // }
-    string siteName("unknown");
-    // string siteName(_platform.getInstrumentName());
-    // if (_params.override_site_name) {
-    //   siteName = _params.site_name;
-    // }
-    string radarSiteLabel = radarName;
-    if (siteName.size() > 0) {
-      radarSiteLabel += "/";
-      radarSiteLabel += siteName;
-    }
-    legends.push_back(radarSiteLabel);
-
-    // field name legend
-
-    // string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
-    // snprintf(text, "Field: %s", fieldName.c_str());
-    legends.push_back(text);
-    
-    // azimuth legend
-
-    snprintf(text, 1024, "Azimuth(deg): %.2f", _meanAz);
-    legends.push_back(text);
-
-    // nrays legend
-
-    snprintf(text, 1024, "NRays: %g", _nRays);
-    legends.push_back(text);
-    
-    painter.save();
-    painter.setPen(QColor(_params.text_color)); //Qt::yellow);
-    painter.setBrush(Qt::black);
-    painter.setBackgroundMode(Qt::OpaqueMode);
-
-    switch (_params.horiz_main_legend_pos) {
-      case Params::LEGEND_TOP_LEFT:
-        _zoomWorld.drawLegendsTopLeft(painter, legends);
-        break;
-      case Params::LEGEND_TOP_RIGHT:
-        _zoomWorld.drawLegendsTopRight(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_LEFT:
-        _zoomWorld.drawLegendsBottomLeft(painter, legends);
-        break;
-      case Params::LEGEND_BOTTOM_RIGHT:
-        _zoomWorld.drawLegendsBottomRight(painter, legends);
-        break;
-      default: {}
-    }
-
-    // painter.setBrush(Qt::white);
-    // painter.setBackgroundMode(Qt::TransparentMode);
-    painter.restore();
-
-  } // if (_archiveMode) {
-
-#endif
+  painter.restore();
 
 }
 
@@ -719,11 +672,32 @@ void VertView::paintEvent(QPaintEvent *event)
     _sectionPixmapDirty = false;
   }
   painter.drawPixmap(0, 0, _sectionPixmap);
+
+  // add overlays
+  
   _drawOverlays(painter);
+
+  // add legends
+
+  _drawLegends(painter);
+
+  // add color scale
+  
+  if (_sectionReader != nullptr) {
+    // The compact vertical window needs the scale shifted into its plot area,
+    // while its units sit above the highest numeric label instead of
+    // competing with it.
+    _zoomWorld.drawColorScale(_sectionReader->colorMap, painter,
+                              _params.horiz_axis_label_font_size);
+    _zoomWorld.drawTitleTopCenter(painter, _sectionReader->fieldLabelVert());
+  }
+
+  // show mouse value if needed
+
   if (_showValue && _mouseValueVisible) {
     _drawMouseValue(painter);
   }
-
+  
 }
 
 /////////////////////////////////////////////////////////////

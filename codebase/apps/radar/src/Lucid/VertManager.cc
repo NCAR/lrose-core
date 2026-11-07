@@ -66,17 +66,12 @@ VertManager::VertManager(GuiManager *manager):
   vertLayout->setContentsMargins(0, 0, 0, 0);
   vertLayout->addWidget(_vertView);
   
-  // Create the status panel
-  
-  _createStatusPanel(_params.label_font_size);
-  
   // Create the main window layout.  We need a layout so the main window can
   // contain multiple views.
 
   QVBoxLayout *main_layout = new QVBoxLayout(_main);
   main_layout->setContentsMargins(0,0,0,0);
   main_layout->addWidget(_vertTopFrame, 100);
-  main_layout->addWidget(_statusPanel, 0);
   
   // Create the actions and the menus
 
@@ -131,37 +126,32 @@ void VertManager::closeEvent(QCloseEvent * e)
 
 void VertManager::_createActions(VertView *vert)
 {
-  _ringsAct = new QAction(tr("Range Rings"), this);
-  _ringsAct->setStatusTip(tr("Turn range rings on/off"));
-  _ringsAct->setCheckable(true);
-  _ringsAct->setChecked(_params.plot_range_rings_from_data);
-  // connect(_ringsAct, SIGNAL(triggered(bool)),
-  //         vert, SLOT(setRings(bool)));
 
+  // show height grid
+  
   _heightGridAct = new QAction(tr("Height Grid"), this);
   _heightGridAct->setStatusTip(tr("Turn horizontal height grid lines on/off"));
   _heightGridAct->setCheckable(true);
   _heightGridAct->setChecked(_params.vsection_ht_grid_on_at_startup);
   connect(_heightGridAct, &QAction::toggled, vert, &VertView::setHeightGrid);
 
+  // show distance grid
+  
   _distanceGridAct = new QAction(tr("Distance Grid"), this);
   _distanceGridAct->setStatusTip(tr("Turn vertical distance grid lines on/off"));
   _distanceGridAct->setCheckable(true);
   _distanceGridAct->setChecked(_params.vsection_distance_grid_on_at_startup);
   connect(_distanceGridAct, &QAction::toggled, vert, &VertView::setDistanceGrid);
 
-  _azLinesAct = new QAction(tr("Az Lines"), this);
-  _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
-  _azLinesAct->setCheckable(true);
-  _azLinesAct->setChecked(_params.plot_range_rings_from_data);
-  // connect(_azLinesAct, SIGNAL(triggered(bool)),
-  //         vert, SLOT(setAngleLines(bool)));
-
+  // unzoom
+  
   _unzoomAct = new QAction(tr("Unzoom"), this);
   _unzoomAct->setStatusTip(tr("Unzoom to original view"));
   _unzoomAct->setEnabled(false);
   connect(_unzoomAct, SIGNAL(triggered()), this, SLOT(_unzoom()));
 
+  // set single segment on/off
+  
   _singleSegmentVsectionAct =
     new QAction(tr("Single-segment selection"), this);
   _singleSegmentVsectionAct->setStatusTip(
@@ -201,7 +191,9 @@ void VertManager::_unzoom()
 
 void VertManager::_createMenus()
 {
+
   _overlaysMenu = menuBar()->addMenu(tr("&Overlays"));
+
   _overlaysMenu->addAction(_heightGridAct);
   _overlaysMenu->addAction(_distanceGridAct);
   _overlaysMenu->addSeparator();
@@ -212,110 +204,6 @@ void VertManager::_createMenus()
   menuBar()->addAction(_unzoomAct);
 }
 
-
-/*************************************************************************
- * _createStatusPanel()
- */
-
-void VertManager::_createStatusPanel(const int label_font_size)
-{
-  // Create the status panel
-  
-  _statusPanel = new QFrame(_main);
-  _statusPanel->setFrameShape(QFrame::Box);
-  // QHBoxLayout *layout = new QHBoxLayout(_statusPanel);
-  QGridLayout *layout = new QGridLayout(_statusPanel);
-  layout->setSpacing(0);
-
-  // Create the desired font and alignment
-  
-  QLabel dummy;
-  QFont font = dummy.font();
-  int fsize = label_font_size + 2;
-  font.setPixelSize(fsize);
-
-  // The HawkEye window reported radar angles here.  For an MDV cross section,
-  // field identity and route length are the persistent context the user needs.
-
-  QLabel *elev_label = new QLabel(_statusPanel);
-  elev_label->setText("Field ");
-  elev_label->setFont(font);
-  // layout->addWidget(elev_label, 0, Qt::AlignLeft);
-  layout->addWidget(elev_label, 0, 0, Qt::AlignLeft);
-  
-  _elevValue = new QLabel(_statusPanel);
-  _elevValue->setText("-----");
-  _elevValue->setFont(font);
-  _elevValue->setMinimumWidth(_elevValue->width());
-  // layout->addWidget(_elevValue, 0, Qt::AlignRight);
-  layout->addWidget(_elevValue, 0, 1, Qt::AlignRight);
-  
-  QLabel *az_label = new QLabel(_statusPanel);
-  az_label->setText("Vsection length ");
-  az_label->setFont(font);
-  // layout->addWidget(az_label, 0, Qt::AlignLeft);
-  layout->addWidget(az_label, 0, 2, Qt::AlignLeft);
-  
-  _azValue = new QLabel(_statusPanel);
-  _azValue->setText("-----");
-  _azValue->setFont(font);
-  _azValue->setMinimumWidth(_azValue->width());
-  // layout->addWidget(_azValue, 0, Qt::AlignRight);
-  layout->addWidget(_azValue, 0, 3, Qt::AlignRight);
-  
-  //layout->addStretch(100);
-  layout->setColumnStretch(4, 100);
-  
-  _statusPanel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-}
-
-/**
- * @brief Set the azimuth value displayed in the window.
- */
-
-void VertManager::setAzimuth(const double azimuth)
-{
-  if (_guiManager->getArchiveMode()) {
-    _azValue->setText("-----");
-    _azValue->setEnabled(false);
-  } else {
-    char text[1024];
-    snprintf(text, 1024, "%6.2f", azimuth);
-    _azValue->setText(text);
-    _azValue->setEnabled(true);
-  }
-}
-
-/**
- * @brief Set the elevation value displayed in the window.
- */
-
-void VertManager::setElevation(const double elevation)
-{
-  if (_guiManager->getArchiveMode()) {
-    _elevValue->setText("-----");
-    _elevValue->setEnabled(false);
-  } else {
-    char text[1024];
-    snprintf(text, 1024, "%6.2f", elevation);
-    _elevValue->setText(text);
-    _elevValue->setEnabled(true);
-  }
-}
-
-
-/**
- * @brief Set the radar name.  The name is included as part of the window
- *        title.
- */
-
-void VertManager::setRadarName(const string &radar_name)
-{
-  string window_title = "VERT -- " + radar_name;
-  setWindowTitle(tr(window_title.c_str()));
-}
-
 /////////////////////////////////////////////////////////////
 // update the displayed vertical-section identity
 
@@ -323,11 +211,9 @@ void VertManager::setSectionInfo(const string &fieldName,
                                  const DateTime &validTime,
                                  double routeLengthKm)
 {
-  _elevValue->setText(QString::fromStdString(fieldName));
-  _azValue->setText(QString("%1 km").arg(routeLengthKm, 0, 'f', 1));
-
-  const string title = "Vertical section -- " + fieldName + " -- " +
-                       validTime.asString(3);
-  setWindowTitle(QString::fromStdString(title));
+  _fieldName = fieldName;
+  _validTime = validTime;
+  _routeLengthKm = routeLengthKm;
+  _vertView->setRouteLengthKm(routeLengthKm);
 }
 
