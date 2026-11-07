@@ -102,35 +102,10 @@ class DLL_EXPORT VertView : public QWidget
   
   virtual void configureWorldCoords(int zoomLevel = 0);
 
-  /**********************************************
-   * turn on archive-style rendering - all fields
-   */
-
-  void activateArchiveRendering();
-
-  /**********************************************************************
-   * turn on reatlime-style rendering - non-selected fields in background
-   */
-
-  void activateRealtimeRendering();
-
   // set the route length
   
   void setRouteLengthKm(double val) { _routeLengthKm = val; }
   
-  /**
-   * @brief Select the field to display.
-   *
-   * @param[in] index   Index of the field to display, zero based.
-   */
-
-  void selectVar(const size_t index);
-
-  // get plot times
-
-  const DateTime &getPlotStartTime() { return _plotStartTime; }
-  const DateTime &getPlotEndTime() { return _plotEndTime; }
-
   // adjust pixel scale to suit window size etc.
 
   virtual void updatePixelScales();
@@ -290,14 +265,6 @@ class DLL_EXPORT VertView : public QWidget
   
   double _routeLengthKm;
 
-  // angles and times in archive mode
-
-  DateTime _plotStartTime;
-  DateTime _plotEndTime;
-  double _meanAz;
-  double _sumAz;
-  double _nRays;
-
   /**
    * @brief The maximum range of the beams, in km.  It affects the
    *        labelling of the range rings
@@ -312,14 +279,6 @@ class DLL_EXPORT VertView : public QWidget
    */
 
   BeamHeight _beamHt;
-
-  // computing angle limits of rays
-
-  DateTime _prevTime;
-  double _prevAz;
-  double _prevElev;
-  double _startElev;
-  double _endElev;
 
   /**
    * @brief The index of the field selected for display.
@@ -430,10 +389,6 @@ class DLL_EXPORT VertView : public QWidget
   // Protected methods //
   ///////////////////////
 
-  // get ray closest to click point
-
-  virtual const RadxRay *_getClosestRay(double x_km, double y_km);
-
   /**
    * @brief Render the rings and grid. The current value of _ringsGridColor
    *        will be used for the color.
@@ -475,19 +430,6 @@ class DLL_EXPORT VertView : public QWidget
 
   virtual void _setGridSpacing();
   double _getSpacing(double range, int pixelExtent);
-
-  // Compute the limits of the ray angles
-  
-  void _computeAngleLimits(const RadxRay *ray);
-  
-  // store ray location
-  
-  void _storeRayLoc(const RadxRay *ray);
-
-  // clear overlap with existing rays
-
-  void _clearRayOverlap(const int startIndex,
-                        const int endIndex);
 
   // overide refresh images
 
@@ -539,10 +481,6 @@ class DLL_EXPORT VertView : public QWidget
   // reset the world coords
 
   void _resetWorld(int width, int height);
-
-  // rendering
-
-  void _performRendering();
 
 };
 

@@ -119,12 +119,7 @@ VertView::VertView(QWidget* parent,
   _zoomCornerX = 0;
   _zoomCornerY = 0;
   
-  _prevElev = -9999.0;
-  _prevAz = -9999.0;
-  _prevTime.setToZero();
-  
   _colorScaleWidth = _params.vsection_color_scale_width;
-
   
   // initialize world view
   
@@ -132,9 +127,6 @@ VertView::VertView(QWidget* parent,
   _xGridSpacing = 0.0;
   _yGridSpacing = 0.0;
 
-  _plotStartTime.setToZero();
-  _plotEndTime.setToZero();
-  
 }
 
 
@@ -282,11 +274,6 @@ void VertView::mouseReleaseEvent(QMouseEvent *e)
     if (_sampleSection(_mouseReleaseX, _mouseReleaseY, sample)) {
       _pointClicked = true;
       emit clickReportAvailable(_createClickReport(sample));
-
-      // Retain the legacy signal for any remaining vertical-view consumers.
-      const RadxRay *closestRay =
-        _getClosestRay(_worldReleaseX, _worldReleaseY);
-      emit locationClicked(_worldReleaseX, _worldReleaseY, closestRay);
     }
   
   } else {
@@ -322,37 +309,6 @@ void VertView::mouseReleaseEvent(QMouseEvent *e)
     _updateMouseValue(_mouseReleaseX, _mouseReleaseY);
   }
   update();
-
-}
-
-////////////////////////////////////////////////////////////////////////////
-// get ray closest to click point
-
-const RadxRay *VertView::_getClosestRay(double xx, double yy)
-
-{
-
-  // if (_platform.getAltitudeKm() > -1.0) {
-  //   _beamHt.setInstrumentHtKm(_platform.getAltitudeKm());
-  // }
-  // double clickEl = _beamHt.computeElevationDeg(yy, xx);
-  
-  // double minDiff = 1.0e99;
-  const RadxRay *closestRay = NULL;
-  // for (size_t ii = 0; ii < _vertBeams.size(); ii++) {
-  //   const RadxRay *ray = _vertBeams[ii]->getRay();
-  //   double rayEl = ray->getElevationDeg();
-  //   double diff = fabs(clickEl - rayEl);
-  //   if (diff > 180.0) {
-  //     diff = fabs(diff - 360.0);
-  //   }
-  //   if (diff < minDiff) {
-  //     closestRay = ray;
-  //     minDiff = diff;
-  //   }
-  // }
-
-  return closestRay;
 
 }
 
@@ -519,8 +475,6 @@ void VertView::_drawLegends(QPainter &painter)
     
   painter.save();
   painter.setPen(QColor(_params.text_color));
-  // painter.setBrush(Qt::black);
-  // painter.setBackgroundMode(Qt::OpaqueMode);
   
   switch (_params.vsection_main_legend_pos) {
     case Params::LEGEND_TOP_LEFT:
@@ -551,43 +505,8 @@ void VertView::_refreshImages()
 
   _sectionPixmapDirty = true;
 
-  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-    
-  //   FieldRenderer *field = _fieldRenderers[ifield];
-    
-  //   // If needed, create new image for this field
-    
-  //   if (size() != field->getImage()->size()) {
-  //     field->createImage(width(), height());
-  //   }
-
-  //   // clear image
-
-  //   field->getImage()->fill(_backgroundBrush.color().rgb());
-    
-  //   // set up rendering details
-
-  //   field->setTransform(_zoomTransform);
-    
-  //   // Add pointers to the beams to be rendered
-    
-  //   if (ifield == _selectedField || field->isBackgroundRendered()) {
-
-  //     std::deque<VertBeam*>::iterator beam;
-  //     for (beam = _vertBeams.begin(); beam != _vertBeams.end(); ++beam) {
-  //       (*beam)->setBeingRendered(ifield, true);
-  //       field->addBeam(*beam);
-  //     }
-      
-  //   }
-    
-  // } // ifield
-  
-  // do the rendering
-
-  _performRendering();
-
   update();
+  
 }
 
 
@@ -1227,50 +1146,6 @@ bool VertView::_drawSectionContours(QPainter &painter)
 }
 
 /*************************************************************************
- * selectVar()
- */
-
-void VertView::selectVar(const size_t index)
-{
-
-  // If the field index isn't actually changing, we don't need to do anything
-  
-  if (_selectedField == index) {
-    return;
-  }
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> VertView::selectVar() for field index: " 
-         << index << endl;
-  }
-
-  // If this field isn't being rendered in the background, render all of
-  // the beams for it
-
-  // if (!_fieldRenderers[index]->isBackgroundRendered()) {
-  //   std::deque<VertBeam*>::iterator beam;
-  //   for (beam = _vertBeams.begin(); beam != _vertBeams.end(); ++beam) {
-  //     (*beam)->setBeingRendered(index, true);
-  //     _fieldRenderers[index]->addBeam(*beam);
-  //   }
-  // }
-  _performRendering();
-
-  // Do any needed housekeeping when the field selection is changed
-
-  // _fieldRenderers[_selectedField]->unselectField();
-  // _fieldRenderers[index]->selectField();
-  
-  // Change the selected field index
-
-  _selectedField = index;
-
-  // Update the display
-
-  update();
-}
-
-/*************************************************************************
  * RENDER_V_MOVIE_FRAME:
  */
 
@@ -1497,33 +1372,6 @@ void VertView::setShowValue(bool enabled)
 
 
 /*************************************************************************
- * turn on archive-style rendering - all fields
- */
-
-void VertView::activateArchiveRendering()
-{
-  // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-  //   _fieldRenderers[ii]->setBackgroundRenderingOn();
-  // }
-}
-
-
-/*************************************************************************
- * turn on reatlime-style rendering - non-selected fields in background
- */
-
-void VertView::activateRealtimeRendering()
-{
-  
-  // for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-  //   if (ii != _selectedField) {
-  //     _fieldRenderers[ii]->activateBackgroundRendering();
-  //   }
-  // }
-
-}
-
-/*************************************************************************
  * displayImage()
  */
 
@@ -1679,26 +1527,6 @@ void VertView::leaveEvent(QEvent *event)
   QWidget::leaveEvent(event);
 }
 
-#ifdef NOTNOW
-/**************   testing ******/
-
-void VertView::smartBrush(int xPixel, int yPixel) 
-{
-
-  //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
-  //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
-  QImage qImage;
-  qImage.load("/h/eol/brenda/octopus.jpg");
-  // get the Image from somewhere ...   
-  //qImage->convertToFormat(QImage::Format_ARGB32);
-  //qImage->invertPixels();
-  QPainter painter(this);
-  painter.drawImage(0, 0, qImage);
-  _drawOverlays(painter);
-
-}
-#endif
-
 /*************************************************************************
  * resizeEvent()
  */
@@ -1745,35 +1573,6 @@ void VertView::_setTransform(const QTransform &transform)
   _zoomTransform = transform;
 }
   
-/*************************************************************************
- * perform the rendering
- */
-
-void VertView::_performRendering()
-{
-
-  // start the rendering
-  
-  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-  //   if (ifield == _selectedField ||
-  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
-  //     _fieldRenderers[ifield]->signalRunToStart();
-  //   }
-  // } // ifield
-
-  // wait for rendering to complete
-  
-  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-  //   if (ifield == _selectedField ||
-  //       _fieldRenderers[ifield]->isBackgroundRendered()) {
-  //     _fieldRenderers[ifield]->waitForRunToComplete();
-  //   }
-  // } // ifield
-
-  update();
-
-}
-
 void VertView::informationMessage()
 {
   
@@ -1788,27 +1587,6 @@ void VertView::informationMessage()
   //  informationLabel->setText("Escape");
 
 }
-
-// void VertView::notImplemented()
-// {
-//   cerr << "inside notImplemented() ... " << endl;
-
-//   QErrorMessage *errorMessageDialog = new QErrorMessage(_parent);
-//   // QLabel *informationLabel = new QLabel();
-
-//   errorMessageDialog->showMessage("This option is not implemented yet.");
-//   QLabel errorLabel;
-//   int frameStyle = QFrame::Sunken | QFrame::Panel;
-//   errorLabel.setFrameStyle(frameStyle);
-//   errorLabel.setText("If the box is unchecked, the message "
-// 		     "won't appear again.");
-
-//   cerr << "exiting notImplemented() " << endl;
-
-// }
-
-
-// slots for context editing; create and show the associated modeless dialog and return                                   
 
 void VertView::contextMenuCancel()
 {

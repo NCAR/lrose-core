@@ -938,7 +938,7 @@ cidd.click_posn_rel_to_origin: 1
 # click and drag. When set to 1, disallows multi way point cross sections
 # - RHI are defined by clicking right mouse near the radar origin and
 # dragging away from the radar along the desired  azimuth and releasing.
-cidd.one_click_rhi: 0
+cidd.one_click_rhi: 1
 
 # Set this parameter to force the field menu popup to this many columns
 # If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
