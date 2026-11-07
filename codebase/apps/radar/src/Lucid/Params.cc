@@ -2583,6 +2583,18 @@ Params *Params::_instance = (Params *) NULL;
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'start_ht_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("start_ht_km");
+    tt->descr = tdrpStrDup("Starting height of horizontal view.");
+    tt->help = tdrpStrDup("This refers to the height of the data, in km, MSL.");
+    tt->val_offset = (char *) &start_ht_km - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
     // Parameter 'horiz_window_x_pos'
     // ctype is 'int'
     
@@ -3057,40 +3069,28 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'min_ht_km'
+    // Parameter 'vsection_min_ht_km'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_ht_km");
+    tt->param_name = tdrpStrDup("vsection_min_ht_km");
     tt->descr = tdrpStrDup("Minimum ht of cross section.");
     tt->help = tdrpStrDup("This refers to the height of the data, in km, MSL.");
-    tt->val_offset = (char *) &min_ht_km - &_start_;
+    tt->val_offset = (char *) &vsection_min_ht_km - &_start_;
     tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'max_ht_km'
+    // Parameter 'vsection_max_ht_km'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_ht_km");
+    tt->param_name = tdrpStrDup("vsection_max_ht_km");
     tt->descr = tdrpStrDup("Maximum ht of cross section.");
     tt->help = tdrpStrDup("This refers to the height of the data, in km, MSL.");
-    tt->val_offset = (char *) &max_ht_km - &_start_;
+    tt->val_offset = (char *) &vsection_max_ht_km - &_start_;
     tt->single_val.d = 30;
-    tt++;
-    
-    // Parameter 'start_ht_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("start_ht_km");
-    tt->descr = tdrpStrDup("Starting height of horizontal view.");
-    tt->help = tdrpStrDup("This refers to the height of the data, in km, MSL.");
-    tt->val_offset = (char *) &start_ht_km - &_start_;
-    tt->single_val.d = 0;
     tt++;
     
     // Parameter 'vsection_title_prefix'

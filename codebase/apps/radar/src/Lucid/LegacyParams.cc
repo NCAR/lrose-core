@@ -1324,10 +1324,10 @@ int LegacyParams::_readMainParams()
   // vert axis
 
   double minHt = _getDouble("cidd.min_ht", 0.0, false);
-  fprintf(_tdrpFile, "min_ht_km = %g;\n", minHt);
+  fprintf(_tdrpFile, "vsection_min_ht_km = %g;\n", minHt);
 
   double maxHt = _getDouble("cidd.max_ht", 0.0, false);
-  fprintf(_tdrpFile, "max_ht_km = %g;\n", maxHt);
+  fprintf(_tdrpFile, "vsection_max_ht_km = %g;\n", maxHt);
 
   double startHt = _getDouble("cidd.start_ht", 0.0, false);
   fprintf(_tdrpFile, "start_ht_km = %g;\n", startHt);

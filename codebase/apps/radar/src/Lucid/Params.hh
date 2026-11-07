@@ -842,6 +842,8 @@ public:
 
   char* vlevel_selector_data_values_color;
 
+  double start_ht_km;
+
   int horiz_window_x_pos;
 
   int horiz_window_y_pos;
@@ -916,11 +918,9 @@ public:
 
   tdrp_bool_t single_segment_vsection;
 
-  double min_ht_km;
+  double vsection_min_ht_km;
 
-  double max_ht_km;
-
-  double start_ht_km;
+  double vsection_max_ht_km;
 
   char* vsection_title_prefix;
 

@@ -618,8 +618,8 @@ int Lucid::_initDataSpace()
   //////////////////////////////////////////
   // heights
   
-  _gd.h_win.min_ht = _params.min_ht_km;
-  _gd.h_win.max_ht = _params.max_ht_km;
+  _gd.h_win.min_ht = _params.vsection_min_ht_km;
+  _gd.h_win.max_ht = _params.vsection_max_ht_km;
 
   // Otherwise set in the command line arguments
 

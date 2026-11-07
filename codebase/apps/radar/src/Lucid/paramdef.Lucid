@@ -1079,6 +1079,12 @@ commentdef {
   p_header = "<HORIZ_VIEW>";
 }
 
+paramdef double {
+  p_default = 0;
+  p_descr = "Starting height of horizontal view.";
+  p_help = "This refers to the height of the data, in km, MSL.";
+} start_ht_km;
+
 paramdef int {
   p_default = 0;
   p_descr = "Startup X for main horizontal window (pixels).";
@@ -1304,19 +1310,13 @@ paramdef double {
   p_default = 0;
   p_descr = "Minimum ht of cross section.";
   p_help = "This refers to the height of the data, in km, MSL.";
-} min_ht_km;
+} vsection_min_ht_km;
 
 paramdef double {
   p_default = 30;
   p_descr = "Maximum ht of cross section.";
   p_help = "This refers to the height of the data, in km, MSL.";
-} max_ht_km;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Starting height of horizontal view.";
-  p_help = "This refers to the height of the data, in km, MSL.";
-} start_ht_km;
+} vsection_max_ht_km;
 
 paramdef string {
   p_default = "Vertical section:";
