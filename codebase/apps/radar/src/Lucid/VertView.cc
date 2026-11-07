@@ -517,12 +517,6 @@ void VertView::_refreshImages()
 void VertView::clear()
 {
 
-  // Clear out the beam array
-  
-  // for (size_t i = 0; i < _vertBeams.size(); i++) {
-  //   Beam::deleteIfUnused(_vertBeams[i]);
-  // }
-  // _vertBeams.clear();
   _pointClicked = false;
   _leftDragActive = false;
   _mouseValueVisible = false;
@@ -558,15 +552,7 @@ void VertView::unzoomView()
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
   _refreshImages();
-  // _updateRenderers();
 
-}
-
-/*************************************************************************
- * adjust pixel scale for correct aspect ratio etc
- */
-void VertView::updatePixelScales()
-{
 }
 
 /*************************************************************************
@@ -1171,154 +1157,6 @@ int VertView::renderVMovieFrame(int index, QPainter &painter)
   return stat;
 }
 
-#ifdef NOTYET
-
-/**********************************************************************
- * RENDER_VERT_DISPLAY: Render the vertical cross section display
- */
-
-int VertView::renderVertDisplay(QPaintDevice *pdev,
-                                int page,
-                                time_t start_time,
-                                time_t end_time)
-{
-
-  int i;
-  int x1,y1,ht,wd;    /* boundries of image area */
-  // int stat;
-  contour_info_t cont; // contour params
-  
-  if(xid == 0) return CIDD_FAILURE;
-
-  if(_params.show_data_messages) {
-    gui_label_h_frame("Rendering",-1);
-  } else {
-    set_busy_state(1);
-  }
-
-  if(_gd.debug2) fprintf(stderr,"Rendering Vertical Image, page :%d\n",page);
-  /* Clear drawing area */
-  XFillRectangle(_gd.dpy,xid,_gd.legends.background_color->gc,
-                 0,0,_gd.v_win.can_dim.width,_gd.v_win.can_dim.height);
-
-  if(!_params.draw_main_on_top) { 
-    if(_gd.mread[page]->render_method == LINE_CONTOURS) {
-      cont.min = _gd.mread[page]->cont_low;
-      cont.max = _gd.mread[page]->cont_high;
-      cont.interval = _gd.mread[page]->cont_interv;
-      cont.active = 1;
-      cont.field = page;
-      cont.labels_on = _params.label_contours;
-      cont.color = _gd.legends.foreground_color;
-      cont.vcm = &_gd.mread[page]->v_vcm;
-      if (0) {   // Taiwan HACK - Buggy - do not use RenderLineContours()
-        //if (_gd.layers.use_alt_contours) {
-        RenderLineContours(xid, &cont, true);
-      } else {
-        render_xsect_line_contours(xid,&cont);
-      }
-    } else {
-      render_xsect_grid(xid,_gd.mread[page],start_time,end_time,0);
-      // stat =  render_xsect_grid(xid,_gd.mread[page],start_time,end_time,0);
-    }
-  }
-    
-  /* Render each of the gridded_overlay fields */
-  for(i=0; i < NUM_GRID_LAYERS; i++) {           
-    if(_gd.layers.overlay_field_on[i]) {
-      render_xsect_grid(xid,_gd.mread[_gd.layers.overlay_field[i]],start_time,end_time,1);
-    }
-  } 
-
-  if(_params.draw_main_on_top) { 
-    if(_gd.mread[page]->render_method == LINE_CONTOURS) {
-      cont.min = _gd.mread[page]->cont_low;
-      cont.max = _gd.mread[page]->cont_high;
-      cont.interval = _gd.mread[page]->cont_interv;
-      cont.active = 1;
-      cont.field = page;
-      cont.labels_on = _params.label_contours;
-      cont.color = _gd.legends.foreground_color;
-      cont.vcm = &_gd.mread[page]->v_vcm;
-      if (0) {   // Taiwan HACK - Buggy - do not use RenderLineContours()
-        // if (_gd.layers.use_alt_contours) {
-        RenderLineContours(xid, &cont, true);
-      } else {
-        render_xsect_line_contours(xid,&cont);
-      }
-    } else {
-      // stat =  render_xsect_grid(xid,_gd.mread[page],start_time,end_time,0);
-      render_xsect_grid(xid,_gd.mread[page],start_time,end_time,0);
-    }
-  }
-
-  /* render contours if selected */
-  for(i=0; i < NUM_CONT_LAYERS; i++) {
-    if(_gd.layers.cont[i].active) {    
-      if (0) {   // Taiwan HACK - Buggy - do not use RenderLineContours()
- 	// if (_gd.layers.use_alt_contours) {
-        RenderLineContours(xid, &(_gd.layers.cont[i]), true);
-      } else {
-        render_xsect_line_contours(xid, &(_gd.layers.cont[i]));
-      }
-    }
-  }
-
-  /* render Winds if selected */
-  if(_gd.layers.wind_vectors) {
-    render_vert_wind_vectors(xid);
-  }
-
-  // Render masking terrain
-  if(_gd.layers.earth.terrain_active) {
-    render_v_terrain(xid);
-  }
-
-  render_xsect_top_layers(xid,page);
-
-  // render_vert_products(xid);
-
-  /* clear margin areas */
-  XFillRectangle(_gd.dpy,xid,_gd.legends.background_color->gc,
-                 0,0,_gd.v_win.can_dim.width,_gd.v_win.margin.top);
-
-  XFillRectangle(_gd.dpy,xid,_gd.legends.background_color->gc,
-                 0,_gd.v_win.can_dim.height - _gd.v_win.margin.bot,
-                 _gd.v_win.can_dim.width,_gd.v_win.margin.bot);
-
-  XFillRectangle(_gd.dpy,xid,_gd.legends.background_color->gc,
-                 0,0,_gd.v_win.margin.left,_gd.v_win.can_dim.height);
-
-  XFillRectangle(_gd.dpy,xid,_gd.legends.background_color->gc,
-                 _gd.v_win.can_dim.width - _gd.v_win.margin.right,
-                 0,_gd.v_win.margin.right,_gd.v_win.can_dim.height);
-
-
-  draw_vwin_right_margin(xid,page);
-  draw_vwin_top_margin(xid,page);
-  draw_vwin_left_margin(xid,page);
-  draw_vwin_bot_margin(xid,page);
-
-  /* Add a border */
-  x1 = _gd.v_win.margin.left -1;
-  y1 = _gd.v_win.margin.top -1;
-  wd = _gd.v_win.img_dim.width +1;
-  ht = _gd.v_win.img_dim.height +1;
-  /* Add a border around the plot */
-  XDrawRectangle(_gd.dpy,xid,_gd.legends.foreground_color->gc,x1,y1,wd,ht);
- 
-
-  if(_params.show_data_messages) {
-    gui_label_h_frame(_gd.frame_label,-1);
-  } else {
-    set_busy_state(0); 
-  }
-
-  return CIDD_SUCCESS;
-}
-
-#endif
-
 /*************************************************************************
  * zoomBack the view
  */
@@ -1434,8 +1272,6 @@ QPixmap* VertView::getPixmap()
 void VertView::mousePressEvent(QMouseEvent *e)
 {
 
-  // cerr << "cccc mousePressEvent" << endl;
-  
 #if QT_VERSION >= 0x060000
   QPointF pos(e->position());
 #else
@@ -1452,8 +1288,6 @@ void VertView::mousePressEvent(QMouseEvent *e)
 
     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
     _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-
-    emit customContextMenuRequested(pos.toPoint()); // , closestRay);
 
   } else if (e->button() == Qt::LeftButton) {
 
@@ -1534,11 +1368,9 @@ void VertView::leaveEvent(QEvent *event)
 void VertView::resizeEvent(QResizeEvent *event)
 {
   QWidget::resizeEvent(event);
-
   // Rebuild the world-to-pixel transform from the geometry assigned by the
   // layout so data, grids, and labels all cover the same drawable area.
   _resetWorld(event->size().width(), event->size().height());
-  updatePixelScales();
   _refreshImages();
   update();
 }
@@ -1573,91 +1405,4 @@ void VertView::_setTransform(const QTransform &transform)
   _zoomTransform = transform;
 }
   
-void VertView::informationMessage()
-{
-  
-  // QMessageBox::StandardButton reply;
-  // QLabel *informationLabel;
-  
-  // reply = QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
-  QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
-  //  if (reply == QMessageBox::Ok)
-  //  informationLabel->setText("OK");
-  //else
-  //  informationLabel->setText("Escape");
-
-}
-
-void VertView::contextMenuCancel()
-{
-  // informationMessage();
-  // notImplemented();                                                                                                     
-}
-
-void VertView::contextMenuParameterColors()
-{
-  /*
-    LOG(DEBUG_VERBOSE) << "enter";
-
-    //DisplayField selectedField;
-
-    const DisplayField &field = _manager.getSelectedField();
-    const ColorMap &colorMapForSelectedField = field.getColorMap();
-    ParameterColorView *parameterColorView = new ParameterColorView(this);
-    vector<DisplayField> displayFields = _manager.getDisplayFields();
-    DisplayFieldModel *displayFieldModel = new DisplayFieldModel(displayFields);
-    FieldColorController fieldColorController(parameterColorView, displayFieldModel);
-    // connect some signals and slots in order to retrieve information
-    // and send changes back to display 
-    connect(&parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
-    connect(&parameterColorView, SIGNAL(changesToDisplay()), &_manager, SLOT(changesToDisplayFields()));
-
-    // TODO: move this call to the controller?
-    parameterColorView.exec();
-
-    if(parameterColorController.Changes()) {
-    // TODO: what are changes?  new displayField(s)?
-    }
-  
-    // TODO: where to delete the ParameterColor objects & disconnect the signals and slots??
-    delete parameterColorView;
-    delete parameterColorModel;
-
-    LOG(DEBUG_VERBOSE) << "exit ";
-  */
-  informationMessage();
-   
-}
-
-void VertView::contextMenuView()
-{
-  informationMessage();
-  //  notImplemented();                                                                                                   
-}
-
-void VertView::contextMenuEditor()
-{
-  informationMessage();
-  //  notImplemented();                                                                                                   
-}
-
-
-void VertView::contextMenuExamine()         
-{
-  informationMessage();                                                                                                 
-
-}
-
-void VertView::contextMenuDataWidget()
-{
-  informationMessage();
-
-  //  notImplemented();                                                                                                   
-}
-
-void VertView::ShowContextMenu(const QPoint &pos, RadxVol *vol)
-{
-
-}
-
 

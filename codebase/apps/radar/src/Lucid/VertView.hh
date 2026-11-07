@@ -106,10 +106,6 @@ class DLL_EXPORT VertView : public QWidget
   
   void setRouteLengthKm(double val) { _routeLengthKm = val; }
   
-  // adjust pixel scale to suit window size etc.
-
-  virtual void updatePixelScales();
-
   // Install the latest MDV vertical section.  MdvReader is owned for the
   // lifetime of the application; this view retains a non-owning pointer.
 
@@ -161,11 +157,6 @@ class DLL_EXPORT VertView : public QWidget
   
   const WorldPlot getZoomWorld() const { return _zoomWorld; }
   const vector<WorldPlot> getSavedZooms() const { return _savedZooms; }
-
-  //  virtual void ShowContextMenu(const QPoint &pos);
-  virtual void ShowContextMenu(const QPoint &pos, RadxVol *vol);
-  void setFont();
-  virtual void informationMessage();
 
  signals:
 
@@ -232,15 +223,6 @@ class DLL_EXPORT VertView : public QWidget
 
   void setShowValue(bool enabled);
 
-  // context menu
-  
-  virtual void contextMenuCancel();
-  virtual void contextMenuParameterColors();
-  virtual void contextMenuView();
-  virtual void contextMenuEditor();
-  virtual void contextMenuExamine(); // const QPoint &pos);
-  virtual void contextMenuDataWidget();
-  
  protected:
 
   ///////////////////////
