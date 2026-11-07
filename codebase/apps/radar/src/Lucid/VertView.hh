@@ -225,6 +225,12 @@ class DLL_EXPORT VertView : public QWidget
 
   void setHeightRange(double minHeightKm, double maxHeightKm);
 
+  // Control the horizontal reference line for the level selected in the
+  // main plan view. The initial implementation treats the value as km.
+
+  void setSelectedHorizHeight(double heightKm);
+  void setPlotSelectedHorizHeight(bool enabled);
+
   // Enable or disable the transient value displayed at the cursor.
 
   void setShowValue(bool enabled);
@@ -363,6 +369,9 @@ class DLL_EXPORT VertView : public QWidget
   bool _mouseValueVisible;
   int _mouseValueX, _mouseValueY;
   string _mouseValueText;
+
+  bool _plotSelectedHorizHeight;
+  double _selectedHorizHeightKm;
 
   struct SectionSample {
     double distanceKm = 0.0;

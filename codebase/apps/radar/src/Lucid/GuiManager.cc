@@ -1475,6 +1475,7 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
     if (_gd.h_win.page < _gd.num_datafields) {
       _vlevelManager.set(*_gd.mread[_gd.h_win.page]);
     }
+    _vert->setSelectedHorizHeight(_vlevelManager.getSelectedLevel());
     _vlevelSelector->update();
   }
 
@@ -1499,6 +1500,7 @@ bool GuiManager::_checkForStateChange()
   
   if (_vlevelHasChanged) {
     _vlevelHasChanged = false;
+    _vert->setSelectedHorizHeight(_vlevelManager.getSelectedLevel());
     stateHasChanged = true;
   }
 

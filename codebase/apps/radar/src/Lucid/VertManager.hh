@@ -168,6 +168,7 @@ protected:
 
   QAction *_minimumHeightAct;
   QAction *_maximumHeightAct;
+  QAction *_plotSelectedHorizHeightAct;
 
   ///////////////////////
   // Protected methods //

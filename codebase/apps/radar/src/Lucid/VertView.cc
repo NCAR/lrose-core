@@ -112,6 +112,8 @@ VertView::VertView(QWidget* parent,
   _mouseValueVisible = false;
   _mouseValueX = 0;
   _mouseValueY = 0;
+  _plotSelectedHorizHeight = _params.vsection_plot_selected_horiz_height;
+  _selectedHorizHeightKm = _params.start_ht_km;
   _mousePressX = 0;
   _mousePressY = 0;
   _mouseReleaseX = 0;
@@ -434,6 +436,26 @@ void VertView::_drawOverlays(QPainter &painter)
       painter.drawLine(QLineF(xPixel, _zoomWorld.getYMaxPixel(),
                               xPixel, _zoomWorld.getYMinPixel()));
     }
+    painter.restore();
+  }
+
+  // Use the same visual convention as the section route in the horizontal
+  // view. This is an overlay rather than part of the cached data layer, so a
+  // level change does not force filled contours to be regenerated.
+
+  if (_plotSelectedHorizHeight &&
+      std::isfinite(_selectedHorizHeightKm)) {
+    painter.save();
+    _zoomWorld.setClippingOn(painter);
+    QPen selectedHeightPen(QColor(_params.route_path_color));
+    selectedHeightPen.setWidth(2);
+    selectedHeightPen.setCapStyle(Qt::RoundCap);
+    selectedHeightPen.setJoinStyle(Qt::RoundJoin);
+    painter.setPen(selectedHeightPen);
+    const double yPixel =
+      _zoomWorld.getYPixel(_selectedHorizHeightKm);
+    painter.drawLine(QLineF(_zoomWorld.getXMinPixel(), yPixel,
+                            _zoomWorld.getXMaxPixel(), yPixel));
     painter.restore();
   }
     
@@ -1211,6 +1233,27 @@ void VertView::setHeightRange(double minHeightKm, double maxHeightKm)
   _maxHeightKm = maxHeightKm;
   _savedZooms.clear();
   configureWorldCoords();
+}
+
+////////////////////////////////////////////////////////
+// set the level selected in the horizontal view
+
+void VertView::setSelectedHorizHeight(double heightKm)
+{
+  if (_selectedHorizHeightKm == heightKm) {
+    return;
+  }
+  _selectedHorizHeightKm = heightKm;
+  update();
+}
+
+////////////////////////////////////////////////////////
+// set visibility of the horizontal selected-height line
+
+void VertView::setPlotSelectedHorizHeight(bool enabled)
+{
+  _plotSelectedHorizHeight = enabled;
+  update();
 }
 
 ////////////////////////////////////////////////////////

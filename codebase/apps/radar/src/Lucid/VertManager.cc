@@ -186,6 +186,22 @@ void VertManager::_createActions(VertView *vert)
 
   _updateHeightActionText();
 
+  // Show the plan-view level as a reference line across the section.
+
+  _plotSelectedHorizHeightAct =
+    new QAction(tr("Show selected horizontal height"), this);
+  _plotSelectedHorizHeightAct->setStatusTip(
+    tr("Show the main horizontal view's selected height on the section"));
+  _plotSelectedHorizHeightAct->setCheckable(true);
+  _plotSelectedHorizHeightAct->setChecked(
+    _params.vsection_plot_selected_horiz_height);
+  connect(_plotSelectedHorizHeightAct, &QAction::toggled,
+          this, [this, vert](bool enabled) {
+            _params.vsection_plot_selected_horiz_height =
+              enabled ? pTRUE : pFALSE;
+            vert->setPlotSelectedHorizHeight(enabled);
+          });
+
 }
 
 //////////////////////////////////////////////////
@@ -276,6 +292,8 @@ void VertManager::_createMenus()
   _configurationMenu->addSeparator();
   _configurationMenu->addAction(_minimumHeightAct);
   _configurationMenu->addAction(_maximumHeightAct);
+  _configurationMenu->addSeparator();
+  _configurationMenu->addAction(_plotSelectedHorizHeightAct);
 
   menuBar()->addAction(_unzoomAct);
 }
