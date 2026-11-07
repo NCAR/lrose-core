@@ -24,6 +24,7 @@
 #include <iostream>
 
 #include <QHBoxLayout>
+#include <QInputDialog>
 #include <QLabel>
 #include <QVBoxLayout>
 
@@ -41,7 +42,9 @@ VertManager::VertManager(GuiManager *manager):
         QMainWindow(manager),
         _guiManager(manager),
         _params(Params::Instance()),
-        _gd(GlobalData::Instance())
+        _gd(GlobalData::Instance()),
+        _minHeightKm(_params.vsection_min_ht_km),
+        _maxHeightKm(_params.vsection_max_ht_km)
         
 {
   // Create the main frame which contains everything in this window
@@ -166,6 +169,23 @@ void VertManager::_createActions(VertView *vert)
             emit singleSegmentVsectionChanged(enabled);
           });
 
+  // Height-range actions use dialogs rather than embedded menu widgets so a
+  // partially entered value cannot update the plot or violate min < max.
+
+  _minimumHeightAct = new QAction(this);
+  _minimumHeightAct->setStatusTip(
+    tr("Set the minimum height of the vertical-section plot"));
+  connect(_minimumHeightAct, &QAction::triggered,
+          this, &VertManager::_setMinimumHeight);
+
+  _maximumHeightAct = new QAction(this);
+  _maximumHeightAct->setStatusTip(
+    tr("Set the maximum height of the vertical-section plot"));
+  connect(_maximumHeightAct, &QAction::triggered,
+          this, &VertManager::_setMaximumHeight);
+
+  _updateHeightActionText();
+
 }
 
 //////////////////////////////////////////////////
@@ -185,6 +205,59 @@ void VertManager::_unzoom()
   _unzoomAct->setEnabled(false);
 }
 
+/////////////////////////////////////////////////////////////
+// set the minimum height of the unzoomed plot
+
+void VertManager::_setMinimumHeight()
+{
+  bool accepted = false;
+  const double value = QInputDialog::getDouble(
+    this, tr("Minimum vertical-section height"), tr("Height (km MSL):"),
+    _minHeightKm, -100000.0, _maxHeightKm - 0.001, 3, &accepted,
+    Qt::WindowFlags(), 0.1);
+  if (!accepted) {
+    return;
+  }
+
+  _minHeightKm = value;
+  _params.vsection_min_ht_km = value;
+  _vertView->setHeightRange(_minHeightKm, _maxHeightKm);
+  _unzoomAct->setEnabled(false);
+  _updateHeightActionText();
+}
+
+/////////////////////////////////////////////////////////////
+// set the maximum height of the unzoomed plot
+
+void VertManager::_setMaximumHeight()
+{
+  bool accepted = false;
+  const double value = QInputDialog::getDouble(
+    this, tr("Maximum vertical-section height"), tr("Height (km MSL):"),
+    _maxHeightKm, _minHeightKm + 0.001, 100000.0, 3, &accepted,
+    Qt::WindowFlags(), 0.1);
+  if (!accepted) {
+    return;
+  }
+
+  _maxHeightKm = value;
+  _params.vsection_max_ht_km = value;
+  _vertView->setHeightRange(_minHeightKm, _maxHeightKm);
+  _unzoomAct->setEnabled(false);
+  _updateHeightActionText();
+}
+
+/////////////////////////////////////////////////////////////
+// show the active height limits in the configuration menu
+
+void VertManager::_updateHeightActionText()
+{
+  _minimumHeightAct->setText(
+    tr("Minimum height: %1 km...").arg(_minHeightKm, 0, 'g', 6));
+  _maximumHeightAct->setText(
+    tr("Maximum height: %1 km...").arg(_maxHeightKm, 0, 'g', 6));
+}
+
 /*************************************************************************
  * _createMenus()
  */
@@ -200,6 +273,9 @@ void VertManager::_createMenus()
 
   _configurationMenu = menuBar()->addMenu(tr("&Configuration"));
   _configurationMenu->addAction(_singleSegmentVsectionAct);
+  _configurationMenu->addSeparator();
+  _configurationMenu->addAction(_minimumHeightAct);
+  _configurationMenu->addAction(_maximumHeightAct);
 
   menuBar()->addAction(_unzoomAct);
 }

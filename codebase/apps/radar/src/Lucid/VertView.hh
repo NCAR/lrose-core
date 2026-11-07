@@ -219,6 +219,12 @@ class DLL_EXPORT VertView : public QWidget
   void setHeightGrid(const bool enabled);
   void setDistanceGrid(const bool enabled);
 
+  // Replace the unzoomed vertical range and discard zooms based on the old
+  // range. These values apply to height-coordinate sections; other native
+  // vertical coordinates continue to use the limits returned with the data.
+
+  void setHeightRange(double minHeightKm, double maxHeightKm);
+
   // Enable or disable the transient value displayed at the cursor.
 
   void setShowValue(bool enabled);
@@ -247,11 +253,10 @@ class DLL_EXPORT VertView : public QWidget
   
   double _routeLengthKm;
 
-  /**
-   * @brief The maximum range of the beams, in km.  It affects the
-   *        labelling of the range rings
-   */
+  // Unzoomed height limits for sections using height as their vertical
+  // coordinate. They are initialized from TDRP and may be changed at runtime.
 
+  double _minHeightKm;
   double _maxHeightKm;
   double _xGridSpacing;
   double _yGridSpacing;

@@ -123,6 +123,7 @@ VertView::VertView(QWidget* parent,
   
   // initialize world view
   
+  _minHeightKm = _params.vsection_min_ht_km;
   _maxHeightKm = _params.vsection_max_ht_km;
   _xGridSpacing = 0.0;
   _yGridSpacing = 0.0;
@@ -167,7 +168,7 @@ void VertView::configureWorldCoords(int zoomLevel)
   _fullWorld.setWindowGeom(width(), height(), 0, 0);
   
   double xMax = 100.0;
-  double yMin = _params.vsection_min_ht_km;
+  double yMin = _minHeightKm;
   double yMax = _maxHeightKm;
   if (_sectionReader != nullptr && _sectionReader->isValidV()) {
     xMax = _sectionReader->getVertTotalLengthKm();
@@ -1192,6 +1193,24 @@ void VertView::setDistanceGrid(const bool enabled)
 {
   _distanceGridEnabled = enabled;
   update();
+}
+
+////////////////////////////////////////////////////////
+// set the unzoomed height range
+
+void VertView::setHeightRange(double minHeightKm, double maxHeightKm)
+{
+  if (maxHeightKm <= minHeightKm) {
+    return;
+  }
+
+  // A configured range defines a new base view, so zoom history created
+  // against the previous range is no longer meaningful.
+
+  _minHeightKm = minHeightKm;
+  _maxHeightKm = maxHeightKm;
+  _savedZooms.clear();
+  configureWorldCoords();
 }
 
 ////////////////////////////////////////////////////////

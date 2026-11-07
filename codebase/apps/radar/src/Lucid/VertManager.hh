@@ -100,6 +100,8 @@ private slots:
   // override
   
   virtual void _unzoom();
+  void _setMinimumHeight();
+  void _setMaximumHeight();
   
 protected:
 
@@ -117,6 +119,8 @@ protected:
   string _fieldName;
   DateTime _validTime;
   double _routeLengthKm;
+  double _minHeightKm;
+  double _maxHeightKm;
   
   /**
    * @brief The main frame for the window.
@@ -159,6 +163,12 @@ protected:
 
   QAction *_singleSegmentVsectionAct;
 
+  // Actions edit the unzoomed height range initialized by the TDRP
+  // parameters. The current values are included in their menu labels.
+
+  QAction *_minimumHeightAct;
+  QAction *_maximumHeightAct;
+
   ///////////////////////
   // Protected methods //
   ///////////////////////
@@ -181,6 +191,7 @@ protected:
    */
   
   void _createMenus();
+  void _updateHeightActionText();
   
 };
 
