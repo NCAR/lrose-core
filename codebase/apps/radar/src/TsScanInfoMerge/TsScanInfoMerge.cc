@@ -386,10 +386,12 @@ int TsScanInfoMerge::_mergeAndWriteUsingTime()
                 interpEl, interpAz);
   
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "el0, el1, az0, az1, stime, pmtime, mtime, iel, iaz: "
+    cerr << "elS, azS, el0, az0, el1, az1, stime, pmtime, mtime, iel, iaz: "
+         << slaveHdr.elevation << ", "
+         << slaveHdr.azimuth << ", "
          << prevHdr.elevation << ", "
-         << latestHdr.elevation << ", "
          << prevHdr.azimuth << ", "
+         << latestHdr.elevation << ", "
          << latestHdr.azimuth << ", "
          << _slaveTime << ", "
          << _prevMasterTime << ", "
