@@ -58,6 +58,7 @@
 #include <QStatusBar>
 #include <QDateTime>
 #include <QDateTimeEdit>
+#include <QDoubleSpinBox>
 #include <QLineEdit>
 #include <QErrorMessage>
 #include <QFileDialog>
@@ -95,6 +96,7 @@
 #include "FieldTableItem.hh"
 #include "HorizView.hh"
 #include "MapMenuItem.hh"
+#include "MdvReader.hh"
 #include "ProdMenuItem.hh"
 #include "TimeControl.hh"
 #include "VlevelSelector.hh"
@@ -109,6 +111,38 @@
 
 using namespace std;
 using namespace H5x;
+
+namespace {
+
+// Place numeric controls directly in the context menu so related contour and
+// color-scale values can be inspected together. They intentionally have no
+// model connections yet; this first step establishes only the interaction.
+
+void addFieldNumberEditor(QMenu *menu, const QString &label, double value,
+                          double minimum = -1.0e12,
+                          double maximum = 1.0e12)
+{
+  QWidget *editor = new QWidget(menu);
+  QHBoxLayout *layout = new QHBoxLayout(editor);
+  layout->setContentsMargins(8, 2, 8, 2);
+
+  QLabel *nameLabel = new QLabel(label, editor);
+  nameLabel->setMinimumWidth(65);
+  layout->addWidget(nameLabel);
+
+  QDoubleSpinBox *spinBox = new QDoubleSpinBox(editor);
+  spinBox->setRange(minimum, maximum);
+  spinBox->setDecimals(6);
+  spinBox->setValue(value);
+  spinBox->setKeyboardTracking(false);
+  layout->addWidget(spinBox);
+
+  QWidgetAction *action = new QWidgetAction(menu);
+  action->setDefaultWidget(editor);
+  menu->addAction(action);
+}
+
+} // namespace
 
 GuiManager* GuiManager::m_pInstance = NULL;
 
@@ -1240,6 +1274,7 @@ void GuiManager::_createFieldMenu()
   _fieldTable->adjustSize();
   _fieldTable->setAlternatingRowColors(true);
   _fieldTable->setSelectionMode(QAbstractItemView::SingleSelection);
+  _fieldTable->setContextMenuPolicy(Qt::CustomContextMenu);
   
   // initialize
 
@@ -1252,7 +1287,80 @@ void GuiManager::_createFieldMenu()
 
   connect(_fieldTable, SIGNAL(cellClicked(const int, const int)),
           this, SLOT(_fieldTableCellClicked(const int, const int)));
+  connect(_fieldTable, &QWidget::customContextMenuRequested,
+          this, &GuiManager::_showFieldContextMenu);
   
+}
+
+/////////////////////////////////////////////////////
+// show the configuration controls for one field
+
+void GuiManager::_showFieldContextMenu(const QPoint &pos)
+{
+  FieldTableItem *item =
+    dynamic_cast<FieldTableItem *>(_fieldTable->itemAt(pos));
+  if (item == nullptr || item->getFieldIndex() < 0 ||
+      item->getFieldIndex() >= _params.fields_n ||
+      !(item->flags() & Qt::ItemIsEnabled)) {
+    return;
+  }
+
+  const int fieldNum = item->getFieldIndex();
+  const Params::field_t *field = item->getFieldParams();
+  if (field == nullptr) {
+    return;
+  }
+
+  QMenu menu(_fieldTable);
+  menu.addSection(QString::fromUtf8(field->button_label));
+
+  QMenu *renderMenu = menu.addMenu(tr("Render method"));
+  QActionGroup *renderGroup = new QActionGroup(renderMenu);
+  renderGroup->setExclusive(true);
+  QAction *noneAction = renderMenu->addAction(tr("None"));
+  QAction *polygonsAction = renderMenu->addAction(tr("Polygons"));
+  QAction *filledContoursAction =
+    renderMenu->addAction(tr("Filled contours"));
+  for (QAction *action : {noneAction, polygonsAction,
+                          filledContoursAction}) {
+    action->setCheckable(true);
+    renderGroup->addAction(action);
+  }
+  noneAction->setChecked(field->render_mode == Params::NONE);
+  polygonsAction->setChecked(field->render_mode == Params::POLYGONS);
+  filledContoursAction->setChecked(field->render_mode ==
+                                   Params::FILLED_CONTOURS);
+
+  QAction *lineContoursAction =
+    menu.addAction(tr("Overlay line contours"));
+  lineContoursAction->setCheckable(true);
+  lineContoursAction->setChecked(field->overlay_line_contours);
+
+  QMenu *contourMenu = menu.addMenu(tr("Contour details"));
+  addFieldNumberEditor(contourMenu, tr("Low"), field->contour_low);
+  addFieldNumberEditor(contourMenu, tr("High"), field->contour_high);
+  addFieldNumberEditor(contourMenu, tr("Interval"),
+                       field->contour_interval, 0.0);
+
+  QAction *columnMaxAction = menu.addAction(tr("Column max mode"));
+  columnMaxAction->setCheckable(true);
+  columnMaxAction->setChecked(field->composite_mode);
+
+  double colorScaleMin = field->contour_low;
+  double colorScaleMax = field->contour_high;
+  if (_gd.mread[fieldNum] != nullptr) {
+    const vector<ColorMap::CmapEntry> &entries =
+      _gd.mread[fieldNum]->colorMap.getEntries();
+    if (!entries.empty()) {
+      colorScaleMin = entries.front().minVal;
+      colorScaleMax = entries.back().maxVal;
+    }
+  }
+  QMenu *colorScaleMenu = menu.addMenu(tr("Color scale"));
+  addFieldNumberEditor(colorScaleMenu, tr("Minimum"), colorScaleMin);
+  addFieldNumberEditor(colorScaleMenu, tr("Maximum"), colorScaleMax);
+
+  menu.exec(_fieldTable->viewport()->mapToGlobal(pos));
 }
 
 /////////////////////////////////////
