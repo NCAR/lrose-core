@@ -73,6 +73,7 @@ MdvReader::MdvReader(QObject* parent) :
   currently_displayed = 0;
   auto_render = 0;
   render_method = 0;
+  overlay_line_contours = false;
   composite_mode = 0;
   auto_scale = 0;
   use_landuse = 0;

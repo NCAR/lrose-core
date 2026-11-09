@@ -1070,26 +1070,7 @@ int HorizView::_controlRenderGrid(int page,
   }
 
   if(!_params.draw_main_on_top) {
-    if(mr->render_method == LINE_CONTOURS) {
-#ifdef NOTYET
-      contour_info_t cont; // contour params 
-      cont.min = mr->cont_low;
-      cont.max = mr->cont_high;
-      cont.interval = mr->cont_interv;
-      cont.active = 1;
-      cont.field = page;
-      cont.labels_on = _params.label_contours;
-      cont.color = _gd.legends.foreground_color;
-      cont.vcm = &mr->h_vcm;
-      if (_gd.layers.use_alt_contours) {
-        RenderLineContours(xid,&cont);
-      } else {
-        render_line_contours(xid,&cont);
-      }
-#endif
-    } else {
-      _renderFieldGrid(page, mr, start_time, end_time, 0);
-    }
+    _renderFieldGrid(page, mr, start_time, end_time, 0);
     if(_gd.layers.earth.terrain_active &&
        (mr->ds_fhdr.nz > 1) &&
        ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
@@ -1110,27 +1091,7 @@ int HorizView::_controlRenderGrid(int page,
   }
   
   if(_params.draw_main_on_top) {
-    if(mr->render_method == LINE_CONTOURS) {
-#ifdef NOTYET
-      contour_info_t cont; // contour params 
-      cont.min = mr->cont_low;
-      cont.max = mr->cont_high;
-      cont.interval = mr->cont_interv;
-      cont.active = 1;
-      cont.field = page;
-      cont.labels_on = _params.label_contours;
-      cont.color = _gd.legends.foreground_color;
-      cont.vcm = &mr->h_vcm;
-      if (_gd.layers.use_alt_contours) {
-        RenderLineContours(xid,&cont);
-      } else {
-        render_line_contours(xid,&cont);
-      }
-#endif
-    } else {
-      _renderFieldGrid(page, mr, start_time, end_time, 0);
-      // render_grid(xid,mr,start_time,end_time,0);
-    }
+    _renderFieldGrid(page, mr, start_time, end_time, 0);
     if(_gd.layers.earth.terrain_active && 
        ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
        (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1)) {
@@ -1233,7 +1194,7 @@ int HorizView::_renderFieldGrid(int page,
   } else if (mr->render_method == FILLED_CONTOURS ||
              (mr->render_method == DYNAMIC_CONTOURS &&
               (int64_t) mr->h_fhdr.nx * mr->h_fhdr.ny <
-              _params.dynamic_contour_threshold)) {
+                _params.dynamic_contour_threshold)) {
     // Polar data retains its gate polygons, while Cartesian grids share one
     // contour path which handles any projection distortion internally.
     _zoom->renderFilledContours(page, mr,
@@ -1247,6 +1208,13 @@ int HorizView::_renderFieldGrid(int page,
     _zoom->renderGridDistorted(page, mr,
                                start_time, end_time,
                                is_overlay_field);
+  }
+
+  // Line contours are an overlay choice independent of how the underlying
+  // colors were filled. Polar radar gates retain their native geometry and do
+  // not currently have a Cartesian contour topology suitable for this path.
+  if (mr->overlay_line_contours && projType != Mdvx::PROJ_POLAR_RADAR) {
+    _zoom->renderLineContours(mr);
   }
 
 #ifdef NOTYET

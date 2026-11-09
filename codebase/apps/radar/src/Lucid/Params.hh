@@ -81,9 +81,7 @@ public:
 
   typedef enum {
     POLYGONS = 0,
-    FILLED_CONTOURS = 1,
-    DYNAMIC_CONTOURS = 2,
-    LINE_CONTOURS = 3
+    FILLED_CONTOURS = 1
   } grid_render_mode_t;
 
   typedef enum {
@@ -203,6 +201,7 @@ public:
     double contour_high;
     double contour_interval;
     grid_render_mode_t render_mode;
+    tdrp_bool_t overlay_line_contours;
     tdrp_bool_t display_in_menu;
     tdrp_bool_t background_render;
     tdrp_bool_t composite_mode;

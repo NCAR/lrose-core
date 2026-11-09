@@ -173,7 +173,10 @@ public:
   int plane; /* plane of data rendered in horiz visible area */
   int currently_displayed; /* flag indicating if field in field list */
   int auto_render; /* flag indicating html/ automatic rendering */
-  int render_method; /* Either RECTANGLES, FILLED_CONTOURS or LINE_CONTOURS */
+  // Keep the base fill independent from its optional line overlay so either
+  // polygon or filled-contour rendering can carry the same contour lines.
+  int render_method;
+  bool overlay_line_contours;
   int composite_mode; /* Set to 1 to request a composite of this data field */
   int auto_scale; /* Set to 1 to map the data's dynamic range into the color scale */
   int use_landuse; /* activate the Land Use Field */

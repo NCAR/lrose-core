@@ -1139,14 +1139,17 @@ void VertView::_drawSection(QPainter &painter)
     painter.restore();
   }
 
-  if (_sectionReader->render_method == FILLED_CONTOURS ||
-      _sectionReader->render_method == DYNAMIC_CONTOURS) {
-    if (_drawSectionContours(painter)) {
-      return;
-    }
+  bool renderedFilledContours = false;
+  if (_sectionReader->render_method == FILLED_CONTOURS) {
+    renderedFilledContours = _drawSectionContours(painter);
   }
 
-  _drawSectionCells(painter);
+  if (!renderedFilledContours) {
+    _drawSectionCells(painter);
+  }
+  if (_sectionReader->overlay_line_contours) {
+    _drawSectionContourLines(painter);
+  }
 }
 
 /////////////////////////////////////////////////////////////
@@ -1307,6 +1310,80 @@ bool VertView::_drawSectionContours(QPainter &painter)
   }
   painter.restore();
   return true;
+}
+
+/////////////////////////////////////////////////////////////
+// draw line contours over the selected vertical-section fill
+
+void VertView::_drawSectionContourLines(QPainter &painter)
+{
+  const int nx = _sectionReader->v_fhdr.nx;
+  const int nz = _sectionReader->v_fhdr.nz;
+  if (nx < 2 || nz < 2 ||
+      _sectionReader->v_fl32_data.size() != (size_t) nx * (size_t) nz ||
+      !std::isfinite(_sectionReader->cont_low) ||
+      !std::isfinite(_sectionReader->cont_high) ||
+      !std::isfinite(_sectionReader->cont_interv) ||
+      _sectionReader->cont_interv <= 0.0 ||
+      _sectionReader->cont_high < _sectionReader->cont_low) {
+    return;
+  }
+
+  MdvxContour contours;
+  const int maxContourLevels = 10000;
+  int nlevels = 0;
+  for (double value = _sectionReader->cont_low;
+       value <= _sectionReader->cont_high +
+                  _sectionReader->cont_interv * 1.0e-6 &&
+         nlevels < maxContourLevels;
+       value = _sectionReader->cont_low +
+                 (++nlevels) * _sectionReader->cont_interv) {
+    contours.addVal(value);
+  }
+  if (nlevels == 0 || nlevels >= maxContourLevels) {
+    return;
+  }
+
+  // Keep the VSECTION header and nonuniform level coordinates intact so the
+  // line geometry shares exactly the same distance/height space as the fill.
+  Mdvx::field_header_t contourHeader = _sectionReader->v_fhdr;
+  contourHeader.encoding_type = Mdvx::ENCODING_FLOAT32;
+  contourHeader.compression_type = Mdvx::COMPRESSION_NONE;
+  contourHeader.data_element_nbytes = sizeof(fl32);
+  contourHeader.volume_size = nx * contourHeader.ny * nz * sizeof(fl32);
+  MdvxField contourField(contourHeader, _sectionReader->v_vhdr,
+                         _sectionReader->v_fl32_data.data());
+  if (contours.computeLines(contourField)) {
+    cerr << "ERROR - VertView::_drawSectionContourLines" << endl;
+    cerr << "  Cannot compute contour lines" << endl;
+    return;
+  }
+
+  painter.save();
+  _zoomWorld.setClippingOn(painter);
+  QPen pen(QColor(_params.foreground_color));
+  pen.setWidth(std::max(1, _params.contour_line_width));
+  pen.setCapStyle(Qt::RoundCap);
+  pen.setJoinStyle(Qt::RoundJoin);
+  painter.setPen(pen);
+  painter.setBrush(Qt::NoBrush);
+
+  for (const MdvxContourLevel &level : contours.getLevels()) {
+    for (const MdvxContourLine &line : level.lines) {
+      if (line.pts.size() < 2) {
+        continue;
+      }
+      QPainterPath path;
+      path.moveTo(_zoomWorld.getPixelPointF(line.pts[0].x,
+                                             line.pts[0].y));
+      for (size_t ii = 1; ii < line.pts.size(); ++ii) {
+        path.lineTo(_zoomWorld.getPixelPointF(line.pts[ii].x,
+                                               line.pts[ii].y));
+      }
+      painter.drawPath(path);
+    }
+  }
+  painter.restore();
 }
 
 /*************************************************************************

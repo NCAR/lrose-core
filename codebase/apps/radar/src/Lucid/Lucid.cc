@@ -854,6 +854,7 @@ int Lucid::_initGrids()
     mread->cont_low = fld.contour_low;
     mread->cont_high = fld.contour_high;
     mread->cont_interv = fld.contour_interval;
+    mread->overlay_line_contours = fld.overlay_line_contours;
 
     mread->time_allowance = _gd.movie.mr_stretch_factor * _gd.movie.time_interval_mins;
 
@@ -861,10 +862,6 @@ int Lucid::_initGrids()
       mread->render_method = POLYGONS;
     } else if (fld.render_mode == Params::FILLED_CONTOURS) {
       mread->render_method = FILLED_CONTOURS;
-    } else if (fld.render_mode == Params::DYNAMIC_CONTOURS) {
-      mread->render_method = DYNAMIC_CONTOURS;
-    } else if (fld.render_mode == Params::LINE_CONTOURS) {
-      mread->render_method = LINE_CONTOURS;
     }
 
     if (fld.composite_mode) {

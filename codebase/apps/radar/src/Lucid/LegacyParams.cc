@@ -1970,6 +1970,7 @@ int LegacyParams::_readGrids()
     fld.contour_low = atof(cfield[5]);
     fld.contour_high = atof(cfield[6]);
     fld.contour_interval = atof(cfield[7]);
+    fld.overlay_line_contours = false;
 
     if (strncasecmp(cfield[8],"rad",3) == 0) {
       fld.render_mode = POLYGONS;
@@ -1982,11 +1983,14 @@ int LegacyParams::_readGrids()
     }
 
     if (strncasecmp(cfield[8],"lcont",4) == 0) {
-      fld.render_mode = LINE_CONTOURS;
+      fld.render_mode = POLYGONS;
+      fld.overlay_line_contours = true;
     }
 
     if (strncasecmp(cfield[8],"dcont",4) == 0) {
-      fld.render_mode = DYNAMIC_CONTOURS;
+      // Lucid no longer switches rendering methods according to grid size.
+      // Preserve the contouring intent of legacy dcont fields explicitly.
+      fld.render_mode = FILLED_CONTOURS;
     }
 
     if (strstr(cfield[8],"comp") != NULL) {
@@ -2106,13 +2110,9 @@ int LegacyParams::_readGrids()
       case FILLED_CONTOURS:
         fprintf(_tdrpFile, "    render_mode = FILLED_CONTOURS,\n");
         break;
-      case DYNAMIC_CONTOURS:
-        fprintf(_tdrpFile, "    render_mode = DYNAMIC_CONTOURS,\n");
-        break;
-      case LINE_CONTOURS:
-        fprintf(_tdrpFile, "    render_mode = LINE_CONTOURS,\n");
-        break;
     }
+    fprintf(_tdrpFile, "    overlay_line_contours = %s,\n",
+            (fld.overlay_line_contours?"TRUE":"FALSE"));
     fprintf(_tdrpFile, "    display_in_menu = %s,\n",
             (fld.display_in_menu?"TRUE":"FALSE"));
     fprintf(_tdrpFile, "    background_render = %s,\n",

@@ -397,6 +397,7 @@ class DLL_EXPORT VertView : public QWidget
   void _drawSection(QPainter &painter);
   void _drawSectionCells(QPainter &painter);
   bool _drawSectionContours(QPainter &painter);
+  void _drawSectionContourLines(QPainter &painter);
   vector<double> _computeVerticalEdges() const;
   bool _sampleGridValue(int mouseX, int mouseY,
                         SectionSample &sample) const;

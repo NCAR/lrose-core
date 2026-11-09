@@ -604,6 +604,11 @@ public:
                             time_t start_time,
                             time_t end_time,
                             bool is_overlay_field);
+
+  // Add line contours to the already-rendered field without replacing its
+  // polygon or filled-contour colors.
+
+  void renderLineContours(MdvReader *mr);
   
   // render a data grid for polar radar data
   // returns QImage* - owned by this object

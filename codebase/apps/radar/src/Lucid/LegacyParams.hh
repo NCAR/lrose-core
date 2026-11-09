@@ -97,9 +97,7 @@ private:
   
   typedef enum {
     POLYGONS,
-    FILLED_CONTOURS,
-    DYNAMIC_CONTOURS,
-    LINE_CONTOURS
+    FILLED_CONTOURS
   } GridRenderMode;
 
   class Field {
@@ -111,6 +109,7 @@ private:
       contour_high = 100;
       contour_interval = 5;
       render_mode = POLYGONS;
+      overlay_line_contours = false;
       display_in_menu = true;
       background_render = false;
       composite_mode = false;
@@ -136,6 +135,7 @@ private:
       contour_high = rhs.contour_high;
       contour_interval = rhs.contour_interval;
       render_mode = rhs.render_mode;
+      overlay_line_contours = rhs.overlay_line_contours;
       display_in_menu = rhs.display_in_menu;
       background_render = rhs.background_render;
       composite_mode = rhs.composite_mode;
@@ -156,6 +156,7 @@ private:
     double contour_high;
     double contour_interval;
     GridRenderMode render_mode;
+    bool overlay_line_contours;
     bool display_in_menu;
     bool background_render;
     bool composite_mode;

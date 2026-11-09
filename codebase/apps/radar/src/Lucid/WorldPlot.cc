@@ -3068,6 +3068,90 @@ void WorldPlot::renderFilledContours(int fieldNum,
 
 }
 
+//////////////////////////////////////////////////////////
+// render line contours over the existing filled field
+
+void WorldPlot::renderLineContours(MdvReader *mr)
+
+{
+  if (mr == nullptr || _gridImage == nullptr ||
+      mr->h_fhdr.nx < 2 || mr->h_fhdr.ny < 2 ||
+      mr->h_fl32_data.size() !=
+        (size_t) mr->h_fhdr.nx * (size_t) mr->h_fhdr.ny ||
+      !std::isfinite(mr->cont_low) || !std::isfinite(mr->cont_high) ||
+      !std::isfinite(mr->cont_interv) || mr->cont_interv <= 0.0 ||
+      mr->cont_high < mr->cont_low) {
+    return;
+  }
+
+  MdvxContour contours;
+  const int maxContourLevels = 10000;
+  int nlevels = 0;
+  for (double value = mr->cont_low;
+       value <= mr->cont_high + mr->cont_interv * 1.0e-6 &&
+         nlevels < maxContourLevels;
+       value = mr->cont_low + (++nlevels) * mr->cont_interv) {
+    contours.addVal(value);
+  }
+  if (nlevels == 0 || nlevels >= maxContourLevels) {
+    return;
+  }
+
+  // The reader retains only the selected FLOAT32 plane after releasing the
+  // source volume. Give MdvxContour a self-contained field whose lifetime
+  // covers the complete line construction operation.
+  Mdvx::field_header_t contourHeader = mr->h_fhdr;
+  contourHeader.nz = 1;
+  contourHeader.encoding_type = Mdvx::ENCODING_FLOAT32;
+  contourHeader.compression_type = Mdvx::COMPRESSION_NONE;
+  contourHeader.data_element_nbytes = sizeof(fl32);
+  contourHeader.volume_size = contourHeader.nx * contourHeader.ny * sizeof(fl32);
+  MdvxField contourField(contourHeader, mr->h_vhdr,
+                         mr->h_fl32_data.data());
+  if (contours.computeLines(contourField)) {
+    cerr << "ERROR - WorldPlot::renderLineContours" << endl;
+    cerr << "  Cannot compute contour lines" << endl;
+    return;
+  }
+
+  const bool distorted = mr->proj.getPjgMath() != _proj.getPjgMath();
+  QPainter painter(_gridImage);
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth, _plotHeight);
+  QPen pen(QColor(_params.foreground_color));
+  pen.setWidth(std::max(1, _params.contour_line_width));
+  pen.setCapStyle(Qt::RoundCap);
+  pen.setJoinStyle(Qt::RoundJoin);
+  painter.setPen(pen);
+  painter.setBrush(Qt::NoBrush);
+
+  for (const MdvxContourLevel &level : contours.getLevels()) {
+    for (const MdvxContourLine &line : level.lines) {
+      if (line.pts.size() < 2) {
+        continue;
+      }
+      QPainterPath path;
+      for (size_t ipt = 0; ipt < line.pts.size(); ++ipt) {
+        double xx = line.pts[ipt].x;
+        double yy = line.pts[ipt].y;
+        if (distorted) {
+          double lat, lon;
+          mr->proj.xy2latlon(xx, yy, lat, lon);
+          _proj.latlon2xy(lat, lon, xx, yy);
+        }
+        const QPointF point = getPixelPointF(xx, yy);
+        if (ipt == 0) {
+          path.moveTo(point);
+        } else {
+          path.lineTo(point);
+        }
+      }
+      painter.drawPath(path);
+    }
+  }
+  painter.restore();
+}
+
 /////////////////////////////////////////////////////
 // render polar radar grid
 
