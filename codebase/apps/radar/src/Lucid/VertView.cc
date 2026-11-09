@@ -1138,12 +1138,13 @@ void VertView::_drawSection(QPainter &painter)
     painter.restore();
   }
 
-  bool renderedFilledContours = false;
   if (_sectionReader->render_method == FILLED_CONTOURS) {
-    renderedFilledContours = _drawSectionContours(painter);
-  }
-
-  if (!renderedFilledContours) {
+    // A contour failure falls back to cells so valid data is not lost. NONE
+    // deliberately bypasses both fill paths while retaining optional lines.
+    if (!_drawSectionContours(painter)) {
+      _drawSectionCells(painter);
+    }
+  } else if (_sectionReader->render_method == POLYGONS) {
     _drawSectionCells(painter);
   }
   if (_sectionReader->overlay_line_contours) {
