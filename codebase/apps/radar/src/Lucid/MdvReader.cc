@@ -168,6 +168,9 @@ MdvReader::MdvReader(QObject* parent) :
   isRadar = false;
   
   _vLevelReq = -9999.0;
+  _compositeModeReq = false;
+  _compositeMinHtReq = 0.0;
+  _compositeMaxHtReq = 0.0;
   _validH = false;
   _validV = false;
   _newH = false;
@@ -270,6 +273,13 @@ void MdvReader::requestHorizPlane(const DateTime &midTime,
   
   _midTime = midTime;
   _page = page;
+
+  // The GUI can change column-max mode while a worker is active.  Capture it
+  // with the other request details so an in-flight MDV request remains
+  // internally consistent; a queued GUI change will start a subsequent read.
+  _compositeModeReq = (composite_mode != FALSE);
+  _compositeMinHtReq = _gd.h_win.min_ht;
+  _compositeMaxHtReq = _gd.h_win.max_ht;
   
   // check for change in request details
   
@@ -341,10 +351,14 @@ int MdvReader::getHorizPlane()
   
   // vlevel
   
-  h_mdvx.setReadVlevelLimits(_vLevelReq, _vLevelReq);
-  if(composite_mode) {
-    // Request column max composite
+  if (_compositeModeReq) {
+    // A composite must include the configured vertical domain.  Restricting
+    // this request to the selected plan-view level leaves MDV no column over
+    // which to compute the maximum.
+    h_mdvx.setReadVlevelLimits(_compositeMinHtReq, _compositeMaxHtReq);
     h_mdvx.setReadComposite();
+  } else {
+    h_mdvx.setReadVlevelLimits(_vLevelReq, _vLevelReq);
   }
   
   // clip to zoom limits

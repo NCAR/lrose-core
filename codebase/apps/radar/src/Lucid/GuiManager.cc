@@ -201,6 +201,7 @@ GuiManager::GuiManager() :
   _fieldNum = 0;
   _prevFieldNum = -1;
   _fieldHasChanged = true;
+  _horizontalRequestHasChanged = false;
   
   _fieldTableCol = 0;
   _fieldTableRow = 0;
@@ -1409,6 +1410,22 @@ void GuiManager::_showFieldContextMenu(const QPoint &pos)
   QAction *columnMaxAction = menu.addAction(tr("Column max mode"));
   columnMaxAction->setCheckable(true);
   columnMaxAction->setChecked(field->composite_mode);
+  connect(columnMaxAction, &QAction::toggled, this,
+          [this, field, fieldNum](bool enabled) {
+            field->composite_mode = enabled ? pTRUE : pFALSE;
+            MdvReader *reader = _gd.mread[fieldNum];
+            if (reader != nullptr) {
+              reader->composite_mode = enabled ? TRUE : FALSE;
+            }
+
+            // Column-max is an MDV request option rather than a rendering
+            // choice.  Queue a new horizontal read for the active field; the
+            // normal timer path waits for an existing read and deliberately
+            // leaves the vertical-section request and display unchanged.
+            if (fieldNum == _fieldNum) {
+              _horizontalRequestHasChanged = true;
+            }
+          });
 
   double colorScaleMin = field->contour_low;
   double colorScaleMax = field->contour_high;
@@ -1658,6 +1675,13 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
   if (_fieldHasChanged) {
     stateHasChanged = true;
     _fieldHasChanged = false;
+  }
+
+  // Request options such as column-max require new horizontal data even
+  // though the selected field, level, time, and display geometry are stable.
+  if (_horizontalRequestHasChanged) {
+    stateHasChanged = true;
+    _horizontalRequestHasChanged = false;
   }
   
   // get new data if needed - data is retrieved in a thread

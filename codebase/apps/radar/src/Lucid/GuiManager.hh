@@ -264,6 +264,7 @@ private:
   QLabel *_valueLabel;
   
   bool _fieldHasChanged;
+  bool _horizontalRequestHasChanged;
 
   // maps
 

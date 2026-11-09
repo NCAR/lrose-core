@@ -348,6 +348,9 @@ private:
   DateTime _timeReq;
   LatLonBox _zoomBoxReq;                 // horiz data
   double _vLevelReq;                     // horiz data
+  bool _compositeModeReq;                // immutable for an active H read
+  double _compositeMinHtReq;
+  double _compositeMaxHtReq;
   
   bool _validH, _validV;
   mutable bool _newH, _newV;
