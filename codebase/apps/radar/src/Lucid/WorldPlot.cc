@@ -3152,6 +3152,31 @@ void WorldPlot::renderLineContours(MdvReader *mr)
   painter.restore();
 }
 
+//////////////////////////////////////////////////////////
+// prepare the grid image when no filled field is rendered
+
+void WorldPlot::prepareGridImageForUnfilledField(bool is_overlay_field)
+
+{
+  const bool imageMissingOrWrongSize =
+    _gridImage == nullptr ||
+    _gridImage->width() != _widthPixels ||
+    _gridImage->height() != _heightPixels;
+  _createImage(_gridImage);
+
+  // A line-only main field owns the grid image and must erase the previous
+  // field. A line-only overlay deliberately retains that image so contours
+  // from one field can be composed over another field's filled rendering.
+  if (!is_overlay_field || imageMissingOrWrongSize) {
+    QPainter painter(_gridImage);
+    const char *missingColor =
+      string(_params.missing_data_color) == "transparent" ?
+        _params.background_color : _params.missing_data_color;
+    fillCanvas(painter, missingColor);
+    fillMargins(painter, _params.background_color);
+  }
+}
+
 /////////////////////////////////////////////////////
 // render polar radar grid
 

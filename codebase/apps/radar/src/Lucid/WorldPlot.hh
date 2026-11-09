@@ -609,6 +609,11 @@ public:
   // polygon or filled-contour colors.
 
   void renderLineContours(MdvReader *mr);
+
+  // Establish an empty grid layer for a line-only field. Main fields replace
+  // stale data; overlays preserve the field already rendered beneath them.
+
+  void prepareGridImageForUnfilledField(bool is_overlay_field);
   
   // render a data grid for polar radar data
   // returns QImage* - owned by this object

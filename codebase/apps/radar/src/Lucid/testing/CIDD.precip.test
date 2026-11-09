@@ -131,6 +131,7 @@ WRF-TMP    WRF-TMP    $(HOME)/data/lucid/precip/mdv/wrf&Temp   temp.colors   C  
 WRF-RH     WRF-RH     $(HOME)/data/lucid/precip/mdv/wrf&RH     rh.colors   %   -5   80  5  dcont   1 0
 WRF-DBZ-3D WRF-DBZ-3D $(HOME)/data/lucid/precip/mdv/wrf&dbz_3d dbz.colors  dbz   -5   80  5  dcont   1 0
 WRF-DBZ-3D2 WRF-DBZ-3D2 $(HOME)/data/lucid/precip/mdv/wrf&dbz_3d dbz.colors  dbz   -5   80  5  dcart   1 0
+WRF-DBZ-3D3 WRF-DBZ-3D3 $(HOME)/data/lucid/precip/mdv/wrf&dbz_3d dbz.colors  dbz   -5   80  5  lcont   1 0
 WRF-DBZ-2D WRF-DBZ-2D $(HOME)/data/lucid/precip/mdv/wrf&dbz_2d dbz.colors  dbz   -5   80  5  dcont   1 0
 
 WRF-WSPD   WRF-WSPD   $(HOME)/data/lucid/precip/mdv/wrf&Wspeed wind_speed.colors m/s   -5   80  5  dcont   1 0

@@ -76,8 +76,9 @@ typedef enum wind_marker_t {
 typedef enum {
   POLYGONS = 0,
   FILLED_CONTOURS = 1,
+  NONE = 2,
   // Retained internally for the separate terrain rendering configuration.
-  DYNAMIC_CONTOURS = 2
+  DYNAMIC_CONTOURS = 3
 } render_method_t;
  
 /////////////////////////////////////////////////////////////////

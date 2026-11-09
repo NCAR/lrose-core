@@ -862,6 +862,8 @@ int Lucid::_initGrids()
       mread->render_method = POLYGONS;
     } else if (fld.render_mode == Params::FILLED_CONTOURS) {
       mread->render_method = FILLED_CONTOURS;
+    } else if (fld.render_mode == Params::NONE) {
+      mread->render_method = NONE;
     }
 
     if (fld.composite_mode) {

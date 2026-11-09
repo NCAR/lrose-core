@@ -1187,7 +1187,9 @@ int HorizView::_renderFieldGrid(int page,
   const PjgMath &dataMath = mr->proj.getPjgMath();
   const PjgMath &displayMath = _proj.getPjgMath();
   
-  if (projType == Mdvx::PROJ_POLAR_RADAR) {
+  if (mr->render_method == NONE) {
+    _zoom->prepareGridImageForUnfilledField(is_overlay_field);
+  } else if (projType == Mdvx::PROJ_POLAR_RADAR) {
     _zoom->renderGridRadarPolar(page, mr,
                                 start_time, end_time,
                                 is_overlay_field);

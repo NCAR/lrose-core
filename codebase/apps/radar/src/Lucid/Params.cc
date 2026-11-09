@@ -861,7 +861,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("fields");
     tt->descr = tdrpStrDup("Fields to be displayed.");
-    tt->help = tdrpStrDup("/ngroup_name: we organize the fields into groups. If all are the same we use a single group. Set the group name to empty if this is just a filler field to organize the field list in the gui./nbutton_label: appears on the GUI. /nlegend_label: appears in the plot. /nurl: location of data or data server. /nfield_name: name in the file. /ncolor_map: name of color map in color_scale_dir. /nunits: units to appear on the display. /ncontour_low: contour rendering lower limit. /ncontour_high: contour rendering upper limit. /ncontour_interval: contour rendering interval. /nrender_mode:/n  POLYGONS: Rectangle/polygon fills of gridded data./n  FILLED_CONTOURS: false color filled contours./noverlay_line_contours: draw line contours over the selected filled rendering./ndisplay_in_menu: display this field in the menu./nbackground_render: render this field automatically in the background./ncomposite_mode: display max over height./nauto_scale: scale automatically./nauto_render: render automatically./n");
+    tt->help = tdrpStrDup("/ngroup_name: we organize the fields into groups. If all are the same we use a single group. Set the group name to empty if this is just a filler field to organize the field list in the gui./nbutton_label: appears on the GUI. /nlegend_label: appears in the plot. /nurl: location of data or data server. /nfield_name: name in the file. /ncolor_map: name of color map in color_scale_dir. /nunits: units to appear on the display. /ncontour_low: contour rendering lower limit. /ncontour_high: contour rendering upper limit. /ncontour_interval: contour rendering interval. /nrender_mode:/n  POLYGONS: Rectangle/polygon fills of gridded data./n  FILLED_CONTOURS: false color filled contours./n  NONE: do not render filled grid data./noverlay_line_contours: draw line contours over the selected filled rendering./ndisplay_in_menu: display this field in the menu./nbackground_render: render this field automatically in the background./ncomposite_mode: display max over height./nauto_scale: scale automatically./nauto_render: render automatically./n");
     tt->array_offset = (char *) &_fields - &_start_;
     tt->array_n_offset = (char *) &fields_n - &_start_;
     tt->is_array = TRUE;
@@ -928,13 +928,15 @@ Params *Params::_instance = (Params *) NULL;
       tt->struct_def.fields[10].rel_offset = 
         (char *) &_fields->render_mode - (char *) _fields;
         tt->struct_def.fields[10].enum_def.name = tdrpStrDup("grid_render_mode_t");
-        tt->struct_def.fields[10].enum_def.nfields = 2;
+        tt->struct_def.fields[10].enum_def.nfields = 3;
         tt->struct_def.fields[10].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[10].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[10].enum_def.fields[0].name = tdrpStrDup("POLYGONS");
         tt->struct_def.fields[10].enum_def.fields[0].val = POLYGONS;
         tt->struct_def.fields[10].enum_def.fields[1].name = tdrpStrDup("FILLED_CONTOURS");
         tt->struct_def.fields[10].enum_def.fields[1].val = FILLED_CONTOURS;
+        tt->struct_def.fields[10].enum_def.fields[2].name = tdrpStrDup("NONE");
+        tt->struct_def.fields[10].enum_def.fields[2].val = NONE;
       tt->struct_def.fields[11].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[11].fname = tdrpStrDup("overlay_line_contours");
       tt->struct_def.fields[11].ptype = BOOL_TYPE;

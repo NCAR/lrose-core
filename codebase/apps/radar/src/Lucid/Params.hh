@@ -81,7 +81,8 @@ public:
 
   typedef enum {
     POLYGONS = 0,
-    FILLED_CONTOURS = 1
+    FILLED_CONTOURS = 1,
+    NONE = 2
   } grid_render_mode_t;
 
   typedef enum {

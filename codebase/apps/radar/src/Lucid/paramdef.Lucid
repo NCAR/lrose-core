@@ -167,7 +167,8 @@ paramdef string {
 
 typedef enum {
   POLYGONS,
-  FILLED_CONTOURS
+  FILLED_CONTOURS,
+  NONE
 } grid_render_mode_t;
 
 typedef struct {
@@ -247,6 +248,7 @@ paramdef struct field_t {
     "/nrender_mode:"
     "/n  POLYGONS: Rectangle/polygon fills of gridded data."
     "/n  FILLED_CONTOURS: false color filled contours."
+    "/n  NONE: do not render filled grid data."
     "/noverlay_line_contours: draw line contours over the selected filled rendering."
     "/ndisplay_in_menu: display this field in the menu."
     "/nbackground_render: render this field automatically in the background."
