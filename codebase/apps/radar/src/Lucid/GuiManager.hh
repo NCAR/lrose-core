@@ -439,6 +439,7 @@ private slots:
   void _placeFieldMenu();
   void _fieldTableCellClicked(int row, int col);
   void _showFieldContextMenu(const QPoint &pos);
+  void _applyFieldRenderingChange(int fieldNum);
 
   // maps
 

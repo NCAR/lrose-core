@@ -854,6 +854,19 @@ void HorizView::triggerGridRendering(int page, int index)
   update(); // call paint event
   
 }
+
+/////////////////////////////////////////////////////////////
+// rerender retained data without changing its request state
+
+void HorizView::rerenderGrid()
+{
+  if (_renderFrameIndex < 0 ||
+      _renderFrameIndex >= _gd.movie.num_frames) {
+    return;
+  }
+  _renderGrids();
+  update();
+}
   
 //////////////////////////////////////////
 // set flags to check for invalid images

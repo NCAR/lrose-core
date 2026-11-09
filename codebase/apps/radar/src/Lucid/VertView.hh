@@ -275,12 +275,6 @@ class DLL_EXPORT VertView : public QWidget
   BeamHeight _beamHt;
 
   /**
-   * @brief The index of the field selected for display.
-   */
-
-  size_t _selectedField;
-
-  /**
    * @brief The brush for the background.
    */
 

@@ -69,7 +69,6 @@ VertView::VertView(QWidget* parent,
         _params(Params::Instance()),
         _gd(GlobalData::Instance()),
         _vertWindow(vertWindow),
-        _selectedField(0),
         _backgroundBrush(QColor(_params.background_color)),
         _heightGridEnabled(_params.vsection_ht_grid_on_at_startup),
         _distanceGridEnabled(_params.vsection_distance_grid_on_at_startup),
@@ -1510,8 +1509,11 @@ void VertView::setShowValue(bool enabled)
 
 void VertView::displayImage(const size_t field_num)
 {
-  // If we weren't rendering the current field, do nothing
-  if (field_num != _selectedField) {
+  // The installed reader is the authoritative section identity. Comparing
+  // reader pointers avoids a separate field index becoming stale whenever a
+  // new field's asynchronous vertical request completes.
+  if (field_num >= (size_t) _gd.num_datafields ||
+      _gd.mread[field_num] != _sectionReader) {
     return;
   }
   _sectionPixmapDirty = true;

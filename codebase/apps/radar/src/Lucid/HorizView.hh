@@ -137,6 +137,10 @@ class DLL_EXPORT HorizView : public QWidget
   // set flags to control rendering
 
   void triggerGridRendering(int index, int page);
+
+  // Rerender retained data after a display-only field setting changes.
+
+  void rerenderGrid();
   
   // set flags to render invalid images
   

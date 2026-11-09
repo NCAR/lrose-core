@@ -115,12 +115,12 @@ using namespace H5x;
 namespace {
 
 // Place numeric controls directly in the context menu so related contour and
-// color-scale values can be inspected together. They intentionally have no
-// model connections yet; this first step establishes only the interaction.
+// color-scale values can be inspected and edited together.
 
-void addFieldNumberEditor(QMenu *menu, const QString &label, double value,
-                          double minimum = -1.0e12,
-                          double maximum = 1.0e12)
+QDoubleSpinBox *addFieldNumberEditor(QMenu *menu, const QString &label,
+                                     double value,
+                                     double minimum = -1.0e12,
+                                     double maximum = 1.0e12)
 {
   QWidget *editor = new QWidget(menu);
   QHBoxLayout *layout = new QHBoxLayout(editor);
@@ -140,6 +140,7 @@ void addFieldNumberEditor(QMenu *menu, const QString &label, double value,
   QWidgetAction *action = new QWidgetAction(menu);
   action->setDefaultWidget(editor);
   menu->addAction(action);
+  return spinBox;
 }
 
 } // namespace
@@ -1306,7 +1307,7 @@ void GuiManager::_showFieldContextMenu(const QPoint &pos)
   }
 
   const int fieldNum = item->getFieldIndex();
-  const Params::field_t *field = item->getFieldParams();
+  Params::field_t *field = item->getFieldParams();
   if (field == nullptr) {
     return;
   }
@@ -1331,16 +1332,79 @@ void GuiManager::_showFieldContextMenu(const QPoint &pos)
   filledContoursAction->setChecked(field->render_mode ==
                                    Params::FILLED_CONTOURS);
 
+  connect(noneAction, &QAction::triggered, this,
+          [this, field, fieldNum]() {
+            field->render_mode = Params::NONE;
+            if (_gd.mread[fieldNum] != nullptr) {
+              _gd.mread[fieldNum]->render_method = NONE;
+            }
+            _applyFieldRenderingChange(fieldNum);
+          });
+  connect(polygonsAction, &QAction::triggered, this,
+          [this, field, fieldNum]() {
+            field->render_mode = Params::POLYGONS;
+            if (_gd.mread[fieldNum] != nullptr) {
+              _gd.mread[fieldNum]->render_method = POLYGONS;
+            }
+            _applyFieldRenderingChange(fieldNum);
+          });
+  connect(filledContoursAction, &QAction::triggered, this,
+          [this, field, fieldNum]() {
+            field->render_mode = Params::FILLED_CONTOURS;
+            if (_gd.mread[fieldNum] != nullptr) {
+              _gd.mread[fieldNum]->render_method = FILLED_CONTOURS;
+            }
+            _applyFieldRenderingChange(fieldNum);
+          });
+
   QAction *lineContoursAction =
     menu.addAction(tr("Overlay line contours"));
   lineContoursAction->setCheckable(true);
   lineContoursAction->setChecked(field->overlay_line_contours);
+  connect(lineContoursAction, &QAction::toggled, this,
+          [this, field, fieldNum](bool enabled) {
+            field->overlay_line_contours = enabled ? pTRUE : pFALSE;
+            if (_gd.mread[fieldNum] != nullptr) {
+              _gd.mread[fieldNum]->overlay_line_contours = enabled;
+            }
+            _applyFieldRenderingChange(fieldNum);
+          });
 
   QMenu *contourMenu = menu.addMenu(tr("Contour details"));
-  addFieldNumberEditor(contourMenu, tr("Low"), field->contour_low);
-  addFieldNumberEditor(contourMenu, tr("High"), field->contour_high);
-  addFieldNumberEditor(contourMenu, tr("Interval"),
-                       field->contour_interval, 0.0);
+  QDoubleSpinBox *contourLow =
+    addFieldNumberEditor(contourMenu, tr("Low"), field->contour_low);
+  QDoubleSpinBox *contourHigh =
+    addFieldNumberEditor(contourMenu, tr("High"), field->contour_high);
+  QDoubleSpinBox *contourInterval =
+    addFieldNumberEditor(contourMenu, tr("Interval"),
+                         field->contour_interval, 0.0);
+  contourMenu->addSeparator();
+  QAction *applyContoursAction = contourMenu->addAction(tr("Apply"));
+  connect(applyContoursAction, &QAction::triggered, this,
+          [this, field, fieldNum, contourLow, contourHigh,
+           contourInterval]() {
+            const double low = contourLow->value();
+            const double high = contourHigh->value();
+            const double interval = contourInterval->value();
+            if (high < low || interval <= 0.0) {
+              QMessageBox::warning(_fieldMenu, tr("Invalid contours"),
+                                   tr("High must not be below low, and interval must be positive."));
+              return;
+            }
+
+            // Params retain the interactive choices for subsequent menus;
+            // MdvReader is the rendering-time copy used by both views.
+            field->contour_low = low;
+            field->contour_high = high;
+            field->contour_interval = interval;
+            MdvReader *reader = _gd.mread[fieldNum];
+            if (reader != nullptr) {
+              reader->cont_low = low;
+              reader->cont_high = high;
+              reader->cont_interv = interval;
+            }
+            _applyFieldRenderingChange(fieldNum);
+          });
 
   QAction *columnMaxAction = menu.addAction(tr("Column max mode"));
   columnMaxAction->setCheckable(true);
@@ -1361,6 +1425,30 @@ void GuiManager::_showFieldContextMenu(const QPoint &pos)
   addFieldNumberEditor(colorScaleMenu, tr("Maximum"), colorScaleMax);
 
   menu.exec(_fieldTable->viewport()->mapToGlobal(pos));
+}
+
+/////////////////////////////////////////////////////////////
+// redraw retained data after an interactive rendering edit
+
+void GuiManager::_applyFieldRenderingChange(int fieldNum)
+{
+  if (fieldNum < 0 || fieldNum >= _gd.num_datafields ||
+      _gd.mread[fieldNum] == nullptr) {
+    return;
+  }
+
+  // These settings change only presentation. Reuse retained horizontal and
+  // vertical data so menu edits do not initiate MDV requests or disturb the
+  // current movie time and selected level.
+  if (_horiz != nullptr && _gd.h_win.page >= 0 &&
+      _gd.h_win.page < _gd.num_datafields &&
+      _gd.mread[_gd.h_win.page] != nullptr &&
+      _gd.mread[_gd.h_win.page]->isValidH()) {
+    _horiz->rerenderGrid();
+  }
+  if (_vert != nullptr) {
+    _vert->displayImage(fieldNum);
+  }
 }
 
 /////////////////////////////////////
