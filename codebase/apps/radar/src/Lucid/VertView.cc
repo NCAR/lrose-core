@@ -598,10 +598,8 @@ void VertView::paintEvent(QPaintEvent *event)
     // The compact vertical window needs the scale shifted into its plot area,
     // while its units sit above the highest numeric label instead of
     // competing with it.
-    cerr << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVV" << endl;
     _zoomWorld.drawColorScale(_sectionReader->colorMap, painter,
                               _params.horiz_axis_label_font_size);
-    cerr << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVV" << endl;
     _zoomWorld.drawTitleTopCenter(painter, _sectionReader->fieldLabelVert());
   }
 

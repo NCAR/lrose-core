@@ -623,6 +623,16 @@ void GuiManager::_setupWindows()
   // }
   // _setVlevelPanelVisibility();
 
+  // set up status bar
+
+  // statusBar()->setStyleSheet(
+  //         "QStatusBar {"
+  //         "  background-color: palette(alternate-base);"
+  //         "  border-top: 2px solid palette(mid);"
+  //         "  padding: 4px 6px;"
+  //         "}"
+  //                            );
+  
 }
 
 ///////////////////////////////////////////////////////
@@ -3074,7 +3084,7 @@ void GuiManager::_verticalRouteCompleted(const VsectionRoute &route)
   snprintf(message, sizeof(message),
            "Vertical section route: %zu points, %.1f km",
            route.size(), route.totalLengthKm());
-  statusBar()->showMessage(message, 5000);
+  // statusBar()->showMessage(message, 5000);
 
   if (_params.debug || _params.route_debug != Params::ROUTE_DEBUG_OFF) {
     cerr << "Vertical section route completed" << endl;
@@ -3112,7 +3122,7 @@ void GuiManager::_requestVerticalSection()
   connect(reader, &MdvReader::verticalReadComplete,
           this, &GuiManager::_verticalReadComplete,
           Qt::UniqueConnection);
-  statusBar()->showMessage("Requesting vertical section");
+  // statusBar()->showMessage("Requesting vertical section");
   reader->requestVertSection(_timeControl->getSelectedTime(),
                              _gd.h_win.page, wayPts);
 }
@@ -3131,10 +3141,10 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
     return;
   }
 
-  if (reader == nullptr || !reader->isValidV()) {
-    statusBar()->showMessage("Vertical section data are not available", 5000);
-    return;
-  }
+  // if (reader == nullptr || !reader->isValidV()) {
+  //   statusBar()->showMessage("Vertical section data are not available", 5000);
+  //   return;
+  // }
 
   _vert->setSection(reader);
   _vertWindow->setSectionInfo(_params._fields[_gd.h_win.page].field_name,
@@ -3144,7 +3154,7 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
   _vertWindow->show();
   _vertWindow->raise();
   _vertWindow->activateWindow();
-  statusBar()->showMessage("Vertical section ready", 5000);
+  // statusBar()->showMessage("Vertical section ready", 5000);
 }
 
 /////////////////////////////

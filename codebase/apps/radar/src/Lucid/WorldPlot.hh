@@ -644,8 +644,6 @@ public:
 protected:
 private:
 
-  int _count;
-  
   Params &_params;
   GlobalData &_gd;
 
