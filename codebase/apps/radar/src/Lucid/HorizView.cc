@@ -1226,14 +1226,6 @@ int HorizView::_renderFieldGrid(int page,
   const PjgMath &dataMath = mr->proj.getPjgMath();
   const PjgMath &displayMath = _proj.getPjgMath();
   
-  if (_gd.debug) {
-    cerr << "-->> data projection <<--" << endl;
-    dataMath.print(cerr);
-    cerr << "-->> display projection <<--" << endl;
-    displayMath.print(cerr);
-    cerr << "----------------------------" << endl;
-  }
-
   if (projType == Mdvx::PROJ_POLAR_RADAR) {
     _zoom->renderGridRadarPolar(page, mr,
                                 start_time, end_time,
