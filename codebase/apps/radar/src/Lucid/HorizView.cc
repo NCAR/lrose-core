@@ -371,7 +371,9 @@ void HorizView::paintEvent(QPaintEvent *event)
   // draw the color scale
 
   const ColorMap &colorMap(_gd.mread[fieldNum]->colorMap);
+  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHH" << endl;
   _zoom->drawColorScale(colorMap, painter, _params.horiz_axis_label_font_size);
+  cerr << "HHHHHHHHHHHHHHHHHHHHHHHHHHHH" << endl;
 
   // title
   
@@ -851,7 +853,10 @@ void HorizView::triggerGridRendering(int page, int index)
     _renderInvalidImages = false;
   }
   
-  update(); // call paint event
+  // A rendered field and its live color scale form one visual update. Force a
+  // complete paint now so the inexpensive scale redraw cannot lag the cached
+  // grid image.
+  repaint();
   
 }
 
@@ -860,12 +865,19 @@ void HorizView::triggerGridRendering(int page, int index)
 
 void HorizView::rerenderGrid()
 {
-  if (_renderFrameIndex < 0 ||
-      _renderFrameIndex >= _gd.movie.num_frames) {
-    return;
+  const int fieldNum = _gd.h_win.page;
+  if (_renderFrameIndex >= 0 &&
+      _renderFrameIndex < _gd.movie.num_frames &&
+      fieldNum >= 0 && fieldNum < _gd.num_datafields &&
+      _gd.mread[fieldNum] != nullptr &&
+      _gd.mread[fieldNum]->isValidH()) {
+    _renderGrids();
   }
-  _renderGrids();
-  update();
+
+  // A horizontal read temporarily invalidates the reader while its buffers
+  // are replaced. Avoid regenerating the cached grid in that interval, but
+  // still repaint live annotations such as an interactively edited color bar.
+  repaint();
 }
   
 //////////////////////////////////////////

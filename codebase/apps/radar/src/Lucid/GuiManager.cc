@@ -119,6 +119,7 @@ namespace {
 
 QDoubleSpinBox *addFieldNumberEditor(QMenu *menu, const QString &label,
                                      double value,
+                                     int decimals = 6,
                                      double minimum = -1.0e12,
                                      double maximum = 1.0e12)
 {
@@ -132,7 +133,7 @@ QDoubleSpinBox *addFieldNumberEditor(QMenu *menu, const QString &label,
 
   QDoubleSpinBox *spinBox = new QDoubleSpinBox(editor);
   spinBox->setRange(minimum, maximum);
-  spinBox->setDecimals(6);
+  spinBox->setDecimals(decimals);
   spinBox->setValue(value);
   spinBox->setKeyboardTracking(false);
   layout->addWidget(spinBox);
@@ -1374,12 +1375,12 @@ void GuiManager::_showFieldContextMenu(const QPoint &pos)
 
   QMenu *contourMenu = menu.addMenu(tr("Contour details"));
   QDoubleSpinBox *contourLow =
-    addFieldNumberEditor(contourMenu, tr("Low"), field->contour_low);
+    addFieldNumberEditor(contourMenu, tr("Low"), field->contour_low, 3);
   QDoubleSpinBox *contourHigh =
-    addFieldNumberEditor(contourMenu, tr("High"), field->contour_high);
+    addFieldNumberEditor(contourMenu, tr("High"), field->contour_high, 3);
   QDoubleSpinBox *contourInterval =
     addFieldNumberEditor(contourMenu, tr("Interval"),
-                         field->contour_interval, 0.0);
+                         field->contour_interval, 3, 0.0);
   contourMenu->addSeparator();
   QAction *applyContoursAction = contourMenu->addAction(tr("Apply"));
   connect(applyContoursAction, &QAction::triggered, this,
@@ -1440,9 +1441,9 @@ void GuiManager::_showFieldContextMenu(const QPoint &pos)
   }
   QMenu *colorScaleMenu = menu.addMenu(tr("Color scale"));
   QDoubleSpinBox *colorScaleMinEditor =
-    addFieldNumberEditor(colorScaleMenu, tr("Minimum"), colorScaleMin);
+    addFieldNumberEditor(colorScaleMenu, tr("Minimum"), colorScaleMin, 3);
   QDoubleSpinBox *colorScaleMaxEditor =
-    addFieldNumberEditor(colorScaleMenu, tr("Maximum"), colorScaleMax);
+    addFieldNumberEditor(colorScaleMenu, tr("Maximum"), colorScaleMax, 3);
   colorScaleMenu->addSeparator();
   QAction *applyColorScaleAction = colorScaleMenu->addAction(tr("Apply"));
   connect(applyColorScaleAction, &QAction::triggered, this,
@@ -1478,10 +1479,7 @@ void GuiManager::_applyFieldRenderingChange(int fieldNum)
   // These settings change only presentation. Reuse retained horizontal and
   // vertical data so menu edits do not initiate MDV requests or disturb the
   // current movie time and selected level.
-  if (_horiz != nullptr && _gd.h_win.page >= 0 &&
-      _gd.h_win.page < _gd.num_datafields &&
-      _gd.mread[_gd.h_win.page] != nullptr &&
-      _gd.mread[_gd.h_win.page]->isValidH()) {
+  if (_horiz != nullptr) {
     _horiz->rerenderGrid();
   }
   if (_vert != nullptr) {

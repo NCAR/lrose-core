@@ -61,6 +61,8 @@ WorldPlot::WorldPlot() :
         _gd(GlobalData::Instance())
 {
 
+  _count = 88;
+  
   _name = "Unknown";
   
   _widthPixels = 1000;
@@ -2518,6 +2520,11 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   
   const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
   
+  for (size_t ii = 0; ii < cmap.size(); ii++) {
+    const ColorMap::CmapEntry &entry = cmap[ii];
+    cerr << "1111111111111 ii, min, max: " << ii << ", " << entry.minVal << ", " << entry.maxVal << endl;
+  }
+
   int pltHt = _heightPixels;
 
   // The right margin separates the plot axis from the independently reserved
@@ -2527,6 +2534,13 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   const int scalePadding = 5;
   int width = std::max(1, _colorScaleWidth - 2 * scalePadding);
   int xStart = _xPixOffset + _widthPixels - _colorScaleWidth + scalePadding;
+
+  // The scale is a live field annotation rather than part of the cached data
+  // image. Clear its complete reserved strip on every draw so a changed map
+  // cannot leave old swatches or differently sized labels behind.
+  painter.fillRect(_xPixOffset + _widthPixels - _colorScaleWidth,
+                   _yPixOffset, _colorScaleWidth, _heightPixels,
+                   QColor(_params.background_color));
 
   // Compute the patch heights for the color scale values
   
@@ -2628,9 +2642,20 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     
     double yy = yStart + pltHt - (patchHt * 1.0);
     double prevIyy = -1;
+    cerr << "3333333333333333 rangeMin: " << colorMap.rangeMin() << endl;
     for (size_t ii = 0; ii < cmap.size(); ii++) {
       const ColorMap::CmapEntry &entry = cmap[ii];
-      QString label = QString("%1").arg(entry.minVal,0,format,ndecimals);
+      // The map range is authoritative at the endpoints. In particular, an
+      // interactive range edit may update the valid limit independently of
+      // the first or last interval retained from the source color scale.
+      const double labelValue = (ii == 0) ? colorMap.rangeMin() :
+        entry.minVal;
+      cerr << "2222222222222 ii, value: " << ii << ", " << labelValue << endl;
+      QString label = QString("%1").arg(labelValue,0,format,ndecimals);
+      cerr << "55555555555555 label: " << label.toStdString() << endl;
+      label = QString("%1").arg((double) _count,0,format,ndecimals);
+      cerr << "6666666666666 label: " << label.toStdString() << endl;
+      _count++;
       int iyy = (int) (topY[ii] + patchHt * 0.5);
       bool doText = false;
       if (prevIyy < 0) {
@@ -2638,6 +2663,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
       } else if ((prevIyy - iyy) > textHt * 2) {
         doText = true;
       }
+      doText = true;
       if (doText) {
         painter.drawText(xStart, iyy, width, iPatchHt, 
                          Qt::AlignCenter | Qt::AlignHCenter, 
@@ -2649,8 +2675,8 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
     
     // last label at top
     
-    const ColorMap::CmapEntry &entry = cmap[cmap.size()-1];
-    QString label = QString("%1").arg(entry.maxVal,0,format,ndecimals);
+    cerr << "4444444444444444444444 rangeMax: " << colorMap.rangeMax() << endl;
+    QString label = QString("%1").arg(colorMap.rangeMax(),0,format,ndecimals);
     int iyy = (int) (topY[cmap.size()-1] - patchHt * 0.5);
     painter.drawText(xStart, iyy, width, iPatchHt, 
                      Qt::AlignVCenter | Qt::AlignHCenter, 
