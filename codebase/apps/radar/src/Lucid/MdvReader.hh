@@ -63,6 +63,15 @@ class ReadVolV;
 class QThread;
 class QTimer;
 
+// Lucid permits interactive color-scale edits while retaining the detailed
+// spacing defined by the source color map.  ColorMap's standard range setters
+// rebuild equal-width entries, so this specialization exposes that distinct
+// rescaling operation while keeping its lookup-table internals encapsulated.
+class LucidColorMap : public ColorMap {
+public:
+  bool rescaleRange(double rangeMin, double rangeMax);
+};
+
 // Vertical reads use self-contained request and result objects.  The blocking
 // worker never mutates MdvReader, so horizontal and vertical requests can be
 // in flight together without sharing transient request state.
@@ -289,7 +298,7 @@ public:
 
   // color scale
   
-  ColorMap colorMap;
+  LucidColorMap colorMap;
 
   // copy of field data, saved for later
   

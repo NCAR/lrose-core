@@ -57,6 +57,48 @@ QMutex mdvLibraryReadMutex;
 
 }
 
+///////////////////////////////////////////////////////////////
+// rescale color boundaries without imposing equal intervals
+
+bool LucidColorMap::rescaleRange(double rangeMin, double rangeMax)
+{
+  if (_entries.empty() || !std::isfinite(rangeMin) ||
+      !std::isfinite(rangeMax) || rangeMax <= rangeMin) {
+    return false;
+  }
+
+  const double oldMin = _entries.front().minVal;
+  const double oldMax = _entries.back().maxVal;
+  const double oldRange = oldMax - oldMin;
+  if (!std::isfinite(oldMin) || !std::isfinite(oldMax) || oldRange <= 0.0) {
+    return false;
+  }
+
+  const double newRange = rangeMax - rangeMin;
+  const auto rescaleValue = [oldMin, oldRange, rangeMin, newRange]
+                            (double value) {
+    return rangeMin + ((value - oldMin) / oldRange) * newRange;
+  };
+
+  // Apply one affine transform to every boundary.  This preserves unequal
+  // color widths, gaps, and overlaps as fractions of the complete scale.
+  for (CmapEntry &entry : _entries) {
+    entry.minVal = rescaleValue(entry.minVal);
+    entry.maxVal = rescaleValue(entry.maxVal);
+  }
+  for (CmapLabel &label : _specifiedLabels) {
+    label.value = rescaleValue(label.value);
+  }
+
+  _rangeMin = rangeMin;
+  _rangeMax = rangeMax;
+  _range = newRange;
+  _useLog10ForLut = false;
+  _loadTransitions();
+  _computeLut();
+  return true;
+}
+
 ///////////////////////////////////////////////
 // constructor
 

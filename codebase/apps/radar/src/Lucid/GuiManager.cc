@@ -1421,8 +1421,28 @@ void GuiManager::_showFieldContextMenu(const QPoint &pos)
     }
   }
   QMenu *colorScaleMenu = menu.addMenu(tr("Color scale"));
-  addFieldNumberEditor(colorScaleMenu, tr("Minimum"), colorScaleMin);
-  addFieldNumberEditor(colorScaleMenu, tr("Maximum"), colorScaleMax);
+  QDoubleSpinBox *colorScaleMinEditor =
+    addFieldNumberEditor(colorScaleMenu, tr("Minimum"), colorScaleMin);
+  QDoubleSpinBox *colorScaleMaxEditor =
+    addFieldNumberEditor(colorScaleMenu, tr("Maximum"), colorScaleMax);
+  colorScaleMenu->addSeparator();
+  QAction *applyColorScaleAction = colorScaleMenu->addAction(tr("Apply"));
+  connect(applyColorScaleAction, &QAction::triggered, this,
+          [this, fieldNum, colorScaleMinEditor, colorScaleMaxEditor]() {
+            const double rangeMin = colorScaleMinEditor->value();
+            const double rangeMax = colorScaleMaxEditor->value();
+            MdvReader *reader = _gd.mread[fieldNum];
+            if (reader == nullptr || rangeMax <= rangeMin ||
+                !reader->colorMap.rescaleRange(rangeMin, rangeMax)) {
+              QMessageBox::warning(_fieldMenu, tr("Invalid color scale"),
+                                   tr("Maximum must be greater than minimum, "
+                                      "and the existing color scale must have "
+                                      "a valid range."));
+              return;
+            }
+
+            _applyFieldRenderingChange(fieldNum);
+          });
 
   menu.exec(_fieldTable->viewport()->mapToGlobal(pos));
 }
