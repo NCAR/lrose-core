@@ -423,7 +423,7 @@ private slots:
   
   void _openFile();
   void _saveFile();
-  void _refresh();
+  void _reloadData();
 
   // help menu
   

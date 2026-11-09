@@ -727,7 +727,8 @@ void GuiManager::_createActions()
   
   _reloadAct = new QAction(tr("Reload"), this);
   _reloadAct->setStatusTip(tr("Reload data"));
-  connect(_reloadAct, &QAction::triggered, this, &GuiManager::_refresh);
+  connect(_reloadAct, &QAction::triggered,
+          this, &GuiManager::_reloadData);
 
   // clear display
   _clearAct = new QAction(tr("Clear"), this);
@@ -1798,12 +1799,20 @@ void GuiManager::_handleFirstTimerEvent()
 }
 
 ////////////////////////////////////////////
-// refresh
+// reload the data currently represented by the display
 
-void GuiManager::_refresh()
+void GuiManager::_reloadData()
 {
-  if (_horiz) {
-    _horiz->update();
+  // Use the normal request path so a reload waits for any active horizontal
+  // read and preserves the displayed image until replacement data arrive.
+  _horizontalRequestHasChanged = true;
+
+  // A visible vertical section is part of the current display state.  Reuse
+  // its retained route; request generations prevent an older in-flight result
+  // from replacing this explicit reload when it eventually completes.
+  if (_vertWindow != nullptr && _vertWindow->isVisible() &&
+      _vsectionRoute.size() >= 2) {
+    _requestVerticalSection();
   }
 }
 
