@@ -36,11 +36,15 @@
 ///////////////////////////////////////////////////////////////
 
 #include <cassert>
+#include <algorithm>
+#include <cmath>
 #include <QFrame>
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QSignalBlocker>
 #include "TimeControl.hh"
+#include "TimePlotWidget.hh"
 #include "GuiManager.hh"
 
 // initialize instance
@@ -65,6 +69,7 @@ TimeControl::TimeControl(GuiManager *parent) :
   
   _timePanel = NULL;
   _timeLayout = NULL;
+  _timePlot = NULL;
 
   _startButton = NULL;
   _stopButton = NULL;
@@ -166,7 +171,7 @@ void TimeControl::_populateGui()
   // create time panel
   
   _timePanel = new QFrame(this);
-  timeControlLayout->addWidget(_timePanel, Qt::AlignCenter);
+  timeControlLayout->addWidget(_timePanel);
   _timeLayout = new QVBoxLayout;
   _timePanel->setLayout(_timeLayout);
   _timePanel->setStyleSheet("font: bold 10px;"
@@ -192,6 +197,15 @@ void TimeControl::_populateGui()
   
   _timeLayout->addWidget(timeUpper);
   _timeLayout->addWidget(timeLower);
+
+  // Keep the time canvas inside the dialog so it follows the controller's
+  // window lifetime, movement, and resizing automatically.
+  _timePlot = new TimePlotWidget(_timePanel, _params);
+  _timePlot->setExpansionCallback(
+    [this](time_t startTime, int nFrames) {
+      _applyExpandedMovieRange(startTime, nFrames);
+    });
+  _timeLayout->addWidget(_timePlot);
   
   //////////////////////////////////////////////////////////////////////
   // upper panel contents
@@ -738,6 +752,8 @@ void TimeControl::_setStartTimeFromEdit(const QDateTime &val)
   QTime tt = val.time();
   _guiStartTime.set(dd.year(), dd.month(), dd.day(),
                     tt.hour(), tt.minute(), tt.second());
+  _endTimeLabel->setText(_getGuiEndTime().asString(0).c_str());
+  _updateSelectedTimeInGui();
   _enableAcceptCancel(true);
 }
 
@@ -771,6 +787,7 @@ void TimeControl::_updateTimesInGui()
   _selectedTimeLabel->setText(_getGuiSelectedTime().asString(0).c_str());
 
   _computeFrameTimes();
+  _updateTimePlot();
 
 }
 
@@ -783,6 +800,50 @@ void TimeControl::_updateSelectedTimeInGui()
     return;
   }
   _selectedTimeLabel->setText(_getGuiSelectedTime().asString(0).c_str());
+  _updateTimePlot();
+}
+
+////////////////////////////////////////////////////////
+// update the compact time plot from pending GUI state
+
+void TimeControl::_updateTimePlot()
+{
+  if (_timePlot) {
+    _timePlot->setMovieState(_guiStartTime.utime(), _guiNFramesMovie,
+                             _guiFrameIntervalSecs, _guiFrameIndex);
+  }
+}
+
+////////////////////////////////////////////////////////
+// apply a frame-aligned movie expansion as a pending GUI edit
+
+void TimeControl::_applyExpandedMovieRange(time_t startTime, int nFrames)
+{
+  if (nFrames < 1 || nFrames > Constants::MAX_FRAMES) {
+    return;
+  }
+
+  const DateTime selectedTime = _getGuiSelectedTime();
+  _guiStartTime.set(startTime);
+  _guiNFramesMovie = nFrames;
+  _guiFrameIndex = std::clamp(
+    static_cast<int>(llround((selectedTime.utime() - startTime) /
+                             _guiFrameIntervalSecs)),
+    0, nFrames - 1);
+
+  // Expansion changes several interdependent controls. Block their signals
+  // so observers see one coherent pending movie definition.
+  const QSignalBlocker startBlocker(_startTimeEdit);
+  const QSignalBlocker framesBlocker(_nFramesSelector);
+  const QSignalBlocker sliderBlocker(_timeSlider);
+  _startTimeEdit->setDateTime(getQDateTime(_guiStartTime));
+  _nFramesSelector->setValue(_guiNFramesMovie);
+  _timeSlider->setMaximum(_guiNFramesMovie - 1);
+  _timeSlider->setSliderPosition(_guiFrameIndex);
+  _endTimeLabel->setText(_getGuiEndTime().asString(0).c_str());
+  _selectedTimeLabel->setText(_getGuiSelectedTime().asString(0).c_str());
+  _updateTimePlot();
+  _enableAcceptCancel(true);
 }
 
 ////////////////////////////////////////////////////////

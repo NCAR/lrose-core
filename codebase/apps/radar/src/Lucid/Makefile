@@ -77,6 +77,7 @@ HDRS = \
 	SymprodRenderObj.hh \
 	SymprodRenderContext.hh \
 	TimeList.hh \
+	TimePlotWidget.hh \
 	VertView.hh \
 	VertManager.hh \
 	VlevelManager.hh \
@@ -123,6 +124,7 @@ NORM_SRCS = \
 	SymprodRender.cc \
 	SymprodRenderObj.cc \
 	TimeList.cc \
+	TimePlotWidget.cc \
 	VlevelManager.cc \
 	VsectionRoute.cc \
 	WayPts.cc \

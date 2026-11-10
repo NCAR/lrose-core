@@ -65,6 +65,7 @@ class QFrame;
 class QHBoxLayout;
 class QVBoxLayout;
 class GuiManager;
+class TimePlotWidget;
 
 #include <toolsa/DateTime.hh>
 #include "GlobalData.hh"
@@ -138,6 +139,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   QFrame *_timePanel;
   QVBoxLayout *_timeLayout;
+  TimePlotWidget *_timePlot;
 
   QPushButton *_startButton;
   QPushButton *_stopButton;
@@ -207,6 +209,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _setGuiStartTime(const DateTime &val);
   void _updateTimesInGui();
   void _updateSelectedTimeInGui();
+  void _updateTimePlot();
+  void _applyExpandedMovieRange(time_t startTime, int nFrames);
   
   void _setFrameIndex(int val) { _frameIndex = val; }
 

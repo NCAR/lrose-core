@@ -34,6 +34,7 @@ set (SRCS
       SymprodRenderObj.cc
       SymprodRenderContext.hh
       TimeList.cc
+      TimePlotWidget.cc
       VlevelManager.cc
       VsectionRoute.cc
       WayPts.cc
