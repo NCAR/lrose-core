@@ -222,7 +222,9 @@ void SymprodRenderText::drawQt(QPainter &painter,
   }
 
   QPointF anchor = projectPoint(_props.origin.lat, _props.origin.lon, context);
-  anchor += QPointF(_props.offset.x, _props.offset.y);
+  // Symprod pixel offsets use the plot convention that positive Y is up,
+  // while Qt device coordinates increase downward.
+  anchor += QPointF(_props.offset.x, -_props.offset.y);
 
   painter.save();
   QFont font = painter.font();
@@ -1013,18 +1015,31 @@ void SymprodRenderChunk::_drawStationQt(
   const QFontMetrics metrics(font);
   const int gap = qMax(3, metrics.horizontalAdvance(QLatin1Char(' ')) / 2);
 
-  auto drawStationText = [&](const QString &text, bool left, int row) {
+  enum class StationTextRow { Upper, Middle, Lower, Dewpoint };
+  auto drawStationText = [&](const QString &text, bool left,
+                             StationTextRow row) {
     if (text.isEmpty()) {
       return;
     }
     const QRect bounds = metrics.boundingRect(text);
     const double x = left ? origin.x() - gap - bounds.width() :
                             origin.x() + gap;
-    double baseline = origin.y() + (bounds.height() - metrics.descent()) / 2.0;
-    if (row < 0) {
-      baseline = origin.y() - gap - metrics.descent();
-    } else if (row > 0) {
-      baseline = origin.y() + gap + metrics.ascent();
+    double baseline;
+    switch (row) {
+      case StationTextRow::Upper:
+        baseline = origin.y() - gap - metrics.descent();
+        break;
+      case StationTextRow::Middle:
+        baseline = origin.y() + metrics.ascent() - metrics.descent();
+        break;
+      case StationTextRow::Lower:
+        baseline = origin.y() + gap + metrics.ascent();
+        break;
+      case StationTextRow::Dewpoint:
+        // CIDD gives the lower-left dewpoint an additional ascent of
+        // clearance; the lower-right gust uses only the normal lower row.
+        baseline = origin.y() + gap + 2.0 * metrics.ascent();
+        break;
     }
     if (background.alpha() > 0) {
       painter.fillRect(QRectF(x - 1.0, baseline - metrics.ascent() - 1.0,
@@ -1039,10 +1054,12 @@ void SymprodRenderChunk::_drawStationQt(
     scale >= prod._prodInfo.text_off_threshold;
   if (drawText) {
     if (station.temp != STATION_NAN) {
-      drawStationText(QString::number(station.temp, 'f', 0), true, -1);
+      drawStationText(QString::number(station.temp, 'f', 0), true,
+                      StationTextRow::Upper);
     }
     if (station.dew_point != STATION_NAN) {
-      drawStationText(QString::number(station.dew_point, 'f', 0), true, 1);
+      drawStationText(QString::number(station.dew_point, 'f', 0), true,
+                      StationTextRow::Dewpoint);
     }
 
     QString weather;
@@ -1056,7 +1073,7 @@ void SymprodRenderChunk::_drawStationQt(
       weather = QString::fromLatin1(
         weather_type2string_trunc(station.weather_type, 1)).trimmed();
     }
-    drawStationText(weather, true, 0);
+    drawStationText(weather, true, StationTextRow::Middle);
 
     if (context.kmAcrossScreen < 1000.0 && station.station_label[0] != '\0') {
       QString label = QString::fromLatin1(
@@ -1066,11 +1083,12 @@ void SymprodRenderChunk::_drawStationQt(
       if (label.startsWith(QLatin1Char('K'))) {
         label.remove(0, 1);
       }
-      drawStationText(label, false, -1);
+      drawStationText(label, false, StationTextRow::Upper);
     }
     if (station.windgust != STATION_NAN && station.windgust > 2.0) {
       drawStationText(QString("G%1").arg(station.windgust * NMH_PER_MS,
-                                          0, 'f', 0), false, 1);
+                                          0, 'f', 0), false,
+                      StationTextRow::Lower);
     }
   }
 
