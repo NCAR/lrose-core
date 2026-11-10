@@ -1,157 +1,165 @@
 # Lucid Codex handoff
 
-Snapshot: 2026-11-02, source committed through `56a849403`. At this snapshot
-the source tree is clean; `main_window.png`, `main_window2.png`,
-`vsection2.png`, `vsection3.png`, and `vsection_window.png` are untracked test
-screenshots.
+Snapshot: 2026-11-10, source committed through `9b86159ca`. The only current
+worktree change is this handoff update.
 
 ## Architecture
 
-Lucid is a Qt 6 replacement for the XView CIDD application. Much of the data
-model and terminology still comes from `apps/cidd/src/CIDD`; `old/` contains
-additional copied legacy code. The application is intentionally transitional,
-with legacy code, `#ifdef`s, and some HawkEye-derived vertical-view code still
-present.
+Lucid is the Qt replacement for the XView CIDD application. CIDD in
+`apps/cidd/src/CIDD` is the reference implementation; `old/` contains other
+legacy code retained for comparison. The application is intentionally still
+transitional.
 
-- `Main.cc` owns process startup, Qt application lifetime, and signal handling.
-- `GuiManager` is the main coordinator. Its timer drives horizontal reads and
-  rendering, it owns the menus/dialogs, and it connects the horizontal and
-  vertical workflows.
-- `GlobalData` remains the shared CIDD-style state. `GlobalData::mread` contains
-  one `MdvReader` per configured data field; `h_win.page` is the selected field.
-- `MdvReader` handles MDV/Radx access and retains returned headers, projection,
-  data, color map, and vertical-section geometry.
-- `WorldPlot` owns world/pixel transforms, margins, axes, cached images, grid
-  rendering, and filled-contour rendering.
-- `HorizView` draws the plan view and handles zoom, pan, cursor values, click
-  reports, and vertical-section route selection.
-- `VlevelManager` and `VlevelSelector` manage available vertical levels and the
-  level-selection axis.
-- `VertManager` is the separate vertical-section `QMainWindow`; `VertView`
-  renders the returned section. These classes originated in HawkEye and still
-  contain legacy radar-oriented scaffolding.
-- `Params`, generated from `paramdef.Lucid`, and `LegacyParams` bridge the new
-  TDRP configuration to remaining CIDD structures. Parameter design is still
-  evolving and broad TDRP cleanup was deliberately deferred.
+- `Lucid` initializes global state, readers, movie timing, products, and Qt
+  application lifetime.
+- `GuiManager` owns the main window and menus. Its timer coordinates MDV reads,
+  frame rendering, product requests, reload, and horizontal/vertical updates.
+- `GlobalData` retains shared CIDD-style state. `mread` contains one
+  `MdvReader` per configured field; `h_win.page` is the selected field.
+- `MdvReader` performs asynchronous horizontal and vertical MDV/Radx reads.
+  Completed results are installed on the GUI thread, and generations reject
+  obsolete results.
+- `WorldPlot` owns projection transforms, axes, margins, cached images, grid
+  rendering, contours, and the transparent symbolic-product image.
+- `HorizView` composes the plan view and handles zoom, pan, cursor values,
+  click reports, vertical-section routes, and Symprod hover picking.
+- `VertManager` owns the vertical-section window and configuration menu;
+  `VertView` renders the current section and its overlays.
+- `ProductMgr` captures display state and starts independent SPDB worker
+  threads. It installs completed results atomically, retains a previous valid
+  snapshot on failure, and requests a product-layer repaint through callbacks.
+- `Product` owns the immutable decoded snapshot for one configured product and
+  applies the configured temporal selection rules at render time.
+- `SymprodRender` decodes one Symprod buffer into owned `SymprodRenderObj`
+  instances. `SymprodRenderObj` subclasses render natively with `QPainter`.
+- `SymprodRenderContext` is the small read-only display state passed through
+  the Qt rendering and picking path.
+- `Params` is generated from `paramdef.Lucid`; `LegacyParams` translates CIDD
+  parameter files into the temporary TDRP-based form used by Lucid.
 
-## Relevant files changed
+## Major implementation completed
 
-- `Main.cc`: termination signals now use an async-signal-safe pipe and a Qt
-  notifier, allowing normal Qt/C++ cleanup outside the POSIX signal handler.
-- `GlobalData.cc`: the field menu defaults to one column.
-- `MdvReader.cc/.hh`: horizontal request state/retry and shutdown handling were
-  hardened; single-level vertical data are guarded; vertical sections use
-  immutable request/result objects on worker threads; stale generations are
-  discarded; worker threads are tracked for shutdown. A process-wide mutex
-  serializes MDV/Radx NetCDF/HDF5 reads because the installed HDF5 library
-  crashed when horizontal and vertical workers entered it concurrently.
-- `VlevelManager.cc`, `VlevelSelector.cc`, `WorldPlot.cc/.hh`: corrected initial
-  level limits and made aspect-ratio preservation configurable. The level
-  selector disables it so its axis uses the intended min/max immediately.
-- `WorldPlot.cc/.hh`, `HorizView.cc`: added filled contours for rectangular and
-  distorted grids. Color boundaries are derived from persistent color-map
-  entries, invalid topology falls back to cell rendering, and values outside
-  the configured range use the bottom/top colors. Polar radar remains on its
-  existing renderer by design.
-- `ClickReport.hh`, `GuiManager.cc/.hh`, `HorizView.cc/.hh`, `Makefile`: added
-  cursor-value overlay and a compact click-report dialog containing metadata
-  plus values from the saved field-data queue. An open report refreshes when a
-  newly selected field is added to that queue.
-- `HorizView.cc/.hh`: normalized mouse input early. Left drag zooms; middle or
-  Option-left drag pans with a live translated preview; right click builds a
-  vertical route; Shift-right opens the context menu. On macOS the fallback
-  maps Meta-modified left clicks to right clicks because Qt maps the Control
-  key to `MetaModifier`. The effective button is captured on press for stable
-  drag behavior.
-- `VsectionRoute.cc/.hh`: new value type storing route points in world and
-  lat/lon coordinates with cumulative distance.
-- `GuiManager.cc/.hh`: retains the completed route, requests it for the current
-  field, reissues it after field changes, ignores completions for superseded
-  fields, and installs successful results in the vertical window.
-- `VertManager.cc/.hh`, `VertView.cc/.hh`: replaced the HawkEye startup resize
-  workaround with layout ownership, derive world limits from the returned
-  route and vertical levels, render the section as colored cells, and show
-  field/time/route metadata.
-- `Params.cc/.hh`, `paramdef.Lucid`, `LegacyParams.cc`, and
-  `testing/CIDD.precip.test`: recent work added/tuned vertical-window and color
-  scale geometry parameters. Treat generated `Params` files consistently with
-  the project's TDRP generation workflow.
+### Horizontal and vertical display
 
-## Current implementation status
+- Horizontal polygon and filled-contour rendering supports rectangular and
+  distorted grids, current-zoom culling, optional line contours, interactive
+  render configuration, color-scale editing/reset, and column-max requests.
+- Reload invalidates and re-requests the horizontal field and an open vertical
+  section.
+- Mouse input is normalized at the event boundary: left drag zooms, middle or
+  Option-left drag pans with a live preview, right click builds a vertical
+  route, and Shift-right opens the context menu.
+- Cursor-value overlays and the click-report dialog work in horizontal and
+  vertical views. Filled-contour hover reads use the underlying data grid and
+  do not regenerate contours.
+- Vertical routes support single-segment and multi-segment modes. The vertical
+  section refreshes on field changes and has configuration for plot height
+  bounds and the selected horizontal height/beam-height curve.
+- Polar fields compute the selected-elevation beam-height curve using radar
+  location and altitude; invalid radar locations suppress the curve.
+- Concurrent MDV NetCDF/HDF5 access is serialized because the deployed library
+  stack was observed to crash when horizontal and vertical workers entered it
+  concurrently.
 
-The basic display workflow has been exercised successfully:
+### Symbolic products
 
-- Horizontal field display, zoom, active pan preview, cursor values, and click
-  reports work.
-- Click-report cells are compact and left-aligned; date and time are separate.
-- Filled contours work for matching and distorted projections, with safe
-  fallback to grid cells.
-- A right-button route may contain one or more segments; double-right-click
-  completes it, Escape cancels it, and Backspace removes the last point.
-- Lucid asynchronously requests the MDV vertical section for the selected
-  field, opens a separate window, and renders it across the full widget.
-- Changing fields reuses the saved route and updates `VertView`.
-- Rapid/concurrent horizontal and vertical access no longer crashes HDF5;
-  library calls are serialized while remaining off the GUI thread.
-- Ctrl-C follows the Qt shutdown path without the earlier thread-storage
-  warnings in the tested cases.
+- SPDB retrieval runs independently of MDV reads. Per-product generations
+  reject stale completions; bounded retry prevents a failed server from being
+  polled continuously.
+- Product toggles, global enable, display-state changes, reload, and DataMapper
+  expiry participate in request or repaint decisions.
+- Retrieval/decode failure reports an error without removing the last valid
+  displayed snapshot.
+- Symprod objects are decoded with bounds checks and owned with `unique_ptr`.
+  The old X11 `RenderContext`, inactive `HAVE_XID` rendering, and legacy raw
+  ownership were removed from the active implementation and build files.
+- Qt renderers exist for text, polylines, icon lines, stroked icons, named and
+  bitmap icons, arcs, rectangles, and station-report chunks.
+- Hover picking can expose normally hidden details, and selected geometry is
+  available through the export API.
+- `symprod_debug != SYMPROD_DEBUG_OFF` enables request/result diagnostics.
+  `SymprodReadRequest::debug` makes the captured setting available inside the
+  worker without accessing `ProductMgr` state from another thread.
+- Movie frame times were previously left at zero because CIDD's
+  `reset_time_points()` was never ported. `Lucid::_initMovieFrameTimes()` now
+  initializes regular, daily-climatology, and yearly-climatology frames after
+  `movie.start_time` receives its final adjustment. Epoch bounds come from the
+  initialized frames.
 
-There are no automated GUI tests. The statements above are based on interactive
-testing and successful builds.
+## Current Symprod test status
+
+Using `testing/CIDD.precip.test`, local `Metar2Symprod` requests now use the
+correct archive interval. The observed diagnostics were:
+
+```text
+requested=2022/06/07 22:30:00 UTC to 2022/06/08 00:12:00 UTC
+status=0 chunks=8 bytes=18964 stale=no
+```
+
+Both `METARS-simple` and `METARS-labels` return data. METAR station products are
+visible in Lucid and comparison screenshots reviewed during this session were
+favorable at first order: stations appeared at corresponding locations with
+temperature/dew point, weather, labels, winds, and ceiling information.
+Remaining differences appeared mainly related to Qt font metrics, spacing,
+symbol layout, and the differing plot aspect/domain.
+
+The worker request messages can interleave because two threads write directly
+to `cerr`. The structured `SYMPROD result` messages execute on the GUI thread
+and remain readable.
 
 ## Outstanding bugs and tasks
 
-1. Clean up vertical-window presentation: axis/grid labeling, color-scale
-   placement, margins, sizing, and platform-specific window placement still
-   need refinement and regression testing.
-2. Review the recent placement code. Temporary `XXXXXXXX...`/`SSSSSS...` debug
-   output remains, and `GuiManager` calls `_vert->move(getTopRightPos())` while
-   `VertManager` separately sets geometry for `_vertWindow`. The child view is
-   layout-managed, so the intended target is likely the top-level window.
-3. Re-request the retained vertical route when display time/movie frame changes,
-   if that is the desired behavior. It currently refreshes on route completion
-   and field selection only.
-4. Decide vertical-read failure policy. Horizontal reads retry with capped
-   backoff; vertical reads report failure but do not retry. In-flight vertical
-   workers are not cancelled; generations make obsolete results harmless.
-5. Continue removing unused HawkEye radar/beam code and stale comments from
-   `VertView`/`VertManager`, then validate their zoom and overlay actions.
-6. Consider whether the vertical display should remain colored grid cells or
-   gain filled contours/interpolation. The current cell renderer correctly
-   supports nonuniform vertical levels.
-7. Revisit TDRP naming, defaults, generated files, and the legacy-parameter
-   bridge after the display design stabilizes.
-8. Test macOS Control-click/Option-drag behavior and Linux three-button behavior
-   after further input changes.
-9. The global MDV read mutex trades throughput for correctness. Keep it unless
-   the deployed NetCDF/HDF5 stack is demonstrably thread-safe or I/O is moved
-   to a single explicit queue.
+1. Test `METARS-simple` and `METARS-labels` separately against CIDD, then test
+   zoom scaling, label suppression, animation, reload, and product toggling.
+2. Address two review findings in the new picking path:
+   - A picked Symprod can remain from the previous movie frame until the cursor
+     moves. Clear/reselect it on frame changes or validate it against the
+     current `Product::_selectForDisplay()` result before drawing.
+   - Named-icon and bitmap-icon picking measures only `_iconOrigins[0]`.
+     Compute the minimum distance over every rendered icon origin.
+3. Consider moving worker diagnostic formatting to one buffered line or the GUI
+   thread so concurrent request messages do not interleave.
+4. A successful zero-chunk SPDB response currently installs an empty snapshot
+   and reports the product as ready. Decide whether it should preserve the old
+   snapshot or explicitly report “no products.”
+5. `_initMovieFrameTimes()` handles startup. Several legacy movie-configuration
+   paths in `GuiManager` still contain commented `reset_time_points()` calls;
+   restore equivalent recomputation when interactive movie timing is enabled.
+6. Continue visual comparison of station-model layout, especially text
+   justification, wind-barb geometry, background treatment, and dense overlap.
+7. Picking/export data paths exist, but the complete legacy draw/export UI has
+   not been ported.
+8. Continue vertical-window presentation cleanup and regression tests.
+9. TDRP parameter names/defaults and checked-in Lucid test parameter files are
+   intentionally deferred while the parameter design remains fluid. Current
+   testing primarily uses CIDD parameter files through `LegacyParams`.
+10. There are no automated GUI tests; current validation is interactive.
 
 ## Important design decisions
 
-- Add concise comments for non-obvious intent, ownership/lifetime, concurrency,
-  invariants, failure policy, and tradeoffs; do not restate obvious operations.
-- Normalize mouse buttons at the event boundary and retain the effective press
-  button throughout a drag.
-- A vertical route is display geometry, not field-specific state, so it is
-  retained and reused across field selections.
-- Vertical workers receive self-contained request snapshots and return complete
-  result objects. Only the GUI thread installs results into `MdvReader`.
-- Per-reader generations reject older requests; `GuiManager` also rejects a
-  completion from a reader that is no longer the selected field.
-- `VertView` keeps a non-owning pointer to an `MdvReader`; readers live for the
-  application lifetime. Header/data replacement occurs atomically on the GUI
-  thread.
-- Qt layouts own widget geometry. Plot transforms are rebuilt from actual resize
-  events rather than guessed construction-time dimensions.
-- Missing/bad data remain holes unless mapping parameters explicitly map them
-  to the data minimum. Invalid contour geometry falls back to a usable grid
-  renderer instead of producing a blank plot.
+- Use CIDD as the behavioral reference, but implement rendering with Qt rather
+  than carrying forward the X11 drawing context.
+- Add concise higher-level comments for non-obvious intent, lifetime,
+  concurrency, invariants, failure policy, and tradeoffs. Do not restate
+  obvious operations.
+- SPDB workers own request-local state. Only the GUI thread publishes decoded
+  snapshots and invokes repaint/status callbacks.
+- Snapshot replacement is all-or-nothing. Malformed or failed responses must
+  not erase still-useful displayed products.
+- Temporal selection is centralized in `Product::_selectForDisplay()` so normal
+  drawing and picking use the same configured render rules.
+- Normalize mouse buttons on press and retain the effective button for the
+  entire gesture.
+- Vertical routes are display geometry rather than field-specific state and
+  are retained across field changes.
+- Missing/bad grid values remain holes unless explicit mapping parameters say
+  otherwise. Invalid contour topology falls back to polygon rendering.
+- `tdrp_gen` regenerates `Params.hh` and `Params.cc` automatically when
+  `paramdef.Lucid` changes and `make` is run.
 
-## Build and test procedures
+## Build and test
 
-From `codebase/apps/radar/src/Lucid`, with the LROSE build/install environment
-and Qt 6 configured:
+From `codebase/apps/radar/src/Lucid`, with the LROSE environment and Qt 6:
 
 ```bash
 make -j4
@@ -159,21 +167,30 @@ git diff --check
 ./Lucid -p testing/CIDD.precip.test -debug
 ```
 
-Suggested interactive smoke test:
+Suggested smoke test:
 
-1. Confirm the initial vertical-level selector limits are correct.
-2. Select several fields and verify the horizontal plot, hover value, and an
-   open click report update.
-3. Zoom with left drag; pan with middle drag (Option-drag on a Mac) and verify
-   the live preview and Zoom Back behavior.
-4. Build a multi-segment route with right clicks and finish with a right double
-   click. Verify the vertical plot fills its window and reports the correct
-   field, time, route length, and vertical units.
-5. Change fields repeatedly while reads are active. Both views should settle on
-   the latest field without a crash or stale vertical result.
-6. Exercise rectangular and distorted filled-contour fields, including values
-   below and above the color-map bounds.
-7. Press Ctrl-C during an active MDV request and verify clean shutdown.
+1. Confirm the selected archive time and the `SYMPROD result` request interval.
+2. Compare one METAR product at a time with CIDD at the same frame and zoom.
+3. Toggle each product and the global Products enabled action.
+4. Zoom and pan; verify station placement, symbol scaling, and clipping.
+5. Advance movie frames and ensure products follow the frame validity window.
+6. Use Reload and confirm MDV, products, and an open vertical section refresh.
+7. Exercise horizontal and vertical hover/click values and vertical route modes.
+8. Change fields while reads are active and verify that stale completions do
+   not replace the current display.
+9. Press Ctrl-C during active MDV/SPDB requests and verify clean shutdown.
 
-Before committing, inspect `git status --short`; screenshots and generated/build
-artifacts should not be committed accidentally.
+Before committing, run `git status --short`. In particular, leave comparison
+screenshots untracked unless they are intentionally being added as test assets.
+
+## Continuing on another machine
+
+Commit and push both the Lucid source and this handoff. On the other machine,
+pull `lrose-core` and the private `~/git/codex` configuration repository, run
+its `install.sh` if links need refreshing, and start Codex in this directory.
+Use an opening request such as:
+
+```text
+Read AGENTS.md and docs/codex-handoff.md, then review the recent Lucid git
+history and current worktree. Summarize the current state before changing code.
+```
