@@ -12,6 +12,7 @@
 #include <cmath>
 
 #include <QDateTime>
+#include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QToolTip>
@@ -48,7 +49,8 @@ TimePlotWidget::TimePlotWidget(QWidget *parent, const Params &params) :
   setMouseTracking(true);
   setToolTip("Left click: select frame; left drag: zoom time; "
              "middle drag: pan time; "
-             "right drag: expand movie; double-click: fit movie");
+             "right drag: expand movie; double-click: fit movie; "
+             "Shift+right-click: help");
 }
 
 QSize TimePlotWidget::sizeHint() const
@@ -328,6 +330,29 @@ void TimePlotWidget::paintEvent(QPaintEvent *event)
 void TimePlotWidget::mousePressEvent(QMouseEvent *event)
 {
   if (!_plotRect().contains(event->position())) {
+    return;
+  }
+  if (event->button() == Qt::RightButton &&
+      event->modifiers().testFlag(Qt::ShiftModifier)) {
+    QMessageBox::information(
+      this, "Time canvas help",
+      "Single left click\n"
+      "Selects the movie frame containing the clicked time.\n\n"
+      "Left drag — time zoom\n"
+      "Zooms the visible time window to the dragged interval. The movie "
+      "frame interval is unchanged.\n\n"
+      "Middle drag — time pan\n"
+      "Moves the visible time window by an integral number of frames. "
+      "Panning beyond a movie boundary adds frames on that side and "
+      "retrieves data for the expanded movie.\n\n"
+      "Right drag — time expand\n"
+      "Maps the current movie start and end to the left and right edges of "
+      "the dragged rectangle. This computes a larger, frame-aligned movie "
+      "range; use Accept to apply it.\n\n"
+      "Double left click\n"
+      "Fits the complete movie range in the canvas.\n\n"
+      "Shift+right-click opens this help.");
+    event->accept();
     return;
   }
   if (event->button() == Qt::LeftButton) {
