@@ -1,7 +1,9 @@
 # Lucid Codex handoff
 
-Snapshot: 2026-11-10, source committed through `9b86159ca`. The only current
-worktree change is this handoff update.
+Snapshot: 2026-11-10, source committed and pushed through `471f55a36`. The only
+tracked worktree change is this handoff update. The unrelated untracked
+`../ScanInfo2TsFmq/testing/sim_data/` directory belongs to another application
+and must be left untouched.
 
 ## Architecture
 
@@ -22,7 +24,8 @@ transitional.
 - `WorldPlot` owns projection transforms, axes, margins, cached images, grid
   rendering, contours, and the transparent symbolic-product image.
 - `HorizView` composes the plan view and handles zoom, pan, cursor values,
-  click reports, vertical-section routes, and Symprod hover picking.
+  click reports, vertical-section routes, Symprod hover picking, and immutable
+  composite images used for movie playback.
 - `VertManager` owns the vertical-section window and configuration menu;
   `VertView` renders the current section and its overlays.
 - `ProductMgr` captures display state and starts independent SPDB worker
@@ -36,6 +39,9 @@ transitional.
   the Qt rendering and picking path.
 - `Params` is generated from `paramdef.Lucid`; `LegacyParams` translates CIDD
   parameter files into the temporary TDRP-based form used by Lucid.
+- `TimeControl` owns the time dialog, accepted and pending movie state, movie
+  build/playback state machine, and playback timer. `TimePlotWidget` renders
+  the compact time axis, data availability, build progress, and mouse gestures.
 
 ## Major implementation completed
 
@@ -86,6 +92,53 @@ transitional.
   `movie.start_time` receives its final adjustment. Epoch bounds come from the
   initialized frames.
 
+### Time controller and data availability
+
+- `TimePlotWidget` is owned by the time dialog, moves and resizes with it, and
+  uses `time_plot_bar_height_pixels` as its nominal height. It grows vertically
+  when required to keep multiple Product rows from overlapping.
+- The visible axis covers the movie interval. UTC labels are clipped only in X,
+  leaving the lower margin available for text.
+- The selected grid field publishes its MDV time list as dots; the selected
+  data time uses a larger dot. Active symbolic products have separate colored
+  tick rows and use real SPDB `compileTimeList()` results, so availability is
+  complete even when `symprod_short_requests = TRUE`.
+- Grid and Product labels have opaque margin-colored backgrounds so dense dots
+  and ticks cannot obscure the text. Availability failure is supplementary:
+  it preserves the prior list and does not discard otherwise valid data.
+- Mouse behavior:
+  - single left click selects and immediately retrieves the containing frame;
+  - left drag zooms the visible interval without changing frame spacing;
+  - middle drag pans by integral frames, retrieves the newly visible range,
+    and automatically extends the movie on either side when it crosses a movie
+    boundary;
+  - right drag maps the old movie boundaries to the rectangle boundaries and
+    computes a frame-aligned expanded movie, applied through Accept;
+  - double left click fits the complete movie;
+  - Shift-right click opens a help dialog describing these gestures.
+- Accepted movie changes synchronize the legacy `GlobalData::movie` frame
+  times and epoch with the Qt controller. Pans and expansions invalidate MDV
+  and Product availability caches and use the normal full retrieval path.
+
+### Movie construction and playback
+
+- Start now always builds the movie sequentially from frame zero through the
+  last frame, independent of the frame selected when Start is pressed.
+- Each frame is requested through the normal asynchronous MDV/Product path.
+  `GuiManager` captures a frame only after its grid is rendered and every
+  active Product has installed the exact desired request key; an older valid
+  Product snapshot is not considered ready for a new frame.
+- `HorizView` owns immutable composite `QImage` frames. Playback displays these
+  cached composites rather than mutable live `WorldPlot` layers.
+- The time canvas fills the frame currently being built in gold and completed
+  frames in green. The status bar also reports the frame being built.
+- Playback starts automatically after every frame is cached. The dwell control
+  determines normal frame duration. Non-sweep playback moves first-to-last,
+  applies the configured end delay, and restarts at frame zero. Sweep playback
+  reverses at both ends and applies the end delay at each endpoint.
+- Stop cancels an active build or playback timer. Manual time selection exits
+  cached playback and returns to live rendering.
+
 ## Current Symprod test status
 
 Using `testing/CIDD.precip.test`, local `Metar2Symprod` requests now use the
@@ -109,31 +162,42 @@ and remain readable.
 
 ## Outstanding bugs and tasks
 
-1. Test `METARS-simple` and `METARS-labels` separately against CIDD, then test
-   zoom scaling, label suppression, animation, reload, and product toggling.
-2. Address two review findings in the new picking path:
+1. Exercise the new movie builder with operational MDV and SPDB sources.
+   Verify strict first-to-last construction, grid/Product alignment, progress
+   colors, dwell changes, end delays, normal looping, Sweep reversal, Stop
+   during build, and Stop during playback.
+2. The movie builder currently waits indefinitely if an active Product never
+   reaches its desired request key. Stop remains available and Product retry
+   continues, but a future timeout/failure policy should allow a grid-only or
+   explicitly incomplete frame instead of stalling forever.
+3. Cached movie composites are sized to the horizontal widget at build time
+   and can consume substantial memory for very large frame counts. Decide
+   whether resize/display-setting changes should invalidate the loop and
+   whether a cache memory limit or reduced representation is needed.
+4. Movie playback currently caches the horizontal composite only. Decide
+   whether an open vertical section should be captured and animated in lockstep.
+5. Test `METARS-simple` and `METARS-labels` separately against CIDD, then test
+   zoom scaling, label suppression, reload, and product toggling.
+6. Address two review findings in the new picking path:
    - A picked Symprod can remain from the previous movie frame until the cursor
      moves. Clear/reselect it on frame changes or validate it against the
      current `Product::_selectForDisplay()` result before drawing.
    - Named-icon and bitmap-icon picking measures only `_iconOrigins[0]`.
      Compute the minimum distance over every rendered icon origin.
-3. Consider moving worker diagnostic formatting to one buffered line or the GUI
+7. Consider moving worker diagnostic formatting to one buffered line or the GUI
    thread so concurrent request messages do not interleave.
-4. A successful zero-chunk SPDB response currently installs an empty snapshot
+8. A successful zero-chunk SPDB response currently installs an empty snapshot
    and reports the product as ready. Decide whether it should preserve the old
    snapshot or explicitly report “no products.”
-5. `_initMovieFrameTimes()` handles startup. Several legacy movie-configuration
-   paths in `GuiManager` still contain commented `reset_time_points()` calls;
-   restore equivalent recomputation when interactive movie timing is enabled.
-6. Continue visual comparison of station-model layout, especially text
+9. Continue visual comparison of station-model layout, especially text
    justification, wind-barb geometry, background treatment, and dense overlap.
-7. Picking/export data paths exist, but the complete legacy draw/export UI has
+10. Picking/export data paths exist, but the complete legacy draw/export UI has
    not been ported.
-8. Continue vertical-window presentation cleanup and regression tests.
-9. TDRP parameter names/defaults and checked-in Lucid test parameter files are
+11. Continue vertical-window presentation cleanup and regression tests.
+12. TDRP parameter names/defaults and checked-in Lucid test parameter files are
    intentionally deferred while the parameter design remains fluid. Current
    testing primarily uses CIDD parameter files through `LegacyParams`.
-10. There are no automated GUI tests; current validation is interactive.
+13. There are no automated GUI tests; current validation is interactive.
 
 ## Important design decisions
 
@@ -150,6 +214,11 @@ and remain readable.
   drawing and picking use the same configured render rules.
 - Normalize mouse buttons on press and retain the effective button for the
   entire gesture.
+- Treat availability lists as independent snapshots from displayed data.
+  Short Product requests must not substitute for the SPDB time list.
+- Movie frames are GUI-thread-owned immutable composites. Construction is
+  sequential; playback begins only after every requested layer for every frame
+  is ready.
 - Vertical routes are display geometry rather than field-specific state and
   are retained across field changes.
 - Missing/bad grid values remain holes unless explicit mapping parameters say
@@ -174,11 +243,18 @@ Suggested smoke test:
 3. Toggle each product and the global Products enabled action.
 4. Zoom and pan; verify station placement, symbol scaling, and clipping.
 5. Advance movie frames and ensure products follow the frame validity window.
-6. Use Reload and confirm MDV, products, and an open vertical section refresh.
-7. Exercise horizontal and vertical hover/click values and vertical route modes.
-8. Change fields while reads are active and verify that stale completions do
+6. Exercise time-canvas click, zoom, pan, automatic extension, right-drag
+   expansion, double-click fit, and Shift-right help. Confirm availability dots
+   and ticks refresh for the displayed interval.
+7. Press Start from a middle frame and confirm construction nevertheless begins
+   at frame zero. Verify gold/green progress, automatic playback, dwell and
+   delay, Sweep direction changes, and Stop in both build and playback phases.
+8. Use Reload and confirm MDV, products, and an open vertical section refresh.
+9. Exercise horizontal and vertical hover/click values and vertical route modes.
+10. Change fields while reads are active and verify that stale completions do
    not replace the current display.
-9. Press Ctrl-C during active MDV/SPDB requests and verify clean shutdown.
+11. Press Ctrl-C during active MDV/SPDB or movie-build requests and verify clean
+    shutdown.
 
 Before committing, run `git status --short`. In particular, leave comparison
 screenshots untracked unless they are intentionally being added as test assets.
