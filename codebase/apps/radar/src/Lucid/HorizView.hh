@@ -143,6 +143,11 @@ class DLL_EXPORT HorizView : public QWidget
   void rerenderGrid();
 
   void rerenderProducts();
+
+  void clearMovieFrames(int frameCount);
+  bool captureMovieFrame(int frameIndex);
+  bool showMovieFrame(int frameIndex);
+  void stopMoviePlayback();
   
   // set flags to render invalid images
   
@@ -246,6 +251,11 @@ class DLL_EXPORT HorizView : public QWidget
   bool _sizeChanged;
   bool _gridsReady;
   bool _mapsReady;
+  // Movie frames are complete widget composites owned by this view. Keeping
+  // playback independent of live WorldPlot layers prevents later retrievals
+  // from mutating frames that have already been built.
+  vector<QImage> _movieFrames;
+  int _playbackFrameIndex;
   
   // The index of the field selected for display.
   

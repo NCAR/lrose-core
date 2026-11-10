@@ -214,6 +214,8 @@ GuiManager::GuiManager() :
   _vlevelHasChanged = true;
   
   _overlaysHaveChanged = true;
+  _movieBuildFrame = -1;
+  _movieGridReady = false;
   
   _timeControl = NULL;
   _timeControlPlaced = false;
@@ -341,6 +343,72 @@ void GuiManager::setArchiveMode(bool state)
 
   _archiveMode = state;
   
+}
+
+////////////////////////////////////////////////////////
+// initialize storage and request state for a new movie build
+
+void GuiManager::prepareMovieBuild(int frameCount)
+{
+  _movieBuildFrame = -1;
+  _movieGridReady = false;
+  if (_horiz) {
+    _horiz->clearMovieFrames(frameCount);
+  }
+  // Force frame zero to be rebuilt even when it is already the live frame.
+  if (_gd.prod_mgr) {
+    _gd.prod_mgr->reset_product_valid_flags();
+  }
+}
+
+void GuiManager::beginMovieFrameBuild(int frameIndex)
+{
+  _movieBuildFrame = frameIndex;
+  _movieGridReady = false;
+  _horizontalRequestHasChanged = true;
+  if (_horiz) {
+    _horiz->stopMoviePlayback();
+  }
+  statusBar()->showMessage(
+    tr("Building movie frame %1 of %2")
+      .arg(frameIndex + 1).arg(_timeControl->getNFramesMovie()));
+}
+
+void GuiManager::cancelMovieBuild()
+{
+  _movieBuildFrame = -1;
+  _movieGridReady = false;
+}
+
+bool GuiManager::showMovieFrame(int frameIndex)
+{
+  return _horiz && _horiz->showMovieFrame(frameIndex);
+}
+
+void GuiManager::stopMoviePlayback()
+{
+  if (_horiz) {
+    _horiz->stopMoviePlayback();
+  }
+}
+
+void GuiManager::_checkMovieFrameReady()
+{
+  if (_movieBuildFrame < 0 || !_movieGridReady || !_horiz || !_timeControl) {
+    return;
+  }
+  const bool productsReady = !_gd.prod.products_on || !_gd.prod_mgr ||
+    _gd.prod_mgr->activeProductsReady();
+  if (!productsReady) {
+    return;
+  }
+
+  const int completedFrame = _movieBuildFrame;
+  _movieBuildFrame = -1;
+  _movieGridReady = false;
+  if (_horiz->captureMovieFrame(completedFrame)) {
+    _timeControl->movieFrameRendered(completedFrame);
+  }
 }
 
 //////////////////////////////////////////////////
@@ -536,6 +604,7 @@ void GuiManager::_setupWindows()
       if (_timeControl) {
         _timeControl->refreshDataAvailability();
       }
+      _checkMovieFrameReady();
     });
     _gd.prod_mgr->setStatusCallback(
       [this](const string &message, bool isError) {
@@ -1796,6 +1865,10 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
       frameIndex = _gd.movie.num_frames - 1;
     }
     _horiz->triggerGridRendering(_gd.h_win.page, frameIndex);
+    if (_movieBuildFrame == frameIndex) {
+      _movieGridReady = true;
+      _checkMovieFrameReady();
+    }
     if (_gd.h_win.page < _gd.num_datafields) {
       _vlevelManager.set(*_gd.mread[_gd.h_win.page]);
     }

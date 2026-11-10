@@ -138,6 +138,13 @@ public:
   // update the click report from a horizontal-view selection
 
   void updateClickReport(const ClickReport &report);
+
+  // Coordinate asynchronous data retrieval with TimeControl's movie builder.
+  void prepareMovieBuild(int frameCount);
+  void beginMovieFrameBuild(int frameIndex);
+  void cancelMovieBuild();
+  bool showMovieFrame(int frameIndex);
+  void stopMoviePlayback();
   
   // override event handling
 
@@ -265,6 +272,11 @@ private:
   
   bool _fieldHasChanged;
   bool _horizontalRequestHasChanged;
+
+  int _movieBuildFrame;
+  bool _movieGridReady;
+
+  void _checkMovieFrameReady();
 
   // maps
 

@@ -704,6 +704,18 @@ int ProductMgr::num_products_invalid()
   return num;
 }
 
+bool ProductMgr::activeProductsReady() const
+{
+  for (size_t ii = 0; ii < _products.size(); ++ii) {
+    if (_products[ii]->_active &&
+        (_requestInFlight[ii] || !_installedKeyValid[ii] ||
+         !(_installedKeys[ii] == _desiredKeys[ii]))) {
+      return false;
+    }
+  }
+  return true;
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 // CHECK_PRODUCT_VALIDITY:  use the data mapper info to find data that 

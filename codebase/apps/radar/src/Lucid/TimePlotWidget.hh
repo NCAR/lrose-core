@@ -40,6 +40,8 @@ public:
                      double frameIntervalSecs, int selectedFrame);
   void setGridSeries(const TimePlotSeries &series, time_t selectedTime);
   void setProductSeries(const std::vector<TimePlotSeries> &series);
+  void setRenderedFrames(const std::vector<bool> &renderedFrames,
+                         int buildingFrame);
   void setExpansionCallback(
     const std::function<void(time_t, int)> &callback) {
     _expansionCallback = callback;
@@ -78,6 +80,8 @@ private:
   TimePlotSeries _gridSeries;
   time_t _selectedGridTime;
   std::vector<TimePlotSeries> _productSeries;
+  std::vector<bool> _renderedFrames;
+  int _buildingFrame;
   DragMode _dragMode;
   QPoint _dragStart;
   QPoint _dragCurrent;

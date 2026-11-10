@@ -142,6 +142,7 @@ HorizView::HorizView(QWidget* parent,
   setRingsDataDriven(_params.plot_range_rings_from_data);
 
   _renderFrameIndex = 0;
+  _playbackFrameIndex = -1;
   _renderFramePage = 0;
 
   _renderInvalidImages = false;
@@ -298,6 +299,14 @@ void HorizView::_printNow(int ndecimals,
 
 void HorizView::paintEvent(QPaintEvent *event)
 {
+
+  if (_playbackFrameIndex >= 0 &&
+      _playbackFrameIndex < static_cast<int>(_movieFrames.size()) &&
+      !_movieFrames[_playbackFrameIndex].isNull()) {
+    QPainter painter(this);
+    painter.drawImage(0, 0, _movieFrames[_playbackFrameIndex]);
+    return;
+  }
 
   int fieldNum = _gd.h_win.page;
 
@@ -994,6 +1003,44 @@ void HorizView::rerenderGrid()
 void HorizView::rerenderProducts()
 {
   _renderProducts();
+  repaint();
+}
+
+/////////////////////////////////////////////////////////////
+// manage immutable composites used by movie playback
+
+void HorizView::clearMovieFrames(int frameCount)
+{
+  _playbackFrameIndex = -1;
+  _movieFrames.assign(std::max(0, frameCount), QImage());
+  update();
+}
+
+bool HorizView::captureMovieFrame(int frameIndex)
+{
+  if (frameIndex < 0 || frameIndex >= static_cast<int>(_movieFrames.size())) {
+    return false;
+  }
+  _playbackFrameIndex = -1;
+  repaint();
+  _movieFrames[frameIndex] = grab().toImage();
+  return !_movieFrames[frameIndex].isNull();
+}
+
+bool HorizView::showMovieFrame(int frameIndex)
+{
+  if (frameIndex < 0 || frameIndex >= static_cast<int>(_movieFrames.size()) ||
+      _movieFrames[frameIndex].isNull()) {
+    return false;
+  }
+  _playbackFrameIndex = frameIndex;
+  repaint();
+  return true;
+}
+
+void HorizView::stopMoviePlayback()
+{
+  _playbackFrameIndex = -1;
   repaint();
 }
   

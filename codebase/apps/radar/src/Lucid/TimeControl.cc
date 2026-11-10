@@ -43,6 +43,8 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QSignalBlocker>
+#include <QStatusBar>
+#include <QTimer>
 #include "TimeControl.hh"
 #include "TimePlotWidget.hh"
 #include "GuiManager.hh"
@@ -115,6 +117,14 @@ TimeControl::TimeControl(GuiManager *parent) :
   
   _isRealtime = (_params.start_mode == Params::MODE_REALTIME);
   _isSweep = false;
+  _movieState = MovieState::Idle;
+  _movieTimer = new QTimer(this);
+  _movieTimer->setSingleShot(true);
+  _buildingFrameIndex = -1;
+  _playbackFrameIndex = -1;
+  _playbackDirection = 1;
+  connect(_movieTimer, &QTimer::timeout,
+          this, &TimeControl::_advanceMoviePlayback);
 
   _timeHasChanged = false;
   
@@ -229,24 +239,24 @@ void TimeControl::_populateGui()
   startStopFrameLayout->setSpacing(2);
   startStopFrameLayout->setContentsMargins(2, 2, 2, 2);
   
-  QPushButton *startButton = new QPushButton(startStopFrame);
-  startButton->setText("Start");
-  connect(startButton, &QPushButton::clicked, this,
+  _startButton = new QPushButton(startStopFrame);
+  _startButton->setText("Start");
+  connect(_startButton, &QPushButton::clicked, this,
           &TimeControl::_startMovie);
-  startButton->setToolTip("Start the movie");
-  startButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+  _startButton->setToolTip("Build and start the movie");
+  _startButton->setStyleSheet("padding: 2px 4px 2px 4px; "
                              "background-color: seagreen;");
   
-  QPushButton *stopButton = new QPushButton(startStopFrame);
-  stopButton->setText("Stop");
-  connect(stopButton, &QPushButton::clicked, this,
+  _stopButton = new QPushButton(startStopFrame);
+  _stopButton->setText("Stop");
+  connect(_stopButton, &QPushButton::clicked, this,
           &TimeControl::_stopMovie);
-  stopButton->setToolTip("Stop the movie");
-  stopButton->setStyleSheet("padding: 2px 4px 2px 4px; "
+  _stopButton->setToolTip("Stop building or playing the movie");
+  _stopButton->setStyleSheet("padding: 2px 4px 2px 4px; "
                             "background-color: red;");
 
-  startStopFrameLayout->addWidget(startButton, 0, Qt::AlignTop);
-  startStopFrameLayout->addWidget(stopButton, 0, Qt::AlignTop);
+  startStopFrameLayout->addWidget(_startButton, 0, Qt::AlignTop);
+  startStopFrameLayout->addWidget(_stopButton, 0, Qt::AlignTop);
 
   // realtime?
 
@@ -697,6 +707,12 @@ DateTime TimeControl::_getGuiEndTime() const
 
 void TimeControl::_acceptGuiSelections()
 {
+  // Stop showing an immutable cached frame before a manual controller edit
+  // requests live data again. During build/playback the movie state owns the
+  // displayed image and therefore bypasses this path.
+  if (_movieState == MovieState::Idle) {
+    _manager->stopMoviePlayback();
+  }
   const bool movieRangeChanged = _startTime != _guiStartTime ||
     _nFramesMovie != _guiNFramesMovie ||
     fabs(_frameIntervalSecs - _guiFrameIntervalSecs) > 1.0e-6;
@@ -744,12 +760,138 @@ void TimeControl::_cancelGuiSelections()
 
 void TimeControl::_startMovie()
 {
-  cerr << "Start the movie" << endl;
+  if (_guiNFramesMovie < 1) {
+    return;
+  }
+
+  _movieTimer->stop();
+  _manager->cancelMovieBuild();
+  _manager->stopMoviePlayback();
+  _acceptGuiSelections();
+
+  _movieState = MovieState::Building;
+  _gd.movie.movie_on = 1;
+  _renderedMovieFrames.assign(_nFramesMovie, false);
+  _buildingFrameIndex = -1;
+  _playbackFrameIndex = -1;
+  _playbackDirection = 1;
+  _timePlot->setRenderedFrames(_renderedMovieFrames, -1);
+  _manager->prepareMovieBuild(_nFramesMovie);
+  _startButton->setEnabled(false);
+  _requestMovieFrame(0);
 }
 
 void TimeControl::_stopMovie()
 {
-  cerr << "Stop the movie" << endl;
+  const bool wasBuilding = _movieState == MovieState::Building;
+  _movieTimer->stop();
+  _manager->cancelMovieBuild();
+  _movieState = MovieState::Idle;
+  _gd.movie.movie_on = 0;
+  _buildingFrameIndex = -1;
+  _startButton->setEnabled(true);
+  _timePlot->setRenderedFrames(std::vector<bool>(), -1);
+  if (wasBuilding) {
+    _manager->stopMoviePlayback();
+  }
+  _manager->statusBar()->showMessage("Movie stopped", 3000);
+}
+
+void TimeControl::_requestMovieFrame(int frameIndex)
+{
+  if (_movieState != MovieState::Building || frameIndex < 0 ||
+      frameIndex >= _nFramesMovie) {
+    return;
+  }
+
+  _buildingFrameIndex = frameIndex;
+  _guiFrameIndex = frameIndex;
+  {
+    const QSignalBlocker sliderBlocker(_timeSlider);
+    _timeSlider->setSliderPosition(frameIndex);
+  }
+  _updateSelectedTimeInGui();
+  _acceptGuiSelections();
+  _timePlot->setRenderedFrames(_renderedMovieFrames, frameIndex);
+  _manager->beginMovieFrameBuild(frameIndex);
+}
+
+void TimeControl::movieFrameRendered(int frameIndex)
+{
+  if (_movieState != MovieState::Building ||
+      frameIndex != _buildingFrameIndex || frameIndex < 0 ||
+      frameIndex >= static_cast<int>(_renderedMovieFrames.size())) {
+    return;
+  }
+
+  _renderedMovieFrames[frameIndex] = true;
+  _buildingFrameIndex = -1;
+  _timePlot->setRenderedFrames(_renderedMovieFrames, -1);
+  if (frameIndex + 1 < _nFramesMovie) {
+    _requestMovieFrame(frameIndex + 1);
+  } else {
+    _startMoviePlayback();
+  }
+}
+
+void TimeControl::_startMoviePlayback()
+{
+  _movieState = MovieState::Playing;
+  _buildingFrameIndex = -1;
+  _playbackDirection = 1;
+  _manager->statusBar()->showMessage("Movie ready", 3000);
+  _showPlaybackFrame(0, true);
+}
+
+void TimeControl::_showPlaybackFrame(int frameIndex, bool firstFrame)
+{
+  if (_movieState != MovieState::Playing ||
+      !_manager->showMovieFrame(frameIndex)) {
+    return;
+  }
+
+  _playbackFrameIndex = frameIndex;
+  _frameIndex = frameIndex;
+  _guiFrameIndex = frameIndex;
+  _gd.movie.cur_frame = frameIndex;
+  {
+    const QSignalBlocker sliderBlocker(_timeSlider);
+    _timeSlider->setSliderPosition(frameIndex);
+  }
+  _updateSelectedTimeInGui();
+
+  const int lastFrame = _nFramesMovie - 1;
+  const bool endpoint = !firstFrame &&
+    ((!_isSweep && frameIndex == lastFrame) ||
+     (_isSweep && ((_playbackDirection > 0 && frameIndex == lastFrame) ||
+                   (_playbackDirection < 0 && frameIndex == 0))));
+  _movieTimer->start(endpoint ? _loopDelayMsecs : _loopDwellMsecs);
+}
+
+void TimeControl::_advanceMoviePlayback()
+{
+  if (_movieState != MovieState::Playing || _nFramesMovie < 1) {
+    return;
+  }
+  if (_nFramesMovie == 1) {
+    _showPlaybackFrame(0);
+    return;
+  }
+
+  const int lastFrame = _nFramesMovie - 1;
+  int nextFrame = _playbackFrameIndex;
+  if (_isSweep) {
+    if (_playbackFrameIndex >= lastFrame) {
+      _playbackDirection = -1;
+    } else if (_playbackFrameIndex <= 0) {
+      _playbackDirection = 1;
+    }
+    nextFrame += _playbackDirection;
+  } else {
+    nextFrame = (_playbackFrameIndex >= lastFrame) ? 0 :
+                _playbackFrameIndex + 1;
+  }
+  _showPlaybackFrame(nextFrame);
 }
 
 void TimeControl::_outputMovieLoop()
@@ -889,6 +1031,9 @@ void TimeControl::_retrieveForTimeRange(time_t startTime, time_t endTime)
   if (endTime <= startTime) {
     return;
   }
+  if (_movieState != MovieState::Idle) {
+    _stopMovie();
+  }
 
   const time_t movieStart = _guiStartTime.utime();
   const double movieEnd = movieStart +
@@ -937,6 +1082,10 @@ void TimeControl::_selectFrameFromTimePlot(int frameIndex)
     return;
   }
 
+  if (_movieState != MovieState::Idle) {
+    _stopMovie();
+  }
+
   _guiFrameIndex = frameIndex;
   {
     const QSignalBlocker sliderBlocker(_timeSlider);
@@ -953,6 +1102,9 @@ void TimeControl::_applyExpandedMovieRange(time_t startTime, int nFrames)
 {
   if (nFrames < 1 || nFrames > Constants::MAX_FRAMES) {
     return;
+  }
+  if (_movieState != MovieState::Idle) {
+    _stopMovie();
   }
 
   const DateTime selectedTime = _getGuiSelectedTime();
@@ -998,6 +1150,9 @@ void TimeControl::_setStartTime(const DateTime &stime)
 
 void TimeControl::goBack1()
 {
+  if (_movieState != MovieState::Idle) {
+    _stopMovie();
+  }
   // change index
   if (_guiFrameIndex == 0) {
     return;
@@ -1042,6 +1197,9 @@ void TimeControl::_shiftBack3()
 
 void TimeControl::goFwd1()
 {
+  if (_movieState != MovieState::Idle) {
+    _stopMovie();
+  }
   // change index
   if (_guiFrameIndex == _nFramesMovie - 1) {
     return;
@@ -1153,6 +1311,9 @@ void TimeControl::_timeSliderReleased()
 
 void TimeControl::_timeSliderPressed() 
 {
+  if (_movieState != MovieState::Idle) {
+    _stopMovie();
+  }
   int value = _timeSlider->value();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider pressed, value: " << value << endl;
@@ -1202,7 +1363,24 @@ void TimeControl::_computeFrameTimes()
   for (int ii = 0; ii < _nFramesMovie; ii++) {
     DateTime frameTime(_startTime + ii * _frameIntervalSecs);
     _frameTimes.push_back(frameTime);
+
+    // Legacy renderers still consume GlobalData movie bounds. Keep them in
+    // lockstep with the accepted Qt controller so cached frames are rendered
+    // for the same interval shown by the time canvas.
+    movie_frame_t &frame = _gd.movie.frame[ii];
+    frame.time_start = frameTime.utime();
+    frame.time_mid = static_cast<time_t>(
+      frame.time_start + _frameIntervalSecs / 2.0);
+    frame.time_end = static_cast<time_t>(
+      frame.time_start + _frameIntervalSecs);
   }
+  _gd.movie.start_time = _startTime.utime();
+  _gd.movie.time_interval_mins = _frameIntervalSecs / 60.0;
+  _gd.movie.num_frames = _nFramesMovie;
+  _gd.movie.start_frame = 0;
+  _gd.movie.end_frame = std::max(0, _nFramesMovie - 1);
+  _gd.movie.cur_frame = std::clamp(_frameIndex, 0,
+                                   std::max(0, _nFramesMovie - 1));
 }
 
 // realtime mode?

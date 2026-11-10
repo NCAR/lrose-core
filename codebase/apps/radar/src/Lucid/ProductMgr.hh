@@ -173,6 +173,11 @@ public:
   // Returns the number of products marked as invalid.
   int num_products_invalid(void);
 
+  // True only when every active product has installed the exact request key
+  // currently desired by the display. Movie capture uses this stronger test
+  // so an older but still valid snapshot is never recorded for a new frame.
+  bool activeProductsReady() const;
+
   // Returns the number of products its supervising
   int get_num_products(void);
 

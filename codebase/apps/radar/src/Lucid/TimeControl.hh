@@ -64,6 +64,7 @@
 class QFrame;
 class QHBoxLayout;
 class QVBoxLayout;
+class QTimer;
 class GuiManager;
 class TimePlotWidget;
 
@@ -127,6 +128,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   // Refresh the value-owned availability snapshots rendered below the movie
   // controls. Call only on the GUI thread after readers publish new data.
   void refreshDataAvailability();
+
+  // Called by GuiManager after all layers for the requested frame have been
+  // captured into the immutable playback cache.
+  void movieFrameRendered(int frameIndex);
 
  private:
 
@@ -196,6 +201,14 @@ class DLL_EXPORT TimeControl : public QDialog {
   int _loopDelayMsecs;
   bool _isRealtime;
   bool _isSweep;
+
+  enum class MovieState { Idle, Building, Playing };
+  MovieState _movieState;
+  QTimer *_movieTimer;
+  vector<bool> _renderedMovieFrames;
+  int _buildingFrameIndex;
+  int _playbackFrameIndex;
+  int _playbackDirection;
   
   // private methods
   
@@ -247,6 +260,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _startMovie();
   void _stopMovie();
   void _outputMovieLoop();
+  void _requestMovieFrame(int frameIndex);
+  void _startMoviePlayback();
+  void _advanceMoviePlayback();
+  void _showPlaybackFrame(int frameIndex, bool firstFrame = false);
   
   // move in time
   

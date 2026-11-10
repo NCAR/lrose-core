@@ -42,6 +42,7 @@ TimePlotWidget::TimePlotWidget(QWidget *parent, const Params &params) :
         _nFrames(0),
         _selectedFrame(0),
         _selectedGridTime(0),
+        _buildingFrame(-1),
         _dragMode(DragMode::None)
 {
   _updateMinimumHeight();
@@ -95,6 +96,14 @@ void TimePlotWidget::setProductSeries(
   _productSeries = series;
   _updateMinimumHeight();
   updateGeometry();
+  update();
+}
+
+void TimePlotWidget::setRenderedFrames(
+  const std::vector<bool> &renderedFrames, int buildingFrame)
+{
+  _renderedFrames = renderedFrames;
+  _buildingFrame = buildingFrame;
   update();
 }
 
@@ -176,15 +185,41 @@ void TimePlotWidget::paintEvent(QPaintEvent *event)
   painter.setClipRect(QRectF(plot.left(), plot.top(), plot.width(),
                              height() - plot.top()));
 
-  // The selected frame is filled before the epoch outline so its boundaries
-  // remain visible even when the time view is tightly zoomed.
+  // Build progress is encoded directly in the movie band so it stays aligned
+  // with the frames even while data retrieval changes the selected time.
+  const QColor renderedColor(46, 139, 87);
+  const QColor buildingColor(218, 165, 32);
+  for (int ii = 0; ii < _nFrames; ++ii) {
+    QColor statusColor;
+    if (ii == _buildingFrame) {
+      statusColor = buildingColor;
+    } else if (ii < static_cast<int>(_renderedFrames.size()) &&
+               _renderedFrames[ii]) {
+      statusColor = renderedColor;
+    } else {
+      continue;
+    }
+    const double frameLeft = _pixelForTime(
+      _movieStart + ii * _frameIntervalSecs);
+    const double frameRight = _pixelForTime(
+      _movieStart + (ii + 1) * _frameIntervalSecs);
+    painter.fillRect(QRectF(frameLeft, bandTop, frameRight - frameLeft,
+                            bandBottom - bandTop), statusColor);
+  }
+
+  // The selected frame is translucent while build status is displayed, so
+  // selection and completion remain visible at the same time.
   const double selectedStart = _movieStart +
     _selectedFrame * _frameIntervalSecs;
   const double selectedEnd = selectedStart + _frameIntervalSecs;
+  QColor selectedColor = frameColor;
+  if (!_renderedFrames.empty() || _buildingFrame >= 0) {
+    selectedColor.setAlpha(120);
+  }
   painter.fillRect(QRectF(_pixelForTime(selectedStart), bandTop,
                           _pixelForTime(selectedEnd) -
                             _pixelForTime(selectedStart),
-                          bandBottom - bandTop), frameColor);
+                          bandBottom - bandTop), selectedColor);
 
   const double movieLeft = _pixelForTime(_movieStart);
   const double movieRight = _pixelForTime(_movieEnd);
