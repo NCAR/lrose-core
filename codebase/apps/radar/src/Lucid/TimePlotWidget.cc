@@ -207,6 +207,8 @@ void TimePlotWidget::paintEvent(QPaintEvent *event)
   seriesFont.setPixelSize(10);
   painter.setFont(seriesFont);
   const int productRowHeight = 12;
+  QColor labelBackground = colorOr(_params.margin_color, Qt::black);
+  labelBackground.setAlpha(255);
   double productY = bandBottom + 8.0;
   for (size_t ii = 0; ii < _productSeries.size(); ++ii) {
     const int colorIndex = _params.time_tick_colors_n > 0 ?
@@ -222,9 +224,18 @@ void TimePlotWidget::paintEvent(QPaintEvent *event)
       }
     }
     const QString label = QString::fromStdString(_productSeries[ii].label);
-    const int labelWidth = painter.fontMetrics().horizontalAdvance(label);
-    painter.drawText(QPointF(plot.right() - labelWidth, productY + 4.0),
-                     label);
+    const QFontMetrics metrics = painter.fontMetrics();
+    const int labelWidth = metrics.horizontalAdvance(label);
+    const double labelRight = plot.right() - 2.0;
+    const double baseline = productY + 4.0;
+    const QRectF labelRect(labelRight - labelWidth - 2.0,
+                           baseline - metrics.ascent() - 1.0,
+                           labelWidth + 4.0,
+                           metrics.height() + 2.0);
+    // Paint labels after their row's ticks, with an opaque backing so dense
+    // availability data cannot obscure the product identity.
+    painter.fillRect(labelRect, labelBackground);
+    painter.drawText(QPointF(labelRight - labelWidth, baseline), label);
     productY += productRowHeight;
   }
 
@@ -239,8 +250,17 @@ void TimePlotWidget::paintEvent(QPaintEvent *event)
       painter.drawEllipse(QPointF(x, gridY), radius, radius);
     }
   }
-  painter.drawText(QPointF(plot.left(), gridY + 4.0),
-                   QString::fromStdString(_gridSeries.label));
+  const QString gridLabel = QString::fromStdString(_gridSeries.label);
+  const QFontMetrics gridMetrics = painter.fontMetrics();
+  const int gridLabelWidth = gridMetrics.horizontalAdvance(gridLabel);
+  const double gridLabelLeft = plot.left() + 2.0;
+  const double gridBaseline = gridY + 4.0;
+  const QRectF gridLabelRect(gridLabelLeft - 2.0,
+                             gridBaseline - gridMetrics.ascent() - 1.0,
+                             gridLabelWidth + 4.0,
+                             gridMetrics.height() + 2.0);
+  painter.fillRect(gridLabelRect, labelBackground);
+  painter.drawText(QPointF(gridLabelLeft, gridBaseline), gridLabel);
 
   painter.setPen(QPen(axisColor, 1));
   painter.drawLine(QPointF(plot.left(), axisY),
