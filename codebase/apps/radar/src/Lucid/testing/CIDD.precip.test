@@ -123,7 +123,7 @@ SPOL_DBMVC_F  SPOL_DBMVC_F   $(HOME)/data/lucid/precip/cfradial/spol/sur&DBMVC_F
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
 SAT_VIS   SAT_VIS   $(HOME)/data/lucid/precip/mdv/himawari_ch03&albedo sat_albedo_extended.colors %  -5   80  5  cart   1 0
-========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
+SAT_VIS2   SAT_VIS2   $(HOME)/data/lucid/precip/mdv/himawari_ch03&albedo sat_albedo_extended.colors %  -5   80  5  dcont   1 0
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 

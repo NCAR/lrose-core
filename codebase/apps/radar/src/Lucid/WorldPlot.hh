@@ -653,6 +653,13 @@ private:
     double x, y;
   } WorldPoint;
 
+  struct GridIndexBounds {
+    int minX;
+    int maxX;
+    int minY;
+    int maxY;
+  };
+
   // dimensions of the window in pixels
   
   int _widthPixels;
@@ -775,6 +782,9 @@ private:
   
   void _computePixPerKm();
   void _computeTransform();
+
+  bool _computeVisibleGridBounds(const MdvReader &reader,
+                                 GridIndexBounds &bounds) const;
 
   // copy method for assignment and copy constructor
 

@@ -38,6 +38,8 @@
 #include <iostream>
 #include <cstdio>
 #include <cmath>
+#include <algorithm>
+#include <limits>
 #include <QtCore/QLineF>
 #include <QtGui/QPainterPath>
 
@@ -2815,6 +2817,99 @@ void WorldPlot::renderGridRect(int fieldNum,
 }
 
 //////////////////////////////////////////////////////////
+// conservatively map the visible display into data-grid indices
+
+bool WorldPlot::_computeVisibleGridBounds(const MdvReader &reader,
+                                          GridIndexBounds &bounds) const
+{
+  const int nx = reader.h_fhdr.nx;
+  const int ny = reader.h_fhdr.ny;
+  const double dx = reader.h_fhdr.grid_dx;
+  const double dy = reader.h_fhdr.grid_dy;
+  const double gridMinX = reader.h_fhdr.grid_minx;
+  const double gridMinY = reader.h_fhdr.grid_miny;
+
+  bounds = {0, nx - 1, 0, ny - 1};
+  if (nx <= 0 || ny <= 0 || !std::isfinite(dx) || dx == 0.0 ||
+      !std::isfinite(dy) || dy == 0.0) {
+    return false;
+  }
+
+  // Projection boundaries can curve substantially, so sample across the
+  // complete view instead of relying only on its corners.  The sample count
+  // grows slowly with the canvas while remaining negligible beside a large
+  // satellite grid transformation.
+  const int nSamplesX = std::clamp(std::abs(_plotWidth) / 64 + 2, 9, 33);
+  const int nSamplesY = std::clamp(std::abs(_plotHeight) / 64 + 2, 9, 33);
+  const double displayMinX = std::min(_xMinWorld, _xMaxWorld);
+  const double displayMaxX = std::max(_xMinWorld, _xMaxWorld);
+  const double displayMinY = std::min(_yMinWorld, _yMaxWorld);
+  const double displayMaxY = std::max(_yMinWorld, _yMaxWorld);
+
+  double minGridX = std::numeric_limits<double>::infinity();
+  double maxGridX = -std::numeric_limits<double>::infinity();
+  double minGridY = std::numeric_limits<double>::infinity();
+  double maxGridY = -std::numeric_limits<double>::infinity();
+  for (int iy = 0; iy < nSamplesY; ++iy) {
+    const double yFraction = (double) iy / (double) (nSamplesY - 1);
+    const double displayY = displayMinY +
+      yFraction * (displayMaxY - displayMinY);
+    for (int ix = 0; ix < nSamplesX; ++ix) {
+      const double xFraction = (double) ix / (double) (nSamplesX - 1);
+      const double displayX = displayMinX +
+        xFraction * (displayMaxX - displayMinX);
+
+      double lat, lon;
+      _proj.xy2latlon(displayX, displayY, lat, lon);
+      double dataX, dataY;
+      reader.proj.latlon2xy(lat, lon, dataX, dataY);
+      if (!std::isfinite(dataX) || !std::isfinite(dataY)) {
+        return false;
+      }
+
+      const double gridX = (dataX - gridMinX) / dx;
+      const double gridY = (dataY - gridMinY) / dy;
+      minGridX = std::min(minGridX, gridX);
+      maxGridX = std::max(maxGridX, gridX);
+      minGridY = std::min(minGridY, gridY);
+      maxGridY = std::max(maxGridY, gridY);
+    }
+  }
+
+  if (!std::isfinite(minGridX) || !std::isfinite(maxGridX) ||
+      !std::isfinite(minGridY) || !std::isfinite(maxGridY)) {
+    return false;
+  }
+
+  // Extra cells protect against curvature between samples and retain every
+  // polygon which can straddle the edge of the visible plot.
+  static const int indexPadding = 2;
+  const double safeIntMin =
+    (double) std::numeric_limits<int>::min() + indexPadding;
+  const double safeIntMax =
+    (double) std::numeric_limits<int>::max() - indexPadding;
+  if (minGridX < safeIntMin || maxGridX > safeIntMax ||
+      minGridY < safeIntMin || maxGridY > safeIntMax) {
+    return false;
+  }
+  const int rawMinX = (int) std::floor(minGridX) - indexPadding;
+  const int rawMaxX = (int) std::ceil(maxGridX) + indexPadding;
+  const int rawMinY = (int) std::floor(minGridY) - indexPadding;
+  const int rawMaxY = (int) std::ceil(maxGridY) + indexPadding;
+
+  if (rawMaxX < 0 || rawMinX >= nx || rawMaxY < 0 || rawMinY >= ny) {
+    bounds = {0, -1, 0, -1};
+    return true;
+  }
+
+  bounds.minX = std::clamp(rawMinX, 0, nx - 1);
+  bounds.maxX = std::clamp(rawMaxX, 0, nx - 1);
+  bounds.minY = std::clamp(rawMinY, 0, ny - 1);
+  bounds.maxY = std::clamp(rawMaxY, 0, ny - 1);
+  return true;
+}
+
+//////////////////////////////////////////////////////////
 // render a data grid which is distorted
 // i.e. where the data and display projection do not match
 
@@ -2836,74 +2931,122 @@ void WorldPlot::renderGridDistorted(int fieldNum,
   fillCanvas(painter, string(_params.missing_data_color) == "transparent" ?
              _params.background_color : _params.missing_data_color);
    
-  // the data projection type and plot projection type are not the same
-  // so we need to compute the lat/lon of each corner of the grid cells
+  const int nx = mr->h_fhdr.nx;
+  const int ny = mr->h_fhdr.ny;
+  const size_t expectedDataSize = (size_t) nx * (size_t) ny;
+  if (nx <= 0 || ny <= 0 || mr->h_fl32_data.size() < expectedDataSize) {
+    fillMargins(painter, _params.background_color);
+    return;
+  }
 
-  // compute the location of the vertices
-  // these are the cell limits in (x, y)
-  
-  vector< vector<QPointF> > vertices;
-  
-  int nx = mr->h_fhdr.nx;
-  int ny = mr->h_fhdr.ny;
-  double dy = mr->h_fhdr.grid_dy;
-  double lowy = mr->h_fhdr.grid_miny - dy / 2.0;
-  double dx = mr->h_fhdr.grid_dx;
-  double lowx = mr->h_fhdr.grid_minx - dx / 2.0;
+  GridIndexBounds bounds;
+  const bool boundsEstimated = _computeVisibleGridBounds(*mr, bounds);
+  if (!boundsEstimated) {
+    bounds = {0, nx - 1, 0, ny - 1};
+  }
+  if (bounds.maxX < bounds.minX || bounds.maxY < bounds.minY) {
+    fillMargins(painter, _params.background_color);
+    return;
+  }
 
-  // compute the vertices
+  const double dx = mr->h_fhdr.grid_dx;
+  const double dy = mr->h_fhdr.grid_dy;
+  const double lowX = mr->h_fhdr.grid_minx - dx / 2.0;
+  const double lowY = mr->h_fhdr.grid_miny - dy / 2.0;
+  const int nVisibleVerticesX = bounds.maxX - bounds.minX + 2;
 
-  // cerr << "=============>> Data proj" << endl;
-  // mr->proj->print(cerr);
-  // cerr << "==================================================" << endl;
-  // cerr << "=============>> Display proj" << endl;
-  // _proj.print(cerr);
-  // cerr << "==================================================" << endl;
-  
-  double yy = lowy;
-  for(int iy = 0; iy <= ny; iy++, yy += dy) {
-    vector<QPointF> row;
-    double xx = lowx;
-    for(int ix = 0; ix <= nx; ix++, xx += dx) {
-      // compute lat/lon from data projection
+  // Retain only adjacent projected rows.  This bounds temporary memory by
+  // visible width and transforms each candidate vertex exactly once.
+  auto projectRow = [this, mr, lowX, lowY, dx, dy,
+                     &bounds, nVisibleVerticesX]
+                    (int gridY, vector<QPointF> &row) {
+    row.clear();
+    row.reserve(nVisibleVerticesX);
+    const double dataY = lowY + gridY * dy;
+    for (int localX = 0; localX < nVisibleVerticesX; ++localX) {
+      const int gridX = bounds.minX + localX;
+      const double dataX = lowX + gridX * dx;
       double lat, lon;
-      mr->proj.xy2latlon(xx, yy, lat, lon);
-      // compute x(x,y) in display projection
-      double xx1, yy1;
-      _proj.latlon2xy(lat, lon, xx1, yy1);
-      // cerr << "xxxxxxxx xx, yy, lat, lon, xx1, yy1: "
-      //      << xx << ", " << yy << ", "
-      //      << lat << ", " << lon << ", "
-      //      << xx1 << ", " << yy1 << endl;
-      // set pixel space point
-      QPointF pt = getPixelPointF(xx1, yy1);
-      row.push_back(pt);
-    } // ix
-    vertices.push_back(row);
-  } // iy
-  
-  // plot the polygons for each grid cell
+      mr->proj.xy2latlon(dataX, dataY, lat, lon);
+      double displayX, displayY;
+      _proj.latlon2xy(lat, lon, displayX, displayY);
+      row.push_back(getPixelPointF(displayX, displayY));
+    }
+  };
 
-  fl32 *val = mr->h_fl32_data.data();
-  fl32 miss = mr->h_fhdr.missing_data_value;
-  fl32 bad = mr->h_fhdr.bad_data_value;
-  
-  for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
-    for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
-      fl32 fval = *val;
+  vector<QPointF> lowerVertices;
+  vector<QPointF> upperVertices;
+  projectRow(bounds.minY, lowerVertices);
+
+  QRectF visiblePixels(QPointF(std::min(_xMinPixel, _xMaxPixel),
+                               std::min(_yMinPixel, _yMaxPixel)),
+                       QPointF(std::max(_xMinPixel, _xMaxPixel),
+                               std::max(_yMinPixel, _yMaxPixel)));
+  visiblePixels.adjust(-1.0, -1.0, 1.0, 1.0);
+
+  const fl32 miss = mr->h_fhdr.missing_data_value;
+  const fl32 bad = mr->h_fhdr.bad_data_value;
+  size_t cellsDrawn = 0;
+  size_t cellsOutside = 0;
+
+  // Install clipping once for the complete grid instead of rebuilding an
+  // identical painter path and clip state for every visible cell.
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth, _plotHeight);
+  painter.setPen(Qt::NoPen);
+  for (int iy = bounds.minY; iy <= bounds.maxY; ++iy) {
+    projectRow(iy + 1, upperVertices);
+    for (int ix = bounds.minX; ix <= bounds.maxX; ++ix) {
+      const size_t dataIndex = (size_t) iy * (size_t) nx + (size_t) ix;
+      const fl32 fval = mr->h_fl32_data[dataIndex];
       if (fval == miss || fval == bad || !std::isfinite(fval) ||
           !mr->colorMap.withinValidRange(fval)) {
         continue;
       }
+
+      const int localX = ix - bounds.minX;
+      const QPointF &p0 = lowerVertices[localX];
+      const QPointF &p1 = lowerVertices[localX + 1];
+      const QPointF &p2 = upperVertices[localX + 1];
+      const QPointF &p3 = upperVertices[localX];
+      if (!std::isfinite(p0.x()) || !std::isfinite(p0.y()) ||
+          !std::isfinite(p1.x()) || !std::isfinite(p1.y()) ||
+          !std::isfinite(p2.x()) || !std::isfinite(p2.y()) ||
+          !std::isfinite(p3.x()) || !std::isfinite(p3.y())) {
+        continue;
+      }
+
+      const double cellMinX = std::min({p0.x(), p1.x(), p2.x(), p3.x()});
+      const double cellMaxX = std::max({p0.x(), p1.x(), p2.x(), p3.x()});
+      const double cellMinY = std::min({p0.y(), p1.y(), p2.y(), p3.y()});
+      const double cellMaxY = std::max({p0.y(), p1.y(), p2.y(), p3.y()});
+      const QRectF cellBounds(QPointF(cellMinX, cellMinY),
+                              QPointF(cellMaxX, cellMaxY));
+      if (!visiblePixels.intersects(cellBounds)) {
+        ++cellsOutside;
+        continue;
+      }
+
       const QBrush *brush = mr->colorMap.dataBrush(fval);
-      QVector<QPointF> points;
-      points.push_back(vertices[iy][ix]);
-      points.push_back(vertices[iy][ix+1]);
-      points.push_back(vertices[iy+1][ix+1]);
-      points.push_back(vertices[iy+1][ix]);
-      fillPolygonPixelCoords(painter, *brush, points);
-    } // ix
-  } // iy
+      QPolygonF polygon;
+      polygon << p0 << p1 << p2 << p3;
+      painter.setBrush(*brush);
+      painter.drawPolygon(polygon);
+      ++cellsDrawn;
+    }
+    lowerVertices.swap(upperVertices);
+  }
+  painter.restore();
+
+  if (_gd.debug2) {
+    const size_t candidateCells =
+      (size_t) (bounds.maxX - bounds.minX + 1) *
+      (size_t) (bounds.maxY - bounds.minY + 1);
+    cerr << "renderGridDistorted visible candidates: " << candidateCells
+         << " of " << expectedDataSize
+         << ", outside after projection: " << cellsOutside
+         << ", drawn: " << cellsDrawn << endl;
+  }
   
   // fill margins with background color
 
