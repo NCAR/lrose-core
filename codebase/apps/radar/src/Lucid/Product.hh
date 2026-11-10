@@ -46,6 +46,8 @@
 class SymprodRender;
 class SymprodRenderObj;
 class RenderContext;
+class QPainter;
+struct SymprodRenderContext;
 
 ///////////////////////////////////////////////////////////////
 // class definition
@@ -97,6 +99,9 @@ public:
   
   // draw
   void draw(RenderContext &context);
+
+  void drawQt(QPainter &painter,
+              const SymprodRenderContext &context);
 
   // Returns closest distance.
   double pick_closest_obj(double lat, double lon, RenderContext &context);

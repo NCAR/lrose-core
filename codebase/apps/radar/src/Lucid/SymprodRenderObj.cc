@@ -34,12 +34,131 @@
 
 #include "SymprodRenderObj.hh"
 #include "RenderContext.hh"
+#include "WorldPlot.hh"
 #include "Product.hh"
 #include <Spdb/Symprod.hh>
 #include <Spdb/Product_defines.hh>
 #include <vector>
 #include <toolsa/str.h>
 #include <toolsa/pjg.h>     // Map projection geometry
+#include <QFontMetrics>
+#include <QPainterPath>
+
+namespace {
+
+QColor symprodColor(const char *name, const QColor &fallback = Qt::white)
+{
+  if (name == nullptr || name[0] == '\0') {
+    return fallback;
+  }
+  const QColor color(name);
+  return color.isValid() ? color : fallback;
+}
+
+Qt::PenStyle penStyle(int lineType)
+{
+  switch (lineType) {
+    case Symprod::LINETYPE_DASH: return Qt::DashLine;
+    case Symprod::LINETYPE_DOT_DASH: return Qt::DashDotLine;
+    default: return Qt::SolidLine;
+  }
+}
+
+Qt::PenCapStyle penCapStyle(int capStyle)
+{
+  switch (capStyle) {
+    case Symprod::CAPSTYLE_PROJECTING: return Qt::SquareCap;
+    case Symprod::CAPSTYLE_ROUND: return Qt::RoundCap;
+    default: return Qt::FlatCap;
+  }
+}
+
+Qt::PenJoinStyle penJoinStyle(int joinStyle)
+{
+  switch (joinStyle) {
+    case Symprod::JOINSTYLE_MITER: return Qt::MiterJoin;
+    case Symprod::JOINSTYLE_ROUND: return Qt::RoundJoin;
+    default: return Qt::BevelJoin;
+  }
+}
+
+QPen symprodPen(const char *color, int width, int lineType,
+                int capStyle, int joinStyle)
+{
+  QPen pen(symprodColor(color));
+  pen.setWidth(qMax(1, width));
+  pen.setStyle(penStyle(lineType));
+  pen.setCapStyle(penCapStyle(capStyle));
+  pen.setJoinStyle(penJoinStyle(joinStyle));
+  return pen;
+}
+
+QBrush symprodBrush(const char *color, int fillType)
+{
+  QColor fillColor = symprodColor(color);
+  if (fillType == Symprod::FILL_NONE) {
+    return Qt::NoBrush;
+  }
+  if (fillType >= Symprod::FILL_ALPHA10 &&
+      fillType <= Symprod::FILL_ALPHA90) {
+    const int percent = (fillType - Symprod::FILL_ALPHA10 + 1) * 10;
+    fillColor.setAlphaF(percent / 100.0);
+    return QBrush(fillColor);
+  }
+  if (fillType >= Symprod::FILL_STIPPLE10 &&
+      fillType <= Symprod::FILL_STIPPLE90) {
+    static const Qt::BrushStyle styles[] = {
+      Qt::Dense7Pattern, Qt::Dense6Pattern, Qt::Dense5Pattern,
+      Qt::Dense4Pattern, Qt::Dense4Pattern, Qt::Dense3Pattern,
+      Qt::Dense2Pattern, Qt::Dense1Pattern, Qt::Dense1Pattern
+    };
+    return QBrush(fillColor, styles[fillType - Symprod::FILL_STIPPLE10]);
+  }
+  return QBrush(fillColor);
+}
+
+bool objectVisible(const Symprod::obj_hdr_t &header,
+                   const SymprodRenderContext &context)
+{
+  if (!(header.detail_level & Symprod::DETAIL_LEVEL_USUALLY_HIDDEN)) {
+    return true;
+  }
+  if (!context.showHidden || context.showingHidden) {
+    return false;
+  }
+  context.showingHidden = true;
+  return true;
+}
+
+QPointF projectPoint(double lat, double lon,
+                     const SymprodRenderContext &context)
+{
+  double x = 0.0;
+  double y = 0.0;
+  context.plot.getProjection().latlon2xy(lat, lon, x, y);
+  return context.plot.getPixelPointF(x, y);
+}
+
+QPointF projectOffsetKm(double lat, double lon, double dx, double dy,
+                        const SymprodRenderContext &context)
+{
+  double offsetLat = lat;
+  double offsetLon = lon;
+  PJGLatLonPlusDxDy(lat, lon, dx, dy, &offsetLat, &offsetLon);
+  return projectPoint(offsetLat, offsetLon, context);
+}
+
+void drawPath(QPainter &painter, const QPainterPath &path,
+              const QPen &pen, const QBrush &brush)
+{
+  painter.save();
+  painter.setPen(pen);
+  painter.setBrush(brush);
+  painter.drawPath(path);
+  painter.restore();
+}
+
+} // namespace
 
 void set_pick_box_xy(int x, int y, QPoint *bpt);
 //
@@ -126,6 +245,13 @@ SymprodRenderObj::~SymprodRenderObj()
 void SymprodRenderObj::draw(RenderContext &context)
 {
   fprintf(stderr,"SymprodRenderObj:: Should not Get Here - Draw\n");
+}
+
+void SymprodRenderObj::drawQt(QPainter &painter,
+                              const SymprodRenderContext &context) const
+{
+  Q_UNUSED(painter);
+  Q_UNUSED(context);
 }
 
 double SymprodRenderObj::dist(double lat, double lon)
@@ -300,6 +426,63 @@ void SymprodRenderText::draw(RenderContext &context)
   }
 #endif
   
+}
+
+void SymprodRenderText::drawQt(QPainter &painter,
+                               const SymprodRenderContext &context) const
+{
+  if (!objectVisible(_hdr, context)) {
+    return;
+  }
+  if (!(_hdr.detail_level & Symprod::DETAIL_LEVEL_IGNORE_TRESHOLDS) &&
+      context.iconScale < prod._prodInfo.text_off_threshold) {
+    return;
+  }
+
+  QPointF anchor = projectPoint(_props.origin.lat, _props.origin.lon, context);
+  anchor += QPointF(_props.offset.x, _props.offset.y);
+
+  painter.save();
+  QFont font = painter.font();
+  if (_props.fontname[0] != '\0') {
+    font.setFamily(_props.fontname);
+  }
+  if (_props.font_size > 0) {
+    font.setPixelSize(_props.font_size);
+  }
+  switch (_props.font_style) {
+    case Symprod::TEXT_BOLD: font.setBold(true); break;
+    case Symprod::TEXT_ITALICS: font.setItalic(true); break;
+    case Symprod::TEXT_UNDERLINE: font.setUnderline(true); break;
+    case Symprod::TEXT_STRIKETHROUGH: font.setStrikeOut(true); break;
+    default: break;
+  }
+  painter.setFont(font);
+  painter.setPen(symprodColor(_hdr.color));
+
+  const QString text = QString::fromStdString(_text);
+  QRectF bounds = QFontMetricsF(font).boundingRect(QRectF(),
+                                                Qt::TextDontClip, text);
+  qreal left = anchor.x();
+  qreal top = anchor.y();
+  if (_props.horiz_alignment == Symprod::HORIZ_ALIGN_CENTER) {
+    left -= bounds.width() / 2.0;
+  } else if (_props.horiz_alignment == Symprod::HORIZ_ALIGN_RIGHT) {
+    left -= bounds.width();
+  }
+  if (_props.vert_alignment == Symprod::VERT_ALIGN_CENTER) {
+    top -= bounds.height() / 2.0;
+  } else if (_props.vert_alignment == Symprod::VERT_ALIGN_BOTTOM) {
+    top -= bounds.height();
+  }
+  bounds.moveTopLeft(QPointF(left, top));
+
+  if (_hdr.background_color[0] != '\0') {
+    painter.fillRect(bounds.adjusted(-1.0, -1.0, 1.0, 1.0),
+                     symprodColor(_hdr.background_color, Qt::transparent));
+  }
+  painter.drawText(bounds, Qt::TextDontClip, text);
+  painter.restore();
 }
 
 double SymprodRenderText::dist(double lat, double lon)
@@ -550,6 +733,51 @@ void SymprodRenderPolyline::draw(RenderContext &context)
   }
 
 #endif
+}
+
+void SymprodRenderPolyline::drawQt(QPainter &painter,
+                                   const SymprodRenderContext &context) const
+{
+  if (!objectVisible(_hdr, context) || _props.num_points < 2 || !_points) {
+    return;
+  }
+
+  const QPen pen = symprodPen(_hdr.color, _props.linewidth,
+                             _props.linetype, _props.capstyle,
+                             _props.joinstyle);
+  const QBrush brush = _props.close_flag ?
+    symprodBrush(_hdr.color, _props.fill) : QBrush(Qt::NoBrush);
+
+  // Pen-up markers delimit independent paths. Longitude jumps are also split
+  // so a dateline crossing cannot draw an erroneous line across the display.
+  QPainterPath path;
+  bool havePoint = false;
+  double previousLon = 0.0;
+  for (int ii = 0; ii < _props.num_points; ++ii) {
+    const Symprod::wpt_t &point = _points[ii];
+    const bool penUp = point.lat == Symprod::WPT_PENUP ||
+                       point.lon == Symprod::WPT_PENUP;
+    if (penUp || (havePoint && fabs(point.lon - previousLon) > 180.0)) {
+      if (_props.close_flag && havePoint) {
+        path.closeSubpath();
+      }
+      havePoint = false;
+      continue;
+    }
+
+    const QPointF pixel = projectPoint(point.lat, point.lon, context);
+    if (!havePoint) {
+      path.moveTo(pixel);
+      havePoint = true;
+    } else {
+      path.lineTo(pixel);
+    }
+    previousLon = point.lon;
+  }
+  if (_props.close_flag && havePoint) {
+    path.closeSubpath();
+  }
+  drawPath(painter, path, pen, brush);
 }
 
 double SymprodRenderPolyline::dist(double lat, double lon)
@@ -940,6 +1168,50 @@ void SymprodRenderStrokedIcon::draw(RenderContext &context)
 
 }
 
+void SymprodRenderStrokedIcon::drawQt(
+  QPainter &painter, const SymprodRenderContext &context) const
+{
+  if (!objectVisible(_hdr, context) || _props.num_icons < 1 ||
+      _props.num_icon_pts < 1 || !_iconOrigins || !_iconPts) {
+    return;
+  }
+
+  const double scale =
+    (_hdr.detail_level & Symprod::DETAIL_LEVEL_DO_NOT_SCALE) ?
+    1.0 : context.iconScale;
+  const QPen pen = symprodPen(_hdr.color, _props.linewidth,
+                             Symprod::LINETYPE_SOLID,
+                             Symprod::CAPSTYLE_BUTT,
+                             Symprod::JOINSTYLE_ROUND);
+
+  painter.save();
+  painter.setPen(pen);
+  painter.setBrush(Qt::NoBrush);
+  for (int iicon = 0; iicon < _props.num_icons; ++iicon) {
+    const QPointF origin = projectPoint(_iconOrigins[iicon].lat,
+                                        _iconOrigins[iicon].lon, context);
+    QPainterPath path;
+    bool havePoint = false;
+    for (int ipt = 0; ipt < _props.num_icon_pts; ++ipt) {
+      if (_iconPts[ipt].x == Symprod::PPT_PENUP ||
+          _iconPts[ipt].y == Symprod::PPT_PENUP) {
+        havePoint = false;
+        continue;
+      }
+      const QPointF point(origin.x() + scale * _iconPts[ipt].x,
+                          origin.y() - scale * _iconPts[ipt].y);
+      if (havePoint) {
+        path.lineTo(point);
+      } else {
+        path.moveTo(point);
+        havePoint = true;
+      }
+    }
+    painter.drawPath(path);
+  }
+  painter.restore();
+}
+
 double SymprodRenderStrokedIcon::dist(double lat, double lon)
 {
   double d = 999999.99; // A huge distance by default.
@@ -1276,6 +1548,57 @@ void SymprodRenderArc::draw(RenderContext &context)
 
 }
 
+void SymprodRenderArc::drawQt(QPainter &painter,
+                              const SymprodRenderContext &context) const
+{
+  if (!objectVisible(_hdr, context)) {
+    return;
+  }
+
+  const QPen pen = symprodPen(_hdr.color, _props.linewidth,
+                             _props.linetype, _props.capstyle,
+                             _props.joinstyle);
+  const QBrush brush = symprodBrush(_hdr.color, _props.fill);
+  const int nsegments = qMax(4, _props.nsegments);
+  const double span = _props.angle2 - _props.angle1;
+  const double iconScale =
+    (_hdr.detail_level & Symprod::DETAIL_LEVEL_DO_NOT_SCALE) ?
+    1.0 : context.iconScale;
+  const QPointF center = projectPoint(_props.origin.lat, _props.origin.lon,
+                                      context);
+
+  QPainterPath path;
+  if (_props.fill != Symprod::FILL_NONE && fabs(span) < 359.999) {
+    path.moveTo(center);
+  }
+  for (int ii = 0; ii <= nsegments; ++ii) {
+    const double angle = (_props.angle1 + span * ii / nsegments) *
+                         M_PI / 180.0;
+    const double rotation = _props.axis_rotation * M_PI / 180.0;
+    const double ellipseX = _props.radius_x * cos(angle);
+    const double ellipseY = _props.radius_y * sin(angle);
+    const double dx = ellipseX * cos(rotation) - ellipseY * sin(rotation);
+    const double dy = ellipseX * sin(rotation) + ellipseY * cos(rotation);
+    QPointF point;
+    if (_props.radii_in_pixels) {
+      point = QPointF(center.x() + iconScale * dx,
+                      center.y() - iconScale * dy);
+    } else {
+      point = projectOffsetKm(_props.origin.lat, _props.origin.lon,
+                              dx, dy, context);
+    }
+    if (ii == 0 && _props.fill == Symprod::FILL_NONE) {
+      path.moveTo(point);
+    } else {
+      path.lineTo(point);
+    }
+  }
+  if (_props.fill != Symprod::FILL_NONE) {
+    path.closeSubpath();
+  }
+  drawPath(painter, path, pen, brush);
+}
+
 
 double SymprodRenderArc::dist(double lat, double lon)
 {
@@ -1390,6 +1713,32 @@ void SymprodRenderRectangle::draw(RenderContext &context)
 
 #endif
 
+}
+
+void SymprodRenderRectangle::drawQt(
+  QPainter &painter, const SymprodRenderContext &context) const
+{
+  if (!objectVisible(_hdr, context)) {
+    return;
+  }
+
+  // Rectangle dimensions are in km from the lower-left origin. Projecting
+  // every corner preserves their geographic placement in non-Cartesian views.
+  QPainterPath path;
+  path.moveTo(projectOffsetKm(_props.origin.lat, _props.origin.lon,
+                              0.0, 0.0, context));
+  path.lineTo(projectOffsetKm(_props.origin.lat, _props.origin.lon,
+                              _props.width, 0.0, context));
+  path.lineTo(projectOffsetKm(_props.origin.lat, _props.origin.lon,
+                              _props.width, _props.height, context));
+  path.lineTo(projectOffsetKm(_props.origin.lat, _props.origin.lon,
+                              0.0, _props.height, context));
+  path.closeSubpath();
+
+  const QPen pen = symprodPen(_hdr.color, _props.linewidth,
+                             _props.linetype, _props.capstyle,
+                             _props.joinstyle);
+  drawPath(painter, path, pen, symprodBrush(_hdr.color, _props.fill));
 }
 
 double SymprodRenderRectangle::dist(double lat, double lon)

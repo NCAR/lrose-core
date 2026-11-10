@@ -56,6 +56,7 @@
 #include "ScaledLabel.hh"
 
 class ColorMap;
+class ProductMgr;
 
 using namespace std;
 
@@ -630,12 +631,24 @@ public:
   
   void drawRangeRingsHoriz(int fieldNum,
                            MdvReader *mr);
+
+  // Render symbolic products into a transparent cached overlay. Keeping this
+  // separate from the grid avoids repeating projection work on mouse moves.
+
+  void renderSymprods(ProductMgr &productMgr,
+                      time_t epochStart,
+                      time_t epochEnd,
+                      time_t frameStart,
+                      time_t frameEnd,
+                      time_t dataTime,
+                      double kmAcrossScreen);
   
   // get images after rendering
   
   const QImage *getGridImage();
   const QImage *getMapsImage();
   const QImage *getRingsImage();
+  const QImage *getProductsImage();
 
   // print
   
@@ -670,6 +683,7 @@ private:
   QImage *_gridImage;
   QImage *_mapsImage;
   QImage *_ringsImage;
+  QImage *_productsImage;
 
   // offset of the window in pixels
   // from the top-left of the main canvas

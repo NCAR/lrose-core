@@ -40,6 +40,8 @@
 
 class RenderContext;
 class SymprodRenderObj;
+class QPainter;
+struct SymprodRenderContext;
 
 ///////////////////////////////////////////////////////////////
 // class definition
@@ -95,6 +97,9 @@ public:
 
   // Render all products using the current context
   void draw(void);
+
+  void drawQt(QPainter &painter,
+              const SymprodRenderContext &context);
   
   SymprodRenderObj *get_closest_Rob() { return _active_Rob; }
 

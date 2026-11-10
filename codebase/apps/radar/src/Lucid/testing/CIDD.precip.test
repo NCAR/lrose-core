@@ -1280,6 +1280,32 @@ short_requests = TRUE;
 
 prod_info = {
   {
+    menu_label = "METARS-simple",
+    url = "spdbp:Metar2Symprod:simple//localhost::$(HOME)/data/lucid/precip/spdb/metar",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = TRUE,
+    minutes_allow_before = 90.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.0,
+    request_data_on_zoom = FALSE,
+    request_data_on_vert_change = FALSE
+  }
+  ,
+  {
+    menu_label = "METARS-labels",
+    url = "spdbp:Metar2Symprod:labels//localhost::$(HOME)/data/lucid/precip/spdb/metar",
+    data_type = 0,
+    render_type = RENDER_LATEST_IN_FRAME,
+    on_by_default = TRUE,
+    minutes_allow_before = 90.0,
+    minutes_allow_after = 0.0,
+    text_off_threshold = 0.0,
+    request_data_on_zoom = FALSE,
+    request_data_on_vert_change = FALSE
+  }
+  ,
+  {
     menu_label = "RHI-SPOL",
     url = "spdbp:Rhi2Symprod:ticks//localhost::$(HOME)/data/lucid/precip/spdb/spol_rhi",
     data_type = 0,
@@ -1317,32 +1343,6 @@ prod_info = {
     request_data_on_zoom = FALSE,
     request_data_on_vert_change = FALSE
     }
-  ,
-  {
-    menu_label = "METARS-simple",
-    url = "spdbp:Metar2Symprod:simple//localhost::$(HOME)/data/lucid/precip/spdb/metar",
-    data_type = 0,
-    render_type = RENDER_LATEST_IN_FRAME,
-    on_by_default = FALSE,
-    minutes_allow_before = 90.0,
-    minutes_allow_after = 0.0,
-    text_off_threshold = 0.0,
-    request_data_on_zoom = FALSE,
-    request_data_on_vert_change = FALSE
-  }
-  ,
-  {
-    menu_label = "METARS-labels",
-    url = "spdbp:Metar2Symprod:labels//localhost::$(HOME)/data/lucid/precip/spdb/metar",
-    data_type = 0,
-    render_type = RENDER_LATEST_IN_FRAME,
-    on_by_default = FALSE,
-    minutes_allow_before = 90.0,
-    minutes_allow_after = 0.0,
-    text_off_threshold = 0.0,
-    request_data_on_zoom = FALSE,
-    request_data_on_vert_change = FALSE
-  }
   ,
   {
     menu_label = "LTG" ,

@@ -44,6 +44,8 @@
 class SymprodRenderObj;
 class RenderContext;
 class Product;
+class QPainter;
+struct SymprodRenderContext;
 
 ///////////////////////////////////////////////////////////////
 // class definition
@@ -77,6 +79,9 @@ public:
   // draw
   
   void draw(RenderContext &context);
+
+  void drawQt(QPainter &painter,
+              const SymprodRenderContext &context) const;
 
   double pick_closest_obj(double lat, double lon);
 

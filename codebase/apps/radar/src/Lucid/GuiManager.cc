@@ -980,6 +980,7 @@ void GuiManager::_populateProductsMenu()
   // products enabled
 
   _productsEnabled = _params.symprods_enabled_at_startup;
+  _gd.prod.products_on = _productsEnabled;
   _productsEnabledAct = new QAction(tr("Products enabled"), this);
   _productsEnabledAct->setStatusTip(tr("Enable / disable all products"));
   _productsEnabledAct->setCheckable(true);
@@ -1011,6 +1012,11 @@ void GuiManager::_populateProductsMenu()
     act->setChecked(prodParams.on_by_default);
     connect(act, &QAction::toggled,
             item, &ProdMenuItem::toggled);
+    connect(act, &QAction::toggled, this, [this](bool) {
+      if (_horiz) {
+        _horiz->rerenderProducts();
+      }
+    });
     
     // add item for wind selection
     
@@ -1030,6 +1036,10 @@ void GuiManager::_populateProductsMenu()
 void GuiManager::_setProductsEnabled(bool enable)
 {
   _productsEnabled = enable;
+  _gd.prod.products_on = enable;
+  if (_horiz) {
+    _horiz->rerenderProducts();
+  }
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> products enabled? " << (_productsEnabled?"Y":"N") << endl;
   }

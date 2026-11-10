@@ -343,6 +343,10 @@ void HorizView::paintEvent(QPaintEvent *event)
     _zoom->drawRangeRingsHoriz(fieldNum, mr);
     painter.drawImage(0, 0, *_zoom->getRingsImage());
   }
+
+  if (_gd.prod_mgr && _gd.prod.products_on) {
+    painter.drawImage(0, 0, *_zoom->getProductsImage());
+  }
   painter.restore();
   
   // set axis areas to background color
@@ -877,6 +881,15 @@ void HorizView::rerenderGrid()
   // still repaint live annotations such as an interactively edited color bar.
   repaint();
 }
+
+/////////////////////////////////////////////////////////////
+// rerender symbolic products from the retained SPDB data
+
+void HorizView::rerenderProducts()
+{
+  _renderProducts();
+  repaint();
+}
   
 //////////////////////////////////////////
 // set flags to check for invalid images
@@ -909,7 +922,32 @@ void HorizView::_renderGrids()
   
 
   _gridsReady = true;
+
+  _renderProducts();
   
+}
+
+/////////////////////////////////////////////////////////////
+// render symbolic products into their independent overlay
+
+void HorizView::_renderProducts()
+{
+  if (!_zoom || !_gd.prod_mgr || _renderFrameIndex < 0 ||
+      _renderFrameIndex >= _gd.movie.num_frames) {
+    return;
+  }
+
+  time_t dataTime = 0;
+  const int fieldNum = _gd.h_win.page;
+  if (fieldNum >= 0 && fieldNum < _gd.num_datafields &&
+      _gd.mread[fieldNum] != nullptr) {
+    dataTime = _gd.mread[fieldNum]->h_date.utime();
+  }
+  const movie_frame_t &frame = _gd.movie.frame[_renderFrameIndex];
+  _zoom->renderSymprods(*_gd.prod_mgr,
+                        _gd.epoch_start, _gd.epoch_end,
+                        frame.time_start, frame.time_end,
+                        dataTime, _gd.h_win.km_across_screen);
 }
 
 /************************************************************************

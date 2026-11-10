@@ -38,6 +38,7 @@
 #include "SymprodRender.hh"
 #include "SymprodRenderObj.hh"
 #include "MdvReader.hh"
+#include "SymprodRenderContext.hh"
 
 //////////////////////////////////////////
 // default constructor
@@ -218,6 +219,17 @@ void ProductMgr::draw()
     _products[i]->draw(_context);
   }
   
+}
+
+void ProductMgr::drawQt(QPainter &painter,
+                        const SymprodRenderContext &context)
+{
+  if (!_gd.prod.products_on) {
+    return;
+  }
+  for (size_t ii = 0; ii < _products.size(); ++ii) {
+    _products[ii]->drawQt(painter, context);
+  }
 }
 
 //////////////////////////////////

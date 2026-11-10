@@ -31,6 +31,7 @@
 
 #include "SymprodRender.hh"
 #include "SymprodRenderObj.hh"
+#include "SymprodRenderContext.hh"
 #include <dataport/bigend.h>
 
 //////////////////////////////////////////
@@ -180,6 +181,14 @@ void SymprodRender::draw(RenderContext &context)
     _objs[i]->draw(context);
   }
 
+}
+
+void SymprodRender::drawQt(QPainter &painter,
+                           const SymprodRenderContext &context) const
+{
+  for (size_t ii = 0; ii < _objs.size(); ++ii) {
+    _objs[ii]->drawQt(painter, context);
+  }
 }
 
 //////////////////////////////////

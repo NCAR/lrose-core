@@ -35,6 +35,7 @@
 #include "SymprodRender.hh"
 #include "SymprodRenderObj.hh"
 #include "SymprodRender.hh"
+#include "SymprodRenderContext.hh"
 #include "MdvReader.hh"
 
 //////////////////////////////////////////
@@ -280,6 +281,120 @@ void Product::draw(RenderContext &context)
 
   } // If product is selected and its data is valid 
 
+}
+
+void Product::drawQt(QPainter &painter,
+                     const SymprodRenderContext &context)
+{
+  obj_list.clear();
+  if (!_active || !_data_valid || _symprods.empty()) {
+    return;
+  }
+
+  const Symprod::prod_hdr_props_t first = _symprods.front()->getProps();
+  const Symprod::prod_hdr_props_t last = _symprods.back()->getProps();
+  const bool reverseOrder = first.start_time > last.start_time;
+
+  // Some render modes select one product for each data type. Keep the legacy
+  // ordering and selection rules while directing the selected objects to Qt.
+  for (size_t ii = 0; ii < _symprods.size(); ++ii) {
+    const size_t index = reverseOrder ? _symprods.size() - 1 - ii : ii;
+    SymprodRender *symprod = _symprods[index];
+    const Symprod::prod_hdr_props_t props = symprod->getProps();
+    bool render = false;
+    bool remember = false;
+
+    bool alreadyDone = false;
+    for (size_t jj = 0; jj < obj_list.size(); ++jj) {
+      if (obj_list[jj].start_time != props.start_time &&
+          obj_list[jj].data_type == props.data_type) {
+        alreadyDone = true;
+        break;
+      }
+    }
+
+    switch (_prodInfo.render_type) {
+      case Params::SYMPROD_RENDER_ALL:
+      case Params::SYMPROD_RENDER_GET_VALID:
+      case Params::SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME:
+      case Params::SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME:
+        render = true;
+        break;
+
+      case Params::SYMPROD_RENDER_ALL_VALID:
+        render = props.start_time <= context.frameEnd +
+                   _prodInfo.minutes_allow_after * 60 &&
+                 props.expire_time >= context.frameStart -
+                   _prodInfo.minutes_allow_before * 60;
+        break;
+
+      case Params::SYMPROD_RENDER_VALID_IN_LAST_FRAME:
+        render = props.start_time <= context.epochEnd +
+                   _prodInfo.minutes_allow_after * 60 &&
+                 props.expire_time >= context.epochEnd -
+                   (context.frameEnd - context.frameStart) -
+                   _prodInfo.minutes_allow_before * 60;
+        break;
+
+      case Params::SYMPROD_RENDER_LATEST_IN_FRAME:
+        render = !alreadyDone &&
+                 props.start_time <= context.frameEnd +
+                   _prodInfo.minutes_allow_after * 60 &&
+                 props.expire_time >= context.frameStart -
+                   _prodInfo.minutes_allow_before * 60;
+        remember = render;
+        break;
+
+      case Params::SYMPROD_RENDER_LATEST_IN_LOOP:
+        render = !alreadyDone &&
+                 props.start_time <= context.epochEnd +
+                   _prodInfo.minutes_allow_after * 60 &&
+                 props.expire_time >= context.epochStart -
+                   _prodInfo.minutes_allow_before * 60;
+        remember = render;
+        break;
+
+      case Params::SYMPROD_RENDER_FIRST_AFTER_DATA_TIME:
+        render = !alreadyDone &&
+                 props.start_time <= context.dataTime +
+                   _prodInfo.minutes_allow_after * 60 &&
+                 props.expire_time >= context.epochStart -
+                   _prodInfo.minutes_allow_before * 60;
+        remember = render;
+        break;
+
+      case Params::SYMPROD_RENDER_FIRST_BEFORE_DATA_TIME:
+        render = !alreadyDone &&
+                 props.start_time >= context.dataTime -
+                   _prodInfo.minutes_allow_before * 60 &&
+                 props.start_time <= context.epochEnd +
+                   _prodInfo.minutes_allow_after * 60;
+        remember = render;
+        break;
+
+      case Params::SYMPROD_RENDER_ALL_BEFORE_DATA_TIME:
+        render = props.start_time <= context.dataTime +
+                   _prodInfo.minutes_allow_after * 60 &&
+                 props.start_time >= context.epochStart -
+                   _prodInfo.minutes_allow_before * 60;
+        break;
+
+      case Params::SYMPROD_RENDER_ALL_AFTER_DATA_TIME:
+        render = props.start_time >= context.dataTime -
+                   _prodInfo.minutes_allow_before * 60 &&
+                 props.start_time <= context.epochEnd +
+                   _prodInfo.minutes_allow_after * 60;
+        remember = render;
+        break;
+    }
+
+    if (render) {
+      symprod->drawQt(painter, context);
+      if (remember) {
+        obj_list.push_back(props);
+      }
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////

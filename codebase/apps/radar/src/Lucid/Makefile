@@ -76,6 +76,7 @@ HDRS = \
 	ScaledLabel.hh \
 	SymprodRender.hh \
 	SymprodRenderObj.hh \
+	SymprodRenderContext.hh \
 	TimeList.hh \
 	VertView.hh \
 	VertManager.hh \

@@ -52,6 +52,8 @@
 #include <Mdv/MdvxField.hh>
 #include <qtplot/ColorMap.hh>
 #include "WorldPlot.hh"
+#include "ProductMgr.hh"
+#include "SymprodRenderContext.hh"
 
 using namespace std;
 
@@ -71,6 +73,7 @@ WorldPlot::WorldPlot() :
   _gridImage = nullptr;
   _mapsImage = nullptr;
   _ringsImage = nullptr;
+  _productsImage = nullptr;
   
   _xPixOffset = 0;
   _yPixOffset = 0;
@@ -187,6 +190,7 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _gridImage = nullptr;
   _mapsImage = nullptr;
   _ringsImage = nullptr;
+  _productsImage = nullptr;
   
   _xPixOffset = rhs._xPixOffset;
   _yPixOffset = rhs._yPixOffset;
@@ -2737,6 +2741,57 @@ const QImage *WorldPlot::getRingsImage()
     _createImage(_ringsImage);
   }
   return _ringsImage;
+}
+
+const QImage *WorldPlot::getProductsImage()
+{
+  if (!_productsImage) {
+    _createImage(_productsImage);
+    _productsImage->fill(Qt::transparent);
+  }
+  return _productsImage;
+}
+
+////////////////////////////////////////////////////////
+// render symbolic products into their transparent layer
+
+void WorldPlot::renderSymprods(ProductMgr &productMgr,
+                               time_t epochStart,
+                               time_t epochEnd,
+                               time_t frameStart,
+                               time_t frameEnd,
+                               time_t dataTime,
+                               double kmAcrossScreen)
+{
+  _createImage(_productsImage);
+  _productsImage->fill(Qt::transparent);
+
+  if (!_gd.prod.products_on || kmAcrossScreen <= 0.0) {
+    return;
+  }
+
+  double iconScale = 1.0;
+  if (_params.scale_constant > 0.0) {
+    iconScale = log10(_params.scale_constant / kmAcrossScreen) + 1.0;
+    if (iconScale < 0.05) {
+      iconScale = 0.0;
+    }
+  }
+
+  QPainter painter(_productsImage);
+  painter.setRenderHint(QPainter::Antialiasing, true);
+  painter.setRenderHint(QPainter::TextAntialiasing, true);
+  painter.setClipRect(QRect(qMin(_xMinPixel, _xMaxPixel),
+                            qMin(_yMinPixel, _yMaxPixel),
+                            qAbs(_xMaxPixel - _xMinPixel) + 1,
+                            qAbs(_yMaxPixel - _yMinPixel) + 1));
+
+  // The snapshot is read-only during a render. A later retrieval stage will
+  // install completed SPDB results on the GUI thread before calling here.
+  SymprodRenderContext context(*this, epochStart, epochEnd,
+                               frameStart, frameEnd, dataTime,
+                               kmAcrossScreen, iconScale);
+  productMgr.drawQt(painter, context);
 }
 
 /////////////////////////////////////////////////////

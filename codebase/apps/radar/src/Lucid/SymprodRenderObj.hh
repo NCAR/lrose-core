@@ -37,8 +37,10 @@
 
 #include <Spdb/SymprodObj.hh>
 #include <rapformats/station_reports.h>
+#include <QPainter>
 #include "Constants.hh"
 #include "GlobalData.hh"
+#include "SymprodRenderContext.hh"
 
 class SymprodRender;
 class RenderContext;
@@ -58,6 +60,9 @@ public:
   virtual ~SymprodRenderObj();
   
   virtual void draw(RenderContext &context);  
+
+  virtual void drawQt(QPainter &painter,
+                      const SymprodRenderContext &context) const;
 
   virtual double dist(double lat, double lon); 
 
@@ -137,6 +142,9 @@ public:
   
   virtual void draw(RenderContext &context);
 
+  virtual void drawQt(QPainter &painter,
+                      const SymprodRenderContext &context) const;
+
   virtual double dist(double lat, double lon);
 
   virtual void fill_export_fields( vector<world_pt_t> &wpt, string &label);
@@ -165,6 +173,9 @@ public:
   virtual ~SymprodRenderPolyline() {};
 
   virtual void draw(RenderContext &context);
+
+  virtual void drawQt(QPainter &painter,
+                      const SymprodRenderContext &context) const;
   
   virtual double dist(double lat, double lon);
 
@@ -222,6 +233,9 @@ public:
   virtual ~SymprodRenderStrokedIcon() {};
 
   virtual void draw(RenderContext &context);
+
+  virtual void drawQt(QPainter &painter,
+                      const SymprodRenderContext &context) const;
   
   virtual double dist(double lat, double lon);
 
@@ -309,6 +323,9 @@ public:
   virtual ~SymprodRenderArc() {};
 
   virtual void draw(RenderContext &context);
+
+  virtual void drawQt(QPainter &painter,
+                      const SymprodRenderContext &context) const;
   
   virtual double dist(double lat, double lon);
 
@@ -338,6 +355,9 @@ public:
   virtual ~SymprodRenderRectangle() {};
 
   virtual void draw(RenderContext &context);
+
+  virtual void drawQt(QPainter &painter,
+                      const SymprodRenderContext &context) const;
   
   virtual double dist(double lat, double lon);
 

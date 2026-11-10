@@ -141,6 +141,8 @@ class DLL_EXPORT HorizView : public QWidget
   // Rerender retained data after a display-only field setting changes.
 
   void rerenderGrid();
+
+  void rerenderProducts();
   
   // set flags to render invalid images
   
@@ -352,6 +354,8 @@ class DLL_EXPORT HorizView : public QWidget
   // render the grid data
 
   void _renderGrids();
+
+  void _renderProducts();
   
   // render the maps
   

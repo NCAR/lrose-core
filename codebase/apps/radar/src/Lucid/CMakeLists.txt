@@ -33,6 +33,7 @@ set (SRCS
       ScaledLabel.cc
       SymprodRender.cc
       SymprodRenderObj.cc
+      SymprodRenderContext.hh
       TimeList.cc
       VlevelManager.cc
       VsectionRoute.cc
