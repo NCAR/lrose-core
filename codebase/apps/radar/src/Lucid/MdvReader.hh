@@ -69,7 +69,20 @@ class QTimer;
 // rescaling operation while keeping its lookup-table internals encapsulated.
 class LucidColorMap : public ColorMap {
 public:
+  LucidColorMap() :
+          _originalRangeSet(false),
+          _originalRangeMin(0.0),
+          _originalRangeMax(0.0) {}
+
+  bool saveOriginalRange();
   bool rescaleRange(double rangeMin, double rangeMax);
+  bool resetRange();
+  bool hasOriginalRange() const { return _originalRangeSet; }
+
+private:
+  bool _originalRangeSet;
+  double _originalRangeMin;
+  double _originalRangeMax;
 };
 
 // Vertical reads use self-contained request and result objects.  The blocking

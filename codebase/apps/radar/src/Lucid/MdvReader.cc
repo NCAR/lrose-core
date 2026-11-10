@@ -58,6 +58,29 @@ QMutex mdvLibraryReadMutex;
 }
 
 ///////////////////////////////////////////////////////////////
+// retain the loaded range for later interactive reset
+
+bool LucidColorMap::saveOriginalRange()
+{
+  _originalRangeSet = false;
+  if (_entries.empty()) {
+    return false;
+  }
+
+  const double rangeMin = _entries.front().minVal;
+  const double rangeMax = _entries.back().maxVal;
+  if (!std::isfinite(rangeMin) || !std::isfinite(rangeMax) ||
+      rangeMax <= rangeMin) {
+    return false;
+  }
+
+  _originalRangeMin = rangeMin;
+  _originalRangeMax = rangeMax;
+  _originalRangeSet = true;
+  return true;
+}
+
+///////////////////////////////////////////////////////////////
 // rescale color boundaries without imposing equal intervals
 
 bool LucidColorMap::rescaleRange(double rangeMin, double rangeMax)
@@ -72,6 +95,14 @@ bool LucidColorMap::rescaleRange(double rangeMin, double rangeMax)
   const double oldRange = oldMax - oldMin;
   if (!std::isfinite(oldMin) || !std::isfinite(oldMax) || oldRange <= 0.0) {
     return false;
+  }
+
+  // Normally captured immediately after the map is loaded, this fallback
+  // also preserves reset behavior if another initialization path is added.
+  if (!_originalRangeSet) {
+    _originalRangeMin = oldMin;
+    _originalRangeMax = oldMax;
+    _originalRangeSet = true;
   }
 
   const double newRange = rangeMax - rangeMin;
@@ -97,6 +128,17 @@ bool LucidColorMap::rescaleRange(double rangeMin, double rangeMax)
   _loadTransitions();
   _computeLut();
   return true;
+}
+
+///////////////////////////////////////////////////////////////
+// restore the endpoints captured when the map was loaded
+
+bool LucidColorMap::resetRange()
+{
+  if (!_originalRangeSet) {
+    return false;
+  }
+  return rescaleRange(_originalRangeMin, _originalRangeMax);
 }
 
 ///////////////////////////////////////////////

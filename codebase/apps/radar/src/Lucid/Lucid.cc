@@ -926,6 +926,9 @@ int Lucid::_initGrids()
     }
     mread->colorMap.setDebug(_params.debug >= Params::DEBUG_EXTRA);
     mread->colorMap.readMap(colorscaleCachePath);
+    // Interactive range edits are session state.  Retain the range loaded
+    // from the configured color map so the field menu can restore it exactly.
+    mread->colorMap.saveOriginalRange();
     mread->colorMap.setName(fld.color_map);
     mread->colorMap.setUnits(mread->field_units);
     

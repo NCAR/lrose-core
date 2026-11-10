@@ -1472,6 +1472,24 @@ void GuiManager::_showFieldContextMenu(const QPoint &pos)
 
             _applyFieldRenderingChange(fieldNum);
           });
+  QAction *resetColorScaleAction = colorScaleMenu->addAction(tr("Reset"));
+  MdvReader *colorScaleReader = _gd.mread[fieldNum];
+  const bool canResetColorScale =
+    colorScaleReader != nullptr &&
+    colorScaleReader->colorMap.hasOriginalRange();
+  resetColorScaleAction->setEnabled(canResetColorScale);
+  connect(resetColorScaleAction, &QAction::triggered, this,
+          [this, fieldNum]() {
+            MdvReader *reader = _gd.mread[fieldNum];
+            if (reader == nullptr || !reader->colorMap.resetRange()) {
+              QMessageBox::warning(_fieldMenu, tr("Cannot reset color scale"),
+                                   tr("The original color-scale range is not "
+                                      "available."));
+              return;
+            }
+
+            _applyFieldRenderingChange(fieldNum);
+          });
 
   menu.exec(_fieldTable->viewport()->mapToGlobal(pos));
 }
