@@ -40,9 +40,9 @@
 #include "Constants.hh"
 #include "GlobalData.hh"
 #include "Params.hh"
+#include <memory>
 
 class SymprodRenderObj;
-class RenderContext;
 class Product;
 class QPainter;
 struct SymprodRenderContext;
@@ -60,8 +60,6 @@ public:
   
   SymprodRender(Product &p);
 
-  // destructor
-  
   virtual ~SymprodRender();
 
   // clear products
@@ -76,10 +74,6 @@ public:
   
   int deserialize(void *in_buf, int buf_len = -1);
 
-  // draw
-  
-  void draw(RenderContext &context);
-
   void drawQt(QPainter &painter,
               const SymprodRenderContext &context) const;
 
@@ -93,14 +87,9 @@ public:
 
 protected:
 
-  Params &_params;
-  GlobalData &_gd;
-  
   Product &prod; 
 
-  vector<SymprodRenderObj *> _objs;
-
-  void _freeObjs();
+  vector<unique_ptr<SymprodRenderObj>> _objs;
 
   SymprodRenderObj *closest_obj;
   

@@ -72,7 +72,6 @@ HDRS = \
 	ProdMenuItem.hh \
 	LatLonBox.hh \
 	Lucid.hh \
-	RenderContext.hh \
 	ScaledLabel.hh \
 	SymprodRender.hh \
 	SymprodRenderObj.hh \
@@ -120,7 +119,6 @@ NORM_SRCS = \
 	Main.cc \
 	Product.cc \
 	ProductMgr.cc \
-	RenderContext.cc \
 	ScaledLabel.cc \
 	SymprodRender.cc \
 	SymprodRenderObj.cc \

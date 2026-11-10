@@ -25,6 +25,8 @@
 #include "HorizView.hh"
 #include "VertView.hh"
 #include "GuiManager.hh"
+#include "ProductMgr.hh"
+#include "SymprodRenderContext.hh"
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
@@ -155,6 +157,7 @@ HorizView::HorizView(QWidget* parent,
   _mouseValueVisible = false;
   _mouseValueX = 0;
   _mouseValueY = 0;
+  _updateMouseTracking();
 
   // initialize the horiz projection
   
@@ -346,6 +349,7 @@ void HorizView::paintEvent(QPaintEvent *event)
 
   if (_gd.prod_mgr && _gd.prod.products_on) {
     painter.drawImage(0, 0, *_zoom->getProductsImage());
+    _drawPickedProduct(painter);
   }
   painter.restore();
   
@@ -441,7 +445,7 @@ void HorizView::setShowValue(bool state)
 
 {
   _showValue = state;
-  setMouseTracking(_showValue || _vsectionRouteEditing);
+  _updateMouseTracking();
 
   // Disabling the feature must also erase the last transient report.
   if (!_showValue) {
@@ -636,6 +640,108 @@ void HorizView::_drawMouseValue(QPainter &painter)
   painter.setPen(_params.foreground_color);
   painter.drawText(box.adjusted(padding, padding, -padding, -padding),
                    textFlags, label);
+}
+
+////////////////////////////////////////////////////////
+// keep mouse tracking enabled for every live cursor interaction
+
+void HorizView::_updateMouseTracking()
+{
+  setMouseTracking(_showValue || _vsectionRouteEditing ||
+                   !_params.disable_pick_mode);
+}
+
+////////////////////////////////////////////////////////
+// select the displayed symbolic product nearest the cursor
+
+void HorizView::_updateProductPick(int mouseX, int mouseY)
+{
+  if (_params.disable_pick_mode || !_gd.prod_mgr ||
+      !_gd.prod.products_on || _renderFrameIndex < 0 ||
+      _renderFrameIndex >= _gd.movie.num_frames) {
+    if (_gd.prod_mgr) {
+      _gd.prod_mgr->clearPickedObject();
+    }
+    return;
+  }
+
+  const int left = std::min(_zoom->getXMinPixel(), _zoom->getXMaxPixel());
+  const int right = std::max(_zoom->getXMinPixel(), _zoom->getXMaxPixel());
+  const int top = std::min(_zoom->getYMinPixel(), _zoom->getYMaxPixel());
+  const int bottom = std::max(_zoom->getYMinPixel(), _zoom->getYMaxPixel());
+  if (mouseX < left || mouseX > right || mouseY < top || mouseY > bottom) {
+    _gd.prod_mgr->clearPickedObject();
+    return;
+  }
+
+  const double worldX = _zoom->getXWorld(mouseX);
+  const double worldY = _zoom->getYWorld(mouseY);
+  double lat = 0.0;
+  double lon = 0.0;
+  _proj.xy2latlon(worldX, worldY, lat, lon);
+
+  time_t dataTime = 0;
+  const int fieldNum = _gd.h_win.page;
+  if (fieldNum >= 0 && fieldNum < _gd.num_datafields &&
+      _gd.mread[fieldNum]) {
+    dataTime = _gd.mread[fieldNum]->h_date.utime();
+  }
+  const movie_frame_t &frame = _gd.movie.frame[_renderFrameIndex];
+  double iconScale = 1.0;
+  if (_params.scale_constant > 0.0) {
+    iconScale = log10(_params.scale_constant /
+                      _gd.h_win.km_across_screen) + 1.0;
+    if (iconScale < 0.05) {
+      iconScale = 0.0;
+    }
+  }
+  SymprodRenderContext context(*_zoom, _gd.epoch_start, _gd.epoch_end,
+                               frame.time_start, frame.time_end, dataTime,
+                               _gd.h_win.km_across_screen, iconScale);
+  _gd.prod_mgr->pickClosestObject(lat, lon, context,
+                                  _gd.h_win.km_across_screen / 20.0);
+}
+
+////////////////////////////////////////////////////////
+// draw hidden details for the product selected by cursor picking
+
+void HorizView::_drawPickedProduct(QPainter &painter)
+{
+  if (_params.disable_pick_mode || !_gd.prod_mgr ||
+      _renderFrameIndex < 0 ||
+      _renderFrameIndex >= _gd.movie.num_frames) {
+    return;
+  }
+
+  time_t dataTime = 0;
+  const int fieldNum = _gd.h_win.page;
+  if (fieldNum >= 0 && fieldNum < _gd.num_datafields &&
+      _gd.mread[fieldNum]) {
+    dataTime = _gd.mread[fieldNum]->h_date.utime();
+  }
+  const movie_frame_t &frame = _gd.movie.frame[_renderFrameIndex];
+  double iconScale = 1.0;
+  if (_params.scale_constant > 0.0) {
+    iconScale = log10(_params.scale_constant /
+                      _gd.h_win.km_across_screen) + 1.0;
+    if (iconScale < 0.05) {
+      iconScale = 0.0;
+    }
+  }
+  SymprodRenderContext context(*_zoom, _gd.epoch_start, _gd.epoch_end,
+                               frame.time_start, frame.time_end, dataTime,
+                               _gd.h_win.km_across_screen, iconScale);
+  painter.save();
+  painter.setClipRect(QRect(std::min(_zoom->getXMinPixel(),
+                                     _zoom->getXMaxPixel()),
+                            std::min(_zoom->getYMinPixel(),
+                                     _zoom->getYMaxPixel()),
+                            abs(_zoom->getXMaxPixel() -
+                                _zoom->getXMinPixel()) + 1,
+                            abs(_zoom->getYMaxPixel() -
+                                _zoom->getYMinPixel()) + 1));
+  _gd.prod_mgr->drawPickedQt(painter, context);
+  painter.restore();
 }
 
 /*************************************************************************
@@ -1211,11 +1317,6 @@ int HorizView::_controlRenderGrid(int page,
   render_top_layers(xid);  // Range rings X section reference etc.
 #endif
 
-  // Native Symprod products.
-#ifdef HAVE_XID
-  render_products(xid,start_time,end_time);
-#endif
-
 #ifdef HAVE_XID
   render_horiz_margins(xid,page,start_time,end_time);
 #endif
@@ -1609,7 +1710,7 @@ void HorizView::mousePressEvent(QMouseEvent *e)
       _vsectionRoute.clear();
       _vsectionRouteEditing =
         _appendVsectionRoutePoint(pos.x(), pos.y());
-      setMouseTracking(_showValue || _vsectionRouteEditing);
+      _updateMouseTracking();
     }
     _vsectionPreviewX = pos.x();
     _vsectionPreviewY = pos.y();
@@ -1658,6 +1759,11 @@ void HorizView::mouseMoveEvent(QMouseEvent * e)
 
   if (_showValue && _activeMouseButton != Qt::MiddleButton) {
     _updateMouseValue(xx, yy);
+    update();
+  }
+
+  if (_activeMouseButton == Qt::NoButton && !_params.disable_pick_mode) {
+    _updateProductPick(xx, yy);
     update();
   }
 
@@ -1717,6 +1823,9 @@ void HorizView::leaveEvent(QEvent *event)
 {
   _mouseValueVisible = false;
   _mouseValueText.clear();
+  if (_gd.prod_mgr) {
+    _gd.prod_mgr->clearPickedObject();
+  }
   update();
   QWidget::leaveEvent(event);
 }
@@ -1963,7 +2072,7 @@ void HorizView::_cancelVsectionRoute()
   _vsectionRoute.clear();
   _vsectionRouteEditing = false;
   _activeMouseButton = Qt::NoButton;
-  setMouseTracking(_showValue);
+  _updateMouseTracking();
   update();
 }
 
@@ -1977,7 +2086,7 @@ void HorizView::_completeVsectionRoute()
   }
 
   _vsectionRouteEditing = false;
-  setMouseTracking(_showValue);
+  _updateMouseTracking();
   emit verticalRouteCompleted(_vsectionRoute);
   update();
 }

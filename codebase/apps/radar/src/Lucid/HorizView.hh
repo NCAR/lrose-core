@@ -406,6 +406,10 @@ class DLL_EXPORT HorizView : public QWidget
 
   void _drawMouseValue(QPainter &painter);
 
+  void _drawPickedProduct(QPainter &painter);
+  void _updateProductPick(int mouseX, int mouseY);
+  void _updateMouseTracking();
+
   // edit and draw the vertical-section route
 
   bool _appendVsectionRoutePoint(int mouseX, int mouseY);

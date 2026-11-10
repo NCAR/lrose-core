@@ -33,15 +33,17 @@
 #include "SymprodRenderObj.hh"
 #include "SymprodRenderContext.hh"
 #include <dataport/bigend.h>
+#include <limits>
+#include <memory>
 
 //////////////////////////////////////////
 // default constructor
 
 SymprodRender::SymprodRender(Product &p) :
         Symprod(),
-        _params(Params::Instance()),
-        _gd(GlobalData::Instance()),
-        prod(p)
+        _objDataType(0),
+        prod(p),
+        closest_obj(nullptr)
 
 {
 }
@@ -50,31 +52,18 @@ SymprodRender::SymprodRender(Product &p) :
 // destructor
   
 SymprodRender::~SymprodRender()
-{
-  _freeObjs();
-}
+  = default;
 
 /////////////////////
 // clear all products
   
 void SymprodRender::clear()
 {
-  _freeObjs();
+  closest_obj = nullptr;
+  _objs.clear();
+  _objTypes.clear();
   Symprod::clear();
 
-}
-  
-///////////////
-// free objects
-
-void SymprodRender::_freeObjs()
-
-{
-  for (size_t i = 0; i < _objs.size(); i++) {
-    delete _objs[i];
-  }
-  _objs.erase(_objs.begin(), _objs.end());
-  _objTypes.erase(_objTypes.begin(), _objTypes.end());
 }
 
 //////////////////////////////////
@@ -98,16 +87,51 @@ int SymprodRender::deserialize(void *in_buf, int buf_len /* = -1 */)
   
   memcpy(&_prodProps, in_buf, sizeof(prod_hdr_props_t));
   prodHdrFromBE(&_prodProps);
+
+  if (_prodProps.num_objs < 0 ||
+      static_cast<size_t>(_prodProps.num_objs) >
+        (std::numeric_limits<size_t>::max() - sizeof(prod_hdr_props_t)) /
+          sizeof(si32)) {
+    _errStr += "ERROR - SymprodRender::deserialize\n";
+    _errStr += "  Invalid object count.\n";
+    return -1;
+  }
+  const size_t offsetTableEnd = sizeof(prod_hdr_props_t) +
+    static_cast<size_t>(_prodProps.num_objs) * sizeof(si32);
+  if (buf_len >= 0 && offsetTableEnd > static_cast<size_t>(buf_len)) {
+    _errStr += "ERROR - SymprodRender::deserialize\n";
+    _errStr += "  Object offset table exceeds input buffer.\n";
+    return -1;
+  }
   
   si32 *beOffsets = (si32 *)
     ((char *) in_buf + sizeof(prod_hdr_props_t));
   
   for (int i = 0; i < _prodProps.num_objs; i++) {
     
-    int offset = BE_to_si32(beOffsets[i]);
+    const int offset = BE_to_si32(beOffsets[i]);
+    if (offset < static_cast<int>(offsetTableEnd) ||
+        (buf_len >= 0 &&
+         static_cast<size_t>(offset) + sizeof(obj_hdr_t) >
+           static_cast<size_t>(buf_len))) {
+      _errStr += "ERROR - SymprodRender::deserialize\n";
+      _errStr += "  Invalid object offset.\n";
+      _addIntErr("  Object offset: ", offset);
+      clear();
+      return -1;
+    }
     obj_hdr_t *hdr = (obj_hdr_t *) ((char *) in_buf + offset);
     int objType = BE_to_si32(hdr->object_type);
-    int objLen = sizeof(obj_hdr_t) + BE_to_si32(hdr->num_bytes);
+    const int payloadLen = BE_to_si32(hdr->num_bytes);
+    if (payloadLen < 0 ||
+        payloadLen > std::numeric_limits<int>::max() -
+                       static_cast<int>(sizeof(obj_hdr_t))) {
+      _errStr += "ERROR - SymprodRender::deserialize\n";
+      _errStr += "  Invalid object length.\n";
+      clear();
+      return -1;
+    }
+    const int objLen = sizeof(obj_hdr_t) + payloadLen;
     _objDataType = BE_to_si32(hdr->object_id);
 
     if (buf_len >= 0 && buf_len < (offset + objLen)) {
@@ -118,34 +142,34 @@ int SymprodRender::deserialize(void *in_buf, int buf_len /* = -1 */)
       return -1;
     }
     
-    SymprodRenderObj *obj = nullptr;
+    unique_ptr<SymprodRenderObj> obj;
     switch (objType) {
     case Symprod::OBJ_TEXT:
-      obj = new SymprodRenderText( in_buf, offset, prod, this);
+      obj = make_unique<SymprodRenderText>(in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_POLYLINE:
-      obj = new SymprodRenderPolyline(in_buf, offset, prod, this);
+      obj = make_unique<SymprodRenderPolyline>(in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_ICONLINE:
-      obj = new SymprodRenderIconline(in_buf, offset, prod, this);
+      obj = make_unique<SymprodRenderIconline>(in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_STROKED_ICON:
-      obj = new SymprodRenderStrokedIcon(in_buf, offset, prod, this);
+      obj = make_unique<SymprodRenderStrokedIcon>(in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_NAMED_ICON:
-      obj = new SymprodRenderNamedIcon(in_buf, offset, prod, this);
+      obj = make_unique<SymprodRenderNamedIcon>(in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_BITMAP_ICON:
-      obj = new SymprodRenderBitmapIcon(in_buf, offset, prod, this);
+      obj = make_unique<SymprodRenderBitmapIcon>(in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_ARC:
-      obj = new SymprodRenderArc(in_buf, offset, prod, this);
+      obj = make_unique<SymprodRenderArc>(in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_RECTANGLE:
-      obj = new SymprodRenderRectangle(in_buf, offset, prod, this);
+      obj = make_unique<SymprodRenderRectangle>(in_buf, offset, prod, this);
       break;
     case Symprod::OBJ_CHUNK:
-      obj = new SymprodRenderChunk(in_buf, offset, prod, this);
+      obj = make_unique<SymprodRenderChunk>(in_buf, offset, prod, this);
       break;
     default:
       _errStr += "ERROR - SymprodRender::deserialize\n";
@@ -155,7 +179,7 @@ int SymprodRender::deserialize(void *in_buf, int buf_len /* = -1 */)
       return -1;
     }
     
-    _objs.push_back(obj);
+    _objs.push_back(std::move(obj));
     _objTypes.push_back(objType);
 
   } // i
@@ -164,30 +188,6 @@ int SymprodRender::deserialize(void *in_buf, int buf_len /* = -1 */)
 
 }
 
-
-//////////////////////////////////
-// draw the product
-
-void SymprodRender::draw(RenderContext &context)
-  
-{
-  char msg1[128];
-  char msg2[256];
-
-  strftime(msg1,128,"%b %d %H:%M:%S", gmtime((time_t *) &(_prodProps.start_time)));
-  snprintf(msg2,256,"Product: %s - %d objects, %s",
-	      _prodProps.label,
-	      _prodProps.num_objs,
-	      msg1);
-
-  // add_message_to_status_win(msg2,0);
-  
-  for (size_t i = 0; i < _objs.size(); i++) {
-    // if(!_gd.io_info.busy_status) _objs[i]->draw(context);
-    _objs[i]->draw(context);
-  }
-
-}
 
 void SymprodRender::drawQt(QPainter &painter,
                            const SymprodRenderContext &context) const
@@ -203,13 +203,14 @@ void SymprodRender::drawQt(QPainter &painter,
 double SymprodRender::pick_closest_obj(double lat, double lon)
   
 {
+  closest_obj = nullptr;
   double min_dist = 999999.9;
   double dist;
 
   for (size_t i = 0; i < _objs.size(); i++) {
      dist =  _objs[i]->dist(lat,lon);
 	 if(dist < min_dist) {
-		 closest_obj = _objs[i];
+		 closest_obj = _objs[i].get();
 		 min_dist = dist;
 	 }
   }

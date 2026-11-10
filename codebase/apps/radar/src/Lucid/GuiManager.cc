@@ -260,6 +260,8 @@ GuiManager::~GuiManager()
 
   if (_gd.prod_mgr) {
     _gd.prod_mgr->setProductsChangedCallback(std::function<void()>());
+    _gd.prod_mgr->setStatusCallback(
+      std::function<void(const string &, bool)>());
   }
 
   if (_horiz) {
@@ -532,6 +534,13 @@ void GuiManager::_setupWindows()
         _horiz->rerenderProducts();
       }
     });
+    _gd.prod_mgr->setStatusCallback(
+      [this](const string &message, bool isError) {
+        // Successful requests use a brief progress message. Errors remain
+        // visible longer while the previous valid product stays displayed.
+        statusBar()->showMessage(QString::fromStdString(message),
+                                 isError ? 15000 : 3000);
+      });
   }
 
   connect(_horiz, &HorizView::verticalRouteCompleted,
@@ -2827,7 +2836,6 @@ void GuiManager::_checkForDataUpdates(time_t tm)
     // reset_data_valid_flags(1,1);
     if (_gd.prod_mgr) {
       _gd.prod_mgr->reset_product_valid_flags();
-      _gd.prod_mgr->reset_times_valid_flags();
     }
 
   } else {   // Got valid  data back from the Data Mapper
@@ -3647,10 +3655,6 @@ void GuiManager::_updateMoviePopup()
   /* update the start/end frames text */
   snprintf(text,64,"%d",_gd.movie.end_frame +1);
   // xv_set(_gd.movie_pu->end_frame_tx,PANEL_VALUE,text,NULL);
-
-  if (_gd.prod_mgr) {
-    _gd.prod_mgr->reset_times_valid_flags();
-  }
 
 #ifdef NOTYET
   if(_gd.time_plot)

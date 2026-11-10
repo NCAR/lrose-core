@@ -40,7 +40,6 @@
 #include "GuiManager.hh"
 #include "LegacyParams.hh"
 #include "MdvReader.hh"
-#include "RenderContext.hh"
 #include "ProductMgr.hh"
 #include <toolsa/mem.h>
 #include <toolsa/pmu.h>
@@ -179,12 +178,10 @@ Lucid::~Lucid()
     delete _guiManager;
   }
 
-  // Product workers must finish before the Products and their legacy render
-  // context are released. GuiManager has already detached its repaint hook.
+  // Product workers must finish before their GUI-owned snapshots are released.
+  // GuiManager has already detached its repaint and status callbacks.
   delete _gd.prod_mgr;
   _gd.prod_mgr = nullptr;
-  delete _gd.r_context;
-  _gd.r_context = nullptr;
 
 }
 
@@ -2667,16 +2664,7 @@ void Lucid::_initOverlayFields()
 void Lucid::_initSymprods()
 {
 
-  _gd.r_context = new RenderContext(_gd.h_win.vis_pdev,
-                                    _gd.def_brush, _gd.cmap, _gd.proj);
-  
-  _gd.prod_mgr = new ProductMgr(*_gd.r_context, (_gd.debug1 | _gd.debug2));
-  
-  _gd.r_context->set_scale_constant(_params.scale_constant);
-  
-  double min_lat, max_lat, min_lon, max_lon; 
-  _getBoundingBox(min_lat,max_lat,min_lon,max_lon);
-  _gd.r_context->set_clip_limits(min_lat, min_lon, max_lat, max_lon);
+  _gd.prod_mgr = new ProductMgr;
   
   if(_params.symprod_prod_info_n <= 32) {
     int value = 0;

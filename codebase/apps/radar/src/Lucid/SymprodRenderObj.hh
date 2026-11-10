@@ -44,7 +44,6 @@
 #include "SymprodRenderContext.hh"
 
 class SymprodRender;
-class RenderContext;
 class Product;
 
 //////////////////////
@@ -60,8 +59,6 @@ public:
   
   virtual ~SymprodRenderObj();
   
-  virtual void draw(RenderContext &context);  
-
   virtual void drawQt(QPainter &painter,
                       const SymprodRenderContext &context) const;
 
@@ -78,49 +75,6 @@ protected:
   Params &_params;
   GlobalData &_gd;
   
-  unsigned long _background_pixel;
-  bool _background_pixel_init;
-  
-  QPixmap _stipple;
-  bool _stippleCreated;
-
-  static const int _blankPixelSpacing;
-  static const int _stipple_bitmap_width;
-  static const int _stipple_bitmap_height;
-  static const unsigned char _stipple10_bitmap_bits[];
-  static const unsigned char _stipple20_bitmap_bits[];
-  static const unsigned char _stipple30_bitmap_bits[];
-  static const unsigned char _stipple40_bitmap_bits[];
-  static const unsigned char _stipple50_bitmap_bits[];
-  static const unsigned char _stipple60_bitmap_bits[];
-  static const unsigned char _stipple70_bitmap_bits[];
-  static const unsigned char _stipple80_bitmap_bits[];
-  static const unsigned char _stipple90_bitmap_bits[];
-
-  void _setXColors(char *foreground_color, char *background_color,
-		   RenderContext &context);
-  
-  void _setBackgroundColor(char *color_name, RenderContext &context);
-  
-  void setStipple(Symprod::fill_t filltype, RenderContext &context);
-  
-  void _latLon2World(double lat,
-		     double lon,
-		     double &world_x,
-		     double &world_y,
-		     RenderContext &context);
-
-  void _latLon2WorldConstrained(double lat,
-				double lon,
-				double ref_x,
-				double &world_x,
-				double &world_y,
-				RenderContext &context);
-
-  static int _convertCapstyle2X(Symprod::capstyle_t capstyle);
-  static int _convertJoinstyle2X(Symprod::joinstyle_t joinstyle);
-  static int _convertLinetype2X(Symprod::linetype_t linetype);
-
 private:
 
 };
@@ -141,8 +95,6 @@ public:
   
   virtual ~SymprodRenderText() {};
   
-  virtual void draw(RenderContext &context);
-
   virtual void drawQt(QPainter &painter,
                       const SymprodRenderContext &context) const;
 
@@ -173,8 +125,6 @@ public:
 
   virtual ~SymprodRenderPolyline() {};
 
-  virtual void draw(RenderContext &context);
-
   virtual void drawQt(QPainter &painter,
                       const SymprodRenderContext &context) const;
   
@@ -203,8 +153,6 @@ public:
 			Product &prod, SymprodRender *c);
 
   virtual ~SymprodRenderIconline() {};
-
-  virtual void draw(RenderContext &context);
 
   virtual void drawQt(QPainter &painter,
                       const SymprodRenderContext &context) const;
@@ -236,8 +184,6 @@ public:
   
   virtual ~SymprodRenderStrokedIcon() {};
 
-  virtual void draw(RenderContext &context);
-
   virtual void drawQt(QPainter &painter,
                       const SymprodRenderContext &context) const;
   
@@ -267,8 +213,6 @@ public:
 			 Product &prod, SymprodRender *c);
   
   virtual ~SymprodRenderNamedIcon() {};
-
-  virtual void draw(RenderContext &context);
 
   virtual void drawQt(QPainter &painter,
                       const SymprodRenderContext &context) const;
@@ -305,8 +249,6 @@ public:
   
   virtual ~SymprodRenderBitmapIcon() {};
 
-  virtual void draw(RenderContext &context);
-
   virtual void drawQt(QPainter &painter,
                       const SymprodRenderContext &context) const;
   
@@ -338,8 +280,6 @@ public:
   
   virtual ~SymprodRenderArc() {};
 
-  virtual void draw(RenderContext &context);
-
   virtual void drawQt(QPainter &painter,
                       const SymprodRenderContext &context) const;
   
@@ -369,8 +309,6 @@ public:
 			 Product &prod, SymprodRender *c);
   
   virtual ~SymprodRenderRectangle() {};
-
-  virtual void draw(RenderContext &context);
 
   virtual void drawQt(QPainter &painter,
                       const SymprodRenderContext &context) const;
@@ -402,23 +340,12 @@ public:
   
   virtual ~SymprodRenderChunk() {};
 
-  virtual void draw(RenderContext &context);
-
   virtual void drawQt(QPainter &painter,
                       const SymprodRenderContext &context) const;
   
   virtual double dist(double lat, double lon);
 
   virtual void fill_export_fields( vector<world_pt_t> &wpt, string &label);
-
-protected:
-  void _drawStation(station_report_t *station, RenderContext &context);
-
-  void _drawStationSingle(RenderContext &context);
-
-  void _drawStationsFromArray(RenderContext &context);
-
-  int _barbShaftLen;
 
 private:
   void _drawStationQt(const station_report_t &station,

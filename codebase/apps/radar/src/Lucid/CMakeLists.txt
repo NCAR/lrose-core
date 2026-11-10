@@ -29,7 +29,6 @@ set (SRCS
       Main.cc
       Product.cc
       ProductMgr.cc
-      RenderContext.cc
       ScaledLabel.cc
       SymprodRender.cc
       SymprodRenderObj.cc

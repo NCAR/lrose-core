@@ -34,10 +34,8 @@
 //////////////////////////////////////////////////////////
 
 #include "ProductMgr.hh"
-#include "RenderContext.hh"
 #include "SymprodRender.hh"
 #include "SymprodRenderObj.hh"
-#include "MdvReader.hh"
 #include "SymprodRenderContext.hh"
 #include "WorldPlot.hh"
 #include <Spdb/DsSpdb.hh>
@@ -52,8 +50,9 @@ namespace {
 class SymprodReadThread : public QThread
 {
 public:
-  explicit SymprodReadThread(const SymprodReadRequest &request) :
-          _request(request), _result(nullptr)
+  explicit SymprodReadThread(const SymprodReadRequest &request,
+                             QObject *parent) :
+          QThread(parent), _request(request), _result(nullptr)
   {
   }
 
@@ -170,14 +169,13 @@ bool SymprodRequestKey::operator==(const SymprodRequestKey &rhs) const
 //////////////////////////////////////////
 // default constructor
 
-ProductMgr::ProductMgr(RenderContext &context, int debug) :
+ProductMgr::ProductMgr() :
         _params(Params::Instance()),
-        _gd(GlobalData::Instance()),
-        _context(context)
+        _gd(GlobalData::Instance())
           
 {
-  _active_Rob = NULL;
-  _completionContext = new QObject;
+  _active_Rob = nullptr;
+  _completionContext = make_unique<QObject>();
   _shuttingDown = false;
   _lastDisplayStateValid = false;
   _lastFrameStart = 0;
@@ -189,14 +187,9 @@ ProductMgr::ProductMgr(RenderContext &context, int debug) :
 
   for (int i = 0; i < _params.symprod_prod_info_n; i++) {
     
-    Product *product = new Product(debug, _params._symprod_prod_info[i]);
-    
-    if (_params.symprod_debug != Params::SYMPROD_DEBUG_OFF ) {
-      product->setDebug(true);
-    } else {
-      product->setDebug(false);
-    }
-    _products.push_back(product);
+    unique_ptr<Product> product =
+      make_unique<Product>(_params._symprod_prod_info[i]);
+    _products.push_back(std::move(product));
     
   }
 
@@ -217,13 +210,9 @@ ProductMgr::~ProductMgr()
   _shuttingDown = true;
   _productsChangedCallback = std::function<void()>();
 
-  // Destroying the connection context cancels queued completion lambdas that
-  // capture this manager, including signals emitted just before shutdown.
-  delete _completionContext;
-  _completionContext = nullptr;
-
   // A worker owns all SPDB request state, but its completion handler targets
-  // this manager. Wait for blocking calls to return before freeing Products.
+  // this manager. Wait for blocking calls to return before releasing the
+  // QObject owner, which also cancels queued completion lambdas.
   const QSet<QThread *> threads = _readThreads;
   for (QThread *thread : threads) {
     QObject::disconnect(thread, nullptr, nullptr, nullptr);
@@ -234,14 +223,11 @@ ProductMgr::~ProductMgr()
     thread->wait();
     SymprodReadThread *readThread = static_cast<SymprodReadThread *>(thread);
     delete readThread->takeResult();
-    delete readThread;
   }
   _readThreads.clear();
+  _completionContext.reset();
 
-  for (size_t i = 0; i < _products.size(); i++) {
-    delete _products[i];
-  }
-  _products.erase(_products.begin(), _products.end());
+  _products.clear();
 }
 
 ///////////////////////////////////////////////////////////////
@@ -341,12 +327,17 @@ void ProductMgr::_requestCapturedState()
 
 void ProductMgr::_startRequest(const SymprodReadRequest &request)
 {
-  SymprodReadThread *thread = new SymprodReadThread(request);
+  SymprodReadThread *thread =
+    new SymprodReadThread(request, _completionContext.get());
   _readThreads.insert(thread);
+
+  if (_statusCallback) {
+    _statusCallback("Requesting " + request.label, false);
+  }
 
   // A manager-owned QObject supplies the GUI-thread connection context. Its
   // destruction cancels queued lambdas before ProductMgr itself is released.
-  QObject::connect(thread, &QThread::finished, _completionContext,
+  QObject::connect(thread, &QThread::finished, _completionContext.get(),
                    [this, thread]() {
     _readThreads.remove(thread);
     std::unique_ptr<SymprodReadResult> result(thread->takeResult());
@@ -379,6 +370,11 @@ void ProductMgr::_handleResult(SymprodReadResult *rawResult)
     // The main GUI timer is intentionally very frequent. Bound retries here
     // so an unavailable SPDB server cannot create a tight request loop.
     _retryNotBefore[index] = time(nullptr) + 5;
+    if (_statusCallback) {
+      _statusCallback("Cannot retrieve " +
+                      string(product._prodInfo.menu_label) + ": " +
+                      result->error, true);
+    }
     return;
   }
 
@@ -388,14 +384,24 @@ void ProductMgr::_handleResult(SymprodReadResult *rawResult)
          << product._prodInfo.menu_label << endl;
     cerr << decodeError << endl;
     _retryNotBefore[index] = time(nullptr) + 5;
+    if (_statusCallback) {
+      _statusCallback("Cannot decode " +
+                      string(product._prodInfo.menu_label) + ": " +
+                      decodeError, true);
+    }
     return;
   }
 
+  // An object selected from the old snapshot cannot survive its atomic swap.
+  _active_Rob = nullptr;
   _installedKeys[index] = _desiredKeys[index];
   _installedKeyValid[index] = true;
   _retryNotBefore[index] = 0;
   if (_productsChangedCallback) {
     _productsChangedCallback();
+  }
+  if (_statusCallback) {
+    _statusCallback(string(product._prodInfo.menu_label) + " ready", false);
   }
 }
 
@@ -436,149 +442,6 @@ void ProductMgr::_computeLatLonBounds(const WorldPlot &plot,
   }
 }
 
-//////////////////////////////////////////////////
-// get data in interval mode
-//
-// returns 0 on success, -1 on failure
-
-int ProductMgr::getData(time_t start_time, time_t end_time)
-  
-{
-
-  // set context times
-
-  _gd.r_context->set_times((time_t) _gd.epoch_start,
-                           (time_t) _gd.epoch_end,
-                           (time_t) start_time,
-                           (time_t) end_time,
-                           _gd.mread[_gd.h_win.page]->h_date.utime());
-
-  // get the data
-  
-  for (size_t i = 0; i < _products.size(); i++) {
-    if(_products[i]->_data_valid == 0 && _products[i]->_active  ) {
-
-      // _gd.io_info.prod = _products[i];
-      // _gd.io_info.outstanding_request = 1; 
-      // _gd.io_info.request_type = SYMPROD_REQUEST;
-      // _gd.io_info.mode = SYMPROD_DATA;
-      // _gd.io_info.expire_time = time(0) + _params.data_timeout_secs;
-      // _gd.io_info.last_read = 0;
-
-      if(_gd.debug1) _products[i]->setThreadingOff();
-
-      char label[128];
-      snprintf(label,128,"Requesting %s Product Data", _params._symprod_prod_info[i].menu_label);
-      
-#ifdef NOTNOW
-      if(_params.show_data_messages) gui_label_h_frame(label,-1);
-#endif
-
-      if (_products[i]->getData(
-                  (time_t) (start_time - (_params._symprod_prod_info[i].minutes_allow_before * 60)),
-                  (time_t) (end_time + (_params._symprod_prod_info[i].minutes_allow_after * 60)),
-                  _context)) {
-
-        _products[i]->_data_valid = 1;
-        return Constants::CIDD_FAILURE;
-      }
-      return Constants::INCOMPLETE;
-    }
-  }
-
-  return Constants::CIDD_SUCCESS;
-
-}
-
-//////////////////////////////////
-// PICK_CLOSEST_OBJ Find the closest object
-// to the click point for all products 
-//
-
-void ProductMgr::pick_closest_obj(double lat, double lon)
-{
-  double min_dist = 999999.0; // A large distance
-  double dist;
-
-  _active_Rob = (SymprodRenderObj *) NULL;
-
-  for (size_t i = 0; i < _products.size(); i++) {
-
-    dist = _products[i]->pick_closest_obj(lat, lon, _context);
-
-#ifdef DEBUG
-    fprintf(stderr, "Prod: %d Min Dist: %g\n",i,dist);
-#endif
-
-    if(dist <= min_dist) { // greater than or equal to allow latest to be closest.
-      min_dist = dist;
-      _active_Rob = _products[i]->get_closest_symprod_obj();
-    }
-  }
-
-}
-
-//////////////////////////////////
-// DRAW the picked product Using the XOR GC
-//
-
-void ProductMgr::draw_pick_obj()
-  
-{
-  _context.set_brush(_gd.ol_brush);
-  _context.set_drawable(_gd.hcan_pdev);
-  _context.set_xid(_gd.hcan_pdev);
-
-  if(_active_Rob != NULL) {
-    _active_Rob->container->draw(_context);
-  } else {
-    fprintf(stderr," NO Pickable product!\n");
-  }
-
-  _context.set_brush(_gd.def_brush);
-  _context.set_drawable(_gd.h_win.vis_pdev);
-  _context.set_xid(_gd.h_win.vis_pdev);
-}
-
-//////////////////////////////////
-// DRAW the picked product Using existing GC
-//
-
-void ProductMgr::draw_pick_obj_plain()
-  
-{
-  _context.set_brush(_gd.def_brush);
-  _context.set_drawable(_gd.hcan_pdev);
-  _context.set_xid(_gd.hcan_pdev);
-  if(_active_Rob != NULL) {
-    _active_Rob->container->draw(_context);
-  }
-}
-
-//////////////////////////////////
-// fill_export_fields
-//
-
-void ProductMgr::fill_export_fields(vector<world_pt_t> &wpt, string &label)
-  
-{
-  if(_active_Rob != NULL) {
-    _active_Rob->container-> fill_export_fields(wpt, label);
-  }
-}
-
-//////////////////////////////////
-// DRAW the products
-//
-
-void ProductMgr::draw()
-  
-{
-  for (size_t i = 0; i < _products.size(); i++) {
-    _products[i]->draw(_context);
-  }
-  
-}
 
 void ProductMgr::drawQt(QPainter &painter,
                         const SymprodRenderContext &context)
@@ -591,17 +454,43 @@ void ProductMgr::drawQt(QPainter &painter,
   }
 }
 
-//////////////////////////////////
-// RESET_TIMES_VALID_FLAGS 
-//
-
-void ProductMgr::reset_times_valid_flags()
-  
+bool ProductMgr::pickClosestObject(
+  double lat, double lon, const SymprodRenderContext &context,
+  double maxDistanceKm)
 {
-  for (size_t i = 0; i < _products.size(); i++) {
-    _products[i]->_times_valid = 0;
+  _active_Rob = nullptr;
+  double closestDistance = maxDistanceKm;
+  for (const unique_ptr<Product> &product : _products) {
+    const double distance = product->pickClosestObject(lat, lon, context);
+    if (distance <= closestDistance) {
+      closestDistance = distance;
+      _active_Rob = product->getClosestObject();
+    }
   }
-  
+  return _active_Rob != nullptr;
+}
+
+void ProductMgr::drawPickedQt(
+  QPainter &painter, const SymprodRenderContext &context) const
+{
+  if (!_active_Rob) {
+    return;
+  }
+
+  // Hidden objects are alternate details within the selected Symprod. Draw
+  // that complete product live so its normal and hidden pieces stay aligned.
+  SymprodRenderContext pickedContext(context);
+  pickedContext.showHidden = true;
+  pickedContext.showingHidden = false;
+  _active_Rob->container->drawQt(painter, pickedContext);
+}
+
+void ProductMgr::fillExportFields(vector<world_pt_t> &wpt,
+                                  string &label) const
+{
+  if (_active_Rob) {
+    _active_Rob->container->fill_export_fields(wpt, label);
+  }
 }
 
 //////////////////////////////////
@@ -667,6 +556,9 @@ int ProductMgr::get_product_active(int product)
 void ProductMgr::set_product_active(int product, int active)
 {
   _products[product]->_active = active;
+  if (!active) {
+    _active_Rob = nullptr;
+  }
   if (active) {
     refreshActiveProducts();
   }
@@ -684,14 +576,6 @@ void ProductMgr::set_product_data_valid(int product, int valid)
   }
 }
 
-
-///////////////////////////////////////////////////////////////////////
-// SET_PRODUCT_TIMES_VALID
-//
-void ProductMgr::set_product_times_valid(int product, int valid)
-{
-  _products[product]->_times_valid  = valid;
-}
 
 ///////////////////////////////////////////////////////////////////////
 // GET_PRODUCT_DATA_VALID

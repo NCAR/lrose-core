@@ -138,7 +138,6 @@ GlobalData::GlobalData()
 
   // MEM_zero(io_info);
   
-  r_context = nullptr;    
   station_loc = nullptr;    
   remote_ui = nullptr;   
   

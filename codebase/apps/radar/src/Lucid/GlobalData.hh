@@ -41,7 +41,6 @@
 
 class ProductMgr;
 class MdvReader;
-class RenderContext;
 class StationLoc;
 class RemoteUIQueue;
 
@@ -1084,10 +1083,6 @@ public:
   // Dynamic Status message info
   
   status_msg_t status;
-  
-  // Symprod/Gdraw Contains Window, Domain geometries, etc
-  
-  RenderContext *r_context;
   
   // locations of surface stations
   
