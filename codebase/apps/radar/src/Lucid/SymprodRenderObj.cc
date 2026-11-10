@@ -803,7 +803,12 @@ void SymprodRenderArc::drawQt(QPainter &painter,
                                       context);
 
   QPainterPath path;
-  if (_props.fill != Symprod::FILL_NONE && fabs(span) < 359.999) {
+  // Partial filled arcs are sectors and therefore start at the center. A
+  // complete filled ellipse must start on its circumference; otherwise the
+  // first lineTo() makes Qt connect the device origin to the station symbol.
+  const bool filledSector = _props.fill != Symprod::FILL_NONE &&
+                            fabs(span) < 359.999;
+  if (filledSector) {
     path.moveTo(center);
   }
   for (int ii = 0; ii <= nsegments; ++ii) {
@@ -822,7 +827,7 @@ void SymprodRenderArc::drawQt(QPainter &painter,
       point = projectOffsetKm(_props.origin.lat, _props.origin.lon,
                               dx, dy, context);
     }
-    if (ii == 0 && _props.fill == Symprod::FILL_NONE) {
+    if (ii == 0 && !filledSector) {
       path.moveTo(point);
     } else {
       path.lineTo(point);
