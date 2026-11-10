@@ -886,11 +886,32 @@ void TimeControl::refreshDataAvailability()
 
 void TimeControl::_retrieveForTimeRange(time_t startTime, time_t endTime)
 {
-  if (endTime <= startTime ||
-      (_gd.epoch_start == startTime && _gd.epoch_end == endTime)) {
+  if (endTime <= startTime) {
     return;
   }
 
+  const time_t movieStart = _guiStartTime.utime();
+  const double movieEnd = movieStart +
+    _guiNFramesMovie * _guiFrameIntervalSecs;
+  if (startTime < movieStart || endTime > movieEnd) {
+    const time_t expandedStart = std::min(startTime, movieStart);
+    const double expandedEnd = std::max(
+      static_cast<double>(endTime), movieEnd);
+    const int expandedFrames = static_cast<int>(ceil(
+      (expandedEnd - expandedStart) / _guiFrameIntervalSecs));
+    if (expandedFrames <= Constants::MAX_FRAMES) {
+      // Panning beyond either edge grows only that side of the movie. Accept
+      // immediately so newly exposed frame slots and availability arrive as
+      // one coherent retrieval while the selected absolute time is retained.
+      _applyExpandedMovieRange(expandedStart, expandedFrames);
+      _acceptGuiSelections();
+      return;
+    }
+  }
+
+  if (_gd.epoch_start == startTime && _gd.epoch_end == endTime) {
+    return;
+  }
   _gd.epoch_start = startTime;
   _gd.epoch_end = endTime;
   // Availability ranges are part of the request domain. Invalidate both
