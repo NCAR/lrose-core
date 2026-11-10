@@ -612,6 +612,8 @@ int Lucid::_initDataSpace()
 
   } // if(strlen(_params.demo_time) < 8 && (_gd.movie.mode != ARCHIVE_MODE))
 
+  _initMovieFrameTimes();
+
   /////////////////////////////////////////////////
   // zooms
   
@@ -802,6 +804,62 @@ int Lucid::_initDataSpace()
 
   return iret;
   
+}
+
+////////////////////////////////////////////////////
+// initialize the time bounds for each movie frame
+
+void Lucid::_initMovieFrameTimes()
+{
+  // Movie frames are the common time model for grids and symbolic products.
+  // Populate them only after start_time has received its final rounding and
+  // frame-centering adjustment, matching the original CIDD behavior.
+  switch (_params.climo_mode) {
+    case Params::CLIMO_REGULAR_INTERVAL: {
+      const double intervalSecs = _gd.movie.time_interval_mins * 60.0;
+      for (int ii = 0; ii < _gd.movie.num_frames; ++ii) {
+        movie_frame_t &frame = _gd.movie.frame[ii];
+        frame.time_start = static_cast<time_t>(
+          _gd.movie.start_time + ii * intervalSecs + 0.5);
+        frame.time_mid = static_cast<time_t>(
+          _gd.movie.start_time + (ii + 0.5) * intervalSecs + 0.5);
+        frame.time_end = static_cast<time_t>(
+          frame.time_start + intervalSecs + 0.5);
+      }
+      break;
+    }
+
+    case Params::CLIMO_DAILY_INTERVAL:
+      for (int ii = 0; ii < _gd.movie.num_frames; ++ii) {
+        movie_frame_t &frame = _gd.movie.frame[ii];
+        frame.time_start = static_cast<time_t>(
+          _gd.movie.start_time + ii * 1440.0 * 60.0);
+        frame.time_mid = static_cast<time_t>(
+          frame.time_start + _gd.movie.frame_span * 30.0);
+        frame.time_end = static_cast<time_t>(
+          frame.time_start + _gd.movie.frame_span * 60.0);
+      }
+      break;
+
+    case Params::CLIMO_YEARLY_INTERVAL: {
+      UTIMstruct frameDate;
+      UTIMunix_to_date(_gd.movie.start_time, &frameDate);
+      for (int ii = 0; ii < _gd.movie.num_frames; ++ii, ++frameDate.year) {
+        movie_frame_t &frame = _gd.movie.frame[ii];
+        frame.time_start = UTIMdate_to_unix(&frameDate);
+        frame.time_mid = static_cast<time_t>(
+          frame.time_start + _gd.movie.frame_span * 30.0);
+        frame.time_end = static_cast<time_t>(
+          frame.time_start + _gd.movie.frame_span * 60.0);
+      }
+      break;
+    }
+  }
+
+  _gd.epoch_start = _gd.movie.start_time;
+  _gd.epoch_end = _gd.movie.num_frames > 0 ?
+    _gd.movie.frame[_gd.movie.num_frames - 1].time_end :
+    _gd.epoch_start;
 }
 
 //////////////////////////////////
@@ -2729,13 +2787,6 @@ void Lucid::_initShared()
   _gd.coord_expt->selection_sec = 0;
   _gd.coord_expt->selection_usec = 0;
   
-  _gd.epoch_start = (time_t)
-    (_gd.movie.start_time - (_gd.movie.time_interval_mins * 30.0));   
-  _gd.epoch_end = (time_t)
-    (_gd.movie.start_time +
-     (_gd.movie.num_frames * _gd.movie.time_interval_mins * 60.0) -
-     (_gd.movie.time_interval_mins * 30.0)); 
-
   _gd.coord_expt->epoch_start = _gd.epoch_start;
   _gd.coord_expt->epoch_end = _gd.epoch_end;
   

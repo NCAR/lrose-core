@@ -647,13 +647,13 @@ void GuiManager::_setupWindows()
 
   // set up status bar
 
-  // statusBar()->setStyleSheet(
-  //         "QStatusBar {"
-  //         "  background-color: palette(alternate-base);"
-  //         "  border-top: 2px solid palette(mid);"
-  //         "  padding: 4px 6px;"
-  //         "}"
-  //                            );
+  statusBar()->setStyleSheet(
+          "QStatusBar {"
+          "  background-color: palette(alternate-base);"
+          "  border-top: 2px solid palette(mid);"
+          "  padding: 4px 6px;"
+          "}"
+                             );
   
 }
 

@@ -94,6 +94,7 @@ private:
   // methods
   
   int _initDataSpace();
+  void _initMovieFrameTimes();
 
   int _initGrids();
   void _initWinds();

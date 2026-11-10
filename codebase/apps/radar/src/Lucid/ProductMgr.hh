@@ -71,6 +71,7 @@ struct SymprodReadRequest {
   string url;
   int dataType = 0;
   Params::symprod_render_type_t renderType = Params::SYMPROD_RENDER_ALL;
+  bool debug = false;
   bool shortRequests = false;
   bool gzip = false;
   time_t frameStart = 0;
@@ -81,6 +82,8 @@ struct SymprodReadRequest {
 struct SymprodReadResult {
   int productIndex = -1;
   int generation = 0;
+  string label;
+  SymprodRequestKey key;
   int status = -1;
   string error;
   vector<QByteArray> chunks;

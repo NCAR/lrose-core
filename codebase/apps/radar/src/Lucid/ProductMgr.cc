@@ -39,6 +39,7 @@
 #include "SymprodRenderContext.hh"
 #include "WorldPlot.hh"
 #include <Spdb/DsSpdb.hh>
+#include <toolsa/DateTime.hh>
 #include <QObject>
 #include <algorithm>
 #include <cmath>
@@ -69,6 +70,8 @@ protected:
     std::unique_ptr<SymprodReadResult> result(new SymprodReadResult);
     result->productIndex = _request.productIndex;
     result->generation = _request.generation;
+    result->label = _request.label;
+    result->key = _request.key;
 
     DsSpdb spdb;
     spdb.setUniqueOff();
@@ -89,6 +92,12 @@ protected:
 
     int status = -1;
     if (_request.renderType == Params::SYMPROD_RENDER_GET_VALID) {
+      if (_request.debug) {
+        cerr << "SYMPROD getValid(), url, time, dataType: "
+             << _request.url << ", "
+             << DateTime::strm(_request.key.dataTime) << ", "
+             << _request.dataType << endl;
+      }
       status = spdb.getValid(_request.url, _request.key.dataTime,
                              _request.dataType);
     } else if (_request.shortRequests &&
@@ -96,17 +105,37 @@ protected:
                  Params::SYMPROD_RENDER_FIRST_BEFORE_FRAME_TIME) {
       const int margin = (int) (_request.frameStart -
                                 _request.key.startTime);
+      if (_request.debug) {
+        cerr << "SYMPROD getFirstBefore(), url, time, margin, dataType: "
+             << _request.url << ", "
+             << DateTime::strm(_request.frameEnd) << ", "
+             << margin << ", "
+             << _request.dataType << endl;
+      }
       status = spdb.getFirstBefore(_request.url, _request.frameEnd,
                                    margin, _request.dataType);
     } else if (_request.shortRequests &&
                _request.renderType ==
                  Params::SYMPROD_RENDER_GET_VALID_AT_FRAME_TIME) {
+      if (_request.debug) {
+        cerr << "SYMPROD getValid(), url, time, dataType: "
+             << _request.url << ", "
+             << DateTime::strm(_request.key.endTime) << ", "
+             << _request.dataType << endl;
+      }
       status = spdb.getValid(_request.url, _request.key.endTime,
                              _request.dataType);
     } else {
       if (_request.shortRequests &&
           _request.renderType == Params::SYMPROD_RENDER_LATEST_IN_FRAME) {
         spdb.setUniqueLatest();
+      }
+      if (_request.debug) {
+        cerr << "SYMPROD getInterval(), url, startTime, endTime, dataType: "
+             << _request.url << ", "
+             << DateTime::strm(_request.key.startTime) << ", "
+             << DateTime::strm(_request.key.endTime) << ", "
+             << _request.dataType << endl;
       }
       status = spdb.getInterval(_request.url,
                                 _request.key.startTime,
@@ -313,6 +342,7 @@ void ProductMgr::_requestCapturedState()
     request.url = addTunnelOptions(info.url, _params);
     request.dataType = info.data_type;
     request.renderType = info.render_type;
+    request.debug = _params.symprod_debug != Params::SYMPROD_DEBUG_OFF;
     request.shortRequests = _params.symprod_short_requests;
     request.gzip = _params.symprod_gzip_requests;
     request.frameStart = _lastFrameStart;
@@ -356,7 +386,24 @@ void ProductMgr::_handleResult(SymprodReadResult *rawResult)
   }
 
   const int index = result->productIndex;
-  if (result->generation != _generations[index]) {
+  const bool stale = result->generation != _generations[index];
+  if (_params.symprod_debug != Params::SYMPROD_DEBUG_OFF) {
+    size_t totalBytes = 0;
+    for (const QByteArray &chunk : result->chunks) {
+      totalBytes += static_cast<size_t>(chunk.size());
+    }
+    // Keep request diagnostics at the snapshot boundary: one line shows
+    // whether the server returned usable bytes and whether Lucid accepted it.
+    cerr << "SYMPROD result: label=" << result->label
+         << " generation=" << result->generation
+         << " requested=" << DateTime::str(result->key.startTime)
+         << " to " << DateTime::str(result->key.endTime)
+         << " status=" << result->status
+         << " chunks=" << result->chunks.size()
+         << " bytes=" << totalBytes
+         << " stale=" << (stale ? "yes" : "no") << endl;
+  }
+  if (stale) {
     return;
   }
   _requestInFlight[index] = false;
