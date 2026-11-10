@@ -258,6 +258,10 @@ GuiManager::~GuiManager()
 
 {
 
+  if (_gd.prod_mgr) {
+    _gd.prod_mgr->setProductsChangedCallback(std::function<void()>());
+  }
+
   if (_horiz) {
     delete _horiz;
   }
@@ -520,6 +524,15 @@ void GuiManager::_setupWindows()
   // configure the HORIZ
 
   _horiz = new HorizView(_horizFrame, *this);
+  if (_gd.prod_mgr) {
+    // SPDB workers publish data on the GUI thread. Regenerate only the
+    // transparent product layer when a product snapshot is replaced.
+    _gd.prod_mgr->setProductsChangedCallback([this]() {
+      if (_horiz) {
+        _horiz->rerenderProducts();
+      }
+    });
+  }
 
   connect(_horiz, &HorizView::verticalRouteCompleted,
           this, &GuiManager::_verticalRouteCompleted);
@@ -1039,6 +1052,9 @@ void GuiManager::_setProductsEnabled(bool enable)
   _gd.prod.products_on = enable;
   if (_horiz) {
     _horiz->rerenderProducts();
+  }
+  if (enable && _gd.prod_mgr) {
+    _gd.prod_mgr->refreshActiveProducts();
   }
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> products enabled? " << (_productsEnabled?"Y":"N") << endl;
@@ -1732,6 +1748,17 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
     mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
                           _vlevelManager.getRequestedLevel(),
                           _gd.h_win.page);
+    if (_gd.prod_mgr && frameIndex >= 0 &&
+        frameIndex < _gd.movie.num_frames) {
+      const movie_frame_t &frame = _gd.movie.frame[frameIndex];
+      _gd.prod_mgr->requestData(frame.time_start, frame.time_end,
+                                _timeControl->getSelectedTime().utime(),
+                                _vlevelManager.getRequestedLevel(),
+                                *_horiz->getZoomWorld());
+    }
+  } else if (_gd.prod_mgr &&
+             _gd.prod_mgr->num_products_invalid() > 0) {
+    _gd.prod_mgr->refreshActiveProducts();
   }
   
   // check for new data
@@ -1842,6 +1869,10 @@ void GuiManager::_reloadData()
   // Use the normal request path so a reload waits for any active horizontal
   // read and preserves the displayed image until replacement data arrive.
   _horizontalRequestHasChanged = true;
+  if (_gd.prod_mgr) {
+    _gd.prod_mgr->reset_product_valid_flags();
+    _gd.prod_mgr->refreshActiveProducts();
+  }
 
   // A visible vertical section is part of the current display state.  Reuse
   // its retained route; request generations prevent an older in-flight result

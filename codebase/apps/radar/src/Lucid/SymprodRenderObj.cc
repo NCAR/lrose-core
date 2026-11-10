@@ -1005,6 +1005,50 @@ void SymprodRenderIconline::draw(RenderContext &context)
 
 }
 
+void SymprodRenderIconline::drawQt(
+  QPainter &painter, const SymprodRenderContext &context) const
+{
+  if (!objectVisible(_hdr, context) || _props.num_points < 2 || !_points) {
+    return;
+  }
+
+  const double scale =
+    (_hdr.detail_level & Symprod::DETAIL_LEVEL_DO_NOT_SCALE) ?
+    1.0 : context.iconScale;
+  const QPointF origin = projectPoint(_props.origin.lat, _props.origin.lon,
+                                      context);
+  QPainterPath path;
+  bool havePoint = false;
+  for (int ii = 0; ii < _props.num_points; ++ii) {
+    if (_points[ii].x == Symprod::PPT_PENUP ||
+        _points[ii].y == Symprod::PPT_PENUP) {
+      if (_props.close_flag && havePoint) {
+        path.closeSubpath();
+      }
+      havePoint = false;
+      continue;
+    }
+    const QPointF point(origin.x() + scale * _points[ii].x,
+                        origin.y() - scale * _points[ii].y);
+    if (havePoint) {
+      path.lineTo(point);
+    } else {
+      path.moveTo(point);
+      havePoint = true;
+    }
+  }
+  if (_props.close_flag && havePoint) {
+    path.closeSubpath();
+  }
+
+  const QPen pen = symprodPen(_hdr.color, _props.linewidth,
+                             _props.linetype, _props.capstyle,
+                             _props.joinstyle);
+  const QBrush brush = _props.close_flag ?
+    symprodBrush(_hdr.color, _props.fill) : QBrush(Qt::NoBrush);
+  drawPath(painter, path, pen, brush);
+}
+
 double SymprodRenderIconline::dist(double lat, double lon)
 {
   double d = 999999.99; // A huge distance by default.

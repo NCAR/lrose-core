@@ -179,6 +179,13 @@ Lucid::~Lucid()
     delete _guiManager;
   }
 
+  // Product workers must finish before the Products and their legacy render
+  // context are released. GuiManager has already detached its repaint hook.
+  delete _gd.prod_mgr;
+  _gd.prod_mgr = nullptr;
+  delete _gd.r_context;
+  _gd.r_context = nullptr;
+
 }
 
 //////////////////////////////////////////////////

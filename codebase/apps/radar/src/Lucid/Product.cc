@@ -50,8 +50,12 @@ Product::Product(int debug,
         
         
 {
+  _active = 0;
   _data_valid = 0;
   _times_valid = 0;
+  _last_collected = 0;
+  closest_symprod_obj = nullptr;
+  closest_dist = 0.0;
   _prev_epoch_start = 0;
   _prev_epoch_end = 0;
   _chunksNeedProcess = false;
@@ -636,6 +640,41 @@ bool Product::processChunks()
 
   return true;
 
+}
+
+///////////////////////////////////////////////////////////////
+// Install copied chunks returned by an SPDB worker
+
+bool Product::installChunks(const vector<QByteArray> &chunks, string &error)
+{
+  vector<SymprodRender *> decoded;
+  decoded.reserve(chunks.size());
+
+  for (size_t ii = 0; ii < chunks.size(); ++ii) {
+    const QByteArray &chunk = chunks[ii];
+    if (chunk.isEmpty()) {
+      continue;
+    }
+    SymprodRender *symprod = new SymprodRender(*this);
+    if (symprod->deserialize(const_cast<char *>(chunk.constData()),
+                             chunk.size()) != 0) {
+      error = symprod->getErrStr();
+      delete symprod;
+      for (size_t jj = 0; jj < decoded.size(); ++jj) {
+        delete decoded[jj];
+      }
+      return false;
+    }
+    decoded.push_back(symprod);
+  }
+
+  // Publish the replacement only after decoding the complete response. This
+  // prevents a malformed chunk from erasing a still-useful product display.
+  clearSymprods();
+  _symprods.swap(decoded);
+  _data_valid = 1;
+  _last_collected = time(nullptr);
+  return true;
 }
 
 ////////////////////////////////////////////////////////////////

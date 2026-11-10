@@ -38,6 +38,7 @@
 
 #include <Spdb/DsSpdbThreaded.hh>
 #include <Spdb/Symprod.hh>
+#include <QByteArray>
 #include "Constants.hh"
 #include "GlobalData.hh"
 #include "Csyprod_P.hh"
@@ -89,6 +90,10 @@ public:
 
   bool processChunks();
   bool processTimeRefs();
+
+  // Decode a completed worker result on the GUI thread. The existing display
+  // remains intact unless every returned chunk can be decoded successfully.
+  bool installChunks(const vector<QByteArray> &chunks, string &error);
 
   int _active;
 

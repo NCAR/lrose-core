@@ -37,11 +37,54 @@
 #include "Params.hh"
 #include "Product.hh"
 #include <dsserver/DmapAccess.hh>
+#include <QSet>
+#include <QThread>
+#include <functional>
 
 class RenderContext;
 class SymprodRenderObj;
 class QPainter;
 struct SymprodRenderContext;
+class WorldPlot;
+class QObject;
+
+struct SymprodRequestKey {
+  time_t startTime = 0;
+  time_t endTime = 0;
+  time_t dataTime = 0;
+  bool useHorizLimits = false;
+  double minLat = 0.0;
+  double minLon = 0.0;
+  double maxLat = 0.0;
+  double maxLon = 0.0;
+  bool useVertLimits = false;
+  double minAlt = 0.0;
+  double maxAlt = 0.0;
+
+  bool operator==(const SymprodRequestKey &rhs) const;
+};
+
+struct SymprodReadRequest {
+  int productIndex = -1;
+  int generation = 0;
+  string label;
+  string url;
+  int dataType = 0;
+  Params::symprod_render_type_t renderType = Params::SYMPROD_RENDER_ALL;
+  bool shortRequests = false;
+  bool gzip = false;
+  time_t frameStart = 0;
+  time_t frameEnd = 0;
+  SymprodRequestKey key;
+};
+
+struct SymprodReadResult {
+  int productIndex = -1;
+  int generation = 0;
+  int status = -1;
+  string error;
+  vector<QByteArray> chunks;
+};
 
 ///////////////////////////////////////////////////////////////
 // class definition
@@ -63,6 +106,22 @@ public:
   // Get data from each product marked as having invalid data 
   int getData(const time_t start_time,
 	      const time_t end_time);
+
+  // Start all required SPDB requests for the current display state. Each
+  // product runs independently, in parallel with the MDV request.
+  void requestData(time_t frameStart,
+                   time_t frameEnd,
+                   time_t dataTime,
+                   double selectedLevel,
+                   const WorldPlot &plot);
+
+  // Re-evaluate enabled products using the most recently captured display
+  // state, for example after a menu toggle or explicit reload.
+  void refreshActiveProducts();
+
+  void setProductsChangedCallback(const std::function<void()> &callback) {
+    _productsChangedCallback = callback;
+  }
   
   // Turn on/off the product - Skip rendering if active != TRUE
   void set_product_active(int product, int active);
@@ -138,6 +197,34 @@ protected:
   SymprodRenderObj *_active_Rob;
   
 private:
+
+  void _startRequest(const SymprodReadRequest &request);
+  void _handleResult(SymprodReadResult *result);
+  void _computeLatLonBounds(const WorldPlot &plot,
+                            double &minLat, double &minLon,
+                            double &maxLat, double &maxLon) const;
+  void _requestCapturedState();
+
+  vector<int> _generations;
+  vector<bool> _requestInFlight;
+  vector<bool> _installedKeyValid;
+  vector<time_t> _retryNotBefore;
+  vector<SymprodRequestKey> _desiredKeys;
+  vector<SymprodRequestKey> _installedKeys;
+  QSet<QThread *> _readThreads;
+  QObject *_completionContext;
+  bool _shuttingDown;
+
+  bool _lastDisplayStateValid;
+  time_t _lastFrameStart;
+  time_t _lastFrameEnd;
+  time_t _lastDataTime;
+  double _lastSelectedLevel;
+  double _lastMinLat;
+  double _lastMinLon;
+  double _lastMaxLat;
+  double _lastMaxLon;
+  std::function<void()> _productsChangedCallback;
 
 };
 

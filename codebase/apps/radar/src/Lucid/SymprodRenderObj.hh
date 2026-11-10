@@ -204,6 +204,9 @@ public:
   virtual ~SymprodRenderIconline() {};
 
   virtual void draw(RenderContext &context);
+
+  virtual void drawQt(QPainter &painter,
+                      const SymprodRenderContext &context) const;
   
   virtual double dist(double lat, double lon);
 

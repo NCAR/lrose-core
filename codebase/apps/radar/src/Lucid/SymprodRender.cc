@@ -118,7 +118,7 @@ int SymprodRender::deserialize(void *in_buf, int buf_len /* = -1 */)
       return -1;
     }
     
-    SymprodRenderObj *obj;
+    SymprodRenderObj *obj = nullptr;
     switch (objType) {
     case Symprod::OBJ_TEXT:
       obj = new SymprodRenderText( in_buf, offset, prod, this);
@@ -147,6 +147,12 @@ int SymprodRender::deserialize(void *in_buf, int buf_len /* = -1 */)
     case Symprod::OBJ_CHUNK:
       obj = new SymprodRenderChunk(in_buf, offset, prod, this);
       break;
+    default:
+      _errStr += "ERROR - SymprodRender::deserialize\n";
+      _errStr += "  Unsupported symbolic product object type.\n";
+      _addIntErr("  Object type: ", objType);
+      clear();
+      return -1;
     }
     
     _objs.push_back(obj);
