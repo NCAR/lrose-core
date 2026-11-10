@@ -211,6 +211,10 @@ void TimeControl::_populateGui()
     [this](time_t startTime, time_t endTime) {
       _retrieveForTimeRange(startTime, endTime);
     });
+  _timePlot->setFrameSelectedCallback(
+    [this](int frameIndex) {
+      _selectFrameFromTimePlot(frameIndex);
+    });
   _timeLayout->addWidget(_timePlot);
   
   //////////////////////////////////////////////////////////////////////
@@ -900,6 +904,25 @@ void TimeControl::_retrieveForTimeRange(time_t startTime, time_t endTime)
     _gd.prod_mgr->reset_product_valid_flags();
   }
   _timeHasChanged = true;
+}
+
+////////////////////////////////////////////////////////
+// select and immediately accept a frame clicked in the time plot
+
+void TimeControl::_selectFrameFromTimePlot(int frameIndex)
+{
+  if (frameIndex < 0 || frameIndex >= _guiNFramesMovie ||
+      frameIndex == _guiFrameIndex) {
+    return;
+  }
+
+  _guiFrameIndex = frameIndex;
+  {
+    const QSignalBlocker sliderBlocker(_timeSlider);
+    _timeSlider->setSliderPosition(frameIndex);
+  }
+  _updateSelectedTimeInGui();
+  _acceptGuiSelections();
 }
 
 ////////////////////////////////////////////////////////

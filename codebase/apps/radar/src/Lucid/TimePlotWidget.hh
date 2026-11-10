@@ -48,6 +48,9 @@ public:
     const std::function<void(time_t, time_t)> &callback) {
     _viewChangedCallback = callback;
   }
+  void setFrameSelectedCallback(const std::function<void(int)> &callback) {
+    _frameSelectedCallback = callback;
+  }
   void fitMovie();
 
   QSize sizeHint() const override;
@@ -80,6 +83,7 @@ private:
   QPoint _dragCurrent;
   std::function<void(time_t, int)> _expansionCallback;
   std::function<void(time_t, time_t)> _viewChangedCallback;
+  std::function<void(int)> _frameSelectedCallback;
 
   QRectF _plotRect() const;
   double _pixelForTime(double time) const;

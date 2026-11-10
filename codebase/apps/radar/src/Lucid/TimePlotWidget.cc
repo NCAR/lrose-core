@@ -46,7 +46,8 @@ TimePlotWidget::TimePlotWidget(QWidget *parent, const Params &params) :
   _updateMinimumHeight();
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   setMouseTracking(true);
-  setToolTip("Left drag: zoom time; middle drag: pan time; "
+  setToolTip("Left click: select frame; left drag: zoom time; "
+             "middle drag: pan time; "
              "right drag: expand movie; double-click: fit movie");
 }
 
@@ -407,6 +408,17 @@ void TimePlotWidget::_finishZoom()
     static_cast<double>(std::max(_dragStart.x(), _dragCurrent.x())),
     plot.left(), plot.right());
   if (right - left < 4.0) {
+    if (_frameSelectedCallback) {
+      const double clickTime = _timeForPixel(
+        std::clamp(static_cast<double>(_dragCurrent.x()),
+                   plot.left(), plot.right()),
+        _pressViewStart, _pressViewEnd);
+      const int frame = std::clamp(
+        static_cast<int>(floor((clickTime - _movieStart) /
+                               _frameIntervalSecs)),
+        0, _nFrames - 1);
+      _frameSelectedCallback(frame);
+    }
     return;
   }
   const double start = _floorToFrame(
