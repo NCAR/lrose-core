@@ -37,6 +37,7 @@
 
 #include <Spdb/SymprodObj.hh>
 #include <rapformats/station_reports.h>
+#include <QImage>
 #include <QPainter>
 #include "Constants.hh"
 #include "GlobalData.hh"
@@ -268,6 +269,9 @@ public:
   virtual ~SymprodRenderNamedIcon() {};
 
   virtual void draw(RenderContext &context);
+
+  virtual void drawQt(QPainter &painter,
+                      const SymprodRenderContext &context) const;
   
   virtual double dist(double lat, double lon);
 
@@ -277,6 +281,11 @@ protected:
 
 private:
   Product &prod;
+
+  // Map definitions are owned by GlobalData and outlive downloaded products.
+  // The lookup is cached because symbolic products are repainted frequently.
+  mutable const Geo_feat_icondef_t *_iconDef;
+  mutable bool _iconLookupComplete;
 
 };
 
@@ -297,6 +306,9 @@ public:
   virtual ~SymprodRenderBitmapIcon() {};
 
   virtual void draw(RenderContext &context);
+
+  virtual void drawQt(QPainter &painter,
+                      const SymprodRenderContext &context) const;
   
   virtual double dist(double lat, double lon);
 
@@ -306,6 +318,7 @@ protected:
 
 private:
   Product &prod;
+  mutable QImage _bitmapImage;
 
 };
 
@@ -390,6 +403,9 @@ public:
   virtual ~SymprodRenderChunk() {};
 
   virtual void draw(RenderContext &context);
+
+  virtual void drawQt(QPainter &painter,
+                      const SymprodRenderContext &context) const;
   
   virtual double dist(double lat, double lon);
 
@@ -405,6 +421,10 @@ protected:
   int _barbShaftLen;
 
 private:
+  void _drawStationQt(const station_report_t &station,
+                      QPainter &painter,
+                      const SymprodRenderContext &context) const;
+
   Product &prod;
 
 };
