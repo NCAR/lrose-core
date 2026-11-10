@@ -2762,53 +2762,68 @@ void WorldPlot::renderGridRect(int fieldNum,
   fillCanvas(painter, string(_params.missing_data_color) == "transparent" ?
              _params.background_color : _params.missing_data_color);
    
-  // the data projection type and plot projection type are the same
-  // so we can use the (x,y) locations unchanged
+  const int nx = mr->h_fhdr.nx;
+  const int ny = mr->h_fhdr.ny;
+  const size_t expectedDataSize = (size_t) nx * (size_t) ny;
+  if (nx <= 0 || ny <= 0 || mr->h_fl32_data.size() < expectedDataSize) {
+    fillMargins(painter, _params.background_color);
+    return;
+  }
 
-  // compute the location of the vertices
-  // these are the cell limits in (x, y)
+  GridIndexBounds bounds;
+  if (!_computeVisibleGridBounds(*mr, bounds)) {
+    bounds = {0, nx - 1, 0, ny - 1};
+  }
+  if (bounds.maxX < bounds.minX || bounds.maxY < bounds.minY) {
+    fillMargins(painter, _params.background_color);
+    return;
+  }
 
-  vector< vector<QPointF> > vertices;
+  const double dx = mr->h_fhdr.grid_dx;
+  const double dy = mr->h_fhdr.grid_dy;
+  const double lowX = mr->h_fhdr.grid_minx - dx / 2.0;
+  const double lowY = mr->h_fhdr.grid_miny - dy / 2.0;
+  const fl32 miss = mr->h_fhdr.missing_data_value;
+  const fl32 bad = mr->h_fhdr.bad_data_value;
 
-  int nx = mr->h_fhdr.nx;
-  int ny = mr->h_fhdr.ny;
-  double dy = mr->h_fhdr.grid_dy;
-  double lowy = mr->h_fhdr.grid_miny - dy / 2.0;
-  double dx = mr->h_fhdr.grid_dx;
-  double lowx = mr->h_fhdr.grid_minx - dx / 2.0;
-
-  double yy = lowy;
-  for(int iy = 0; iy <= ny; iy++, yy += dy) {
-    vector<QPointF> row;
-    double xx = lowx;
-    for(int ix = 0; ix <= nx; ix++, xx += dx) {
-      QPointF pt = getPixelPointF(xx, yy);
-      row.push_back(pt);
-    } // ix
-    vertices.push_back(row);
-  } // iy
-  
-  // plot the rectangles for each grid cell
-
-  fl32 *val = mr->h_fl32_data.data();
-  fl32 miss = mr->h_fhdr.missing_data_value;
-  fl32 bad = mr->h_fhdr.bad_data_value;
-  
-  for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
-    for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
-      fl32 fval = *val;
+  // Matching projections make each cell rectangular in display space.  Draw
+  // only the conservative visible index window and install clipping once for
+  // the complete operation rather than once per cell.
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth, _plotHeight);
+  painter.setPen(Qt::NoPen);
+  size_t cellsDrawn = 0;
+  for (int iy = bounds.minY; iy <= bounds.maxY; ++iy) {
+    const double y0 = getYPixel(lowY + iy * dy);
+    const double y1 = getYPixel(lowY + (iy + 1) * dy);
+    const double top = std::min(y0, y1);
+    const double height = std::abs(y1 - y0) + 1.0;
+    for (int ix = bounds.minX; ix <= bounds.maxX; ++ix) {
+      const size_t dataIndex = (size_t) iy * (size_t) nx + (size_t) ix;
+      const fl32 fval = mr->h_fl32_data[dataIndex];
       if (fval == miss || fval == bad || !std::isfinite(fval) ||
           !mr->colorMap.withinValidRange(fval)) {
         continue;
       }
       const QBrush *brush = mr->colorMap.dataBrush(fval);
-      double xx = vertices[iy+1][ix].x();
-      double yy = vertices[iy+1][ix].y();
-      double width = vertices[iy][ix+1].x() - vertices[iy][ix].x() + 1;
-      double height = vertices[iy][ix].y() - vertices[iy+1][ix].y() + 1;
-      fillRectanglePixelCoords(painter, *brush, xx, yy, width, height);
-    } // ix
-  } // iy
+      const double x0 = getXPixel(lowX + ix * dx);
+      const double x1 = getXPixel(lowX + (ix + 1) * dx);
+      const double left = std::min(x0, x1);
+      const double width = std::abs(x1 - x0) + 1.0;
+      painter.fillRect(QRectF(left, top, width, height), *brush);
+      ++cellsDrawn;
+    }
+  }
+  painter.restore();
+
+  if (_gd.debug2) {
+    const size_t candidateCells =
+      (size_t) (bounds.maxX - bounds.minX + 1) *
+      (size_t) (bounds.maxY - bounds.minY + 1);
+    cerr << "renderGridRect visible candidates: " << candidateCells
+         << " of " << expectedDataSize
+         << ", drawn: " << cellsDrawn << endl;
+  }
 
   // fill margins with background color
 
@@ -2850,29 +2865,42 @@ bool WorldPlot::_computeVisibleGridBounds(const MdvReader &reader,
   double maxGridX = -std::numeric_limits<double>::infinity();
   double minGridY = std::numeric_limits<double>::infinity();
   double maxGridY = -std::numeric_limits<double>::infinity();
-  for (int iy = 0; iy < nSamplesY; ++iy) {
-    const double yFraction = (double) iy / (double) (nSamplesY - 1);
-    const double displayY = displayMinY +
-      yFraction * (displayMaxY - displayMinY);
-    for (int ix = 0; ix < nSamplesX; ++ix) {
-      const double xFraction = (double) ix / (double) (nSamplesX - 1);
-      const double displayX = displayMinX +
-        xFraction * (displayMaxX - displayMinX);
+  if (reader.proj.getPjgMath() == _proj.getPjgMath()) {
+    // Matching projections use identical world coordinates, so their bounds
+    // can be computed exactly without sampling or projection transforms.
+    const double gridX0 = (displayMinX - gridMinX) / dx;
+    const double gridX1 = (displayMaxX - gridMinX) / dx;
+    const double gridY0 = (displayMinY - gridMinY) / dy;
+    const double gridY1 = (displayMaxY - gridMinY) / dy;
+    minGridX = std::min(gridX0, gridX1);
+    maxGridX = std::max(gridX0, gridX1);
+    minGridY = std::min(gridY0, gridY1);
+    maxGridY = std::max(gridY0, gridY1);
+  } else {
+    for (int iy = 0; iy < nSamplesY; ++iy) {
+      const double yFraction = (double) iy / (double) (nSamplesY - 1);
+      const double displayY = displayMinY +
+        yFraction * (displayMaxY - displayMinY);
+      for (int ix = 0; ix < nSamplesX; ++ix) {
+        const double xFraction = (double) ix / (double) (nSamplesX - 1);
+        const double displayX = displayMinX +
+          xFraction * (displayMaxX - displayMinX);
 
-      double lat, lon;
-      _proj.xy2latlon(displayX, displayY, lat, lon);
-      double dataX, dataY;
-      reader.proj.latlon2xy(lat, lon, dataX, dataY);
-      if (!std::isfinite(dataX) || !std::isfinite(dataY)) {
-        return false;
+        double lat, lon;
+        _proj.xy2latlon(displayX, displayY, lat, lon);
+        double dataX, dataY;
+        reader.proj.latlon2xy(lat, lon, dataX, dataY);
+        if (!std::isfinite(dataX) || !std::isfinite(dataY)) {
+          return false;
+        }
+
+        const double gridX = (dataX - gridMinX) / dx;
+        const double gridY = (dataY - gridMinY) / dy;
+        minGridX = std::min(minGridX, gridX);
+        maxGridX = std::max(maxGridX, gridX);
+        minGridY = std::min(minGridY, gridY);
+        maxGridY = std::max(maxGridY, gridY);
       }
-
-      const double gridX = (dataX - gridMinX) / dx;
-      const double gridY = (dataY - gridMinY) / dy;
-      minGridX = std::min(minGridX, gridX);
-      maxGridX = std::max(maxGridX, gridX);
-      minGridY = std::min(minGridY, gridY);
-      maxGridY = std::max(maxGridY, gridY);
     }
   }
 
@@ -3113,27 +3141,53 @@ void WorldPlot::renderFilledContours(int fieldNum,
     return;
   }
 
-  vector<fl32> contourData = mr->h_fl32_data;
+  GridIndexBounds bounds;
+  if (!_computeVisibleGridBounds(*mr, bounds)) {
+    bounds = {0, nx - 1, 0, ny - 1};
+  }
+
+  const int croppedNx = bounds.maxX - bounds.minX + 1;
+  const int croppedNy = bounds.maxY - bounds.minY + 1;
+  if (croppedNx < 2 || croppedNy < 2) {
+    _createImage(_gridImage);
+    QPainter painter(_gridImage);
+    const char *missingColor =
+      string(_params.missing_data_color) == "transparent" ?
+      _params.background_color : _params.missing_data_color;
+    fillCanvas(painter, missingColor);
+    fillMargins(painter, _params.background_color);
+    return;
+  }
+
   const fl32 missing = mr->h_fhdr.missing_data_value;
   const fl32 bad = mr->h_fhdr.bad_data_value;
 
+  vector<fl32> contourData;
+  contourData.reserve((size_t) croppedNx * (size_t) croppedNy);
+
   // Keep horizontal and vertical rendering consistent: missing, bad,
   // non-finite, and out-of-scale values all remain unpainted. The configured
-  // missing color beneath the contours will therefore show through, and a
-  // color scale can be widened explicitly when those values should be shown.
+  // missing color beneath the contours will therefore show through.  Copy
+  // only the visible window plus its bounds-helper halo so contour topology
+  // remains complete at the clipping boundary without processing the full
+  // downloaded domain.
 
-  for (fl32 &value : contourData) {
-    if (!std::isfinite(value) || value == missing || value == bad) {
-      value = missing;
-      continue;
-    }
-    double displayValue = value;
-    if (mr->h_fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
-      displayValue = exp(displayValue);
-    }
-    if (!std::isfinite(displayValue) ||
-        !mr->colorMap.withinValidRange(displayValue)) {
-      value = missing;
+  for (int iy = bounds.minY; iy <= bounds.maxY; ++iy) {
+    for (int ix = bounds.minX; ix <= bounds.maxX; ++ix) {
+      fl32 value = mr->h_fl32_data[(size_t) iy * (size_t) nx + (size_t) ix];
+      if (!std::isfinite(value) || value == missing || value == bad) {
+        contourData.push_back(missing);
+        continue;
+      }
+      double displayValue = value;
+      if (mr->h_fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
+        displayValue = exp(displayValue);
+      }
+      if (!std::isfinite(displayValue) ||
+          !mr->colorMap.withinValidRange(displayValue)) {
+        value = missing;
+      }
+      contourData.push_back(value);
     }
   }
 
@@ -3142,11 +3196,15 @@ void WorldPlot::renderFilledContours(int fieldNum,
   // plane copy and any MDV transform remain independent of later requests.
 
   Mdvx::field_header_t contourHeader = mr->h_fhdr;
+  contourHeader.nx = croppedNx;
+  contourHeader.ny = croppedNy;
   contourHeader.nz = 1;
+  contourHeader.grid_minx += bounds.minX * contourHeader.grid_dx;
+  contourHeader.grid_miny += bounds.minY * contourHeader.grid_dy;
   contourHeader.encoding_type = Mdvx::ENCODING_FLOAT32;
   contourHeader.compression_type = Mdvx::COMPRESSION_NONE;
   contourHeader.data_element_nbytes = sizeof(fl32);
-  contourHeader.volume_size = nx * ny * sizeof(fl32);
+  contourHeader.volume_size = croppedNx * croppedNy * sizeof(fl32);
   MdvxField contourField(contourHeader, mr->h_vhdr, contourData.data());
 
   MdvxContour contours;
@@ -3178,6 +3236,13 @@ void WorldPlot::renderFilledContours(int fieldNum,
 
   const vector<MdvxContourLevel> &levels = contours.getLevels();
   const QBrush missingBrush{QColor(missingColor)};
+  QRectF visiblePixels(QPointF(std::min(_xMinPixel, _xMaxPixel),
+                               std::min(_yMinPixel, _yMaxPixel)),
+                       QPointF(std::max(_xMinPixel, _xMaxPixel),
+                               std::max(_yMinPixel, _yMaxPixel)));
+  visiblePixels.adjust(-1.0, -1.0, 1.0, 1.0);
+  size_t trianglesDrawn = 0;
+  size_t trianglesOutside = 0;
   painter.save();
   painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth, _plotHeight);
   for (size_t ilevel = 0; ilevel < levels.size(); ilevel++) {
@@ -3202,6 +3267,12 @@ void WorldPlot::renderFilledContours(int fieldNum,
     QPainterPath levelPath;
     for (size_t itri = 0; itri < level.triangles.size(); itri++) {
       const MdvxContourTriangle &triangle = level.triangles[itri];
+      QPointF points[3];
+      bool geometryValid = true;
+      double triangleMinX = std::numeric_limits<double>::infinity();
+      double triangleMaxX = -std::numeric_limits<double>::infinity();
+      double triangleMinY = std::numeric_limits<double>::infinity();
+      double triangleMaxY = -std::numeric_limits<double>::infinity();
       QPolygonF polygon;
       for (int ivert = 0; ivert < 3; ivert++) {
         double xx = triangle.vertex[ivert].x;
@@ -3211,13 +3282,41 @@ void WorldPlot::renderFilledContours(int fieldNum,
           mr->proj.xy2latlon(xx, yy, lat, lon);
           _proj.latlon2xy(lat, lon, xx, yy);
         }
-        polygon << getPixelPointF(xx, yy);
+        points[ivert] = getPixelPointF(xx, yy);
+        if (!std::isfinite(points[ivert].x()) ||
+            !std::isfinite(points[ivert].y())) {
+          geometryValid = false;
+          break;
+        }
+        triangleMinX = std::min(triangleMinX, points[ivert].x());
+        triangleMaxX = std::max(triangleMaxX, points[ivert].x());
+        triangleMinY = std::min(triangleMinY, points[ivert].y());
+        triangleMaxY = std::max(triangleMaxY, points[ivert].y());
       }
+      if (!geometryValid) {
+        continue;
+      }
+      const QRectF triangleBounds(QPointF(triangleMinX, triangleMinY),
+                                  QPointF(triangleMaxX, triangleMaxY));
+      if (!visiblePixels.intersects(triangleBounds)) {
+        ++trianglesOutside;
+        continue;
+      }
+      polygon << points[0] << points[1] << points[2];
       levelPath.addPolygon(polygon);
+      ++trianglesDrawn;
     }
     painter.fillPath(levelPath, *levelBrush);
   }
   painter.restore();
+
+  if (_gd.debug2) {
+    cerr << "renderFilledContours cropped grid: "
+         << croppedNx << " x " << croppedNy
+         << " from " << nx << " x " << ny
+         << ", triangles outside after projection: " << trianglesOutside
+         << ", drawn: " << trianglesDrawn << endl;
+  }
 
   fillMargins(painter, _params.background_color);
 
