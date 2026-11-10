@@ -215,6 +215,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _updateSelectedTimeInGui();
   void _updateTimePlot();
   void _applyExpandedMovieRange(time_t startTime, int nFrames);
+  void _retrieveForTimeRange(time_t startTime, time_t endTime);
   
   void _setFrameIndex(int val) { _frameIndex = val; }
 

@@ -958,23 +958,14 @@ int MdvReader::_getTimeList(const string &url,
                             Mdvx &mdvx)
 {
 
-  TimeControl *tc = TimeControl::getInstance();
-  if (tc == nullptr) {
-    // TimeControl does not yet exist
+  if (_gd.epoch_end <= _gd.epoch_start) {
     return -1;
   }
-  
-  double movieDurationSecs = tc->getMovieDurationSecs();
-  DateTime movieStartTime(tc->getStartTime());
-  DateTime movieEndTime(movieStartTime + movieDurationSecs);
-  time_t delta = movieEndTime - movieStartTime;
-  DateTime listStartTime(movieStartTime - delta);
-  DateTime listEndTime(movieEndTime + delta);
+  const DateTime listStartTime(_gd.epoch_start);
+  const DateTime listEndTime(_gd.epoch_end);
   
   if(_gd.debug1) {
     cerr << "Get MDVX Time List, page: " << page << ", url: " << url << endl;
-    cerr << "  Movie start time: " << movieStartTime.asString(0) << endl;
-    cerr << "  Movie end time: " << movieEndTime.asString(0) << endl;
     cerr << "  List start time: " << listStartTime.asString(0) << endl;
     cerr << "  List end time: " << listEndTime.asString(0) << endl;
   }
@@ -1006,7 +997,7 @@ int MdvReader::_getTimeList(const string &url,
     fprintf(stderr,
             "{ TIME_LIST_REQUEST, \"%s\", \"%s\", %ld, %ld, %g, %g, %g, %g, %g },\n",
             fullUrl.c_str(), "none",
-            _gd.epoch_start - delta, _gd.epoch_end + delta,
+            _gd.epoch_start, _gd.epoch_end,
             -99.9, min_lat, min_lon, max_lat, max_lon);
   }
 

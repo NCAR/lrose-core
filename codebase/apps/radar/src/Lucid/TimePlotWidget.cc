@@ -389,6 +389,10 @@ void TimePlotWidget::mouseDoubleClickEvent(QMouseEvent *event)
   if (event->button() == Qt::LeftButton) {
     _dragMode = DragMode::None;
     fitMovie();
+    if (_viewChangedCallback) {
+      _viewChangedCallback(static_cast<time_t>(llround(_viewStart)),
+                           static_cast<time_t>(llround(_viewEnd)));
+    }
     event->accept();
   }
 }
@@ -423,6 +427,10 @@ void TimePlotWidget::_finishPan()
   const double frameDelta = round(delta / _frameIntervalSecs);
   _viewStart = _pressViewStart + frameDelta * _frameIntervalSecs;
   _viewEnd = _pressViewEnd + frameDelta * _frameIntervalSecs;
+  if (frameDelta != 0.0 && _viewChangedCallback) {
+    _viewChangedCallback(static_cast<time_t>(llround(_viewStart)),
+                         static_cast<time_t>(llround(_viewEnd)));
+  }
 }
 
 void TimePlotWidget::_finishExpand()

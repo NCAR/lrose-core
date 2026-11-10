@@ -207,6 +207,10 @@ void TimeControl::_populateGui()
     [this](time_t startTime, int nFrames) {
       _applyExpandedMovieRange(startTime, nFrames);
     });
+  _timePlot->setViewChangedCallback(
+    [this](time_t startTime, time_t endTime) {
+      _retrieveForTimeRange(startTime, endTime);
+    });
   _timeLayout->addWidget(_timePlot);
   
   //////////////////////////////////////////////////////////////////////
@@ -711,6 +715,9 @@ void TimeControl::_acceptGuiSelections()
         _gd.mread[ii]->invalidateTimeList();
       }
     }
+    if (_gd.prod_mgr) {
+      _gd.prod_mgr->reset_product_valid_flags();
+    }
   }
   _timeHasChanged = true;
 }
@@ -868,6 +875,31 @@ void TimeControl::refreshDataAvailability()
     }
   }
   _timePlot->setProductSeries(productSeries);
+}
+
+////////////////////////////////////////////////////////
+// retrieve data and availability for a panned time view
+
+void TimeControl::_retrieveForTimeRange(time_t startTime, time_t endTime)
+{
+  if (endTime <= startTime ||
+      (_gd.epoch_start == startTime && _gd.epoch_end == endTime)) {
+    return;
+  }
+
+  _gd.epoch_start = startTime;
+  _gd.epoch_end = endTime;
+  // Availability ranges are part of the request domain. Invalidate both
+  // caches and let the normal GUI timer issue one coherent full retrieval.
+  for (int ii = 0; ii < _gd.num_datafields; ++ii) {
+    if (_gd.mread[ii]) {
+      _gd.mread[ii]->invalidateTimeList();
+    }
+  }
+  if (_gd.prod_mgr) {
+    _gd.prod_mgr->reset_product_valid_flags();
+  }
+  _timeHasChanged = true;
 }
 
 ////////////////////////////////////////////////////////
