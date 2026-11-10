@@ -78,6 +78,9 @@ int Args::parse (int argc, char **argv, const string &prog_name)
   printUptime = false;
   hostTimeOnly = false;
   hostUtimeOnly = false;
+  debug = false;
+  useDir = false;
+  procmapDir = "";
 
   // loop through args
   
@@ -107,6 +110,11 @@ int Args::parse (int argc, char **argv, const string &prog_name)
 	iret = 1;
       }
       
+    } else if (strcmp(argv[i], "-dir") == 0) {
+      useDir = true;
+      if (i < argc - 1 && argv[i+1][0] != '-') {
+	procmapDir = argv[++i];
+      }
     } else if (strcmp(argv[i], "-debug") == 0) {
 
       debug = true;
@@ -169,6 +177,16 @@ int Args::parse (int argc, char **argv, const string &prog_name)
     
   } // i
   
+  if (useDir && procmapDir.size() == 0) {
+    const char *envDir = getenv("PROCMAP_DIR");
+    if (envDir != NULL && strlen(envDir) > 0) {
+      procmapDir = envDir;
+    } else {
+      cerr << "ERROR - -dir given with no path, and $PROCMAP_DIR not set" << endl;
+      iret = 1;
+    }
+  }
+
   if (iret) {
     _usage(cerr);
     return -1;
@@ -187,6 +205,11 @@ void Args::_usage(ostream &out)
       << "       [ -c, -cont ?] provide a continuous listing\n"
       << "                      updated every n seconds\n"
       << "       [ -debug] print debugging messages\n"
+      << "       [ -dir ?] read registration files from this dir\n"
+      << "                 instead of querying procmap.\n"
+      << "                 Default dir is $PROCMAP_DIR. Best with\n"
+      << "                 PROCMAP_DIR_EXTENDED=true set for the apps.\n"
+      << "                 See PROCMAP_DIR in toolsa/pmu.h.\n"
       << "       [ -host ?] hostname - def. is $PROCMAP_HOST\n"
       << "       [ -host_time] print host time only\n"
       << "                     (ignores most args)\n"

@@ -49,6 +49,8 @@
 #include <cstdio>
 #include <cerrno>
 #include <unistd.h>
+#include <dirent.h>
+#include <toolsa/port.h>
 using namespace std;
 
 #define BASIC_FORMAT  "%-12.12s %-12.12s %-10.10s %-10.10s %-6.6s"
@@ -145,21 +147,48 @@ int print_procmap::_queryMapper()
   }
 
   PmuInfo pmuInfo;
-  if (pmuInfo.read(_args.hostname)) {
-    if (!_args.hostTimeOnly && !_args.hostUtimeOnly) {
-      fprintf(stdout, "No procmap reachable on %s\n", hostName.c_str());
-      if (isRelay) {
-	fprintf(stdout, "Relay host list: '%s'\n", hostList.c_str());
-      }
-      if (_args.debug) {
-	cerr << pmuInfo.getErrStr() << endl;
-      }
+  vector<PROCMAP_info_t> dirProcs;
+  time_t hostTime, upTime;
+  int nProcs;
+  PROCMAP_info_t *info;
+
+  if (_args.useDir) {
+
+    // read registration files from $PROCMAP_DIR instead of procmap
+
+    hostName = PORThostname();
+    hostList = "";
+    isRelay = false;
+    hostTime = time(NULL);
+    if (_readDir(dirProcs, hostTime, upTime)) {
+      return -1;
     }
-    cerr << "Cannot contact procmap, host: " << _args.hostname << endl;
-    return -1;
+    nProcs = (int) dirProcs.size();
+    info = (nProcs > 0) ? &dirProcs[0] : NULL;
+
+  } else {
+
+    if (pmuInfo.read(_args.hostname)) {
+      if (!_args.hostTimeOnly && !_args.hostUtimeOnly) {
+        fprintf(stdout, "No procmap reachable on %s\n", hostName.c_str());
+        if (isRelay) {
+	  fprintf(stdout, "Relay host list: '%s'\n", hostList.c_str());
+        }
+        if (_args.debug) {
+	  cerr << pmuInfo.getErrStr() << endl;
+        }
+      }
+      cerr << "Cannot contact procmap, host: " << _args.hostname << endl;
+      return -1;
+    }
+
+    hostTime = pmuInfo.getReplyTime();
+    upTime = pmuInfo.getUpTime();
+    nProcs = pmuInfo.getNProcs();
+    info = (PROCMAP_info_t *) pmuInfo.getInfoArray();
+
   }
 
-  time_t hostTime = pmuInfo.getReplyTime();
   DateTime hostDateTime(hostTime);
   if (_args.hostTimeOnly) {
     fprintf(stdout, "%.4d %.2d %.2d %.2d %.2d %.2d\n",
@@ -174,9 +203,6 @@ int print_procmap::_queryMapper()
     fprintf(stdout, "%ld\n", (long) hostTime);
     return 0;
   }
-
-  time_t upTime = pmuInfo.getUpTime();
-  int nProcs = pmuInfo.getNProcs();
 
   if (nProcs == 0 && !_args.printXml) {
     fprintf(stdout, "No procs registered with %s\n", hostName.c_str());
@@ -193,7 +219,6 @@ int print_procmap::_queryMapper()
   
   // sort procs
 
-  PROCMAP_info_t *info = (PROCMAP_info_t *) pmuInfo.getInfoArray();
   qsort(info, nProcs, sizeof(PROCMAP_info_t), _sortInfo);
 
   if (!_args.printToFile) {
@@ -294,6 +319,75 @@ int print_procmap::_queryMapper()
 
   return 0;
   
+}
+
+/////////////////////////////////////////////////////////////////
+// _readDir
+//
+// Read the registration files written by PMU_register() when
+// $PROCMAP_DIR is set. Entries that have not registered within
+// PROCMAP_PURGE_MULTIPLE * max_reg_interval are skipped, as procmap
+// would purge them. upTime is set to the time since the oldest
+// listed process started.
+//
+// Returns 0 on success, -1 on failure
+
+int print_procmap::_readDir(vector<PROCMAP_info_t> &procs,
+                            time_t now, time_t &upTime)
+  
+{
+
+  procs.clear();
+  upTime = 0;
+
+  DIR *dirp = opendir(_args.procmapDir.c_str());
+  if (dirp == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - print_procmap::_readDir" << endl;
+    cerr << "  Cannot open dir: " << _args.procmapDir << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  time_t oldestStart = now;
+  struct dirent *dp;
+  while ((dp = readdir(dirp)) != NULL) {
+
+    // skip '.', '..', and temporary files, which start with '.'
+
+    if (dp->d_name[0] == '.') {
+      continue;
+    }
+
+    string path = _args.procmapDir + PATH_DELIM + dp->d_name;
+    PROCMAP_info_t info;
+    if (PMU_read_dir_entry(path.c_str(), &info)) {
+      if (_args.debug) {
+        cerr << "Skipping unreadable entry: " << path << endl;
+      }
+      continue;
+    }
+
+    if (info.max_reg_interval > 0 &&
+        now - info.heartbeat_time >
+        PROCMAP_PURGE_MULTIPLE * info.max_reg_interval) {
+      if (_args.debug) {
+        cerr << "Skipping stale entry: " << path << endl;
+      }
+      continue;
+    }
+
+    if (info.start_time > 0 && info.start_time < oldestStart) {
+      oldestStart = info.start_time;
+    }
+    procs.push_back(info);
+
+  }
+  closedir(dirp);
+
+  upTime = now - oldestStart;
+  return 0;
+
 }
 
 /////////////////////////////////////////////////////////////////

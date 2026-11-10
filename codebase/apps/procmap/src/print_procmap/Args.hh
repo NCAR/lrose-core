@@ -71,6 +71,8 @@ public:
   bool hostTimeOnly;
   bool hostUtimeOnly;
   bool debug;
+  bool useDir;
+  string procmapDir;
 
 protected:
   

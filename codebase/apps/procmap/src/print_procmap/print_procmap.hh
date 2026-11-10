@@ -39,6 +39,7 @@
 #include <cstdio>
 #include <string>
 #include <map>
+#include <vector>
 #include <toolsa/pmu.h>
 using namespace std;
 
@@ -75,6 +76,8 @@ private:
   char _basicFormat[1024];
 
   int _queryMapper();
+  int _readDir(vector<PROCMAP_info_t> &procs, time_t now,
+               time_t &upTime);
   
   void _printTable(FILE *out,
                    const string &procmapHostName,
