@@ -723,6 +723,8 @@ public:
 
   double magnetic_variation_deg;
 
+  int time_plot_bar_height_pixels;
+
   int n_movie_frames;
 
   double frame_interval_secs;
@@ -1342,7 +1344,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[418];
+  mutable TDRPtable _table[419];
 
   const char *_className;
 

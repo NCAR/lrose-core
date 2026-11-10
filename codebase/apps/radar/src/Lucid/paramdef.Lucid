@@ -652,6 +652,12 @@ commentdef {
 }
 
 paramdef int {
+  p_default = 100;
+  p_descr = "Nominal height of the time plot height canvas (in pixels).";
+  p_help = "The canvas shows up below the time controller GUI. The height is recommended, not enforced. It may be increased if a large number of products is shown.";
+} time_plot_bar_height_pixels;
+
+paramdef int {
   p_default = 12;
   p_descr = "The number of frames in the movie at startup.";
   p_help = "The movie duration is the number of frames multiplied by the frame duration.";

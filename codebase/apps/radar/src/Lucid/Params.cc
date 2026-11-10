@@ -1734,6 +1734,18 @@ Params *Params::_instance = (Params *) NULL;
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'time_plot_bar_height_pixels'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("time_plot_bar_height_pixels");
+    tt->descr = tdrpStrDup("Nominal height of the time plot height canvas (in pixels).");
+    tt->help = tdrpStrDup("The canvas shows up below the time controller GUI. The height is recommended, not enforced. It may be increased if a large number of products is shown.");
+    tt->val_offset = (char *) &time_plot_bar_height_pixels - &_start_;
+    tt->single_val.i = 100;
+    tt++;
+    
     // Parameter 'n_movie_frames'
     // ctype is 'int'
     
