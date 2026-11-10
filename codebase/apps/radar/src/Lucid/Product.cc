@@ -12,6 +12,7 @@
 #include "SymprodRender.hh"
 #include "SymprodRenderContext.hh"
 #include <QPainter>
+#include <algorithm>
 #include <limits>
 
 Product::Product(Params::symprod_prod_info_t &prodInfo) :
@@ -24,6 +25,14 @@ Product::Product(Params::symprod_prod_info_t &prodInfo) :
 }
 
 Product::~Product() = default;
+
+void Product::setAvailableTimes(const vector<time_t> &times)
+{
+  _availableTimes = times;
+  sort(_availableTimes.begin(), _availableTimes.end());
+  _availableTimes.erase(unique(_availableTimes.begin(), _availableTimes.end()),
+                        _availableTimes.end());
+}
 
 bool Product::installChunks(const vector<QByteArray> &chunks, string &error)
 {

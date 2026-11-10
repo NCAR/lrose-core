@@ -39,6 +39,7 @@
 #include "SymprodRenderContext.hh"
 #include "WorldPlot.hh"
 #include <Spdb/DsSpdb.hh>
+#include <didss/DsURL.hh>
 #include <toolsa/DateTime.hh>
 #include <QObject>
 #include <algorithm>
@@ -72,6 +73,24 @@ protected:
     result->generation = _request.generation;
     result->label = _request.label;
     result->key = _request.key;
+    result->timeListStart = _request.timeListStart;
+    result->timeListEnd = _request.timeListEnd;
+
+    if (_request.requestTimeList) {
+      // Translator and parameter-file options apply to graphic generation,
+      // not to the underlying SPDB reference list queried for availability.
+      DsURL timesUrl(_request.url);
+      timesUrl.setTranslator("");
+      timesUrl.setParamFile("");
+      DsSpdb timeListSpdb;
+      result->timeListStatus = timeListSpdb.compileTimeList(
+        timesUrl.getURLStr(), _request.timeListStart, _request.timeListEnd);
+      if (result->timeListStatus == 0) {
+        result->availableTimes = timeListSpdb.getTimeList();
+      } else {
+        result->timeListError = timeListSpdb.getErrStr();
+      }
+    }
 
     DsSpdb spdb;
     spdb.setUniqueOff();
@@ -225,6 +244,9 @@ ProductMgr::ProductMgr() :
   _generations.resize(_products.size(), 0);
   _requestInFlight.resize(_products.size(), false);
   _installedKeyValid.resize(_products.size(), false);
+  _timeListValid.resize(_products.size(), false);
+  _timeListStarts.resize(_products.size(), 0);
+  _timeListEnds.resize(_products.size(), 0);
   _retryNotBefore.resize(_products.size(), 0);
   _desiredKeys.resize(_products.size());
   _installedKeys.resize(_products.size());
@@ -347,6 +369,11 @@ void ProductMgr::_requestCapturedState()
     request.gzip = _params.symprod_gzip_requests;
     request.frameStart = _lastFrameStart;
     request.frameEnd = _lastFrameEnd;
+    request.timeListStart = _gd.epoch_start;
+    request.timeListEnd = _gd.epoch_end;
+    request.requestTimeList = !_timeListValid[ii] ||
+      _timeListStarts[ii] != request.timeListStart ||
+      _timeListEnds[ii] != request.timeListEnd;
     request.key = key;
 
     _desiredKeys[ii] = key;
@@ -409,6 +436,20 @@ void ProductMgr::_handleResult(SymprodReadResult *rawResult)
   _requestInFlight[index] = false;
 
   Product &product = *_products[index];
+  bool availabilityChanged = false;
+  if (result->timeListStatus == 0) {
+    product.setAvailableTimes(result->availableTimes);
+    _timeListValid[index] = true;
+    _timeListStarts[index] = result->timeListStart;
+    _timeListEnds[index] = result->timeListEnd;
+    availabilityChanged = true;
+  } else if (!result->timeListError.empty()) {
+    // Availability is supplementary: preserve the previous ticks and allow
+    // a successful graphics request to be installed normally.
+    cerr << "WARNING - ProductMgr: cannot retrieve availability times for "
+         << product._prodInfo.menu_label << endl;
+    cerr << result->timeListError << endl;
+  }
   if (result->status != 0) {
     cerr << "ERROR - ProductMgr: cannot retrieve "
          << product._prodInfo.menu_label << endl;
@@ -421,6 +462,9 @@ void ProductMgr::_handleResult(SymprodReadResult *rawResult)
       _statusCallback("Cannot retrieve " +
                       string(product._prodInfo.menu_label) + ": " +
                       result->error, true);
+    }
+    if (availabilityChanged && _productsChangedCallback) {
+      _productsChangedCallback();
     }
     return;
   }
@@ -435,6 +479,9 @@ void ProductMgr::_handleResult(SymprodReadResult *rawResult)
       _statusCallback("Cannot decode " +
                       string(product._prodInfo.menu_label) + ": " +
                       decodeError, true);
+    }
+    if (availabilityChanged && _productsChangedCallback) {
+      _productsChangedCallback();
     }
     return;
   }
@@ -549,6 +596,7 @@ void ProductMgr::reset_product_valid_flags()
 {
   for (size_t i = 0; i < _products.size(); i++) {
     _installedKeyValid[i] = false;
+    _timeListValid[i] = false;
     _requestInFlight[i] = false;
     _retryNotBefore[i] = 0;
   }
@@ -608,6 +656,9 @@ void ProductMgr::set_product_active(int product, int active)
   }
   if (active) {
     refreshActiveProducts();
+  }
+  if (_productsChangedCallback) {
+    _productsChangedCallback();
   }
 }
 

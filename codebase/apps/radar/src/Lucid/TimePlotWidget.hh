@@ -13,6 +13,8 @@
 
 #include <ctime>
 #include <functional>
+#include <string>
+#include <vector>
 
 #include <QPoint>
 #include <QRectF>
@@ -23,6 +25,12 @@
 class QMouseEvent;
 class QPaintEvent;
 
+struct TimePlotSeries
+{
+  std::string label;
+  std::vector<time_t> times;
+};
+
 class TimePlotWidget : public QWidget
 {
 public:
@@ -30,6 +38,8 @@ public:
 
   void setMovieState(time_t startTime, int nFrames,
                      double frameIntervalSecs, int selectedFrame);
+  void setGridSeries(const TimePlotSeries &series, time_t selectedTime);
+  void setProductSeries(const std::vector<TimePlotSeries> &series);
   void setExpansionCallback(
     const std::function<void(time_t, int)> &callback) {
     _expansionCallback = callback;
@@ -58,6 +68,9 @@ private:
   double _frameIntervalSecs;
   int _nFrames;
   int _selectedFrame;
+  TimePlotSeries _gridSeries;
+  time_t _selectedGridTime;
+  std::vector<TimePlotSeries> _productSeries;
   DragMode _dragMode;
   QPoint _dragStart;
   QPoint _dragCurrent;
@@ -68,6 +81,7 @@ private:
   double _timeForPixel(double x, double start, double end) const;
   double _floorToFrame(double time) const;
   double _ceilToFrame(double time) const;
+  void _updateMinimumHeight();
   void _finishZoom();
   void _finishPan();
   void _finishExpand();

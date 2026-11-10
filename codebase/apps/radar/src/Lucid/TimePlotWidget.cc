@@ -40,10 +40,11 @@ TimePlotWidget::TimePlotWidget(QWidget *parent, const Params &params) :
         _frameIntervalSecs(1.0),
         _nFrames(0),
         _selectedFrame(0),
+        _selectedGridTime(0),
         _dragMode(DragMode::None)
 {
-  setMinimumHeight(92);
-  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  _updateMinimumHeight();
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
   setMouseTracking(true);
   setToolTip("Left drag: zoom time; middle drag: pan time; "
              "right drag: expand movie; double-click: fit movie");
@@ -51,7 +52,7 @@ TimePlotWidget::TimePlotWidget(QWidget *parent, const Params &params) :
 
 QSize TimePlotWidget::sizeHint() const
 {
-  return QSize(800, 92);
+  return QSize(800, minimumHeight());
 }
 
 void TimePlotWidget::setMovieState(time_t startTime, int nFrames,
@@ -75,6 +76,23 @@ void TimePlotWidget::setMovieState(time_t startTime, int nFrames,
   } else {
     update();
   }
+}
+
+void TimePlotWidget::setGridSeries(const TimePlotSeries &series,
+                                   time_t selectedTime)
+{
+  _gridSeries = series;
+  _selectedGridTime = selectedTime;
+  update();
+}
+
+void TimePlotWidget::setProductSeries(
+  const std::vector<TimePlotSeries> &series)
+{
+  _productSeries = series;
+  _updateMinimumHeight();
+  updateGeometry();
+  update();
 }
 
 void TimePlotWidget::fitMovie()
@@ -119,6 +137,16 @@ double TimePlotWidget::_ceilToFrame(double time) const
   return _movieStart + frame * _frameIntervalSecs;
 }
 
+void TimePlotWidget::_updateMinimumHeight()
+{
+  // Product rows are allowed to grow the dialog beyond the configured
+  // nominal height so labels and ticks never silently overlap the time axis.
+  const int contentHeight = 67 +
+    static_cast<int>(_productSeries.size()) * 12;
+  setMinimumHeight(std::max(70, std::max(
+    _params.time_plot_bar_height_pixels, contentHeight)));
+}
+
 void TimePlotWidget::paintEvent(QPaintEvent *event)
 {
   Q_UNUSED(event);
@@ -140,7 +168,10 @@ void TimePlotWidget::paintEvent(QPaintEvent *event)
                                     QColor("gray"));
 
   painter.save();
-  painter.setClipRect(plot.adjusted(0.0, 0.0, 1.0, 1.0));
+  // Clip horizontally to the time viewport but retain the lower label margin.
+  // The earlier plot-only clip hid otherwise correctly positioned labels.
+  painter.setClipRect(QRectF(plot.left(), plot.top(), plot.width(),
+                             height() - plot.top()));
 
   // The selected frame is filled before the epoch outline so its boundaries
   // remain visible even when the time view is tightly zoomed.
@@ -171,6 +202,45 @@ void TimePlotWidget::paintEvent(QPaintEvent *event)
                                    ii * _frameIntervalSecs);
     painter.drawLine(QPointF(x, bandTop), QPointF(x, bandBottom));
   }
+
+  QFont seriesFont = font();
+  seriesFont.setPixelSize(10);
+  painter.setFont(seriesFont);
+  const int productRowHeight = 12;
+  double productY = bandBottom + 8.0;
+  for (size_t ii = 0; ii < _productSeries.size(); ++ii) {
+    const int colorIndex = _params.time_tick_colors_n > 0 ?
+      static_cast<int>(ii % _params.time_tick_colors_n) : -1;
+    const QColor color = colorIndex >= 0 ?
+      colorOr(_params._time_tick_colors[colorIndex], Qt::cyan) : Qt::cyan;
+    painter.setPen(QPen(color, 1));
+    for (time_t time : _productSeries[ii].times) {
+      if (time >= _viewStart && time <= _viewEnd) {
+        const double x = _pixelForTime(static_cast<double>(time));
+        painter.drawLine(QPointF(x, productY - 4.0),
+                         QPointF(x, productY + 4.0));
+      }
+    }
+    const QString label = QString::fromStdString(_productSeries[ii].label);
+    const int labelWidth = painter.fontMetrics().horizontalAdvance(label);
+    painter.drawText(QPointF(plot.right() - labelWidth, productY + 4.0),
+                     label);
+    productY += productRowHeight;
+  }
+
+  const double gridY = axisY - 9.0;
+  const QColor gridColor = colorOr(_params.time_tick_color, Qt::yellow);
+  painter.setPen(QPen(gridColor, 1));
+  painter.setBrush(gridColor);
+  for (time_t time : _gridSeries.times) {
+    if (time >= _viewStart && time <= _viewEnd) {
+      const double x = _pixelForTime(static_cast<double>(time));
+      const double radius = time == _selectedGridTime ? 3.0 : 2.0;
+      painter.drawEllipse(QPointF(x, gridY), radius, radius);
+    }
+  }
+  painter.drawText(QPointF(plot.left(), gridY + 4.0),
+                   QString::fromStdString(_gridSeries.label));
 
   painter.setPen(QPen(axisColor, 1));
   painter.drawLine(QPointF(plot.left(), axisY),

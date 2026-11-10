@@ -152,9 +152,10 @@ public:
   bool getReadBusyH() { return _readBusyH; }
 
   // time list
-  
-  // void setTimeListValid(bool state) { _timeListValid = state; }
+
+  void invalidateTimeList() { _timeListValid = false; }
   bool getTimeListValid() const { return _timeListValid; }
+  const vector<time_t> &getTimeList() const { return _timeList; }
   
   // Get data for a horiz plane
   // This is implemented in a thread.
@@ -372,6 +373,10 @@ private:
   
   int _page;
   bool _timeListValid;
+  // The worker fills the pending list; successful horizontal completion
+  // publishes it on the GUI thread alongside the matching grid data.
+  vector<time_t> _pendingTimeList;
+  vector<time_t> _timeList;
   double _vLevel;
   bool _readBusyH;
 

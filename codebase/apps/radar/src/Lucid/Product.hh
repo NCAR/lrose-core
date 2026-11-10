@@ -39,6 +39,9 @@ public:
                            const SymprodRenderContext &context);
   SymprodRenderObj *getClosestObject() const { return _closestObject; }
 
+  void setAvailableTimes(const vector<time_t> &times);
+  const vector<time_t> &getAvailableTimes() const { return _availableTimes; }
+
   int _active;
   int _data_valid;
   time_t _last_collected;
@@ -49,6 +52,9 @@ private:
                          vector<SymprodRender *> &selected) const;
 
   vector<unique_ptr<SymprodRender>> _symprods;
+  // Availability is independent of the decoded snapshot because short SPDB
+  // requests intentionally retrieve only enough graphics for one frame.
+  vector<time_t> _availableTimes;
   SymprodRenderObj *_closestObject;
 };
 

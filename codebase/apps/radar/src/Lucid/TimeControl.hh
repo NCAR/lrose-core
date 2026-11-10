@@ -124,6 +124,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   void goBack1();
   void goFwd1();
 
+  // Refresh the value-owned availability snapshots rendered below the movie
+  // controls. Call only on the GUI thread after readers publish new data.
+  void refreshDataAvailability();
+
  private:
 
   // Singleton instance pointer.

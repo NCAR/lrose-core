@@ -46,6 +46,8 @@
 #include "TimeControl.hh"
 #include "TimePlotWidget.hh"
 #include "GuiManager.hh"
+#include "MdvReader.hh"
+#include "ProductMgr.hh"
 
 // initialize instance
 
@@ -687,12 +689,29 @@ DateTime TimeControl::_getGuiEndTime() const
 
 void TimeControl::_acceptGuiSelections()
 {
+  const bool movieRangeChanged = _startTime != _guiStartTime ||
+    _nFramesMovie != _guiNFramesMovie ||
+    fabs(_frameIntervalSecs - _guiFrameIntervalSecs) > 1.0e-6;
   _startTime = _guiStartTime;
   _nFramesMovie = _guiNFramesMovie;
   _frameIntervalSecs = _guiFrameIntervalSecs;
   _frameIndex = _guiFrameIndex;
   _enableAcceptCancel(false);
   _computeFrameTimes();
+  if (movieRangeChanged) {
+    // Keep the legacy request epoch synchronized with this dialog. Its end is
+    // the end of the final frame, matching the canvas band and CIDD semantics.
+    _gd.epoch_start = _startTime.utime();
+    _gd.epoch_end = static_cast<time_t>(
+      _startTime.utime() + _nFramesMovie * _frameIntervalSecs);
+    // MDV time lists are queried over the movie domain. Force each field to
+    // publish a matching list after a pending movie edit is accepted.
+    for (int ii = 0; ii < _gd.num_datafields; ++ii) {
+      if (_gd.mread[ii]) {
+        _gd.mread[ii]->invalidateTimeList();
+      }
+    }
+  }
   _timeHasChanged = true;
 }
 
@@ -812,6 +831,43 @@ void TimeControl::_updateTimePlot()
     _timePlot->setMovieState(_guiStartTime.utime(), _guiNFramesMovie,
                              _guiFrameIntervalSecs, _guiFrameIndex);
   }
+}
+
+////////////////////////////////////////////////////////
+// refresh grid and symbolic-product availability rows
+
+void TimeControl::refreshDataAvailability()
+{
+  if (!_timePlot) {
+    return;
+  }
+
+  TimePlotSeries gridSeries;
+  time_t selectedGridTime = 0;
+  if (_gd.h_win.page >= 0 && _gd.h_win.page < _gd.num_datafields) {
+    const MdvReader *reader = _gd.mread[_gd.h_win.page];
+    if (reader) {
+      gridSeries.label = reader->legend_name;
+      gridSeries.times = reader->getTimeList();
+      selectedGridTime = reader->h_date.utime();
+    }
+  }
+  _timePlot->setGridSeries(gridSeries, selectedGridTime);
+
+  vector<TimePlotSeries> productSeries;
+  if (_gd.prod.products_on && _gd.prod_mgr) {
+    for (int ii = 0; ii < _gd.prod_mgr->get_num_products(); ++ii) {
+      const Product *product = _gd.prod_mgr->getProduct(ii);
+      if (!product || !product->_active) {
+        continue;
+      }
+      TimePlotSeries series;
+      series.label = product->_prodInfo.menu_label;
+      series.times = product->getAvailableTimes();
+      productSeries.push_back(std::move(series));
+    }
+  }
+  _timePlot->setProductSeries(productSeries);
 }
 
 ////////////////////////////////////////////////////////

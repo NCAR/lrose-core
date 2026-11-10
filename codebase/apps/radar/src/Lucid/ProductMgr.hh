@@ -76,6 +76,9 @@ struct SymprodReadRequest {
   bool gzip = false;
   time_t frameStart = 0;
   time_t frameEnd = 0;
+  bool requestTimeList = false;
+  time_t timeListStart = 0;
+  time_t timeListEnd = 0;
   SymprodRequestKey key;
 };
 
@@ -87,6 +90,11 @@ struct SymprodReadResult {
   int status = -1;
   string error;
   vector<QByteArray> chunks;
+  int timeListStatus = -1;
+  string timeListError;
+  time_t timeListStart = 0;
+  time_t timeListEnd = 0;
+  vector<time_t> availableTimes;
 };
 
 ///////////////////////////////////////////////////////////////
@@ -199,6 +207,9 @@ private:
   vector<int> _generations;
   vector<bool> _requestInFlight;
   vector<bool> _installedKeyValid;
+  vector<bool> _timeListValid;
+  vector<time_t> _timeListStarts;
+  vector<time_t> _timeListEnds;
   vector<time_t> _retryNotBefore;
   vector<SymprodRequestKey> _desiredKeys;
   vector<SymprodRequestKey> _installedKeys;

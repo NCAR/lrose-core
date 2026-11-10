@@ -516,6 +516,7 @@ int MdvReader::_handleHorizReadDone()
   // success - data is in
 
   h_data_valid = 1;
+  _timeList = _pendingTimeList;
   
   // copy the requested field
 
@@ -1015,10 +1016,16 @@ int MdvReader::_getTimeList(const string &url,
     if (mdvx.compileTimeList()) {
       cerr << "ERROR -CIDD:  setTimeListModeValid" << endl;
       cerr << mdvx.getErrStr();
-      _timeListValid = true;
-    }  
+      _timeListValid = false;
+      // Availability is supplementary display information. Preserve the
+      // previous list and continue the primary grid read if this query fails.
+      return 0;
+    }
+    _pendingTimeList = mdvx.getTimeList();
+    _timeListValid = true;
   } else {
     // _gd.io_info.outstanding_request = 0;
+    _pendingTimeList.clear();
     _timeListValid = true;
   }
 

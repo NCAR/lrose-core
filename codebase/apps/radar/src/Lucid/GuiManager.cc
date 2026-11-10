@@ -533,6 +533,9 @@ void GuiManager::_setupWindows()
       if (_horiz) {
         _horiz->rerenderProducts();
       }
+      if (_timeControl) {
+        _timeControl->refreshDataAvailability();
+      }
     });
     _gd.prod_mgr->setStatusCallback(
       [this](const string &message, bool isError) {
@@ -597,6 +600,7 @@ void GuiManager::_setupWindows()
   // time panel
   
   _timeControl = new TimeControl(this);
+  _timeControl->refreshDataAvailability();
   
   // fill out menu bar
 
@@ -1038,6 +1042,9 @@ void GuiManager::_populateProductsMenu()
       if (_horiz) {
         _horiz->rerenderProducts();
       }
+      if (_timeControl) {
+        _timeControl->refreshDataAvailability();
+      }
     });
     
     // add item for wind selection
@@ -1064,6 +1071,9 @@ void GuiManager::_setProductsEnabled(bool enable)
   }
   if (enable && _gd.prod_mgr) {
     _gd.prod_mgr->refreshActiveProducts();
+  }
+  if (_timeControl) {
+    _timeControl->refreshDataAvailability();
   }
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> products enabled? " << (_productsEnabled?"Y":"N") << endl;
@@ -1737,6 +1747,7 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
   if (_fieldHasChanged) {
     stateHasChanged = true;
     _fieldHasChanged = false;
+    _timeControl->refreshDataAvailability();
   }
 
   // Request options such as column-max require new horizontal data even
@@ -1790,6 +1801,7 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
     }
     _vert->setSelectedHorizHeight(_vlevelManager.getSelectedLevel());
     _vlevelSelector->update();
+    _timeControl->refreshDataAvailability();
   }
 
 }
@@ -1878,6 +1890,10 @@ void GuiManager::_reloadData()
   // Use the normal request path so a reload waits for any active horizontal
   // read and preserves the displayed image until replacement data arrive.
   _horizontalRequestHasChanged = true;
+  if (_gd.h_win.page >= 0 && _gd.h_win.page < _gd.num_datafields &&
+      _gd.mread[_gd.h_win.page]) {
+    _gd.mread[_gd.h_win.page]->invalidateTimeList();
+  }
   if (_gd.prod_mgr) {
     _gd.prod_mgr->reset_product_valid_flags();
     _gd.prod_mgr->refreshActiveProducts();
