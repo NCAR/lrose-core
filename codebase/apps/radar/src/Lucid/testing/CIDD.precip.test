@@ -1294,7 +1294,7 @@ prod_info = {
   ,
   {
     menu_label = "SURFACE-simple",
-    url = "spdbp:Rhi2Symprod:ticks//localhost::$(HOME)/data/lucid/precip/spdb/surface",
+    url = "spdbp:Metar2Symprod:simple//localhost::$(HOME)/data/lucid/precip/spdb/surface",
     data_type = 0,
     render_type = RENDER_LATEST_IN_FRAME,
     on_by_default = FALSE,
@@ -1306,8 +1306,8 @@ prod_info = {
   }
   ,
   {
-    menu_label = "SURFACE-full",
-    url = "spdbp:Rhi2Symprod:ticks//localhost::$(HOME)/data/lucid/precip/spdb/surface",
+    menu_label = "SURFACE-labels",
+    url = "spdbp:MetarSymprod:labels//localhost::$(HOME)/data/lucid/precip/spdb/surface",
     data_type = 0,
     render_type = RENDER_LATEST_IN_FRAME,
     on_by_default = FALSE,
@@ -1320,7 +1320,7 @@ prod_info = {
   ,
   {
     menu_label = "METARS-simple",
-    url = "spdbp:Rhi2Symprod:ticks//localhost::$(HOME)/data/lucid/precip/spdb/metar",
+    url = "spdbp:Metar2Symprod:simple//localhost::$(HOME)/data/lucid/precip/spdb/metar",
     data_type = 0,
     render_type = RENDER_LATEST_IN_FRAME,
     on_by_default = FALSE,
@@ -1332,8 +1332,8 @@ prod_info = {
   }
   ,
   {
-    menu_label = "METARS-full",
-    url = "spdbp:Rhi2Symprod:ticks//localhost::$(HOME)/data/lucid/precip/spdb/metar",
+    menu_label = "METARS-labels",
+    url = "spdbp:Metar2Symprod:labels//localhost::$(HOME)/data/lucid/precip/spdb/metar",
     data_type = 0,
     render_type = RENDER_LATEST_IN_FRAME,
     on_by_default = FALSE,
@@ -1346,7 +1346,7 @@ prod_info = {
   ,
   {
     menu_label = "LTG" ,
-    url = "spdbp:Rhi2Symprod:ticks//localhost::$(HOME)/data/lucid/precip/spdb/ltg",
+    url = "spdbp:Ltg2Symprod:yellow//localhost::$(HOME)/data/lucid/precip/spdb/ltg",
     data_type = 0,
     render_type = RENDER_ALL_VALID,
     // render_type = RENDER_ALL_BEFORE_DATA_TIME,
@@ -1360,7 +1360,7 @@ prod_info = {
   ,
   {
     menu_label = "PRECIP-rate",
-    url = "spdbp:Rhi2Symprod:ticks//localhost::$(HOME)/data/lucid/precip/spdb/gauge",
+    url = "spdbp:Metar2Symprod:precip_rate//localhost::$(HOME)/data/lucid/precip/spdb/gauge",
     data_type = 0,
     render_type = RENDER_LATEST_IN_FRAME,
     on_by_default = FALSE,
@@ -1373,7 +1373,7 @@ prod_info = {
   ,
   {
     menu_label = "PRECIP-24hr",
-    url = "spdbp:Rhi2Symprod:ticks//localhost::$(HOME)/data/lucid/precip/spdb/gauge",
+    url = "spdbp:Metar2Symprod:precip_24hr//localhost::$(HOME)/data/lucid/precip/spdb/gauge",
     data_type = 0,
     render_type = RENDER_LATEST_IN_FRAME,
     on_by_default = FALSE,
