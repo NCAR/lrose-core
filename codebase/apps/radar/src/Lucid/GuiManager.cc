@@ -34,6 +34,7 @@
 
 #include <string>
 #include <cmath>
+#include <ctime>
 #include <iostream>
 #include <QActionGroup>
 #include <QApplication>
@@ -58,6 +59,7 @@
 #include <QStatusBar>
 #include <QDateTime>
 #include <QDateTimeEdit>
+#include <QDir>
 #include <QDoubleSpinBox>
 #include <QLineEdit>
 #include <QErrorMessage>
@@ -74,6 +76,9 @@
 #include <QDesktopServices>
 #include <QTableWidget>
 #include <QHeaderView>
+#include <QFileInfo>
+#include <QRegularExpression>
+#include <QStringList>
 
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
@@ -142,6 +147,14 @@ QDoubleSpinBox *addFieldNumberEditor(QMenu *menu, const QString &label,
   action->setDefaultWidget(editor);
   menu->addAction(action);
   return spinBox;
+}
+
+QString safeFileNameComponent(QString value)
+{
+  value = value.trimmed();
+  value.replace(QRegularExpression("[^A-Za-z0-9._-]+"), "_");
+  value.remove(QRegularExpression("^_+|_+$"));
+  return value.isEmpty() ? QString("field") : value;
 }
 
 } // namespace
@@ -1093,8 +1106,10 @@ void GuiManager::_createActions()
   // save image
   
   _saveImageAct = new QAction(tr("Save-Image"), this);
-  _saveImageAct->setStatusTip(tr("Save image to png file"));
-  connect(_saveImageAct, &QAction::triggered, this, &GuiManager::_saveImageToFile);
+  _saveImageAct->setStatusTip(
+    tr("Save the horizontal and visible vertical views to the image output directory"));
+  connect(_saveImageAct, &QAction::triggered,
+          this, &GuiManager::_saveViewImages);
 
 }
 
@@ -2765,6 +2780,91 @@ void GuiManager::_saveImageToFile(bool interactive)
     
   } // if (_params.images_write_latest_data_info)
 
+}
+
+/////////////////////////////////////////////////////
+// save current view snapshots to the configured image directory
+
+void GuiManager::_saveViewImages()
+{
+  if (!_horiz) {
+    QMessageBox::critical(this, tr("Cannot save images"),
+                          tr("The horizontal view is not available."));
+    return;
+  }
+
+  QString outputDirPath = QString::fromUtf8(_params.images_output_dir);
+  outputDirPath.replace("$(HOME)", QDir::homePath());
+  if (outputDirPath.startsWith("$HOME")) {
+    outputDirPath.replace(0, 5, QDir::homePath());
+  }
+  if (outputDirPath.trimmed().isEmpty()) {
+    QMessageBox::critical(this, tr("Cannot save images"),
+                          tr("images_output_dir is empty."));
+    return;
+  }
+  outputDirPath = QDir::cleanPath(outputDirPath);
+  QDir outputDir;
+  if (!outputDir.mkpath(outputDirPath)) {
+    QMessageBox::critical(
+      this, tr("Cannot save images"),
+      tr("Cannot create the output directory:\n%1").arg(outputDirPath));
+    return;
+  }
+  outputDir.setPath(outputDirPath);
+
+  const time_t selectedTime = _timeControl ?
+    _timeControl->getSelectedTime().utime() : time(nullptr);
+  const QString timePart = QDateTime::fromSecsSinceEpoch(
+    selectedTime, Qt::UTC).toString("yyyyMMdd_HHmmss'_UTC'");
+  const QString fieldPart = safeFileNameComponent(
+    QString::fromStdString(getSelectedFieldLabel()));
+  const QString commonPart = fieldPart + "_" + timePart;
+  const bool saveVertical = _vertWindow && _vert &&
+                            _vertWindow->isVisible();
+
+  // Choose one suffix for the complete capture so horizontal and vertical
+  // files remain an obvious pair and an earlier snapshot is never replaced.
+  QString suffix;
+  QString horizPath;
+  QString vertPath;
+  for (int sequence = 1; ; ++sequence) {
+    suffix = sequence == 1 ? QString() :
+      QString("_%1").arg(sequence, 2, 10, QChar('0'));
+    horizPath = outputDir.filePath(
+      "lucid_horiz_" + commonPart + suffix + ".png");
+    vertPath = outputDir.filePath(
+      "lucid_vert_" + commonPart + suffix + ".png");
+    if (!QFileInfo::exists(horizPath) &&
+        (!saveVertical || !QFileInfo::exists(vertPath))) {
+      break;
+    }
+  }
+
+  QStringList savedPaths;
+  QStringList failedPaths;
+  if (_horiz->grab().save(horizPath, "PNG")) {
+    savedPaths.push_back(horizPath);
+  } else {
+    failedPaths.push_back(horizPath);
+  }
+  if (saveVertical) {
+    if (_vert->grab().save(vertPath, "PNG")) {
+      savedPaths.push_back(vertPath);
+    } else {
+      failedPaths.push_back(vertPath);
+    }
+  }
+
+  if (!failedPaths.isEmpty()) {
+    QMessageBox::critical(
+      this, tr("Image save failed"),
+      tr("Could not save:\n%1").arg(failedPaths.join("\n")));
+  } else {
+    QMessageBox::information(
+      this, tr("Images saved"),
+      tr("Saved:\n%1").arg(savedPaths.join("\n")));
+  }
 }
 
 void GuiManager::ShowContextMenu(const QPoint &pos) {

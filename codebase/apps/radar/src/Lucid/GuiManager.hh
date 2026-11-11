@@ -497,6 +497,7 @@ private slots:
   
   // images
 
+  void _saveViewImages();
   void _saveImageToFile(bool interactive = true);
   void _createRealtimeImageFiles();
   void _createArchiveImageFiles();
