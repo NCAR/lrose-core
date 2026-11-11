@@ -48,6 +48,7 @@
 #include <time.h>
 #include <signal.h>
 #include <limits.h>
+#include <sys/stat.h>
 #include <pthread.h>
 
 #include <netinet/in.h> /* sin_family sin_addr */
@@ -65,6 +66,7 @@ static int Init_done = 0;
 static long Start_time = 0;
 static si32 Status = 0;
 static int Port = -1;
+static si32 N_reg = 0;
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /*
@@ -206,6 +208,11 @@ static int Proc_dir_path(char *path, size_t len, const char *proc_dir,
 
 /*
  * Write the registration file for this process into proc_dir.
+ * info is in host byte order. status_str is the caller's full string,
+ * written as-is in the legacy format.
+ *
+ * If extended is set, the file is in 'key=value' format, otherwise the
+ * legacy 3-line format.
  *
  * The file is written to a temporary name in the same directory and
  * then renamed onto the final name. rename() replaces the target
@@ -217,11 +224,9 @@ static int Proc_dir_path(char *path, size_t len, const char *proc_dir,
  */
 
 static void Write_proc_dir_file(const char *proc_dir,
-                                const char *prog_name,
-                                const char *instance,
-                                int pid,
-                                int max_reg_interval,
-                                const char *status_str)
+                                const PROCMAP_info_t *info,
+                                const char *status_str,
+                                int extended)
 {
   char proc_path[MAX_PATH_LEN];
   char tmp_path[MAX_PATH_LEN];
@@ -229,11 +234,11 @@ static void Write_proc_dir_file(const char *proc_dir,
   int n;
 
   if (Proc_dir_path(proc_path, sizeof(proc_path),
-                    proc_dir, prog_name, instance)) {
+                    proc_dir, info->name, info->instance)) {
     return;
   }
   n = snprintf(tmp_path, sizeof(tmp_path), "%s/.%s.%s.%d.tmp",
-               proc_dir, prog_name, instance, pid);
+               proc_dir, info->name, info->instance, (int) info->pid);
   if (n < 0 || (size_t) n >= sizeof(tmp_path)) {
     return;
   }
@@ -241,9 +246,40 @@ static void Write_proc_dir_file(const char *proc_dir,
   if ((proc_file = fopen(tmp_path, "w")) == NULL) {
     return;
   }
-  fprintf(proc_file, "%d\n", pid);
-  fprintf(proc_file, "%ld\n", (long) max_reg_interval);
-  fprintf(proc_file, "%s\n", status_str);
+
+  if (extended) {
+
+    /* status string must stay on one line */
+
+    char one_line[PROCMAP_STATUS_MAX];
+    char *cp;
+    STRncopy(one_line, info->status_str, PROCMAP_STATUS_MAX);
+    for (cp = one_line; *cp != '\0'; cp++) {
+      if (*cp == '\n' || *cp == '\r') {
+        *cp = ' ';
+      }
+    }
+
+    fprintf(proc_file, "name=%s\n", info->name);
+    fprintf(proc_file, "instance=%s\n", info->instance);
+    fprintf(proc_file, "pid=%d\n", (int) info->pid);
+    fprintf(proc_file, "host=%s\n", info->host);
+    fprintf(proc_file, "user=%s\n", info->user);
+    fprintf(proc_file, "start_time=%ld\n", (long) info->start_time);
+    fprintf(proc_file, "heartbeat_time=%ld\n", (long) info->heartbeat_time);
+    fprintf(proc_file, "max_reg_interval=%ld\n", (long) info->max_reg_interval);
+    fprintf(proc_file, "status=%ld\n", (long) info->status);
+    fprintf(proc_file, "n_reg=%ld\n", (long) info->n_reg);
+    fprintf(proc_file, "status_str=%s\n", one_line);
+
+  } else {
+
+    fprintf(proc_file, "%d\n", (int) info->pid);
+    fprintf(proc_file, "%ld\n", (long) info->max_reg_interval);
+    fprintf(proc_file, "%s\n", status_str);
+
+  }
+
   if (fclose(proc_file) != 0) {
     unlink(tmp_path);
     return;
@@ -410,6 +446,8 @@ void PMU_register_pid(const char *prog_name, const char *instance,
   static char *proc_host2;
   static char *proc_dir;
   static char *proc_user;
+  static int proc_dir_extended;
+  char *env_str;
   PROCMAP_info_t info;
 
   /*
@@ -418,17 +456,14 @@ void PMU_register_pid(const char *prog_name, const char *instance,
 
   if (first_call) {
     proc_dir = getenv("PROCMAP_DIR");
+    env_str = getenv("PROCMAP_DIR_EXTENDED");
+    proc_dir_extended = (env_str != NULL && STRequal(env_str, "true"));
     proc_host = getenv("PROCMAP_HOST");
     proc_host2 = getenv("PROCMAP_HOST2");
     proc_user = getenv("USER");
     if(proc_user == NULL)
       proc_user = getenv("LOGNAME");
     first_call = FALSE;
-  }
-
-  if (proc_dir != NULL) {
-    Write_proc_dir_file(proc_dir, prog_name, instance,
-                        pid, max_reg_interval, status_str);
   }
 
   /*
@@ -441,11 +476,16 @@ void PMU_register_pid(const char *prog_name, const char *instance,
   info.pid = pid;
   info.max_reg_interval = max_reg_interval;
   info.status = Status;
+  info.n_reg = ++N_reg;
   STRncopy(info.name, prog_name, PROCMAP_NAME_MAX);
   STRncopy(info.instance, instance, PROCMAP_INSTANCE_MAX);
   STRncopy(info.status_str, status_str, PROCMAP_STATUS_MAX);
   STRncopy(info.host, Pmu_hostname("local"), PROCMAP_HOST_MAX);
-  STRncopy(info.user, proc_user, PROCMAP_USER_MAX);
+  STRncopy(info.user, proc_user ? proc_user : "", PROCMAP_USER_MAX);
+
+  if (proc_dir != NULL) {
+    Write_proc_dir_file(proc_dir, &info, status_str, proc_dir_extended);
+  }
   
   PMU_htonl_Info(&info);
     
@@ -932,3 +972,123 @@ void PMU_set_status(si32 status, const char *status_str)
 }
 
   
+
+/******************************************
+ * PMU_read_dir_entry()
+ *
+ * Read one $PROCMAP_DIR registration file into info (host byte order).
+ * See pmu.h for details.
+ */
+
+int PMU_read_dir_entry(const char *path, PROCMAP_info_t *info)
+
+{
+
+  FILE *fp;
+  char line[PROCMAP_STATUS_MAX + 64];
+  struct stat sbuf;
+  const char *base;
+  const char *dot;
+  int nlines = 0;
+  int keyed = 0;
+  int have_pid = 0;
+
+  memset(info, 0, sizeof(PROCMAP_info_t));
+
+  if (stat(path, &sbuf) != 0) {
+    return -1;
+  }
+
+  /* default name / instance from file name 'name.instance' */
+
+  base = strrchr(path, '/');
+  base = (base == NULL) ? path : base + 1;
+  dot = strchr(base, '.');
+  if (dot != NULL && dot != base) {
+    size_t nlen = (size_t) (dot - base);
+    if (nlen >= PROCMAP_NAME_MAX) {
+      nlen = PROCMAP_NAME_MAX - 1;
+    }
+    memcpy(info->name, base, nlen);
+    info->name[nlen] = '\0';
+    STRncopy(info->instance, dot + 1, PROCMAP_INSTANCE_MAX);
+  } else {
+    STRncopy(info->name, base, PROCMAP_NAME_MAX);
+  }
+
+  /* default heartbeat from file modify time */
+
+  info->heartbeat_time = (si32) sbuf.st_mtime;
+  info->last_registered = (si32) sbuf.st_mtime;
+
+  if ((fp = fopen(path, "r")) == NULL) {
+    return -1;
+  }
+
+  while (fgets(line, sizeof(line), fp) != NULL) {
+
+    char *eq;
+    char *val;
+    size_t len = strlen(line);
+    while (len > 0 && (line[len-1] == '\n' || line[len-1] == '\r')) {
+      line[--len] = '\0';
+    }
+
+    if (nlines == 0) {
+      keyed = (strchr(line, '=') != NULL);
+    }
+    nlines++;
+
+    if (!keyed) {
+      /* legacy 3-line format: pid, max_reg_interval, status_str */
+      if (nlines == 1) {
+        info->pid = atoi(line);
+        have_pid = 1;
+      } else if (nlines == 2) {
+        info->max_reg_interval = atoi(line);
+      } else if (nlines == 3) {
+        STRncopy(info->status_str, line, PROCMAP_STATUS_MAX);
+      }
+      continue;
+    }
+
+    if ((eq = strchr(line, '=')) == NULL) {
+      continue;
+    }
+    *eq = '\0';
+    val = eq + 1;
+
+    if (STRequal(line, "name")) {
+      STRncopy(info->name, val, PROCMAP_NAME_MAX);
+    } else if (STRequal(line, "instance")) {
+      STRncopy(info->instance, val, PROCMAP_INSTANCE_MAX);
+    } else if (STRequal(line, "pid")) {
+      info->pid = atoi(val);
+      have_pid = 1;
+    } else if (STRequal(line, "host")) {
+      STRncopy(info->host, val, PROCMAP_HOST_MAX);
+    } else if (STRequal(line, "user")) {
+      STRncopy(info->user, val, PROCMAP_USER_MAX);
+    } else if (STRequal(line, "start_time")) {
+      info->start_time = (si32) atol(val);
+    } else if (STRequal(line, "heartbeat_time")) {
+      info->heartbeat_time = (si32) atol(val);
+      info->last_registered = info->heartbeat_time;
+    } else if (STRequal(line, "max_reg_interval")) {
+      info->max_reg_interval = (si32) atol(val);
+    } else if (STRequal(line, "status")) {
+      info->status = (si32) atol(val);
+    } else if (STRequal(line, "n_reg")) {
+      info->n_reg = (si32) atol(val);
+    } else if (STRequal(line, "status_str")) {
+      STRncopy(info->status_str, val, PROCMAP_STATUS_MAX);
+    }
+    /* unknown keys are ignored, for forward compatibility */
+
+  }
+
+  fclose(fp);
+
+  return have_pid ? 0 : -1;
+
+}

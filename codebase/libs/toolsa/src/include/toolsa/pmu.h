@@ -76,6 +76,24 @@ extern void PMU_htonl_Reply(PROCMAP_reply_t *reply);
  *   ('.procname.instance.pid.tmp') and renamed into place, so readers
  *   never see an empty or partial file.
  *
+ *   If $PROCMAP_DIR_EXTENDED is also set to "true", the file instead
+ *   contains one 'key=value' per line, covering the fields of
+ *   PROCMAP_info_t:
+ *     name=<prog_name>
+ *     instance=<instance>
+ *     pid=<pid>
+ *     host=<hostname>
+ *     user=<user>
+ *     start_time=<unix secs>
+ *     heartbeat_time=<unix secs, time of this registration>
+ *     max_reg_interval=<max secs expected between registrations>
+ *     status=<int status, see PMU_set_status()>
+ *     n_reg=<number of registrations by this process>
+ *     status_str=<status string, newlines replaced by spaces>
+ *   Readers should ignore unknown keys. A process is considered
+ *   hung if now - heartbeat_time > max_reg_interval.
+ *   PMU_read_dir_entry() parses either format.
+ *
  *   If $PROCMAP_HOST is set, it registers with procmap on
  *     that host
  *
@@ -222,6 +240,20 @@ extern int PMU_requestInfo(PROCMAP_request_t *req,
  */
 
 int PMU_init_done();
+
+/******************************************
+ * PMU_read_dir_entry()
+ *
+ * Read one $PROCMAP_DIR registration file into info, in host byte
+ * order. Accepts both formats (see PMU_register above). For the
+ * 3-line format, name and instance come from the file name
+ * 'name.instance' and heartbeat_time from the file modify time.
+ * last_registered is set to heartbeat_time.
+ *
+ * Returns 0 on success, -1 on failure.
+ */
+
+extern int PMU_read_dir_entry(const char *path, PROCMAP_info_t *info);
 
 #ifdef __cplusplus
 }
