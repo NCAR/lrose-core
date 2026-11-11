@@ -72,6 +72,9 @@ extern void PMU_htonl_Reply(PROCMAP_reply_t *reply);
  *     line 0: pid
  *     line 1: max secs between registration
  *     line 2: status string
+ *   The file is written to a temporary dot-file in the same directory
+ *   ('.procname.instance.pid.tmp') and renamed into place, so readers
+ *   never see an empty or partial file.
  *
  *   If $PROCMAP_HOST is set, it registers with procmap on
  *     that host

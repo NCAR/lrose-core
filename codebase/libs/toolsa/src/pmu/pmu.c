@@ -190,6 +190,70 @@ static int Communicate(int type,
   return (ret == 1);
 }
 
+/*------------------ PROCMAP_DIR file backend -----------------------*/
+
+/*
+ * Compute the path of the registration file in proc_dir.
+ * Returns 0 on success, -1 if the path does not fit.
+ */
+
+static int Proc_dir_path(char *path, size_t len, const char *proc_dir,
+                         const char *prog_name, const char *instance)
+{
+  int n = snprintf(path, len, "%s/%s.%s", proc_dir, prog_name, instance);
+  return (n < 0 || (size_t) n >= len) ? -1 : 0;
+}
+
+/*
+ * Write the registration file for this process into proc_dir.
+ *
+ * The file is written to a temporary name in the same directory and
+ * then renamed onto the final name. rename() replaces the target
+ * atomically, so a reader always sees either the previous complete
+ * file or the new complete file - never an empty or partial one.
+ * The temporary name starts with '.' so directory scanners can skip it.
+ *
+ * See pmu.h for the file format.
+ */
+
+static void Write_proc_dir_file(const char *proc_dir,
+                                const char *prog_name,
+                                const char *instance,
+                                int pid,
+                                int max_reg_interval,
+                                const char *status_str)
+{
+  char proc_path[MAX_PATH_LEN];
+  char tmp_path[MAX_PATH_LEN];
+  FILE *proc_file;
+  int n;
+
+  if (Proc_dir_path(proc_path, sizeof(proc_path),
+                    proc_dir, prog_name, instance)) {
+    return;
+  }
+  n = snprintf(tmp_path, sizeof(tmp_path), "%s/.%s.%s.%d.tmp",
+               proc_dir, prog_name, instance, pid);
+  if (n < 0 || (size_t) n >= sizeof(tmp_path)) {
+    return;
+  }
+
+  if ((proc_file = fopen(tmp_path, "w")) == NULL) {
+    return;
+  }
+  fprintf(proc_file, "%d\n", pid);
+  fprintf(proc_file, "%ld\n", (long) max_reg_interval);
+  fprintf(proc_file, "%s\n", status_str);
+  if (fclose(proc_file) != 0) {
+    unlink(tmp_path);
+    return;
+  }
+
+  if (rename(tmp_path, proc_path) != 0) {
+    unlink(tmp_path);
+  }
+}
+
 /**********************************************************************
  *
  * Communicate_both()
@@ -331,9 +395,7 @@ void PMU_register_pid(const char *prog_name, const char *instance,
   static char *proc_host2;
   static char *proc_dir;
   static char *proc_user;
-  char proc_path[512];
   PROCMAP_info_t info;
-  FILE *proc_file;
 
   /*
    * get environment variables
@@ -350,23 +412,9 @@ void PMU_register_pid(const char *prog_name, const char *instance,
   }
 
   if (proc_dir != NULL) {
-
-    /*
-     * write file
-     * Limit the characters copied from proc_dir to proc_path to 
-     * avoid unbounded array copy
-     */
-    
-    snprintf(proc_path, 512,"%s/%s.%s", proc_dir, prog_name, instance);
-
-    if ((proc_file = fopen(proc_path, "w")) != NULL) {
-      fprintf(proc_file, "%d\n", pid);
-      fprintf(proc_file, "%ld\n", (long) max_reg_interval);
-      fprintf(proc_file, "%s\n", status_str);
-      fclose(proc_file);
-    }
-    
-  } /* if (proc_dir != NULL) */
+    Write_proc_dir_file(proc_dir, prog_name, instance,
+                        pid, max_reg_interval, status_str);
+  }
 
   /*
    * load up info struct
