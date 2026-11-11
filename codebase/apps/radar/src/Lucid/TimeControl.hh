@@ -208,6 +208,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   int _loopDelayMsecs;
   bool _isRealtime;
   bool _isSweep;
+  bool _outputAfterBuild;
 
   enum class MovieState { Idle, Building, Playing };
   MovieState _movieState;
@@ -266,8 +267,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _cancelGuiSelections();
   
   void _startMovie();
+  void _beginMovieBuild(bool outputAfterBuild);
   void _stopMovie();
   void _outputMovieLoop();
+  void _finishMovieOutput();
   void _requestMovieFrame(int frameIndex);
   void _startMoviePlayback();
   void _advanceMoviePlayback();

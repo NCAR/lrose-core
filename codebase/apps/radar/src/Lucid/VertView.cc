@@ -660,6 +660,14 @@ bool VertView::hasMovieFrame(int frameIndex) const
     !_movieFrames[frameIndex].isNull();
 }
 
+QImage VertView::movieFrameImage(int frameIndex) const
+{
+  if (!hasMovieFrame(frameIndex)) {
+    return QImage();
+  }
+  return _movieFrames[frameIndex];
+}
+
 bool VertView::captureMovieFrame(int frameIndex)
 {
   if (frameIndex < 0 || frameIndex >= static_cast<int>(_movieFrames.size()) ||

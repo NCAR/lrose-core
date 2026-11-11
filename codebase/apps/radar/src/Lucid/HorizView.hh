@@ -146,6 +146,7 @@ class DLL_EXPORT HorizView : public QWidget
 
   void clearMovieFrames(int frameCount);
   bool hasMovieFrame(int frameIndex) const;
+  QImage movieFrameImage(int frameIndex) const;
   bool captureMovieFrame(int frameIndex);
   bool showMovieFrame(int frameIndex);
   void stopMoviePlayback();

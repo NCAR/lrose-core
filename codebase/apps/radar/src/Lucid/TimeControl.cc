@@ -41,6 +41,7 @@
 #include <QFrame>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QMessageBox>
 #include <QVBoxLayout>
 #include <QSignalBlocker>
 #include <QStatusBar>
@@ -117,6 +118,7 @@ TimeControl::TimeControl(GuiManager *parent) :
   
   _isRealtime = (_params.start_mode == Params::MODE_REALTIME);
   _isSweep = false;
+  _outputAfterBuild = false;
   _movieState = MovieState::Idle;
   _movieTimer = new QTimer(this);
   _movieTimer->setSingleShot(true);
@@ -481,15 +483,15 @@ void TimeControl::_populateGui()
   outputLoopFrameLayout->setSpacing(2);
   outputLoopFrameLayout->setContentsMargins(2, 2, 2, 2);
   
-  QPushButton *outputButton = new QPushButton(timeLower);
-  outputButton->setText("Output Loop");
-  connect(outputButton, &QPushButton::clicked, this,
+  _outputButton = new QPushButton(timeLower);
+  _outputButton->setText("Output Loop");
+  connect(_outputButton, &QPushButton::clicked, this,
           &TimeControl::_outputMovieLoop);
-  outputButton->setToolTip("Output movie loop to file");
-  outputButton->setStyleSheet("padding: 3px 6px 3px 6px; "
-                              "background-color: seagreen;");
+  _outputButton->setToolTip("Save every movie frame and create an animation");
+  _outputButton->setStyleSheet("padding: 3px 6px 3px 6px; "
+                               "background-color: seagreen;");
   
-  outputLoopFrameLayout->addWidget(outputButton, 0, Qt::AlignLeft);
+  outputLoopFrameLayout->addWidget(_outputButton, 0, Qt::AlignLeft);
   
   // fwd and back buttons
   
@@ -779,6 +781,11 @@ void TimeControl::_cancelGuiSelections()
 
 void TimeControl::_startMovie()
 {
+  _beginMovieBuild(false);
+}
+
+void TimeControl::_beginMovieBuild(bool outputAfterBuild)
+{
   if (_guiNFramesMovie < 1) {
     return;
   }
@@ -789,6 +796,7 @@ void TimeControl::_startMovie()
   _acceptGuiSelections();
 
   _movieState = MovieState::Building;
+  _outputAfterBuild = outputAfterBuild;
   _gd.movie.movie_on = 1;
   _setMovieDefinitionControlsEnabled(false);
   _manager->movieStateChanged();
@@ -799,6 +807,7 @@ void TimeControl::_startMovie()
   _timePlot->setRenderedFrames(_renderedMovieFrames, -1);
   _manager->prepareMovieBuild(_nFramesMovie);
   _startButton->setEnabled(false);
+  _outputButton->setEnabled(false);
   _requestMovieFrame(0);
 }
 
@@ -807,6 +816,7 @@ void TimeControl::_stopMovie()
   _movieTimer->stop();
   _manager->cancelMovieBuild();
   _movieState = MovieState::Idle;
+  _outputAfterBuild = false;
   _gd.movie.movie_on = 0;
   _setMovieDefinitionControlsEnabled(true);
   _enableAcceptCancel(false);
@@ -814,6 +824,7 @@ void TimeControl::_stopMovie()
   _buildingFrameIndex = -1;
   _playbackFrameIndex = -1;
   _startButton->setEnabled(true);
+  _outputButton->setEnabled(true);
   _timePlot->setRenderedFrames(std::vector<bool>(), -1);
 
   // Return ownership of the canvas to the live layers whenever either movie
@@ -857,6 +868,8 @@ void TimeControl::movieFrameRendered(int frameIndex)
   _timePlot->setRenderedFrames(_renderedMovieFrames, -1);
   if (frameIndex + 1 < _nFramesMovie) {
     _requestMovieFrame(frameIndex + 1);
+  } else if (_outputAfterBuild) {
+    _finishMovieOutput();
   } else {
     _startMoviePlayback();
   }
@@ -869,6 +882,7 @@ void TimeControl::_startMoviePlayback()
   _buildingFrameIndex = -1;
   _playbackDirection = 1;
   _manager->statusBar()->showMessage("Movie ready", 3000);
+  _outputButton->setEnabled(true);
   _showPlaybackFrame(0, true);
 }
 
@@ -925,7 +939,41 @@ void TimeControl::_advanceMoviePlayback()
 
 void TimeControl::_outputMovieLoop()
 {
-  cerr << "Output movie loop" << endl;
+  if (_movieState == MovieState::Building) {
+    _manager->statusBar()->showMessage(
+      "Wait for the current movie build to finish", 3000);
+    return;
+  }
+
+  if (_movieState == MovieState::Playing) {
+    _manager->statusBar()->showMessage("Writing movie loop images");
+    QString message;
+    const bool success = _manager->exportMovieLoop(message);
+    if (success) {
+      QMessageBox::information(this, tr("Movie loop saved"), message);
+    } else {
+      QMessageBox::warning(this, tr("Movie loop output"), message);
+    }
+    return;
+  }
+
+  _beginMovieBuild(true);
+}
+
+void TimeControl::_finishMovieOutput()
+{
+  _manager->statusBar()->showMessage("Writing movie loop images");
+  QString message;
+  const bool success = _manager->exportMovieLoop(message);
+
+  // Output builds use the same immutable cache as playback, but ownership of
+  // the live canvases returns immediately after the files have been written.
+  _stopMovie();
+  if (success) {
+    QMessageBox::information(this, tr("Movie loop saved"), message);
+  } else {
+    QMessageBox::warning(this, tr("Movie loop output"), message);
+  }
 }
 
 //////////////////////////////

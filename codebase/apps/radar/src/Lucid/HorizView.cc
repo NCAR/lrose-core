@@ -1024,6 +1024,16 @@ bool HorizView::hasMovieFrame(int frameIndex) const
     !_movieFrames[frameIndex].isNull();
 }
 
+QImage HorizView::movieFrameImage(int frameIndex) const
+{
+  if (!hasMovieFrame(frameIndex)) {
+    return QImage();
+  }
+  // QImage copies are implicitly shared, so the exporter gets stable
+  // value semantics without duplicating the complete movie in memory.
+  return _movieFrames[frameIndex];
+}
+
 bool HorizView::captureMovieFrame(int frameIndex)
 {
   if (frameIndex < 0 || frameIndex >= static_cast<int>(_movieFrames.size())) {

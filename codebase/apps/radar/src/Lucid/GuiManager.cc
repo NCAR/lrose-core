@@ -53,6 +53,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QProcess>
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QRadioButton>
@@ -381,6 +382,7 @@ void GuiManager::prepareMovieBuild(int frameCount)
     _vertWindow->isVisible() && _vsectionRoute.size() >= 2;
   _movieVerticalReady = !_movieIncludesVertical;
   _movieVerticalRequestGeneration = -1;
+  _movieFieldLabel = getSelectedFieldLabel();
   if (_horiz) {
     _horiz->clearMovieFrames(frameCount);
   }
@@ -438,6 +440,157 @@ bool GuiManager::showMovieFrame(int frameIndex)
     return false;
   }
   return !_movieIncludesVertical || _vert->showMovieFrame(frameIndex);
+}
+
+bool GuiManager::exportMovieLoop(QString &message)
+{
+  message.clear();
+  if (!_timeControl || !_horiz) {
+    message = tr("The movie views are not available.");
+    return false;
+  }
+
+  const int frameCount = _timeControl->getNFramesMovie();
+  if (frameCount < 1) {
+    message = tr("The movie contains no frames.");
+    return false;
+  }
+  for (int frameIndex = 0; frameIndex < frameCount; ++frameIndex) {
+    if (!_horiz->hasMovieFrame(frameIndex) ||
+        (_movieIncludesVertical &&
+         (!_vert || !_vert->hasMovieFrame(frameIndex)))) {
+      message = tr("Movie frame %1 is not ready for output.")
+        .arg(frameIndex + 1);
+      return false;
+    }
+  }
+
+  QString outputDirPath = QString::fromUtf8(_params.images_output_dir);
+  outputDirPath.replace("$(HOME)", QDir::homePath());
+  if (outputDirPath.startsWith("$HOME")) {
+    outputDirPath.replace(0, 5, QDir::homePath());
+  }
+  if (outputDirPath.trimmed().isEmpty()) {
+    message = tr("images_output_dir is empty.");
+    return false;
+  }
+  outputDirPath = QDir::cleanPath(outputDirPath);
+  QDir outputDir;
+  if (!outputDir.mkpath(outputDirPath)) {
+    message = tr("Cannot create the output directory:\n%1")
+      .arg(outputDirPath);
+    return false;
+  }
+  outputDir.setPath(outputDirPath);
+
+  QString extension = safeFileNameComponent(
+    QString::fromUtf8(_params.images_file_name_extension)).toLower();
+  if (extension.startsWith('.')) {
+    extension.remove(0, 1);
+  }
+  if (extension.isEmpty() || extension == "field") {
+    extension = "png";
+  }
+  // Playback permits the live field selection to change, so name the files
+  // from the display configuration captured when this cache was built.
+  const QString fieldPart = safeFileNameComponent(
+    QString::fromStdString(_movieFieldLabel));
+  const QString startPart = QDateTime::fromSecsSinceEpoch(
+    _timeControl->getStartTime().utime(), Qt::UTC)
+    .toString("yyyyMMdd_HHmmss'_UTC'");
+
+  // One shared suffix keeps the horizontal and vertical sequences paired.
+  // Checking every target prevents a repeated export from replacing even a
+  // partially retained earlier sequence.
+  QString seriesSuffix;
+  for (int sequence = 1; ; ++sequence) {
+    seriesSuffix = sequence == 1 ? QString() :
+      QString("_%1").arg(sequence, 2, 10, QChar('0'));
+    bool collision = false;
+    for (int frameIndex = 0; frameIndex < frameCount; ++frameIndex) {
+      const QString framePart = QString("_%1.%2")
+        .arg(frameIndex + 1, 3, 10, QChar('0')).arg(extension);
+      const QString commonPart = fieldPart + "_" + startPart +
+        seriesSuffix + framePart;
+      collision = QFileInfo::exists(outputDir.filePath(
+        "lucid_horiz_" + commonPart)) ||
+        (_movieIncludesVertical && QFileInfo::exists(outputDir.filePath(
+          "lucid_vert_" + commonPart)));
+      if (collision) {
+        break;
+      }
+    }
+    if (!collision) {
+      break;
+    }
+  }
+
+  QStringList horizontalFiles;
+  QStringList verticalFiles;
+  for (int frameIndex = 0; frameIndex < frameCount; ++frameIndex) {
+    const QString framePart = QString("_%1.%2")
+      .arg(frameIndex + 1, 3, 10, QChar('0')).arg(extension);
+    const QString commonPart = fieldPart + "_" + startPart +
+      seriesSuffix + framePart;
+    const QString horizontalPath = outputDir.filePath(
+      "lucid_horiz_" + commonPart);
+    if (!_horiz->movieFrameImage(frameIndex).save(horizontalPath)) {
+      message = tr("Could not save movie frame:\n%1").arg(horizontalPath);
+      return false;
+    }
+    horizontalFiles.push_back(horizontalPath);
+
+    if (_movieIncludesVertical) {
+      const QString verticalPath = outputDir.filePath(
+        "lucid_vert_" + commonPart);
+      if (!_vert->movieFrameImage(frameIndex).save(verticalPath)) {
+        message = tr("Could not save movie frame:\n%1").arg(verticalPath);
+        return false;
+      }
+      verticalFiles.push_back(verticalPath);
+    }
+  }
+
+  QStringList convertersStarted;
+  const QString converter = QString::fromUtf8(
+    _params.series_convert_script).trimmed();
+  auto startConverter = [&](const QStringList &files,
+                            const QString &viewName) {
+    if (converter.isEmpty()) {
+      return true;
+    }
+    QStringList command = QProcess::splitCommand(converter);
+    if (command.isEmpty()) {
+      return true;
+    }
+    const QString program = command.takeFirst();
+    command.append(files);
+    if (!QProcess::startDetached(program, command, outputDirPath)) {
+      message = tr("Saved %1 frames in:\n%2\n\n"
+                   "Could not start converter: %3")
+        .arg(frameCount).arg(outputDirPath, converter);
+      return false;
+    }
+    convertersStarted.push_back(viewName);
+    return true;
+  };
+
+  if (!startConverter(horizontalFiles, tr("horizontal")) ||
+      (_movieIncludesVertical &&
+       !startConverter(verticalFiles, tr("vertical")))) {
+    return false;
+  }
+
+  const int fileCount = horizontalFiles.size() + verticalFiles.size();
+  message = tr("Saved %1 image files in:\n%2")
+    .arg(fileCount).arg(outputDirPath);
+  if (!convertersStarted.isEmpty()) {
+    message += tr("\n\nStarted %1 for the %2 sequence(s).")
+      .arg(converter, convertersStarted.join(tr(" and ")));
+  } else {
+    message += tr("\n\nNo animation converter was configured.");
+  }
+  return true;
 }
 
 void GuiManager::stopMoviePlayback()

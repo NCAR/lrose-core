@@ -116,6 +116,7 @@ class DLL_EXPORT VertView : public QWidget
   // horizontal loop without retaining mutable MDV buffers for every frame.
   void clearMovieFrames(int frameCount);
   bool hasMovieFrame(int frameIndex) const;
+  QImage movieFrameImage(int frameIndex) const;
   bool captureMovieFrame(int frameIndex);
   bool showMovieFrame(int frameIndex);
   void stopMoviePlayback();

@@ -72,6 +72,7 @@ class QDateTime;
 class QDateTimeEdit;
 class QFileDialog;
 class QTableWidget;
+class QString;
 
 class HorizView;
 class VertView;
@@ -144,6 +145,7 @@ public:
   void beginMovieFrameBuild(int frameIndex);
   void cancelMovieBuild();
   bool showMovieFrame(int frameIndex);
+  bool exportMovieLoop(QString &message);
   void stopMoviePlayback();
   void restoreLiveDisplayAfterMovie();
   void stopMovieForDisplayChange();
@@ -285,6 +287,7 @@ private:
   bool _movieIncludesVertical;
   bool _movieVerticalReady;
   int _movieVerticalRequestGeneration;
+  string _movieFieldLabel;
 
   void _checkMovieFrameReady();
 
