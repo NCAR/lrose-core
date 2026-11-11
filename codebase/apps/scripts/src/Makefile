@@ -15,6 +15,7 @@ SCRIPTS = \
 	ipcrm_linux \
 	ldd_smart \
 	loop_cmd \
+	make_anim.csh \
 	make_cdrom \
 	make_cdrom2 \
 	make_dvd+rw \
