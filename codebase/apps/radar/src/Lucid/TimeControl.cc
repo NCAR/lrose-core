@@ -641,6 +641,16 @@ void TimeControl::_populateGui()
   timeLowerLayout->addWidget(backButtonFrame, stretch, Qt::AlignLeft);
   timeLowerLayout->addWidget(timeSliderFrame, stretch, Qt::AlignCenter);
   timeLowerLayout->addWidget(fwdButtonFrame, stretch, Qt::AlignRight);
+
+  // QDialog otherwise assigns an automatic default push button, causing
+  // Enter used to commit a spin-box edit to invoke Start as a second action.
+  // Controller commands should run only when their button is explicitly used.
+  const QList<QPushButton *> commandButtons =
+    findChildren<QPushButton *>();
+  for (QPushButton *button : commandButtons) {
+    button->setAutoDefault(false);
+    button->setDefault(false);
+  }
   
 }
 
