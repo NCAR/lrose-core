@@ -254,6 +254,21 @@ static void Write_proc_dir_file(const char *proc_dir,
   }
 }
 
+/*
+ * Remove the registration file for this process from proc_dir.
+ */
+
+static void Remove_proc_dir_file(const char *proc_dir,
+                                 const char *prog_name,
+                                 const char *instance)
+{
+  char proc_path[MAX_PATH_LEN];
+  if (Proc_dir_path(proc_path, sizeof(proc_path),
+                    proc_dir, prog_name, instance) == 0) {
+    unlink(proc_path);
+  }
+}
+
 /**********************************************************************
  *
  * Communicate_both()
@@ -454,6 +469,7 @@ void PMU_unregister_pid(const char *prog_name, const char *instance, int pid)
   
   char *proc_host;
   char *proc_host2;
+  char *proc_dir;
   char *proc_user;
   PROCMAP_info_t info;
 
@@ -461,6 +477,11 @@ void PMU_unregister_pid(const char *prog_name, const char *instance, int pid)
    * get environment variables
    */
   
+  proc_dir = getenv("PROCMAP_DIR");
+  if (proc_dir != NULL) {
+    Remove_proc_dir_file(proc_dir, prog_name, instance);
+  }
+
   proc_host = getenv("PROCMAP_HOST");
   proc_host2 = getenv("PROCMAP_HOST2");
   proc_user = getenv("USER");
