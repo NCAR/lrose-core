@@ -207,13 +207,14 @@ void TimePlotWidget::paintEvent(QPaintEvent *event)
                             bandBottom - bandTop), statusColor);
   }
 
-  // The selected frame is translucent while build status is displayed, so
-  // selection and completion remain visible at the same time.
+  // During construction, retain the build color beneath the selected-frame
+  // marker. Once construction is complete, the opaque marker identifies the
+  // frame currently displayed during playback instead of leaving it green.
   const double selectedStart = _movieStart +
     _selectedFrame * _frameIntervalSecs;
   const double selectedEnd = selectedStart + _frameIntervalSecs;
   QColor selectedColor = frameColor;
-  if (!_renderedFrames.empty() || _buildingFrame >= 0) {
+  if (_buildingFrame >= 0) {
     selectedColor.setAlpha(120);
   }
   painter.fillRect(QRectF(_pixelForTime(selectedStart), bandTop,
