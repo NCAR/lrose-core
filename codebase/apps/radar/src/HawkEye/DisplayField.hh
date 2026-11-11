@@ -36,6 +36,7 @@
 #include <string>
 #include <QLabel>
 #include <QDialog>
+#include <QPointer>
 #include <iostream>
 #include <qtplot/ColorMap.hh>
 
@@ -93,7 +94,10 @@ private:
   bool _isFilt;
   bool _haveColorMap;
   double _selectValue;
-  QLabel *_dialog;
+  // QPointer, since _dialog is a child of the click-report dialog: Qt
+  // deletes it when the main window is deleted, before ~DisplayField()
+  // runs, and QPointer then reads NULL instead of dangling.
+  QPointer<QLabel> _dialog;
 
 };
 
