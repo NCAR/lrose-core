@@ -375,6 +375,8 @@ public:
 
   tdrp_bool_t run_secure;
 
+  tdrp_bool_t run_read_only;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -382,7 +384,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[11];
+  mutable TDRPtable _table[12];
 
   const char *_className;
 
