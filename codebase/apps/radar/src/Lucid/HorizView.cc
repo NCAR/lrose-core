@@ -1017,6 +1017,13 @@ void HorizView::clearMovieFrames(int frameCount)
   update();
 }
 
+bool HorizView::hasMovieFrame(int frameIndex) const
+{
+  return frameIndex >= 0 &&
+    frameIndex < static_cast<int>(_movieFrames.size()) &&
+    !_movieFrames[frameIndex].isNull();
+}
+
 bool HorizView::captureMovieFrame(int frameIndex)
 {
   if (frameIndex < 0 || frameIndex >= static_cast<int>(_movieFrames.size())) {
@@ -1030,8 +1037,7 @@ bool HorizView::captureMovieFrame(int frameIndex)
 
 bool HorizView::showMovieFrame(int frameIndex)
 {
-  if (frameIndex < 0 || frameIndex >= static_cast<int>(_movieFrames.size()) ||
-      _movieFrames[frameIndex].isNull()) {
+  if (!hasMovieFrame(frameIndex)) {
     return false;
   }
   _playbackFrameIndex = frameIndex;

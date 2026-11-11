@@ -112,6 +112,15 @@ class DLL_EXPORT VertView : public QWidget
 
   void setSection(const MdvReader *reader);
 
+  // Immutable widget composites keep vertical playback synchronized with the
+  // horizontal loop without retaining mutable MDV buffers for every frame.
+  void clearMovieFrames(int frameCount);
+  bool hasMovieFrame(int frameIndex) const;
+  bool captureMovieFrame(int frameIndex);
+  bool showMovieFrame(int frameIndex);
+  void stopMoviePlayback();
+  void setMovieInteractionActive(bool active);
+
   // render frame based on movie index
   
   int renderVMovieFrame(int index, QPainter &painter);
@@ -359,6 +368,8 @@ class DLL_EXPORT VertView : public QWidget
 
   QPixmap _sectionPixmap;
   bool _sectionPixmapDirty;
+  vector<QImage> _movieFrames;
+  int _playbackFrameIndex;
 
   bool _showValue;
   bool _mouseValueVisible;

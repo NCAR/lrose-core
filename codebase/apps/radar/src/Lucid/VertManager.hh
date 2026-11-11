@@ -90,6 +90,7 @@ public:
   // enable the zoom button - called by VertView
   
   void enableZoomButton() const;
+  void setMovieInteractionActive(bool active);
 
 signals:
 
@@ -104,6 +105,8 @@ private slots:
   void _setMaximumHeight();
   
 protected:
+
+  void resizeEvent(QResizeEvent *event) override;
 
   ///////////////////////
   // Protected members //

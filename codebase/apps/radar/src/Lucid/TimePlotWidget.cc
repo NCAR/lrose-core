@@ -15,6 +15,7 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QTimeZone>
 #include <QToolTip>
 
 #include "Constants.hh"
@@ -328,7 +329,8 @@ void TimePlotWidget::paintEvent(QPaintEvent *event)
   for (qint64 tick = firstTick; tick <= _viewEnd; tick += tickSecs) {
     const double x = _pixelForTime(static_cast<double>(tick));
     painter.drawLine(QPointF(x, axisY), QPointF(x, axisY - 4.0));
-    const QDateTime dateTime = QDateTime::fromSecsSinceEpoch(tick, Qt::UTC);
+    const QDateTime dateTime = QDateTime::fromSecsSinceEpoch(
+      tick, QTimeZone(QTimeZone::UTC));
     QString label = dateTime.toString("HH:mm:ss");
     if (tickSecs >= 86400 || dateTime.time() == QTime(0, 0)) {
       label = dateTime.toString("MM/dd HH:mm");

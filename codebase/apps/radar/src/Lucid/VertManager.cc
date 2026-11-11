@@ -114,9 +114,26 @@ void VertManager::keyPressEvent(QKeyEvent * e)
   _guiManager->keyPressEvent(e);
 }
 
+void VertManager::resizeEvent(QResizeEvent *event)
+{
+  QMainWindow::resizeEvent(event);
+  if (_guiManager->isMovieActive()) {
+    _guiManager->stopMovieForDisplayChange();
+  }
+}
+
 ////////////////////////////////////////////////////////////////
 void VertManager::closeEvent(QCloseEvent * e)
 {
+  // The open vertical window is part of every frame's readiness contract once
+  // construction starts. Keep it present until construction completes;
+  // during playback it is safe to hide because its cached index continues to
+  // advance with the horizontal view.
+  if (_guiManager->isMovieBuilding()) {
+    _guiManager->showMovieInteractionBlocked();
+    e->ignore();
+    return;
+  }
   // pass event up to GuiManager
   _guiManager->vertWindowClosed(e);
 }
@@ -209,7 +226,20 @@ void VertManager::_createActions(VertView *vert)
 
 void VertManager::enableZoomButton() const
 {
+  if (_guiManager->isMovieActive()) {
+    return;
+  }
   _unzoomAct->setEnabled(true);
+}
+
+void VertManager::setMovieInteractionActive(bool active)
+{
+  // Cached vertical frames share one transform and overlay configuration.
+  // Defer changes to those controls until live rendering resumes.
+  _overlaysMenu->setEnabled(!active);
+  _configurationMenu->setEnabled(!active);
+  _unzoomAct->setEnabled(!active && !_vertView->getSavedZooms().empty());
+  _vertView->setMovieInteractionActive(active);
 }
 
 ////////////////////////////////

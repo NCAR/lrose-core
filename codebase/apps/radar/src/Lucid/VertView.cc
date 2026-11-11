@@ -108,6 +108,7 @@ VertView::VertView(QWidget* parent,
   _pointClicked = false;
   _leftDragActive = false;
   _sectionPixmapDirty = true;
+  _playbackFrameIndex = -1;
   _showValue = false;
   _mouseValueVisible = false;
   _mouseValueX = 0;
@@ -248,6 +249,13 @@ void VertView::configureWorldCoords(int zoomLevel)
 
 void VertView::mouseReleaseEvent(QMouseEvent *e)
 {
+
+  if (_manager.isMovieActive()) {
+    _leftDragActive = false;
+    _rubberBand->hide();
+    e->accept();
+    return;
+  }
 
   _pointClicked = false;
 
@@ -568,6 +576,12 @@ void VertView::unzoomView()
 void VertView::paintEvent(QPaintEvent *event)
 {
 
+  if (hasMovieFrame(_playbackFrameIndex)) {
+    QPainter painter(this);
+    painter.drawImage(0, 0, _movieFrames[_playbackFrameIndex]);
+    return;
+  }
+
   QPainter painter(this);
   painter.fillRect(rect(), _backgroundBrush);
 
@@ -626,6 +640,69 @@ void VertView::setSection(const MdvReader *reader)
   _rebuildSelectedHorizHeightCurve();
   _savedZooms.clear();
   configureWorldCoords();
+  update();
+}
+
+/////////////////////////////////////////////////////////////
+// manage immutable composites used by vertical movie playback
+
+void VertView::clearMovieFrames(int frameCount)
+{
+  _playbackFrameIndex = -1;
+  _movieFrames.assign(std::max(0, frameCount), QImage());
+  update();
+}
+
+bool VertView::hasMovieFrame(int frameIndex) const
+{
+  return frameIndex >= 0 &&
+    frameIndex < static_cast<int>(_movieFrames.size()) &&
+    !_movieFrames[frameIndex].isNull();
+}
+
+bool VertView::captureMovieFrame(int frameIndex)
+{
+  if (frameIndex < 0 || frameIndex >= static_cast<int>(_movieFrames.size()) ||
+      width() <= 0 || height() <= 0) {
+    return false;
+  }
+
+  _playbackFrameIndex = -1;
+  QImage frame(size(), QImage::Format_ARGB32_Premultiplied);
+  frame.fill(_backgroundBrush.color());
+  // QWidget::render() invokes paintEvent synchronously, so the expensive
+  // section pixmap and all legends represent this exact MDV completion even
+  // when the vertical window is obscured.
+  render(&frame);
+  _movieFrames[frameIndex] = std::move(frame);
+  return !_movieFrames[frameIndex].isNull();
+}
+
+bool VertView::showMovieFrame(int frameIndex)
+{
+  if (!hasMovieFrame(frameIndex)) {
+    return false;
+  }
+  _playbackFrameIndex = frameIndex;
+  repaint();
+  return true;
+}
+
+void VertView::stopMoviePlayback()
+{
+  _playbackFrameIndex = -1;
+  repaint();
+}
+
+void VertView::setMovieInteractionActive(bool active)
+{
+  if (!active) {
+    return;
+  }
+  _leftDragActive = false;
+  _mouseValueVisible = false;
+  _mouseValueText.clear();
+  _rubberBand->hide();
   update();
 }
 
@@ -1570,6 +1647,11 @@ QPixmap* VertView::getPixmap()
 void VertView::mousePressEvent(QMouseEvent *e)
 {
 
+  if (_manager.isMovieActive()) {
+    e->accept();
+    return;
+  }
+
 #if QT_VERSION >= 0x060000
   QPointF pos(e->position());
 #else
@@ -1610,6 +1692,10 @@ void VertView::mousePressEvent(QMouseEvent *e)
 
 void VertView::mouseMoveEvent(QMouseEvent * e)
 {
+
+  if (_manager.isMovieActive()) {
+    return;
+  }
 
   // cerr << "ccccc mouseMoveEvent" << endl;
   

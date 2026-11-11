@@ -830,7 +830,10 @@ int MdvReader::requestVertSection(const DateTime &midTime,
   }
 
   _startReadVolV(request);
-  return 0;
+  // The caller can associate an asynchronous completion with the display
+  // frame which initiated it. Stale generations are still rejected here
+  // before verticalReadComplete is emitted.
+  return request.generation;
 }
 
 ////////////////////////////////////////////////////////////

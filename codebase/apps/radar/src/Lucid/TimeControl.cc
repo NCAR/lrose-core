@@ -820,7 +820,7 @@ void TimeControl::_stopMovie()
   // construction or playback stops. Refresh at the selected movie time so we
   // do not expose data retained from the last frame constructed underneath
   // the immutable playback image.
-  _manager->stopMoviePlayback();
+  _manager->restoreLiveDisplayAfterMovie();
   _timeHasChanged = true;
   _manager->statusBar()->showMessage("Movie stopped", 3000);
 }

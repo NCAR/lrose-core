@@ -145,6 +145,8 @@ public:
   void cancelMovieBuild();
   bool showMovieFrame(int frameIndex);
   void stopMoviePlayback();
+  void restoreLiveDisplayAfterMovie();
+  void stopMovieForDisplayChange();
   bool isMovieBuilding() const;
   bool isMoviePlaying() const;
   bool isMovieActive() const;
@@ -280,6 +282,9 @@ private:
 
   int _movieBuildFrame;
   bool _movieGridReady;
+  bool _movieIncludesVertical;
+  bool _movieVerticalReady;
+  int _movieVerticalRequestGeneration;
 
   void _checkMovieFrameReady();
 
@@ -425,7 +430,7 @@ private:
   
   void _autoCreateFunc();
   void _setField(int value);
-  void _requestVerticalSection();
+  int _requestVerticalSection();
   void _setDisplayTime(time_t utime);
   void _setEndFrame(int num_frames);
   void _updateMoviePopup();

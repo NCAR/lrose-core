@@ -216,6 +216,9 @@ GuiManager::GuiManager() :
   _overlaysHaveChanged = true;
   _movieBuildFrame = -1;
   _movieGridReady = false;
+  _movieIncludesVertical = false;
+  _movieVerticalReady = false;
+  _movieVerticalRequestGeneration = -1;
   
   _timeControl = NULL;
   _timeControlPlaced = false;
@@ -361,8 +364,15 @@ void GuiManager::prepareMovieBuild(int frameCount)
 {
   _movieBuildFrame = -1;
   _movieGridReady = false;
+  _movieIncludesVertical = _vertWindow && _vert &&
+    _vertWindow->isVisible() && _vsectionRoute.size() >= 2;
+  _movieVerticalReady = !_movieIncludesVertical;
+  _movieVerticalRequestGeneration = -1;
   if (_horiz) {
     _horiz->clearMovieFrames(frameCount);
+  }
+  if (_vert) {
+    _vert->clearMovieFrames(_movieIncludesVertical ? frameCount : 0);
   }
   // Force frame zero to be rebuilt even when it is already the live frame.
   if (_gd.prod_mgr) {
@@ -374,9 +384,21 @@ void GuiManager::beginMovieFrameBuild(int frameIndex)
 {
   _movieBuildFrame = frameIndex;
   _movieGridReady = false;
+  _movieVerticalReady = !_movieIncludesVertical;
+  _movieVerticalRequestGeneration = -1;
   _horizontalRequestHasChanged = true;
   if (_horiz) {
     _horiz->stopMoviePlayback();
+  }
+  if (_movieIncludesVertical && _vert) {
+    _vert->stopMoviePlayback();
+    _movieVerticalRequestGeneration = _requestVerticalSection();
+    if (_movieVerticalRequestGeneration < 0) {
+      // Do not deadlock movie construction if the retained route can no
+      // longer produce a request. The captured vertical frame will show the
+      // current no-data state for this time.
+      _movieVerticalReady = true;
+    }
   }
   statusBar()->showMessage(
     tr("Building movie frame %1 of %2")
@@ -387,17 +409,48 @@ void GuiManager::cancelMovieBuild()
 {
   _movieBuildFrame = -1;
   _movieGridReady = false;
+  _movieIncludesVertical = false;
+  _movieVerticalReady = false;
+  _movieVerticalRequestGeneration = -1;
 }
 
 bool GuiManager::showMovieFrame(int frameIndex)
 {
-  return _horiz && _horiz->showMovieFrame(frameIndex);
+  if (!_horiz || !_horiz->hasMovieFrame(frameIndex) ||
+      (_movieIncludesVertical &&
+       (!_vert || !_vert->hasMovieFrame(frameIndex)))) {
+    return false;
+  }
+  if (!_horiz->showMovieFrame(frameIndex)) {
+    return false;
+  }
+  return !_movieIncludesVertical || _vert->showMovieFrame(frameIndex);
 }
 
 void GuiManager::stopMoviePlayback()
 {
   if (_horiz) {
     _horiz->stopMoviePlayback();
+  }
+  if (_vert) {
+    _vert->stopMoviePlayback();
+  }
+}
+
+void GuiManager::restoreLiveDisplayAfterMovie()
+{
+  stopMoviePlayback();
+  if (_vertWindow && _vertWindow->isVisible() && _vsectionRoute.size() >= 2) {
+    // Supersede any build request so the live section corresponds to the
+    // exact frame at which playback was stopped.
+    _requestVerticalSection();
+  }
+}
+
+void GuiManager::stopMovieForDisplayChange()
+{
+  if (_timeControl && _timeControl->isMovieActive()) {
+    _timeControl->stopMovie();
   }
 }
 
@@ -461,6 +514,15 @@ void GuiManager::movieStateChanged()
   if (_horiz) {
     _horiz->setMovieInteractionActive(active);
   }
+  if (_vertWindow) {
+    _vertWindow->setMovieInteractionActive(active);
+  }
+  if (_showVertAct) {
+    // A cached vertical loop may be hidden and reopened. If no vertical cache
+    // was selected at Start, opening a live section during horizontal-only
+    // playback would imply synchronization which does not exist.
+    _showVertAct->setEnabled(!active || _movieIncludesVertical);
+  }
 
   enableUnzoomButtons(_horiz && !_horiz->getCustomZooms().empty());
 }
@@ -472,7 +534,8 @@ void GuiManager::showMovieInteractionBlocked()
 
 void GuiManager::_checkMovieFrameReady()
 {
-  if (_movieBuildFrame < 0 || !_movieGridReady || !_horiz || !_timeControl) {
+  if (_movieBuildFrame < 0 || !_movieGridReady || !_movieVerticalReady ||
+      !_horiz || !_timeControl) {
     return;
   }
   const bool productsReady = !_gd.prod.products_on || !_gd.prod_mgr ||
@@ -484,7 +547,11 @@ void GuiManager::_checkMovieFrameReady()
   const int completedFrame = _movieBuildFrame;
   _movieBuildFrame = -1;
   _movieGridReady = false;
-  if (_horiz->captureMovieFrame(completedFrame)) {
+  _movieVerticalReady = false;
+  const bool horizCaptured = _horiz->captureMovieFrame(completedFrame);
+  const bool vertCaptured = !_movieIncludesVertical ||
+    (_vert && _vert->captureMovieFrame(completedFrame));
+  if (horizCaptured && vertCaptured) {
     _timeControl->movieFrameRendered(completedFrame);
   }
 }
@@ -3363,11 +3430,11 @@ void GuiManager::_verticalRouteCompleted(const VsectionRoute &route)
 /////////////////////////////////////////////////////////////
 // request the retained route for the currently selected field
 
-void GuiManager::_requestVerticalSection()
+int GuiManager::_requestVerticalSection()
 {
   if (_vsectionRoute.size() < 2 ||
       _gd.h_win.page < 0 || _gd.h_win.page >= _gd.num_datafields) {
-    return;
+    return -1;
   }
 
   WayPts wayPts;
@@ -3380,8 +3447,8 @@ void GuiManager::_requestVerticalSection()
           this, &GuiManager::_verticalReadComplete,
           Qt::UniqueConnection);
   // statusBar()->showMessage("Requesting vertical section");
-  reader->requestVertSection(_timeControl->getSelectedTime(),
-                             _gd.h_win.page, wayPts);
+  return reader->requestVertSection(_timeControl->getSelectedTime(),
+                                    _gd.h_win.page, wayPts);
 }
 
 /////////////////////////////////////////////////////////////
@@ -3407,6 +3474,21 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
   _vertWindow->setSectionInfo(_params._fields[_gd.h_win.page].field_name,
                               reader->v_date,
                               reader->getVertTotalLengthKm());
+
+  if (isMovieBuilding() && _movieIncludesVertical &&
+      _movieBuildFrame >= 0 &&
+      reader->getVertGeneration() == _movieVerticalRequestGeneration) {
+    _movieVerticalReady = true;
+    _checkMovieFrameReady();
+    return;
+  }
+
+  // Field changes during cached playback update the hidden live section. Do
+  // not raise the window or replace the frame currently owned by the movie.
+  if (isMovieActive()) {
+    return;
+  }
+
   _showVertAct->setChecked(true);
   _vertWindow->show();
   _vertWindow->raise();
