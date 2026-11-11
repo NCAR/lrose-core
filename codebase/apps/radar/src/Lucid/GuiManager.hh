@@ -145,6 +145,11 @@ public:
   void cancelMovieBuild();
   bool showMovieFrame(int frameIndex);
   void stopMoviePlayback();
+  bool isMovieBuilding() const;
+  bool isMoviePlaying() const;
+  bool isMovieActive() const;
+  void movieStateChanged();
+  void showMovieInteractionBlocked();
   
   // override event handling
 

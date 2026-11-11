@@ -790,6 +790,8 @@ void TimeControl::_startMovie()
 
   _movieState = MovieState::Building;
   _gd.movie.movie_on = 1;
+  _setMovieDefinitionControlsEnabled(false);
+  _manager->movieStateChanged();
   _renderedMovieFrames.assign(_nFramesMovie, false);
   _buildingFrameIndex = -1;
   _playbackFrameIndex = -1;
@@ -806,6 +808,9 @@ void TimeControl::_stopMovie()
   _manager->cancelMovieBuild();
   _movieState = MovieState::Idle;
   _gd.movie.movie_on = 0;
+  _setMovieDefinitionControlsEnabled(true);
+  _enableAcceptCancel(false);
+  _manager->movieStateChanged();
   _buildingFrameIndex = -1;
   _playbackFrameIndex = -1;
   _startButton->setEnabled(true);
@@ -860,6 +865,7 @@ void TimeControl::movieFrameRendered(int frameIndex)
 void TimeControl::_startMoviePlayback()
 {
   _movieState = MovieState::Playing;
+  _manager->movieStateChanged();
   _buildingFrameIndex = -1;
   _playbackDirection = 1;
   _manager->statusBar()->showMessage("Movie ready", 3000);
@@ -1488,6 +1494,24 @@ void TimeControl::_enableAcceptCancel(bool val)
   } else {
     _acceptButton->setStyleSheet("background-color: lightgray;");
     _cancelButton->setStyleSheet("background-color: lightgray;");
+  }
+}
+
+////////////////////////////////////////////////////////
+// prevent accepted movie bounds from changing underneath cached frames
+
+void TimeControl::_setMovieDefinitionControlsEnabled(bool enabled)
+{
+  // Timeline gestures deliberately stop the movie before applying their
+  // change. Direct editors remain frozen until Stop so Accept cannot alter
+  // frame spacing or bounds partway through construction or playback.
+  _startTimeEdit->setEnabled(enabled);
+  _nFramesSelector->setEnabled(enabled);
+  _frameIntervalSelector->setEnabled(enabled);
+  _realtimeSelector->setEnabled(enabled);
+  if (!enabled) {
+    _acceptButton->setEnabled(false);
+    _cancelButton->setEnabled(false);
   }
 }
 

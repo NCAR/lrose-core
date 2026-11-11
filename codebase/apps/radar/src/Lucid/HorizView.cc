@@ -152,6 +152,7 @@ HorizView::HorizView(QWidget* parent,
   _gridsReady = false;
   _mapsReady = false;
   _zoomChanged = true;
+  _zoomRequestPending = true;
   _sizeChanged = true;
 
   _showValue = false;
@@ -835,7 +836,7 @@ void HorizView::_initZooms()
 {
 
   _zoomLevel = 0;
-  _zoomChanged = true;
+  _markZoomChanged();
   
   // create defined zooms
   
@@ -1042,6 +1043,32 @@ void HorizView::stopMoviePlayback()
 {
   _playbackFrameIndex = -1;
   repaint();
+}
+
+void HorizView::setMovieInteractionActive(bool active)
+{
+  if (!active) {
+    return;
+  }
+
+  // Cached playback cannot provide frame-specific data for transient canvas
+  // tools. Clear any gesture or sample inherited from live mode so it cannot
+  // reappear with stale coordinates when playback stops.
+  _activeMouseButton = Qt::NoButton;
+  _panPreviewActive = false;
+  _mouseValueVisible = false;
+  _mouseValueText.clear();
+  unsetCursor();
+  if (_rubberBand) {
+    _rubberBand->hide();
+  }
+  if (_vsectionRouteEditing) {
+    _cancelVsectionRoute();
+  }
+  if (_gd.prod_mgr) {
+    _gd.prod_mgr->clearPickedObject();
+  }
+  update();
 }
   
 //////////////////////////////////////////
@@ -1611,6 +1638,10 @@ int HorizView::_renderFieldGrid(int page,
 
 void HorizView::zoomBackView()
 {
+  if (_manager.isMovieActive()) {
+    _manager.showMovieInteractionBlocked();
+    return;
+  }
   if (_customZooms.size() <= 1) {
     // go back to defined zooms
     _customZooms.clear();
@@ -1621,7 +1652,7 @@ void HorizView::zoomBackView()
     _zoom = &_customZooms[_customZooms.size()-1];
   }
   _updateGlobalCurrentZoom();
-  _zoomChanged = true;
+  _markZoomChanged();
   update();
 }
 
@@ -1631,10 +1662,14 @@ void HorizView::zoomBackView()
 
 void HorizView::zoomOutView()
 {
+  if (_manager.isMovieActive()) {
+    _manager.showMovieInteractionBlocked();
+    return;
+  }
   _customZooms.clear();
   _zoom = &_definedZooms[_zoomLevel];
   _updateGlobalCurrentZoom();
-  _zoomChanged = true;
+  _markZoomChanged();
   update();
 }
 
@@ -1644,13 +1679,17 @@ void HorizView::zoomOutView()
 
 void HorizView::setZoomIndex(int zoomIndex)
 {
+  if (_manager.isMovieActive()) {
+    _manager.showMovieInteractionBlocked();
+    return;
+  }
   if (zoomIndex > (int) _definedZooms.size() - 1) {
     zoomIndex = (int) _definedZooms.size() - 1;
   }
   _zoomLevel = zoomIndex;
   _zoom = &_definedZooms[_zoomLevel];
   _updateGlobalCurrentZoom();
-  _zoomChanged = true;
+  _markZoomChanged();
   update();
 }
 
@@ -1659,12 +1698,26 @@ void HorizView::setZoomIndex(int zoomIndex)
 
 bool HorizView::checkForZoomChange()
 {
-  if (_zoomChanged) {
-    _zoomChanged = false; // reset state
+  if (_zoomRequestPending) {
+    _zoomRequestPending = false;
     return true;
   } else {
     return false;
   }
+}
+
+/////////////////////////////////////////////////////////
+// invalidate live layers after the display transform changes
+
+void HorizView::_markZoomChanged()
+{
+  // Request and paint state are intentionally separate. The GUI timer may
+  // consume the request before Qt delivers a paint event; retaining the paint
+  // flag prevents a newly copied WorldPlot from exposing empty image buffers.
+  _zoomRequestPending = true;
+  _zoomChanged = true;
+  _gridsReady = false;
+  _mapsReady = false;
 }
 
 /*************************************************************************
@@ -1729,6 +1782,13 @@ QPixmap* HorizView::getPixmap()
 void HorizView::mousePressEvent(QMouseEvent *e)
 {
 
+  if (_manager.isMovieActive()) {
+    _activeMouseButton = Qt::NoButton;
+    _manager.showMovieInteractionBlocked();
+    e->accept();
+    return;
+  }
+
 #if QT_VERSION >= 0x060000
   QPointF pos(e->position());
 #else
@@ -1784,6 +1844,10 @@ void HorizView::mousePressEvent(QMouseEvent *e)
 
 void HorizView::mouseMoveEvent(QMouseEvent * e)
 {
+
+  if (_manager.isMovieActive()) {
+    return;
+  }
 
   // Zooming with the mouse
 
@@ -1882,6 +1946,17 @@ void HorizView::leaveEvent(QEvent *event)
  */
 void HorizView::mouseReleaseEvent(QMouseEvent *e)
 {
+
+  if (_manager.isMovieActive()) {
+    _activeMouseButton = Qt::NoButton;
+    _panPreviewActive = false;
+    unsetCursor();
+    if (_rubberBand) {
+      _rubberBand->hide();
+    }
+    e->accept();
+    return;
+  }
 
   _pointClicked = false;
 
@@ -1984,7 +2059,7 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     _customZooms[_customZooms.size()-1].setName(zoomName);
     _zoom = &_customZooms[_customZooms.size()-1];
     _updateGlobalCurrentZoom();
-    _zoomChanged = true;
+    _markZoomChanged();
     
     // handle the zoom action
     
@@ -2024,6 +2099,11 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
 
 void HorizView::mouseDoubleClickEvent(QMouseEvent *e)
 {
+  if (_manager.isMovieActive()) {
+    _manager.showMovieInteractionBlocked();
+    e->accept();
+    return;
+  }
   if (effectiveButton(e) != Qt::RightButton ||
       (e->modifiers() & Qt::ShiftModifier)) {
     QWidget::mouseDoubleClickEvent(e);
@@ -2194,6 +2274,10 @@ void HorizView::_drawVsectionRoute(QPainter &painter)
 
 void HorizView::_panView(int mouseReleaseX, int mouseReleaseY)
 {
+  if (_manager.isMovieActive()) {
+    _manager.showMovieInteractionBlocked();
+    return;
+  }
   const int deltaPixelsX = mouseReleaseX - _mousePressX;
   const int deltaPixelsY = mouseReleaseY - _mousePressY;
   if (abs(deltaPixelsX) <= 5 && abs(deltaPixelsY) <= 5) {
@@ -2249,7 +2333,7 @@ void HorizView::_panView(int mouseReleaseX, int mouseReleaseY)
   _zoom = &_customZooms.back();
 
   _updateGlobalCurrentZoom();
-  _zoomChanged = true;
+  _markZoomChanged();
   _manager.enableUnzoomButtons(true);
   update();
 }
@@ -2433,6 +2517,11 @@ void HorizView::contextMenuEditor()
 
 void HorizView::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
 {
+
+  if (_manager.isMovieActive()) {
+    _manager.showMovieInteractionBlocked();
+    return;
+  }
 
   // _vol = vol;
 

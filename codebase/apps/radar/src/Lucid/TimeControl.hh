@@ -109,6 +109,13 @@ class DLL_EXPORT TimeControl : public QDialog {
   }
   int getFrameIndex() const { return _frameIndex; }
   double getLoopDwellMsecs() const { return _loopDwellMsecs; }
+  bool isMovieBuilding() const { return _movieState == MovieState::Building; }
+  bool isMoviePlaying() const { return _movieState == MovieState::Playing; }
+  bool isMovieActive() const { return _movieState != MovieState::Idle; }
+
+  // Leave cached playback and restore the live display after an external
+  // interaction, such as resizing the main window, invalidates movie frames.
+  void stopMovie() { _stopMovie(); }
 
   // convert between Qt and Radx date/time objects
   
@@ -247,6 +254,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   DateTime _getGuiSelectedTime() const;
                                       
   void _enableAcceptCancel(bool val);
+  void _setMovieDefinitionControlsEnabled(bool enabled);
                                      
   void _computeFrameTimes();
                            

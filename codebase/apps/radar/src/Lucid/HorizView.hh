@@ -148,6 +148,7 @@ class DLL_EXPORT HorizView : public QWidget
   bool captureMovieFrame(int frameIndex);
   bool showMovieFrame(int frameIndex);
   void stopMoviePlayback();
+  void setMovieInteractionActive(bool active);
   
   // set flags to render invalid images
   
@@ -248,6 +249,7 @@ class DLL_EXPORT HorizView : public QWidget
   VertView *_vert;
   
   bool _zoomChanged;
+  bool _zoomRequestPending;
   bool _sizeChanged;
   bool _gridsReady;
   bool _mapsReady;
@@ -430,6 +432,7 @@ class DLL_EXPORT HorizView : public QWidget
   // pan the current view by a completed middle-button drag
 
   void _panView(int mouseReleaseX, int mouseReleaseY);
+  void _markZoomChanged();
 
   // debug prints
   

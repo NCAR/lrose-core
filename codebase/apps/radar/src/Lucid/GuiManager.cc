@@ -306,9 +306,14 @@ int GuiManager::run(QApplication &app)
 
 void GuiManager::enableUnzoomButtons(bool val) const
 {
-  _zoomBackAct->setEnabled(val);
-  _zoomOutAct->setEnabled(val);
-  if (val) {
+  const bool spatialChangesAllowed = !isMovieActive();
+  _zoomBackAct->setEnabled(spatialChangesAllowed && val);
+  _zoomOutAct->setEnabled(spatialChangesAllowed && val);
+  if (!spatialChangesAllowed) {
+    for (size_t ii = 0; ii < _zoomMenuItems.size(); ii++) {
+      _zoomMenuItems[ii]->getAction()->setEnabled(false);
+    }
+  } else if (val) {
     // disable zoom menu items
     for (size_t ii = 0; ii < _zoomMenuItems.size(); ii++) {
       _zoomMenuItems[ii]->getAction()->setEnabled(false);
@@ -326,6 +331,10 @@ void GuiManager::enableUnzoomButtons(bool val) const
 
 void GuiManager::setZoomIndex(int zoomIndex)
 {
+  if (isMovieActive()) {
+    showMovieInteractionBlocked();
+    return;
+  }
   _horiz->setZoomIndex(zoomIndex);
 }
 
@@ -390,6 +399,75 @@ void GuiManager::stopMoviePlayback()
   if (_horiz) {
     _horiz->stopMoviePlayback();
   }
+}
+
+bool GuiManager::isMovieBuilding() const
+{
+  return _timeControl && _timeControl->isMovieBuilding();
+}
+
+bool GuiManager::isMoviePlaying() const
+{
+  return _timeControl && _timeControl->isMoviePlaying();
+}
+
+bool GuiManager::isMovieActive() const
+{
+  return _timeControl && _timeControl->isMovieActive();
+}
+
+void GuiManager::movieStateChanged()
+{
+  const bool building = isMovieBuilding();
+  const bool active = isMovieActive();
+
+  // A movie build must capture one stable display configuration. Playback is
+  // less restrictive: field and level choices may update the hidden live
+  // state and become visible after Stop, but spatial transforms would make
+  // the immutable cached frames incompatible with that state.
+  if (_fieldTable) {
+    _fieldTable->setEnabled(!building);
+  }
+  if (_vlevelSelector) {
+    _vlevelSelector->setEnabled(!building);
+  }
+  if (_mapsMenu) {
+    _mapsMenu->setEnabled(!building);
+  }
+  if (_windsMenu) {
+    _windsMenu->setEnabled(!building);
+  }
+  if (_productsMenu) {
+    _productsMenu->setEnabled(!building);
+  }
+  if (_overlaysMenu) {
+    _overlaysMenu->setEnabled(!building);
+  }
+  if (_reloadAct) {
+    _reloadAct->setEnabled(!building);
+  }
+  if (_clearAct) {
+    _clearAct->setEnabled(!building);
+  }
+  if (_zoomsMenu) {
+    _zoomsMenu->setEnabled(!active);
+  }
+  if (_showValueAct) {
+    _showValueAct->setEnabled(!active);
+  }
+  if (_showClickAct) {
+    _showClickAct->setEnabled(!active);
+  }
+  if (_horiz) {
+    _horiz->setMovieInteractionActive(active);
+  }
+
+  enableUnzoomButtons(_horiz && !_horiz->getCustomZooms().empty());
+}
+
+void GuiManager::showMovieInteractionBlocked()
+{
+  statusBar()->showMessage(tr("Stop the movie to change the view"), 3000);
 }
 
 void GuiManager::_checkMovieFrameReady()
@@ -478,6 +556,12 @@ void GuiManager::timerEvent(QTimerEvent *event)
 void GuiManager::resizeEvent(QResizeEvent *event)
 {
   QWidget::resizeEvent(event);
+  // Cached movie composites have the canvas dimensions and projection that
+  // were active at build time. A resize necessarily returns to live mode so
+  // the display can rebuild all layers for the new geometry.
+  if (_timeControl && _timeControl->isMovieActive()) {
+    _timeControl->stopMovie();
+  }
   // Restart the timer on each resize event
   _resizeTimer->start();
 }
@@ -506,6 +590,15 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Clicked char: " << keychar << ":" << (int) keychar << endl;
     cerr << "         key: " << hex << key << dec << endl;
+  }
+
+  // Do not let keyboard shortcuts alter the field or level halfway through a
+  // build; every captured frame must use the same display configuration.
+  if (isMovieBuilding() &&
+      (keychar == '.' || key == Qt::Key_Up || key == Qt::Key_Down)) {
+    showMovieInteractionBlocked();
+    e->accept();
+    return;
   }
   
   // for '.', swap with previous field
@@ -1931,6 +2024,10 @@ bool GuiManager::_checkForStateChange()
 
 void GuiManager::_zoomBack()
 {
+  if (isMovieActive()) {
+    showMovieInteractionBlocked();
+    return;
+  }
   _horiz->zoomBackView();
   if (_horiz->getCustomZooms().size() == 0) {
     enableUnzoomButtons(false);
@@ -1942,6 +2039,10 @@ void GuiManager::_zoomBack()
 
 void GuiManager::_zoomOut()
 {
+  if (isMovieActive()) {
+    showMovieInteractionBlocked();
+    return;
+  }
   _horiz->zoomOutView();
   _horiz->clearCustomZooms();
   enableUnzoomButtons(false);
