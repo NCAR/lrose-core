@@ -722,6 +722,15 @@ void TimeControl::_acceptGuiSelections()
   _frameIndex = _guiFrameIndex;
   _enableAcceptCancel(false);
   _computeFrameTimes();
+
+  // Publish the accepted movie limits back to the controls as one coherent
+  // update. Blocking the editable start-time signal prevents this model-to-
+  // view synchronization from being mistaken for another pending user edit.
+  if (_startTimeEdit && _endTimeLabel) {
+    const QSignalBlocker startBlocker(_startTimeEdit);
+    _startTimeEdit->setDateTime(getQDateTime(_startTime));
+    _endTimeLabel->setText(getEndTime().asString(0).c_str());
+  }
   if (movieRangeChanged) {
     // Keep the legacy request epoch synchronized with this dialog. Its end is
     // the end of the final frame, matching the canvas band and CIDD semantics.
