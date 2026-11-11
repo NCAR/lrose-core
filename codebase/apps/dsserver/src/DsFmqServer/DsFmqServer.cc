@@ -35,6 +35,7 @@
 #include <string>
 #include <didss/RapDataDir.hh>
 #include <didss/DsMessage.hh>
+#include <dsserver/DsServerMsg.hh>
 #include <Fmq/DsFmq.hh>
 #include <Fmq/DsFmqMsg.hh>
 #include <toolsa/Socket.hh>
@@ -180,6 +181,25 @@ int DsFmqServer::_performInit(DsFmqMsg &msg)
     }
     return -1;
   }
+
+  // in secure mode, reject absolute paths and paths containing '..',
+  // so clients can only reach queues below DATA_DIR
+
+  if (_isSecure) {
+    string securityErr;
+    if (!DsServerMsg::urlIsSecure(urlStr, securityErr)) {
+      string errStr = "ERROR - DsFmqServer::_performInit\n";
+      errStr += "  Running in secure mode.\n";
+      errStr += securityErr;
+      TaStr::AddStr(errStr, "  URL: ", urlStr);
+      if (_isDebug) {
+        cerr << errStr;
+      }
+      _sendReply(msg.getType(), -1, errStr);
+      return -1;
+    }
+  }
+
   string fmqPath;
   RapDataDir.fillPath(url.getFile(), fmqPath);
 
