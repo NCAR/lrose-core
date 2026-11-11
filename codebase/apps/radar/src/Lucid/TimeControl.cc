@@ -783,17 +783,21 @@ void TimeControl::_startMovie()
 
 void TimeControl::_stopMovie()
 {
-  const bool wasBuilding = _movieState == MovieState::Building;
   _movieTimer->stop();
   _manager->cancelMovieBuild();
   _movieState = MovieState::Idle;
   _gd.movie.movie_on = 0;
   _buildingFrameIndex = -1;
+  _playbackFrameIndex = -1;
   _startButton->setEnabled(true);
   _timePlot->setRenderedFrames(std::vector<bool>(), -1);
-  if (wasBuilding) {
-    _manager->stopMoviePlayback();
-  }
+
+  // Return ownership of the canvas to the live layers whenever either movie
+  // construction or playback stops. Refresh at the selected movie time so we
+  // do not expose data retained from the last frame constructed underneath
+  // the immutable playback image.
+  _manager->stopMoviePlayback();
+  _timeHasChanged = true;
   _manager->statusBar()->showMessage("Movie stopped", 3000);
 }
 
