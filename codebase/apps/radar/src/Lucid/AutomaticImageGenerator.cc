@@ -25,13 +25,13 @@
 AutomaticImageGenerator::AutomaticImageGenerator() :
         _jobIndex(-1),
         _expectedGeneration(-1),
-        _gridReady(false),
+        _dataReady(false),
         _failureCount(0)
 {
 }
 
 /////////////////////////////////////////////////////////////
-// build an immutable height-major job sequence
+// build an immutable horizontal-and-vertical job sequence
 
 bool AutomaticImageGenerator::configure(const Params &params,
                                          int numDataFields,
@@ -39,6 +39,7 @@ bool AutomaticImageGenerator::configure(const Params &params,
 {
   error.clear();
   _jobs.clear();
+  _routes.clear();
   _jobIndex = -1;
   _failureCount = 0;
   _resetJobReadiness();
@@ -181,8 +182,47 @@ bool AutomaticImageGenerator::configure(const Params &params,
   for (const double height : heights) {
     for (const auto &zoom : zooms) {
       for (size_t ii = 0; ii < fields.size(); ++ii) {
-        _jobs.push_back({fields[ii], height, zoom.first, zoom.second,
-                         outputFieldNames[ii]});
+        _jobs.push_back({JobType::Horizontal, fields[ii], height,
+                         zoom.first, zoom.second, outputFieldNames[ii], -1});
+      }
+    }
+  }
+
+  if (params.generate_vsection_images) {
+    if (params.images_vsection_spec_n < 1) {
+      error = "generate_vsection_images is true but images_vsection_spec "
+              "is empty";
+      return false;
+    }
+    QSet<QString> routeNames;
+    for (int ii = 0; ii < params.images_vsection_spec_n; ++ii) {
+      const Params::images_vsection_spec_t &spec =
+        params._images_vsection_spec[ii];
+      const QString rawName = QString::fromUtf8(spec.vsection_label).trimmed();
+      const QString routeName = _safeFileNameComponent(rawName);
+      if (rawName.isEmpty() || routeNames.contains(routeName)) {
+        error = QString("images_vsection_spec contains an empty or "
+                        "filename-equivalent label: %1").arg(rawName);
+        return false;
+      }
+
+      std::vector<QPointF> points;
+      if (!_parseRoutePoints(QString::fromUtf8(spec.waypt_locs), points) ||
+          points.size() != static_cast<size_t>(spec.n_waypts) ||
+          points.size() < 2) {
+        error = QString("Invalid waypt_locs or n_waypts for vertical "
+                        "section %1").arg(rawName);
+        return false;
+      }
+      routeNames.insert(routeName);
+      _routes.push_back({routeName, std::move(points)});
+    }
+
+    for (size_t iroute = 0; iroute < _routes.size(); ++iroute) {
+      for (size_t ifield = 0; ifield < fields.size(); ++ifield) {
+        _jobs.push_back({JobType::Vertical, fields[ifield], 0.0, -1,
+                         QString(), outputFieldNames[ifield],
+                         static_cast<int>(iroute)});
       }
     }
   }
@@ -232,11 +272,17 @@ int AutomaticImageGenerator::jobCount() const
 
 bool AutomaticImageGenerator::hasMultipleHeights() const
 {
-  if (_jobs.empty()) {
-    return false;
-  }
-  const double firstHeight = _jobs.front().heightKm;
+  bool found = false;
+  double firstHeight = 0.0;
   for (const Job &job : _jobs) {
+    if (job.type != JobType::Horizontal) {
+      continue;
+    }
+    if (!found) {
+      firstHeight = job.heightKm;
+      found = true;
+      continue;
+    }
     if (job.heightKm != firstHeight) {
       return true;
     }
@@ -246,16 +292,38 @@ bool AutomaticImageGenerator::hasMultipleHeights() const
 
 bool AutomaticImageGenerator::hasMultipleZooms() const
 {
-  if (_jobs.empty()) {
-    return false;
-  }
-  const int firstZoom = _jobs.front().zoomIndex;
+  bool found = false;
+  int firstZoom = -1;
   for (const Job &job : _jobs) {
+    if (job.type != JobType::Horizontal) {
+      continue;
+    }
+    if (!found) {
+      firstZoom = job.zoomIndex;
+      found = true;
+      continue;
+    }
     if (job.zoomIndex != firstZoom) {
       return true;
     }
   }
   return false;
+}
+
+bool AutomaticImageGenerator::currentJobIsHorizontal() const
+{
+  return hasCurrentJob() && currentJob().type == JobType::Horizontal;
+}
+
+bool AutomaticImageGenerator::currentJobIsVertical() const
+{
+  return hasCurrentJob() && currentJob().type == JobType::Vertical;
+}
+
+const AutomaticImageGenerator::Route &
+AutomaticImageGenerator::currentRoute() const
+{
+  return _routes.at(currentJob().routeIndex);
 }
 
 void AutomaticImageGenerator::setExpectedGeneration(int generation)
@@ -268,19 +336,19 @@ int AutomaticImageGenerator::expectedGeneration() const
   return _expectedGeneration;
 }
 
-bool AutomaticImageGenerator::acceptGridCompletion(int generation)
+bool AutomaticImageGenerator::acceptDataCompletion(int generation)
 {
   if (!hasCurrentJob() || generation < 0 ||
       generation != _expectedGeneration) {
     return false;
   }
-  _gridReady = true;
+  _dataReady = true;
   return true;
 }
 
 bool AutomaticImageGenerator::readyToSave(bool productsReady) const
 {
-  return hasCurrentJob() && _gridReady && productsReady;
+  return hasCurrentJob() && _dataReady && productsReady;
 }
 
 void AutomaticImageGenerator::recordFailure()
@@ -299,12 +367,10 @@ int AutomaticImageGenerator::failureCount() const
 bool AutomaticImageGenerator::prepareOutput(const Params &params,
                                              const DateTime &imageTime,
                                              QString &path,
-                                             QString &outputRoot,
                                              QByteArray &format,
                                              QString &error) const
 {
   path.clear();
-  outputRoot.clear();
   format.clear();
   error.clear();
   if (!hasCurrentJob()) {
@@ -325,7 +391,7 @@ bool AutomaticImageGenerator::prepareOutput(const Params &params,
     return false;
   }
 
-  outputRoot = QString::fromUtf8(params.images_output_dir).trimmed();
+  QString outputRoot = QString::fromUtf8(params.images_output_dir).trimmed();
   outputRoot.replace("$(HOME)", QDir::homePath());
   if (outputRoot.startsWith("$HOME")) {
     outputRoot.replace(0, 5, QDir::homePath());
@@ -342,19 +408,20 @@ bool AutomaticImageGenerator::prepareOutput(const Params &params,
       .arg(imageTime.getMonth(), 2, 10, QChar('0'))
       .arg(imageTime.getDay(), 2, 10, QChar('0'));
   }
-  QString horizSubdir = QDir::cleanPath(
-    QString::fromUtf8(params.images_horiz_subdir).trimmed());
-  if (horizSubdir == ".") {
-    horizSubdir.clear();
+  QString viewSubdir = QDir::cleanPath(QString::fromUtf8(
+    currentJobIsHorizontal() ? params.images_horiz_subdir :
+                               params.images_vsect_subdir).trimmed());
+  if (viewSubdir == ".") {
+    viewSubdir.clear();
   }
-  if (QDir::isAbsolutePath(horizSubdir) || horizSubdir == ".." ||
-      horizSubdir.startsWith("../") || horizSubdir.contains("/../")) {
-    error = "images_horiz_subdir must remain below images_output_dir";
+  if (QDir::isAbsolutePath(viewSubdir) || viewSubdir == ".." ||
+      viewSubdir.startsWith("../") || viewSubdir.contains("/../")) {
+    error = "Image subdirectory must remain below images_output_dir";
     return false;
   }
-  if (!horizSubdir.isEmpty()) {
-    relativeDir = relativeDir.isEmpty() ? horizSubdir :
-      QDir(relativeDir).filePath(horizSubdir);
+  if (!viewSubdir.isEmpty()) {
+    relativeDir = relativeDir.isEmpty() ? viewSubdir :
+      QDir(relativeDir).filePath(viewSubdir);
   }
 
   outputRoot = QDir::cleanPath(outputRoot);
@@ -402,15 +469,19 @@ bool AutomaticImageGenerator::prepareOutput(const Params &params,
   if (params.images_include_field_name_in_file_name) {
     productName = currentJob().outputFieldName;
   }
-  productName += QString::fromUtf8(params.image_field_suffix_horiz);
+  productName += QString::fromUtf8(currentJobIsHorizontal() ?
+    params.image_field_suffix_horiz : params.image_field_suffix_vsect);
   if (!productName.trimmed().isEmpty()) {
     nameParts.push_back(_safeFileNameComponent(productName));
   }
-  if (hasMultipleHeights()) {
+  if (currentJobIsHorizontal() && hasMultipleHeights()) {
     nameParts.push_back(_heightName(currentJob().heightKm));
   }
-  if (hasMultipleZooms()) {
+  if (currentJobIsHorizontal() && hasMultipleZooms()) {
     nameParts.push_back(currentJob().zoomName);
+  }
+  if (currentJobIsVertical()) {
+    nameParts.push_back(currentRoute().name);
   }
   if (nameParts.empty()) {
     nameParts.push_back("image");
@@ -423,7 +494,7 @@ bool AutomaticImageGenerator::prepareOutput(const Params &params,
 void AutomaticImageGenerator::_resetJobReadiness()
 {
   _expectedGeneration = -1;
-  _gridReady = false;
+  _dataReady = false;
 }
 
 QString AutomaticImageGenerator::_safeFileNameComponent(QString value)
@@ -444,4 +515,42 @@ QString AutomaticImageGenerator::_heightName(double heightKm)
     value.chop(1);
   }
   return _safeFileNameComponent(value + "km");
+}
+
+bool AutomaticImageGenerator::_parseRoutePoints(
+        const QString &text,
+        std::vector<QPointF> &points)
+{
+  points.clear();
+  const QRegularExpression pairExpression(
+    R"(\(\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*,\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*\))");
+  QRegularExpressionMatchIterator matches =
+    pairExpression.globalMatch(text);
+  while (matches.hasNext()) {
+    const QRegularExpressionMatch match = matches.next();
+    bool firstOk = false;
+    bool secondOk = false;
+    const double first = match.captured(1).toDouble(&firstOk);
+    const double second = match.captured(2).toDouble(&secondOk);
+    if (!firstOk || !secondOk || !std::isfinite(first) ||
+        !std::isfinite(second)) {
+      points.clear();
+      return false;
+    }
+    points.emplace_back(first, second);
+  }
+
+  QString remainder = text;
+  remainder.remove(pairExpression);
+  if (!remainder.trimmed().isEmpty() || points.size() < 2) {
+    points.clear();
+    return false;
+  }
+  for (size_t ii = 1; ii < points.size(); ++ii) {
+    if (points[ii] != points[0]) {
+      return true;
+    }
+  }
+  points.clear();
+  return false;
 }

@@ -303,15 +303,26 @@ private:
 
   void _maybeStartAutomaticImages();
   void _startAutomaticImageJob();
-  void _selectAutomaticImageField(int fieldIndex);
+  void _startAutomaticHorizontalJob();
+  void _startAutomaticVerticalJob();
+  void _selectAutomaticImageField(int fieldIndex,
+                                  bool requestHorizontal = true);
   void _checkAutomaticImageReady();
+  void _failAutomaticImage(const QString &error);
   void _automaticImageTimedOut();
   bool _saveAutomaticHorizontalImage(QString &path, QString &error);
+  bool _saveAutomaticVerticalImage(QString &path, QString &error);
+  bool _publishAutomaticImage(const QImage &image,
+                              const DateTime &imageTime,
+                              bool writeGeoXml,
+                              QString &path,
+                              QString &error);
+  bool _buildAutomaticVsectionRoute(VsectionRoute &route,
+                                    QString &error) const;
   bool _writeAutomaticGeoXml(const QString &imagePath,
                              const QImage &image,
                              QString &error) const;
   bool _writeAutomaticLatestDataInfo(const QString &imagePath,
-                                     const QString &outputRoot,
                                      const QByteArray &format,
                                      const DateTime &imageTime,
                                      QString &error) const;

@@ -10,6 +10,7 @@
 #define AutomaticImageGenerator_HH
 
 #include <QByteArray>
+#include <QPointF>
 #include <QString>
 #include <vector>
 
@@ -26,12 +27,24 @@ class AutomaticImageGenerator
 {
 public:
 
+  enum class JobType {
+    Horizontal,
+    Vertical
+  };
+
+  struct Route {
+    QString name;
+    std::vector<QPointF> points;
+  };
+
   struct Job {
+    JobType type = JobType::Horizontal;
     int fieldIndex = -1;
     double heightKm = 0.0;
     int zoomIndex = -1;
     QString zoomName;
     QString outputFieldName;
+    int routeIndex = -1;
   };
 
   AutomaticImageGenerator();
@@ -46,10 +59,13 @@ public:
   int jobCount() const;
   bool hasMultipleHeights() const;
   bool hasMultipleZooms() const;
+  bool currentJobIsHorizontal() const;
+  bool currentJobIsVertical() const;
+  const Route &currentRoute() const;
 
   void setExpectedGeneration(int generation);
   int expectedGeneration() const;
-  bool acceptGridCompletion(int generation);
+  bool acceptDataCompletion(int generation);
   bool readyToSave(bool productsReady) const;
 
   void recordFailure();
@@ -58,21 +74,23 @@ public:
   bool prepareOutput(const Params &params,
                      const DateTime &imageTime,
                      QString &path,
-                     QString &outputRoot,
                      QByteArray &format,
                      QString &error) const;
 
 private:
 
   std::vector<Job> _jobs;
+  std::vector<Route> _routes;
   int _jobIndex;
   int _expectedGeneration;
-  bool _gridReady;
+  bool _dataReady;
   int _failureCount;
 
   void _resetJobReadiness();
   static QString _safeFileNameComponent(QString value);
   static QString _heightName(double heightKm);
+  static bool _parseRoutePoints(const QString &text,
+                                std::vector<QPointF> &points);
 };
 
 #endif

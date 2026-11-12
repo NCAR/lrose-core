@@ -2596,7 +2596,7 @@ paramdef boolean {
 paramdef boolean {
   p_default = true;
   p_descr = "Option to write latest_data_info files when an image is created.";
-  p_descr = "If true, _latest_data_info files will be written to the output directory, and the file write will be registered with the DataMapper.";
+  p_help = "If true, a _latest_data_info file is written in each view-specific image subdirectory, and the file write is registered with the DataMapper.";
 } images_write_latest_data_info;
 
 typedef enum {

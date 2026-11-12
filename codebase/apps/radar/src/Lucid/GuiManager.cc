@@ -2191,6 +2191,7 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
       _vlevelManager.getRequestedLevel(),
       _gd.h_win.page);
     if (_automaticImagesActive &&
+        _automaticImageGenerator->currentJobIsHorizontal() &&
         _automaticImageGenerator->hasCurrentJob() &&
         _fieldNum == _automaticImageGenerator->currentJob().fieldIndex &&
         mr == _gd.mread[_fieldNum]) {
@@ -2225,10 +2226,11 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
     }
     _horiz->triggerGridRendering(_gd.h_win.page, frameIndex);
     if (_automaticImagesActive &&
+        _automaticImageGenerator->currentJobIsHorizontal() &&
         _automaticImageGenerator->hasCurrentJob() &&
         _fieldNum == _automaticImageGenerator->currentJob().fieldIndex &&
         mr == _gd.mread[_fieldNum] && mr->isValidH() &&
-        _automaticImageGenerator->acceptGridCompletion(
+        _automaticImageGenerator->acceptDataCompletion(
           mr->getHorizCompletedGeneration())) {
       _checkAutomaticImageReady();
     }
@@ -2632,13 +2634,6 @@ void GuiManager::_maybeStartAutomaticImages()
     return;
   }
 
-  // These options belong to later stages of the image generator. Report them
-  // explicitly so an unattended run never appears to have honored settings
-  // which this deliberately narrow first implementation does not process.
-  if (_params.generate_vsection_images) {
-    cerr << "WARNING - automatic images: vertical-section output is not yet "
-         << "implemented" << endl;
-  }
   _automaticImagesActive = true;
   _timeControl->configureAutomaticImageTime(_imagesStartTime);
 
@@ -2675,6 +2670,22 @@ void GuiManager::_startAutomaticImageJob()
     return;
   }
 
+  if (_automaticImageGenerator->currentJobIsVertical()) {
+    _startAutomaticVerticalJob();
+  } else {
+    _startAutomaticHorizontalJob();
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// apply one horizontal height/zoom/field job
+
+void GuiManager::_startAutomaticHorizontalJob()
+{
+  const AutomaticImageGenerator::Job &job =
+    _automaticImageGenerator->currentJob();
+  const int fieldIndex = job.fieldIndex;
+
   // Apply both outer dimensions before selecting the field. Their normal
   // invalidation paths then let the timer issue one request containing the
   // complete height, geometry, and field state for this job.
@@ -2703,9 +2714,52 @@ void GuiManager::_startAutomaticImageJob()
 }
 
 /////////////////////////////////////////////////////////////
+// request one configured route for the selected field
+
+void GuiManager::_startAutomaticVerticalJob()
+{
+  const AutomaticImageGenerator::Job &job =
+    _automaticImageGenerator->currentJob();
+  VsectionRoute route;
+  QString error;
+  if (!_buildAutomaticVsectionRoute(route, error)) {
+    _failAutomaticImage(error);
+    return;
+  }
+
+  _selectAutomaticImageField(job.fieldIndex, false);
+  _vsectionRoute = route;
+  const int generation = _requestVerticalSection();
+  if (generation < 0) {
+    _failAutomaticImage(tr("Could not start vertical-section request"));
+    return;
+  }
+  _automaticImageGenerator->setExpectedGeneration(generation);
+
+  const QString fieldName = QString::fromUtf8(
+    _params._fields[job.fieldIndex].field_name);
+  statusBar()->showMessage(
+    tr("Creating automatic image %1 of %2: %3, vertical section %4")
+      .arg(_automaticImageGenerator->currentJobNumber())
+      .arg(_automaticImageGenerator->jobCount())
+      .arg(fieldName)
+      .arg(_automaticImageGenerator->currentRoute().name));
+  if (_params.images_debug != Params::IMAGE_DEBUG_OFF) {
+    cerr << "Automatic image: requesting vertical field "
+         << fieldName.toStdString() << ", route "
+         << _automaticImageGenerator->currentRoute().name.toStdString()
+         << " (" << _automaticImageGenerator->currentJobNumber() << " of "
+         << _automaticImageGenerator->jobCount() << ")" << endl;
+  }
+  _automaticImageTimeoutTimer->start(
+    _params.images_request_timeout_secs * 1000);
+}
+
+/////////////////////////////////////////////////////////////
 // update field state without synthesizing a table interaction
 
-void GuiManager::_selectAutomaticImageField(int fieldIndex)
+void GuiManager::_selectAutomaticImageField(int fieldIndex,
+                                            bool requestHorizontal)
 {
   _prevFieldNum = _fieldNum;
   _fieldNum = fieldIndex;
@@ -2713,8 +2767,8 @@ void GuiManager::_selectAutomaticImageField(int fieldIndex)
   _setField(fieldIndex);
   _gd.selected_field = fieldIndex;
   _gd.h_win.page = fieldIndex;
-  _gd.field_has_changed = true;
-  _fieldHasChanged = true;
+  _gd.field_has_changed = requestHorizontal;
+  _fieldHasChanged = requestHorizontal;
 
   // Keep the visible selector consistent for diagnostics without routing the
   // programmatic change back through its user-click handler.
@@ -2731,7 +2785,9 @@ void GuiManager::_selectAutomaticImageField(int fieldIndex)
 
 void GuiManager::_checkAutomaticImageReady()
 {
-  const bool productsReady = !_gd.prod.products_on || !_gd.prod_mgr ||
+  const bool productsReady =
+    _automaticImageGenerator->currentJobIsVertical() ||
+    !_gd.prod.products_on || !_gd.prod_mgr ||
     _gd.prod_mgr->activeProductsReady();
   if (!_automaticImagesActive ||
       !_automaticImageGenerator->readyToSave(productsReady)) {
@@ -2741,13 +2797,30 @@ void GuiManager::_checkAutomaticImageReady()
   _automaticImageTimeoutTimer->stop();
   QString outputPath;
   QString error;
-  if (!_saveAutomaticHorizontalImage(outputPath, error)) {
+  const bool saved = _automaticImageGenerator->currentJobIsVertical() ?
+    _saveAutomaticVerticalImage(outputPath, error) :
+    _saveAutomaticHorizontalImage(outputPath, error);
+  if (!saved) {
     _automaticImageGenerator->recordFailure();
     cerr << "ERROR - automatic image: " << error.toStdString() << endl;
   } else {
     cerr << "Automatic image saved: " << outputPath.toStdString() << endl;
   }
 
+  _automaticImageGenerator->advance();
+  QTimer::singleShot(0, this, [this]() {
+    _startAutomaticImageJob();
+  });
+}
+
+/////////////////////////////////////////////////////////////
+// fail the current job immediately and continue the unattended batch
+
+void GuiManager::_failAutomaticImage(const QString &error)
+{
+  _automaticImageTimeoutTimer->stop();
+  _automaticImageGenerator->recordFailure();
+  cerr << "ERROR - automatic image: " << error.toStdString() << endl;
   _automaticImageGenerator->advance();
   QTimer::singleShot(0, this, [this]() {
     _startAutomaticImageJob();
@@ -2767,15 +2840,27 @@ void GuiManager::_automaticImageTimedOut()
     _automaticImageGenerator->currentJob();
   const int timedOutField = timedOutJob.fieldIndex;
   cerr << "ERROR - automatic image: timed out waiting for field "
-       << _params._fields[timedOutField].field_name << " at "
-       << timedOutJob.heightKm << " km, zoom "
-       << timedOutJob.zoomName.toStdString() << endl;
+       << _params._fields[timedOutField].field_name;
+  if (_automaticImageGenerator->currentJobIsVertical()) {
+    cerr << ", vertical section "
+         << _automaticImageGenerator->currentRoute().name.toStdString();
+  } else {
+    cerr << " at " << timedOutJob.heightKm << " km, zoom "
+         << timedOutJob.zoomName.toStdString();
+  }
+  cerr << endl;
   if (_gd.mread[timedOutField]) {
     const int expectedGeneration =
       _automaticImageGenerator->expectedGeneration();
-    const int generation = expectedGeneration >= 0 ? expectedGeneration :
-      _gd.mread[timedOutField]->getHorizGeneration();
-    _gd.mread[timedOutField]->cancelHorizRequest(generation);
+    if (_automaticImageGenerator->currentJobIsVertical()) {
+      const int generation = expectedGeneration >= 0 ? expectedGeneration :
+        _gd.mread[timedOutField]->getVertGeneration();
+      _gd.mread[timedOutField]->cancelVertRequest(generation);
+    } else {
+      const int generation = expectedGeneration >= 0 ? expectedGeneration :
+        _gd.mread[timedOutField]->getHorizGeneration();
+      _gd.mread[timedOutField]->cancelHorizRequest(generation);
+    }
   }
   _automaticImageGenerator->recordFailure();
   _automaticImageGenerator->advance();
@@ -2807,16 +2892,72 @@ bool GuiManager::_saveAutomaticHorizontalImage(QString &path,
     return false;
   }
 
-  const DateTime imageTime(reader->h_date);
-  QString outputRoot;
-  QByteArray format;
-  if (!_automaticImageGenerator->prepareOutput(
-        _params, imageTime, path, outputRoot, format, error)) {
-    return false;
-  }
   QImage image = _horiz->grab().toImage();
   if (image.isNull()) {
     error = tr("Could not capture the horizontal view");
+    return false;
+  }
+  return _publishAutomaticImage(
+    image, DateTime(reader->h_date), true, path, error);
+}
+
+/////////////////////////////////////////////////////////////
+// capture the completed vertical-section widget synchronously
+
+bool GuiManager::_saveAutomaticVerticalImage(QString &path,
+                                              QString &error)
+{
+  path.clear();
+  error.clear();
+  if (!_vert || !_vertWindow ||
+      !_automaticImageGenerator->currentJobIsVertical()) {
+    error = tr("The vertical view or vertical job is unavailable");
+    return false;
+  }
+  const int fieldIndex =
+    _automaticImageGenerator->currentJob().fieldIndex;
+  MdvReader *reader = _gd.mread[fieldIndex];
+  if (!reader || !reader->isValidV() ||
+      reader->getVertGeneration() !=
+        _automaticImageGenerator->expectedGeneration()) {
+    error = tr("The completed vertical data do not match the requested field");
+    return false;
+  }
+
+  // The automatic window may remain hidden, but activating its layouts gives
+  // the rendering widget the same configured geometry it has when shown
+  // interactively. QWidget::render then paints that exact state synchronously.
+  _vertWindow->ensurePolished();
+  if (_vertWindow->layout()) {
+    _vertWindow->layout()->activate();
+  }
+  if (_vertWindow->centralWidget() &&
+      _vertWindow->centralWidget()->layout()) {
+    _vertWindow->centralWidget()->layout()->activate();
+  }
+  if (_vert->width() < 1 || _vert->height() < 1) {
+    error = tr("The vertical view has no drawable area");
+    return false;
+  }
+  QImage image(_vert->size(), QImage::Format_ARGB32_Premultiplied);
+  image.fill(QColor(_params.background_color));
+  _vert->render(&image);
+  return _publishAutomaticImage(
+    image, DateTime(reader->v_date), false, path, error);
+}
+
+/////////////////////////////////////////////////////////////
+// atomically publish one captured view and its configured metadata
+
+bool GuiManager::_publishAutomaticImage(const QImage &image,
+                                         const DateTime &imageTime,
+                                         bool writeGeoXml,
+                                         QString &path,
+                                         QString &error)
+{
+  QByteArray format;
+  if (!_automaticImageGenerator->prepareOutput(
+        _params, imageTime, path, format, error)) {
     return false;
   }
 
@@ -2841,13 +2982,49 @@ bool GuiManager::_saveAutomaticHorizontalImage(QString &path,
   // Publish optional sidecars before _latest_data_info. The latter is the
   // catalog notification consumed by downstream processes, so it must never
   // advertise an image whose required companion metadata is incomplete.
-  if (_params.images_output_geo_xml &&
+  if (writeGeoXml && _params.images_output_geo_xml &&
       !_writeAutomaticGeoXml(path, image, error)) {
     return false;
   }
   if (_params.images_write_latest_data_info &&
       !_writeAutomaticLatestDataInfo(
-        path, outputRoot, format, imageTime, error)) {
+        path, format, imageTime, error)) {
+    return false;
+  }
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
+// convert one configured route into the display and MDV coordinate forms
+
+bool GuiManager::_buildAutomaticVsectionRoute(VsectionRoute &route,
+                                               QString &error) const
+{
+  route.clear();
+  error.clear();
+  if (!_automaticImageGenerator->currentJobIsVertical()) {
+    error = tr("No automatic vertical-section job is active");
+    return false;
+  }
+
+  for (const QPointF &point :
+       _automaticImageGenerator->currentRoute().points) {
+    double x = point.x();
+    double y = point.y();
+    double lat = 0.0;
+    double lon = 0.0;
+    if (_params.images_vsection_waypts_in_latlon) {
+      lat = point.x();
+      lon = point.y();
+      _gd.proj.latlon2xy(lat, lon, x, y);
+    } else {
+      _gd.proj.xy2latlon(x, y, lat, lon);
+    }
+    route.append(x, y, lat, lon);
+  }
+  if (route.size() < 2 || route.totalLengthKm() <= 0.0) {
+    error = tr("Vertical section %1 has zero usable length")
+      .arg(_automaticImageGenerator->currentRoute().name);
     return false;
   }
   return true;
@@ -2942,16 +3119,13 @@ bool GuiManager::_writeAutomaticGeoXml(const QString &imagePath,
 
 bool GuiManager::_writeAutomaticLatestDataInfo(
         const QString &imagePath,
-        const QString &outputRoot,
         const QByteArray &format,
         const DateTime &imageTime,
         QString &error) const
 {
-  const QString relativePath = QDir(outputRoot).relativeFilePath(imagePath);
-  if (relativePath == ".." || relativePath.startsWith("../")) {
-    error = tr("Image path is outside images_output_dir: %1").arg(imagePath);
-    return false;
-  }
+  const QFileInfo imageInfo(imagePath);
+  const QString outputRoot = imageInfo.absolutePath();
+  const QString relativePath = imageInfo.fileName();
 
   const std::string root = outputRoot.toStdString();
   const std::string extension = format.toStdString();
@@ -4166,6 +4340,25 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
   _vertWindow->setSectionInfo(_params._fields[_gd.h_win.page].field_name,
                               reader->v_date,
                               reader->getVertTotalLengthKm());
+
+  // Automatic vertical output is tied to the exact request generation. A
+  // failed completion advances immediately; waiting for the timeout would
+  // only delay an unattended batch after the MDV layer has already answered.
+  if (_automaticImagesActive &&
+      _automaticImageGenerator->currentJobIsVertical() &&
+      reader == _gd.mread[
+        _automaticImageGenerator->currentJob().fieldIndex] &&
+      reader->getVertGeneration() ==
+        _automaticImageGenerator->expectedGeneration()) {
+    if (!reader->isValidV()) {
+      _failAutomaticImage(tr("Vertical-section data are not available for %1")
+        .arg(_params._fields[_gd.h_win.page].field_name));
+    } else if (_automaticImageGenerator->acceptDataCompletion(
+                 reader->getVertGeneration())) {
+      _checkAutomaticImageReady();
+    }
+    return;
+  }
 
   if (isMovieBuilding() && _movieIncludesVertical &&
       _movieBuildFrame >= 0 &&

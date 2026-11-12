@@ -854,6 +854,17 @@ int MdvReader::requestVertSection(const DateTime &midTime,
   return request.generation;
 }
 
+////////////////////////////////////////////////////////
+// prevent an abandoned vertical read from publishing its eventual result
+
+void MdvReader::cancelVertRequest(int generation)
+{
+  if (generation == _vertGeneration) {
+    ++_vertGeneration;
+    _setNewV(false);
+  }
+}
+
 ////////////////////////////////////////////////////////////
 // compute request time from mid time
 

@@ -5532,7 +5532,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("images_write_latest_data_info");
     tt->descr = tdrpStrDup("Option to write latest_data_info files when an image is created.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("If true, a _latest_data_info file is written in each view-specific image subdirectory, and the file write is registered with the DataMapper.");
     tt->val_offset = (char *) &images_write_latest_data_info - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
