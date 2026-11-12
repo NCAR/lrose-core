@@ -80,6 +80,7 @@
 #include <QDesktopServices>
 #include <QTableWidget>
 #include <QHeaderView>
+#include <QImageWriter>
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QSaveFile>
@@ -244,7 +245,15 @@ GuiManager::GuiManager() :
   _automaticImagesActive = false;
   _automaticImageGenerator = new AutomaticImageGenerator;
   _automaticBatchFailureBaseline = 0;
+  _automaticBatchAttempted = 0;
+  _automaticBatchSaved = 0;
+  _automaticBatchTimedOut = 0;
+  _automaticBatchProductOmissions = 0;
   _automaticTotalFailures = 0;
+  _automaticTotalAttempted = 0;
+  _automaticTotalSaved = 0;
+  _automaticTotalTimedOut = 0;
+  _automaticTotalProductOmissions = 0;
   _automaticCompletedBatches = 0;
   _automaticDisplayStateSaved = false;
   _automaticSavedField = -1;
@@ -2674,12 +2683,65 @@ void GuiManager::_maybeStartAutomaticImages()
 bool GuiManager::_validateAutomaticImageConfiguration(QString &error) const
 {
   error.clear();
-  if (_params.images_request_timeout_secs < 1) {
-    error = tr("images_request_timeout_secs must be greater than zero");
+  if (_params.images_request_timeout_secs < 1 ||
+      _params.images_request_timeout_secs >
+        std::numeric_limits<int>::max() / 1000) {
+    error = tr("images_request_timeout_secs is outside the supported range");
+    return false;
+  }
+
+  QString extension = QString::fromUtf8(
+    _params.images_file_name_extension).trimmed().toLower();
+  while (extension.startsWith('.')) {
+    extension.remove(0, 1);
+  }
+  const QByteArray format = extension.toLatin1();
+  if (extension.isEmpty() ||
+      !QImageWriter::supportedImageFormats().contains(format)) {
+    error = tr("Unsupported images_file_name_extension: %1")
+      .arg(extension);
     return false;
   }
   if (_params.make_images_transparent) {
-    error = tr("Transparent automatic images are not implemented yet");
+    static const QStringList opaqueFormats = {
+      "bmp", "jpg", "jpeg", "jpe", "pbm", "pgm", "ppm"
+    };
+    if (opaqueFormats.contains(extension)) {
+      error = tr("Image format %1 cannot preserve transparency")
+        .arg(extension);
+      return false;
+    }
+    if (!QColor(QString::fromUtf8(_params.background_color)).isValid()) {
+      error = tr("background_color must be valid when transparency is enabled");
+      return false;
+    }
+  }
+
+  QString outputRoot = QString::fromUtf8(
+    _params.images_output_dir).trimmed();
+  outputRoot.replace("$(HOME)", QDir::homePath());
+  if (outputRoot.startsWith("$HOME")) {
+    outputRoot.replace(0, 5, QDir::homePath());
+  }
+  if (outputRoot.isEmpty()) {
+    error = tr("images_output_dir must not be empty");
+    return false;
+  }
+  auto validOutputSubdir = [](const char *value) {
+    const QString subdir = QDir::cleanPath(
+      QString::fromUtf8(value).trimmed());
+    return !QDir::isAbsolutePath(subdir) && subdir != ".." &&
+      !subdir.startsWith("../") && !subdir.contains("/../");
+  };
+  if (!validOutputSubdir(_params.images_horiz_subdir) ||
+      !validOutputSubdir(_params.images_vsect_subdir)) {
+    error = tr("Image subdirectories must remain below images_output_dir");
+    return false;
+  }
+  const QString delimiter = QString::fromUtf8(
+    _params.images_file_name_delimiter);
+  if (delimiter.contains('/') || delimiter.contains('\\')) {
+    error = tr("images_file_name_delimiter cannot contain a path separator");
     return false;
   }
 
@@ -2713,6 +2775,28 @@ bool GuiManager::_validateAutomaticImageConfiguration(QString &error) const
       return false;
     }
   }
+
+  const bool repeatedOutput =
+    _params.images_creation_mode ==
+      Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE ||
+    (_params.images_creation_mode ==
+       Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE &&
+     _imagesEndTime > _imagesStartTime);
+  if (repeatedOutput &&
+      !_params.images_include_time_part_in_file_name) {
+    error = tr("Scheduled image generation requires a time in each file name");
+    return false;
+  }
+  const int scheduleInterval =
+    _params.images_creation_mode ==
+      Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE ?
+      _params.images_archive_interval_secs :
+      _params.images_schedule_interval_secs;
+  if (repeatedOutput && scheduleInterval < 60 &&
+      !_params.images_include_seconds_in_time_part) {
+    error = tr("Sub-minute image schedules require seconds in file names");
+    return false;
+  }
   return true;
 }
 
@@ -2737,6 +2821,11 @@ void GuiManager::_startAutomaticImageBatch(const DateTime &imageTime)
   _automaticBatchTime = imageTime;
   _automaticBatchFailureBaseline =
     _automaticImageGenerator->failureCount();
+  _automaticBatchAttempted = 0;
+  _automaticBatchSaved = 0;
+  _automaticBatchTimedOut = 0;
+  _automaticBatchProductOmissions = 0;
+  _automaticBatchElapsedTimer.start();
   _automaticImagesActive = true;
   _timeControl->configureAutomaticImageTime(imageTime);
 
@@ -2850,9 +2939,12 @@ void GuiManager::_startAutomaticImageJob()
   }
   const AutomaticImageGenerator::Job &job =
     _automaticImageGenerator->currentJob();
+  ++_automaticBatchAttempted;
   const int fieldIndex = job.fieldIndex;
   if (fieldIndex < 0 || _gd.mread[fieldIndex] == nullptr) {
     _automaticImageGenerator->recordFailure();
+    cerr << "ERROR - automatic image: field " << fieldIndex
+         << " has no MDV reader" << endl;
     _automaticImageGenerator->advance();
     QTimer::singleShot(0, this, [this]() {
       _startAutomaticImageJob();
@@ -2971,20 +3063,36 @@ void GuiManager::_selectAutomaticImageField(int fieldIndex,
 }
 
 /////////////////////////////////////////////////////////////
-// save only after the grid and exact Product requests are ready
+// save only after the grid and the configured Product policy are ready
 
 void GuiManager::_checkAutomaticImageReady()
 {
-  const bool productsReady =
-    _automaticImageGenerator->currentJobIsVertical() ||
-    !_gd.prod.products_on || !_gd.prod_mgr ||
-    _gd.prod_mgr->activeProductsReady();
   if (!_automaticImagesActive ||
-      !_automaticImageGenerator->readyToSave(productsReady)) {
+      !_automaticImageGenerator->hasCurrentJob()) {
+    return;
+  }
+
+  const bool productsRelevant =
+    !_automaticImageGenerator->currentJobIsVertical() &&
+    _gd.prod.products_on && _gd.prod_mgr;
+  const bool productsReady = !productsRelevant ||
+    (_params.images_require_all_symprods ?
+       _gd.prod_mgr->activeProductsReady() :
+       _gd.prod_mgr->activeProductRequestsSettled());
+  if (!_automaticImageGenerator->readyToSave(productsReady)) {
     return;
   }
 
   _automaticImageTimeoutTimer->stop();
+  if (productsRelevant && !_params.images_require_all_symprods) {
+    const int unavailable =
+      _gd.prod_mgr->numActiveProductsUnavailable();
+    if (unavailable > 0) {
+      ++_automaticBatchProductOmissions;
+      cerr << "WARNING - automatic image: saving without "
+           << unavailable << " unavailable symbolic product(s)" << endl;
+    }
+  }
   QString outputPath;
   QString error;
   const bool saved = _automaticImageGenerator->currentJobIsVertical() ?
@@ -2994,6 +3102,7 @@ void GuiManager::_checkAutomaticImageReady()
     _automaticImageGenerator->recordFailure();
     cerr << "ERROR - automatic image: " << error.toStdString() << endl;
   } else {
+    ++_automaticBatchSaved;
     cerr << "Automatic image saved: " << outputPath.toStdString() << endl;
   }
 
@@ -3053,6 +3162,7 @@ void GuiManager::_automaticImageTimedOut()
     }
   }
   _automaticImageGenerator->recordFailure();
+  ++_automaticBatchTimedOut;
   _automaticImageGenerator->advance();
   QTimer::singleShot(0, this, [this]() {
     _startAutomaticImageJob();
@@ -3151,6 +3261,25 @@ bool GuiManager::_publishAutomaticImage(const QImage &image,
     return false;
   }
 
+  QImage outputImage = image;
+  if (_params.make_images_transparent) {
+    // Match CIDD's catalog convention: the configured canvas background is
+    // the transparency key. Exact matching deliberately leaves rendered and
+    // anti-aliased pixels intact instead of guessing which colors are data.
+    outputImage = image.convertToFormat(QImage::Format_ARGB32);
+    const QRgb background = QColor(_params.background_color).rgb();
+    const QRgb rgbMask = 0x00ffffff;
+    for (int yy = 0; yy < outputImage.height(); ++yy) {
+      QRgb *line = reinterpret_cast<QRgb *>(outputImage.scanLine(yy));
+      for (int xx = 0; xx < outputImage.width(); ++xx) {
+        if ((line[xx] & rgbMask) == (background & rgbMask)) {
+          line[xx] = qRgba(qRed(line[xx]), qGreen(line[xx]),
+                           qBlue(line[xx]), 0);
+        }
+      }
+    }
+  }
+
   // QSaveFile publishes the catalog image with one atomic rename. Readers
   // therefore see either the previous complete image or the new one, never a
   // partially encoded file while an unattended update is in progress.
@@ -3159,7 +3288,7 @@ bool GuiManager::_publishAutomaticImage(const QImage &image,
     error = tr("Cannot open image for writing: %1").arg(path);
     return false;
   }
-  if (!image.save(&output, format.constData())) {
+  if (!outputImage.save(&output, format.constData())) {
     output.cancelWriting();
     error = tr("Cannot encode image: %1").arg(path);
     return false;
@@ -3173,7 +3302,7 @@ bool GuiManager::_publishAutomaticImage(const QImage &image,
   // catalog notification consumed by downstream processes, so it must never
   // advertise an image whose required companion metadata is incomplete.
   if (writeGeoXml && _params.images_output_geo_xml &&
-      !_writeAutomaticGeoXml(path, image, error)) {
+      !_writeAutomaticGeoXml(path, outputImage, error)) {
     return false;
   }
   if (_params.images_write_latest_data_info &&
@@ -3347,10 +3476,23 @@ void GuiManager::_completeAutomaticImageBatch()
     0, _automaticImageGenerator->failureCount() -
        _automaticBatchFailureBaseline);
   _automaticTotalFailures += batchFailures;
+  _automaticTotalAttempted += _automaticBatchAttempted;
+  _automaticTotalSaved += _automaticBatchSaved;
+  _automaticTotalTimedOut += _automaticBatchTimedOut;
+  _automaticTotalProductOmissions += _automaticBatchProductOmissions;
   ++_automaticCompletedBatches;
 
   cerr << "Automatic image batch for " << _automaticBatchTime.asString()
-       << " completed with " << batchFailures << " failure(s)" << endl;
+       << " completed: attempted=" << _automaticBatchAttempted
+       << ", saved=" << _automaticBatchSaved
+       << ", failed=" << batchFailures
+       << ", timed_out=" << _automaticBatchTimedOut
+       << ", images_with_product_omissions="
+       << _automaticBatchProductOmissions
+       << ", elapsed_secs="
+       << (_automaticBatchElapsedTimer.isValid() ?
+             _automaticBatchElapsedTimer.elapsed() / 1000.0 : 0.0)
+       << endl;
 
   if (_params.images_creation_mode == Params::CREATE_IMAGES_THEN_EXIT) {
     _finishAutomaticImageRun(QString());
@@ -3410,13 +3552,18 @@ void GuiManager::_finishAutomaticImageRun(const QString &fatalError)
 
   const bool success = _automaticTotalFailures == 0;
   if (success) {
-    cerr << "Automatic image generation completed successfully after "
-         << _automaticCompletedBatches << " batch(es)" << endl;
+    cerr << "Automatic image generation completed successfully";
   } else {
-    cerr << "Automatic image generation completed with "
-         << _automaticTotalFailures << " failure(s) in "
-         << _automaticCompletedBatches << " completed batch(es)" << endl;
+    cerr << "Automatic image generation completed with failures";
   }
+  cerr << ": batches=" << _automaticCompletedBatches
+       << ", attempted=" << _automaticTotalAttempted
+       << ", saved=" << _automaticTotalSaved
+       << ", failed=" << _automaticTotalFailures
+       << ", timed_out=" << _automaticTotalTimedOut
+       << ", images_with_product_omissions="
+       << _automaticTotalProductOmissions
+       << endl;
   QTimer::singleShot(0, qApp, [success]() {
     QCoreApplication::exit(success ? EXIT_SUCCESS : EXIT_FAILURE);
   });

@@ -4402,18 +4402,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'products_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("products_on");
-    tt->descr = tdrpStrDup("Render all of the products in the overlay menu.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &products_on - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'product_line_width'
     // ctype is 'int'
     
@@ -4504,8 +4492,8 @@ Params *Params::_instance = (Params *) NULL;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("symprods_enabled_at_startup");
-    tt->descr = tdrpStrDup("Enable symprods at start.");
-    tt->help = tdrpStrDup("If FALSE, symbolic products will not be emabled at startup. You will have to turn them on via the products menu.");
+    tt->descr = tdrpStrDup("Enable symbolic products at startup.");
+    tt->help = tdrpStrDup("If FALSE, symbolic products remain disabled until they are turned on from the products menu.");
     tt->val_offset = (char *) &symprods_enabled_at_startup - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
@@ -5206,7 +5194,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("create_images_automatically");
     tt->descr = tdrpStrDup("Option to create images automatically.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("See images_creation_mode below.");
     tt->val_offset = (char *) &create_images_automatically - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -5256,10 +5244,10 @@ Params *Params::_instance = (Params *) NULL;
     tt->val_offset = (char *) &images_schedule_delay_secs - &_start_;
     tt->single_val.i = 60;
     tt++;
-
+    
     // Parameter 'images_request_timeout_secs'
     // ctype is 'int'
-
+    
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("images_request_timeout_secs");
@@ -5268,7 +5256,19 @@ Params *Params::_instance = (Params *) NULL;
     tt->val_offset = (char *) &images_request_timeout_secs - &_start_;
     tt->single_val.i = 120;
     tt++;
-
+    
+    // Parameter 'images_require_all_symprods'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_require_all_symprods");
+    tt->descr = tdrpStrDup("Require every enabled symbolic product before saving an automatic horizontal image.");
+    tt->help = tdrpStrDup("If TRUE, an unavailable symbolic-product server causes the image job to wait until images_request_timeout_secs expires. If FALSE, Lucid waits for the current product requests to finish and then saves the image with whichever symbolic products were available.");
+    tt->val_offset = (char *) &images_require_all_symprods - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'images_archive_start_time'
     // ctype is 'char*'
     
@@ -5288,7 +5288,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("images_archive_end_time");
     tt->descr = tdrpStrDup("End time for image generation in archive mode.");
-    tt->help = tdrpStrDup("Image generation is terminated when the search time exceeds this end time.");
+    tt->help = tdrpStrDup("Image generation is terminated when the search time exceeds this end time. Only applicable for archive image generation.");
     tt->val_offset = (char *) &images_archive_end_time - &_start_;
     tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
     tt++;
@@ -5312,7 +5312,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("images_write_to_day_dir");
     tt->descr = tdrpStrDup("Option to create a subdirectory for each day.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("If true, a subdirectory named YYYYMMDD will be appended to images_output_dir.");
     tt->val_offset = (char *) &images_write_to_day_dir - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
@@ -5469,10 +5469,10 @@ Params *Params::_instance = (Params *) NULL;
       tt->array_vals[1].d = 2;
       tt->array_vals[2].d = 4;
     tt++;
-
+    
     // Parameter 'images_set_zoom_list'
     // ctype is 'tdrp_bool_t'
-
+    
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("images_set_zoom_list");
@@ -5481,10 +5481,10 @@ Params *Params::_instance = (Params *) NULL;
     tt->val_offset = (char *) &images_set_zoom_list - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
-
+    
     // Parameter 'images_zoom_list'
     // ctype is 'char*'
-
+    
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("images_zoom_list");
@@ -5500,7 +5500,7 @@ Params *Params::_instance = (Params *) NULL;
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].s = tdrpStrDup("100km");
     tt++;
-
+    
     // Parameter 'images_output_geo_xml'
     // ctype is 'tdrp_bool_t'
     

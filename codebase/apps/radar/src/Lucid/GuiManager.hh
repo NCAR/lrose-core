@@ -52,6 +52,7 @@
 #include "VsectionRoute.hh"
 
 #include <QMainWindow>
+#include <QElapsedTimer>
 #include <QListWidgetItem>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxRay.hh>
@@ -305,7 +306,16 @@ private:
   DateTime _automaticBatchTime;
   DateTime _nextAutomaticImageTime;
   int _automaticBatchFailureBaseline;
+  int _automaticBatchAttempted;
+  int _automaticBatchSaved;
+  int _automaticBatchTimedOut;
+  int _automaticBatchProductOmissions;
+  QElapsedTimer _automaticBatchElapsedTimer;
   int _automaticTotalFailures;
+  int _automaticTotalAttempted;
+  int _automaticTotalSaved;
+  int _automaticTotalTimedOut;
+  int _automaticTotalProductOmissions;
   int _automaticCompletedBatches;
 
   // Realtime scheduling temporarily drives the display through the catalog

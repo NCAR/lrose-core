@@ -1761,7 +1761,8 @@ int LegacyParams::_readMainParams()
   
   fprintf(_tdrpFile, "// <PRODUCTS>\n");
 
-  _getBoolean("cidd.products_on", 1);
+  _getBoolean("cidd.products_on", 1, true,
+              "symprods_enabled_at_startup");
   _getLong("cidd.product_line_width", 1);
   _getLong("cidd.product_font_size", 1);
   _getDouble("cidd.scale_constant", 300.0);

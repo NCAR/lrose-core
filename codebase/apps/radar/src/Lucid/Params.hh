@@ -1104,8 +1104,6 @@ public:
 
   char* scale_units_label;
 
-  tdrp_bool_t products_on;
-
   int product_line_width;
 
   int product_font_size;
@@ -1192,6 +1190,8 @@ public:
   int images_schedule_delay_secs;
 
   int images_request_timeout_secs;
+
+  tdrp_bool_t images_require_all_symprods;
 
   char* images_archive_start_time;
 

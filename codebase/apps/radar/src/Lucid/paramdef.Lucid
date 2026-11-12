@@ -1965,12 +1965,6 @@ commentdef {
   p_header = "<SYMBOLIC_PRODUCTS>";
 }
 
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Render all of the products in the overlay menu.";
-  p_help = "";
-} products_on;
-
 paramdef int {
   p_default = 1;
   p_descr = "Line width for rendering products.";
@@ -2024,8 +2018,8 @@ commentdef {
 
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "Enable symprods at start.";
-  p_help = "If FALSE, symbolic products will not be emabled at startup. You will have to turn them on via the products menu.";
+  p_descr = "Enable symbolic products at startup.";
+  p_help = "If FALSE, symbolic products remain disabled until they are turned on from the products menu.";
 } symprods_enabled_at_startup;
 
 typedef enum {
@@ -2440,7 +2434,7 @@ paramdef string {
 paramdef boolean {
   p_default = false;
   p_descr = "Option to create images automatically.";
-  p_descr = "See image_creation_mode below.";
+  p_help = "See images_creation_mode below.";
 } create_images_automatically;
 
 typedef enum {
@@ -2473,6 +2467,12 @@ paramdef int {
   p_help = "A bounded wait prevents unattended image generation from hanging indefinitely when an MDV or symbolic product server is unavailable.";
 } images_request_timeout_secs;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Require every enabled symbolic product before saving an automatic horizontal image.";
+  p_help = "If TRUE, an unavailable symbolic-product server causes the image job to wait until images_request_timeout_secs expires. If FALSE, Lucid waits for the current product requests to finish and then saves the image with whichever symbolic products were available.";
+} images_require_all_symprods;
+
 paramdef string {
   p_default = "1970 01 01 00 00 00";
   p_descr = "Start time for image generation in archive mode.";
@@ -2482,8 +2482,7 @@ paramdef string {
 paramdef string {
   p_default = "1970 01 01 00 00 00";
   p_descr = "End time for image generation in archive mode.";
-  p_help = "Image generation is terminated when the search time exceeds this end time.";
-  p_help = "Only applicable for image generation.";
+  p_help = "Image generation is terminated when the search time exceeds this end time. Only applicable for archive image generation.";
 } images_archive_end_time;
 
 paramdef int {
@@ -2494,7 +2493,7 @@ paramdef int {
 paramdef boolean {
   p_default = true;
   p_descr = "Option to create a subdirectory for each day.";
-  p_descr = "If true, a subdirectory named YYYYMMDD will be appended to images_output_dir.";
+  p_help = "If true, a subdirectory named YYYYMMDD will be appended to images_output_dir.";
 } images_write_to_day_dir;
 
 paramdef string {

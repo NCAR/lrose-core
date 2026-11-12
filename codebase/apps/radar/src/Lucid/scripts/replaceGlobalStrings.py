@@ -166,7 +166,7 @@ def createReplaceDict_v0():
 
     # replaceDict["gd.drawing_mode"] = "_params.drawing_mode"
 
-    replaceDict["gd.products_on"] = "_params.products_on"
+    replaceDict["gd.products_on"] = "_params.symprods_enabled_at_startup"
     replaceDict["gd.product_line_width"] = "_params.product_line_width"
     replaceDict["gd.product_font_size"] = "_params.product_font_size"
   

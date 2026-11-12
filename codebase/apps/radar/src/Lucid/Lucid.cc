@@ -302,7 +302,7 @@ int Lucid::_initDataSpace()
 
   // products
   
-  _gd.prod.products_on = _params.products_on;
+  _gd.prod.products_on = _params.symprods_enabled_at_startup;
   _gd.prod.prod_line_width = _params.product_line_width;
   _gd.prod.prod_font_num = _params.product_font_size;
   
