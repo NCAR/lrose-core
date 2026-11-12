@@ -663,23 +663,26 @@ int write_cc_file(const char *class_name,
 
 
   fprintf(cfile,
-	  "    // sync the source object\n\n"
-	  "    source.sync();\n\n");
-  
-  fprintf(cfile,
 	  "    // zero out table\n\n"
 	  "    memset(_table, 0, sizeof(_table));\n\n"
 	  "    // zero out members\n\n"
 	  "    memset(&_start_, 0, &_end_ - &_start_);\n\n");
-  
+
   fprintf(cfile,
 	  "    // class name\n\n"
 	  "    _className = \"%s\";\n\n", class_name);
-  
+
   fprintf(cfile,
 	  "    // copy table\n\n"
 	  "    tdrpCopyTable((TDRPtable *) source._table, _table);\n\n");
-  
+
+  fprintf(cfile,
+	  "    // load the copied table from the source object's members, so\n"
+	  "    // changes made to them since loading are kept. This is what\n"
+	  "    // source.sync() used to do, but without writing to source, so\n"
+	  "    // several threads can copy the same object safely.\n\n"
+	  "    tdrpUser2Table(_table, (char *) &source._start_);\n\n");
+
   fprintf(cfile,
 	  "    // set members\n\n"
 	  "    tdrpTable2User(_table, &_start_);\n\n"
@@ -752,23 +755,26 @@ int write_cc_file(const char *class_name,
   fprintf(cfile, "  {\n\n");
 
   fprintf(cfile,
-	  "    // sync the other object\n\n"
-	  "    other.sync();\n\n");
-  
-  fprintf(cfile,
 	  "    // free up any existing memory\n\n"
 	  "    freeAll();\n\n");
-  
+
   fprintf(cfile,
 	  "    // zero out table\n\n"
 	  "    memset(_table, 0, sizeof(_table));\n\n"
 	  "    // zero out members\n\n"
 	  "    memset(&_start_, 0, &_end_ - &_start_);\n\n");
-  
+
   fprintf(cfile,
 	  "    // copy table\n\n"
 	  "    tdrpCopyTable((TDRPtable *) other._table, _table);\n\n");
-  
+
+  fprintf(cfile,
+	  "    // load the copied table from the other object's members, so\n"
+	  "    // changes made to them since loading are kept. This is what\n"
+	  "    // other.sync() used to do, but without writing to other, so\n"
+	  "    // several threads can copy the same object safely.\n\n"
+	  "    tdrpUser2Table(_table, (char *) &other._start_);\n\n");
+
   fprintf(cfile,
 	  "    // set members\n\n"
 	  "    tdrpTable2User(_table, &_start_);\n\n");
