@@ -748,6 +748,51 @@ void TimeControl::configureAutomaticImageTime(const DateTime &imageTime)
   _timeHasChanged = true;
 }
 
+/////////////////////////////////////////////////////////////
+// restore accepted display state after a scheduled output batch
+
+void TimeControl::restoreAfterAutomaticImages(const DateTime &startTime,
+                                              int frameCount,
+                                              double frameIntervalSecs,
+                                              int frameIndex,
+                                              bool realtime)
+{
+  if (_movieState != MovieState::Idle) {
+    _stopMovie();
+  }
+
+  _startTime = startTime;
+  _nFramesMovie = std::max(1, frameCount);
+  _frameIntervalSecs = std::max(1.0, frameIntervalSecs);
+  _frameIndex = std::clamp(frameIndex, 0, _nFramesMovie - 1);
+  _guiStartTime = _startTime;
+  _guiNFramesMovie = _nFramesMovie;
+  _guiFrameIntervalSecs = _frameIntervalSecs;
+  _guiFrameIndex = _frameIndex;
+  _isRealtime = realtime;
+
+  // Updating the checkbox must not route this internal restoration back
+  // through the user-mode handler while the remaining state is incomplete.
+  const QSignalBlocker realtimeBlocker(_realtimeSelector);
+  _realtimeSelector->setChecked(_isRealtime);
+  _manager->setArchiveMode(!_isRealtime);
+  _computeFrameTimes();
+  _gd.epoch_start = _startTime.utime();
+  _gd.epoch_end = static_cast<time_t>(
+    getEndTime().utime() + _frameIntervalSecs);
+  for (int ii = 0; ii < _gd.num_datafields; ++ii) {
+    if (_gd.mread[ii]) {
+      _gd.mread[ii]->invalidateTimeList();
+    }
+  }
+  if (_gd.prod_mgr) {
+    _gd.prod_mgr->reset_product_valid_flags();
+  }
+  _updateTimesInGui();
+  _enableAcceptCancel(false);
+  _timeHasChanged = true;
+}
+
 /////////////////////////////////////////////////////////////////////
 // accept or cancel gui selections
 // data retrieval does not change until the selections are accepted

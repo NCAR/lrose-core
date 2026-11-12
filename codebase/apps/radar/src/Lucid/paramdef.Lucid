@@ -2476,7 +2476,7 @@ paramdef int {
 paramdef string {
   p_default = "1970 01 01 00 00 00";
   p_descr = "Start time for image generation in archive mode.";
-  p_help = "Image generation starts with a seach at this time, and the proceeds at increments of images_schedule_interval_secs.";
+  p_help = "Image generation starts with a search at this time, then proceeds at increments of images_archive_interval_secs.";
 } images_archive_start_time;
 
 paramdef string {

@@ -122,6 +122,15 @@ class DLL_EXPORT TimeControl : public QDialog {
   // the requested archive time before the first asynchronous read begins.
   void configureAutomaticImageTime(const DateTime &imageTime);
 
+  // Restore the accepted controller state after a scheduled image batch has
+  // temporarily reduced the display to one archive frame.
+  void restoreAfterAutomaticImages(const DateTime &startTime,
+                                   int frameCount,
+                                   double frameIntervalSecs,
+                                   int frameIndex,
+                                   bool realtime);
+  bool isRealtime() const { return _isRealtime; }
+
   // convert between Qt and Radx date/time objects
   
   static QDateTime getQDateTime(const DateTime &rtime);

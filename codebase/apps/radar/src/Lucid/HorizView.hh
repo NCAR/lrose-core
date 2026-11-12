@@ -111,6 +111,7 @@ class DLL_EXPORT HorizView : public QWidget
   
   const WorldPlot *getZoomWorld() const { return _zoom; }
   const vector<WorldPlot> &getCustomZooms() const { return _customZooms; }
+  int getZoomIndex() const { return _zoomLevel; }
   void clearCustomZooms() { _customZooms.clear(); }
   void setZoomIndex(int zoomIndex);
   bool checkForZoomChange();

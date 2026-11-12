@@ -193,6 +193,11 @@ int Args::parse (const int argc, const char **argv)
       if (i < argc - 1) {
         snprintf(tmp_str, BUFSIZ,  "images_schedule_interval_secs = %s;", argv[++i]);
         TDRP_add_override(&override, tmp_str);
+        // The command-line interval predates the separate archive and
+        // realtime parameters. Apply it to both so it retains its generic
+        // meaning regardless of the selected automatic-image mode.
+        snprintf(tmp_str, BUFSIZ,  "images_archive_interval_secs = %s;", argv[i]);
+        TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
       }

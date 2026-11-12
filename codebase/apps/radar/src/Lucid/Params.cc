@@ -5276,7 +5276,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("images_archive_start_time");
     tt->descr = tdrpStrDup("Start time for image generation in archive mode.");
-    tt->help = tdrpStrDup("Image generation starts with a seach at this time, and the proceeds at increments of images_schedule_interval_secs.");
+    tt->help = tdrpStrDup("Image generation starts with a search at this time, then proceeds at increments of images_archive_interval_secs.");
     tt->val_offset = (char *) &images_archive_start_time - &_start_;
     tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
     tt++;
@@ -5469,7 +5469,7 @@ Params *Params::_instance = (Params *) NULL;
       tt->array_vals[1].d = 2;
       tt->array_vals[2].d = 4;
     tt++;
-    
+
     // Parameter 'images_set_zoom_list'
     // ctype is 'tdrp_bool_t'
 

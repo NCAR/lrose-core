@@ -37,6 +37,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <limits>
 #include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
@@ -242,10 +243,25 @@ GuiManager::GuiManager() :
   _automaticImagesStarted = false;
   _automaticImagesActive = false;
   _automaticImageGenerator = new AutomaticImageGenerator;
+  _automaticBatchFailureBaseline = 0;
+  _automaticTotalFailures = 0;
+  _automaticCompletedBatches = 0;
+  _automaticDisplayStateSaved = false;
+  _automaticSavedField = -1;
+  _automaticSavedZoom = 0;
+  _automaticSavedHeight = 0.0;
+  _automaticSavedFrameCount = 1;
+  _automaticSavedFrameIntervalSecs = 1.0;
+  _automaticSavedFrameIndex = 0;
+  _automaticSavedRealtime = false;
   _automaticImageTimeoutTimer = new QTimer(this);
   _automaticImageTimeoutTimer->setSingleShot(true);
   connect(_automaticImageTimeoutTimer, &QTimer::timeout,
           this, &GuiManager::_automaticImageTimedOut);
+  _automaticImageScheduleTimer = new QTimer(this);
+  _automaticImageScheduleTimer->setSingleShot(true);
+  connect(_automaticImageScheduleTimer, &QTimer::timeout,
+          this, &GuiManager::_automaticImageScheduleDue);
   
   _timeControl = NULL;
   _timeControlPlaced = false;
@@ -2602,7 +2618,7 @@ void GuiManager::_placeTimeControl()
 }
 
 /////////////////////////////////////////////////////////////
-// start the first unattended catalog-image implementation
+// initialize unattended catalog generation and its scheduling policy
 
 void GuiManager::_maybeStartAutomaticImages()
 {
@@ -2611,41 +2627,213 @@ void GuiManager::_maybeStartAutomaticImages()
   }
   _automaticImagesStarted = true;
 
-  if (_params.images_creation_mode != Params::CREATE_IMAGES_THEN_EXIT) {
-    _finishAutomaticImages(
-      tr("Only CREATE_IMAGES_THEN_EXIT is implemented for automatic images"));
-    return;
-  }
-  if (_params.images_request_timeout_secs < 1) {
-    _finishAutomaticImages(
-      tr("images_request_timeout_secs must be greater than zero"));
-    return;
-  }
-  if (_params.make_images_transparent) {
-    _finishAutomaticImages(
-      tr("Transparent automatic images are not implemented yet"));
+  QString configurationError;
+  if (!_validateAutomaticImageConfiguration(configurationError)) {
+    _finishAutomaticImageRun(configurationError);
     return;
   }
 
-  QString configurationError;
   if (!_automaticImageGenerator->configure(
         _params, _gd.num_datafields, configurationError)) {
-    _finishAutomaticImages(configurationError);
+    _finishAutomaticImageRun(configurationError);
     return;
   }
 
+  switch (_params.images_creation_mode) {
+    case Params::CREATE_IMAGES_THEN_EXIT:
+      _startAutomaticImageBatch(_imagesStartTime);
+      break;
+
+    case Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE:
+      _nextAutomaticImageTime = _imagesStartTime;
+      _automaticImageScheduleDue();
+      break;
+
+    case Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE: {
+      const time_t now = std::time(nullptr);
+      const time_t interval = _params.images_schedule_interval_secs;
+      const time_t delay = _params.images_schedule_delay_secs;
+      time_t target = (now / interval) * interval;
+      if (target + delay < now) {
+        target += interval;
+      }
+      _nextAutomaticImageTime.set(target);
+      _scheduleNextRealtimeImageBatch();
+      break;
+    }
+
+    default:
+      _finishAutomaticImageRun(tr("Unknown images_creation_mode"));
+      break;
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// reject schedules which cannot make deterministic progress
+
+bool GuiManager::_validateAutomaticImageConfiguration(QString &error) const
+{
+  error.clear();
+  if (_params.images_request_timeout_secs < 1) {
+    error = tr("images_request_timeout_secs must be greater than zero");
+    return false;
+  }
+  if (_params.make_images_transparent) {
+    error = tr("Transparent automatic images are not implemented yet");
+    return false;
+  }
+
+  if (_params.images_creation_mode == Params::CREATE_IMAGES_THEN_EXIT ||
+      _params.images_creation_mode ==
+        Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
+    if (!_imagesStartTime.isValid()) {
+      error = tr("images_archive_start_time is invalid");
+      return false;
+    }
+  }
+  if (_params.images_creation_mode ==
+      Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
+    if (!_imagesEndTime.isValid() || _imagesEndTime < _imagesStartTime) {
+      error = tr("images_archive_end_time must not precede the start time");
+      return false;
+    }
+    if (_params.images_archive_interval_secs < 1) {
+      error = tr("images_archive_interval_secs must be greater than zero");
+      return false;
+    }
+  }
+  if (_params.images_creation_mode ==
+      Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
+    if (_params.images_schedule_interval_secs < 1) {
+      error = tr("images_schedule_interval_secs must be greater than zero");
+      return false;
+    }
+    if (_params.images_schedule_delay_secs < 0) {
+      error = tr("images_schedule_delay_secs must not be negative");
+      return false;
+    }
+  }
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
+// start the common field/height/zoom/route plan for one target time
+
+void GuiManager::_startAutomaticImageBatch(const DateTime &imageTime)
+{
+  if (_automaticImagesActive) {
+    return;
+  }
+  if (!imageTime.isValid()) {
+    _finishAutomaticImageRun(tr("Automatic image target time is invalid"));
+    return;
+  }
+
+  if (_params.images_creation_mode ==
+      Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
+    _saveAutomaticDisplayState();
+  }
+
+  _automaticBatchTime = imageTime;
+  _automaticBatchFailureBaseline =
+    _automaticImageGenerator->failureCount();
   _automaticImagesActive = true;
-  _timeControl->configureAutomaticImageTime(_imagesStartTime);
+  _timeControl->configureAutomaticImageTime(imageTime);
 
   if (!_automaticImageGenerator->start()) {
-    _finishAutomaticImages(tr("No automatic image jobs were configured"));
+    _automaticImagesActive = false;
+    _finishAutomaticImageRun(tr("No automatic image jobs were configured"));
     return;
   }
 
-  cerr << "Automatic image generation started for "
-       << _imagesStartTime.asString() << ", "
+  cerr << "Automatic image batch started for "
+       << imageTime.asString() << ", "
        << _automaticImageGenerator->jobCount() << " image(s)" << endl;
   _startAutomaticImageJob();
+}
+
+/////////////////////////////////////////////////////////////
+// preserve the live display while a realtime catalog batch takes control
+
+void GuiManager::_saveAutomaticDisplayState()
+{
+  if (_automaticDisplayStateSaved) {
+    return;
+  }
+  _automaticSavedField = _fieldNum;
+  _automaticSavedZoom = _horiz ? _horiz->getZoomIndex() : 0;
+  _automaticSavedHeight = _vlevelManager.getRequestedLevel();
+  _automaticSavedStartTime = _timeControl->getStartTime();
+  _automaticSavedFrameCount = _timeControl->getNFramesMovie();
+  _automaticSavedFrameIntervalSecs = _timeControl->getFrameIntervalSecs();
+  _automaticSavedFrameIndex = _timeControl->getFrameIndex();
+  _automaticSavedRealtime = _timeControl->isRealtime();
+  _automaticSavedVsectionRoute = _vsectionRoute;
+  _automaticDisplayStateSaved = true;
+}
+
+/////////////////////////////////////////////////////////////
+// return control to the accepted display between realtime batches
+
+void GuiManager::_restoreAutomaticDisplayState()
+{
+  if (!_automaticDisplayStateSaved) {
+    return;
+  }
+  _timeControl->restoreAfterAutomaticImages(
+    _automaticSavedStartTime, _automaticSavedFrameCount,
+    _automaticSavedFrameIntervalSecs, _automaticSavedFrameIndex,
+    _automaticSavedRealtime);
+  _vlevelManager.requestLevel(_automaticSavedHeight);
+  _vlevelHasChanged = true;
+  setZoomIndex(_automaticSavedZoom);
+  if (_automaticSavedField >= 0 &&
+      _automaticSavedField < _gd.num_datafields) {
+    _selectAutomaticImageField(_automaticSavedField);
+  }
+  _vsectionRoute = _automaticSavedVsectionRoute;
+  if (_vsectionRoute.size() >= 2 && _vertWindowDisplayed) {
+    _requestVerticalSection();
+  }
+  _automaticDisplayStateSaved = false;
+}
+
+/////////////////////////////////////////////////////////////
+// wait until target plus delay without allowing overlapping batches
+
+void GuiManager::_scheduleNextRealtimeImageBatch()
+{
+  const time_t dueTime = _nextAutomaticImageTime.utime() +
+    _params.images_schedule_delay_secs;
+  const qint64 waitMillis = std::max<qint64>(
+    0, static_cast<qint64>(dueTime - std::time(nullptr)) * 1000);
+  const int timerMillis = static_cast<int>(std::min<qint64>(
+    waitMillis, std::numeric_limits<int>::max()));
+  cerr << "Next automatic image target: "
+       << _nextAutomaticImageTime.asString()
+       << ", generation begins after "
+       << DateTime(dueTime).asString() << endl;
+  _automaticImageScheduleTimer->start(timerMillis);
+}
+
+/////////////////////////////////////////////////////////////
+// dispatch a due archive or realtime target on the GUI thread
+
+void GuiManager::_automaticImageScheduleDue()
+{
+  if (_automaticImagesActive) {
+    return;
+  }
+  if (_params.images_creation_mode ==
+      Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
+    const time_t dueTime = _nextAutomaticImageTime.utime() +
+      _params.images_schedule_delay_secs;
+    if (std::time(nullptr) < dueTime) {
+      _scheduleNextRealtimeImageBatch();
+      return;
+    }
+  }
+  _startAutomaticImageBatch(_nextAutomaticImageTime);
 }
 
 /////////////////////////////////////////////////////////////
@@ -2655,7 +2843,9 @@ void GuiManager::_startAutomaticImageJob()
 {
   if (!_automaticImagesActive ||
       !_automaticImageGenerator->hasCurrentJob()) {
-    _finishAutomaticImages(QString());
+    if (_automaticImagesActive) {
+      _completeAutomaticImageBatch();
+    }
     return;
   }
   const AutomaticImageGenerator::Job &job =
@@ -3147,25 +3337,85 @@ bool GuiManager::_writeAutomaticLatestDataInfo(
 }
 
 /////////////////////////////////////////////////////////////
-// terminate CREATE_IMAGES_THEN_EXIT after all fields settle
+// close one batch and select the next scheduling action
 
-void GuiManager::_finishAutomaticImages(const QString &fatalError)
+void GuiManager::_completeAutomaticImageBatch()
 {
   _automaticImageTimeoutTimer->stop();
   _automaticImagesActive = false;
+  const int batchFailures = std::max(
+    0, _automaticImageGenerator->failureCount() -
+       _automaticBatchFailureBaseline);
+  _automaticTotalFailures += batchFailures;
+  ++_automaticCompletedBatches;
+
+  cerr << "Automatic image batch for " << _automaticBatchTime.asString()
+       << " completed with " << batchFailures << " failure(s)" << endl;
+
+  if (_params.images_creation_mode == Params::CREATE_IMAGES_THEN_EXIT) {
+    _finishAutomaticImageRun(QString());
+    return;
+  }
+
+  if (_params.images_creation_mode ==
+      Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
+    _nextAutomaticImageTime = _automaticBatchTime +
+      _params.images_archive_interval_secs;
+    if (_nextAutomaticImageTime <= _imagesEndTime) {
+      QTimer::singleShot(0, this, [this]() {
+        _automaticImageScheduleDue();
+      });
+    } else {
+      _finishAutomaticImageRun(QString());
+    }
+    return;
+  }
+
+  // A realtime run is intentionally long-lived. Coalesce any missed
+  // intervals to the newest target already due instead of creating an
+  // unbounded queue of obsolete batches.
+  const time_t interval = _params.images_schedule_interval_secs;
+  const time_t delay = _params.images_schedule_delay_secs;
+  const time_t now = std::time(nullptr);
+  time_t nextTarget = _automaticBatchTime.utime() + interval;
+  if (now >= delay) {
+    const time_t latestDueTarget = ((now - delay) / interval) * interval;
+    nextTarget = std::max(nextTarget, latestDueTarget);
+  }
+  _nextAutomaticImageTime.set(nextTarget);
+
+  // Do not restore and immediately re-take the live display when the next
+  // coalesced batch is already due. The original snapshot remains owned by
+  // the run and is restored once the scheduler reaches a genuine wait.
+  if (nextTarget + delay > now) {
+    _restoreAutomaticDisplayState();
+  }
+  _scheduleNextRealtimeImageBatch();
+}
+
+/////////////////////////////////////////////////////////////
+// terminate a finite run, or a realtime run with invalid configuration
+
+void GuiManager::_finishAutomaticImageRun(const QString &fatalError)
+{
+  _automaticImageTimeoutTimer->stop();
+  _automaticImageScheduleTimer->stop();
+  _automaticImagesActive = false;
   if (!fatalError.isEmpty()) {
-    _automaticImageGenerator->recordFailure();
+    ++_automaticTotalFailures;
     cerr << "ERROR - automatic image generation: "
          << fatalError.toStdString() << endl;
   }
+  _restoreAutomaticDisplayState();
 
-  const int failureCount = _automaticImageGenerator->failureCount();
-  const bool success = failureCount == 0;
+  const bool success = _automaticTotalFailures == 0;
   if (success) {
-    cerr << "Automatic image generation completed successfully" << endl;
+    cerr << "Automatic image generation completed successfully after "
+         << _automaticCompletedBatches << " batch(es)" << endl;
   } else {
     cerr << "Automatic image generation completed with "
-         << failureCount << " failure(s)" << endl;
+         << _automaticTotalFailures << " failure(s) in "
+         << _automaticCompletedBatches << " completed batch(es)" << endl;
   }
   QTimer::singleShot(0, qApp, [success]() {
     QCoreApplication::exit(success ? EXIT_SUCCESS : EXIT_FAILURE);

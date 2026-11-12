@@ -75,6 +75,7 @@ class QFileDialog;
 class QImage;
 class QTableWidget;
 class QString;
+class QTimer;
 
 class HorizView;
 class VertView;
@@ -300,8 +301,35 @@ private:
   bool _automaticImagesActive;
   AutomaticImageGenerator *_automaticImageGenerator;
   QTimer *_automaticImageTimeoutTimer;
+  QTimer *_automaticImageScheduleTimer;
+  DateTime _automaticBatchTime;
+  DateTime _nextAutomaticImageTime;
+  int _automaticBatchFailureBaseline;
+  int _automaticTotalFailures;
+  int _automaticCompletedBatches;
+
+  // Realtime scheduling temporarily drives the display through the catalog
+  // matrix. Preserve the accepted interactive state so the interval between
+  // batches remains a normal live display rather than the last output job.
+  bool _automaticDisplayStateSaved;
+  int _automaticSavedField;
+  int _automaticSavedZoom;
+  double _automaticSavedHeight;
+  DateTime _automaticSavedStartTime;
+  int _automaticSavedFrameCount;
+  double _automaticSavedFrameIntervalSecs;
+  int _automaticSavedFrameIndex;
+  bool _automaticSavedRealtime;
+  VsectionRoute _automaticSavedVsectionRoute;
 
   void _maybeStartAutomaticImages();
+  bool _validateAutomaticImageConfiguration(QString &error) const;
+  void _startAutomaticImageBatch(const DateTime &imageTime);
+  void _completeAutomaticImageBatch();
+  void _scheduleNextRealtimeImageBatch();
+  void _automaticImageScheduleDue();
+  void _saveAutomaticDisplayState();
+  void _restoreAutomaticDisplayState();
   void _startAutomaticImageJob();
   void _startAutomaticHorizontalJob();
   void _startAutomaticVerticalJob();
@@ -326,7 +354,7 @@ private:
                                      const QByteArray &format,
                                      const DateTime &imageTime,
                                      QString &error) const;
-  void _finishAutomaticImages(const QString &fatalError);
+  void _finishAutomaticImageRun(const QString &fatalError);
 
   // maps
 
