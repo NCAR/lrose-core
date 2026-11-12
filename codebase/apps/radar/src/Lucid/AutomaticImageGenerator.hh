@@ -29,6 +29,8 @@ public:
   struct Job {
     int fieldIndex = -1;
     double heightKm = 0.0;
+    int zoomIndex = -1;
+    QString zoomName;
     QString outputFieldName;
   };
 
@@ -43,6 +45,7 @@ public:
   int currentJobNumber() const;
   int jobCount() const;
   bool hasMultipleHeights() const;
+  bool hasMultipleZooms() const;
 
   void setExpectedGeneration(int generation);
   int expectedGeneration() const;

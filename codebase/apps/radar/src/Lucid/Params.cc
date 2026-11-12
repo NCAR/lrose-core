@@ -5470,6 +5470,37 @@ Params *Params::_instance = (Params *) NULL;
       tt->array_vals[2].d = 4;
     tt++;
     
+    // Parameter 'images_set_zoom_list'
+    // ctype is 'tdrp_bool_t'
+
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_set_zoom_list");
+    tt->descr = tdrpStrDup("Option to specify the predefined zooms for image generation.");
+    tt->help = tdrpStrDup("If TRUE, every label in images_zoom_list is processed. If FALSE, only the first entry in zoom_levels is processed.");
+    tt->val_offset = (char *) &images_set_zoom_list - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+
+    // Parameter 'images_zoom_list'
+    // ctype is 'char*'
+
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("images_zoom_list");
+    tt->descr = tdrpStrDup("List of predefined zoom labels for image generation.");
+    tt->help = tdrpStrDup("Each value must exactly match a label in zoom_levels. When more than one zoom is configured, its label is added to each horizontal image file name to keep the outputs distinct.");
+    tt->array_offset = (char *) &_images_zoom_list - &_start_;
+    tt->array_n_offset = (char *) &images_zoom_list_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 1;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("100km");
+    tt++;
+
     // Parameter 'images_output_geo_xml'
     // ctype is 'tdrp_bool_t'
     

@@ -2641,7 +2641,6 @@ void GuiManager::_maybeStartAutomaticImages()
   }
   _automaticImagesActive = true;
   _timeControl->configureAutomaticImageTime(_imagesStartTime);
-  setZoomIndex(0);
 
   if (!_automaticImageGenerator->start()) {
     _finishAutomaticImages(tr("No automatic image jobs were configured"));
@@ -2676,23 +2675,25 @@ void GuiManager::_startAutomaticImageJob()
     return;
   }
 
-  // Height changes invalidate every field's plane. Applying the requested
-  // level before the field selection lets the normal timer issue one request
-  // containing the complete state for this job.
+  // Apply both outer dimensions before selecting the field. Their normal
+  // invalidation paths then let the timer issue one request containing the
+  // complete height, geometry, and field state for this job.
   _vlevelManager.requestLevel(job.heightKm);
   _vlevelHasChanged = true;
+  setZoomIndex(job.zoomIndex);
   _selectAutomaticImageField(fieldIndex);
 
   const QString fieldName = QString::fromUtf8(
     _params._fields[fieldIndex].field_name);
   statusBar()->showMessage(
-    tr("Creating automatic image %1 of %2: %3 at %4 km")
+    tr("Creating automatic image %1 of %2: %3 at %4 km, zoom %5")
       .arg(_automaticImageGenerator->currentJobNumber())
       .arg(_automaticImageGenerator->jobCount())
-      .arg(fieldName).arg(job.heightKm));
+      .arg(fieldName).arg(job.heightKm).arg(job.zoomName));
   if (_params.images_debug != Params::IMAGE_DEBUG_OFF) {
     cerr << "Automatic image: requesting field " << fieldName.toStdString()
-         << " at " << job.heightKm << " km ("
+         << " at " << job.heightKm << " km, zoom "
+         << job.zoomName.toStdString() << " ("
          << _automaticImageGenerator->currentJobNumber() << " of "
          << _automaticImageGenerator->jobCount() << ")" << endl;
   }
@@ -2767,7 +2768,8 @@ void GuiManager::_automaticImageTimedOut()
   const int timedOutField = timedOutJob.fieldIndex;
   cerr << "ERROR - automatic image: timed out waiting for field "
        << _params._fields[timedOutField].field_name << " at "
-       << timedOutJob.heightKm << " km" << endl;
+       << timedOutJob.heightKm << " km, zoom "
+       << timedOutJob.zoomName.toStdString() << endl;
   if (_gd.mread[timedOutField]) {
     const int expectedGeneration =
       _automaticImageGenerator->expectedGeneration();

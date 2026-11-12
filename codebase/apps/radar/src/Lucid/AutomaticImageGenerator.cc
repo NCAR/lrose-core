@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <utility>
 
 #include <QDateTime>
 #include <QDir>
@@ -120,11 +121,69 @@ bool AutomaticImageGenerator::configure(const Params &params,
     heights.push_back(params.start_ht_km);
   }
 
-  // Height-major order reuses each requested plane while the fields advance,
-  // and gives the outer loop a stable unit for future zoom and time expansion.
+  if (params.zoom_levels_n < 1) {
+    error = "No predefined zoom levels are available for output";
+    return false;
+  }
+  std::vector<std::pair<int, QString>> zooms;
+  if (params.images_set_zoom_list) {
+    if (params.images_zoom_list_n < 1) {
+      error = "images_set_zoom_list is true but images_zoom_list is empty";
+      return false;
+    }
+    QSet<QString> requestedLabels;
+    QSet<QString> outputLabels;
+    for (int ii = 0; ii < params.images_zoom_list_n; ++ii) {
+      const QString requested = QString::fromUtf8(
+        params._images_zoom_list[ii]).trimmed();
+      if (requested.isEmpty() || requestedLabels.contains(requested)) {
+        error = QString("images_zoom_list contains an empty or duplicate "
+                        "label: %1").arg(requested);
+        return false;
+      }
+      requestedLabels.insert(requested);
+
+      int matchingIndex = -1;
+      for (int izoom = 0; izoom < params.zoom_levels_n; ++izoom) {
+        if (requested == QString::fromUtf8(
+              params._zoom_levels[izoom].label)) {
+          if (matchingIndex >= 0) {
+            error = QString("zoom_levels contains duplicate label: %1")
+              .arg(requested);
+            return false;
+          }
+          matchingIndex = izoom;
+        }
+      }
+      if (matchingIndex < 0) {
+        error = QString("images_zoom_list label is not in zoom_levels: %1")
+          .arg(requested);
+        return false;
+      }
+
+      const QString outputLabel = _safeFileNameComponent(requested);
+      if (outputLabels.contains(outputLabel)) {
+        error = QString("images_zoom_list contains labels which share the "
+                        "output name %1").arg(outputLabel);
+        return false;
+      }
+      outputLabels.insert(outputLabel);
+      zooms.push_back({matchingIndex, outputLabel});
+    }
+  } else {
+    zooms.push_back({0, _safeFileNameComponent(
+      QString::fromUtf8(params._zoom_levels[0].label))});
+  }
+
+  // Height and zoom form the stable outer dimensions. Field remains innermost
+  // because every selection requires a distinct MDV request regardless of the
+  // current display geometry.
   for (const double height : heights) {
-    for (size_t ii = 0; ii < fields.size(); ++ii) {
-      _jobs.push_back({fields[ii], height, outputFieldNames[ii]});
+    for (const auto &zoom : zooms) {
+      for (size_t ii = 0; ii < fields.size(); ++ii) {
+        _jobs.push_back({fields[ii], height, zoom.first, zoom.second,
+                         outputFieldNames[ii]});
+      }
     }
   }
   return true;
@@ -179,6 +238,20 @@ bool AutomaticImageGenerator::hasMultipleHeights() const
   const double firstHeight = _jobs.front().heightKm;
   for (const Job &job : _jobs) {
     if (job.heightKm != firstHeight) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool AutomaticImageGenerator::hasMultipleZooms() const
+{
+  if (_jobs.empty()) {
+    return false;
+  }
+  const int firstZoom = _jobs.front().zoomIndex;
+  for (const Job &job : _jobs) {
+    if (job.zoomIndex != firstZoom) {
       return true;
     }
   }
@@ -335,6 +408,9 @@ bool AutomaticImageGenerator::prepareOutput(const Params &params,
   }
   if (hasMultipleHeights()) {
     nameParts.push_back(_heightName(currentJob().heightKm));
+  }
+  if (hasMultipleZooms()) {
+    nameParts.push_back(currentJob().zoomName);
   }
   if (nameParts.empty()) {
     nameParts.push_back("image");

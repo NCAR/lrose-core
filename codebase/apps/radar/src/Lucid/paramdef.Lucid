@@ -2571,6 +2571,18 @@ paramdef double {
 
 paramdef boolean {
   p_default = FALSE;
+  p_descr = "Option to specify the predefined zooms for image generation.";
+  p_help = "If TRUE, every label in images_zoom_list is processed. If FALSE, only the first entry in zoom_levels is processed.";
+} images_set_zoom_list;
+
+paramdef string {
+  p_default = { "100km" };
+  p_descr = "List of predefined zoom labels for image generation.";
+  p_help = "Each value must exactly match a label in zoom_levels. When more than one zoom is configured, its label is added to each horizontal image file name to keep the outputs distinct.";
+} images_zoom_list[];
+
+paramdef boolean {
+  p_default = FALSE;
   p_descr = "Output an imagename.xml file which contains geo referencing information.";
   p_help = "If use_latlon_in_geo_xml is true, then the georeferencing information will be given in latitude/longitude values.";
 } images_output_geo_xml;

@@ -1226,6 +1226,11 @@ public:
   double *_images_height_list;
   int images_height_list_n;
 
+  tdrp_bool_t images_set_zoom_list;
+
+  char* *_images_zoom_list;
+  int images_zoom_list_n;
+
   tdrp_bool_t images_output_geo_xml;
 
   tdrp_bool_t images_use_latlon_in_geo_xml;
@@ -1298,7 +1303,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[394];
+  mutable TDRPtable _table[396];
 
   const char *_className;
 
