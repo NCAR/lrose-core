@@ -1081,8 +1081,8 @@ int LegacyParams::_readMainParams()
   _getDouble("cidd.past_interval", 0.0, true, "past_interval_hours");
   _getDouble("cidd.movie_magnify_factor",1.0);
   _getBoolean("cidd.check_data_times", 0);
-  _getString("cidd.movieframe_time_format", "%H%M");
-  _getLong("cidd.movieframe_time_mode", 0);
+  // _getString("cidd.movieframe_time_format", "%H%M");
+  // _getLong("cidd.movieframe_time_mode", 0);
 
   // clipping for rendering
   _getBoolean("cidd.check_clipping", 0);
@@ -1168,8 +1168,8 @@ int LegacyParams::_readMainParams()
 
   // script to run after generating image
   
-  _getString("cidd.image_convert_script", "convert_image.csh");
-  _getString("cidd.print_script", "");
+  // _getString("cidd.image_convert_script", "convert_image.csh");
+  // _getString("cidd.print_script", "");
   _getString("cidd.series_convert_script", "make_anim.csh", true, "movie_convert_script");
 
   // data compression from server
@@ -1238,7 +1238,7 @@ int LegacyParams::_readMainParams()
   
   /* Toggle for enabling a Save Image Panel */
 
-  _getBoolean("cidd.enable_save_image_panel", 0);
+  // _getBoolean("cidd.enable_save_image_panel", 0);
 
   // domain limits
 
