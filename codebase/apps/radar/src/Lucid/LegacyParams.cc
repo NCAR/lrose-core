@@ -1124,39 +1124,39 @@ int LegacyParams::_readMainParams()
 
   _getBoolean("cidd.html_mode", 0);
   _runOnceAndExit = _getBoolean("cidd.run_once_and_exit",0);
-  _getBoolean("cidd.transparent_images", 0);
-  _getString("cidd.image_dir", "/tmp/image_dir");
-  _getBoolean("cidd.save_images_to_day_subdir", 0);
-  _getString("cidd.image_ext", "png");
-  _getString("cidd.image_horiz_prefix", "CP");
-  _getString("cidd.image_vert_prefix", "CV");
-  _getString("cidd.image_name_separator", "_");
+  _getString("cidd.image_dir", "$(HOME)/Downloads/Lucid/images", true, "images_output_dir");
+  _getBoolean("cidd.transparent_images", 0, true, "make_images_transparent");
+  _getBoolean("cidd.save_images_to_day_subdir", 0, true, "images_write_to_day_dir");
+  _getString("cidd.image_ext", "png", true, "images_file_name_extension");
+  _getString("cidd.image_horiz_prefix", "Horiz", true, "images_field_suffix_horiz");
+  _getString("cidd.image_vert_prefix", "Vsect", true, "images_field_suffix_vsect");
+  _getString("cidd.image_name_separator", ".", true, "images_file_name_delimiter");
 
   // output image file names
   
-  _getBoolean("cidd.add_height_to_filename",0);
-  _getBoolean("cidd.add_frame_time_to_filename",1);
-  _getBoolean("cidd.add_button_name_to_filename",0);
-  _getBoolean("cidd.add_frame_num_to_filename",1);
-  _getBoolean("cidd.add_gen_time_to_filename",0);
-  _getBoolean("cidd.add_valid_time_to_filename",0);
-  _getString("cidd.horiz_image_dir", "/tmp/cidd_horiz_image_dir");
-  _getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
-  _getString("cidd.horiz_image_command", "");
-  _getString("cidd.vert_image_dir", "/tmp/cidd_vert_image_dir", true,
-             "vsection_image_dir");
-  _getString("cidd.vert_image_fname", "cidd_vert_view.png", true,
-             "vsection_image_fname");
-  _getString("cidd.vert_image_command", "", true,
-             "vsection_image_command");
-  _getBoolean("cidd.output_geo_xml", 0);
-  _getBoolean("cidd.use_latlon_in_geo_xml", 0);
+  // _getBoolean("cidd.add_height_to_filename",0);
+  // _getBoolean("cidd.add_frame_time_to_filename",1);
+  // _getBoolean("cidd.add_button_name_to_filename",0);
+  // _getBoolean("cidd.add_frame_num_to_filename",1);
+  // _getBoolean("cidd.add_gen_time_to_filename",0);
+  // _getBoolean("cidd.add_valid_time_to_filename",0);
+  // _getString("cidd.horiz_image_dir", "/tmp/cidd_horiz_image_dir");
+  // _getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
+  // _getString("cidd.horiz_image_command", "");
+  // _getString("cidd.vert_image_dir", "/tmp/cidd_vert_image_dir", true,
+  //            "vsection_image_dir");
+  // _getString("cidd.vert_image_fname", "cidd_vert_view.png", true,
+  //            "vsection_image_fname");
+  // _getString("cidd.vert_image_command", "", true,
+  //            "vsection_image_command");
+  _getBoolean("cidd.output_geo_xml", 0, true, "images_output_geo_xml");
+  _getBoolean("cidd.use_latlon_in_geo_xml", 0, true, "images_use_latlon_in_geo_xml");
 
   // script to run after generating image
   
   _getString("cidd.image_convert_script", "convert_image.csh");
   _getString("cidd.print_script", "");
-  _getString("cidd.series_convert_script", "make_anim.csh");
+  _getString("cidd.series_convert_script", "make_anim.csh", true, "images_movie_convert_script");
 
   // data compression from server
   

@@ -283,7 +283,7 @@ public:
     char* vsection_label;
     int n_waypts;
     char* waypt_locs;
-  } image_vsection_spec_t;
+  } images_vsection_spec_t;
 
   typedef struct {
     char* id_label;
@@ -1177,29 +1177,13 @@ public:
 
   char* images_output_dir;
 
-  tdrp_bool_t images_write_to_day_dir;
+  char* images_horiz_subdir;
 
-  char* images_file_name_category;
+  char* images_vsect_subdir;
 
-  char* images_file_name_platform;
+  char* movie_convert_script;
 
-  char* images_file_name_extension;
-
-  char* images_file_name_delimiter;
-
-  tdrp_bool_t images_include_time_part_in_file_name;
-
-  tdrp_bool_t images_include_seconds_in_time_part;
-
-  tdrp_bool_t images_include_field_label_in_file_name;
-
-  tdrp_bool_t images_include_scan_type_in_file_name;
-
-  tdrp_bool_t images_include_scan_id_in_file_name;
-
-  tdrp_bool_t images_write_latest_data_info;
-
-  tdrp_bool_t images_auto_create;
+  tdrp_bool_t create_images_automatically;
 
   images_creation_mode_t images_creation_mode;
 
@@ -1211,81 +1195,49 @@ public:
 
   char* images_archive_end_time;
 
-  int images_scan_interval_secs;
+  int images_archive_interval_secs;
 
-  tdrp_bool_t images_set_sweep_index_list;
+  tdrp_bool_t images_write_to_day_dir;
 
-  int *_images_sweep_index_list;
-  int images_sweep_index_list_n;
+  char* images_file_name_category;
 
-  tdrp_bool_t enable_save_image_panel;
+  char* images_file_name_platform;
 
-  tdrp_bool_t image_generation_active;
+  char* image_field_suffix_horiz;
 
-  image_debug_t image_debug;
+  char* image_field_suffix_vsect;
 
-  tdrp_bool_t image_generate_vsection;
+  char* images_file_name_extension;
 
-  tdrp_bool_t image_vsection_waypts_in_latlon;
+  char* images_file_name_delimiter;
 
-  image_vsection_spec_t *_image_vsection_spec;
-  int image_vsection_spec_n;
+  tdrp_bool_t images_include_time_part_in_file_name;
 
-  tdrp_bool_t html_mode;
+  tdrp_bool_t images_include_seconds_in_time_part;
 
-  tdrp_bool_t run_once_and_exit;
+  tdrp_bool_t images_include_field_name_in_file_name;
 
-  tdrp_bool_t transparent_images;
+  tdrp_bool_t make_images_transparent;
 
-  char* image_dir;
+  tdrp_bool_t images_set_height_list;
 
-  tdrp_bool_t save_images_to_day_subdir;
+  double *_images_height_list;
+  int images_height_list_n;
 
-  char* image_ext;
+  tdrp_bool_t images_output_geo_xml;
 
-  char* image_horiz_prefix;
+  tdrp_bool_t images_use_latlon_in_geo_xml;
 
-  char* image_vert_prefix;
+  tdrp_bool_t images_write_latest_data_info;
 
-  char* image_name_separator;
+  image_debug_t images_debug;
 
-  tdrp_bool_t add_height_to_filename;
+  tdrp_bool_t generate_vsection_images;
 
-  tdrp_bool_t add_frame_time_to_filename;
+  tdrp_bool_t images_vsection_waypts_in_latlon;
 
-  tdrp_bool_t add_button_name_to_filename;
-
-  tdrp_bool_t add_frame_num_to_filename;
-
-  tdrp_bool_t add_gen_time_to_filename;
-
-  tdrp_bool_t add_valid_time_to_filename;
-
-  char* horiz_image_dir;
-
-  char* horiz_image_fname;
-
-  char* horiz_image_command;
-
-  char* vsection_image_dir;
-
-  char* vsection_image_fname;
-
-  char* vsection_image_command;
-
-  tdrp_bool_t output_geo_xml;
-
-  tdrp_bool_t use_latlon_in_geo_xml;
-
-  char* movieframe_time_format;
-
-  int movieframe_time_mode;
-
-  char* image_convert_script;
-
-  char* print_script;
-
-  char* series_convert_script;
+  images_vsection_spec_t *_images_vsection_spec;
+  int images_vsection_spec_n;
 
   tdrp_bool_t route_winds_active;
 
@@ -1344,7 +1296,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[419];
+  mutable TDRPtable _table[393];
 
   const char *_className;
 

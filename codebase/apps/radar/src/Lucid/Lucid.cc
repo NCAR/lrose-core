@@ -255,34 +255,35 @@ int Lucid::_initDataSpace()
   
   PMU_auto_register("Initializing SHMEM");
   
-  // html mode
+  // starting zoom level
   
-  if(_params.run_once_and_exit) _params.html_mode = pTRUE;
   _gd.h_win.zoom_level = 0;
   
   // image generation
-  
-  STRcopy(_gd.h_win.image_dir, _params.image_dir, MAX_PATH_LEN);
-  STRcopy(_gd.v_win.image_dir, _params.image_dir, MAX_PATH_LEN);
-  
-  STRcopy(_gd.h_win.image_fname, _params.horiz_image_fname, MAX_PATH_LEN);
-  STRcopy(_gd.h_win.image_command, _params.horiz_image_command, MAX_PATH_LEN);
 
-  STRcopy(_gd.v_win.image_fname, _params.vsection_image_fname, MAX_PATH_LEN);
-  STRcopy(_gd.v_win.image_command, _params.vsection_image_command, MAX_PATH_LEN);
+  snprintf(_gd.h_win.image_dir, MAX_PATH_LEN, "%s%s%s",
+           _params.images_output_dir, PATH_DELIM, _params.images_horiz_subdir);
+  snprintf(_gd.v_win.image_dir, MAX_PATH_LEN, "%s%s%s",
+           _params.images_output_dir, PATH_DELIM, _params.images_vsect_subdir);
+  
+  // STRcopy(_gd.h_win.image_fname, _params.horiz_image_fname, MAX_PATH_LEN);
+  // STRcopy(_gd.h_win.image_command, _params.horiz_image_command, MAX_PATH_LEN);
+
+  // STRcopy(_gd.v_win.image_fname, _params.vsection_image_fname, MAX_PATH_LEN);
+  // STRcopy(_gd.v_win.image_command, _params.vsection_image_command, MAX_PATH_LEN);
 
   // If individual horiz and vert scripts have not been set
   // use the general one.
   
-  if(strlen(_gd.h_win.image_command) < 3) {
-    STRcopy(_gd.h_win.image_command, _params.image_convert_script, MAX_PATH_LEN);
-  }
+  // if(strlen(_gd.h_win.image_command) < 3) {
+  //   STRcopy(_gd.h_win.image_command, _params.image_convert_script, MAX_PATH_LEN);
+  // }
   
-  if(strlen(_gd.v_win.image_command) < 3) {
-    STRcopy(_gd.v_win.image_command, _params.image_convert_script, MAX_PATH_LEN);
-  }
+  // if(strlen(_gd.v_win.image_command) < 3) {
+  //   STRcopy(_gd.v_win.image_command, _params.image_convert_script, MAX_PATH_LEN);
+  // }
 
-  if(_params.idle_reset_seconds <= 0 || _params.html_mode == 1) {
+  if(_params.idle_reset_seconds <= 0) {
     _params.idle_reset_seconds = 1000000000; // 30+ years
   }
 
@@ -505,7 +506,7 @@ int Lucid::_initDataSpace()
   for(int ii = 0; ii < Constants::MAX_FRAMES; ii++) {
     snprintf(_gd.movie.frame[ii].fname, Constants::NAME_LENGTH - 1,
              "%s/cidd_im%d_%d.",
-             _params.image_dir, pid, ii);
+             _params.images_output_dir, pid, ii);
     _gd.movie.frame[ii].h_pdev = 0;
     _gd.movie.frame[ii].v_pdev = 0;
     _gd.movie.frame[ii].redraw_horiz = 1;
@@ -515,7 +516,7 @@ int Lucid::_initDataSpace()
   // copy movie info to other globals
   
   _gd.movie.movie_on = _params.movie_on;
-  if(_params.html_mode) {
+  if(_params.create_images_automatically) {
     _gd.movie.movie_on = 0;
   }
   _gd.movie.magnify_factor = _params.movie_magnify_factor;
@@ -888,7 +889,7 @@ int Lucid::_initGrids()
     mread->legend_name = fld.legend_label;
     mread->button_name = fld.button_label;
     
-    if(_params.html_mode == 0 && _params.replace_underscores) {
+    if(_params.replace_underscores) {
       /* Replace Underscores with spaces in names */
       for(int jj = (int) mread->button_name.size() -1 ; jj >= 0; jj--) {
         if(mread->button_name[jj] == '_') {
@@ -942,7 +943,7 @@ int Lucid::_initGrids()
       mread->currently_displayed = 0;
     }
     
-    if(_params.run_once_and_exit) {
+    if(_params.images_creation_mode == Params::CREATE_IMAGES_THEN_EXIT) {
       mread->auto_render = 1;
     } else {
       mread->auto_render = fld.auto_render;
@@ -1118,7 +1119,7 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   wrec->url = windp.url;
   
   /* Replace Underscores with spaces in names */
-  if(_params.html_mode == 0 && _params.replace_underscores) {
+  if(_params.create_images_automatically == 0 && _params.replace_underscores) {
     for(int jj = (int) wrec->button_name.size() - 1; jj >= 0; jj--) {
       if(wrec->button_name[jj] == '_') {
         wrec->button_name[jj] = ' ';
@@ -2485,7 +2486,7 @@ int Lucid::_initZooms()
   _gd.h_win.num_zoom_levels = _params.zoom_levels_n;
 
   _gd.h_win.start_zoom_level = 0;
-  if (!_params.html_mode && _params.zoom_levels_n > 0) {
+  if (!_params.create_images_automatically && _params.zoom_levels_n > 0) {
     bool zoomLabelFound = false;
     for (int ii = 0; ii < _params.zoom_levels_n; ii++) {
       if (strcmp(_params._zoom_levels[ii].label, _params.start_zoom_label) == 0) {
@@ -2497,7 +2498,7 @@ int Lucid::_initZooms()
       cerr << "WARNING - start zoom label not found: " << _params.start_zoom_label << endl;
       cerr << "  Using first zoom level instead: " << _params._zoom_levels[0].label << endl;
     }
-  } // if (!_params.html_mode)
+  } // if (!_params.create_images_automatically)
   _gd.h_win.zoom_level = _gd.h_win.start_zoom_level;
   _gd.h_win.prev_zoom_level = _gd.h_win.zoom_level;
   
@@ -2651,7 +2652,7 @@ void Lucid::_initContours()
     
     /* Replace underscores with spaces in contour field names */
     char *contourFieldName = cfield.field_name;
-    if(_params.html_mode == 0 && _params.replace_underscores) {
+    if(_params.create_images_automatically == 0 && _params.replace_underscores) {
       for(int jj = strlen(contourFieldName) - 1; jj >= 0; jj--) {
         if (contourFieldName[jj] == '_') {
           contourFieldName[jj] = ' ';
@@ -2694,7 +2695,7 @@ void Lucid::_initOverlayFields()
     char *fieldName = lfield.field_name;
     
     /* Replace Underscores with spaces in field names */
-    if(_params.html_mode == 0 && _params.replace_underscores) {
+    if(_params.create_images_automatically == 0 && _params.replace_underscores) {
       for(int jj = strlen(fieldName) - 1; jj >= 0; jj--) {
         if(fieldName[jj] == '_') {
           fieldName[jj] = ' ';

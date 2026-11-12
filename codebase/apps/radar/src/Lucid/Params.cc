@@ -5148,7 +5148,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 45");
     tt->comment_hdr = tdrpStrDup("<IMAGE_GENERATION>");
-    tt->comment_text = tdrpStrDup("In creating files for the field catalog, the file name is of the form:\n\n\tcategory.platform.YYYYMMDDHHmm.product_name.ext\n\nThe following parameters control the output directory, and the construction of the file name");
+    tt->comment_text = tdrpStrDup("In creating files for the field catalog, the file name is of the form:\n\n\tcategory.platform.YYYYMMDDHHmm.product_name.ext.\n\nThe following parameters control the output directory, and the construction of the file name. The product_name comprises the field name followed by _HORIZ or _VERT.");
     tt++;
     
     // Parameter 'images_output_dir'
@@ -5163,147 +5163,51 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("$(HOME)/Downloads/Lucid/images");
     tt++;
     
-    // Parameter 'images_write_to_day_dir'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("images_write_to_day_dir");
-    tt->descr = tdrpStrDup("Option to create a subdirectory for each day.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &images_write_to_day_dir - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'images_file_name_category'
+    // Parameter 'images_horiz_subdir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("images_file_name_category");
-    tt->descr = tdrpStrDup("Set the category string.");
-    tt->help = tdrpStrDup("If empty, no category will be included.");
-    tt->val_offset = (char *) &images_file_name_category - &_start_;
-    tt->single_val.s = tdrpStrDup("radar");
+    tt->param_name = tdrpStrDup("images_horiz_subdir");
+    tt->descr = tdrpStrDup("Subdirectory for horiz images.");
+    tt->help = tdrpStrDup("Appended to images_output_dir.");
+    tt->val_offset = (char *) &images_horiz_subdir - &_start_;
+    tt->single_val.s = tdrpStrDup("horiz");
     tt++;
     
-    // Parameter 'images_file_name_platform'
+    // Parameter 'images_vsect_subdir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("images_file_name_platform");
-    tt->descr = tdrpStrDup("Set the platform string.");
-    tt->help = tdrpStrDup("If empty, no platform will be included.");
-    tt->val_offset = (char *) &images_file_name_platform - &_start_;
-    tt->single_val.s = tdrpStrDup("NSF_NCAR_GV_HCR");
+    tt->param_name = tdrpStrDup("images_vsect_subdir");
+    tt->descr = tdrpStrDup("Subdirectory for vertical section images.");
+    tt->help = tdrpStrDup("Appended to images_output_dir.");
+    tt->val_offset = (char *) &images_vsect_subdir - &_start_;
+    tt->single_val.s = tdrpStrDup("vsect");
     tt++;
     
-    // Parameter 'images_file_name_extension'
+    // Parameter 'movie_convert_script'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("images_file_name_extension");
-    tt->descr = tdrpStrDup("Set the extension string. This also governs the file format. It should be 'png', 'jpg', 'gif' etc.");
-    tt->help = tdrpStrDup("An extension is always required");
-    tt->val_offset = (char *) &images_file_name_extension - &_start_;
-    tt->single_val.s = tdrpStrDup("png");
+    tt->param_name = tdrpStrDup("movie_convert_script");
+    tt->descr = tdrpStrDup("When the user selects the OutputLoop button, this script will be exec'd after the last image in a movie loop has been written.");
+    tt->help = tdrpStrDup("The arguments will be a list of each output file in the series.");
+    tt->val_offset = (char *) &movie_convert_script - &_start_;
+    tt->single_val.s = tdrpStrDup("make_anim.csh");
     tt++;
     
-    // Parameter 'images_file_name_delimiter'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("images_file_name_delimiter");
-    tt->descr = tdrpStrDup("Set the delimiter between the parts of the file name.");
-    tt->help = tdrpStrDup("NOTE: before the extension the delimited is always a period: '.'.");
-    tt->val_offset = (char *) &images_file_name_delimiter - &_start_;
-    tt->single_val.s = tdrpStrDup(".");
-    tt++;
-    
-    // Parameter 'images_include_time_part_in_file_name'
+    // Parameter 'create_images_automatically'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("images_include_time_part_in_file_name");
-    tt->descr = tdrpStrDup("Normally the file name includes a time part: YYYYMMDDHHMMSS.");
-    tt->help = tdrpStrDup("If FALSE, the time part will be omitted.");
-    tt->val_offset = (char *) &images_include_time_part_in_file_name - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'images_include_seconds_in_time_part'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("images_include_seconds_in_time_part");
-    tt->descr = tdrpStrDup("Normally the time part include the seconds: YYYYMMDDHHMMSS.");
-    tt->help = tdrpStrDup("If FALSE, the SS will be excluuded from the time part.");
-    tt->val_offset = (char *) &images_include_seconds_in_time_part - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'images_include_field_label_in_file_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("images_include_field_label_in_file_name");
-    tt->descr = tdrpStrDup("Normally the file name includes the field label (product type).");
-    tt->help = tdrpStrDup("If FALSE, the field label will be omitted.");
-    tt->val_offset = (char *) &images_include_field_label_in_file_name - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'images_include_scan_type_in_file_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("images_include_scan_type_in_file_name");
-    tt->descr = tdrpStrDup("Option to include the scan type in the image file name.");
-    tt->help = tdrpStrDup("If TRUE, the scan type will be added to the image file name.");
-    tt->val_offset = (char *) &images_include_scan_type_in_file_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'images_include_scan_id_in_file_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("images_include_scan_id_in_file_name");
-    tt->descr = tdrpStrDup("Option to include the scan Id in the image file name.");
-    tt->help = tdrpStrDup("If TRUE, the scan Id will be added to the image file name.");
-    tt->val_offset = (char *) &images_include_scan_id_in_file_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'images_write_latest_data_info'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("images_write_latest_data_info");
-    tt->descr = tdrpStrDup("Option to write latest_data_info files when an image is created.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &images_write_latest_data_info - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'images_auto_create'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("images_auto_create");
+    tt->param_name = tdrpStrDup("create_images_automatically");
     tt->descr = tdrpStrDup("Option to create images automatically.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &images_auto_create - &_start_;
+    tt->val_offset = (char *) &create_images_automatically - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -5377,84 +5281,228 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
     tt++;
     
-    // Parameter 'images_scan_interval_secs'
+    // Parameter 'images_archive_interval_secs'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("images_scan_interval_secs");
-    tt->descr = tdrpStrDup("Time between scans in archive mode (secs).");
-    tt->help = tdrpStrDup("Only applies to POLAR (HORIZ/VERT) mode, not BSCAN mode.");
-    tt->val_offset = (char *) &images_scan_interval_secs - &_start_;
+    tt->param_name = tdrpStrDup("images_archive_interval_secs");
+    tt->descr = tdrpStrDup("Time between images in archive mode (secs).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &images_archive_interval_secs - &_start_;
     tt->single_val.i = 300;
     tt++;
     
-    // Parameter 'images_set_sweep_index_list'
+    // Parameter 'images_write_to_day_dir'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("images_set_sweep_index_list");
-    tt->descr = tdrpStrDup("Option to specify the sweep indexes for the image generation.");
-    tt->help = tdrpStrDup("If TRUE, only the specified sweeps will be processed.");
-    tt->val_offset = (char *) &images_set_sweep_index_list - &_start_;
+    tt->param_name = tdrpStrDup("images_write_to_day_dir");
+    tt->descr = tdrpStrDup("Option to create a subdirectory for each day.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &images_write_to_day_dir - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'images_file_name_category'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("images_file_name_category");
+    tt->descr = tdrpStrDup("Set the category string.");
+    tt->help = tdrpStrDup("If empty, no category will be included.");
+    tt->val_offset = (char *) &images_file_name_category - &_start_;
+    tt->single_val.s = tdrpStrDup("radar");
+    tt++;
+    
+    // Parameter 'images_file_name_platform'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("images_file_name_platform");
+    tt->descr = tdrpStrDup("Set the platform string.");
+    tt->help = tdrpStrDup("If empty, no platform will be included.");
+    tt->val_offset = (char *) &images_file_name_platform - &_start_;
+    tt->single_val.s = tdrpStrDup("SPOL");
+    tt++;
+    
+    // Parameter 'image_field_suffix_horiz'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("image_field_suffix_horiz");
+    tt->descr = tdrpStrDup("The suffix added to the field name to get the horizontal product name.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &image_field_suffix_horiz - &_start_;
+    tt->single_val.s = tdrpStrDup("_HORIZ");
+    tt++;
+    
+    // Parameter 'image_field_suffix_vsect'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("image_field_suffix_vsect");
+    tt->descr = tdrpStrDup("The suffix added to the field name to get the vertical section product name.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &image_field_suffix_vsect - &_start_;
+    tt->single_val.s = tdrpStrDup("_VSECT");
+    tt++;
+    
+    // Parameter 'images_file_name_extension'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("images_file_name_extension");
+    tt->descr = tdrpStrDup("Set the extension string. This also governs the file format. It should be 'png', 'jpg', 'gif' etc.");
+    tt->help = tdrpStrDup("A valid extension is always required");
+    tt->val_offset = (char *) &images_file_name_extension - &_start_;
+    tt->single_val.s = tdrpStrDup("png");
+    tt++;
+    
+    // Parameter 'images_file_name_delimiter'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("images_file_name_delimiter");
+    tt->descr = tdrpStrDup("Set the delimiter between the parts of the file name.");
+    tt->help = tdrpStrDup("NOTE: before the extension the delimited is always a period: '.'.");
+    tt->val_offset = (char *) &images_file_name_delimiter - &_start_;
+    tt->single_val.s = tdrpStrDup(".");
+    tt++;
+    
+    // Parameter 'images_include_time_part_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_include_time_part_in_file_name");
+    tt->descr = tdrpStrDup("Normally the file name includes a time part: YYYYMMDDHHMMSS.");
+    tt->help = tdrpStrDup("If FALSE, the time part will be omitted.");
+    tt->val_offset = (char *) &images_include_time_part_in_file_name - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'images_include_seconds_in_time_part'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_include_seconds_in_time_part");
+    tt->descr = tdrpStrDup("Normally the time part include the seconds: YYYYMMDDHHMMSS.");
+    tt->help = tdrpStrDup("If FALSE, the SS will be excluuded from the time part.");
+    tt->val_offset = (char *) &images_include_seconds_in_time_part - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'images_sweep_index_list'
-    // ctype is 'int'
+    // Parameter 'images_include_field_name_in_file_name'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("images_sweep_index_list");
-    tt->descr = tdrpStrDup("List of valid sweep indexes for image generation.");
-    tt->help = tdrpStrDup("See 'images_set_sweep_index_list'. Images will only be generated for the specified sweep indexes.");
-    tt->array_offset = (char *) &_images_sweep_index_list - &_start_;
-    tt->array_n_offset = (char *) &images_sweep_index_list_n - &_start_;
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_include_field_name_in_file_name");
+    tt->descr = tdrpStrDup("Normally the file name includes the field label (product type).");
+    tt->help = tdrpStrDup("If FALSE, the field label will be omitted.");
+    tt->val_offset = (char *) &images_include_field_name_in_file_name - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'make_images_transparent'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("make_images_transparent");
+    tt->descr = tdrpStrDup("Set background of generated images to transparent.");
+    tt->help = tdrpStrDup("If FALSE, the normal background color is used. Set to TRUE for transparent background.");
+    tt->val_offset = (char *) &make_images_transparent - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'images_set_height_list'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_set_height_list");
+    tt->descr = tdrpStrDup("Option to specify the heights for the image generation.");
+    tt->help = tdrpStrDup("If TRUE, the specified heights will be processed. If false, only start_ht_km will be processed.");
+    tt->val_offset = (char *) &images_set_height_list - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'images_height_list'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("images_height_list");
+    tt->descr = tdrpStrDup("List of heights for image generation.");
+    tt->help = tdrpStrDup("See 'images_set_height_list'.");
+    tt->array_offset = (char *) &_images_height_list - &_start_;
+    tt->array_n_offset = (char *) &images_height_list_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(int);
+    tt->array_elem_size = sizeof(double);
     tt->array_n = 3;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].i = 0;
-      tt->array_vals[1].i = 1;
-      tt->array_vals[2].i = 2;
+      tt->array_vals[0].d = 1;
+      tt->array_vals[1].d = 2;
+      tt->array_vals[2].d = 4;
     tt++;
     
-    // Parameter 'enable_save_image_panel'
+    // Parameter 'images_output_geo_xml'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("enable_save_image_panel");
-    tt->descr = tdrpStrDup("Enable the single middle button click to save image feature.");
-    tt->help = tdrpStrDup("Warning - will allow users shell access, or to write to other dirs.");
-    tt->val_offset = (char *) &enable_save_image_panel - &_start_;
+    tt->param_name = tdrpStrDup("images_output_geo_xml");
+    tt->descr = tdrpStrDup("Output an imagename.xml file which contains geo referencing information.");
+    tt->help = tdrpStrDup("If use_latlon_in_geo_xml is true, then the georeferencing information will be given in latitude/longitude values.");
+    tt->val_offset = (char *) &images_output_geo_xml - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'image_generation_active'
+    // Parameter 'images_use_latlon_in_geo_xml'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("image_generation_active");
-    tt->descr = tdrpStrDup("Is the image generation section active?");
+    tt->param_name = tdrpStrDup("images_use_latlon_in_geo_xml");
+    tt->descr = tdrpStrDup("Georef info is in lat/lon projection.");
+    tt->help = tdrpStrDup("For a lat/lon projection, information is always given in latitude/longitude. Otherwise projection information will be used.");
+    tt->val_offset = (char *) &images_use_latlon_in_geo_xml - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'images_write_latest_data_info'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_write_latest_data_info");
+    tt->descr = tdrpStrDup("Option to write latest_data_info files when an image is created.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &image_generation_active - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->val_offset = (char *) &images_write_latest_data_info - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'image_debug'
+    // Parameter 'images_debug'
     // ctype is '_image_debug_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("image_debug");
+    tt->param_name = tdrpStrDup("images_debug");
     tt->descr = tdrpStrDup("");
     tt->help = tdrpStrDup("Debug option.\nIf set, debug messages will be printed appropriately.\n");
-    tt->val_offset = (char *) &image_debug - &_start_;
+    tt->val_offset = (char *) &images_debug - &_start_;
     tt->enum_def.name = tdrpStrDup("image_debug_t");
     tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
@@ -5468,45 +5516,54 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.e = IMAGE_DEBUG_OFF;
     tt++;
     
-    // Parameter 'image_generate_vsection'
+    // Parameter 'Comment 46'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 46");
+    tt->comment_hdr = tdrpStrDup("GENERATE VSECTION IMAGES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'generate_vsection_images'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("image_generate_vsection");
+    tt->param_name = tdrpStrDup("generate_vsection_images");
     tt->descr = tdrpStrDup("Generate images for specified vertical sections.");
-    tt->help = tdrpStrDup("If TRUE, and Lucid is in html_mode, it will generate vertical section images in addition to the normal plan view images.");
-    tt->val_offset = (char *) &image_generate_vsection - &_start_;
+    tt->help = tdrpStrDup("If TRUE, and create_images_automatically is TRUE, generate vertical section images in addition to the normal horizontal view images.");
+    tt->val_offset = (char *) &generate_vsection_images - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'image_vsection_waypts_in_latlon'
+    // Parameter 'images_vsection_waypts_in_latlon'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("image_vsection_waypts_in_latlon");
+    tt->param_name = tdrpStrDup("images_vsection_waypts_in_latlon");
     tt->descr = tdrpStrDup("The specified waypts are in latlon degree units.");
     tt->help = tdrpStrDup("If TRUE, the waypts are specified in lat/lon degrees. If FALSE, they are specified in (xkm, ykm) units in the current projection.");
-    tt->val_offset = (char *) &image_vsection_waypts_in_latlon - &_start_;
+    tt->val_offset = (char *) &images_vsection_waypts_in_latlon - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'image_vsection_spec'
-    // ctype is '_image_vsection_spec_t'
+    // Parameter 'images_vsection_spec'
+    // ctype is '_images_vsection_spec_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("image_vsection_spec");
+    tt->param_name = tdrpStrDup("images_vsection_spec");
     tt->descr = tdrpStrDup("Vertical section information array");
     tt->help = tdrpStrDup("The fields in the structure are as follows:\n\n  vsection_label: label to be used for the specified vertical section.\n\n  n_waypts: number of waypts for specifying the vert section.\n            Normally this is 2 - for a single vertical section segment.\n\n  waypt_locs: location of way points. This is a string with pairs of points in it, with the following format: (x, y) (x, y) ..... (x, y)\n\n");
-    tt->array_offset = (char *) &_image_vsection_spec - &_start_;
-    tt->array_n_offset = (char *) &image_vsection_spec_n - &_start_;
+    tt->array_offset = (char *) &_images_vsection_spec - &_start_;
+    tt->array_n_offset = (char *) &images_vsection_spec_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(image_vsection_spec_t);
+    tt->array_elem_size = sizeof(images_vsection_spec_t);
     tt->array_n = 1;
-    tt->struct_def.name = tdrpStrDup("image_vsection_spec_t");
+    tt->struct_def.name = tdrpStrDup("images_vsection_spec_t");
     tt->struct_def.nfields = 3;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
@@ -5514,17 +5571,17 @@ Params *Params::_instance = (Params *) NULL;
       tt->struct_def.fields[0].fname = tdrpStrDup("vsection_label");
       tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_image_vsection_spec->vsection_label - (char *) _image_vsection_spec;
+        (char *) &_images_vsection_spec->vsection_label - (char *) _images_vsection_spec;
       tt->struct_def.fields[1].ftype = tdrpStrDup("int");
       tt->struct_def.fields[1].fname = tdrpStrDup("n_waypts");
       tt->struct_def.fields[1].ptype = INT_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_image_vsection_spec->n_waypts - (char *) _image_vsection_spec;
+        (char *) &_images_vsection_spec->n_waypts - (char *) _images_vsection_spec;
       tt->struct_def.fields[2].ftype = tdrpStrDup("string");
       tt->struct_def.fields[2].fname = tdrpStrDup("waypt_locs");
       tt->struct_def.fields[2].ptype = STRING_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_image_vsection_spec->waypt_locs - (char *) _image_vsection_spec;
+        (char *) &_images_vsection_spec->waypt_locs - (char *) _images_vsection_spec;
     tt->n_struct_vals = 3;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
@@ -5533,202 +5590,13 @@ Params *Params::_instance = (Params *) NULL;
       tt->struct_vals[2].s = tdrpStrDup("(0, 0) (0, 150)");
     tt++;
     
-    // Parameter 'Comment 46'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 46");
-    tt->comment_hdr = tdrpStrDup("Orig Lucid image generation");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'html_mode'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("html_mode");
-    tt->descr = tdrpStrDup("Set this to TRUE to activate automatic HTML output mode.");
-    tt->help = tdrpStrDup("Note: image_dir MUST be set.");
-    tt->val_offset = (char *) &html_mode - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'run_once_and_exit'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("run_once_and_exit");
-    tt->descr = tdrpStrDup("After this period of inactivity, the display will reset itself to a known starting point.");
-    tt->help = tdrpStrDup("Set this to FALSE to essentially turn off.");
-    tt->val_offset = (char *) &run_once_and_exit - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'transparent_images'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("transparent_images");
-    tt->descr = tdrpStrDup("Set transparency of generated images.");
-    tt->help = tdrpStrDup("If FALSE, the normal background color is used. Set to TRUE for transparent background.");
-    tt->val_offset = (char *) &transparent_images - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'image_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("image_dir");
-    tt->descr = tdrpStrDup("Directory for output image plots.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &image_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/image_dir");
-    tt++;
-    
-    // Parameter 'save_images_to_day_subdir'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("save_images_to_day_subdir");
-    tt->descr = tdrpStrDup("Save images to subdirs based on date.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &save_images_to_day_subdir - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'image_ext'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("image_ext");
-    tt->descr = tdrpStrDup("Sets the output image type.");
-    tt->help = tdrpStrDup("In latest version, only png type is available.");
-    tt->val_offset = (char *) &image_ext - &_start_;
-    tt->single_val.s = tdrpStrDup("png");
-    tt++;
-    
-    // Parameter 'image_horiz_prefix'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("image_horiz_prefix");
-    tt->descr = tdrpStrDup("The prefix for the horiz (plan view) image file names.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &image_horiz_prefix - &_start_;
-    tt->single_val.s = tdrpStrDup("CP");
-    tt++;
-    
-    // Parameter 'image_vert_prefix'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("image_vert_prefix");
-    tt->descr = tdrpStrDup("The prefix for the vert image file names");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &image_vert_prefix - &_start_;
-    tt->single_val.s = tdrpStrDup("CV");
-    tt++;
-    
-    // Parameter 'image_name_separator'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("image_name_separator");
-    tt->descr = tdrpStrDup("The separator used in the image file names.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &image_name_separator - &_start_;
-    tt->single_val.s = tdrpStrDup("_");
-    tt++;
-    
     // Parameter 'Comment 47'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 47");
-    tt->comment_hdr = tdrpStrDup("The HTML MODE Output file name is built from parts.");
-    tt->comment_text = tdrpStrDup("Some of these are optional - see related parameters below. 'Prefix' + Frame_number + legend_label + zoom_level + [button_label] + [height] + frame_time + [data_generation_time] + [data_valid_time] + .'cidd.image_ext'");
-    tt++;
-    
-    // Parameter 'add_height_to_filename'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("add_height_to_filename");
-    tt->descr = tdrpStrDup("Adds height to the output file name.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &add_height_to_filename - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'add_frame_time_to_filename'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("add_frame_time_to_filename");
-    tt->descr = tdrpStrDup("Adds frame time to the output file name.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &add_frame_time_to_filename - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'add_button_name_to_filename'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("add_button_name_to_filename");
-    tt->descr = tdrpStrDup("Adds GUI button label to the output file name.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &add_button_name_to_filename - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'add_frame_num_to_filename'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("add_frame_num_to_filename");
-    tt->descr = tdrpStrDup("Adds frame number to the output file name.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &add_frame_num_to_filename - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'add_gen_time_to_filename'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("add_gen_time_to_filename");
-    tt->descr = tdrpStrDup("Adds model gen time to the output file name.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &add_gen_time_to_filename - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'add_valid_time_to_filename'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("add_valid_time_to_filename");
-    tt->descr = tdrpStrDup("Adds data valid time to the output file name.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &add_valid_time_to_filename - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->comment_hdr = tdrpStrDup("</IMAGE_GENERATION>");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'Comment 48'
@@ -5736,180 +5604,6 @@ Params *Params::_instance = (Params *) NULL;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 48");
-    tt->comment_hdr = tdrpStrDup("Separate Horizontal and Vertical Image save resources.");
-    tt->comment_text = tdrpStrDup("NOTE: we append the image name to the command string before executing.This allows the script to pull the name off the command line. It is often useful to place a 'rm' as the last command to remove the image after printing, conversion, etc.");
-    tt++;
-    
-    // Parameter 'horiz_image_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("horiz_image_dir");
-    tt->descr = tdrpStrDup("Image directory for horiz images.");
-    tt->help = tdrpStrDup("Note - this is initially set to image_dir");
-    tt->val_offset = (char *) &horiz_image_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/cidd_horiz_image_dir");
-    tt++;
-    
-    // Parameter 'horiz_image_fname'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("horiz_image_fname");
-    tt->descr = tdrpStrDup("The default file name until reset by the user.");
-    tt->help = tdrpStrDup("Appends other info automatically.");
-    tt->val_offset = (char *) &horiz_image_fname - &_start_;
-    tt->single_val.s = tdrpStrDup("cidd_horiz_view.png");
-    tt++;
-    
-    // Parameter 'horiz_image_command'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("horiz_image_command");
-    tt->descr = tdrpStrDup("Command to be run after image is created.");
-    tt->help = tdrpStrDup("Note that this is initially set to 'image_convert_script'.");
-    tt->val_offset = (char *) &horiz_image_command - &_start_;
-    tt->single_val.s = tdrpStrDup("convert_image.csh");
-    tt++;
-    
-    // Parameter 'vsection_image_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vsection_image_dir");
-    tt->descr = tdrpStrDup("Image directory for vert images.");
-    tt->help = tdrpStrDup("Note - this is initially set to image_dir");
-    tt->val_offset = (char *) &vsection_image_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/cidd_vert_image_dir");
-    tt++;
-    
-    // Parameter 'vsection_image_fname'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vsection_image_fname");
-    tt->descr = tdrpStrDup("The default file name until reset by the user.");
-    tt->help = tdrpStrDup("Appends other info automatically.");
-    tt->val_offset = (char *) &vsection_image_fname - &_start_;
-    tt->single_val.s = tdrpStrDup("cidd_vert_view.png");
-    tt++;
-    
-    // Parameter 'vsection_image_command'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vsection_image_command");
-    tt->descr = tdrpStrDup("Command to be run after image is created.");
-    tt->help = tdrpStrDup("Note that this is initially set to 'image_convert_script'.");
-    tt->val_offset = (char *) &vsection_image_command - &_start_;
-    tt->single_val.s = tdrpStrDup("convert_image.csh");
-    tt++;
-    
-    // Parameter 'output_geo_xml'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_geo_xml");
-    tt->descr = tdrpStrDup("Output an imagename.xml file which contains geo referencing information.");
-    tt->help = tdrpStrDup("If use_latlon_in_geo_xml is true, then the georeferencing information will be given in latitude/longitude values.");
-    tt->val_offset = (char *) &output_geo_xml - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'use_latlon_in_geo_xml'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_latlon_in_geo_xml");
-    tt->descr = tdrpStrDup("Georef info is in lat/lon projection.");
-    tt->help = tdrpStrDup("For a lat/lon projection, information is always given in latitude/longitude. Otherwise projection information will be used.");
-    tt->val_offset = (char *) &use_latlon_in_geo_xml - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'movieframe_time_format'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("movieframe_time_format");
-    tt->descr = tdrpStrDup("Set the format for the time fields in the names of output xwd images.");
-    tt->help = tdrpStrDup("See strftime(3) for options.  Default is: %H%M.");
-    tt->val_offset = (char *) &movieframe_time_format - &_start_;
-    tt->single_val.s = tdrpStrDup("%H%M");
-    tt++;
-    
-    // Parameter 'movieframe_time_mode'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("movieframe_time_mode");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &movieframe_time_mode - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'image_convert_script'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("image_convert_script");
-    tt->descr = tdrpStrDup("This script will be exec'd if set whenever an html_mode image is output.");
-    tt->help = tdrpStrDup("The full path name of the xwd image will be sent as the script argument. Setting horiz_image_command or cidd.horiz_image_command will override this and allow separate scripts to be called for horiz and vert images.");
-    tt->val_offset = (char *) &image_convert_script - &_start_;
-    tt->single_val.s = tdrpStrDup("convert_image.csh");
-    tt++;
-    
-    // Parameter 'print_script'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("print_script");
-    tt->descr = tdrpStrDup("This script will be exec'd if set whenever a print command is issued.");
-    tt->help = tdrpStrDup("The full path name of the xwd image will be sent as the script argument.");
-    tt->val_offset = (char *) &print_script - &_start_;
-    tt->single_val.s = tdrpStrDup("do_print.csh");
-    tt++;
-    
-    // Parameter 'series_convert_script'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("series_convert_script");
-    tt->descr = tdrpStrDup("When the user selects the OutputLoop button, this script will be exec'd after the last image in a loop has been written.");
-    tt->help = tdrpStrDup("The arguments will be a list of each output file in the series. Lucid will prepend the cidd.image_dir to each file name which takes the form: cidd_field_name_zoom_name.xwd.");
-    tt->val_offset = (char *) &series_convert_script - &_start_;
-    tt->single_val.s = tdrpStrDup("make_anim.csh");
-    tt++;
-    
-    // Parameter 'Comment 49'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 49");
-    tt->comment_hdr = tdrpStrDup("</IMAGE_GENERATION>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 50'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 50");
     tt->comment_hdr = tdrpStrDup("<AUTO_VERT>");
     tt->comment_text = tdrpStrDup("Predefined vertical sections for image generation.");
     tt++;
@@ -6097,20 +5791,20 @@ Params *Params::_instance = (Params *) NULL;
       tt->array_vals[6].s = tdrpStrDup("B-576 3 SALMI 28.3150 124.0000 BERBA 27.0783 123.0000 APU 25.1767 121.5233 ");
     tt++;
     
-    // Parameter 'Comment 51'
+    // Parameter 'Comment 49'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 51");
+    tt->param_name = tdrpStrDup("Comment 49");
     tt->comment_hdr = tdrpStrDup("</AUTO_VERT>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 52'
+    // Parameter 'Comment 50'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 52");
+    tt->param_name = tdrpStrDup("Comment 50");
     tt->comment_hdr = tdrpStrDup("<PLUGINS>");
     tt->comment_text = tdrpStrDup("Communicating with other applications.");
     tt++;
@@ -6269,20 +5963,20 @@ Params *Params::_instance = (Params *) NULL;
       tt->struct_vals[9].s = tdrpStrDup("B");
     tt++;
     
-    // Parameter 'Comment 53'
+    // Parameter 'Comment 51'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 53");
+    tt->param_name = tdrpStrDup("Comment 51");
     tt->comment_hdr = tdrpStrDup("</PLUGINS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 54'
+    // Parameter 'Comment 52'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 54");
+    tt->param_name = tdrpStrDup("Comment 52");
     tt->comment_hdr = tdrpStrDup("<HELP>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6323,11 +6017,11 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("cidd_help:frame_message");
     tt++;
     
-    // Parameter 'Comment 55'
+    // Parameter 'Comment 53'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 55");
+    tt->param_name = tdrpStrDup("Comment 53");
     tt->comment_hdr = tdrpStrDup("</HELP>");
     tt->comment_text = tdrpStrDup("");
     tt++;

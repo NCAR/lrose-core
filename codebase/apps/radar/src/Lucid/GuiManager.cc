@@ -239,7 +239,7 @@ GuiManager::GuiManager() :
 
   _imagesStartTime.set(_params.images_archive_start_time);
   _imagesEndTime.set(_params.images_archive_end_time);
-  _imagesScanIntervalSecs = _params.images_scan_interval_secs;
+  _imagesScanIntervalSecs = _params.images_schedule_interval_secs;
 
   // set up ray locators
 
@@ -496,7 +496,7 @@ bool GuiManager::exportMovieLoop(QString &message)
   const QString fieldPart = safeFileNameComponent(
     QString::fromStdString(_movieFieldLabel));
   const QString startPart = QDateTime::fromSecsSinceEpoch(
-    _timeControl->getStartTime().utime(), Qt::UTC)
+          _timeControl->getStartTime().utime(), Qt::UTC)
     .toString("yyyyMMdd_HHmmss'_UTC'");
 
   // One shared suffix keeps the horizontal and vertical sequences paired.
@@ -553,7 +553,7 @@ bool GuiManager::exportMovieLoop(QString &message)
 
   QStringList convertersStarted;
   const QString converter = QString::fromUtf8(
-    _params.series_convert_script).trimmed();
+    _params.movie_convert_script).trimmed();
   auto startConverter = [&](const QStringList &files,
                             const QString &viewName) {
     if (converter.isEmpty()) {
@@ -2827,10 +2827,10 @@ string GuiManager::_getOutputPath(bool interactive, string &outputDir, string fi
 
   // field label
 
-  if (_params.images_include_field_label_in_file_name) {
-    fileName += _params.images_file_name_delimiter;
-    fileName += getSelectedFieldLabel();
-  }
+  // // if (_params.images_include_field_label_in_file_name) {
+  // //   fileName += _params.images_file_name_delimiter;
+  // //   fileName += getSelectedFieldLabel();
+  // // }
     
   // scan Id
 
@@ -3846,7 +3846,7 @@ void GuiManager::_autoCreateFunc()
 
     // handle image creation
 
-  if (_params.images_auto_create) {
+  if (_params.create_images_automatically) {
 
     // if we are just creating files in archive mode
     // and then exiting, do that now

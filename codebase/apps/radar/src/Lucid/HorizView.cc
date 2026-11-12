@@ -1293,7 +1293,10 @@ int HorizView::_controlRenderGrid(int page,
                                   time_t end_time)
 {
 
-  if(!_params.run_once_and_exit)  PMU_auto_register("Rendering (OK)");
+  if(_params.images_creation_mode != Params::CREATE_IMAGES_THEN_EXIT) {
+    PMU_auto_register("Rendering (OK)");
+  }
+
   if(_gd.debug2) fprintf(stderr,"Rendering Plan View Image, page :%d\n",page);
 
   // compute distance across the image for setting font sizes, etc.
