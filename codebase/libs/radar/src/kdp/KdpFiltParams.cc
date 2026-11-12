@@ -91,10 +91,6 @@
 
   {
 
-    // sync the source object
-
-    source.sync();
-
     // zero out table
 
     memset(_table, 0, sizeof(_table));
@@ -110,6 +106,13 @@
     // copy table
 
     tdrpCopyTable((TDRPtable *) source._table, _table);
+
+    // load the copied table from the source object's members, so
+    // changes made to them since loading are kept. This is what
+    // source.sync() used to do, but without writing to source, so
+    // several threads can copy the same object safely.
+
+    tdrpUser2Table(_table, (char *) &source._start_);
 
     // set members
 
@@ -141,10 +144,6 @@
 
   {
 
-    // sync the other object
-
-    other.sync();
-
     // free up any existing memory
 
     freeAll();
@@ -160,6 +159,13 @@
     // copy table
 
     tdrpCopyTable((TDRPtable *) other._table, _table);
+
+    // load the copied table from the other object's members, so
+    // changes made to them since loading are kept. This is what
+    // other.sync() used to do, but without writing to other, so
+    // several threads can copy the same object safely.
+
+    tdrpUser2Table(_table, (char *) &other._start_);
 
     // set members
 
