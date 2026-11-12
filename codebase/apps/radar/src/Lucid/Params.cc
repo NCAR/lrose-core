@@ -5647,207 +5647,6 @@ Params *Params::_instance = (Params *) NULL;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 48");
-    tt->comment_hdr = tdrpStrDup("<AUTO_VERT>");
-    tt->comment_text = tdrpStrDup("Predefined vertical sections for image generation.");
-    tt++;
-    
-    // Parameter 'route_winds_active'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("route_winds_active");
-    tt->descr = tdrpStrDup("Activates route winds vert section.");
-    tt->help = tdrpStrDup("If FALSE, no route winds functionality is available.");
-    tt->val_offset = (char *) &route_winds_active - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'route_debug'
-    // ctype is '_route_debug_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("route_debug");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("Set to DEBUG_NORM or DEBUG_VERBOSE for diagnostic output");
-    tt->val_offset = (char *) &route_debug - &_start_;
-    tt->enum_def.name = tdrpStrDup("route_debug_t");
-    tt->enum_def.nfields = 3;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("ROUTE_DEBUG_OFF");
-      tt->enum_def.fields[0].val = ROUTE_DEBUG_OFF;
-      tt->enum_def.fields[1].name = tdrpStrDup("ROUTE_DEBUG_NORM");
-      tt->enum_def.fields[1].val = ROUTE_DEBUG_NORM;
-      tt->enum_def.fields[2].name = tdrpStrDup("ROUTE_DEBUG_VERBOSE");
-      tt->enum_def.fields[2].val = ROUTE_DEBUG_VERBOSE;
-    tt->single_val.e = ROUTE_DEBUG_OFF;
-    tt++;
-    
-    // Parameter 'route_font_height'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("route_font_height");
-    tt->descr = tdrpStrDup(" Maximum height in Pixels of labels");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_font_height - &_start_;
-    tt->single_val.i = 13;
-    tt++;
-    
-    // Parameter 'route_add_waypoints_labels'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("route_add_waypoints_labels");
-    tt->descr = tdrpStrDup("Default state of the add_waypoints_labels");
-    tt->help = tdrpStrDup("0 = off, 1 = on");
-    tt->val_offset = (char *) &route_add_waypoints_labels - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'route_add_wind_text'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("route_add_wind_text");
-    tt->descr = tdrpStrDup("Default state of the add_wind_text labels");
-    tt->help = tdrpStrDup("0 = off, 1 = on");
-    tt->val_offset = (char *) &route_add_wind_text - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'route_label_style'
-    // ctype is '_route_label_style_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("route_label_style");
-    tt->descr = tdrpStrDup("How to space the labels along the route.");
-    tt->help = tdrpStrDup("REGULAR_INTERVALS: use total_length / label_interval. EQUAL_DIVISIONS: use num_labels.");
-    tt->val_offset = (char *) &route_label_style - &_start_;
-    tt->enum_def.name = tdrpStrDup("route_label_style_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("ROUTE_REGULAR_INTERVALS");
-      tt->enum_def.fields[0].val = ROUTE_REGULAR_INTERVALS;
-      tt->enum_def.fields[1].name = tdrpStrDup("ROUTE_EQUAL_DIVISIONS");
-      tt->enum_def.fields[1].val = ROUTE_EQUAL_DIVISIONS;
-    tt->single_val.e = ROUTE_REGULAR_INTERVALS;
-    tt++;
-    
-    // Parameter 'route_label_interval'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("route_label_interval");
-    tt->descr = tdrpStrDup("Distance in km between winds labels");
-    tt->help = tdrpStrDup("Used if label_style is set to REGULAR_INTERVALS");
-    tt->val_offset = (char *) &route_label_interval - &_start_;
-    tt->single_val.d = 55.6;
-    tt++;
-    
-    // Parameter 'route_num_labels'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("route_num_labels");
-    tt->descr = tdrpStrDup("number of route wind labels to plot along the route.");
-    tt->help = tdrpStrDup("Typically this should be set between 5 and 20");
-    tt->val_offset = (char *) &route_num_labels - &_start_;
-    tt->has_min = TRUE;
-    tt->has_max = TRUE;
-    tt->min_val.i = 2;
-    tt->max_val.i = 100;
-    tt->single_val.i = 10;
-    tt++;
-    
-    // Parameter 'route_track_line_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("route_track_line_width");
-    tt->descr = tdrpStrDup("Width in pixels of the route winds track");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_track_line_width - &_start_;
-    tt->has_min = TRUE;
-    tt->has_max = TRUE;
-    tt->min_val.i = 1;
-    tt->max_val.i = 20;
-    tt->single_val.i = 3;
-    tt++;
-    
-    // Parameter 'route_u_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("route_u_url");
-    tt->descr = tdrpStrDup("U Wind Componet");
-    tt->help = tdrpStrDup(" URL's take the form  mdvp::[paramfile]//host.dom::dir/dir&fieldname\n");
-    tt->val_offset = (char *) &route_u_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdvp::zoom_mds//neptune::mdv/mm5&U");
-    tt++;
-    
-    // Parameter 'route_v_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("route_v_url");
-    tt->descr = tdrpStrDup("v Wind Componet");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &route_v_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdvp::zoom_mds//neptune::mdv/mm5&V");
-    tt++;
-    
-    // Parameter 'route_paths'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("route_paths");
-    tt->descr = tdrpStrDup(" Route path strings - Format of each string isROUTE_LABEL NPOINTS  ID_String Lat Lon ID_String LAT Lon ...\n");
-    tt->help = tdrpStrDup("ROUTE_LABEL will be used in the menu, \nNPoints = Number of way points in route \n  Followed by NPoint triplets of the following:\nID_string -> usually a Airport or VOR \nLat Lon :  decimal degrees\n");
-    tt->array_offset = (char *) &_route_paths - &_start_;
-    tt->array_n_offset = (char *) &route_paths_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 7;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("A-1 8 BULAN 27.0917 124.0000 OSTAR 26.3317 123.0000 SHARK 25.8333 122.3583 ANNNA 25.5717 122.0217 APU 25.1767 121.5233 HLG 24.6400 120.7833 MKG 23.5583 119.6283 ELATO 22.3333 117.5000 ");
-      tt->array_vals[1].s = tdrpStrDup("M-750 12 MOLKA 26.6583 124.0000 MORSU 25.9100 123.0000 LEKOS 25.5100 122.4717 ROBIN 25.4200 122.2083 NOKAS 25.1317 121.9917 SANAS 24.8967 121.6917 PILOX 24.4150 121.0250 ANLOT 23.9417 120.5233 TOROX 23.3533 119.9083 RENOT 22.5683 118.5117 DADON 22.2767 118.0033 ENVAR 21.9917 117.5000 ");
-      tt->array_vals[2].s = tdrpStrDup("G-581 7 IGURU 23.9500 124.0000 TULTO 23.3233 123.0000 HCN 21.9283 120.8433 PARPA 22.0150 120.1683 CYRUS 22.2167 118.5317 DADON 22.2767 118.0033 ELATO 22.3333 117.5000 ");
-      tt->array_vals[3].s = tdrpStrDup("B-591 9 APU 25.1767 121.5233 SANAS 24.8967 121.6917 TINHO 24.3533 122.0283 TITUS 23.8283 121.8517 TACLE 22.9933 121.5867 GID 22.6733 121.4867 TUNNY 22.3600 121.2150 HCN 21.9283 120.8433 DOREX 21.0000 120.7833 ");
-      tt->array_vals[4].s = tdrpStrDup("R-583 5 BORDO 26.0167 124.0000 KIKIT 25.8817 123.5917 PABSO 25.6517 122.8750 LEKOS 25.5100 122.4717 APU 25.1767 121.5233 ");
-      tt->array_vals[5].s = tdrpStrDup("G-86 3 HCN 21.9283 120.8433 ANDRE 21.7783 120.1683 KAPLI 21.1667 117.5000 ");
-      tt->array_vals[6].s = tdrpStrDup("B-576 3 SALMI 28.3150 124.0000 BERBA 27.0783 123.0000 APU 25.1767 121.5233 ");
-    tt++;
-    
-    // Parameter 'Comment 49'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 49");
-    tt->comment_hdr = tdrpStrDup("</AUTO_VERT>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 50'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 50");
     tt->comment_hdr = tdrpStrDup("<PLUGINS>");
     tt->comment_text = tdrpStrDup("Communicating with other applications.");
     tt++;
@@ -6006,20 +5805,20 @@ Params *Params::_instance = (Params *) NULL;
       tt->struct_vals[9].s = tdrpStrDup("B");
     tt++;
     
-    // Parameter 'Comment 51'
+    // Parameter 'Comment 49'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 51");
+    tt->param_name = tdrpStrDup("Comment 49");
     tt->comment_hdr = tdrpStrDup("</PLUGINS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 52'
+    // Parameter 'Comment 50'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 52");
+    tt->param_name = tdrpStrDup("Comment 50");
     tt->comment_hdr = tdrpStrDup("<HELP>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -6060,11 +5859,11 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("cidd_help:frame_message");
     tt++;
     
-    // Parameter 'Comment 53'
+    // Parameter 'Comment 51'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 53");
+    tt->param_name = tdrpStrDup("Comment 51");
     tt->comment_hdr = tdrpStrDup("</HELP>");
     tt->comment_text = tdrpStrDup("");
     tt++;

@@ -4673,7 +4673,7 @@ void GuiManager::_verticalRouteCompleted(const VsectionRoute &route)
            route.size(), route.totalLengthKm());
   // statusBar()->showMessage(message, 5000);
 
-  if (_params.debug || _params.route_debug != Params::ROUTE_DEBUG_OFF) {
+  if (_params.debug) {
     cerr << "Vertical section route completed" << endl;
     cerr << "  points: " << route.size() << endl;
     cerr << "  total length km: " << route.totalLengthKm() << endl;

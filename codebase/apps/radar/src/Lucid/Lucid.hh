@@ -103,7 +103,7 @@ private:
                           bool isU, bool isV, bool isW);
   void _initTerrain();
   void _initDrawExport();
-  void _initRouteWinds();
+  // void _initRouteWinds();
 
   int _initMaps();
   int _loadRapMap(MapOverlay_t *ov,

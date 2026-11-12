@@ -34,7 +34,7 @@
 #include "Constants.hh"
 #include "LegacyParams.hh"
 #include "Cimages_P.hh"
-#include "Croutes_P.hh"
+// #include "Croutes_P.hh"
 #include "Csyprod_P.hh"
 #include "Cterrain_P.hh"
 #include "Cdraw_P.hh"
@@ -171,9 +171,9 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     
   // read in route winds from old tdrp section, write to main params
   
-  if (_readRouteWindsTdrp()) {
-    return -1;
-  }
+  // if (_readRouteWindsTdrp()) {
+  //   return -1;
+  // }
     
   // read in draw export from old tdrp section, write to main params
   
@@ -831,7 +831,7 @@ int LegacyParams::_loadKeyValPairsDefault(char* &db_buf, int &db_len)
   Cdraw_P draw_P;
   Cimages_P images_P;
   Cterrain_P terrain_P;
-  Croutes_P routes_P;
+  // Croutes_P routes_P;
   
   string params_text = ParamsTextMasterHeader;
   params_text += _getDefaultTdrpParams("GUI_CONFIG", &gui_P);
@@ -843,7 +843,7 @@ int LegacyParams::_loadKeyValPairsDefault(char* &db_buf, int &db_len)
   params_text += _getDefaultTdrpParams("IMAGE_GENERATION", &images_P);
   params_text += _getDefaultTdrpParams("SYMPRODS", &syprod_P);
   params_text += _getDefaultTdrpParams("TERRAIN", &terrain_P);
-  params_text += _getDefaultTdrpParams("ROUTE_WINDS", &routes_P);
+  // params_text += _getDefaultTdrpParams("ROUTE_WINDS", &routes_P);
   
   // Allocate space for the buffer copy
   
@@ -2803,6 +2803,8 @@ int LegacyParams::_readTerrainTdrp()
   
 }
 
+#ifdef NOT_ANY_MORE
+
 /************************************************************************
  * Read in route winds params
  */
@@ -2905,6 +2907,8 @@ int LegacyParams::_readRouteWindsTdrp()
   return 0;
   
 }
+
+#endif
 
 /************************************************************************
  * Read in draw export params
@@ -3097,7 +3101,7 @@ void LegacyParams::printLegacyDefaults(ostream &out)
   Cdraw_P draw_P;
   Cimages_P images_P;
   Cterrain_P terrain_P;
-  Croutes_P routes_P;
+  // Croutes_P routes_P;
   
   string params_text = ParamsTextMasterHeader;
   params_text += _getDefaultTdrpParams("GUI_CONFIG", &gui_P);
@@ -3109,7 +3113,7 @@ void LegacyParams::printLegacyDefaults(ostream &out)
   params_text += _getDefaultTdrpParams("IMAGE_GENERATION", &images_P);
   params_text += _getDefaultTdrpParams("SYMPRODS", &syprod_P);
   params_text += _getDefaultTdrpParams("TERRAIN", &terrain_P);
-  params_text += _getDefaultTdrpParams("ROUTE_WINDS", &routes_P);
+  // params_text += _getDefaultTdrpParams("ROUTE_WINDS", &routes_P);
 
   out << params_text << endl;
 

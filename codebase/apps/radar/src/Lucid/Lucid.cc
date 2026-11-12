@@ -755,7 +755,7 @@ int Lucid::_initDataSpace()
   
   // initialize route winds
   
-  _initRouteWinds();
+  // _initRouteWinds();
   
   // Establish and initialize Draw-Export params 
 
@@ -1280,6 +1280,8 @@ void Lucid::_initDrawExport()
 
 }
 
+#ifdef NOT_ANY_MORE
+
 ////////////////////////////////////////////////////////////////
 // Initialize route winds
 
@@ -1465,6 +1467,8 @@ void Lucid::_initRouteWinds()
   }
 
 }
+
+#endif
 
 /************************************************************************
  * INIT_MAPS - read in map files

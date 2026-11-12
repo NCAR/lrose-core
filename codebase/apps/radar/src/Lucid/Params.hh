@@ -177,17 +177,6 @@ public:
     IMAGE_DEBUG_VERBOSE = 2
   } image_debug_t;
 
-  typedef enum {
-    ROUTE_DEBUG_OFF = 0,
-    ROUTE_DEBUG_NORM = 1,
-    ROUTE_DEBUG_VERBOSE = 2
-  } route_debug_t;
-
-  typedef enum {
-    ROUTE_REGULAR_INTERVALS = 0,
-    ROUTE_EQUAL_DIVISIONS = 1
-  } route_label_style_t;
-
   // struct typedefs
 
   typedef struct {
@@ -1246,31 +1235,6 @@ public:
   images_vsection_spec_t *_images_vsection_spec;
   int images_vsection_spec_n;
 
-  tdrp_bool_t route_winds_active;
-
-  route_debug_t route_debug;
-
-  int route_font_height;
-
-  int route_add_waypoints_labels;
-
-  int route_add_wind_text;
-
-  route_label_style_t route_label_style;
-
-  double route_label_interval;
-
-  int route_num_labels;
-
-  int route_track_line_width;
-
-  char* route_u_url;
-
-  char* route_v_url;
-
-  char* *_route_paths;
-  int route_paths_n;
-
   char* click_point_fmq_url;
 
   int simple_command_timeout_secs;
@@ -1303,7 +1267,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[396];
+  mutable TDRPtable _table[382];
 
   const char *_className;
 

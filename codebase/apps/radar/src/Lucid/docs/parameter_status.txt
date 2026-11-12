@@ -99,15 +99,15 @@ wind_head_angle
 wind_marker_type
 wind_w_scale_factor
 
-Route-wind styling:
+# Route-wind styling:
 
-route_font_height
-route_add_waypoints_labels
-route_add_wind_text
-route_label_style
-route_label_interval
-route_num_labels
-route_track_line_width
+#route_font_height
+#route_add_waypoints_labels
+#route_add_wind_text
+#route_label_style
+#route_label_interval
+#route_num_labels
+#route_track_line_width
 
 Plugins, external commands, and help:
 
@@ -128,7 +128,7 @@ A few additional parameters are technically read, but do not appear to lead to w
 
 draw_export_info is copied into GlobalData, but nothing subsequently consumes it. draw_export_active is not checked at all.
 
-The route-wind URLs, paths, and enable flag initialize old CIDD structures, but I found no current rendering or request path that consumes those structures afterward. route_debug can still affect diagnostic output.
+# The route-wind URLs, paths, and enable flag initialize old CIDD structures, but I found no current rendering or request path that consumes those structures afterward. route_debug can still affect diagnostic output.
 
 Several old overlay parameters remain around active contour/layer code. contour_fields and layer_fields are still used, but some related controls in the unused list above are not.
 
