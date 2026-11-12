@@ -85,6 +85,7 @@ class WindMenuItem;
 class ZoomMenuItem;
 class TimeControl;
 class VlevelSelector;
+class AutomaticImageGenerator;
 
 class GuiManager : public QMainWindow {
   
@@ -291,18 +292,15 @@ private:
 
   void _checkMovieFrameReady();
 
-  // Automatic catalog output advances only after the exact asynchronous grid
-  // and Product requests for the current field have both completed.
+  // The generator owns sequencing and readiness; this manager owns the live
+  // display operations and its bounded-wait timer.
   bool _automaticImagesStarted;
   bool _automaticImagesActive;
-  bool _automaticImageGridReady;
-  int _automaticImageFieldIndex;
-  int _automaticImageExpectedGeneration;
-  int _automaticImageFailureCount;
+  AutomaticImageGenerator *_automaticImageGenerator;
   QTimer *_automaticImageTimeoutTimer;
 
   void _maybeStartAutomaticImages();
-  void _startAutomaticImageField(int fieldIndex);
+  void _startAutomaticImageJob();
   void _selectAutomaticImageField(int fieldIndex);
   void _checkAutomaticImageReady();
   void _automaticImageTimedOut();

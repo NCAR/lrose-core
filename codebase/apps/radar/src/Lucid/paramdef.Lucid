@@ -2566,7 +2566,7 @@ paramdef boolean {
 paramdef double {
   p_default = { 1.0, 2.0, 4.0 };
   p_descr = "List of heights for image generation.";
-  p_help = "See 'images_set_height_list'.";
+  p_help = "See 'images_set_height_list'. When more than one height is configured, a normalized height in km is added to each horizontal image file name to keep the outputs distinct.";
 } images_height_list[];
 
 paramdef boolean {
