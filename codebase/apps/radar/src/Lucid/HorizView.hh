@@ -144,6 +144,7 @@ class DLL_EXPORT HorizView : public QWidget
   void rerenderGrid();
 
   void rerenderProducts();
+  void rerenderWinds();
 
   void clearMovieFrames(int frameCount);
   bool hasMovieFrame(int frameIndex) const;
@@ -371,6 +372,7 @@ class DLL_EXPORT HorizView : public QWidget
   void _renderGrids();
 
   void _renderProducts();
+  void _renderWinds();
   
   // render the maps
   

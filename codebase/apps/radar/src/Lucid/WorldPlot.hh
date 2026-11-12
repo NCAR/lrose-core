@@ -57,6 +57,7 @@
 
 class ColorMap;
 class ProductMgr;
+class WindManager;
 
 using namespace std;
 
@@ -642,6 +643,9 @@ public:
                       time_t frameEnd,
                       time_t dataTime,
                       double kmAcrossScreen);
+
+  // Render all ready model-wind layers into an independent transparent cache.
+  void renderWinds(const WindManager &windManager);
   
   // get images after rendering
   
@@ -649,6 +653,7 @@ public:
   const QImage *getMapsImage();
   const QImage *getRingsImage();
   const QImage *getProductsImage();
+  const QImage *getWindsImage();
 
   // print
   
@@ -684,6 +689,7 @@ private:
   QImage *_mapsImage;
   QImage *_ringsImage;
   QImage *_productsImage;
+  QImage *_windsImage;
 
   // offset of the window in pixels
   // from the top-left of the main canvas

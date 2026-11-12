@@ -54,6 +54,8 @@
 #include "WorldPlot.hh"
 #include "ProductMgr.hh"
 #include "SymprodRenderContext.hh"
+#include "WindGlyphRenderer.hh"
+#include "WindManager.hh"
 
 using namespace std;
 
@@ -74,6 +76,7 @@ WorldPlot::WorldPlot() :
   _mapsImage = nullptr;
   _ringsImage = nullptr;
   _productsImage = nullptr;
+  _windsImage = nullptr;
   
   _xPixOffset = 0;
   _yPixOffset = 0;
@@ -191,6 +194,7 @@ WorldPlot &WorldPlot::_copy(const WorldPlot &rhs)
   _mapsImage = nullptr;
   _ringsImage = nullptr;
   _productsImage = nullptr;
+  _windsImage = nullptr;
   
   _xPixOffset = rhs._xPixOffset;
   _yPixOffset = rhs._yPixOffset;
@@ -2750,6 +2754,244 @@ const QImage *WorldPlot::getProductsImage()
     _productsImage->fill(Qt::transparent);
   }
   return _productsImage;
+}
+
+const QImage *WorldPlot::getWindsImage()
+{
+  if (!_windsImage) {
+    _createImage(_windsImage);
+    _windsImage->fill(Qt::transparent);
+  }
+  return _windsImage;
+}
+
+////////////////////////////////////////////////////////
+// render model winds into their transparent layer
+
+void WorldPlot::renderWinds(const WindManager &windManager)
+{
+  _createImage(_windsImage);
+  _windsImage->fill(Qt::transparent);
+  if (!windManager.isEnabled()) {
+    return;
+  }
+
+  QPainter painter(_windsImage);
+  painter.setRenderHint(QPainter::Antialiasing, true);
+  painter.setRenderHint(QPainter::TextAntialiasing, true);
+  painter.setClipRect(QRect(qMin(_xMinPixel, _xMaxPixel),
+                            qMin(_yMinPixel, _yMaxPixel),
+                            qAbs(_xMaxPixel - _xMinPixel) + 1,
+                            qAbs(_yMaxPixel - _yMinPixel) + 1));
+
+  bool referenceDrawn = false;
+  for (int layerIndex = 0;
+       layerIndex < windManager.layerCount(); ++layerIndex) {
+    if (!windManager.layerReady(layerIndex)) {
+      continue;
+    }
+
+    const wind_data_t &wind = _gd.layers.wind[layerIndex];
+    const MdvReader *uReader = wind.wind_u;
+    const MdvReader *vReader = wind.wind_v;
+    const int nx = uReader->h_fhdr.nx;
+    const int ny = uReader->h_fhdr.ny;
+    GridIndexBounds bounds;
+    if (!_computeVisibleGridBounds(*uReader, bounds)) {
+      bounds = {0, nx - 1, 0, ny - 1};
+    }
+    if (bounds.maxX < bounds.minX || bounds.maxY < bounds.minY) {
+      continue;
+    }
+
+    // Derive density from the visible subsection, rather than the downloaded
+    // domain, so a large model grid remains responsive and visually stable
+    // while the user zooms into a small area.
+    const int visibleNx = bounds.maxX - bounds.minX + 1;
+    const int visibleNy = bounds.maxY - bounds.minY + 1;
+    const int xStride = max(1, static_cast<int>(floor(
+      visibleNx / static_cast<double>(max(1, _params.wind_ideal_x_vectors)) +
+      0.5)));
+    const int yStride = max(1, static_cast<int>(floor(
+      visibleNy / static_cast<double>(max(1, _params.wind_ideal_y_vectors)) +
+      0.5)));
+    const int firstX = ((bounds.minX + xStride - 1) / xStride) * xStride;
+    const int firstY = ((bounds.minY + yStride - 1) / yStride) * yStride;
+
+    QColor color(wind.color_name);
+    if (!color.isValid()) {
+      color = Qt::white;
+    }
+    const double lineWidth = max(1, wind.line_width);
+    const double scaleSeconds = _params.wind_scaler *
+      _params.wind_time_scale_interval * 60.0;
+    const fl32 uMissing = uReader->h_fhdr.missing_data_value;
+    const fl32 uBad = uReader->h_fhdr.bad_data_value;
+    const fl32 vMissing = vReader->h_fhdr.missing_data_value;
+    const fl32 vBad = vReader->h_fhdr.bad_data_value;
+
+    for (int iy = firstY; iy <= bounds.maxY; iy += yStride) {
+      for (int ix = firstX; ix <= bounds.maxX; ix += xStride) {
+        const size_t dataIndex = static_cast<size_t>(iy) * nx + ix;
+        const fl32 rawU = uReader->h_fl32_data[dataIndex];
+        const fl32 rawV = vReader->h_fl32_data[dataIndex];
+        if (!isfinite(rawU) || !isfinite(rawV) || rawU == uMissing ||
+            rawU == uBad || rawV == vMissing || rawV == vBad) {
+          continue;
+        }
+
+        const double uMps = rawU * wind.data_units_scale_to_mps;
+        const double vMps = rawV * wind.data_units_scale_to_mps;
+        const double speedMps = hypot(uMps, vMps);
+        if (!isfinite(speedMps)) {
+          continue;
+        }
+
+        const double dataX = uReader->h_fhdr.grid_minx +
+          ix * uReader->h_fhdr.grid_dx;
+        const double dataY = uReader->h_fhdr.grid_miny +
+          iy * uReader->h_fhdr.grid_dy;
+        double lat = 0.0;
+        double lon = 0.0;
+        uReader->proj.xy2latlon(dataX, dataY, lat, lon);
+        double displayX = 0.0;
+        double displayY = 0.0;
+        _proj.latlon2xy(lat, lon, displayX, displayY);
+        const QPointF anchor = getPixelPointF(displayX, displayY);
+        if (anchor.x() < qMin(_xMinPixel, _xMaxPixel) - 1 ||
+            anchor.x() > qMax(_xMinPixel, _xMaxPixel) + 1 ||
+            anchor.y() < qMin(_yMinPixel, _yMaxPixel) - 1 ||
+            anchor.y() > qMax(_yMinPixel, _yMaxPixel) + 1) {
+          continue;
+        }
+
+        // Project an earth-relative displacement through the display
+        // projection. This keeps U eastward and V northward even on distorted
+        // grids, instead of aligning symbols with the source-grid axes.
+        double endLat = lat;
+        double endLon = lon;
+        PJGLatLonPlusDxDy(lat, lon,
+                          uMps * scaleSeconds / 1000.0,
+                          vMps * scaleSeconds / 1000.0,
+                          &endLat, &endLon);
+        double endX = 0.0;
+        double endY = 0.0;
+        _proj.latlon2xy(endLat, endLon, endX, endY);
+        const QPointF vectorEnd = getPixelPointF(endX, endY);
+        const QPointF screenVelocity = vectorEnd - anchor;
+
+        if (wind.marker_type == ARROWS || wind.marker_type == VECTOR ||
+            wind.marker_type == TUFT || wind.marker_type == TICKVECTOR) {
+          if (speedMps < 0.1 ||
+              fabs(screenVelocity.x()) >= _plotWidth / 4.0 ||
+              fabs(screenVelocity.y()) >= _plotHeight / 4.0) {
+            continue;
+          }
+          const QPointF tail = wind.marker_type == ARROWS ?
+            anchor - 0.5 * screenVelocity : anchor;
+          const QPointF head = wind.marker_type == ARROWS ?
+            anchor + 0.5 * screenVelocity : vectorEnd;
+          if (wind.marker_type == TUFT) {
+            painter.save();
+            painter.setPen(QPen(color, lineWidth));
+            painter.drawEllipse(anchor, 1.5, 1.5);
+            painter.drawLine(anchor, vectorEnd);
+            painter.restore();
+          } else {
+            WindGlyphRenderer::drawArrow(painter, tail, head, color,
+                                         lineWidth,
+                                         _params.wind_head_size +
+                                           3.0 * (lineWidth - 1.0),
+                                         _params.wind_head_angle);
+            if (wind.marker_type == TICKVECTOR) {
+              const int tickCount = max(1, _params.wind_scaler - 1);
+              const double length = hypot(screenVelocity.x(),
+                                          screenVelocity.y());
+              if (length > 0.5) {
+                const QPointF unit = screenVelocity / length;
+                const QPointF side(-unit.y(), unit.x());
+                painter.save();
+                painter.setPen(QPen(color, lineWidth));
+                for (int itick = 1; itick <= tickCount; ++itick) {
+                  const QPointF at = anchor + screenVelocity *
+                    (itick / static_cast<double>(tickCount + 1));
+                  painter.drawLine(at - 2.0 * side, at + 2.0 * side);
+                }
+                painter.restore();
+              }
+            }
+          }
+          continue;
+        }
+
+        // Barbs have a fixed pixel length. Use a short projected displacement
+        // only to establish the local true-earth direction on the canvas.
+        QPointF toward = screenVelocity;
+        if (speedMps > 0.0) {
+          double dirLat = lat;
+          double dirLon = lon;
+          PJGLatLonPlusDxDy(lat, lon, uMps / speedMps * 10.0,
+                            vMps / speedMps * 10.0, &dirLat, &dirLon);
+          double dirX = 0.0;
+          double dirY = 0.0;
+          _proj.latlon2xy(dirLat, dirLon, dirX, dirY);
+          toward = getPixelPointF(dirX, dirY) - anchor;
+        }
+        if (hypot(toward.x(), toward.y()) < 1.0e-6) {
+          toward = QPointF(0.0, -1.0);
+        }
+        const double directionDeg = fmod(
+          atan2(-uMps, -vMps) * 180.0 / M_PI + 360.0, 360.0);
+        bool southern = false;
+        WindGlyphRenderer::LabelStyle labelStyle =
+          WindGlyphRenderer::LabelStyle::None;
+        if (wind.marker_type == BARB_SH ||
+            wind.marker_type == LABELEDBARB_SH) {
+          southern = true;
+        } else if (wind.marker_type == METBARB) {
+          southern = lat < 0.0;
+        }
+        if (wind.marker_type == LABELEDBARB ||
+            wind.marker_type == LABELEDBARB_SH) {
+          labelStyle = WindGlyphRenderer::LabelStyle::DirectionAtOrigin;
+        } else if (wind.marker_type == METBARB) {
+          labelStyle = WindGlyphRenderer::LabelStyle::DirectionTensAtTip;
+        }
+        WindGlyphRenderer::drawBarb(
+          painter, anchor, -toward, speedMps * 1.9438444924406,
+          _params.wind_barb_shaft_len, lineWidth, color, southern,
+          labelStyle, directionDeg);
+      }
+    }
+
+    if (!referenceDrawn && _params.display_ref_lines &&
+        _params.wind_legends_on &&
+        (wind.marker_type == ARROWS || wind.marker_type == VECTOR ||
+         wind.marker_type == TUFT || wind.marker_type == TICKVECTOR)) {
+      const double referenceKm = wind.reference_speed *
+        wind.units_scale_factor * scaleSeconds / 1000.0;
+      const double pixelsPerKm = fabs(_xPixelsPerKm);
+      const double referencePixels = referenceKm * pixelsPerKm;
+      if (referencePixels > 1.0 && referencePixels < _plotWidth / 2.0) {
+        const QPointF tail((_xMinPixel + _xMaxPixel) / 2.0,
+                           qMin(_yMinPixel, _yMaxPixel) + 12.0);
+        const QPointF head = tail + QPointF(referencePixels, 0.0);
+        WindGlyphRenderer::drawArrow(painter, tail, head, color, lineWidth,
+                                     _params.wind_head_size,
+                                     _params.wind_head_angle);
+        painter.save();
+        painter.setPen(color);
+        painter.drawText(head + QPointF(5.0, 4.0),
+                         QString("%1: %2 %3")
+                           .arg(QString::fromStdString(
+                             wind.wind_u->legend_name))
+                           .arg(wind.reference_speed)
+                           .arg(wind.units_label ? wind.units_label : ""));
+        painter.restore();
+        referenceDrawn = true;
+      }
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////

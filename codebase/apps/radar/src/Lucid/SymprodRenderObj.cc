@@ -34,6 +34,7 @@
 
 #include "SymprodRenderObj.hh"
 #include "WorldPlot.hh"
+#include "WindGlyphRenderer.hh"
 #include "Product.hh"
 #include <Spdb/Symprod.hh>
 #include <Spdb/Product_defines.hh>
@@ -1103,37 +1104,12 @@ void SymprodRenderChunk::_drawStationQt(
       _params.wind_barb_shaft_len * qMax(0.25, scale));
     const double direction = station.winddir * M_PI / 180.0;
     const QPointF unit(sin(direction), -cos(direction));
-    const QPointF side(-unit.y(), unit.x());
-    const QPointF tip = origin + shaftLength * unit;
-    painter.setPen(QPen(foreground, 1));
-    painter.drawLine(origin, tip);
-
-    // Wind speed is encoded with the conventional 50/10/5 knot flags.
-    // Draw from the outer end inward so the station-model layout remains
-    // stable as flags are added or removed.
-    int knots = qMax(0, static_cast<int>(floor(station.windspd *
-                                               NMH_PER_MS / 5.0 + 0.5)) * 5);
-    QPointF flagAt = tip;
-    const double spacing = qMax(2.0, 3.0 * qMax(0.5, scale));
-    const double flagLength = qMax(4.0, shaftLength * 0.35);
-    while (knots >= 50) {
-      QPolygonF pennant;
-      pennant << flagAt << flagAt - spacing * unit
-              << flagAt - spacing * unit + flagLength * side;
-      painter.setBrush(foreground);
-      painter.drawPolygon(pennant);
-      painter.setBrush(Qt::NoBrush);
-      flagAt -= spacing * unit;
-      knots -= 50;
-    }
-    while (knots >= 10) {
-      painter.drawLine(flagAt, flagAt + flagLength * side);
-      flagAt -= spacing * unit;
-      knots -= 10;
-    }
-    if (knots >= 5) {
-      painter.drawLine(flagAt, flagAt + 0.5 * flagLength * side);
-    }
+    // Station and gridded winds share one glyph implementation so their
+    // speed flags and hemisphere convention remain visually consistent.
+    WindGlyphRenderer::drawBarb(painter, origin, unit,
+                                station.windspd * NMH_PER_MS,
+                                shaftLength, 1.0, foreground,
+                                station.lat < 0.0);
   }
   painter.restore();
 }

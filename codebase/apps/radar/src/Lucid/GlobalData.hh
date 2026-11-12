@@ -40,6 +40,7 @@
 #include <Mdv/MdvxProj.hh>
 
 class ProductMgr;
+class WindManager;
 class MdvReader;
 class StationLoc;
 class RemoteUIQueue;
@@ -275,6 +276,7 @@ public:
     marker_type = ARROWS;      
     line_width = 0;
     units_scale_factor = 0;
+    data_units_scale_to_mps = 1;
     reference_speed = 0;
     wind_u = NULL;
     wind_v = NULL;
@@ -291,6 +293,7 @@ public:
   int line_width;
 
   double units_scale_factor;
+  double data_units_scale_to_mps;
   double reference_speed;
 
   MdvReader *wind_u;
@@ -1051,6 +1054,7 @@ public:
   
   prod_info_t prod;
   ProductMgr *prod_mgr;       // Products Manager
+  WindManager *wind_mgr;      // Coordinates paired U/V wind requests
 
   // gridded data records
   

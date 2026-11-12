@@ -27,6 +27,7 @@
 #include "GuiManager.hh"
 #include "ProductMgr.hh"
 #include "SymprodRenderContext.hh"
+#include "WindManager.hh"
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
@@ -347,6 +348,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   if (_gridsReady && _mapsReady) {
     painter.drawImage(0, 0, *_zoom->getGridImage());
     painter.drawImage(0, 0, *_zoom->getMapsImage());
+    painter.drawImage(0, 0, *_zoom->getWindsImage());
   }
 
   // render the range rings
@@ -1008,6 +1010,23 @@ void HorizView::rerenderProducts()
 }
 
 /////////////////////////////////////////////////////////////
+// rerender model winds from retained paired U/V data
+
+void HorizView::rerenderWinds()
+{
+  _renderWinds();
+  repaint();
+}
+
+void HorizView::_renderWinds()
+{
+  if (!_zoom || !_gd.wind_mgr) {
+    return;
+  }
+  _zoom->renderWinds(*_gd.wind_mgr);
+}
+
+/////////////////////////////////////////////////////////////
 // manage immutable composites used by movie playback
 
 void HorizView::clearMovieFrames(int frameCount)
@@ -1118,6 +1137,8 @@ void HorizView::_renderGrids()
   
 
   _gridsReady = true;
+
+  _renderWinds();
 
   _renderProducts();
   

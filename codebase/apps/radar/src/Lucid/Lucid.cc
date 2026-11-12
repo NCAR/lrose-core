@@ -41,6 +41,7 @@
 #include "LegacyParams.hh"
 #include "MdvReader.hh"
 #include "ProductMgr.hh"
+#include "WindManager.hh"
 #include <toolsa/mem.h>
 #include <toolsa/pmu.h>
 #include <toolsa/utim.h>
@@ -62,12 +63,45 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <cctype>
 #include <QApplication>
 #include <QErrorMessage>
 
 // #define THIS_IS_MAIN 1 /* This is the main module */
 
 using namespace std;
+
+namespace {
+
+double windDataScaleToMps(string units, double legacyFallback)
+{
+  transform(units.begin(), units.end(), units.begin(),
+            [](unsigned char ch) { return static_cast<char>(tolower(ch)); });
+  units.erase(remove_if(units.begin(), units.end(),
+                        [](unsigned char ch) { return isspace(ch); }),
+              units.end());
+  if (units == "m/s" || units == "m/sec" || units == "mps" ||
+      units == "ms-1" || units == "m.s-1") {
+    return 1.0;
+  }
+  if (units == "km/h" || units == "km/hr" || units == "kph") {
+    return 1.0 / 3.6;
+  }
+  if (units == "kt" || units == "kts" || units == "knot" ||
+      units == "knots") {
+    return 0.514444444444;
+  }
+  if (units == "mph") {
+    return 0.44704;
+  }
+
+  // Legacy configurations used the global factor for sources whose unit
+  // spelling was site-specific. Preserve that behavior when the explicit
+  // per-layer units cannot be recognized.
+  return legacyFallback;
+}
+
+} // namespace
 
 // Constructor
 
@@ -182,6 +216,11 @@ Lucid::~Lucid()
   // GuiManager has already detached its repaint and status callbacks.
   delete _gd.prod_mgr;
   _gd.prod_mgr = nullptr;
+
+  // WindManager coordinates readers owned by this Lucid QObject, so release
+  // the coordinator before QObject tears down those reader children.
+  delete _gd.wind_mgr;
+  _gd.wind_mgr = nullptr;
 
 }
 
@@ -1010,8 +1049,8 @@ int Lucid::_initGrids()
 void Lucid::_initWinds()
 {
 
-
   if (_params.winds_n == 0) {
+    _gd.wind_mgr = new WindManager;
     return;
   }
 
@@ -1083,10 +1122,14 @@ void Lucid::_initWinds()
     }
 
     lwind.units_scale_factor = _params.wind_units_scale_factor;
+    lwind.data_units_scale_to_mps =
+      windDataScaleToMps(windp.units, _params.wind_units_scale_factor);
     lwind.reference_speed = _params.wind_reference_speed;
     lwind.units_label = _params.wind_units_label;
 
   }
+
+  _gd.wind_mgr = new WindManager;
 
 }
 

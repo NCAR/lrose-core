@@ -133,6 +133,7 @@ GlobalData::GlobalData()
   MEM_zero(data_info);
 
   prod_mgr = nullptr;
+  wind_mgr = nullptr;
   
   MEM_zero(mread);
 

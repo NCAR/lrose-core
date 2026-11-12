@@ -86,6 +86,8 @@ HDRS = \
 	VlevelSelector.hh \
 	WayPts.hh \
 	WindMenuItem.hh \
+	WindGlyphRenderer.hh \
+	WindManager.hh \
 	WorldPlot.hh \
 	XyBox.hh \
 	ZoomMenuItem.hh \
@@ -130,6 +132,8 @@ NORM_SRCS = \
 	VlevelManager.cc \
 	VsectionRoute.cc \
 	WayPts.cc \
+	WindGlyphRenderer.cc \
+	WindManager.cc \
 	WorldPlot.cc \
 	XyBox.cc
 

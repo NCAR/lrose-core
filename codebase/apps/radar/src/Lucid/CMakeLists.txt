@@ -39,6 +39,8 @@ set (SRCS
       VlevelManager.cc
       VsectionRoute.cc
       WayPts.cc
+      WindGlyphRenderer.cc
+      WindManager.cc
       WorldPlot.cc
       XyBox.cc
       Lucid.cc

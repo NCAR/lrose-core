@@ -116,6 +116,7 @@
 #include "VertView.hh"
 #include "VertManager.hh"
 #include "WindMenuItem.hh"
+#include "WindManager.hh"
 #include "ZoomMenuItem.hh"
 
 // GlobalData.hh must be included AFTER qt includes because of #define None in X11/X.h
@@ -749,6 +750,9 @@ void GuiManager::_checkMovieFrameReady()
   if (!productsReady) {
     return;
   }
+  if (_gd.wind_mgr && !_gd.wind_mgr->activeWindsReady()) {
+    return;
+  }
 
   const int completedFrame = _movieBuildFrame;
   _movieBuildFrame = -1;
@@ -826,6 +830,16 @@ void GuiManager::timerEvent(QTimerEvent *event)
   if (!mr->getReadBusyH()) {
     // read the H data if needed
     _checkAndReadH(mr);
+  }
+
+  // U and V complete independently. Publish a new wind overlay only after
+  // the manager has revalidated the pair for the current display request.
+  if (_gd.wind_mgr && _gd.wind_mgr->poll()) {
+    if (_horiz) {
+      _horiz->rerenderWinds();
+    }
+    _checkMovieFrameReady();
+    _checkAutomaticImageReady();
   }
   
 }
@@ -1553,22 +1567,26 @@ void GuiManager::_populateWindsMenu()
 
     // create action for this entry
 
-    WindMenuItem *item = new WindMenuItem;
     QAction *act = new QAction;
-    item->setWindParams(&wparams);
-    item->setWindIndex(iwind);
-    item->setWindData(&_gd.layers.wind[iwind]);
-    item->setAction(act);
     act->setText(wparams.button_label);
     act->setStatusTip(tr("Turn wind layer on/off"));
     act->setCheckable(true);
     act->setChecked(wparams.on_at_startup);
-    connect(act, &QAction::toggled,
-            item, &WindMenuItem::toggled);
-    
-    // add item for wind selection
-    
-    _windMenuItems.push_back(item);
+    connect(act, &QAction::toggled, this,
+            [this, iwind](bool checked) {
+      _params._winds[iwind].on_at_startup =
+        static_cast<tdrp_bool_t>(checked);
+      if (_gd.wind_mgr) {
+        _gd.wind_mgr->setLayerEnabled(iwind, checked);
+        _gd.wind_mgr->requestData(_timeControl->getSelectedTime().utime(),
+                                  _vlevelManager.getRequestedLevel(),
+                                  _gd.h_win.page);
+      }
+      if (_horiz) {
+        _horiz->rerenderWinds();
+      }
+      _checkAutomaticImageReady();
+    });
 
     // add to winds menu
 
@@ -1584,6 +1602,17 @@ void GuiManager::_populateWindsMenu()
 void GuiManager::_setWindsEnabled(bool enable)
 {
   _windsEnabled = enable;
+  _params.winds_on_at_startup = static_cast<tdrp_bool_t>(enable);
+  if (_gd.wind_mgr) {
+    _gd.wind_mgr->setEnabled(enable);
+    _gd.wind_mgr->requestData(_timeControl->getSelectedTime().utime(),
+                              _vlevelManager.getRequestedLevel(),
+                              _gd.h_win.page);
+  }
+  if (_horiz) {
+    _horiz->rerenderWinds();
+  }
+  _checkAutomaticImageReady();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> winds enabled? " << (_windsEnabled?"Y":"N") << endl;
   }
@@ -2215,6 +2244,11 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
       _timeControl->getSelectedTime().utime(),
       _vlevelManager.getRequestedLevel(),
       _gd.h_win.page);
+    if (_gd.wind_mgr) {
+      _gd.wind_mgr->requestData(_timeControl->getSelectedTime().utime(),
+                                _vlevelManager.getRequestedLevel(),
+                                _gd.h_win.page);
+    }
     if (_automaticImagesActive &&
         _automaticImageGenerator->currentJobIsHorizontal() &&
         _automaticImageGenerator->hasCurrentJob() &&
@@ -2372,6 +2406,9 @@ void GuiManager::_reloadData()
   if (_gd.prod_mgr) {
     _gd.prod_mgr->reset_product_valid_flags();
     _gd.prod_mgr->refreshActiveProducts();
+  }
+  if (_gd.wind_mgr) {
+    _gd.wind_mgr->invalidate();
   }
 
   // A visible vertical section is part of the current display state.  Reuse
@@ -3079,7 +3116,12 @@ void GuiManager::_checkAutomaticImageReady()
     (_params.images_require_all_symprods ?
        _gd.prod_mgr->activeProductsReady() :
        _gd.prod_mgr->activeProductRequestsSettled());
-  if (!_automaticImageGenerator->readyToSave(productsReady)) {
+  const bool windsRelevant =
+    !_automaticImageGenerator->currentJobIsVertical() &&
+    _gd.wind_mgr && _gd.wind_mgr->isEnabled();
+  const bool windsReady = !windsRelevant ||
+    _gd.wind_mgr->activeWindsReady();
+  if (!_automaticImageGenerator->readyToSave(productsReady && windsReady)) {
     return;
   }
 
