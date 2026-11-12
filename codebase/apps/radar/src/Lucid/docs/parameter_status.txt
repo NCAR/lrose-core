@@ -1,0 +1,211 @@
+## Unused parameters
+
+Debugging and process control:
+
+debug_flag
+debug1_flag
+debug2_flag
+titan_key
+
+Data retrieval:
+
+model_run_list_hours
+check_clipping
+locator_margin_km
+
+Projection and click coordinates:
+
+proj_persp_radius
+proj_false_northing
+proj_false_easting
+proj_set_offset_origin
+proj_offset_origin_latitude
+proj_offset_origin_longitude
+report_clicks_in_degM_and_nm
+magnetic_variation_deg
+
+GUI and interaction:
+
+min_zoom_threshold
+one_click_rhi
+rotate_coarse_adjust
+rotate_medium_adjust
+rotate_fine_adjust
+close_popups
+status_info_file
+enable_status_window
+report_clicks_in_status_window
+draw_clock_local
+label_font_size
+
+Time and selector display:
+
+vlevel_selector_labels_color
+frame_range_time_format
+display_labels
+display_ref_lines
+
+Vertical-section display:
+
+vsection_bot_margin
+vsection_top_margin2
+vsection_text_margin
+vsection_beam_queue_size
+
+Colors:
+
+background_color2
+out_of_range_color
+height_axis_color
+height_indicator_color
+bad_data_color
+
+missing_data_color is used; bad_data_color is not.
+
+Range rings and overlays:
+
+range_ring_follows_data
+range_ring_x_space
+range_ring_y_space
+range_ring_labels
+clip_overlay_fields
+
+Older rendering controls:
+
+mark_latest_click_location
+latest_click_mark_size
+image_inten
+inten_levels
+data_inten
+image_fill_threshold
+scale_units_per_km
+scale_units_label
+
+Terrain:
+
+terrain_active
+terrain_height_scaler
+terrain_earth_color1
+terrain_earth_color2
+
+Notably, terrain activation currently depends on whether terrain_url is nonempty, not on terrain_active.
+
+Wind rendering:
+
+wind_ideal_x_vectors
+wind_ideal_y_vectors
+wind_head_size
+wind_head_angle
+wind_marker_type
+wind_w_scale_factor
+
+Route-wind styling:
+
+route_font_height
+route_add_waypoints_labels
+route_add_wind_text
+route_label_style
+route_label_interval
+route_num_labels
+route_track_line_width
+
+Plugins, external commands, and help:
+
+click_point_fmq_url
+simple_command_timeout_secs
+complex_command_timeout_secs
+latest_click_mark_color
+click_posn_rel_to_origin
+latest_client_mark_color
+draw_export_active
+help_command
+canvas_help
+frame_message_help
+
+## Functionally orphaned areas
+
+A few additional parameters are technically read, but do not appear to lead to working functionality:
+
+draw_export_info is copied into GlobalData, but nothing subsequently consumes it. draw_export_active is not checked at all.
+
+The route-wind URLs, paths, and enable flag initialize old CIDD structures, but I found no current rendering or request path that consumes those structures afterward. route_debug can still affect diagnostic output.
+
+Several old overlay parameters remain around active contour/layer code. contour_fields and layer_fields are still used, but some related controls in the unused list above are not.
+
+## Significant oddities
+
+Legacy image generation changes terrain state
+
+In LegacyParams.cc (LegacyParams.cc:3034), _readImageGenTdrp() writes:
+
+terrain_active = TRUE;
+
+when an IMAGE_GENERATION section exists, and writes terrain_active = FALSE when it does not. This appears to be a copy-and-paste error. It also runs after _readTerrainTdrp(), so it overrides the terrain configuration that was just translated.
+
+The legacy vertical bottom margin maps to an unused parameter
+
+LegacyParams.cc (LegacyParams.cc:1493) translates cidd.vert_bot_margin into:
+
+vsection_bot_margin
+
+But VertView uses vsection_bottom_margin. Therefore, changing the old CIDD bottom-margin parameter currently has no effect on the displayed vertical section.
+
+There are two overlapping vertical-margin families:
+
+vsection_top_margin       used
+vsection_bot_margin       unused
+
+vsection_top_margin2      unused
+vsection_bottom_margin    used
+
+These should probably be consolidated.
+
+Duplicate single-segment parameters
+
+one_click_rhi remains in paramdef.Lucid, but is unused. Legacy conversion correctly translates cidd.one_click_rhi into single_segment_vsection, which is the parameter Lucid uses. The standalone one_click_rhi parameter can likely be removed.
+
+Duplicate debug interfaces
+
+The application uses the debug enum. The three boolean parameters:
+
+debug_flag
+debug1_flag
+debug2_flag
+
+are unused at runtime. LegacyParams.cc writes both these old booleans and the derived debug enum. Only the enum is needed in the generated TDRP file.
+
+Projection options are advertised but not implemented
+
+The false-easting, false-northing, offset-origin, and vertical-perspective-radius parameters are not read. A user could configure them believing they affect projection setup, but they currently do nothing.
+
+terrain_active is ignored
+
+Lucid.cc (Lucid.cc:1163) creates and enables terrain whenever terrain_url is nonempty. It never checks the documented terrain_active parameter.
+
+Column-max naming remains inconsistent
+
+The GUI presents this feature as “column max,” but the field structure and TDRP parameter member remain named composite_mode in paramdef.Lucid (paramdef.Lucid:189). Renaming it to column_max_mode would match the terminology already used in the GUI and comments.
+
+Symbolic-product section headers are duplicated
+
+There are two opening <SYMBOLIC_PRODUCTS> headers, around lines 1965 and 2016, followed by one closing header. This is only organizational, but makes the generated parameter file confusing.
+
+Window coordinate documentation is reversed
+
+Both horizontal and vertical window help text say:
+
+X is positive downwards.
+Y is positive to the right.
+
+For screen coordinates, X normally increases rightward and Y downward.
+
+Help command contains an unmatched quote
+
+The default is:
+
+chrome http://front.eol.ucar.edu/displayParams/Lucid'
+
+It has a trailing single quote and, independently, help_command is unused.
+
+There are also numerous minor spelling errors in descriptions, but those are cosmetic compared with the configuration problems above.
+
