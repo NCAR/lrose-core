@@ -336,6 +336,10 @@ void IpsMoments::computeMoments(vector<const IpsTsPulse *> &pulses,
       // not the same visit, so do not use this pair
       continue;
     }
+    if (!pulse0->getChanIsCopol(0) || !pulse1->getChanIsCopol(0)) {
+      // copol covariances only - do not mix in cross-pol samples
+      continue;
+    }
     RadarComplex_t diff = RadarComplex::conjugateProduct(iq0[ii], iq0[ii-1]);
     if (pulse0->isHoriz() && pulse1->isHoriz()) {
       _sum_lag1_hc.add(diff);
@@ -357,6 +361,10 @@ void IpsMoments::computeMoments(vector<const IpsTsPulse *> &pulses,
       // not the same visit, so do not use this pair
       continue;
     }
+    if (!pulse0->getChanIsCopol(0) || !pulse2->getChanIsCopol(0)) {
+      // copol covariances only - do not mix in cross-pol samples
+      continue;
+    }
     RadarComplex_t diff = RadarComplex::conjugateProduct(iq0[ii], iq0[ii-2]);
     if (pulse0->isHoriz() && pulse2->isHoriz()) {
       _sum_lag2_hc.add(diff);
@@ -372,6 +380,10 @@ void IpsMoments::computeMoments(vector<const IpsTsPulse *> &pulses,
     const IpsTsPulse *pulse3 = pulses[ii];
     if (pulse0->getVisitNumInBeam() != pulse3->getVisitNumInBeam()) {
       // not the same visit, so do not use this pair
+      continue;
+    }
+    if (!pulse0->getChanIsCopol(0) || !pulse3->getChanIsCopol(0)) {
+      // copol covariances only - do not mix in cross-pol samples
       continue;
     }
     RadarComplex_t diff = RadarComplex::conjugateProduct(iq0[ii], iq0[ii-3]);
@@ -791,7 +803,7 @@ void IpsMoments::computeMoments(vector<const IpsTsPulse *> &pulses,
     }
     
   } else if (snrHcOK && _sum_lag1_hc.valid() &&
-             _sum_lag2_hc.valid() && _sum_lag3_vc.valid()) {
+             _sum_lag2_hc.valid() && _sum_lag3_hc.valid()) {
     
     double lag1_hc_mag = RadarComplex::mag(fields.lag1_hc);
     fields.lag1_hc_db = 20.0 * log10(lag1_hc_mag);

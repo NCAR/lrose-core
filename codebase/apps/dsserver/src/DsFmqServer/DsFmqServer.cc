@@ -35,6 +35,7 @@
 #include <string>
 #include <didss/RapDataDir.hh>
 #include <didss/DsMessage.hh>
+#include <dsserver/DsServerMsg.hh>
 #include <Fmq/DsFmq.hh>
 #include <Fmq/DsFmqMsg.hh>
 #include <toolsa/Socket.hh>
@@ -53,7 +54,7 @@ DsFmqServer::DsFmqServer(const string& progName,
 			params.debug, 
 			params.verbose,
                         params.run_secure, 
-                        false, 
+                        params.run_read_only, 
                         true),
 	_progName(progName),
 	_params(params)
@@ -180,6 +181,25 @@ int DsFmqServer::_performInit(DsFmqMsg &msg)
     }
     return -1;
   }
+
+  // in secure mode, reject absolute paths and paths containing '..',
+  // so clients can only reach queues below DATA_DIR
+
+  if (_isSecure) {
+    string securityErr;
+    if (!DsServerMsg::urlIsSecure(urlStr, securityErr)) {
+      string errStr = "ERROR - DsFmqServer::_performInit\n";
+      errStr += "  Running in secure mode.\n";
+      errStr += securityErr;
+      TaStr::AddStr(errStr, "  URL: ", urlStr);
+      if (_isDebug) {
+        cerr << errStr;
+      }
+      _sendReply(msg.getType(), -1, errStr);
+      return -1;
+    }
+  }
+
   string fmqPath;
   RapDataDir.fillPath(url.getFile(), fmqPath);
 
@@ -194,6 +214,22 @@ int DsFmqServer::_performInit(DsFmqMsg &msg)
     return -1;
   }
   const DsFmqMsg::initInfo_t &info = msg.getInitInfo();
+
+  // in read-only mode, only allow the queue to be opened for reading
+
+  if (_isReadOnly &&
+      info.openMode != Fmq::READ_ONLY &&
+      info.openMode != Fmq::BLOCKING_READ_ONLY) {
+    string errStr = "ERROR - DsFmqServer::_performInit\n";
+    errStr += "  Running in read-only mode.\n";
+    errStr += "  Cannot open queue for writing.\n";
+    TaStr::AddStr(errStr, "  URL: ", urlStr);
+    if (_isDebug) {
+      cerr << errStr;
+    }
+    _sendReply(msg.getType(), -1, errStr);
+    return -1;
+  }
   
   // perform init
 
@@ -432,6 +468,19 @@ int DsFmqServer::_performRead(DsFmqMsg &msg)
 
 int DsFmqServer::_performWrite(DsFmqMsg &msg)
 {
+
+  // in read-only mode, reject all writes
+
+  if (_isReadOnly) {
+    string errStr = "ERROR - DsFmqServer::_performWrite\n";
+    errStr += "  Running in read-only mode.\n";
+    errStr += "  Cannot write to queue.\n";
+    if (_isDebug) {
+      cerr << errStr;
+    }
+    _sendReply(msg.getType(), -1, errStr);
+    return -1;
+  }
 
   const vector<void *> msgData = msg.getMsgData();
   const vector<DsFmqMsg::msgInfo_t> msgInfo = msg.getMsgInfo();
