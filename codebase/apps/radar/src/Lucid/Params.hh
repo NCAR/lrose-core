@@ -1191,6 +1191,8 @@ public:
 
   int images_schedule_delay_secs;
 
+  int images_request_timeout_secs;
+
   char* images_archive_start_time;
 
   char* images_archive_end_time;
@@ -1296,7 +1298,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[393];
+  mutable TDRPtable _table[394];
 
   const char *_className;
 

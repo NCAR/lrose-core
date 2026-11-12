@@ -222,6 +222,8 @@ MdvReader::MdvReader(QObject* parent) :
   _timeListValid = false;
   _vLevel = 0;
   _readBusyH = false;
+  _horizGeneration = 0;
+  _horizCompletedGeneration = -1;
   _vertSampleSpacingKm = 0.0;
   _vertTotalLengthKm = 0.0;
   _vertGeneration = 0;
@@ -292,10 +294,12 @@ MdvReader::~MdvReader()
  * On error, isValidH is set to false.
  */
 
-void MdvReader::requestHorizPlane(const DateTime &midTime,
-                                  double vLevel,
-                                  int page)
+int MdvReader::requestHorizPlane(const DateTime &midTime,
+                                 double vLevel,
+                                 int page)
 {
+
+  const int generation = ++_horizGeneration;
 
   // This is a new user request, so cancel a pending retry and restart the
   // backoff sequence for the new request details.
@@ -330,14 +334,28 @@ void MdvReader::requestHorizPlane(const DateTime &midTime,
     if(_gd.debug2) {
       cerr << "======>> requestHorizPlane - no change <<<<==" << endl;
     }
+    _horizCompletedGeneration = generation;
     _setNewH(true);
-    return;
+    return generation;
   }
 
   // Initiate the request in thread
   
   startReadVolH();
-  
+  return generation;
+}
+
+////////////////////////////////////////////////////////
+// prevent a timed-out request from continuing its retry policy
+
+void MdvReader::cancelHorizRequest(int generation)
+{
+  if (generation != _horizGeneration) {
+    return;
+  }
+  _retryTimerH->stop();
+  ++_horizGeneration;
+  _setNewH(false);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -1302,6 +1320,7 @@ void MdvReader::startReadVolH() {
     return;
   }
   _readBusyH = true;
+  const int generation = _horizGeneration;
 
   // Each request gets its own worker and thread.  The worker performs the
   // blocking MDV call, while all interpretation of the result remains on the
@@ -1319,7 +1338,10 @@ void MdvReader::startReadVolH() {
   // removal from the tracked set occur after the thread has actually stopped.
 
   connect(thread, &QThread::started, worker, &ReadVolH::doRead);
-  connect(worker, &ReadVolH::readDone, this, &MdvReader::readDoneH);
+  connect(worker, &ReadVolH::readDone, this,
+          [this, generation](int readStatus) {
+            readDoneH(readStatus, generation);
+          });
   connect(worker, &ReadVolH::readDone, thread, &QThread::quit,
           Qt::DirectConnection);
   connect(thread, &QThread::finished, worker, &ReadVolH::deleteLater);
@@ -1333,8 +1355,16 @@ void MdvReader::startReadVolH() {
 ////////////////////////
 // done with H vol read
 
-void MdvReader::readDoneH(int readStatus)
+void MdvReader::readDoneH(int readStatus, int generation)
 {
+  // An unattended image job may abandon a request after its bounded wait.
+  // The blocking library call cannot be interrupted safely, but its eventual
+  // completion must neither publish data nor restart the retry sequence.
+  if (generation != _horizGeneration) {
+    _readBusyH = false;
+    return;
+  }
+
   // A successful worker read has produced raw MDV data that still needs to be
   // installed in the display state on this Qt thread.  If either phase fails,
   // leave the data invalid and retry the same stored request.  A subsequent
@@ -1351,6 +1381,7 @@ void MdvReader::readDoneH(int readStatus)
     _scheduleRetryH();
     return;
   }
+  _horizCompletedGeneration = generation;
   _setValidH(iret_h_mdvx_read == 0);
   _setNewH(true);
   cerr << "readDone in ReadVolH worker thread" << endl;

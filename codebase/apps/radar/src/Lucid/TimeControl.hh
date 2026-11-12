@@ -117,6 +117,11 @@ class DLL_EXPORT TimeControl : public QDialog {
   // interaction, such as resizing the main window, invalidates movie frames.
   void stopMovie() { _stopMovie(); }
 
+  // Configure the single frame used by unattended catalog generation. This
+  // keeps legacy frame bounds and Product request intervals synchronized with
+  // the requested archive time before the first asynchronous read begins.
+  void configureAutomaticImageTime(const DateTime &imageTime);
+
   // convert between Qt and Radx date/time objects
   
   static QDateTime getQDateTime(const DateTime &rtime);

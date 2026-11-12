@@ -34,6 +34,7 @@
 
 #include <string>
 #include <cmath>
+#include <cstdlib>
 #include <ctime>
 #include <iostream>
 #include <QActionGroup>
@@ -79,7 +80,9 @@
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QFileInfo>
+#include <QImageWriter>
 #include <QRegularExpression>
+#include <QSaveFile>
 #include <QStringList>
 
 #include <fstream>
@@ -234,6 +237,17 @@ GuiManager::GuiManager() :
   _movieIncludesVertical = false;
   _movieVerticalReady = false;
   _movieVerticalRequestGeneration = -1;
+
+  _automaticImagesStarted = false;
+  _automaticImagesActive = false;
+  _automaticImageGridReady = false;
+  _automaticImageFieldIndex = -1;
+  _automaticImageExpectedGeneration = -1;
+  _automaticImageFailureCount = 0;
+  _automaticImageTimeoutTimer = new QTimer(this);
+  _automaticImageTimeoutTimer->setSingleShot(true);
+  connect(_automaticImageTimeoutTimer, &QTimer::timeout,
+          this, &GuiManager::_automaticImageTimedOut);
   
   _timeControl = NULL;
   _timeControlPlaced = false;
@@ -763,6 +777,14 @@ void GuiManager::timerEvent(QTimerEvent *event)
     _placeTimeControl();
   }
 
+  // Wait until the initial show/resize events have settled. Automatic output
+  // captures the configured canvas geometry, so starting during the resize
+  // debounce could associate a completed read with an obsolete transform.
+  if (_params.create_images_automatically && !_automaticImagesStarted &&
+      _timerEventCount > 10 && !_resizeTimer->isActive()) {
+    _maybeStartAutomaticImages();
+  }
+
   // read click point info from FMQ
   
   _readClickPoint();
@@ -932,6 +954,7 @@ void GuiManager::_setupWindows()
         _timeControl->refreshDataAvailability();
       }
       _checkMovieFrameReady();
+      _checkAutomaticImageReady();
     });
     _gd.prod_mgr->setStatusCallback(
       [this](const string &message, bool isError) {
@@ -2163,9 +2186,15 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
   }
 
   if (stateHasChanged) {
-    mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
-                          _vlevelManager.getRequestedLevel(),
-                          _gd.h_win.page);
+    const int generation = mr->requestHorizPlane(
+      _timeControl->getSelectedTime().utime(),
+      _vlevelManager.getRequestedLevel(),
+      _gd.h_win.page);
+    if (_automaticImagesActive &&
+        _fieldNum == _automaticImageFieldIndex &&
+        mr == _gd.mread[_automaticImageFieldIndex]) {
+      _automaticImageExpectedGeneration = generation;
+    }
     if (_gd.prod_mgr && frameIndex >= 0 &&
         frameIndex < _gd.movie.num_frames) {
       const movie_frame_t &frame = _gd.movie.frame[frameIndex];
@@ -2194,6 +2223,15 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
       frameIndex = _gd.movie.num_frames - 1;
     }
     _horiz->triggerGridRendering(_gd.h_win.page, frameIndex);
+    if (_automaticImagesActive &&
+        _fieldNum == _automaticImageFieldIndex &&
+        mr == _gd.mread[_automaticImageFieldIndex] &&
+        mr->isValidH() &&
+        mr->getHorizCompletedGeneration() ==
+          _automaticImageExpectedGeneration) {
+      _automaticImageGridReady = true;
+      _checkAutomaticImageReady();
+    }
     if (_movieBuildFrame == frameIndex) {
       _movieGridReady = true;
       _checkMovieFrameReady();
@@ -2559,6 +2597,388 @@ void GuiManager::_placeTimeControl()
 
   _timeControl->resize(width(), _timeControl->height());
   
+}
+
+/////////////////////////////////////////////////////////////
+// start the first unattended catalog-image implementation
+
+void GuiManager::_maybeStartAutomaticImages()
+{
+  if (_automaticImagesStarted) {
+    return;
+  }
+  _automaticImagesStarted = true;
+
+  if (_params.images_creation_mode != Params::CREATE_IMAGES_THEN_EXIT) {
+    _finishAutomaticImages(
+      tr("Only CREATE_IMAGES_THEN_EXIT is implemented for automatic images"));
+    return;
+  }
+  if (_params.fields_n < 1 || _gd.num_datafields < 1) {
+    _finishAutomaticImages(tr("No configured fields are available"));
+    return;
+  }
+  int outputFieldCount = 0;
+  for (int ii = 0; ii < std::min(_params.fields_n, _gd.num_datafields); ++ii) {
+    if (_params._fields[ii].display_in_menu &&
+        strlen(_params._fields[ii].group_name) > 0) {
+      outputFieldCount++;
+    }
+  }
+  if (outputFieldCount == 0) {
+    _finishAutomaticImages(tr("No display fields are enabled for output"));
+    return;
+  }
+  if (outputFieldCount > 1 &&
+      !_params.images_include_field_name_in_file_name) {
+    _finishAutomaticImages(
+      tr("images_include_field_name_in_file_name must be true when more "
+         "than one field is generated"));
+    return;
+  }
+  if (_params.images_request_timeout_secs < 1) {
+    _finishAutomaticImages(
+      tr("images_request_timeout_secs must be greater than zero"));
+    return;
+  }
+  if (_params.make_images_transparent) {
+    _finishAutomaticImages(
+      tr("Transparent automatic images are not implemented yet"));
+    return;
+  }
+
+  // These options belong to later stages of the image generator. Report them
+  // explicitly so an unattended run never appears to have honored settings
+  // which this deliberately narrow first implementation does not process.
+  if (_params.images_set_height_list) {
+    cerr << "WARNING - automatic images: images_height_list is not yet "
+         << "implemented; using start_ht_km" << endl;
+  }
+  if (_params.generate_vsection_images) {
+    cerr << "WARNING - automatic images: vertical-section output is not yet "
+         << "implemented" << endl;
+  }
+  if (_params.images_output_geo_xml) {
+    cerr << "WARNING - automatic images: georeferencing XML is not yet "
+         << "implemented" << endl;
+  }
+  if (_params.images_write_latest_data_info) {
+    cerr << "WARNING - automatic images: _latest_data_info output is not yet "
+         << "implemented" << endl;
+  }
+
+  _automaticImagesActive = true;
+  _automaticImageFailureCount = 0;
+  _timeControl->configureAutomaticImageTime(_imagesStartTime);
+  _vlevelManager.requestLevel(_params.start_ht_km);
+  _vlevelHasChanged = true;
+  setZoomIndex(0);
+
+  cerr << "Automatic image generation started for "
+       << _imagesStartTime.asString() << endl;
+  _startAutomaticImageField(0);
+}
+
+/////////////////////////////////////////////////////////////
+// select and request one field in the automatic sequence
+
+void GuiManager::_startAutomaticImageField(int fieldIndex)
+{
+  const int fieldCount = std::min(_params.fields_n, _gd.num_datafields);
+  // Empty groups are menu spacers in legacy CIDD files, and fields excluded
+  // from the menu were not part of CIDD's automatic-render set. Preserve that
+  // distinction instead of issuing guaranteed-failure MDV requests for them.
+  while (fieldIndex < fieldCount &&
+         (!_params._fields[fieldIndex].display_in_menu ||
+          strlen(_params._fields[fieldIndex].group_name) == 0)) {
+    fieldIndex++;
+  }
+  if (!_automaticImagesActive || fieldIndex >= fieldCount) {
+    _finishAutomaticImages(QString());
+    return;
+  }
+  if (fieldIndex < 0 || _gd.mread[fieldIndex] == nullptr) {
+    _automaticImageFailureCount++;
+    QTimer::singleShot(0, this, [this, fieldIndex]() {
+      _startAutomaticImageField(fieldIndex + 1);
+    });
+    return;
+  }
+
+  _automaticImageFieldIndex = fieldIndex;
+  _automaticImageExpectedGeneration = -1;
+  _automaticImageGridReady = false;
+  _selectAutomaticImageField(fieldIndex);
+
+  const QString fieldName = QString::fromUtf8(
+    _params._fields[fieldIndex].field_name);
+  statusBar()->showMessage(
+    tr("Creating automatic image %1 of %2: %3")
+      .arg(fieldIndex + 1).arg(fieldCount).arg(fieldName));
+  if (_params.images_debug != Params::IMAGE_DEBUG_OFF) {
+    cerr << "Automatic image: requesting field " << fieldName.toStdString()
+         << " (" << fieldIndex + 1 << " of " << fieldCount << ")" << endl;
+  }
+
+  _automaticImageTimeoutTimer->start(
+    _params.images_request_timeout_secs * 1000);
+}
+
+/////////////////////////////////////////////////////////////
+// update field state without synthesizing a table interaction
+
+void GuiManager::_selectAutomaticImageField(int fieldIndex)
+{
+  _prevFieldNum = _fieldNum;
+  _fieldNum = fieldIndex;
+  _gd.prev_field = _gd.h_win.page;
+  _setField(fieldIndex);
+  _gd.selected_field = fieldIndex;
+  _gd.h_win.page = fieldIndex;
+  _gd.field_has_changed = true;
+  _fieldHasChanged = true;
+
+  // Keep the visible selector consistent for diagnostics without routing the
+  // programmatic change back through its user-click handler.
+  const int ncols = std::max(1, _params.num_field_menu_cols);
+  _fieldTableRow = fieldIndex / ncols;
+  _fieldTableCol = fieldIndex % ncols;
+  if (_fieldTable) {
+    _fieldTable->setCurrentCell(_fieldTableRow, _fieldTableCol);
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// save only after the grid and exact Product requests are ready
+
+void GuiManager::_checkAutomaticImageReady()
+{
+  if (!_automaticImagesActive || !_automaticImageGridReady ||
+      _automaticImageFieldIndex < 0) {
+    return;
+  }
+  if (_gd.prod.products_on && _gd.prod_mgr &&
+      !_gd.prod_mgr->activeProductsReady()) {
+    return;
+  }
+
+  _automaticImageTimeoutTimer->stop();
+  QString outputPath;
+  QString error;
+  if (!_saveAutomaticHorizontalImage(outputPath, error)) {
+    _automaticImageFailureCount++;
+    cerr << "ERROR - automatic image: " << error.toStdString() << endl;
+  } else {
+    cerr << "Automatic image saved: " << outputPath.toStdString() << endl;
+  }
+
+  const int completedField = _automaticImageFieldIndex;
+  _automaticImageFieldIndex = -1;
+  _automaticImageExpectedGeneration = -1;
+  _automaticImageGridReady = false;
+  QTimer::singleShot(0, this, [this, completedField]() {
+    _startAutomaticImageField(completedField + 1);
+  });
+}
+
+/////////////////////////////////////////////////////////////
+// abandon one field rather than hanging an unattended run forever
+
+void GuiManager::_automaticImageTimedOut()
+{
+  if (!_automaticImagesActive || _automaticImageFieldIndex < 0) {
+    return;
+  }
+  const int timedOutField = _automaticImageFieldIndex;
+  cerr << "ERROR - automatic image: timed out waiting for field "
+       << _params._fields[timedOutField].field_name << endl;
+  if (_gd.mread[timedOutField]) {
+    const int generation = _automaticImageExpectedGeneration >= 0 ?
+      _automaticImageExpectedGeneration :
+      _gd.mread[timedOutField]->getHorizGeneration();
+    _gd.mread[timedOutField]->cancelHorizRequest(generation);
+  }
+  _automaticImageFailureCount++;
+  _automaticImageFieldIndex = -1;
+  _automaticImageExpectedGeneration = -1;
+  _automaticImageGridReady = false;
+  QTimer::singleShot(0, this, [this, timedOutField]() {
+    _startAutomaticImageField(timedOutField + 1);
+  });
+}
+
+/////////////////////////////////////////////////////////////
+// write one catalog image using the configured naming policy
+
+bool GuiManager::_saveAutomaticHorizontalImage(QString &path,
+                                                QString &error)
+{
+  path.clear();
+  error.clear();
+  if (!_horiz || _automaticImageFieldIndex < 0 ||
+      _automaticImageFieldIndex >= _gd.num_datafields) {
+    error = tr("The horizontal view or selected field is unavailable");
+    return false;
+  }
+
+  MdvReader *reader = _gd.mread[_automaticImageFieldIndex];
+  if (!reader || !reader->isValidH() ||
+      reader->getHorizCompletedGeneration() !=
+        _automaticImageExpectedGeneration) {
+    error = tr("The completed MDV data do not match the requested field");
+    return false;
+  }
+
+  QString extension = QString::fromUtf8(
+    _params.images_file_name_extension).trimmed().toLower();
+  while (extension.startsWith('.')) {
+    extension.remove(0, 1);
+  }
+  const QByteArray format = extension.toLatin1();
+  if (extension.isEmpty() ||
+      !QImageWriter::supportedImageFormats().contains(format)) {
+    error = tr("Unsupported images_file_name_extension: %1")
+      .arg(extension);
+    return false;
+  }
+
+  QString outputRoot = QString::fromUtf8(_params.images_output_dir).trimmed();
+  outputRoot.replace("$(HOME)", QDir::homePath());
+  if (outputRoot.startsWith("$HOME")) {
+    outputRoot.replace(0, 5, QDir::homePath());
+  }
+  if (outputRoot.isEmpty()) {
+    error = tr("images_output_dir is empty");
+    return false;
+  }
+
+  const DateTime imageTime(reader->h_date);
+  QString relativeDir;
+  if (_params.images_write_to_day_dir) {
+    relativeDir = QString("%1%2%3")
+      .arg(imageTime.getYear(), 4, 10, QChar('0'))
+      .arg(imageTime.getMonth(), 2, 10, QChar('0'))
+      .arg(imageTime.getDay(), 2, 10, QChar('0'));
+  }
+  QString horizSubdir = QDir::cleanPath(
+    QString::fromUtf8(_params.images_horiz_subdir).trimmed());
+  if (horizSubdir == ".") {
+    horizSubdir.clear();
+  }
+  if (QDir::isAbsolutePath(horizSubdir) || horizSubdir == ".." ||
+      horizSubdir.startsWith("../") || horizSubdir.contains("/../")) {
+    error = tr("images_horiz_subdir must remain below images_output_dir");
+    return false;
+  }
+  if (!horizSubdir.isEmpty()) {
+    relativeDir = relativeDir.isEmpty() ? horizSubdir :
+      QDir(relativeDir).filePath(horizSubdir);
+  }
+
+  outputRoot = QDir::cleanPath(outputRoot);
+  QDir directoryCreator;
+  if (!directoryCreator.mkpath(outputRoot)) {
+    error = tr("Cannot create images_output_dir: %1").arg(outputRoot);
+    return false;
+  }
+  QDir outputDir(outputRoot);
+  if (!relativeDir.isEmpty() && !outputDir.mkpath(relativeDir)) {
+    error = tr("Cannot create automatic image directory: %1")
+      .arg(outputDir.filePath(relativeDir));
+    return false;
+  }
+  if (!relativeDir.isEmpty() && !outputDir.cd(relativeDir)) {
+    error = tr("Cannot access automatic image directory: %1")
+      .arg(relativeDir);
+    return false;
+  }
+
+  QString delimiter = QString::fromUtf8(
+    _params.images_file_name_delimiter);
+  if (delimiter.contains('/') || delimiter.contains('\\')) {
+    error = tr("images_file_name_delimiter cannot contain a path separator");
+    return false;
+  }
+  QStringList nameParts;
+  auto appendNamePart = [&](const char *value) {
+    const QString part = QString::fromUtf8(value).trimmed();
+    if (!part.isEmpty()) {
+      nameParts.push_back(safeFileNameComponent(part));
+    }
+  };
+  appendNamePart(_params.images_file_name_category);
+  appendNamePart(_params.images_file_name_platform);
+  if (_params.images_include_time_part_in_file_name) {
+    const QString timeFormat = _params.images_include_seconds_in_time_part ?
+      "yyyyMMddHHmmss" : "yyyyMMddHHmm";
+    nameParts.push_back(QDateTime::fromSecsSinceEpoch(
+      imageTime.utime(), QTimeZone(QTimeZone::UTC)).toString(timeFormat));
+  }
+
+  QString productName;
+  if (_params.images_include_field_name_in_file_name) {
+    productName = QString::fromUtf8(
+      _params._fields[_automaticImageFieldIndex].field_name);
+  }
+  productName += QString::fromUtf8(_params.image_field_suffix_horiz);
+  if (!productName.trimmed().isEmpty()) {
+    nameParts.push_back(safeFileNameComponent(productName));
+  }
+  if (nameParts.isEmpty()) {
+    nameParts.push_back("image");
+  }
+
+  const QString fileName = nameParts.join(delimiter) + "." + extension;
+  path = outputDir.filePath(fileName);
+  QImage image = _horiz->grab().toImage();
+  if (image.isNull()) {
+    error = tr("Could not capture the horizontal view");
+    return false;
+  }
+
+  // QSaveFile publishes the catalog image with one atomic rename. Readers
+  // therefore see either the previous complete image or the new one, never a
+  // partially encoded file while an unattended update is in progress.
+  QSaveFile output(path);
+  if (!output.open(QIODevice::WriteOnly)) {
+    error = tr("Cannot open image for writing: %1").arg(path);
+    return false;
+  }
+  if (!image.save(&output, format.constData())) {
+    output.cancelWriting();
+    error = tr("Cannot encode image: %1").arg(path);
+    return false;
+  }
+  if (!output.commit()) {
+    error = tr("Cannot publish image: %1").arg(path);
+    return false;
+  }
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
+// terminate CREATE_IMAGES_THEN_EXIT after all fields settle
+
+void GuiManager::_finishAutomaticImages(const QString &fatalError)
+{
+  _automaticImageTimeoutTimer->stop();
+  _automaticImagesActive = false;
+  if (!fatalError.isEmpty()) {
+    _automaticImageFailureCount++;
+    cerr << "ERROR - automatic image generation: "
+         << fatalError.toStdString() << endl;
+  }
+
+  const bool success = _automaticImageFailureCount == 0;
+  if (success) {
+    cerr << "Automatic image generation completed successfully" << endl;
+  } else {
+    cerr << "Automatic image generation completed with "
+         << _automaticImageFailureCount << " failure(s)" << endl;
+  }
+  QTimer::singleShot(0, qApp, [success]() {
+    QCoreApplication::exit(success ? EXIT_SUCCESS : EXIT_FAILURE);
+  });
 }
 
 /////////////////////////////////////////////////////

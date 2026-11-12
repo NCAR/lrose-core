@@ -291,6 +291,24 @@ private:
 
   void _checkMovieFrameReady();
 
+  // Automatic catalog output advances only after the exact asynchronous grid
+  // and Product requests for the current field have both completed.
+  bool _automaticImagesStarted;
+  bool _automaticImagesActive;
+  bool _automaticImageGridReady;
+  int _automaticImageFieldIndex;
+  int _automaticImageExpectedGeneration;
+  int _automaticImageFailureCount;
+  QTimer *_automaticImageTimeoutTimer;
+
+  void _maybeStartAutomaticImages();
+  void _startAutomaticImageField(int fieldIndex);
+  void _selectAutomaticImageField(int fieldIndex);
+  void _checkAutomaticImageReady();
+  void _automaticImageTimedOut();
+  bool _saveAutomaticHorizontalImage(QString &path, QString &error);
+  void _finishAutomaticImages(const QString &fatalError);
+
   // maps
 
   QMenu *_mapsMenu;

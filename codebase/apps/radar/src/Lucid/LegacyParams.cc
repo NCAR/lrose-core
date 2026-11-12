@@ -1122,14 +1122,28 @@ int LegacyParams::_readMainParams()
 
   // image generation in html mode
 
-  _getBoolean("cidd.html_mode", 0);
-  _runOnceAndExit = _getBoolean("cidd.run_once_and_exit",0);
+  const bool htmlMode = _getBoolean("cidd.html_mode", 0, false);
+  _runOnceAndExit = _getBoolean("cidd.run_once_and_exit", 0, false);
+  fprintf(_tdrpFile, "create_images_automatically = %s;\n",
+          htmlMode ? "TRUE" : "FALSE");
+  fprintf(_tdrpFile, "images_creation_mode = %s;\n",
+          _runOnceAndExit ? "CREATE_IMAGES_THEN_EXIT" :
+                            "CREATE_IMAGES_ON_REALTIME_SCHEDULE");
+  const string imageDemoTime = _getString("cidd.demo_time", "", false);
+  if (htmlMode && imageDemoTime.size() >= 12) {
+    DateTime imageTime;
+    _parseStringIntoTime(imageDemoTime, imageTime);
+    fprintf(_tdrpFile,
+            "images_archive_start_time = \"%.4d %.2d %.2d %.2d %.2d %.2d\";\n",
+            imageTime.getYear(), imageTime.getMonth(), imageTime.getDay(),
+            imageTime.getHour(), imageTime.getMin(), imageTime.getSec());
+  }
   _getString("cidd.image_dir", "$(HOME)/Downloads/Lucid/images", true, "images_output_dir");
   _getBoolean("cidd.transparent_images", 0, true, "make_images_transparent");
   _getBoolean("cidd.save_images_to_day_subdir", 0, true, "images_write_to_day_dir");
   _getString("cidd.image_ext", "png", true, "images_file_name_extension");
-  _getString("cidd.image_horiz_prefix", "Horiz", true, "images_field_suffix_horiz");
-  _getString("cidd.image_vert_prefix", "Vsect", true, "images_field_suffix_vsect");
+  _getString("cidd.image_horiz_prefix", "Horiz", true, "image_field_suffix_horiz");
+  _getString("cidd.image_vert_prefix", "Vsect", true, "image_field_suffix_vsect");
   _getString("cidd.image_name_separator", ".", true, "images_file_name_delimiter");
 
   // output image file names
@@ -1156,7 +1170,7 @@ int LegacyParams::_readMainParams()
   
   _getString("cidd.image_convert_script", "convert_image.csh");
   _getString("cidd.print_script", "");
-  _getString("cidd.series_convert_script", "make_anim.csh", true, "images_movie_convert_script");
+  _getString("cidd.series_convert_script", "make_anim.csh", true, "movie_convert_script");
 
   // data compression from server
   
@@ -3021,22 +3035,22 @@ int LegacyParams::_readImageGenTdrp()
     fprintf(_tdrpFile, "terrain_active = TRUE;\n");
     switch (images.debug) {
       case Cimages_P::DEBUG_OFF:
-        fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_OFF;\n");
+        fprintf(_tdrpFile, "images_debug = IMAGE_DEBUG_OFF;\n");
         break;
       case Cimages_P::DEBUG_NORM:
-        fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_NORM;\n");
+        fprintf(_tdrpFile, "images_debug = IMAGE_DEBUG_NORM;\n");
         break;
       case Cimages_P::DEBUG_VERBOSE:
-        fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_VERBOSE;\n");
+        fprintf(_tdrpFile, "images_debug = IMAGE_DEBUG_VERBOSE;\n");
         break;
     }
     
-    fprintf(_tdrpFile, "image_generate_vsection = %s;\n",
+    fprintf(_tdrpFile, "generate_vsection_images = %s;\n",
             (images.generate_vsection_images?"TRUE":"FALSE"));
-    fprintf(_tdrpFile, "image_vsection_waypts_in_latlon = %s;\n",
+    fprintf(_tdrpFile, "images_vsection_waypts_in_latlon = %s;\n",
             (images.vsection_waypts_in_latlon?"TRUE":"FALSE"));
     
-    fprintf(_tdrpFile, "image_vsection_spec = {\n");
+    fprintf(_tdrpFile, "images_vsection_spec = {\n");
     
     for (int ii = 0; ii < images.vsection_spec_n; ii++) {
       

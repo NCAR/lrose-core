@@ -713,6 +713,41 @@ DateTime TimeControl::_getGuiEndTime() const
   return stime;
 }
 
+/////////////////////////////////////////////////////////////
+// configure a single accepted frame for automatic image output
+
+void TimeControl::configureAutomaticImageTime(const DateTime &imageTime)
+{
+  if (_movieState != MovieState::Idle) {
+    _stopMovie();
+  }
+
+  _startTime = imageTime;
+  _nFramesMovie = 1;
+  _frameIndex = 0;
+  _guiStartTime = _startTime;
+  _guiNFramesMovie = _nFramesMovie;
+  _guiFrameIntervalSecs = _frameIntervalSecs;
+  _guiFrameIndex = _frameIndex;
+  _computeFrameTimes();
+
+  _gd.epoch_start = _startTime.utime();
+  _gd.epoch_end = static_cast<time_t>(
+    _startTime.utime() + _frameIntervalSecs);
+  for (int ii = 0; ii < _gd.num_datafields; ++ii) {
+    if (_gd.mread[ii]) {
+      _gd.mread[ii]->invalidateTimeList();
+    }
+  }
+  if (_gd.prod_mgr) {
+    _gd.prod_mgr->reset_product_valid_flags();
+  }
+
+  _updateTimesInGui();
+  _enableAcceptCancel(false);
+  _timeHasChanged = true;
+}
+
 /////////////////////////////////////////////////////////////////////
 // accept or cancel gui selections
 // data retrieval does not change until the selections are accepted

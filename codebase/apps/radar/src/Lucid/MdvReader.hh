@@ -161,9 +161,15 @@ public:
   // This is implemented in a thread.
   // On error, isValidH is set to false.
 
-  void requestHorizPlane(const DateTime &midTime,
-                         double vLevel,
-                         int page);
+  int requestHorizPlane(const DateTime &midTime,
+                        double vLevel,
+                        int page);
+
+  int getHorizGeneration() const { return _horizGeneration; }
+  int getHorizCompletedGeneration() const {
+    return _horizCompletedGeneration;
+  }
+  void cancelHorizRequest(int generation);
 
   int getHorizPlane();
   
@@ -346,7 +352,7 @@ signals:
   void verticalReadComplete(MdvReader *reader);
 
 public slots:
-  void readDoneH(int readStatus);
+  void readDoneH(int readStatus, int generation);
   void readDoneV(VertReadResultPtr result);
 
 private:
@@ -380,6 +386,8 @@ private:
   vector<time_t> _timeList;
   double _vLevel;
   bool _readBusyH;
+  int _horizGeneration;
+  int _horizCompletedGeneration;
 
   // Horizontal MDV reads are performed by short-lived worker threads.  Keep
   // track of every thread because the worker calls back into this MdvReader;

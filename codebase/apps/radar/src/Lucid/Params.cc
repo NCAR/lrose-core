@@ -5218,7 +5218,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("images_creation_mode");
     tt->descr = tdrpStrDup("Mode for controlling auto image creation.");
-    tt->help = tdrpStrDup("\n\nCREATE_IMAGES_FROM_GUI: create images interactively using the GUI.\n\nCREATE_IMAGES_THEN_EXIT: for the specified start time and time span, create an output image for every field in the fields array, and then exit.\n\nCREATE_IMAGES_ON_REALTIME_SCHEDULE: wait for the scheduled time, then generate an image for each field.\n\nCREATE_IMAGES_ON_ARCHIVE_SCHEDULE: for each scheduled time between the start and end times, generate an image for each field.");
+    tt->help = tdrpStrDup("\n\nCREATE_IMAGES_THEN_EXIT: create an output image for every field at the configured archive time, and then exit.\n\nCREATE_IMAGES_ON_REALTIME_SCHEDULE: wait for the scheduled time, then generate an image for each field.\n\nCREATE_IMAGES_ON_ARCHIVE_SCHEDULE: for each scheduled time between the start and end times, generate an image for each field.");
     tt->val_offset = (char *) &images_creation_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("images_creation_mode_t");
     tt->enum_def.nfields = 3;
@@ -5256,7 +5256,19 @@ Params *Params::_instance = (Params *) NULL;
     tt->val_offset = (char *) &images_schedule_delay_secs - &_start_;
     tt->single_val.i = 60;
     tt++;
-    
+
+    // Parameter 'images_request_timeout_secs'
+    // ctype is 'int'
+
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("images_request_timeout_secs");
+    tt->descr = tdrpStrDup("Maximum time to wait for the data layers for one automatically generated image (secs).");
+    tt->help = tdrpStrDup("A bounded wait prevents unattended image generation from hanging indefinitely when an MDV or symbolic product server is unavailable.");
+    tt->val_offset = (char *) &images_request_timeout_secs - &_start_;
+    tt->single_val.i = 120;
+    tt++;
+
     // Parameter 'images_archive_start_time'
     // ctype is 'char*'
     
