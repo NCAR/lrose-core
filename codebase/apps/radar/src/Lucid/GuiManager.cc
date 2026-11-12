@@ -60,6 +60,7 @@
 #include <QStatusBar>
 #include <QDateTime>
 #include <QDateTimeEdit>
+#include <QTimeZone>
 #include <QDir>
 #include <QDoubleSpinBox>
 #include <QLineEdit>
@@ -496,7 +497,7 @@ bool GuiManager::exportMovieLoop(QString &message)
   const QString fieldPart = safeFileNameComponent(
     QString::fromStdString(_movieFieldLabel));
   const QString startPart = QDateTime::fromSecsSinceEpoch(
-          _timeControl->getStartTime().utime(), Qt::UTC)
+          _timeControl->getStartTime().utime(), QTimeZone(QTimeZone::UTC))
     .toString("yyyyMMdd_HHmmss'_UTC'");
 
   // One shared suffix keeps the horizontal and vertical sequences paired.
@@ -2969,7 +2970,8 @@ void GuiManager::_saveViewImages()
   const time_t selectedTime = _timeControl ?
     _timeControl->getSelectedTime().utime() : time(nullptr);
   const QString timePart = QDateTime::fromSecsSinceEpoch(
-    selectedTime, Qt::UTC).toString("yyyyMMdd_HHmmss'_UTC'");
+    selectedTime, QTimeZone(QTimeZone::UTC))
+    .toString("yyyyMMdd_HHmmss'_UTC'");
   const QString fieldPart = safeFileNameComponent(
     QString::fromStdString(getSelectedFieldLabel()));
   const QString commonPart = fieldPart + "_" + timePart;
