@@ -80,10 +80,10 @@
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QFileInfo>
-#include <QImageWriter>
 #include <QRegularExpression>
 #include <QSaveFile>
 #include <QStringList>
+#include <QXmlStreamWriter>
 
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
@@ -2639,15 +2639,6 @@ void GuiManager::_maybeStartAutomaticImages()
     cerr << "WARNING - automatic images: vertical-section output is not yet "
          << "implemented" << endl;
   }
-  if (_params.images_output_geo_xml) {
-    cerr << "WARNING - automatic images: georeferencing XML is not yet "
-         << "implemented" << endl;
-  }
-  if (_params.images_write_latest_data_info) {
-    cerr << "WARNING - automatic images: _latest_data_info output is not yet "
-         << "implemented" << endl;
-  }
-
   _automaticImagesActive = true;
   _timeControl->configureAutomaticImageTime(_imagesStartTime);
   setZoomIndex(0);
@@ -2815,9 +2806,10 @@ bool GuiManager::_saveAutomaticHorizontalImage(QString &path,
   }
 
   const DateTime imageTime(reader->h_date);
+  QString outputRoot;
   QByteArray format;
   if (!_automaticImageGenerator->prepareOutput(
-        _params, imageTime, path, format, error)) {
+        _params, imageTime, path, outputRoot, format, error)) {
     return false;
   }
   QImage image = _horiz->grab().toImage();
@@ -2841,6 +2833,138 @@ bool GuiManager::_saveAutomaticHorizontalImage(QString &path,
   }
   if (!output.commit()) {
     error = tr("Cannot publish image: %1").arg(path);
+    return false;
+  }
+
+  // Publish optional sidecars before _latest_data_info. The latter is the
+  // catalog notification consumed by downstream processes, so it must never
+  // advertise an image whose required companion metadata is incomplete.
+  if (_params.images_output_geo_xml &&
+      !_writeAutomaticGeoXml(path, image, error)) {
+    return false;
+  }
+  if (_params.images_write_latest_data_info &&
+      !_writeAutomaticLatestDataInfo(
+        path, outputRoot, format, imageTime, error)) {
+    return false;
+  }
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
+// write CIDD-compatible georeferencing for the complete image canvas
+
+bool GuiManager::_writeAutomaticGeoXml(const QString &imagePath,
+                                        const QImage &image,
+                                        QString &error) const
+{
+  const WorldPlot *world = _horiz ? _horiz->getZoomWorld() : nullptr;
+  if (!world || image.width() < 1 || image.height() < 1) {
+    error = tr("Cannot compute georeferencing for %1").arg(imagePath);
+    return false;
+  }
+
+  const qreal deviceRatio = image.devicePixelRatio() > 0.0 ?
+    image.devicePixelRatio() : 1.0;
+  const double logicalWidth = image.width() / deviceRatio;
+  const double logicalHeight = image.height() / deviceRatio;
+  const double x0 = world->getXWorld(0.0);
+  const double x1 = world->getXWorld(logicalWidth);
+  const double y0 = world->getYWorld(0.0);
+  const double y1 = world->getYWorld(logicalHeight);
+  const double west = std::min(x0, x1);
+  const double east = std::max(x0, x1);
+  const double south = std::min(y0, y1);
+  const double north = std::max(y0, y1);
+  const double dx = (east - west) / image.width();
+  const double dy = (north - south) / image.height();
+
+  const QFileInfo imageInfo(imagePath);
+  const QString xmlPath = imageInfo.dir().filePath(
+    imageInfo.completeBaseName() + ".xml");
+  QSaveFile output(xmlPath);
+  if (!output.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    error = tr("Cannot open georeferencing XML for writing: %1")
+      .arg(xmlPath);
+    return false;
+  }
+
+  auto number = [](double value) {
+    return QString::number(value, 'g', 15);
+  };
+  QXmlStreamWriter xml(&output);
+  xml.setAutoFormatting(true);
+  xml.writeStartElement("GeoImage");
+  xml.writeTextElement("px", QString::number(image.width()));
+  xml.writeTextElement("py", QString::number(image.height()));
+  xml.writeTextElement("pdx", number(dx));
+  xml.writeTextElement("pdy", number(dy));
+
+  if (_params.images_use_latlon_in_geo_xml ||
+      world->getProjection().getProjType() == Mdvx::PROJ_LATLON) {
+    double southLat = south;
+    double westLon = west;
+    double northLat = north;
+    double eastLon = east;
+    if (world->getProjection().getProjType() != Mdvx::PROJ_LATLON) {
+      MdvxProj projection = world->getProjection();
+      projection.xy2latlon(west, south, southLat, westLon);
+      projection.xy2latlon(east, north, northLat, eastLon);
+    }
+    xml.writeStartElement("LatLonBox");
+    xml.writeTextElement("north", number(northLat));
+    xml.writeTextElement("south", number(southLat));
+    xml.writeTextElement("east", number(eastLon));
+    xml.writeTextElement("west", number(westLon));
+    xml.writeEndElement();
+  } else {
+    xml.writeStartElement("ProjectionBox");
+    xml.writeTextElement("north", number(north));
+    xml.writeTextElement("south", number(south));
+    xml.writeTextElement("east", number(east));
+    xml.writeTextElement("west", number(west));
+    xml.writeEndElement();
+  }
+  xml.writeEndElement();
+  xml.writeCharacters("\n");
+
+  if (xml.hasError() || !output.commit()) {
+    error = tr("Cannot publish georeferencing XML: %1").arg(xmlPath);
+    return false;
+  }
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
+// advertise the image only after all configured outputs are complete
+
+bool GuiManager::_writeAutomaticLatestDataInfo(
+        const QString &imagePath,
+        const QString &outputRoot,
+        const QByteArray &format,
+        const DateTime &imageTime,
+        QString &error) const
+{
+  const QString relativePath = QDir(outputRoot).relativeFilePath(imagePath);
+  if (relativePath == ".." || relativePath.startsWith("../")) {
+    error = tr("Image path is outside images_output_dir: %1").arg(imagePath);
+    return false;
+  }
+
+  const std::string root = outputRoot.toStdString();
+  const std::string extension = format.toStdString();
+  DsLdataInfo latest(root);
+  if (_params.images_debug != Params::IMAGE_DEBUG_OFF) {
+    latest.setDebug();
+  }
+  latest.setLatestTime(imageTime.utime());
+  latest.setWriter("Lucid");
+  latest.setDataFileExt(extension);
+  latest.setDataType(extension);
+  latest.setUserInfo1("Lucid Output Image");
+  latest.setRelDataPath(relativePath.toStdString());
+  if (latest.write(imageTime.utime())) {
+    error = tr("Cannot write _latest_data_info in %1").arg(outputRoot);
     return false;
   }
   return true;

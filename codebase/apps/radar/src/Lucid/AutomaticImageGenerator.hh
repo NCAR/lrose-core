@@ -55,6 +55,7 @@ public:
   bool prepareOutput(const Params &params,
                      const DateTime &imageTime,
                      QString &path,
+                     QString &outputRoot,
                      QByteArray &format,
                      QString &error) const;
 

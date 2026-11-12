@@ -226,10 +226,12 @@ int AutomaticImageGenerator::failureCount() const
 bool AutomaticImageGenerator::prepareOutput(const Params &params,
                                              const DateTime &imageTime,
                                              QString &path,
+                                             QString &outputRoot,
                                              QByteArray &format,
                                              QString &error) const
 {
   path.clear();
+  outputRoot.clear();
   format.clear();
   error.clear();
   if (!hasCurrentJob()) {
@@ -250,7 +252,7 @@ bool AutomaticImageGenerator::prepareOutput(const Params &params,
     return false;
   }
 
-  QString outputRoot = QString::fromUtf8(params.images_output_dir).trimmed();
+  outputRoot = QString::fromUtf8(params.images_output_dir).trimmed();
   outputRoot.replace("$(HOME)", QDir::homePath());
   if (outputRoot.startsWith("$HOME")) {
     outputRoot.replace(0, 5, QDir::homePath());

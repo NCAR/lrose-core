@@ -70,7 +70,9 @@ class QHBoxLayout;
 class QVBoxLayout;
 class QDateTime;
 class QDateTimeEdit;
+class QByteArray;
 class QFileDialog;
+class QImage;
 class QTableWidget;
 class QString;
 
@@ -305,6 +307,14 @@ private:
   void _checkAutomaticImageReady();
   void _automaticImageTimedOut();
   bool _saveAutomaticHorizontalImage(QString &path, QString &error);
+  bool _writeAutomaticGeoXml(const QString &imagePath,
+                             const QImage &image,
+                             QString &error) const;
+  bool _writeAutomaticLatestDataInfo(const QString &imagePath,
+                                     const QString &outputRoot,
+                                     const QByteArray &format,
+                                     const DateTime &imageTime,
+                                     QString &error) const;
   void _finishAutomaticImages(const QString &fatalError);
 
   // maps
