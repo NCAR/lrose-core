@@ -86,14 +86,12 @@
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
-#include <toolsa/file_io.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/LogStream.hh>
 #include <toolsa/TaStr.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <radar/RadarComplex.hh>
 #include <toolsa/DateTime.hh>
-#include <Radx/RadxPath.hh>
 #include <Ncxx/H5x.hh>
 
 #include "GuiManager.hh"
@@ -276,7 +274,6 @@ GuiManager::GuiManager() :
 
   _imagesStartTime.set(_params.images_archive_start_time);
   _imagesEndTime.set(_params.images_archive_end_time);
-  _imagesScanIntervalSecs = _params.images_schedule_interval_secs;
 
   // set up ray locators
 
@@ -1197,14 +1194,8 @@ void GuiManager::_setupWindows()
   _vertWindow->move(vertX, vertY);
 
   // set up click report dialog
+
   _createClickReportDialog();
-
-  // createBoundaryEditorDialog();
-
-  // if (_archiveMode) {
-  //   _showTimeControl();
-  // }
-  // _setVlevelPanelVisibility();
 
   // set up status bar
 
@@ -3469,315 +3460,6 @@ void GuiManager::_finishAutomaticImageRun(const QString &fatalError)
   QTimer::singleShot(0, qApp, [success]() {
     QCoreApplication::exit(success ? EXIT_SUCCESS : EXIT_FAILURE);
   });
-}
-
-/////////////////////////////////////////////////////
-// creating image files in realtime mode
-
-void GuiManager::_createRealtimeImageFiles()
-{
-
-  // int interval = _params.images_schedule_interval_secs;
-  // int delay = _params.images_schedule_delay_secs;
-  // time_t latestRayTime = _readerRayTime.utime();
-  
-  // initialize the schedule if required
-
-  if (_imagesScheduledTime.utime() == 0) {
-    // if (latestRayTime == 0) {
-    //   // no data yet
-    //   return;
-    // }
-    // time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
-    // _imagesScheduledTime.set(nextUtime + delay);
-    // if (_params.debug) {
-    //   cerr << "Next scheduled time for images: " 
-    //        << _imagesScheduledTime.asString() << endl;
-    // }
-  }
-  
-  // if (_readerRayTime > _imagesScheduledTime) {
-    
-  //   // create images
-
-  //   _timeControl->setArchiveEndTime(_imagesScheduledTime - delay);
-  //   _timeControl->setArchiveStartTime
-  //     (_timeControl->getArchiveEndTime() - _imagesScanIntervalSecs);
-  //   _createImageFilesAllSweeps();
-
-  //   // set next scheduled time
-    
-  //   time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
-  //   _imagesScheduledTime.set(nextUtime + delay);
-  //   if (_params.debug) {
-  //     cerr << "Next scheduled time for images: "
-  //          << _imagesScheduledTime.asString() << endl;
-  //   }
-
-  // }
-
-}
-
-/////////////////////////////////////////////////////
-// creating image files in archive mode
-
-void GuiManager::_createArchiveImageFiles()
-{
-
-  if (_params.images_creation_mode ==
-      Params::CREATE_IMAGES_THEN_EXIT) {
-    
-    if (_archiveFileList.size() > 0) {
-
-      // using input file list to drive image generation
-
-      while (_archiveFileList.size() > 0) {
-        _createImageFilesAllLevels();
-        _archiveFileList.erase(_archiveFileList.begin(), 
-                               _archiveFileList.begin() + 1);
-      }
-      
-    } else {
-      
-      // using archive time to drive image generation
-      
-      while (_timeControl->getStartTime() <= _imagesEndTime) {
-        _createImageFilesAllLevels();
-        // _timeControl->setStartTime(_timeControl->getStartTime() +
-        //                            _imagesScanIntervalSecs);
-      }
-      
-    }
-    
-  } else if (_params.images_creation_mode ==
-             Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
-    
-    for (DateTime stime = _imagesStartTime;
-         stime <= _imagesEndTime;
-         stime += _params.images_schedule_interval_secs) {
-      
-      // _timeControl->setStartTime(stime);
-      // _timeControl->setEndTime(_timeControl->getStartTime() +
-      //                          _imagesScanIntervalSecs);
-      
-      _createImageFilesAllLevels();
-      
-    } // stime
-    
-  } // if (_params.images_creation_mode ...
-
-}
-
-/////////////////////////////////////////////////////
-// creating one image per field, for each level
-
-void GuiManager::_createImageFilesAllLevels()
-{
-  
-  // if (_params.images_set_sweep_index_list) {
-    
-  //   for (int ii = 0; ii < _params.images_sweep_index_list_n; ii++) {
-  //     int index = _params._images_sweep_index_list[ii];
-  //     if (index >= 0 && index < (int) _vol.getNSweeps()) {
-  //       // _sweepManager.setFileIndex(index);
-  //       _createImageFiles();
-  //     }
-  //   }
-    
-  // } else {
-    
-  //   for (size_t index = 0; index < _vol.getNSweeps(); index++) {
-  //     // _sweepManager.setFileIndex(index);
-  //     _createImageFiles();
-  //   }
-    
-  // }
-
-}
-
-string GuiManager::_getOutputPath(bool interactive, string &outputDir, string fileExt)
-{
-  // set times from plots
-
-  if (_vertMode) {
-    // _plotStartTime = _vert->getPlotStartTime();
-    // _plotEndTime = _vert->getPlotEndTime();
-  } else {
-    // _plotStartTime = _horiz->getPlotStartTime();
-    // _plotEndTime = _horiz->getPlotEndTime();
-  }
-
-  // compute output dir
-  outputDir = _params.images_output_dir;
-  char dayStr[1024];
-  if (_params.images_write_to_day_dir)
-  {
-    snprintf(dayStr, 1024, "%.4d%.2d%.2d", _plotStartTime.getYear(), _plotStartTime.getMonth(), _plotStartTime.getDay());
-    outputDir += PATH_DELIM;
-    outputDir += dayStr;
-  }
-
-  // make sure output dir exists
-
-  if (ta_makedir_recurse(outputDir.c_str())) {
-    string errmsg("Cannot create output dir: " + outputDir);
-    cerr << "ERROR - GuiManager::_saveImageToFile()" << endl;
-    cerr << "  " << errmsg << endl;
-    if (interactive) {
-      QMessageBox::critical(this, "Error", errmsg.c_str());
-    }
-    return(NULL);
-  }
-
-  // compute file name
-
-  string fileName;
-
-  // category
-
-  if (strlen(_params.images_file_name_category) > 0) {
-    fileName += _params.images_file_name_category;
-  }
-
-  // platform
-
-  if (strlen(_params.images_file_name_platform) > 0) {
-    fileName += _params.images_file_name_delimiter;
-    fileName += _params.images_file_name_platform;
-  }
-
-  // time
-
-  if (_params.images_include_time_part_in_file_name) {
-    fileName += _params.images_file_name_delimiter;
-    char timeStr[1024];
-    if (_params.images_include_seconds_in_time_part) {
-      snprintf(timeStr, 1024, "%.4d%.2d%.2d%.2d%.2d%.2d",
-               _plotStartTime.getYear(),
-               _plotStartTime.getMonth(),
-               _plotStartTime.getDay(),
-               _plotStartTime.getHour(),
-               _plotStartTime.getMin(),
-               _plotStartTime.getSec());
-    } else {
-      snprintf(timeStr, 1024, "%.4d%.2d%.2d%.2d%.2d",
-               _plotStartTime.getYear(),
-               _plotStartTime.getMonth(),
-               _plotStartTime.getDay(),
-               _plotStartTime.getHour(),
-               _plotStartTime.getMin());
-    }
-    fileName += timeStr;
-  }
-
-  // field label
-
-  // // if (_params.images_include_field_label_in_file_name) {
-  // //   fileName += _params.images_file_name_delimiter;
-  // //   fileName += getSelectedFieldLabel();
-  // // }
-    
-  // scan Id
-
-  // if (_params.images_include_scan_id_in_file_name) {
-  //   fileName += _params.images_file_name_delimiter;
-  //   fileName += std::to_string(_vol.getScanId());
-  // }
-
-  // scan type
-
-  // if (_params.images_include_scan_type_in_file_name) {
-  //   fileName += _params.images_file_name_delimiter;
-  //   string scanType = "SUR";
-  //   if (_vol.getSweeps().size() > 0) {
-  //     Radx::SweepMode_t predomSweepMode = _vol.getPredomSweepMode();
-  //     scanType = Radx::sweepModeToShortStr(predomSweepMode);
-  //   }
-  //   fileName += scanType;
-  // }
-
-  // extension
-
-  fileName += ".";
-  fileName += fileExt;
-
-  // compute output path
-
-  string outputPath(outputDir);
-  outputPath += PATH_DELIM;
-  outputPath += fileName;
-
-  return(outputPath);
-}
-
-/////////////////////////////////////////////////////
-// save image to file
-// If interactive is true, use dialog boxes to indicate errors or report
-// where the image was saved.
-
-void GuiManager::_saveImageToFile(bool interactive)
-{
-
-  cerr << "SSSSSSSSSSSSSSSSSSSSSSSSSSSSS" << endl;
-  return;
-  
-  // create image
-  QPixmap pixmap;
-  if (_vertMode)
-    pixmap = _vert->grab();
-  else
-    pixmap = _horiz->grab();
-  QImage image = pixmap.toImage();
-
-  string outputDir;
-  string outputPath = _getOutputPath(interactive, outputDir, _params.images_file_name_extension);
-
-  // write the file
-  if (!image.save(outputPath.c_str())) {
-    string errmsg("Cannot save image to file: " + outputPath);
-    cerr << "ERROR - GuiManager::_saveImageToFile()" << endl;
-    cerr << "  " << errmsg << endl;
-    if (interactive) {
-      QMessageBox::critical(this, "Error", errmsg.c_str());
-    }
-    return;
-  }
-
-  if (interactive) {
-    string infoMsg("Saved image to file " + outputPath);
-    QMessageBox::information(this, "Image Saved", infoMsg.c_str());
-  }
-
-  if (_params.debug) {
-    cerr << "==>> saved image to file: " << outputPath << endl;
-  }
-
-  // write latest data info
-
-  if (_params.images_write_latest_data_info) {
-    
-    DsLdataInfo ldataInfo(_params.images_output_dir);
-    
-    string relPath;
-    RadxPath::stripDir(_params.images_output_dir, outputPath, relPath);
-    
-    if(_params.debug) {
-      ldataInfo.setDebug();
-    }
-    ldataInfo.setLatestTime(_plotStartTime.utime());
-    ldataInfo.setWriter("Lucid");
-    ldataInfo.setDataFileExt(_params.images_file_name_extension);
-    ldataInfo.setDataType(_params.images_file_name_extension);
-    ldataInfo.setRelDataPath(relPath);
-    
-    if(ldataInfo.write(_plotStartTime.utime())) {
-      cerr << "ERROR - GuiManager::_saveImageToFile()" << endl;
-      cerr << "  Cannot write _latest_data_info to dir: " << outputDir << endl;
-      return;
-    }
-    
-  } // if (_params.images_write_latest_data_info)
-
 }
 
 /////////////////////////////////////////////////////

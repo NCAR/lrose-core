@@ -208,18 +208,12 @@ private:
   VertManager *_vertWindow;
   VertView *_vert;
   bool _vertWindowDisplayed;
-  bool _vertMode;
 
   // Keep the most recently completed route independently of the canvas so a
   // later field or time change can request the same vertical section.
 
   VsectionRoute _vsectionRoute;
   
-  // times for data
-
-  DateTime _plotStartTime;
-  DateTime _plotEndTime;
-
   // vlevels
 
   VlevelManager _vlevelManager;
@@ -431,18 +425,10 @@ private:
   QTableWidget *_clickFieldsTable;
   bool _clickReportPlaced;
 
-  // creating images in archive mode
-  
-  vector<string> _archiveFileList;
-  bool _archiveFilesHaveDayDir;
-  DateTime _archiveIntermediateTime;
+  // automatic image time range
 
-  // saving images in real time mode
-
-  DateTime _imagesScheduledTime;
   DateTime _imagesStartTime;
   DateTime _imagesEndTime;
-  int _imagesScanIntervalSecs;
 
   // for timer
   
@@ -497,7 +483,6 @@ private:
   // for timer
   
   void _handleClientEvent();
-  void _handleImageCreationEvent();
 
        
   int _requestVerticalSection();
@@ -572,11 +557,6 @@ private slots:
   // images
 
   void _saveViewImages();
-  void _saveImageToFile(bool interactive = true);
-  void _createRealtimeImageFiles();
-  void _createArchiveImageFiles();
-  void _createImageFilesAllLevels();
-  string _getOutputPath(bool interactive, string &outputDir, string fileExt);
 
   // open file 
 
