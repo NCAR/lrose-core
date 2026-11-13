@@ -1,9 +1,8 @@
 # Lucid Codex handoff
 
-Snapshot: 2026-11-12. Source is committed and pushed through `64212c323`,
-which comments out the Route Winds implementation. The current worktree also
-contains an update to the section catalog at the top of `paramdef.Lucid`, its
-regenerated `Params.cc`, and this handoff update.
+Snapshot: 2026-11-13. Source and supporting documentation are committed and
+pushed through `e5815f2e0`. The current worktree contains only this handoff
+update.
 
 ## Architecture
 
@@ -15,13 +14,17 @@ transitional and retains some CIDD-style shared structures.
 - `Lucid` initializes global state, field readers, projections, overlays,
   symbolic products, movie timing, and Qt application lifetime.
 - `GuiManager` owns the main window and menus. Its timer coordinates MDV reads,
-  rendering, Products, movies, reload, vertical sections, and automatic image
-  generation.
-- `GlobalData` retains shared CIDD-style state. `mread` contains one
-  `MdvReader` per configured field; `h_win.page` is the selected field.
+  rendering, Products, reload, vertical sections, and the manager callbacks
+  which must touch live widgets.
+- `GlobalData` retains the remaining shared CIDD-style display and data state.
+  Much of the legacy timing, interaction, click-location, and unused layer
+  state has been removed. `mread` contains one `MdvReader` per configured
+  field.
 - `MdvReader` performs asynchronous horizontal and vertical MDV/Radx reads.
-  Completed generations are installed on the GUI thread; stale generations
-  are rejected.
+  Horizontal workers receive immutable requests; the reader retains one
+  latest-pending request while a blocking read is active. Exact request keys
+  allow installed data to be reused, and completed generations are installed
+  only on the GUI thread.
 - `WorldPlot` owns transforms, axes, margins, cached images, grid rendering,
   filled and line contours, range rings, and symbolic-product composition.
 - `HorizView` renders the plan view and handles zoom, live-preview pan, cursor
@@ -30,17 +33,21 @@ transitional and retains some CIDD-style shared structures.
 - `VertManager` owns the vertical-section window and configuration menu;
   `VertView` renders the section, cursor/click values, and selected horizontal
   height or radar beam-height curve.
-- `TimeControl` owns accepted and pending movie state, construction/playback,
-  and playback timing. `TimePlotWidget` renders the time axis, availability,
-  build progress, and interval gestures.
+- `TimeControl` owns the accepted timeline, pending time edits, and playback
+  controls. `TimePlotWidget` renders the time axis, availability, build
+  progress, and interval gestures.
+- `MovieManager` owns movie build/capture/playback state, immutable-cache
+  export, and the per-frame dependency timeout. `GuiManager` supplies narrow
+  callbacks for requests and view capture.
 - `ProductMgr` captures display state and starts independent SPDB workers. It
   uses request generations and request keys to reject stale completions and
   installs decoded Product snapshots on the GUI thread.
 - `Product`, `SymprodRender`, and `SymprodRenderObj` own and render decoded
   symbolic-product graphics using `QPainter`.
 - `AutomaticImageGenerator` builds the immutable field/height/zoom/vertical-
-  route job matrix, tracks generation readiness, and constructs safe catalog
-  output paths.
+  route job matrix. `ImageGenerationManager` owns scheduling, readiness,
+  timeout, publication, summaries, and lifecycle state, using callbacks for
+  the few operations which must touch the live display.
 - `Params` is generated from `paramdef.Lucid`. `LegacyParams` translates CIDD
   parameter files into a temporary Lucid TDRP file.
 
@@ -49,6 +56,9 @@ transitional and retains some CIDD-style shared structures.
 - Horizontal grids support polygon and filled-contour rendering for
   rectangular and distorted grids, plus polar-radar polygons. Cells outside
   the current display domain are culled for non-polar rendering.
+- Filled gridded overlays now preserve the base image. Render method `NONE`
+  prepares the composition correctly for line-only overlays instead of
+  clearing or retaining an unrelated prior field.
 - Line contours can be overlaid on filled rendering or displayed alone with
   render method `NONE`. Render method, line contours, contour levels,
   column-max mode, and color-scale bounds can be changed from each field's
@@ -60,6 +70,9 @@ transitional and retains some CIDD-style shared structures.
   `setReadComposite()`. Vertical sections continue to use normal 3-D data.
 - Reload invalidates and re-requests the horizontal field and an open vertical
   section.
+- Map layers are cached independently from MDV grids. Global and per-map menu
+  changes rebuild that cache immediately without issuing a field request. The
+  global Maps toggle now controls painting as intended.
 - Mouse input is normalized at the event boundary. Left drag zooms, middle or
   Option-left drag pans, and right click selects a vertical section.
 - Vertical sections support single-segment and multi-segment selection. The
@@ -93,15 +106,15 @@ transitional and retains some CIDD-style shared structures.
 - Local METAR testing with `testing/CIDD.precip.test` returns and displays both
   `METARS-simple` and `METARS-labels` at the correct archive times.
 
-Known Product issues still worth revisiting:
+Product details still worth revisiting:
 
-- A hover-picked object can remain from the previous movie frame until the
-  cursor moves.
-- Named-icon and bitmap-icon picking measures only the first icon origin in a
-  multi-icon object.
 - A successful zero-chunk response installs an empty snapshot. Decide whether
   that should mean a valid empty result or preserve the prior snapshot.
 - Worker diagnostics can interleave because multiple threads write to `cerr`.
+
+Multi-instance named and bitmap icons now test every rendered origin when
+picking. Movie interaction also clears transient Product picks rather than
+carrying a live hover selection into cached playback.
 
 ## Movie construction and playback
 
@@ -118,14 +131,15 @@ Known Product issues still worth revisiting:
 - View changes that invalidate cached geometry are disabled while the movie
   owns the canvases. Height changes may proceed in the background and become
   visible after Stop.
+- Each frame has a configurable dependency timeout. A missing grid, Product,
+  wind, terrain profile, or vertical section stops the build with a message
+  naming the outstanding layers instead of leaving the UI in Building state.
+- A capture failure follows the same stop path, so movie construction cannot
+  remain permanently active after an image-capture error.
 - Right-drag interval expansion requires Accept and updates the movie start and
   end widgets. Editing the frame interval no longer starts a build implicitly.
 - A field selected after stopping a movie immediately returns to the normal
   non-movie request/render path.
-
-The movie builder still waits indefinitely for an enabled Product that never
-reaches its desired key. Stop remains available; a future movie-specific
-timeout or best-effort policy may be useful.
 
 ## Interactive image output
 
@@ -153,7 +167,8 @@ are obsolete.
 - `CREATE_IMAGES_ON_REALTIME_SCHEDULE` aligns target times to the realtime
   interval and delay. Missed intervals are coalesced instead of queued.
 - Realtime batches save and restore the accepted interactive field, time,
-  height, zoom, frame index, and vertical route while the scheduler waits.
+  height, zoom, frame index, vertical route, and vertical-window visibility
+  while the scheduler waits.
 - Each job waits for its exact MDV generation. Requests have a configurable
   timeout, cancellation, failure recording, and continuation to the next job.
 - Symbolic products have an explicit image policy:
@@ -168,6 +183,9 @@ are obsolete.
 - Output naming distinguishes fields, multiple heights, multiple zooms, and
   vertical routes. Day directories and horizontal/vertical subdirectories are
   supported.
+- Automatic-generation instances disable conflicting interactive controls.
+  Generated captures suppress transient cursor text, click marks, rubber-band
+  geometry, pan previews, and picked-Product graphics.
 - Startup validation checks timeout range, image writer availability,
   transparency compatibility, output paths/subdirectories, delimiter safety,
   archive/realtime intervals, and scheduled filename time resolution.
@@ -207,6 +225,37 @@ sidecars, transparency, multiple heights/zooms, and vertical images.
 - `tdrp_gen` regenerates `Params.hh` and `Params.cc` automatically when
   `paramdef.Lucid` changes and `make` runs.
 
+## Recent reliability and cleanup work
+
+- The original CIDD movie structure in `GlobalData` has been replaced by the
+  timeline owned by `TimeControl`.
+- Horizontal MDV cache reuse is active, and a request arriving during a worker
+  read replaces the bounded latest-pending slot rather than being lost.
+- Movie and automatic-image waits are bounded independently. Live display
+  readers may continue their normal retry policy without trapping a batch or
+  movie build indefinitely.
+- Qt parent ownership now covers the horizontal and vertical views, rubber
+  band, menu helper objects, and their actions. Manager objects are still
+  deleted early during `GuiManager` teardown to stop callbacks before Qt
+  destroys child views.
+- The unused `GuiManager` singleton, archive-mode mirror, archive start time,
+  legacy timer fields, dead clear method, and unused selected-field getters
+  were removed.
+- Open and parameter-file Save remain visible but disabled. They are reserved
+  for future parameter-file loading and serialization. Save-Image remains
+  enabled in interactive mode.
+- Routine successful horizontal-read messages are controlled by the debug
+  setting; error diagnostics remain unconditional.
+- Variable-length legacy contour and layer-field configuration is bounded
+  before indexing fixed CIDD-compatible arrays, preventing startup memory
+  corruption from oversized parameter lists.
+- Field rendering no longer has a dynamic-contour branch; the supported field
+  choices are polygons, filled contours, or no fill plus optional line
+  contours.
+- `docs/lrose-process-data-management.md` summarizes the LROSE process and
+  data layers and records the intended approach for a Lucid realtime
+  simulator.
+
 ## Important design decisions
 
 - Use CIDD as the behavioral reference, but render with Qt rather than carrying
@@ -233,23 +282,28 @@ sidecars, transparency, multiple heights/zooms, and vertical images.
 
 ## Outstanding work
 
-1. Build the realtime/archive simulation environment and create a repeatable
-   image-generation test matrix covering success, timeout, stale completion,
-   recovery, and scheduler coalescing.
-2. Verify automatic PNG transparency, geo XML, `_latest_data_info`, day
+1. Build the realtime/archive simulation environment described conceptually in
+   `docs/lrose-process-data-management.md`. Select the archive replay boundary,
+   project layout, process list, datasets, and late-data thresholds.
+2. Create a repeatable image-generation test matrix covering success, timeout,
+   stale completion, recovery, and scheduler coalescing.
+3. Verify automatic PNG transparency, geo XML, `_latest_data_info`, day
    directories, and DataMapper behavior with downstream consumers.
-3. Exercise automatic combinations of multiple fields, heights, zooms, and
+4. Exercise automatic combinations of multiple fields, heights, zooms, and
    vertical routes, including filename uniqueness and state restoration.
-4. Continue visual comparison of symbolic products with CIDD and address the
-   picking issues listed above.
-5. Decide whether movies need a Product timeout/best-effort policy comparable
-   to automatic images.
-6. Continue vertical-window presentation cleanup and regression testing.
-7. Remove Route Winds completely when the current commented history is no
+5. Continue visual comparison of symbolic products with CIDD and decide the
+   desired zero-chunk snapshot policy.
+6. Consolidate `MdvReader`'s remaining public legacy validity flags with its
+   private request/result state.
+7. Continue removing demonstrably unused `GlobalData::layers` state and
+   simplify terrain/wind request queuing where `MdvReader` now provides the
+   latest-request policy.
+8. Continue vertical-window presentation cleanup and regression testing.
+9. Remove Route Winds completely when the current commented history is no
    longer needed.
-8. Work through `docs/parameter_status.txt` incrementally as affected features
+10. Work through `docs/parameter_status.txt` incrementally as affected features
    are cleaned up.
-9. There are no automated GUI tests yet; current validation is interactive.
+11. There are no automated GUI tests yet; current validation is interactive.
 
 ## Build and test
 
