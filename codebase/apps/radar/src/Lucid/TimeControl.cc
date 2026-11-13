@@ -1154,8 +1154,9 @@ void TimeControl::refreshDataAvailability()
 
   TimePlotSeries gridSeries;
   time_t selectedGridTime = 0;
-  if (_gd.h_win.page >= 0 && _gd.h_win.page < _gd.num_datafields) {
-    const MdvReader *reader = _gd.mread[_gd.h_win.page];
+  const int fieldIndex = _manager->getSelectedFieldIndex();
+  if (fieldIndex >= 0 && fieldIndex < _gd.num_datafields) {
+    const MdvReader *reader = _gd.mread[fieldIndex];
     if (reader) {
       gridSeries.label = reader->legend_name;
       gridSeries.times = reader->getTimeList();

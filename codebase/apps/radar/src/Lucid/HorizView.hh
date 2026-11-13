@@ -87,7 +87,7 @@ class DLL_EXPORT HorizView : public QWidget
    * @param[in] parent   Parent widget.
    * @param[in] params   TDRP parameters.
    */
-  
+
   explicit HorizView(QWidget* parent,
                      GuiManager &manager);
 
@@ -154,10 +154,6 @@ class DLL_EXPORT HorizView : public QWidget
   void stopMoviePlayback();
   void setMovieInteractionActive(bool active);
   
-  // set flags to render invalid images
-  
-  void setRenderInvalidImages(int index, VertView *vert);
-
   // virtual void ShowContextMenu(const QPoint &pos, RadxVol *vol);
 
   void setFont();
@@ -247,10 +243,6 @@ class DLL_EXPORT HorizView : public QWidget
 
   int _renderFrameIndex;
   int _renderFramePage;
-  
-  bool _renderInvalidImages;
-  int _invalidImagesFrameIndex;
-  VertView *_vert;
   
   bool _zoomChanged;
   bool _zoomRequestPending;
@@ -400,8 +392,6 @@ class DLL_EXPORT HorizView : public QWidget
                        MdvReader *mr,
                        time_t start_time, time_t end_time,
                        bool is_overlay_field);
-  
-  void _doRenderInvalidImages(int index, VertView *vert);
 
   // save field data to queue
 

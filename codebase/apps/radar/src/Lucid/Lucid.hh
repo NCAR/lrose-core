@@ -102,7 +102,6 @@ private:
                           const Params::wind_t &windp,
                           bool isU, bool isV, bool isW);
   void _initTerrain();
-  void _initDrawExport();
   // void _initRouteWinds();
 
   int _initMaps();
@@ -115,7 +114,6 @@ private:
   
   void _calcMapCoordsProj();
   void _calcMapCoordsLatLon();
-  int _initStationLoc();
   
   int _initZooms();
   void _initContours();

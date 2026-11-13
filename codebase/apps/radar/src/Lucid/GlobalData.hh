@@ -30,8 +30,6 @@
 #define GLOBAL_DATA_HH
 
 #include <QPaintDevice>
-#include <QBrush>
-#include <qtplot/ColorMap.hh>
 
 #include "Constants.hh"
 #include "Params.hh"
@@ -42,8 +40,6 @@
 class ProductMgr;
 class WindManager;
 class MdvReader;
-class StationLoc;
-class RemoteUIQueue;
 
 /////////////////////////////////////////////////////////////////
 // enums
@@ -84,48 +80,6 @@ typedef enum {
 /////////////////////////////////////////////////////////////////
 // worker classes
 
-class Val_color_t {   /* data value to color mappings */
-public:
-  Val_color_t() {
-    min = 1.0e99;
-    max = -1.0e99;
-    pixval = 0;
-    cname[0] = '\0';
-    label[0] = '\0';
-  }
-  double min,max;  /* data Range to map onto color */
-  long pixval;     /* X value to use to draw in this color */
-  QBrush brush;    /* A brush for this color */
-  char cname[Constants::NAME_LENGTH];   /* color name    */
-  char label[Constants::LABEL_LENGTH];  /* label to use (use min value if empty) */
-};
-
-class Valcolormap_t {
-public:
-  Valcolormap_t() {
-    nentries = 0;
-    MEM_zero(val_pix);
-    MEM_zero(vc);
-  }
-  int nentries;
-  long val_pix[Constants::MAX_COLOR_CELLS]; /* Pixel values to draw in */
-  QBrush brush[Constants::MAX_COLOR_CELLS]; /* brush for each value */
-  Val_color_t *vc[Constants::MAX_COLOR_CELLS];
-};
- 
-class Color_gc_t {
-public:
-  Color_gc_t() {
-    name[0] = '\0';
-    pixval = 0;
-    r = g = b = 0;
-  }
-  char name[Constants::NAME_LENGTH];
-  long pixval;
-  QBrush brush;
-  unsigned short r,g,b; /* Full intensity color values for this color */
-};
-
 class contour_info_t {
 public:
   contour_info_t() {
@@ -136,8 +90,6 @@ public:
     min = 0.0;
     max = 0.0;
     interval = 0.0;
-    color = nullptr;
-    vcm = nullptr;
     MEM_zero(color_name);
   }
   int field;      /* global field number to contour */
@@ -147,8 +99,6 @@ public:
   double  min;
   double  max;
   double  interval;
-  Color_gc_t *color;
-  Valcolormap_t *vcm;
   char color_name[Constants::NAME_LENGTH];  /* Color name*/
 };
 
@@ -165,71 +115,10 @@ public:
   double max;
 };
 
-class status_msg_t {    /* Dynamic Data Status info */
-public:
-  status_msg_t()
-  {
-    is_dynamic = 0;
-    last_accessed = 0;
-    status_fname = nullptr;
-  }
-  int is_dynamic;
-  time_t last_accessed;
-  string stat_msg;
-  const char *status_fname;
-};
-
 typedef struct {
   double lat;
   double lon;
 } world_pt_t;
-
-class draw_export_info_t { // Draw-Export
-public:
-  draw_export_info_t()
-  {
-    default_serial_no = 0;
-    default_valid_minutes = 0.0;
-    data_time = 0;
-    product_id_label = nullptr;
-    product_label_text = nullptr;
-    product_fmq_url = nullptr;
-    param_line = nullptr;
-  }
-  int default_serial_no;
-  double default_valid_minutes;
-  time_t data_time;
-  char *product_id_label;
-  char *product_label_text;
-  char *product_fmq_url;
-  char *param_line;
-};
-
-class draw_export_t { // Draw-Export
-public:
-  draw_export_t()
-  {
-    num_draw_products = 0;
-    cur_draw_product = 0;
-    dexport = nullptr;
-  }
-  int num_draw_products;
-  int cur_draw_product;
-  draw_export_info_t *dexport;
-};
-
-class time_list_t { // Time-List
-public:
-  time_list_t()
-  {
-    num_entries = 0;
-    num_alloc_entries = 0;
-    tim = nullptr;
-  }
-  unsigned int num_entries;
-  unsigned int num_alloc_entries;
-  time_t *tim;
-};
 
 class margin_t { /* Margin settings */
 public:
@@ -284,7 +173,6 @@ public:
     data_info = NULL;
     MEM_zero(color_name);
     units_label = NULL;
-    color = NULL;
   }
   
   int active;       /* if True - draw wind features (vectors) */
@@ -304,8 +192,6 @@ public:
   char color_name[Constants::NAME_LENGTH];  /* Color name*/
   const char *units_label;  /* Color name*/
   
-  Color_gc_t *color;
-
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -319,15 +205,11 @@ public:
     landuse_active = 0;
     terr = nullptr;
     land_use = nullptr;
-    color1 = nullptr;
-    color2 = nullptr;
   }
   int terrain_active;       /* if True - draw terrain features */
   int landuse_active;       /* if True - draw landuse features */
   MdvReader *terr;          // terrain
   MdvReader *land_use;
-  Color_gc_t *color1;  // skin color
-  Color_gc_t *color2;  // core color
 };
 
 class route_track_t {  // Route track
@@ -432,8 +314,6 @@ public:
     MEM_zero(overlay_field);
     MEM_zero(overlay_min);
     MEM_zero(overlay_max);
-    missing_data_color = nullptr;
-    bad_data_color = nullptr;
   }
   
   int wind_vectors;   /* Flag to turn on/off wind vectors as a whole */
@@ -477,9 +357,6 @@ public:
   double overlay_min[Constants::NUM_GRID_LAYERS]; /* Clip all values in grid below this */
   double overlay_max[Constants::NUM_GRID_LAYERS]; /* Clip all values in grid above this */
   
-  Color_gc_t *missing_data_color;  // Used for Displaying missing data
-  Color_gc_t *bad_data_color;      // Used for Displaying bad  data
-  
   double special_contour_value;      // which value to draw wider 
   
 };
@@ -496,9 +373,6 @@ public:
     ip = nullptr;
     
     active = 0;
-    page = 0;
-    prev_page = 0;
-    movie_page = 0;
     min_height = 0;
     min_width = 0;
     zoom_level = 0;
@@ -507,7 +381,6 @@ public:
     last_cache_im = 0;
     num_zoom_levels = 0;
     start_zoom_level = 0;
-    MEM_zero(redraw_flag);
     selectionChanged = 0;
     
     legends_start_x = 0;
@@ -522,21 +395,16 @@ public:
     min_y = max_y = 0.0;
     min_lat = max_lat = 0.0;
     min_lon = max_lon = 0.0;
-    min_ht = max_ht = 0.0;
     min_r = max_r = 0.0;
     min_deg = max_deg = 0.0;
     cmin_x = cmax_x = 0.0;
     cmin_y = cmax_y = 0.0;
-    cur_ht = 0.0;
     
     km_across_screen = 0.0;
     
     // MEM_zero(route);
     
     vis_pdev = nullptr;
-    can_pdev = nullptr;
-    tmp_pdev = nullptr;
-    MEM_zero(page_pdev);
     
     MEM_zero(title);
     MEM_zero(image_dir);
@@ -547,9 +415,6 @@ public:
   
   int *ip; /* instance pointer; hook to XView object structures*/
   int active; /* set to 1 if window is currently active */
-  int page; /* Current page selected in the window */
-  int prev_page; /* The last page viewed */
-  int movie_page; /* The page currently viewed in movie loops */
   int min_height; /* minimum height window is allowed to get to */
   int min_width; /* minimum width window is allowed to get to */
   int zoom_level; /* index to use for zoom boundary coords */
@@ -558,7 +423,6 @@ public:
   int last_cache_im; /* index to last XID Cache */
   int num_zoom_levels; /* number of stored zoom levels */
   int start_zoom_level; /* The starting zoom level - for reset function */
-  int redraw_flag[Constants::MAX_DATA_FIELDS]; /* set to 1 when field needs re-rendered */
   int selectionChanged;
   
   int legends_start_x; /* the X value for the first legend character */
@@ -574,14 +438,12 @@ public:
   double min_y,max_y; /* Km limits of full display area */
   double min_lat,max_lat; /* Globe limits of full display area */
   double min_lon,max_lon; /* Globe limits of full display area */
-  double min_ht,max_ht; /* Km limits of full display area */
   double min_r,max_r; /* Radial r limits of full display area */
 
   double min_deg,max_deg;/* Radial deg limits of full display area */
 
   double cmin_x,cmax_x; /* X limits of current display area */
   double cmin_y,cmax_y; /* Y limits of current display area */
-  double cur_ht; /* Z Height of current display area */
 
   double km_across_screen; /* Approx. distance across the window (KM) */
 
@@ -593,10 +455,6 @@ public:
   // Drawable page_xid[MAX_DATA_FIELDS]; /* draw Pixmap for each field */
 
   QPaintDevice *vis_pdev; /* X ID of Visible canvas */
-  QPixmap **can_pdev; /* X ID of last stage canvases to draw products on top of */
-  QPixmap *tmp_pdev; /* X ID of area to draw fields that aren't updated */
-  QPixmap *page_pdev[Constants::MAX_DATA_FIELDS]; /* draw Pixmap for each field */
-
   draw_dim_t win_dim; /* Window dimensions and position */
   draw_dim_t can_dim; /* Canvas dimensions and position */
   draw_dim_t img_dim; /* Image Pixmaps dimensions and positions */
@@ -863,7 +721,6 @@ public:
     geo_icon = NULL;
     geo_icondef = NULL;
     geo_polyline = NULL;
-    color = NULL;
     mapParams = NULL;
   }
   
@@ -897,8 +754,6 @@ public:
   string map_code; /* SHORT NAME */
   string color_name; /* Current Color */
 
-  Color_gc_t *color;
-
   Params::map_t *mapParams;
 
 };
@@ -925,9 +780,6 @@ public:
 
   // Command line arguments
   
-  QPaintDevice *hcan_pdev;    
-  QPaintDevice *vcan_pdev;    
-
   int debug;        // Normal debugging flag  
   int debug1;       // More verbose debugging  flag 
   int debug2;       // Very verbose debug statements flag 
@@ -935,96 +787,29 @@ public:
   string cacheDir;  // directory for storing cached temporary files
   string mapCacheDir;  // directory for storing cached map files
   string colorscaleCacheDir;  // directory for storing cached color scale files
-  string stationlocCacheDir;  // directory for storing cached station locator file
 
   int display_projection;// Which projection CIDD Uses for display  - Enum
 
   int quiet_mode;   // 1 =  Do not output normal startup and shutdown messages
-  int report_mode;   // 1 =  Do continious data value reporting
   int run_unmapped;   // 1 runs unmapped
   int use_cosine_correction; // use cosine correction for computing range in polar data
-  int drawing_mode;   // Flag for Internal drawing mode - FMQ output
-  double product_detail_threshold[Constants::NUM_PRODUCT_DETAIL_THRESHOLDS];
-  int product_detail_adjustment[Constants::NUM_PRODUCT_DETAIL_THRESHOLDS];
-  
-  int mark_latest_client_location; // place a mark at latest click location from client
-  int forecast_mode;     // 1 = Apply forecast interval
-  int data_format; // format of received data:  CART_DATA_FORMAT  
-  int num_colors;       // Total colors allocated 
-  int num_draw_colors;  // Total number of colors excluding color scale colors 
-  int map_overlay_color_index_start;
-  int finished_init;    // 0 before xview init, 1 after.
 
   int num_datafields;   // the number of fields in the data.info file 
-  int num_menu_fields;  // the number of items in the data field menus 
-  int num_field_menu_cols; // number of columns in the data field menus 
   int num_map_overlays; // the number of overlays in the system 
-  int num_render_heights;// the number of heights to render in HTML mode
-  int num_cache_zooms;   // the number of cached images for quick access
-  int cur_render_height; // Current height being rendered in HTML mode
-  int cur_field_set;     // Current set of fields that is active
-  int save_im_win;       // Which window to dump: PLAN_VIEW, XSECT_VIEW or BOTH_VIEWS 
-  int image_needs_saved; // Set to 1 when a finished image needs saved to disk
-  int generate_filename; // Flag, indicating a new name needs generated.
-  int max_time_list_span; // Maximum number of days in epoch to a request a time list 
-
-  // State Variables
-  int pan_in_progress;    // Set to 1 while panning 
-  int zoom_in_progress;   // Set to 1 while zooming 
-  int route_in_progress;  // Set to 1 while defining an ROUTE 
-  int data_timeout_secs;  // number of seconds before request is canceled
-  int data_status_changed;// 1 =  all data is now invalidated 
-  int series_save_active; // When 1 - In series save mode.
-
-  int num_field_labels;  // Current number of labels spaces occupied by field data labels 
-  int field_index[Constants::MAX_DATA_FIELDS];   // menu item to field number lookup table 
-  int movieframe_time_mode;  // mode for determining output file name
-
   double aspect_correction; // Aspect ratio correction for LAT-LON mode 
-  double height_array[Constants::MAX_SECTS];  // Heights to render in HTML MODE
-
-  // selected values
-
-  // bool redraw_horiz;
-  bool redraw_vert;
-  bool time_has_changed;
-  bool field_has_changed;
-  bool zoom_has_changed;
-  bool vsect_has_changed;
-  bool ht_has_changed;
-
-  time_t prev_time;
-  int prev_field;
-  double prev_ht;
-
-  time_t selected_time;
-  int selected_field;
-  double selected_ht;
-
-  time_t last_event_time;  // the unix time of when the last activity occured
   time_t epoch_start;      //  The start of the movie loop
   time_t epoch_end ;       //  the end of the movie loop
   time_t model_run_time;  //  Which Model run to use.  When 0 = Ask for "lastest"
-  time_t data_request_time; // Time for which Mdv data is requested
 
   // projections
   
-  const char *projection_type;
   double proj_param[8];
-
-  // start time etc
-
-  const char *demo_time;
   
   // Files, names, Commands and other text parameters
   const char *orig_wd;           // Original working directory
-  const char *frame_label;       // The default string to show on the frame 
   const char *app_name;          // Application name 
   const char *app_instance;      // Application Instance 
 
-  char *data_info[Constants::MAX_DATA_FIELDS]; // information about each field  
-  
-  time_list_t gen_time_list;
   
   MdvxProj proj; // Display projection
   
@@ -1034,16 +819,6 @@ public:
   win_param_t v_win;     // Cross Section (Vert) view X window parameters
 
   // Drawing contexts
-
-  QBrush def_brush;       // default brush for copy & misc X operations  
-  QBrush ol_brush;        // Brush for drawing in the reference reference overlay color 
-  QBrush clear_ol_brush;  // Brush for Removing the reference overlay color 
-
-  // char *dpyName; // display name
-  // Display *dpy;     // default Display pointer for copy operations 
-  ColorMap cmap;
-  Color_gc_t color[Constants::MAX_COLORS];   // stores all colors and GCs 
-  Color_gc_t null_color;          // The color "transparent" 
 
   // FONTS
   // int num_fonts;                  // number of fonts in use 
@@ -1084,22 +859,6 @@ public:
   
   // io_info_t io_info;
 
-  // Dynamic Status message info
-  
-  status_msg_t status;
-  
-  // locations of surface stations
-  
-  StationLoc *station_loc;    // Station locator class
-
-  // Control variables for Draw-Export feature
-
-  draw_export_t draw;
-
-  // Remote User Interface/Command class
-
-  RemoteUIQueue *remote_ui;
-
   // Array of bookmarks
   
   // bookmark_t *bookmark;
@@ -1108,11 +867,6 @@ public:
 
   int coord_key;
   coord_export_t *coord_expt; // Pointer to exported coordinates & info
-
-  // image copy
-
-  int h_copy_flag;
-  int v_copy_flag;
 
 private:
   

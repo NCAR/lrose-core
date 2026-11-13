@@ -128,9 +128,10 @@ public:
 
   // get selected name and units
 
-  const string &getSelectedFieldLabel() const { return _selectedLabel; }
-  const string &getSelectedFieldName() const { return _selectedName; }
-  const string &getSelectedFieldUnits() const { return _selectedUnits; }
+  const string &getSelectedFieldLabel() const;
+  const string &getSelectedFieldName() const;
+  const string &getSelectedFieldUnits() const;
+  int getSelectedFieldIndex() const { return _fieldNum; }
 
   // set flag to indicate changes
 
@@ -282,9 +283,6 @@ private:
   int _prevFieldTableCol;
   int _prevFieldTableRow;
 
-  string _selectedName;
-  string _selectedLabel;
-  string _selectedUnits;
   QLabel *_valueLabel;
   
   bool _fieldHasChanged;
@@ -506,27 +504,17 @@ private:
   void _handleClientEvent();
   void _handleImageCreationEvent();
 
-  void _checkForExpiredData(time_t tm);
-  void _checkForDataUpdates(time_t tm);
-  void _checkWhatNeedsRendering(int frame_index);
        
   // setting text
 
   void _setText(char *text, size_t maxTextLen, const char *format, int val);
   void _setText(char *text, size_t maxTextLen, const char *format, double val);
 
-  // legacy
-  
-  void _autoCreateFunc();
-  void _setField(int value);
   int _requestVerticalSection();
   int _requestVerticalWinds();
   int _requestVerticalTerrain();
   bool _horizontalTerrainApplies() const;
   int _requestHorizontalTerrain();
-  void _setDisplayTime(time_t utime);
-  void _setEndFrame(int num_frames);
-  void _updateMoviePopup();
                           
 private slots:
 

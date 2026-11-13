@@ -57,8 +57,6 @@
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxProj.hh>
-#include <Fmq/RemoteUIQueue.hh>
-#include <Spdb/StationLoc.hh> // Station locator class 
 
 #include <string>
 #include <iostream>
@@ -229,8 +227,6 @@ Lucid::~Lucid()
 
 int Lucid::RunApp(QApplication &app)
 {
-
-  _gd.finished_init = 1;
 
   // create cartesian display
   
@@ -517,28 +513,6 @@ int Lucid::_initDataSpace()
       
   }
   
-  _gd.h_win.prev_page = -1;
-  _gd.v_win.prev_page = -1;
-
-  // global redraw flags
-
-  // _gd.redraw_horiz = true;
-  _gd.redraw_vert = true;
-
-  _gd.time_has_changed = true;
-  _gd.field_has_changed = true;
-  _gd.zoom_has_changed = true;
-  _gd.vsect_has_changed = true;
-  _gd.ht_has_changed = true;
-
-  _gd.prev_time = -1;
-  _gd.prev_field = -1;
-  _gd.prev_ht = -9999.0;
-  
-  _gd.selected_time = -2;
-  _gd.selected_field = -2;
-  _gd.selected_ht = -9998.0;
-  
   // movies
 
   int pid = getpid();
@@ -600,8 +574,6 @@ int Lucid::_initDataSpace()
     _gd.movie.mode = REALTIME_MODE;
     _gd.coord_expt->runtime_mode = RUNMODE_REALTIME;
     _gd.coord_expt->time_seq_num++;
-    _gd.forecast_mode = 0;
-    
     /* set the first index's time based on current time  */
     time_t clock = time(0);    /* get current time */
     _gd.movie.start_time =
@@ -611,8 +583,6 @@ int Lucid::_initDataSpace()
     
     UTIMunix_to_date(_gd.movie.start_time,&temp_utime);
     _gd.movie.demo_mode = 0;
-    _gd.selected_time = clock;
-    
   } else {
 
     /* ARCHIVE MODE */
@@ -626,8 +596,6 @@ int Lucid::_initDataSpace()
       DateTime startTime;
       startTime.set(_params.archive_start_time);
       _gd.movie.start_time = startTime.utime();
-      _gd.selected_time = startTime.utime();
-      
     }
     _gd.movie.demo_mode = 1;
 	 
@@ -643,10 +611,6 @@ int Lucid::_initDataSpace()
 
     _gd.movie.demo_time = _gd.movie.start_time;
     UTIMunix_to_date(_gd.movie.start_time,&temp_utime);
-    
-    _gd.h_win.movie_page = _gd.h_win.page;
-    _gd.v_win.movie_page = _gd.v_win.page;
-    _gd.selected_field = _gd.h_win.page;
     
     _gd.movie.cur_frame = 0;
 
@@ -664,16 +628,6 @@ int Lucid::_initDataSpace()
   //////////////////////////////////////////
   // heights
   
-  _gd.h_win.min_ht = _params.vsection_min_ht_km;
-  _gd.h_win.max_ht = _params.vsection_max_ht_km;
-
-  // Otherwise set in the command line arguments
-
-  if(_gd.num_render_heights == 0) {
-    _gd.h_win.cur_ht = _params.start_ht_km;
-    _gd.selected_ht = _params.start_ht_km;
-  }
-
   /////////////////////////////////////////////
   // Fix limits as needed
 
@@ -758,9 +712,6 @@ int Lucid::_initDataSpace()
   _gd.v_win.max_x = _gd.h_win.max_x;
   _gd.v_win.min_y = _gd.h_win.min_y;
   _gd.v_win.max_y = _gd.h_win.max_y;
-  _gd.v_win.min_ht = _gd.h_win.min_ht;
-  _gd.v_win.max_ht = _gd.h_win.max_ht;
-
   // Set Vertical window route  params
 
   _gd.v_win.cmin_x = _gd.h_win.route.x_world[0];
@@ -796,40 +747,12 @@ int Lucid::_initDataSpace()
   
   // _initRouteWinds();
   
-  // Establish and initialize Draw-Export params 
-
-  _initDrawExport();
-
   // initialize the map overlays
 
   if (_initMaps()) {
     iret = -1;
   }
   
-  // Instantiate the Station locator classes and params.
-
-  if (_initStationLoc()) {
-    iret = -1;
-  }
-
-  /////////////////////
-  // remote command queue
-  
-  if(strlen(_params.remote_ui_url) > 1) {
-    _gd.remote_ui = new RemoteUIQueue();
-    // Create the FMQ with 4096 slots - Total size 1M
-    bool compression = false;
-    if (_gd.remote_ui->initReadWrite( _params.remote_ui_url,
-                                      (char *) "CIDD",
-                                      (bool) _gd.debug2,
-                                      DsFmq::END, compression,
-                                      4096, 4096*256 ) != 0 ) { 
-      fprintf(stderr,
-              "Problems initialising Remote Command Fmq: %s - aborting\n",
-              _params.remote_ui_url);
-    }
-  }
-
   // initialize contours
 
   _initContours();
@@ -1144,8 +1067,6 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   
   wrec->h_data_valid = 0;
   wrec->v_data_valid = 0;
-  wrec->h_vcm.nentries = 0;
-  wrec->v_vcm.nentries = 0;
   wrec->h_fhdr.scale = -1.0;
   wrec->h_last_scale = 0.0;
   // wrec->time_list.num_alloc_entries = 0;
@@ -1282,56 +1203,6 @@ void Lucid::_initTerrain()
     }
     
   }
-
-}
-
-////////////////////////////////////////////////////////////////
-// INIT_DRAW_EXPORT_LINKS:  Scan param file and setup links to
-//  for drawn and exported points 
-
-void Lucid::_initDrawExport()
-{
-
-  _gd.draw.num_draw_products = _params.draw_export_info_n;
-  _gd.draw.dexport = new draw_export_info_t[_gd.draw.num_draw_products];
-  if (_gd.draw.dexport == NULL) {
-    fprintf(stderr,"Unable to allocate space for %d draw.dexport sets\n",
-            _gd.draw.num_draw_products);
-    perror("Lucid");
-    exit(-1);
-  }
-  
-  for(int ii = 0; ii < _params.draw_export_info_n;  ii++) {
-    
-    Params::draw_export_t &dinfo = _params._draw_export_info[ii];
-    draw_export_info_t &dexp = _gd.draw.dexport[ii];
-
-    // Product ID label
-    int len = strlen(dinfo.id_label) + 1;
-    dexp.product_id_label = (char *) calloc(1, len);
-    STRcopy(dexp.product_id_label, dinfo.id_label, len);
-    
-    // product_label_text
-    dexp.product_label_text = (char *) calloc(1,Constants::TITLE_LENGTH);
-    STRcopy(dexp.product_label_text, dinfo.default_label, Constants::TITLE_LENGTH);
-    
-    // FMQ URL 
-    len = strlen(dinfo.url) + 1;
-    if(len > Constants::NAME_LENGTH) {
-      fprintf(stderr,"URL: %s too long - Must be less than %d chars. Sorry.",
-              dinfo.url,Constants::URL_LENGTH);
-      exit(-1);
-    }
-    dexp.product_fmq_url = (char *) calloc(1, Constants::URL_LENGTH);
-    STRcopy(dexp.product_fmq_url, dinfo.url, Constants::URL_LENGTH);
-    
-    // Get the Default valid time  
-    dexp.default_valid_minutes = dinfo.valid_minutes;
-    
-    // Get the Default ID   
-    dexp.default_serial_no = dinfo.default_id_no;
-    
-  } // ii
 
 }
 
@@ -2476,49 +2347,6 @@ void Lucid::_calcMapCoordsLatLon()
 
 }
 
-///////////////////////////////////////////////////////
-// Instantiate the Station locator classes and params.
-  
-int Lucid::_initStationLoc()
-
-{
-
-  if (strlen(_params.station_loc_url) < 1) {
-    return 0;
-  }
-    
-  if(_gd.debug || _gd.debug1) {
-    fprintf(stderr,"Loading Station data from: %s\n", _params.station_loc_url);
-  }
-  _gd.station_loc =  new StationLoc();
-  if(_gd.station_loc == NULL) {
-    fprintf(stderr,"CIDD: Fatal alloc constructing new stationLoc()\n");
-    exit(-1);
-  }
-
-  // download station location file into cache
-  
-  Path locPath(_params.station_loc_url);
-  string stationlocCachePath;
-  if (_getResourceCachePath(_gd.stationlocCacheDir, locPath.getDirectory(),
-                            locPath.getFile(), stationlocCachePath)) {
-    fprintf(stderr, "CIDD: Can't find Station Data from %s\n", _params.station_loc_url);
-    return -1;
-  }
-  
-  if(_gd.station_loc->ReadData(stationlocCachePath.c_str()) < 0) {
-    fprintf(stderr, "CIDD: Can't load Station Data from cache path %s\n", stationlocCachePath.c_str());
-    return -1;
-  }
-  
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    _gd.station_loc->PrintAll();
-  }
-
-  return 0;
-  
-}
-
 /////////////////////////////////////////////////
 // zooms
 
@@ -2538,9 +2366,6 @@ int Lucid::_initZooms()
   if(_params.num_cache_zooms < 1) {
     _params.num_cache_zooms = 1 ;
   }
-  
-  _gd.h_win.can_pdev = new QPixmap*[_params.num_cache_zooms];
-  _gd.v_win.can_pdev = new QPixmap*[_params.num_cache_zooms];
   
   _gd.h_win.num_zoom_levels = _params.zoom_levels_n;
 
@@ -2696,11 +2521,6 @@ void Lucid::_initContours()
   }
   for(int ii = 0; ii < Constants::NUM_GRID_LAYERS; ii++) {
     _gd.layers.overlay_field[ii] = 0;
-  }
-
-  for(int ii = 0; ii < _gd.num_datafields; ii++) {
-    _gd.h_win.redraw_flag[ii] = 1;
-    _gd.v_win.redraw_flag[ii] = 1;
   }
 
   for(int ii = 0; ii < _params.contour_fields_n; ii++ ) {
@@ -2913,15 +2733,6 @@ int Lucid::_createCacheDirs()
     int err = errno;
     cerr << "ERROR - Lucid" << endl;
     cerr << "Cannot make color scales cache dir: " << _gd.colorscaleCacheDir << endl;
-    cerr << "  " << strerror(err) << endl;
-    return -1;
-  }
-
-  _gd.stationlocCacheDir = _gd.cacheDir + PATH_DELIM + "stationloc";
-  if (ta_makedir_recurse(_gd.stationlocCacheDir.c_str())) {
-    int err = errno;
-    cerr << "ERROR - Lucid" << endl;
-    cerr << "Cannot make station locator cache dir: " << _gd.stationlocCacheDir << endl;
     cerr << "  " << strerror(err) << endl;
     return -1;
   }

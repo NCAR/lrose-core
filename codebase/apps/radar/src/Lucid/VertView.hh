@@ -124,8 +124,6 @@ class DLL_EXPORT VertView : public QWidget
 
   // render frame based on movie index
   
-  int renderVMovieFrame(int index, QPainter &painter);
-
   /**
    * @brief Specify the background color.
    *

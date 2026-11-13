@@ -369,7 +369,6 @@ int Args::_processLegacyArgs(int argc, const char **argv)
 
   int n_fields;
   const char *app_ptr;
-  const char *token;
   UTIMstruct temp_utime;
 
   TDRP_str_replace(&_params.http_proxy_url, "");
@@ -439,17 +438,13 @@ int Args::_processLegacyArgs(int argc, const char **argv)
       
       if (ii < argc - 1) {
         const char *optarg = argv[++ii];
-        _gd.num_render_heights = 0;
-        _gd.cur_render_height = 0;
-        token = strtok((char *) optarg,","); // Prime strtok
-        _gd.h_win.cur_ht = atof(token);
-        while(token != NULL && _gd.num_render_heights < Constants::MAX_SECTS) {
-          _gd.height_array[_gd.num_render_heights] = atof(token);
-          _gd.num_render_heights++;
-          token = strtok(NULL,","); // get next rtoken strtok
+        // The Qt display has one authoritative requested level in
+        // VlevelManager. Preserve the legacy option for its first value, but
+        // do not retain CIDD's disabled HTML-mode height sequence.
+        _params.start_ht_km = atof(optarg);
+        if(!_gd.quiet_mode) {
+          printf("Lucid start height: %g\n", _params.start_ht_km);
         }
-        if(!_gd.quiet_mode) printf("CIDD Found %d heights starting at: %g\n",
-                                  _gd.num_render_heights,_gd.h_win.cur_ht);
       } else {
 	iret = -1;
       }

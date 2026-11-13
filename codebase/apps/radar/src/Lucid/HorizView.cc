@@ -146,10 +146,6 @@ HorizView::HorizView(QWidget* parent,
   _playbackFrameIndex = -1;
   _renderFramePage = 0;
 
-  _renderInvalidImages = false;
-  _invalidImagesFrameIndex = 0;
-  _vert = NULL;
-
   _gridsReady = false;
   _mapsReady = false;
   _zoomChanged = true;
@@ -310,7 +306,7 @@ void HorizView::paintEvent(QPaintEvent *event)
     return;
   }
 
-  int fieldNum = _gd.h_win.page;
+  const int fieldNum = _manager.getSelectedFieldIndex();
 
   // render data grids to grid image in WorldPlot
 
@@ -693,7 +689,7 @@ void HorizView::_updateProductPick(int mouseX, int mouseY)
   _proj.xy2latlon(worldX, worldY, lat, lon);
 
   time_t dataTime = 0;
-  const int fieldNum = _gd.h_win.page;
+  const int fieldNum = _manager.getSelectedFieldIndex();
   if (fieldNum >= 0 && fieldNum < _gd.num_datafields &&
       _gd.mread[fieldNum]) {
     dataTime = _gd.mread[fieldNum]->h_date.utime();
@@ -726,7 +722,7 @@ void HorizView::_drawPickedProduct(QPainter &painter)
   }
 
   time_t dataTime = 0;
-  const int fieldNum = _gd.h_win.page;
+  const int fieldNum = _manager.getSelectedFieldIndex();
   if (fieldNum >= 0 && fieldNum < _gd.num_datafields &&
       _gd.mread[fieldNum]) {
     dataTime = _gd.mread[fieldNum]->h_date.utime();
@@ -966,13 +962,6 @@ void HorizView::triggerGridRendering(int page, int index)
   
   _renderGrids();
   
-  // render invalid images
-  
-  if (_renderInvalidImages) {
-    _doRenderInvalidImages(_invalidImagesFrameIndex, _vert);
-    _renderInvalidImages = false;
-  }
-  
   // A rendered field and its live color scale form one visual update. Force a
   // complete paint now so the inexpensive scale redraw cannot lag the cached
   // grid image.
@@ -985,7 +974,7 @@ void HorizView::triggerGridRendering(int page, int index)
 
 void HorizView::rerenderGrid()
 {
-  const int fieldNum = _gd.h_win.page;
+  const int fieldNum = _manager.getSelectedFieldIndex();
   if (_renderFrameIndex >= 0 &&
       _renderFrameIndex < _gd.movie.num_frames &&
       fieldNum >= 0 && fieldNum < _gd.num_datafields &&
@@ -1106,18 +1095,6 @@ void HorizView::setMovieInteractionActive(bool active)
   update();
 }
   
-//////////////////////////////////////////
-// set flags to check for invalid images
-
-void HorizView::setRenderInvalidImages(int index, VertView *vert)
-
-{
-  _renderInvalidImages = true;
-  _invalidImagesFrameIndex = index;
-  _vert = vert;
-  update(); // call paint event
-}
-  
 /*************************************************************************
  * _renderGrids()
  */
@@ -1155,7 +1132,7 @@ void HorizView::_renderProducts()
   }
 
   time_t dataTime = 0;
-  const int fieldNum = _gd.h_win.page;
+  const int fieldNum = _manager.getSelectedFieldIndex();
   if (fieldNum >= 0 && fieldNum < _gd.num_datafields &&
       _gd.mread[fieldNum] != nullptr) {
     dataTime = _gd.mread[fieldNum]->h_date.utime();
@@ -1165,143 +1142,6 @@ void HorizView::_renderProducts()
                         _gd.epoch_start, _gd.epoch_end,
                         frame.time_start, frame.time_end,
                         dataTime, _gd.h_win.km_across_screen);
-}
-
-/************************************************************************
- * RENDER_INVALID_IMAGES: Check for images in which the data 
- * are no longer valid. Look for the "best" invalid  image to 
- *  render.
- *
- */
-
-void HorizView::_doRenderInvalidImages(int index, VertView *vert)
-{
-
-#ifdef JUNK
-  
-  int i;
-  int h_image,v_image;
-  int stat;
-  int none_found = 1;
-  QPaintDevice *pdev;
-  
-  h_image = _gd.h_win.page + 1;
-  v_image = _gd.v_win.page + 1;
-  if(!_params.run_once_and_exit)  PMU_auto_register("Checking Images (OK)");
-  
-  /* look through the rest of the images  */
-  for (i=0; i < _gd.num_datafields-1; i++) {    
-    
-    /*
-     * Render horizontal image, if necessary.
-     */
-    
-    if (h_image >= _gd.num_datafields) {
-      h_image = 0;
-    }
-    
-    if (_gd.mread[h_image]->currently_displayed && _gd.mread[h_image]->auto_render) {
-      
-      if (_gd.h_win.redraw_flag[h_image] || (_gd.mread[h_image]->h_data_valid == 0)) {
-        none_found = 0;
-        stat = gather_hwin_data(h_image,
-                                _gd.movie.frame[index].time_start,
-                                _gd.movie.frame[index].time_end);
-        if (stat == CIDD_SUCCESS) {
-          if(_gd.mread[h_image]->auto_render) {
-            pdev = _gd.h_win.page_pdev[h_image];
-          } else {
-            pdev = _gd.h_win.tmp_pdev;
-          }
-          QPainter painter(this);
-          _controlRenderGrid(painter,
-                             h_image,
-                             _gd.movie.frame[index].time_start,
-                             _gd.movie.frame[index].time_end);
-          
-          save_h_movie_frame(index,pdev,h_image);
-          
-          _gd.h_win.redraw_flag[h_image] = 0;
-        } else {
-          return;
-        }
-        if (h_image == _gd.h_win.prev_page && _gd.h_win.redraw_flag[h_image] == 0) {
-          _gd.h_copy_flag = 1;
-        }
-      } // if (_gd.h_win.redraw_flag[h_image] ...
-    } // if (_gd.mread[h_image]->currently_displayed ...
-    h_image++;
-
-    /*
-     * Render vertical image, if necessary.
-     */
-
-    if (v_image >= _gd.num_datafields) v_image = 0;
-
-    if (_gd.mread[v_image]->currently_displayed && _gd.mread[v_image]->auto_render) {
-      if ((_gd.v_win.active) && (_gd.v_win.redraw_flag[v_image] || (_gd.mread[v_image]->v_data_valid == 0))) {
-        stat = gather_vwin_data(v_image, _gd.movie.frame[index].time_start,
-                                _gd.movie.frame[index].time_end);
-        if (stat == CIDD_SUCCESS) {
-          if(_gd.mread[v_image]->auto_render) {
-            pdev = _gd.v_win.page_pdev[v_image];
-          } else {
-            pdev = _gd.v_win.tmp_pdev;
-          }
-          QPainter painter(this);
-#ifdef NOTYET
-          vert->renderVertDisplay(painter, v_image, _gd.movie.frame[index].time_start,
-                                  _gd.movie.frame[index].time_end);
-#endif
-          _gd.v_win.redraw_flag[v_image] = 0;
-        } else {
-          return;
-        }
-        if (v_image == _gd.v_win.prev_page && _gd.v_win.redraw_flag[v_image] == 0) _gd.v_copy_flag = 1;
-      }
-    }
-        
-    v_image++;
-  }
-
-  // At this point all background images have been rendered. and nothing else is
-  //  happening
-
-  // In html mode, cycle through all zooms and heights
-  if(none_found && _params.html_mode && _gd.io_info.outstanding_request == 0) {
-    
-    /* If more zoom levels to render */
-    if(_gd.h_win.zoom_level < (_gd.h_win.num_zoom_levels -  NUM_CUSTOM_ZOOMS - 2)) {
-
-      /* Set zoom to next level */
-      _gd.h_win.zoom_level++;
-      // set_domain_proc(_gd.zoom_pu->domain_st,_gd.h_win.zoom_level,NULL);
-
-      // If more heights to render
-    } else if (_gd.cur_render_height < _gd.num_render_heights -1) {
-
-      // Set height to next level
-      _gd.cur_render_height++;
-      if(_gd.debug) fprintf(stderr,"HTML_MODE: Height now: %g\n",_gd.h_win.cur_ht);
-      _gd.h_win.cur_ht = _gd.height_array[_gd.cur_render_height];
-
-      // Reset Zoom back to first  level
-      _gd.h_win.zoom_level = 0;
-      // set_domain_proc(_gd.zoom_pu->domain_st,_gd.h_win.zoom_level,NULL);
-
-      // Make sure new data gets loaded
-      reset_data_valid_flags(1,0);
-      reset_terrain_valid_flags(1,0);
-               
-      // No more heights and no more zooms to render
-    } else if(_params.run_once_and_exit) {
-      if(!_gd.quiet_mode)  fprintf(stderr,"Exiting\n");
-      // xv_destroy(_gd.h_win_horiz_bw->horiz_bw);
-      exit(-1);
-    }
-  }
-#endif
-  return;
 }
 
 /**********************************************************************

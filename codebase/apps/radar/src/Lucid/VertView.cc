@@ -1832,32 +1832,6 @@ void VertView::_drawTerrain(QPainter &painter)
 }
 
 /*************************************************************************
- * RENDER_V_MOVIE_FRAME:
- */
-
-int VertView::renderVMovieFrame(int index, QPainter &painter)
-{
-  int stat = 0;
-#ifdef NOTYET
-  int c_field = _gd.v_win.page;
-  
-  if(_gd.debug2) fprintf(stderr, "Rendering Vertical movie_frame %d - field %d\n", index, c_field);
-
-  
-  switch(_gd.movie.mode) {
-    case REALTIME_MODE:
-    case ARCHIVE_MODE:
-      stat = render_vert_display(xid, c_field,
-                                 _gd.movie.frame[index].time_start,
-                                 _gd.movie.frame[index].time_end);
-      break;
-         
-  }
-#endif
-  return stat;
-}
-
-/*************************************************************************
  * zoomBack the view
  */
 

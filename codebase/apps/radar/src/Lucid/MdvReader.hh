@@ -163,7 +163,8 @@ public:
 
   int requestHorizPlane(const DateTime &midTime,
                         double vLevel,
-                        int page);
+                        int page,
+                        bool primaryDisplayField = false);
 
   int getHorizGeneration() const { return _horizGeneration; }
   int getHorizCompletedGeneration() const {
@@ -200,7 +201,6 @@ public:
   string vlevelLabel() const;
   string fieldLabelHoriz() const;
   string fieldLabelVert() const;
-  string heightLabel() const;
   
   // public data members
   
@@ -289,8 +289,6 @@ public:
   // time_list_t time_list; // A list of data times
   
   /* Dynamic - Depends on scale & bias factors */
-  Valcolormap_t h_vcm; /* Data value to X color info */
-  Valcolormap_t v_vcm; /* Data value to X color info */
   
   DateTime h_date; /* date and time stamp of latest data - Horiz */
   DateTime v_date; /* date and time stamp of latest data - Vert */
@@ -376,6 +374,7 @@ private:
   LatLonBox _zoomBoxReq;                 // horiz data
   double _vLevelReq;                     // horiz data
   bool _compositeModeReq;                // immutable for an active H read
+  bool _primaryDisplayFieldReq;
   double _compositeMinHtReq;
   double _compositeMaxHtReq;
   
@@ -456,7 +455,6 @@ private:
                           double &minLat, double &maxLat,
                           double &minLon, double &maxLon);
 
-  void _autoscaleVcm(Valcolormap_t *vcm, double min, double max);
   
 };
 

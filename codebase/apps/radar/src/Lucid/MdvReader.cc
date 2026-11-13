@@ -211,6 +211,7 @@ MdvReader::MdvReader(QObject* parent) :
   
   _vLevelReq = -9999.0;
   _compositeModeReq = false;
+  _primaryDisplayFieldReq = false;
   _compositeMinHtReq = 0.0;
   _compositeMaxHtReq = 0.0;
   _validH = false;
@@ -297,7 +298,8 @@ MdvReader::~MdvReader()
 
 int MdvReader::requestHorizPlane(const DateTime &midTime,
                                  double vLevel,
-                                 int page)
+                                 int page,
+                                 bool primaryDisplayField)
 {
 
   const int generation = ++_horizGeneration;
@@ -325,8 +327,12 @@ int MdvReader::requestHorizPlane(const DateTime &midTime,
   // with the other request details so an in-flight MDV request remains
   // internally consistent; a queued GUI change will start a subsequent read.
   _compositeModeReq = (composite_mode != FALSE);
-  _compositeMinHtReq = _gd.h_win.min_ht;
-  _compositeMaxHtReq = _gd.h_win.max_ht;
+  // Only the selected grid may move a mobile-radar display domain. Capture
+  // that role with the request so a later field selection cannot change the
+  // meaning of an in-flight read.
+  _primaryDisplayFieldReq = primaryDisplayField;
+  _compositeMinHtReq = _params.vsection_min_ht_km;
+  _compositeMaxHtReq = _params.vsection_max_ht_km;
   
   // check for change in request details
   
@@ -576,7 +582,7 @@ int MdvReader::_handleHorizReadDone()
   // Implemented for MOBILE RADARS - 
 
   if (_params.zoom_domain_follows_data &&
-      this == _gd.mread[_gd.h_win.page]) { // Only for the primary field
+      _primaryDisplayFieldReq) {
 
     double dx,locx;
     double dy,locy;
@@ -906,8 +912,6 @@ void MdvReader::_setReadTimes(const string &url,
                               const DateTime &reqTime,
                               Mdvx &mdvx)
 {
-  
-  _gd.data_request_time = reqTime.utime();
   
   switch(_params.gather_data_mode ) {
     
@@ -1672,28 +1676,6 @@ void MdvReader::readDoneV(VertReadResultPtr result)
   emit verticalReadComplete(this);
 }
 
-/*****************************************************************
- * AUTOSCALE_VCM: Autoscale the value-color mapping
- *        color to use
- *
- */
-
-void MdvReader::_autoscaleVcm(Valcolormap_t *vcm, double min, double max)
-{
-  int    i;
-  double delta;
-  
-  delta = (max - min) / (double) vcm->nentries;
-  
-  if(delta == 0.0) delta = 0.1;
-
-  for(i=0; i < vcm->nentries; i++) {
-    vcm->vc[i]->min = min + (delta * i);
-    vcm->vc[i]->max = vcm->vc[i]->min + delta;
-  }
-
-}
-
 /**********************************************************************
  * VLEVEL_LABEL: Return an appropriate units label for a field's
  *               vertical coordinate system
@@ -1818,40 +1800,3 @@ string MdvReader::fieldLabelVert() const
 /*************************************************************************
  * HEIGHT_LABEL: Return the height label
  */
-string MdvReader::heightLabel() const
-{
-
-  static char label[1024];
-  
-  switch(h_vhdr.type[0]) {
-    case Mdvx::VERT_TYPE_SURFACE:
-      strcpy(label,"   " );    // For Now-  Because many Taiwan fields are wrongly
-      // set to "Surface", example: Freezing Level.
-      //strcpy(label,"Surface" );
-      break;
-      
-    case 0:
-    case Mdvx::VERT_VARIABLE_ELEV:
-    case Mdvx::VERT_FIELDS_VAR_ELEV:
-    case Mdvx::VERT_TYPE_COMPOSITE:
-      strcpy(label,"   " );
-      break;
-      
-    case Mdvx::VERT_SATELLITE_IMAGE:
-      strcpy(label,"Sat Image" );
-      break;
-      
-    case Mdvx::VERT_FLIGHT_LEVEL:
-      snprintf(label,1024,"Flight Level %03d", (int)_gd.h_win.cur_ht);
-      break;
-      
-    default:
-      snprintf(label,1024,"%g %s", _gd.h_win.cur_ht,
-               units_label_sects.c_str());
-      break;
-  }
-  
-  return label;
-  
-}
-
