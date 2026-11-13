@@ -53,6 +53,7 @@ LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 HDRS = \
 	$(PARAMS_HH) \
 	AutomaticImageGenerator.hh \
+	ImageGenerationManager.hh \
 	Args.hh \
 	GlobalData.hh \
 	GuiManager.hh \
@@ -110,6 +111,7 @@ HDRS = \
 NORM_SRCS = \
 	$(PARAMS_CC) \
 	AutomaticImageGenerator.cc \
+	ImageGenerationManager.cc \
 	Args.cc \
 	Cdraw_P.cc \
 	Cgui_P.cc \

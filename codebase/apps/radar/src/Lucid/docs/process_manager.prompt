@@ -1,0 +1,47 @@
+LROSE projects use a process management layer for reliability.
+
+LROSE docs are managed at:
+
+  https://github.com/NCAR/lrose-docs
+
+The realtime reliability layer is described at:
+
+  https://github.com/NCAR/lrose-docs/blob/master/lrose-core/lrose-realtime.md
+
+and the data management at:
+
+  https://github.com/NCAR/lrose-docs/blob/master/lrose-core/lrose-data-flow.md
+
+There are examples of simple projects at:
+
+  ~/git/lrose-titan/projects
+
+And SPOL is a good example of a more complex project:
+
+  ~/git/spol-configuration/
+
+For a project we use 2 main environment variables:
+
+  $PROJ_DIR - the top level of a project hierarchy, e.g. ~/git/spol-configuration/projDir.
+  $DATA_DIR - the top level of the data directory hierarchy.
+
+System level params and scripts are located at:
+
+  $PROJ_DIR/system/params
+  $PROJ_DIR/system/scripts
+
+Parameters and scripts are distributed, depending on role. For example:
+
+  $PROJ_DIR/ingest/params
+  $PROJ_DIR/ingest/scripts
+
+The crontab, process mapper (procmap) and data mapper (DataMapper) files are in:
+
+  $PROJ_DIR/control/crontab
+  $PROJ_DIR/control/proc_list
+  $PROJ_DIR/control/data_list
+
+For more complex projects with multiple hosts, the host configuration is performed by a script. For example:
+
+  ~/git/spol-configuration/projDir/system/scripts/configureHost.py
+

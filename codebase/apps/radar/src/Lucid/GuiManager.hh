@@ -52,7 +52,6 @@
 #include "VsectionRoute.hh"
 
 #include <QMainWindow>
-#include <QElapsedTimer>
 #include <euclid/SunPosn.hh>
 
 class QActionGroup;
@@ -84,7 +83,8 @@ class WindMenuItem;
 class ZoomMenuItem;
 class TimeControl;
 class VlevelSelector;
-class AutomaticImageGenerator;
+class ImageGenerationManager;
+class WorldPlot;
 struct TimelineFrame;
 
 class GuiManager : public QMainWindow {
@@ -295,27 +295,10 @@ private:
 
   void _checkMovieFrameReady();
 
-  // The generator owns sequencing and readiness; this manager owns the live
-  // display operations and its bounded-wait timer.
-  bool _automaticImagesStarted;
-  bool _automaticImagesActive;
-  AutomaticImageGenerator *_automaticImageGenerator;
-  QTimer *_automaticImageTimeoutTimer;
-  QTimer *_automaticImageScheduleTimer;
-  DateTime _automaticBatchTime;
-  DateTime _nextAutomaticImageTime;
-  int _automaticBatchFailureBaseline;
-  int _automaticBatchAttempted;
-  int _automaticBatchSaved;
-  int _automaticBatchTimedOut;
-  int _automaticBatchProductOmissions;
-  QElapsedTimer _automaticBatchElapsedTimer;
-  int _automaticTotalFailures;
-  int _automaticTotalAttempted;
-  int _automaticTotalSaved;
-  int _automaticTotalTimedOut;
-  int _automaticTotalProductOmissions;
-  int _automaticCompletedBatches;
+  // The image manager owns unattended scheduling and publication. GuiManager
+  // retains only the live display state which must be restored between
+  // realtime catalog batches.
+  ImageGenerationManager *_imageGenerationManager;
 
   // Realtime scheduling temporarily drives the display through the catalog
   // matrix. Preserve the accepted interactive state so the interval between
@@ -331,12 +314,6 @@ private:
   bool _automaticSavedRealtime;
   VsectionRoute _automaticSavedVsectionRoute;
 
-  void _maybeStartAutomaticImages();
-  bool _validateAutomaticImageConfiguration(QString &error) const;
-  void _startAutomaticImageBatch(const DateTime &imageTime);
-  void _completeAutomaticImageBatch();
-  void _scheduleNextRealtimeImageBatch();
-  void _automaticImageScheduleDue();
   void _saveAutomaticDisplayState();
   void _restoreAutomaticDisplayState();
   void _startAutomaticImageJob();
@@ -345,25 +322,16 @@ private:
   void _selectAutomaticImageField(int fieldIndex,
                                   bool requestHorizontal = true);
   void _checkAutomaticImageReady();
-  void _failAutomaticImage(const QString &error);
-  void _automaticImageTimedOut();
-  bool _saveAutomaticHorizontalImage(QString &path, QString &error);
-  bool _saveAutomaticVerticalImage(QString &path, QString &error);
-  bool _publishAutomaticImage(const QImage &image,
-                              const DateTime &imageTime,
-                              bool writeGeoXml,
-                              QString &path,
+  bool _captureAutomaticImage(QImage &image,
+                              DateTime &dataTime,
+                              const WorldPlot *&world,
+                              bool &writeGeoXml,
                               QString &error);
+  void _cancelTimedOutImageRequest(int fieldIndex,
+                                   bool vertical,
+                                   int expectedGeneration);
   bool _buildAutomaticVsectionRoute(VsectionRoute &route,
                                     QString &error) const;
-  bool _writeAutomaticGeoXml(const QString &imagePath,
-                             const QImage &image,
-                             QString &error) const;
-  bool _writeAutomaticLatestDataInfo(const QString &imagePath,
-                                     const QByteArray &format,
-                                     const DateTime &imageTime,
-                                     QString &error) const;
-  void _finishAutomaticImageRun(const QString &fatalError);
 
   // maps
 
@@ -424,11 +392,6 @@ private:
   QLabel *_clickY;
   QTableWidget *_clickFieldsTable;
   bool _clickReportPlaced;
-
-  // automatic image time range
-
-  DateTime _imagesStartTime;
-  DateTime _imagesEndTime;
 
   // for timer
   

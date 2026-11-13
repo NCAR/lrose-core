@@ -20,8 +20,8 @@
 
 // AutomaticImageGenerator owns the deterministic part of unattended output:
 // job ordering, exact-request readiness, failure accounting, and catalog
-// naming. GuiManager remains responsible for changing live display state and
-// capturing widgets after this class declares the current job ready.
+// naming. ImageGenerationManager owns scheduling and publication, while
+// GuiManager changes live display state and captures the requested widget.
 
 class AutomaticImageGenerator
 {

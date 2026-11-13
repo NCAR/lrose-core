@@ -16,6 +16,7 @@ project (Lucid)
 set (SRCS
       Params.cc
       AutomaticImageGenerator.cc
+      ImageGenerationManager.cc
       Args.cc
       Cdraw_P.cc
       Cgui_P.cc

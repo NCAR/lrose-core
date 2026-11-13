@@ -51,8 +51,12 @@ HEADERS += WindManager.hh
 HEADERS += WorldPlot.hh
 HEADERS += XyBox.hh
 HEADERS += ZoomMenuItem.hh
+HEADERS += AutomaticImageGenerator.hh
+HEADERS += ImageGenerationManager.hh
 
 SOURCES += Args.cc
+SOURCES += AutomaticImageGenerator.cc
+SOURCES += ImageGenerationManager.cc
 SOURCES += GuiManager.cc
 SOURCES += Cdraw_P.cc
 SOURCES += Cgui_P.cc
