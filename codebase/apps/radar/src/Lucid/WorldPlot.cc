@@ -2720,6 +2720,30 @@ void WorldPlot::_createImage(QImage* &image)
   }
 }
 
+/////////////////////////////////////////////////////////////
+// establish the shared grid canvas without erasing an existing base field
+
+void WorldPlot::_prepareGridImageForField(bool isOverlayField)
+{
+  const bool canPreserveBase = isOverlayField && _gridImage != nullptr &&
+    _gridImage->width() == _widthPixels &&
+    _gridImage->height() == _heightPixels;
+  _createImage(_gridImage);
+  if (canPreserveBase) {
+    return;
+  }
+
+  // A main field owns initialization of the shared canvas. An overlay only
+  // initializes when no compatible base exists; its missing cells must
+  // otherwise leave the already-rendered field unchanged.
+  QPainter painter(_gridImage);
+  const char *missingColor =
+    string(_params.missing_data_color) == "transparent" ?
+      _params.background_color : _params.missing_data_color;
+  fillCanvas(painter, missingColor);
+  fillMargins(painter, _params.background_color);
+}
+
 ////////////////////////////////////////////////////////
 // get images after rendering
   
@@ -3050,20 +3074,13 @@ void WorldPlot::renderGridRect(int fieldNum,
 
   // check that image canvas is the correct size
   
-  _createImage(_gridImage);
+  _prepareGridImageForField(is_overlay_field);
   QPainter painter(_gridImage);
-
-  // Missing cells and areas outside the data domain use the missing color.
-  // Margins are restored to the background after rendering the data.
-  
-  fillCanvas(painter, string(_params.missing_data_color) == "transparent" ?
-             _params.background_color : _params.missing_data_color);
    
   const int nx = mr->h_fhdr.nx;
   const int ny = mr->h_fhdr.ny;
   const size_t expectedDataSize = (size_t) nx * (size_t) ny;
   if (nx <= 0 || ny <= 0 || mr->h_fl32_data.size() < expectedDataSize) {
-    fillMargins(painter, _params.background_color);
     return;
   }
 
@@ -3072,7 +3089,6 @@ void WorldPlot::renderGridRect(int fieldNum,
     bounds = {0, nx - 1, 0, ny - 1};
   }
   if (bounds.maxX < bounds.minX || bounds.maxY < bounds.minY) {
-    fillMargins(painter, _params.background_color);
     return;
   }
 
@@ -3121,10 +3137,6 @@ void WorldPlot::renderGridRect(int fieldNum,
          << " of " << expectedDataSize
          << ", drawn: " << cellsDrawn << endl;
   }
-
-  // fill margins with background color
-
-  fillMargins(painter, _params.background_color);
 
 }
 
@@ -3248,19 +3260,13 @@ void WorldPlot::renderGridDistorted(int fieldNum,
 
   // check that image canvas is the correct size
   
-  _createImage(_gridImage);
+  _prepareGridImageForField(is_overlay_field);
   QPainter painter(_gridImage);
-  
-  // Initialize missing data inside the plot; margins are restored below.
-  
-  fillCanvas(painter, string(_params.missing_data_color) == "transparent" ?
-             _params.background_color : _params.missing_data_color);
    
   const int nx = mr->h_fhdr.nx;
   const int ny = mr->h_fhdr.ny;
   const size_t expectedDataSize = (size_t) nx * (size_t) ny;
   if (nx <= 0 || ny <= 0 || mr->h_fl32_data.size() < expectedDataSize) {
-    fillMargins(painter, _params.background_color);
     return;
   }
 
@@ -3270,7 +3276,6 @@ void WorldPlot::renderGridDistorted(int fieldNum,
     bounds = {0, nx - 1, 0, ny - 1};
   }
   if (bounds.maxX < bounds.minX || bounds.maxY < bounds.minY) {
-    fillMargins(painter, _params.background_color);
     return;
   }
 
@@ -3373,10 +3378,6 @@ void WorldPlot::renderGridDistorted(int fieldNum,
          << ", drawn: " << cellsDrawn << endl;
   }
   
-  // fill margins with background color
-
-  fillMargins(painter, _params.background_color);
-
 }
 
 //////////////////////////////////////////////////////////
@@ -3575,13 +3576,7 @@ void WorldPlot::renderFilledContours(int fieldNum,
   const int croppedNx = bounds.maxX - bounds.minX + 1;
   const int croppedNy = bounds.maxY - bounds.minY + 1;
   if (croppedNx < 2 || croppedNy < 2) {
-    _createImage(_gridImage);
-    QPainter painter(_gridImage);
-    const char *missingColor =
-      string(_params.missing_data_color) == "transparent" ?
-      _params.background_color : _params.missing_data_color;
-    fillCanvas(painter, missingColor);
-    fillMargins(painter, _params.background_color);
+    _prepareGridImageForField(is_overlay_field);
     return;
   }
 
@@ -3650,11 +3645,21 @@ void WorldPlot::renderFilledContours(int fieldNum,
     return;
   }
 
-  _createImage(_gridImage);
-  QPainter painter(_gridImage);
+  _prepareGridImageForField(is_overlay_field);
+  QImage overlayImage;
+  QImage *contourImage = _gridImage;
+  if (is_overlay_field) {
+    // Filled-contour levels are cumulative. Render an overlay independently
+    // so its synthetic missing/out-of-range levels can clear earlier contour
+    // colors without clearing pixels from the base field.
+    overlayImage = QImage(_widthPixels, _heightPixels,
+                          QImage::Format_ARGB32);
+    overlayImage.fill(Qt::transparent);
+    contourImage = &overlayImage;
+  }
+  QPainter painter(contourImage);
   const char *missingColor = string(_params.missing_data_color) == "transparent" ?
     _params.background_color : _params.missing_data_color;
-  fillCanvas(painter, missingColor);
 
   // Contour vertices are expressed in the data projection.  Transform only
   // at this final drawing boundary so the same contour topology serves both
@@ -3662,6 +3667,7 @@ void WorldPlot::renderFilledContours(int fieldNum,
 
   const vector<MdvxContourLevel> &levels = contours.getLevels();
   const QBrush missingBrush{QColor(missingColor)};
+  const QBrush transparentBrush{QColor(Qt::transparent)};
   QRectF visiblePixels(QPointF(std::min(_xMinPixel, _xMaxPixel),
                                std::min(_yMinPixel, _yMaxPixel)),
                        QPointF(std::max(_xMinPixel, _xMaxPixel),
@@ -3677,14 +3683,18 @@ void WorldPlot::renderFilledContours(int fieldNum,
       continue;
     }
 
-    // Levels are cumulative and are painted from low to high.  The contour
-    // library marks the synthetic level above the color scale as extra; paint
-    // it back to the missing color instead of inheriting the highest valid
-    // color. Margins retain their separate background fill.
+    // Levels are cumulative and are painted from low to high. The synthetic
+    // level above the scale must remove colors inherited from lower levels.
+    // For an overlay that means clearing its temporary image; for a main
+    // field it means restoring the configured missing-data color.
 
-    const QBrush *levelBrush = &missingBrush;
-    if (!level.extra && level.index < (int) entries.size()) {
+    const QBrush *levelBrush = nullptr;
+    const bool clearsPriorLevels =
+      level.extra || level.index >= (int) entries.size();
+    if (!clearsPriorLevels) {
       levelBrush = entries[level.index].brush;
+    } else {
+      levelBrush = is_overlay_field ? &transparentBrush : &missingBrush;
     }
     if (levelBrush == nullptr) {
       continue;
@@ -3732,9 +3742,20 @@ void WorldPlot::renderFilledContours(int fieldNum,
       levelPath.addPolygon(polygon);
       ++trianglesDrawn;
     }
+    painter.setCompositionMode(
+      is_overlay_field && clearsPriorLevels ?
+        QPainter::CompositionMode_Source :
+        QPainter::CompositionMode_SourceOver);
     painter.fillPath(levelPath, *levelBrush);
   }
   painter.restore();
+  painter.end();
+
+  if (is_overlay_field) {
+    QPainter basePainter(_gridImage);
+    basePainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    basePainter.drawImage(0, 0, overlayImage);
+  }
 
   if (_gd.debug2) {
     cerr << "renderFilledContours cropped grid: "
@@ -3743,8 +3764,6 @@ void WorldPlot::renderFilledContours(int fieldNum,
          << ", triangles outside after projection: " << trianglesOutside
          << ", drawn: " << trianglesDrawn << endl;
   }
-
-  fillMargins(painter, _params.background_color);
 
 }
 
@@ -3838,23 +3857,7 @@ void WorldPlot::renderLineContours(MdvReader *mr)
 void WorldPlot::prepareGridImageForUnfilledField(bool is_overlay_field)
 
 {
-  const bool imageMissingOrWrongSize =
-    _gridImage == nullptr ||
-    _gridImage->width() != _widthPixels ||
-    _gridImage->height() != _heightPixels;
-  _createImage(_gridImage);
-
-  // A line-only main field owns the grid image and must erase the previous
-  // field. A line-only overlay deliberately retains that image so contours
-  // from one field can be composed over another field's filled rendering.
-  if (!is_overlay_field || imageMissingOrWrongSize) {
-    QPainter painter(_gridImage);
-    const char *missingColor =
-      string(_params.missing_data_color) == "transparent" ?
-        _params.background_color : _params.missing_data_color;
-    fillCanvas(painter, missingColor);
-    fillMargins(painter, _params.background_color);
-  }
+  _prepareGridImageForField(is_overlay_field);
 }
 
 /////////////////////////////////////////////////////
@@ -3870,13 +3873,8 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
 
   // check that image canvas is the correct size
   
-  _createImage(_gridImage);
+  _prepareGridImageForField(is_overlay_field);
   QPainter painter(_gridImage);
-  
-  // Initialize missing data inside the plot; margins are restored below.
-  
-  fillCanvas(painter, string(_params.missing_data_color) == "transparent" ?
-             _params.background_color : _params.missing_data_color);
    
   // the data projection type and plot projection type are not the same
   // so we need to compute the lat/lon of each corner of the grid cells
@@ -3924,6 +3922,10 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
   fl32 miss = mr->h_fhdr.missing_data_value;
   fl32 bad = mr->h_fhdr.bad_data_value;
   
+  // Radar gates can extend beyond the plot rectangle after projection. Keep
+  // an overlay from altering the axes and legends retained with its base.
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth, _plotHeight);
   for(int iy = 0; iy < mr->h_fhdr.ny; iy++) {
     for(int ix = 0; ix < mr->h_fhdr.nx; ix++, val++) {
       fl32 fval = *val;
@@ -3940,10 +3942,7 @@ void WorldPlot::renderGridRadarPolar(int fieldNum,
       fillPolygonPixelCoords(painter, *brush, points);
     } // ix
   } // iy
-  
-  // fill margins with background color
-
-  fillMargins(painter, _params.background_color);
+  painter.restore();
 
 }
 

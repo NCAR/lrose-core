@@ -820,6 +820,7 @@ private:
   // create images for rendering
   
   void _createImage(QImage* &image);
+  void _prepareGridImageForField(bool isOverlayField);
   
   void _drawRangeRingsHoriz(QPainter &painter,
                             double originLat,
