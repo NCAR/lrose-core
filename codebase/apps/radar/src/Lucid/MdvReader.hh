@@ -489,6 +489,7 @@ public:
   
   ReadVolH(MdvReader *parentObject,
            const HorizReadRequest &request,
+           bool debug,
            QObject *parent = nullptr);
 
 public slots:
@@ -500,6 +501,7 @@ signals:
 private:
   MdvReader* _mr;
   HorizReadRequest _request;
+  bool _debug;
 
 };
 

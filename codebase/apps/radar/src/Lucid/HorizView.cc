@@ -1263,10 +1263,7 @@ int HorizView::_renderFieldGrid(int page,
     _zoom->renderGridRadarPolar(page, mr,
                                 start_time, end_time,
                                 is_overlay_field);
-  } else if (mr->render_method == FILLED_CONTOURS ||
-             (mr->render_method == DYNAMIC_CONTOURS &&
-              (int64_t) mr->h_fhdr.nx * mr->h_fhdr.ny <
-                _params.dynamic_contour_threshold)) {
+  } else if (mr->render_method == FILLED_CONTOURS) {
     // Polar data retains its gate polygons, while Cartesian grids share one
     // contour path which handles any projection distortion internally.
     _zoom->renderFilledContours(page, mr,

@@ -41,7 +41,7 @@
 // Constructor
 
 ProdMenuItem::ProdMenuItem(QObject *parent) :
-        _parent(parent),
+        QObject(parent),
         _params(Params::Instance()),
         _gd(GlobalData::Instance()),
         _prodParams(NULL),

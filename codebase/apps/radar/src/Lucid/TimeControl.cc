@@ -296,7 +296,6 @@ void TimeControl::_populateGui()
 
   _realtimeSelector = new QCheckBox(realtimeFrame);
   _realtimeSelector->setChecked(_isRealtime);
-  _manager->setArchiveMode(!_isRealtime);
 
   realtimeFrameLayout->addWidget(realtimeTitle, 0,
                                  Qt::AlignTop | Qt::AlignCenter);
@@ -802,7 +801,6 @@ void TimeControl::restoreAfterAutomaticImages(const DateTime &startTime,
   // through the user-mode handler while the remaining state is incomplete.
   const QSignalBlocker realtimeBlocker(_realtimeSelector);
   _realtimeSelector->setChecked(_isRealtime);
-  _manager->setArchiveMode(!_isRealtime);
   _computeFrameTimes();
   _publishTimelineRange();
   for (int ii = 0; ii < _gd.num_datafields; ++ii) {
@@ -1648,7 +1646,6 @@ void TimeControl::_setRealtime(Qt::CheckState val)
     _isRealtime = false;
     cerr << "Archive mode" << endl;
   }
-  _manager->setArchiveMode(!_isRealtime);
 }
 #else
 void TimeControl::_setRealtime(int val)
@@ -1660,7 +1657,6 @@ void TimeControl::_setRealtime(int val)
     _isRealtime = true;
     cerr << "Realtime mode" << endl;
   }
-  _manager->setArchiveMode(!_isRealtime);
 }
 #endif
 

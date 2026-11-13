@@ -1313,15 +1313,22 @@ void MdvReader::_adjustBoundingBox(double lat, double lon,
 
 ReadVolH::ReadVolH(MdvReader *parentObject,
                    const HorizReadRequest &request,
+                   bool debug,
                    QObject *parent) :
-        QObject(parent), _mr(parentObject), _request(request)
+        QObject(parent), _mr(parentObject), _request(request), _debug(debug)
 {
 }
 
 void ReadVolH::doRead() {
-  cerr << "ReadVolH thread started. Parent object:" << _mr << endl;
+  // Capture the debug policy with the immutable request so the worker does
+  // not consult mutable GUI-owned state from its background thread.
+  if (_debug) {
+    cerr << "ReadVolH thread started. Parent object:" << _mr << endl;
+  }
   int iret = _mr->getHorizPlane(_request);
-  cerr << "ReadVolH returned, iret: " << iret << endl;
+  if (_debug) {
+    cerr << "ReadVolH returned, iret: " << iret << endl;
+  }
   emit readDone(iret);
 }
 
@@ -1344,7 +1351,7 @@ void MdvReader::startReadVolH() {
   // MdvReader's Qt thread.  Retain the QThread until it finishes so shutdown
   // can wait for any worker that still refers to this MdvReader.
 
-  ReadVolH* worker = new ReadVolH(this, request);
+  ReadVolH* worker = new ReadVolH(this, request, _gd.debug != 0);
   QThread* thread = new QThread;
   _readThreadsH.insert(thread);
   worker->moveToThread(thread);
@@ -1413,7 +1420,9 @@ void MdvReader::readDoneH(int readStatus, int generation)
   _horizCompletedGeneration = generation;
   _setValidH(iret_h_mdvx_read == 0);
   _setNewH(true);
-  cerr << "readDone in ReadVolH worker thread" << endl;
+  if (_gd.debug) {
+    cerr << "readDone in ReadVolH worker thread" << endl;
+  }
   _readBusyH = false;
   _retryCountH = 0;
   emit horizontalReadComplete(this, generation, true);

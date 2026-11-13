@@ -94,8 +94,6 @@ class GuiManager : public QMainWindow {
 
 public:
 
-  static GuiManager* Instance();
-
   // constructor
   
   GuiManager();
@@ -118,16 +116,9 @@ public:
 
   // void setXyZoom(double minY, double maxY, double minX, double maxX);
 
-  // set/get archive mode
-  
-  void setArchiveMode(bool state);
-  bool getArchiveMode() const { return _archiveMode; }
-
   // get selected name and units
 
   const string &getSelectedFieldLabel() const;
-  const string &getSelectedFieldName() const;
-  const string &getSelectedFieldUnits() const;
   int getSelectedFieldIndex() const { return _fieldNum; }
   bool mapsEnabled() const { return _mapsEnabled; }
 
@@ -190,7 +181,6 @@ private:
 
   int _mainTimerId;
   int _timerEventCount;
-  static GuiManager* m_pInstance;
 
   // main window frame
 
@@ -221,11 +211,6 @@ private:
   VlevelSelector *_vlevelSelector;
   bool _vlevelHasChanged;
 
-  // archive mode
-  
-  bool _archiveMode; // false for realtime mode
-  DateTime _archiveStartTime; // start time for archive mode
-  
   // top-level menus
 
   QMenu *_fileMenu;
@@ -389,18 +374,6 @@ private:
   QTableWidget *_clickFieldsTable;
   bool _clickReportPlaced;
 
-  // for timer
-  
-  int redraw_interv;
-  int update_interv;
-  int update_due;
-
-  struct timeval cur_tm;
-  struct timeval last_frame_tm;
-  struct timeval last_dcheck_tm;
-  time_t last_tick = 0;
-  long client_seq_num = 0;
-  
   //////////////////////////////
   // private methods
   
@@ -411,7 +384,6 @@ private:
 
   // local methods
   
-  void _clear();
   void _setupWindows();
   void _configureAutomaticImageUi();
   void _createActions();

@@ -156,13 +156,6 @@ QString safeFileNameComponent(QString value)
 
 } // namespace
 
-GuiManager* GuiManager::m_pInstance = NULL;
-
-GuiManager* GuiManager::Instance()
-{
-  return m_pInstance;
-}
-
 // Constructor
 
 GuiManager::GuiManager() :
@@ -172,10 +165,7 @@ GuiManager::GuiManager() :
 {
 
   _timerEventCount = 0;
-  _archiveMode = true;
   _mapsEnabled = _params.maps_enabled_at_startup;
-  
-  m_pInstance = this;
 
   // initialize
 
@@ -402,21 +392,6 @@ GuiManager::GuiManager() :
 
   _setupWindows();
 
-  // init for timer
-  
-  redraw_interv = _params.redraw_interval;
-  update_interv = _params.update_interval;
-  update_due = 0;
-  last_frame_tm = {0,0};
-  last_dcheck_tm = {0,0};
-  last_tick = 0;
-  client_seq_num = 0;
-
-  // startup mode
-  
-  setArchiveMode(_params.start_mode == Params::MODE_ARCHIVE);
-  _archiveStartTime.set(_params.archive_start_time);
-
   // qt attributes
   
   setAttribute(Qt::WA_TranslucentBackground);
@@ -513,16 +488,6 @@ void GuiManager::setZoomIndex(int zoomIndex)
 // {
 //   _horiz->setXyZoom(minY, maxY, minX, maxX);
 // }
-
-/////////////////////////////////////
-// set archive mode
-
-void GuiManager::setArchiveMode(bool state)
-{
-
-  _archiveMode = state;
-  
-}
 
 ////////////////////////////////////////////////////////
 // initialize storage and request state for a new movie build
@@ -769,20 +734,6 @@ const string &GuiManager::getSelectedFieldLabel() const
     _gd.mread[_fieldNum] ? _gd.mread[_fieldNum]->legend_name : empty;
 }
 
-const string &GuiManager::getSelectedFieldName() const
-{
-  static const string empty;
-  return _fieldNum >= 0 && _fieldNum < _gd.num_datafields &&
-    _gd.mread[_fieldNum] ? _gd.mread[_fieldNum]->field_label : empty;
-}
-
-const string &GuiManager::getSelectedFieldUnits() const
-{
-  static const string empty;
-  return _fieldNum >= 0 && _fieldNum < _gd.num_datafields &&
-    _gd.mread[_fieldNum] ? _gd.mread[_fieldNum]->field_units : empty;
-}
-  
 //////////////////////////////////////////////////////////////
 // respond to timer events
   
@@ -962,19 +913,6 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
     
   }
 
-}
-
-/////////////////////////////////////
-// clear display widgets
-
-void GuiManager::_clear()
-{
-  if (_horiz) {
-    _horiz->clear();
-  }
-  if (_vert) {
-    _vert->clear();
-  }
 }
 
 //////////////////////////////////////////////////
@@ -1479,8 +1417,8 @@ void GuiManager::_populateMapsMenu()
 
     // create action for this entry
 
-    MapMenuItem *item = new MapMenuItem(nullptr, this);
-    QAction *act = new QAction;
+    MapMenuItem *item = new MapMenuItem(this, this);
+    QAction *act = new QAction(item);
     item->setMapParams(&mparams);
     item->setMapIndex(imap);
     item->setOverlay(_gd.overlays[imap]);
@@ -1554,9 +1492,9 @@ void GuiManager::_populateProductsMenu()
     
     // create action for this entry
 
-    ProdMenuItem *item = new ProdMenuItem;
+    ProdMenuItem *item = new ProdMenuItem(this);
     const Product *product = _gd.prod_mgr->getProduct(iprod);
-    QAction *act = new QAction;
+    QAction *act = new QAction(item);
     item->setProdParams(&prodParams);
     item->setProduct(product);
     item->setProdIndex(iprod);
@@ -1636,7 +1574,7 @@ void GuiManager::_populateWindsMenu()
 
     // create action for this entry
 
-    QAction *act = new QAction;
+    QAction *act = new QAction(_windsMenu);
     act->setText(wparams.button_label);
     act->setStatusTip(tr("Turn wind layer on/off"));
     act->setCheckable(true);
@@ -1723,13 +1661,13 @@ void GuiManager::_populateZoomsMenu()
     
     // create item for this entry
     
-    ZoomMenuItem *item = new ZoomMenuItem(nullptr, this);
+    ZoomMenuItem *item = new ZoomMenuItem(this, this);
     item->setZoomParams(&zparams);
     item->setZoomIndex(izoom);
 
     // create action for the item
     
-    QAction *act = new QAction;
+    QAction *act = new QAction(item);
     item->setAction(act);
     act->setText(zparams.label);
     act->setStatusTip(tr("Select predefined zoom"));

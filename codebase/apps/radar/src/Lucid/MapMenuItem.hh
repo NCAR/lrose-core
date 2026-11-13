@@ -92,7 +92,6 @@ class DLL_EXPORT MapMenuItem : public QObject {
 
  protected:
 
-  QObject *_parent;
   GuiManager *_manager;
 
   Params &_params;

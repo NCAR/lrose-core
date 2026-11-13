@@ -43,7 +43,7 @@
 
 ZoomMenuItem::ZoomMenuItem(QObject *parent,
                            GuiManager *manager) :
-        _parent(parent),
+        QObject(parent),
         _manager(manager),
         _params(Params::Instance()),
         _gd(GlobalData::Instance()),
