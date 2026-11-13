@@ -34,9 +34,9 @@ class Constants {
 
 public:
 
-  static constexpr const char *LUCID_VERSION = "1.0 2025/03/01";
+  static constexpr const char *LUCID_VERSION = "0.5 2026/11/11";
   static constexpr const char *LUCID_COPYRIGHT =
-    "(c) 1991-2024,  National Center for Atmospheric Research";
+    "(c) 1991-2026,  National Center for Atmospheric Research";
 
   // return codes
   

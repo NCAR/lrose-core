@@ -65,8 +65,6 @@
 #include <QApplication>
 #include <QErrorMessage>
 
-// #define THIS_IS_MAIN 1 /* This is the main module */
-
 using namespace std;
 
 namespace {
@@ -97,6 +95,7 @@ double windDataScaleToMps(string units, double legacyFallback)
   // spelling was site-specific. Preserve that behavior when the explicit
   // per-layer units cannot be recognized.
   return legacyFallback;
+
 }
 
 } // namespace
@@ -124,7 +123,6 @@ Lucid::Lucid(int argc, char **argv) :
   char tdrpParamsPath[5000];
   bool usingLegacyParams = false;
   if (_args.getLegacyParamsPath(argc, (const char **) argv, legacyParamsPath) == 0) {
-    // _gd.db_name = strdup(legacyParamsPath.c_str());
     Path lpPath(legacyParamsPath);
     snprintf(tdrpParamsPath, 4999,
              "/tmp/Lucid.%s.%d.tdrp", lpPath.getFile().c_str(), getpid());
@@ -212,11 +210,13 @@ Lucid::~Lucid()
 
   // Product workers must finish before their GUI-owned snapshots are released.
   // GuiManager has already detached its repaint and status callbacks.
+
   delete _gd.prod_mgr;
   _gd.prod_mgr = nullptr;
 
   // WindManager coordinates readers owned by this Lucid QObject, so release
   // the coordinator before QObject tears down those reader children.
+
   delete _gd.wind_mgr;
   _gd.wind_mgr = nullptr;
 
@@ -299,23 +299,6 @@ int Lucid::_initDataSpace()
   snprintf(_gd.v_win.image_dir, MAX_PATH_LEN, "%s%s%s",
            _params.images_output_dir, PATH_DELIM, _params.images_vsect_subdir);
   
-  // STRcopy(_gd.h_win.image_fname, _params.horiz_image_fname, MAX_PATH_LEN);
-  // STRcopy(_gd.h_win.image_command, _params.horiz_image_command, MAX_PATH_LEN);
-
-  // STRcopy(_gd.v_win.image_fname, _params.vsection_image_fname, MAX_PATH_LEN);
-  // STRcopy(_gd.v_win.image_command, _params.vsection_image_command, MAX_PATH_LEN);
-
-  // If individual horiz and vert scripts have not been set
-  // use the general one.
-  
-  // if(strlen(_gd.h_win.image_command) < 3) {
-  //   STRcopy(_gd.h_win.image_command, _params.image_convert_script, MAX_PATH_LEN);
-  // }
-  
-  // if(strlen(_gd.v_win.image_command) < 3) {
-  //   STRcopy(_gd.v_win.image_command, _params.image_convert_script, MAX_PATH_LEN);
-  // }
-
   if(_params.idle_reset_seconds <= 0) {
     _params.idle_reset_seconds = 1000000000; // 30+ years
   }
@@ -349,20 +332,9 @@ int Lucid::_initDataSpace()
   // if domain follows data, do not clip or decimate
   
   if (_params.zoom_domain_follows_data) {
-    // _params.always_get_full_domain = pTRUE;
     _params.clip_to_current_zoom_on_mdv_request = pFALSE;
     _params.decimate_resolution_on_mdv_request = pFALSE;
   }
-
-  // Bookmarks for a menu of URLS - Index starts at 1
-  
-  // if(_params.bookmarks_n > 0) {
-  //   _gd.bookmark = new bookmark_t[_params.bookmarks_n];
-  // }
-  // for(int ii = 0; ii < _params.bookmarks_n; ii++) {
-  //   _gd.bookmark[ii].url = strdup(_params._bookmarks[ii].url);
-  //   _gd.bookmark[ii].label = strdup(_params._bookmarks[ii].label);
-  // }
 
   // origin latitude and longitude
   
@@ -593,13 +565,6 @@ int Lucid::_initDataSpace()
             _gd.h_win.min_y,_gd.h_win.max_y );
   }
   
-  // init current zoom
-  
-  // _gd.h_win.cmin_x = _gd.h_win.zmin_x[_gd.h_win.zoom_level];
-  // _gd.h_win.cmax_x = _gd.h_win.zmax_x[_gd.h_win.zoom_level];
-  // _gd.h_win.cmin_y = _gd.h_win.zmin_y[_gd.h_win.zoom_level];
-  // _gd.h_win.cmax_y = _gd.h_win.zmax_y[_gd.h_win.zoom_level];
-
   if(_gd.debug) {
     printf("CUR X: %g,%g   Y: %g,%g,\n",
            _gd.h_win.cmin_x,_gd.h_win.cmax_x,
@@ -631,6 +596,7 @@ int Lucid::_initDataSpace()
   _gd.v_win.max_x = _gd.h_win.max_x;
   _gd.v_win.min_y = _gd.h_win.min_y;
   _gd.v_win.max_y = _gd.h_win.max_y;
+
   // Set Vertical window route  params
 
   _gd.v_win.cmin_x = _gd.h_win.route.x_world[0];
@@ -652,19 +618,12 @@ int Lucid::_initDataSpace()
   _gd.layers.wind_mode = WIND_MODE_ON;
   _gd.layers.wind_time_scale_interval = _params.wind_time_scale_interval;
   _gd.layers.wind_scaler = _params.wind_scaler;
-  // _gd.legends.range = _params.range_rings;
-  // int plot_azimuths = _params.azimuth_lines;
-  // _gd.legends.azimuths = plot_azimuths ? AZIMUTH_BIT : 0;
 
   _initWinds();
 
   // initialize terrain
 
   _initTerrain();
-  
-  // initialize route winds
-  
-  // _initRouteWinds();
   
   // initialize the map overlays
 
@@ -775,9 +734,6 @@ int Lucid::_initGrids()
       mread->auto_render = fld.auto_render;
     }
     
-    // mread->last_elev = (char *)NULL;
-    // mread->elev_size = 0;
-    
     mread->plane = 0;
     mread->h_data_valid = 0;
     mread->v_data_valid = 0;
@@ -793,21 +749,11 @@ int Lucid::_initGrids()
     mread->v_last_transform  = -1;
     mread->h_fhdr.proj_origin_lat  = 0.0;
     mread->h_fhdr.proj_origin_lon  = 0.0;
-    // mread->time_list.num_alloc_entries = 0;
-    // mread->time_list.num_entries = 0;
     
     mread->units_label_cols = "KM";
     mread->units_label_rows = "KM";
     mread->units_label_sects = "KM";
     
-    // instantiate classes
-    // mread->h_mdvx = new DsMdvx;
-    // mread->v_mdvx = new DsMdvx;
-    // mread->h_mdvx_int16 = new MdvxField;
-    // mread->v_mdvx_int16 = new MdvxField;
-    // mread->proj = new MdvxProj;
-
-    // mread->colorMap = NULL;
     mread->color_file = fld.color_map;
     string colorscaleCachePath;
     if (_getColorscaleCachePath(mread->color_file, colorscaleCachePath)) {
@@ -815,8 +761,10 @@ int Lucid::_initGrids()
     }
     mread->colorMap.setDebug(_params.debug >= Params::DEBUG_EXTRA);
     mread->colorMap.readMap(colorscaleCachePath);
+
     // Interactive range edits are session state.  Retain the range loaded
     // from the configured color map so the field menu can restore it exactly.
+
     mread->colorMap.saveOriginalRange();
     mread->colorMap.setName(fld.color_map);
     mread->colorMap.setUnits(mread->field_units);
@@ -824,6 +772,7 @@ int Lucid::_initGrids()
   } // ifld
   
   /* Make sure the first field is always on */
+
   _gd.mread[0]->currently_displayed = 1;
 
   return iret;
@@ -933,8 +882,6 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   wrec->v_data_valid = 0;
   wrec->h_fhdr.scale = -1.0;
   wrec->h_last_scale = 0.0;
-  // wrec->time_list.num_alloc_entries = 0;
-  // wrec->time_list.num_entries = 0;
   
   wrec->legend_name = windp.legend_label;
   if (isW) {
@@ -947,6 +894,7 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   wrec->url = windp.url;
   
   /* Replace Underscores with spaces in names */
+
   if(_params.create_images_automatically == 0 && _params.replace_underscores) {
     for(int jj = (int) wrec->button_name.size() - 1; jj >= 0; jj--) {
       if(wrec->button_name[jj] == '_') {
@@ -977,17 +925,6 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   wrec->h_fhdr.proj_origin_lon = 0.0;
   wrec->h_fhdr.proj_origin_lat = 0.0;
   
-  // instantiate classes for data retrieval
-  
-  // wrec->h_mdvx = new DsMdvx;
-  // wrec->v_mdvx = new DsMdvx;
-  // wrec->h_mdvx_int16 = new MdvxField;
-  // wrec->v_mdvx_int16 = new MdvxField;
-
-  // projection
-  
-  // wrec->proj = new MdvxProj;
-
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1001,15 +938,19 @@ void Lucid::_initTerrain()
     // Legacy terrain parameters combine the MDV URL and field after the last
     // ampersand. MdvReader deliberately stores those separately, as normal
     // Lucid fields do, so split the compatibility syntax at initialization.
+
     const string terrainSpec(_params.terrain_url);
     const size_t fieldSep = terrainSpec.rfind('&');
+
     if (fieldSep == string::npos || fieldSep == 0 ||
         fieldSep + 1 >= terrainSpec.size()) {
       cerr << "ERROR - invalid terrain_url, expected URL&field: "
            << terrainSpec << endl;
     } else {
+
       // Keep a configured source available even when it starts hidden so the
       // vertical-window menu can enable it without reconstructing a reader.
+
       _gd.layers.earth.terrain_active =
         _params.terrain_active ? 1 : 0;
       _gd.layers.earth.terr = new MdvReader(this);
@@ -1021,12 +962,14 @@ void Lucid::_initTerrain()
       // Static terrain commonly predates the weather archive by decades.
       // Keep a broad search window, but below the signed-integer seconds
       // limit used when MdvReader packages an asynchronous request.
+
       _gd.layers.earth.terr->time_allowance = 35000000; // about 66 years
       _gd.layers.earth.terr->color_file = _params.landuse_colorscale;
       _gd.layers.earth.terr->button_name = _params.terrain_id_label;
       _gd.layers.earth.terr->legend_name = _params.terrain_id_label;
       _gd.layers.earth.terr->url = terrainSpec.substr(0, fieldSep);
       _gd.layers.earth.terr->field_label = terrainSpec.substr(fieldSep + 1);
+
     }
 
   }
@@ -1046,12 +989,6 @@ void Lucid::_initTerrain()
     _gd.layers.earth.land_use->legend_name = _params.terrain_id_label;
     _gd.layers.earth.land_use->url = _params.landuse_url;
     
-    // _gd.layers.earth.land_use->h_mdvx = new DsMdvx;
-    // _gd.layers.earth.land_use->v_mdvx = new DsMdvx;
-    // _gd.layers.earth.land_use->h_mdvx_int16 = new MdvxField;
-    // _gd.layers.earth.land_use->v_mdvx_int16 = new MdvxField;
-    // _gd.layers.earth.land_use->proj =  new MdvxProj;
-    
     switch(_params.landuse_render_method) {
       default:
       case Params::TERRAIN_RENDER_RECTANGLES:
@@ -1070,198 +1007,6 @@ void Lucid::_initTerrain()
   }
 
 }
-
-#ifdef NOT_ANY_MORE
-
-////////////////////////////////////////////////////////////////
-// Initialize route winds
-
-void Lucid::_initRouteWinds()
-{
-
-  // U WINDS Met Record
-
-  if(strlen(_params.route_u_url) > 1) {
-
-    MdvReader *mr = new MdvReader(this);
-    if(mr == NULL) {
-      fprintf(stderr,"Unable to allocate space for Route U Wind\n");
-      perror("cidd_init::_initRouteWinds");
-      exit(-1);
-    }
-    _gd.layers.route_wind.u_wind = mr;
-    mr->h_data_valid = 0;
-    mr->v_data_valid = 0;
-    mr->v_vcm.nentries = 0;
-    mr->h_vcm.nentries = 0;
-    mr->h_fhdr.scale = -1.0;
-    mr->h_last_scale = 0.0;
-    mr->legend_name = "ROUTE_U_WIND";
-    mr->button_name = "ROUTE_U_WIND";
-    mr->url = _params.route_u_url;
-
-    mr->field_units = "unknown";
-    mr->currently_displayed = 1;
-    mr->time_allowance = _params.time_search_stretch_factor *
-      _params.frame_interval_secs / 60.0;
-    mr->h_fhdr.proj_origin_lon = 0.0;
-    mr->h_fhdr.proj_origin_lat = 0.0;
-
-    // instantiate DsMdvx class
-    // mr->v_mdvx = new DsMdvx;
-    // mr->v_mdvx_int16 = new MdvxField;
-
-  } // U WINDS
-
-  // V WINDS Met Record
-  
-  if(strlen(_params.route_v_url) > 1) {
-    
-    MdvReader *mr = new MdvReader(this);
-    if(mr == NULL) {
-      fprintf(stderr,"Unable to allocate space for Route V Wind\n");
-      perror("cidd_init::_initRouteWinds");
-      exit(-1);
-    }
-    _gd.layers.route_wind.v_wind = mr;
-    mr->h_data_valid = 0;
-    mr->v_data_valid = 0;
-    mr->v_vcm.nentries = 0;
-    mr->h_vcm.nentries = 0;
-    mr->h_fhdr.scale = -1.0;
-    mr->h_last_scale = 0.0;
-    mr->legend_name = "ROUTE_V_WIND";
-    mr->button_name = "ROUTE_V_WIND";
-    mr->url = _params.route_v_url;
-    
-    mr->field_units = "unknown";
-    mr->currently_displayed = 1;
-    mr->time_allowance = _params.time_search_stretch_factor *
-      _params.frame_interval_secs / 60.0;
-    mr->h_fhdr.proj_origin_lon = 0.0;
-    mr->h_fhdr.proj_origin_lat = 0.0;
-    
-    // instantiate DsMdvx class
-    // mr->v_mdvx = new DsMdvx;
-    // mr->v_mdvx_int16 = new MdvxField;
-
-  } // V WINDS
-
-  // How many are route are defined in the file
-  _gd.layers.route_wind.num_predef_routes = _params.route_paths_n;
-
-  // Allocate space for num_predef_routes + 1 for the custom/user defined route
-
-  if((_gd.layers.route_wind.route =(route_track_t *) 
-      calloc(_gd.layers.route_wind.num_predef_routes + 1, sizeof(route_track_t))) == NULL) {
-    fprintf(stderr,"Unable to allocate space for %d Routes\n",
-            _gd.layers.route_wind.num_predef_routes + 1);
-    perror("CIDD route_winds_init");
-    exit(-1);
-  }
-  
-  char *cfield[Constants::NUM_PARSE_FIELDS];
-  for(int ii = 0; ii < Constants::NUM_PARSE_FIELDS; ii++) {
-    cfield[ii] =(char *) calloc(Constants::PARSE_FIELD_SIZE, 1);
-  }
-  
-  for(int ii = 0; ii < _gd.layers.route_wind.num_predef_routes; ii++) {
-    
-    int num_fields = STRparse(_params._route_paths[ii], cfield,
-                              strlen(_params._route_paths[ii]),
-                              Constants::NUM_PARSE_FIELDS, Constants::PARSE_FIELD_SIZE);
-    if(num_fields == Constants::NUM_PARSE_FIELDS) {
-      fprintf(stderr,"Warning: Route path: %s\n Too long. Only %d segments allowed \n",
-              _params._route_paths[ii], Constants::MAX_ROUTE);
-    }
-    
-    // Collect Label
-    strncpy(_gd.layers.route_wind.route[ii].route_label, cfield[0], 62);
-    
-    // Collect the number of points  & segments 
-    _gd.layers.route_wind.route[ii].num_segments = atoi(cfield[1]) -1;
-    if(_params.route_debug) {
-      fprintf(stderr,"\nRoute: %s - %d segments\n",
-              _gd.layers.route_wind.route[ii].route_label,
-              _gd.layers.route_wind.route[ii].num_segments);
-    }
-
-    // Sanity check
-    if(_gd.layers.route_wind.route[ii].num_segments <= 0 || 
-       _gd.layers.route_wind.route[ii].num_segments >  Constants::MAX_ROUTE) {
-      fprintf(stderr,"Warning: Route path: %s\n Error Only 1-%d segments allowed \n",
-              _params._route_paths[ii], Constants::MAX_ROUTE);
-      continue;
-    }
-    
-    int index = 2; // The first triplet.
-    // Pick up each triplet
-    for(int kk = 0; kk <= _gd.layers.route_wind.route[ii].num_segments; kk++, index+=3 ) {
-
-      strncpy(_gd.layers.route_wind.route[ii].navaid_id[kk], cfield[index], 16);
-      _gd.layers.route_wind.route[ii].y_world[kk] = atof(cfield[index +1]);
-      _gd.layers.route_wind.route[ii].x_world[kk] = atof(cfield[index +2]);
-
-      switch (_gd.display_projection) {
-        case  Mdvx::PROJ_LATLON:
-          _normalizeLongitude(_gd.h_win.min_x, _gd.h_win.max_x,
-                              &_gd.layers.route_wind.route[ii].x_world[kk]);
-          break;
-
-        default :
-          _normalizeLongitude(-180.0, 180.0,
-                              &_gd.layers.route_wind.route[ii].x_world[kk]);
-          break;
-
-      } 
-
-      _gd.proj.latlon2xy(_gd.layers.route_wind.route[ii].y_world[kk],
-                         _gd.layers.route_wind.route[ii].x_world[kk],
-                         _gd.layers.route_wind.route[ii].x_world[kk],
-                         _gd.layers.route_wind.route[ii].y_world[kk]);
-
-      if(_params.route_debug) {
-        fprintf(stderr,"%s:  %g,    %g\n",
-                _gd.layers.route_wind.route[ii].navaid_id[kk],
-                _gd.layers.route_wind.route[ii].x_world[kk],
-                _gd.layers.route_wind.route[ii].y_world[kk]);
-      }
-    }
-    
-    // Compute the segment lengths
-    _gd.layers.route_wind.route[ii].total_length = 0.0;
-    for(int kk = 0; kk < _gd.layers.route_wind.route[ii].num_segments; kk++) {
-      _gd.layers.route_wind.route[ii].seg_length[kk] = 
-        _dispProjDist(_gd.layers.route_wind.route[ii].x_world[kk],
-                      _gd.layers.route_wind.route[ii].y_world[kk],
-                      _gd.layers.route_wind.route[ii].x_world[kk+1],
-                      _gd.layers.route_wind.route[ii].y_world[kk+1]);
-      _gd.layers.route_wind.route[ii].total_length +=
-        _gd.layers.route_wind.route[ii].seg_length[kk];
-    }
-    
-  } // ii
-
-  // Copy the initial route definition into the space reserved for the Custom route
-  memcpy(_gd.layers.route_wind.route + _gd.layers.route_wind.num_predef_routes,
-         &_gd.h_win.route,sizeof(route_track_t));
-
-  /* free temp space */
-  for(int ii = 0; ii < Constants::NUM_PARSE_FIELDS; ii++) {
-    free(cfield[ii]);
-  }
-  
-  if (_params.route_winds_active) {
-    _gd.layers.route_wind.has_params = 1;
-    // Use the first route as the default.
-    memcpy(&_gd.h_win.route, _gd.layers.route_wind.route, sizeof(route_track_t)); 
-  } else {
-    _gd.layers.route_wind.has_params = 0;
-  }
-
-}
-
-#endif
 
 /************************************************************************
  * INIT_MAPS - read in map files
@@ -1353,7 +1098,6 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
   int len,point;
   int num_points;        
   int num_fields;  /* number of fields (tokens) found in input line */
-  // int ret_stat;
   char name_buf[2048];  /* Buffer for input lines */
   char *lasts;
 
@@ -1936,6 +1680,7 @@ int Lucid::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const stri
     }
 
     if(SO != NULL) SHPDestroyObject(SO);
+
   }  // End of each object
 
   return 0;
@@ -2296,11 +2041,6 @@ int Lucid::_initZooms()
 
     }
     
-    // _gd.h_win.zmin_x[izoom] = minx;
-    // _gd.h_win.zmin_y[izoom] = miny;
-    // _gd.h_win.zmax_x[izoom] = maxx;
-    // _gd.h_win.zmax_y[izoom] = maxy;
-    
     double delta_x = maxx - minx;
     double delta_y = maxy - miny;
 
@@ -2336,20 +2076,15 @@ int Lucid::_initZooms()
       miny =  _gd.h_win.max_y - delta_y;
     }
 
-    // if(_params.horiz_aspect_ratio <= 0.0) {
-    //   _params.horiz_aspect_ratio = fabs(delta_x/delta_y);
-    // }
-    
     _gd.aspect_correction =
       cos(((maxy + miny)/2.0) * Constants::LUCID_DEG_TO_RAD);
-
+    
     /* Make sure domains are consistant with the window aspect ratio */
 
     if (_gd.display_projection == Mdvx::PROJ_LATLON) {
       /* forshorten the Y coords to make things look better */
       delta_y /= _gd.aspect_correction;
     }
-    // delta_x /= _params.aspect_ratio;
 
     if(delta_x > delta_y) {
       maxy += ((delta_x - delta_y) /2.0) ;
@@ -2471,53 +2206,18 @@ void Lucid::_initSymprods()
 
   _gd.prod_mgr = new ProductMgr;
   
-  if(_params.symprod_prod_info_n <= 32) {
-    int value = 0;
-    for (int ii = 0; ii < _params.symprod_prod_info_n && ii < 32; ii++) {
-      if(_params._symprod_prod_info[ii].on_by_default == TRUE) {
-        value |= 1 << ii;
-      }
-      _gd.prod_mgr->set_product_active
-        (ii, (int) _params._symprod_prod_info[ii].on_by_default);
-    } // ii
-
-    // Set the widget's value and size the panel to fit the widget
-    
-    if(!_gd.run_unmapped) {
-      // xv_set(_gd.prod_pu->prod_st, PANEL_VALUE, value,XV_SHOW,TRUE,XV_X,0,XV_Y,0, NULL);
-      // xv_set(_gd.prod_pu->prod_pu,XV_HEIGHT,xv_get(_gd.prod_pu->prod_st,XV_HEIGHT),NULL);
-      // xv_set(_gd.prod_pu->prod_pu,XV_WIDTH,xv_get(_gd.prod_pu->prod_st,XV_WIDTH),NULL);
+  int value = 0;
+  for (int ii = 0; ii < _params.symprod_prod_info_n && ii < 32; ii++) {
+    if(_params._symprod_prod_info[ii].on_by_default == TRUE) {
+      value |= 1 << ii;
     }
-    
-  } else { // Use a  scrolling list when over 32 products are configured in
-    
-    for (int i = 0; i < _params.symprod_prod_info_n ; i++) {
-      if(!_gd.run_unmapped) {
-        // xv_set(_gd.prod_pu->prod_lst,
-        //      PANEL_LIST_INSERT, i,
-        //      PANEL_LIST_STRING, i, _params._symprod_prod_info[i].menu_label,
-        //      PANEL_LIST_CLIENT_DATA, i, i,
-        //      NULL);
-        
-        if(_params._symprod_prod_info[i].on_by_default == TRUE) {
-          // xv_set(_gd.prod_pu->prod_lst,
-          //      PANEL_LIST_SELECT, i, TRUE,
-          //      NULL);
-        }
-      }
-
-      _gd.prod_mgr->set_product_active(i,(int) _params._symprod_prod_info[i].on_by_default);
-    }
-
-    if(!_gd.run_unmapped) {
-      // Set the widget's value and size the panel to fit the widget
-      // xv_set(_gd.prod_pu->prod_st,XV_SHOW,FALSE, NULL);
-      // xv_set(_gd.prod_pu->prod_lst, XV_SHOW,TRUE,XV_X,0,XV_Y,0, NULL);
-      // xv_set(_gd.prod_pu->prod_pu,XV_HEIGHT,xv_get(_gd.prod_pu->prod_lst,XV_HEIGHT),NULL);
-      // xv_set(_gd.prod_pu->prod_pu,XV_WIDTH,xv_get(_gd.prod_pu->prod_lst,XV_WIDTH),NULL);
-    }
+    _gd.prod_mgr->set_product_active
+      (ii, (int) _params._symprod_prod_info[ii].on_by_default);
+  } // ii
+  
+  if(!_gd.run_unmapped) {
   }
-
+  
 }
 
 /************************************************************************

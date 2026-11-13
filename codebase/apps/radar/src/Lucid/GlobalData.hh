@@ -444,11 +444,6 @@ public:
 
   route_track_t route;
 
-  // Drawable vis_xid; /* X ID of Visible canvas */
-  // Drawable *can_xid; /* X ID of last stage canvases to draw products on top of */
-  // Drawable tmp_xid; /* X ID of area to drap fields that aren't updated */
-  // Drawable page_xid[MAX_DATA_FIELDS]; /* draw Pixmap for each field */
-
   QPaintDevice *vis_pdev; /* X ID of Visible canvas */
   draw_dim_t win_dim; /* Window dimensions and position */
   draw_dim_t can_dim; /* Canvas dimensions and position */
@@ -708,13 +703,6 @@ public:
   win_param_t h_win;     // Plan view X window parameters
   win_param_t v_win;     // Cross Section (Vert) view X window parameters
 
-  // Drawing contexts
-
-  // FONTS
-  // int num_fonts;                  // number of fonts in use 
-  // QFont ciddfont[Constants::MAX_FONTS];        // fonts in size order 
-  // QFont *fontst[Constants::MAX_FONTS]; // Font info 
-
   // Symbolic products - features
   
   prod_info_t prod;
@@ -729,28 +717,10 @@ public:
   
   layers_t layers;
 
-  // Control variables for Legends
-  
-  // legend_t legends;
-  
   // map overlays
   
   vector<MapOverlay_t *> overlays;
 
-  // Time scale plotter class for movie panel
-
-  // TimePlot *time_plot;
-
-  // Control vartiables for movie looping
-  
-  // I/O status infomation
-  
-  // io_info_t io_info;
-
-  // Array of bookmarks
-  
-  // bookmark_t *bookmark;
-  
   // shared memory
 
   int coord_key;
