@@ -406,10 +406,14 @@ void HorizView::paintEvent(QPaintEvent *event)
 
     painter.save();
 
-    int startX = _mouseReleaseX - _params.click_cross_size / 2;
-    int endX = _mouseReleaseX + _params.click_cross_size / 2;
-    int startY = _mouseReleaseY - _params.click_cross_size / 2;
-    int endY = _mouseReleaseY + _params.click_cross_size / 2;
+    // The click is retained in world coordinates so its marker follows the
+    // same location when a resize or view transform changes pixel geometry.
+    const int clickX = _zoom->getIxPixel(_worldClickX);
+    const int clickY = _zoom->getIyPixel(_worldClickY);
+    int startX = clickX - _params.click_cross_size / 2;
+    int endX = clickX + _params.click_cross_size / 2;
+    int startY = clickY - _params.click_cross_size / 2;
+    int endY = clickY + _params.click_cross_size / 2;
 
     QPen pen(painter.pen());
     pen.setColor(_params.click_cross_color);
@@ -417,21 +421,10 @@ void HorizView::paintEvent(QPaintEvent *event)
     pen.setWidth(_params.click_cross_line_width);
     painter.setPen(pen);
 
-    painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
-    painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
+    painter.drawLine(startX, clickY, endX, clickY);
+    painter.drawLine(clickX, startY, clickX, endY);
     
     painter.restore();
-
-    char titleStr[1024];
-    if (_proj.getProjType() == Mdvx::PROJ_LATLON) {
-      snprintf(titleStr, 1023, "Click lat,lon: (%.3f, %.3f)",
-               _worldClickLat, _worldClickLon);
-    } else {
-      snprintf(titleStr, 1023, "Click lat,lon:(%.3f, %.3f) x,y:(%.3f, %.3f)",
-               _worldClickLat, _worldClickLon, _worldClickX, _worldClickY);
-    }
-    _manager.setTitleBarStr(titleStr);
-             
   }
 
   _sizeChanged = false;
@@ -592,7 +585,7 @@ void HorizView::_updateClickReport()
       Mdvx::vertTypeZUnits(primaryField.fhdr.vlevel_type);
   }
   report.fields = _getFieldValues(_worldClickLat, _worldClickLon);
-  _manager.updateClickReport(report);
+  emit clickReportAvailable(report);
 }
 
 ////////////////////////////////////////////////////////
@@ -750,29 +743,6 @@ void HorizView::_drawPickedProduct(QPainter &painter)
                                 _zoom->getYMinPixel()) + 1));
   _gd.prod_mgr->drawPickedQt(painter, context);
   painter.restore();
-}
-
-/*************************************************************************
- * react to click point from remote display - Sprite
- * redraw the click point cursor
- */
-
-void HorizView::setClickPoint(double azimuthDeg,
-                              double elevationDeg,
-                              double rangeKm)
-{
-
-  double x_km =
-    rangeKm * sin(azimuthDeg * DEG_TO_RAD) * cos(elevationDeg * DEG_TO_RAD);
-  double y_km =
-    rangeKm * cos(azimuthDeg * DEG_TO_RAD) * cos(elevationDeg * DEG_TO_RAD);
-
-  _mouseReleaseX = _zoom->getIxPixel(x_km);
-  _mouseReleaseY = _zoom->getIyPixel(y_km);
-  _pointClicked = true;
-
-  update();
-
 }
 
 /*************************************************************************
@@ -1696,17 +1666,10 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     _worldClickY = _worldReleaseY;
     _proj.xy2latlon(_worldClickX, _worldClickY, _worldClickLat, _worldClickLon);
     _haveClickLocation = true;
-    _manager.setOverlaysHaveChanged(true);
 
-    // Build the report from the primary field's actual returned metadata and
-    // sample every cached field at the same geographic point.
+    // HorizView owns coordinate conversion and grid sampling; GuiManager
+    // receives a view-independent report and owns its presentation.
     _updateClickReport();
-    _manager.showClickDialog();
-    
-    // Emit a signal to indicate that the click location has changed
-
-    emit locationClicked(_worldClickX, _worldClickY);
-    
     update();
 
   } else {

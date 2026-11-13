@@ -40,7 +40,6 @@
 #include <limits>
 #include <QActionGroup>
 #include <QApplication>
-#include <QButtonGroup>
 #include <QFrame>
 #include <QFont>
 #include <QLabel>
@@ -56,9 +55,6 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QProcess>
-#include <QListWidget>
-#include <QListWidgetItem>
-#include <QRadioButton>
 #include <QStatusBar>
 #include <QDateTime>
 #include <QDateTimeEdit>
@@ -96,9 +92,6 @@
 #include <toolsa/TaStr.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <radar/RadarComplex.hh>
-#include <Radx/RadxFile.hh>
-#include <Radx/NcfRadxFile.hh>
-#include <Radx/RadxSweep.hh>
 #include <toolsa/DateTime.hh>
 #include <Radx/RadxPath.hh>
 #include <Ncxx/H5x.hh>
@@ -923,10 +916,6 @@ void GuiManager::timerEvent(QTimerEvent *event)
     _maybeStartAutomaticImages();
   }
 
-  // read click point info from FMQ
-  
-  _readClickPoint();
-  
   // handle client events
   
   if(_gd.coord_expt->client_event != NO_MESSAGE) {
@@ -1132,20 +1121,16 @@ void GuiManager::_setupWindows()
   // set pointer to the vertWidget
   
   _vert = _vertWindow->getView();
+  // Each view owns the projection-specific sampling while GuiManager owns
+  // the one shared dialog and its visibility policy.
+  const auto displayClickReport = [this](const ClickReport &report) {
+    updateClickReport(report);
+    showClickDialog();
+  };
+  connect(_horiz, &HorizView::clickReportAvailable,
+          this, displayClickReport);
   connect(_vert, &VertView::clickReportAvailable,
-          this, [this](const ClickReport &report) {
-            updateClickReport(report);
-            showClickDialog();
-          });
-  
-  // connect slots for location
-
-#ifdef NOTNOW
-  connect(_horiz, &HorizView::locationClicked,
-          this, &GuiManager::_horizLocationClicked);
-  connect(_vert, &VertWidget::locationClicked,
-          this, &GuiManager::_vertLocationClicked);
-#endif
+          this, displayClickReport);
 
   // Right-button gestures select vertical sections, so HorizView emits this
   // request only for the explicit Shift-right-click help gesture.
@@ -2489,189 +2474,6 @@ void GuiManager::_saveFile() {
 }
 
 
-#ifdef NOTNOW
-
-///////////////////////////////////////////////////
-// respond to a change in click location on the HORIZ
-
-void GuiManager::_horizLocationClicked(double xkm, double ykm, 
-                                       const RadxRay *closestRay)
-
-{
-
-  // find the relevant ray
-  // ignore closest ray sent in
-  
-  double azDeg = 0.0;
-  if (xkm != 0 || ykm != 0) {
-    azDeg = atan2(xkm, ykm) * RAD_TO_DEG;
-    if (azDeg < 0) {
-      azDeg += 360.0;
-    }
-  }
-  if (_params.debug) {
-    cerr << "    azDeg = " << azDeg << endl;
-  }
-  
-  int rayIndex = ((int) (azDeg * RayLoc::RAY_LOC_RES)) % RayLoc::RAY_LOC_N;
-  if (_params.debug) {
-    cerr << "    rayIndex = " << rayIndex << endl;
-  }
-  
-  const RadxRay *ray = _rayLoc[rayIndex].ray;
-  if (ray == NULL) {
-    // no ray data yet
-    if (_params.debug) {
-      cerr << "    No ray data yet..." << endl;
-      cerr << "      active = " << _rayLoc[rayIndex].active << endl;
-      cerr << "      startIndex = " << _rayLoc[rayIndex].startIndex << endl;
-      cerr << "      endIndex = " << _rayLoc[rayIndex].endIndex << endl;
-    }
-    return;
-  }
-
-  _locationClicked(xkm, ykm, ray);
-
-}
-
-///////////////////////////////////////////////////
-// respond to a change in click location on the VERT
-
-void GuiManager::_vertLocationClicked(double xkm, double ykm, 
-                                      const RadxRay *closestRay)
-  
-{
-
-  _locationClicked(xkm, ykm, closestRay);
-
-}
-
-////////////////////////////////////////////////////////////////////////
-// respond to a change in click location on one of the windows
-
-void GuiManager::_locationClicked(double xkm, double ykm,
-                                  const RadxRay *ray)
-  
-{
-
-  if (_params.debug) {
-    cerr << "*** Entering GuiManager::_locationClicked()" << endl;
-  }
-  
-  double rangeKm = sqrt(xkm * xkm + ykm * ykm);
-  int gateNum = (int) 
-    ((rangeKm - ray->getStartRangeKm()) / ray->getGateSpacingKm() + 0.5);
-
-  if (gateNum < 0 || gateNum >= (int) ray->getNGates()) {
-    //user clicked outside of ray
-    return;
-  }
-
-  if (_params.debug) {
-    cerr << "Clicked on location: xkm, ykm: " << xkm << ", " << ykm << endl;
-    cerr << "  rangeKm, gateNum: " << rangeKm << ", " << gateNum << endl;
-    cerr << "  az, el from ray: "
-         << ray->getAzimuthDeg() << ", "
-         << ray->getElevationDeg() << endl;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      ray->print(cerr);
-    }
-  }
-
-  DateTime rayTime(ray->getTimeSecs());
-  char text[256];
-  snprintf(text, 256, "%.4d/%.2d/%.2d",
-           rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
-  _dateClicked->setText(text);
-
-  snprintf(text, 256, "%.2d:%.2d:%.2d.%.3d",
-           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
-           ((int) (ray->getNanoSecs() / 1000000)));
-  _timeClicked->setText(text);
-  
-  _setText(text, sizeof(text), "%6.2f", ray->getElevationDeg());
-  _elevClicked->setText(text);
-  
-  _setText(text, sizeof(text), "%6.2f", ray->getAzimuthDeg());
-  _azClicked->setText(text);
-  
-  _setText(text, sizeof(text), "%d", gateNum);
-  _gateNumClicked->setText(text);
-  
-  _setText(text, sizeof(text), "%6.2f", rangeKm);
-  _rangeClicked->setText(text);
-
-  if (_radarAltKm > -9990) {
-    double gateHtKm = _beamHt.computeHtKm(ray->getElevationDeg(), rangeKm);
-    _setText(text, sizeof(text), "%6.2f (km)", gateHtKm);
-    _altitudeClicked->setText(text);
-  }
-
-  for (size_t ii = 0; ii < _fields.size(); ii++) {
-    _fields[ii]->setSelectValue(-9999.0);
-    _fields[ii]->setDialogText("----");
-  }
-
-  vector<RadxField *> rflds = ray->getFields();
-  for (size_t ifield = 0; ifield < rflds.size(); ifield++) {
-    const RadxField *field = rflds[ifield];
-  
-    const string fieldName = field->getName();
-    if (fieldName.size() == 0) {
-      continue;
-    }
-    Radx::fl32 *data = (Radx::fl32 *) field->getData();
-    double val = data[gateNum];
-    const string fieldUnits = field->getUnits();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Field name, selected name: "
-	   << fieldName << ", "
-	   << _selectedName << endl;
-    }
-    if (fieldName == _selectedName) {
-      char text[128];
-      if (fabs(val) < 10000) {
-        snprintf(text, 128, "%g %s", val, fieldUnits.c_str());
-      } else {
-        snprintf(text, 128, "%g %s", -9999.0, fieldUnits.c_str());
-      }
-      _valueLabel->setText(text);
-    }
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Field name, units, val: "
-	   << field->getName() << ", "
-	   << field->getUnits() << ", "
-	   << val << endl;
-    }
-    for (size_t ii = 0; ii < _fields.size(); ii++) {
-      if (_fields[ii]->getName() == fieldName) {
-	_fields[ii]->setSelectValue(val);
-        char text[128];
-        if (fabs(val) > 10000) {
-          snprintf(text, 128, "----");
-        } else if (fabs(val) > 10) {
-          snprintf(text, 128, "%.2f", val);
-        } else {
-          snprintf(text, 128, "%.3f", val);
-        }
-        _fields[ii]->setDialogText(text);
-      }
-    }
-
-  } // ifield
-
-  // update the status panel
-  
-  _updateStatusPanel(ray);
-
-  // write the click location to FMQ
-
-  _writeClickPointXml2Fmq(ray, rangeKm, gateNum);
-  
-}
-
-#endif
-  
 /////////////////////////////////////
 // show the time controller dialog
 
@@ -3793,72 +3595,6 @@ void GuiManager::_createImageFilesAllLevels()
 
 }
 
-/////////////////////////////////////////////////////
-// creating one image per field
-
-void GuiManager::_createImageFiles()
-{
-
-  if (_params.debug) {
-    cerr << "GuiManager::_createImageFiles()" << endl;
-  }
-
-  PMU_auto_register("createImageFiles");
-
-  // plot the data
-
-  // _horiz->setStartOfSweep(true);
-  // _vert->setStartOfSweep(true);
-  // _handleArchiveData();
-
-  // set times from plots
-
-#ifdef NOTYET
-  
-  if (_vertMode) {
-    _plotStartTime = _vert->getPlotStartTime();
-    _plotEndTime = _vert->getPlotEndTime();
-  } else {
-    _plotStartTime = _horiz->getPlotStartTime();
-    _plotEndTime = _horiz->getPlotEndTime();
-  }
-
-  // save current field
-
-  int fieldNum = _fieldNum;
-  
-  // loop through fields
-
-  for (size_t ii = 0; ii < _fields.size(); ii++) {
-    
-    // select field
-    
-    _changeField(ii, false);
-    
-    // create plot
-    
-    if (_params.debug) {
-      cerr << "Creating image for field: " << getSelectedFieldLabel() << endl;
-    }
-    
-    // save image for plot
-    
-    _saveImageToFile(false);
-
-  }
-
-  // change field back
-
-  _changeField(fieldNum, false);
-
-#endif
-  
-  if (_params.debug) {
-    cerr << "Done creating image files" << endl;
-  }
-
-}
-
 string GuiManager::_getOutputPath(bool interactive, string &outputDir, string fileExt)
 {
   // set times from plots
@@ -4173,162 +3909,6 @@ void GuiManager::_showInteractionHelp(const QPoint &pos)
 }
 
 
-#ifdef NOTNOW
-// Creates the boundary editor dialog and associated event slots
-void GuiManager::_createBoundaryEditorDialog()
-{
-  _boundaryEditorDialog = new QDialog(this);
-  _boundaryEditorDialog->setMaximumHeight(368);
-  _boundaryEditorDialog->setWindowTitle("Boundary Editor");
-
-  Qt::Alignment alignCenter(Qt::AlignCenter);
-  // Qt::Alignment alignRight(Qt::AlignRight);
-
-  _boundaryEditorDialogLayout = new QGridLayout(_boundaryEditorDialog);
-  _boundaryEditorDialogLayout->setVerticalSpacing(4);
-
-  int row = 0;
-  _boundaryEditorInfoLabel = new QLabel("Boundary Editor allows you to select\nan area of your radar image", _boundaryEditorDialog);
-  _boundaryEditorDialogLayout->addWidget(_boundaryEditorInfoLabel, row, 0, 1, 2, alignCenter);
-  
-  _boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
-
-  QLabel *toolsCaption = new QLabel("Editor Tools:", _boundaryEditorDialog);
-  _boundaryEditorDialogLayout->addWidget(toolsCaption, ++row, 0, 1, 2, alignCenter);
-
-  _boundaryEditorPolygonBtn = new QPushButton(_boundaryEditorDialog);
-  _boundaryEditorPolygonBtn->setMaximumWidth(130);
-  _boundaryEditorPolygonBtn->setText(" Polygon");
-  _boundaryEditorPolygonBtn->setIcon(QIcon("images/polygon.png"));
-  _boundaryEditorPolygonBtn->setCheckable(TRUE);
-  _boundaryEditorPolygonBtn->setFocusPolicy(Qt::NoFocus);
-  _boundaryEditorDialogLayout->addWidget(_boundaryEditorPolygonBtn, ++row, 0);
-  connect(_boundaryEditorPolygonBtn, &QPushButton::clicked,
-          this, &GuiManager::polygonBtnBoundaryEditorClick);
-
-  _boundaryEditorCircleBtn = new QPushButton(_boundaryEditorDialog);
-  _boundaryEditorCircleBtn->setMaximumWidth(130);
-  _boundaryEditorCircleBtn->setText(" Circle  ");
-  _boundaryEditorCircleBtn->setIcon(QIcon("images/circle.png"));
-  _boundaryEditorCircleBtn->setCheckable(TRUE);
-  _boundaryEditorCircleBtn->setFocusPolicy(Qt::NoFocus);
-  _boundaryEditorDialogLayout->addWidget(_boundaryEditorCircleBtn, ++row, 0);
-  connect(_boundaryEditorCircleBtn, &QPushButton::clicked,
-          this, &GuiManager::circleBtnBoundaryEditorClick());
-
-  _circleRadiusSlider = new QSlider(Qt::Horizontal);
-  _circleRadiusSlider->setFocusPolicy(Qt::StrongFocus);
-  _circleRadiusSlider->setTracking(true);
-  _circleRadiusSlider->setSingleStep(1);
-  _circleRadiusSlider->setPageStep(0);
-  _circleRadiusSlider->setFixedWidth(100);
-  _circleRadiusSlider->setToolTip("Set the circle radius");
-  _circleRadiusSlider->setMaximumWidth(180);
-  _circleRadiusSlider->setValue(50);
-  _circleRadiusSlider->setMinimum(8);
-  _circleRadiusSlider->setMaximum(200);
-  _boundaryEditorDialogLayout->addWidget(_circleRadiusSlider, row, 1);
-  connect(_circleRadiusSlider, SIGNAL(valueChanged(int)),
-          this, &GuiManager::_circleRadiusSliderValueChanged(int));
-
-  _boundaryEditorBrushBtn = new QPushButton(_boundaryEditorDialog);
-  _boundaryEditorBrushBtn->setMaximumWidth(130);
-  _boundaryEditorBrushBtn->setText(" Brush ");
-  _boundaryEditorBrushBtn->setIcon(QIcon("images/brush.png"));
-  _boundaryEditorBrushBtn->setCheckable(TRUE);
-  _boundaryEditorBrushBtn->setFocusPolicy(Qt::NoFocus);
-  _boundaryEditorDialogLayout->addWidget(_boundaryEditorBrushBtn, ++row, 0);
-  connect(_boundaryEditorBrushBtn, &QPushButton::clicked,
-          this, &GuiManager::brushBtnBoundaryEditorClick());
-
-  _brushRadiusSlider = new QSlider(Qt::Horizontal);
-  _brushRadiusSlider->setFocusPolicy(Qt::StrongFocus);
-  _brushRadiusSlider->setTracking(true);
-  _brushRadiusSlider->setSingleStep(1);
-  _brushRadiusSlider->setPageStep(0);
-  _brushRadiusSlider->setFixedWidth(100);
-  _brushRadiusSlider->setToolTip("Set the smart brush radius");
-  _brushRadiusSlider->setMaximumWidth(180);
-  _brushRadiusSlider->setValue(18);
-  _brushRadiusSlider->setMinimum(12);
-  _brushRadiusSlider->setMaximum(75);
-  _boundaryEditorDialogLayout->addWidget(_brushRadiusSlider, row, 1);
-  connect(_brushRadiusSlider, SIGNAL(valueChanged(int)),
-          this, &GuiManager::_brushRadiusSliderValueChanged(int));
-
-  _boundaryEditorBrushBtn->setChecked(TRUE);
-  _boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog),
-                                         ++row, 0, 1, 2, alignCenter);
-  
-  _boundaryEditorList = new QListWidget(_boundaryEditorDialog);
-  QListWidgetItem *newItem5 = new QListWidgetItem;
-  newItem5->setText("Boundary5 <none>");
-  _boundaryEditorList->insertItem(0, newItem5);
-  QListWidgetItem *newItem4 = new QListWidgetItem;
-  newItem4->setText("Boundary4 <none>");
-  _boundaryEditorList->insertItem(0, newItem4);
-  QListWidgetItem *newItem3 = new QListWidgetItem;
-  newItem3->setText("Boundary3 <none>");
-  _boundaryEditorList->insertItem(0, newItem3);
-  QListWidgetItem *newItem2 = new QListWidgetItem;
-  newItem2->setText("Boundary2 <none>");
-  _boundaryEditorList->insertItem(0, newItem2);
-  QListWidgetItem *newItem1 = new QListWidgetItem;
-  newItem1->setText("Boundary1");
-  _boundaryEditorList->insertItem(0, newItem1);
-  _boundaryEditorDialogLayout->addWidget(_boundaryEditorList, ++row, 0, 1, 2);
-  connect(_boundaryEditorList, SIGNAL(itemClicked(QListWidgetItem*)),
-          this, &GuiManager::onBoundaryEditorListItemClicked(QListWidgetItem*));
-
-  // horizontal layout contains the "Clear", "Help", and "Save" buttons
-  QHBoxLayout *hLayout = new QHBoxLayout;
-  _boundaryEditorDialogLayout->addLayout(hLayout, ++row, 0, 1, 2);
-  
-  _boundaryEditorClearBtn = new QPushButton(_boundaryEditorDialog);
-  _boundaryEditorClearBtn->setText("Clear");
-  hLayout->addWidget(_boundaryEditorClearBtn);
-  connect(_boundaryEditorClearBtn, &QPushButton::clicked,
-          this, &GuiManager::clearBoundaryEditorClick());
-
-  _boundaryEditorHelpBtn = new QPushButton(_boundaryEditorDialog);
-  _boundaryEditorHelpBtn->setText("Help");
-  hLayout->addWidget(_boundaryEditorHelpBtn);
-  connect(_boundaryEditorHelpBtn, &QPushButton::clicked,
-          this, &GuiManager::helpBoundaryEditorClick());
-  
-  _boundaryEditorSaveBtn = new QPushButton(_boundaryEditorDialog);
-  _boundaryEditorSaveBtn->setText("Save");
-  hLayout->addWidget(_boundaryEditorSaveBtn);
-
-}
-#endif
-
-/////////////////////////////////////////////////////////
-// read click point from FMQ - i.e. from another app
-
-void GuiManager::_readClickPoint()
-{
-
-#ifdef NOTNOW
-  bool gotNew = false;
-  
-  if (_readClickPointFmq(gotNew) == 0) {
-    if (gotNew) {
-      if (_params.debug) {
-        cerr << "====>> gotNewClickInfo" << endl;
-      }
-      if (_horiz) {
-        _horiz->setClickPoint(_clickPointFmq.getAzimuth(),
-                              _clickPointFmq.getElevation(),
-                              _clickPointFmq.getRangeKm());
-      }
-    }
-  }
-#endif
-  
-}
-
-  
 /**********************************************************************
  * HANDLE_CLIENT_EVENT: 
  */
@@ -4336,33 +3916,6 @@ void GuiManager::_readClickPoint()
 void GuiManager::_handleClientEvent()
 {
   // Remote CIDD client commands are not implemented by the Qt application.
-}
-
-///////////////////////////////////////////
-// set text for GUI panels
-
-void GuiManager::_setText(char *text,
-                          size_t maxTextLen,
-                          const char *format,
-                          int val)
-{
-  if (abs(val) < 9999) {
-    snprintf(text, maxTextLen, format, val);
-  } else {
-    snprintf(text, maxTextLen, format, -9999);
-  }
-}
-
-void GuiManager::_setText(char *text,
-                          size_t maxTextLen,
-                          const char *format,
-                          double val)
-{
-  if (fabs(val) < 9999) {
-    snprintf(text, maxTextLen, format, val);
-  } else {
-    snprintf(text, maxTextLen, format, -9999.0);
-  }
 }
 
 /////////////////////////////

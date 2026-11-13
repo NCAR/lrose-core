@@ -173,7 +173,6 @@ class DLL_EXPORT VertView : public QWidget
   // Qt signals //
   ////////////////
 
-  void locationClicked(double xkm, double ykm, const RadxRay *closestRay);
   void clickReportAvailable(const ClickReport &report);
   
   //////////////

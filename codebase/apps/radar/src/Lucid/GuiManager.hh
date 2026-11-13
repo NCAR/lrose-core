@@ -53,15 +53,10 @@
 
 #include <QMainWindow>
 #include <QElapsedTimer>
-#include <QListWidgetItem>
 #include <euclid/SunPosn.hh>
-#include <Radx/RadxRay.hh>
 
 class QActionGroup;
-class QButtonGroup;
-class QRadioButton;
 class QPushButton;
-class QListWidget;
 class QFrame;
 class QDialog;
 class QLabel;
@@ -253,7 +248,6 @@ private:
 
   QAction *_showValueAct;
   QAction *_showClickAct;
-  QAction *_showBoundaryEditorAct;
 
   QAction *_gridsAct;
   QAction *_fixedRingsAct;
@@ -287,8 +281,6 @@ private:
   int _prevFieldTableCol;
   int _prevFieldTableRow;
 
-  QLabel *_valueLabel;
-  
   bool _fieldHasChanged;
   bool _horizontalRequestHasChanged;
 
@@ -501,7 +493,6 @@ private:
   bool _checkForStateChange();
   // bool _checkForZoomChange();
   void _handleFirstTimerEvent();
-  void _readClickPoint();
     
   // for timer
   
@@ -509,11 +500,6 @@ private:
   void _handleImageCreationEvent();
 
        
-  // setting text
-
-  void _setText(char *text, size_t maxTextLen, const char *format, int val);
-  void _setText(char *text, size_t maxTextLen, const char *format, double val);
-
   int _requestVerticalSection();
   int _requestVerticalWinds();
   int _requestVerticalTerrain();
@@ -590,7 +576,6 @@ private slots:
   void _createRealtimeImageFiles();
   void _createArchiveImageFiles();
   void _createImageFilesAllLevels();
-  void _createImageFiles();
   string _getOutputPath(bool interactive, string &outputDir, string fileExt);
 
   // open file 

@@ -120,13 +120,6 @@ class DLL_EXPORT HorizView : public QWidget
 
   void setShowValue(bool state);
   
-  // react to click point from remote display - Sprite
-  // redraw the click point cursor
-
-  void setClickPoint(double azimuthDeg,
-                     double elevationDeg,
-                     double rangeKm);
-
   // The method that is called when a repaint event is triggered.
 
   void paintEvent(QPaintEvent *event);
@@ -162,7 +155,7 @@ class DLL_EXPORT HorizView : public QWidget
 
  signals:
  
-  void locationClicked(double xkm, double ykm);
+  void clickReportAvailable(const ClickReport &report);
   void verticalRouteCompleted(const VsectionRoute &route);
 
   //////////////
