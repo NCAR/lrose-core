@@ -612,6 +612,13 @@ public:
 
   void renderLineContours(MdvReader *mr);
 
+  // Mask plan-view cells where the physical terrain surface reaches or
+  // exceeds the selected height of the primary field.
+  void renderTerrainMask(MdvReader *terrain,
+                         double selectedHeight,
+                         double heightScaler,
+                         const char *coreColor);
+
   // Establish an empty grid layer for a line-only field. Main fields replace
   // stale data; overlays preserve the field already rendered beneath them.
 

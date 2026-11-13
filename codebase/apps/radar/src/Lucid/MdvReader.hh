@@ -353,6 +353,8 @@ public:
   };
 
 signals:
+  void horizontalReadComplete(MdvReader *reader, int generation,
+                              bool success);
   void verticalReadComplete(MdvReader *reader);
 
 public slots:

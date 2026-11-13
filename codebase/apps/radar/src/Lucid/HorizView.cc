@@ -1335,6 +1335,24 @@ int HorizView::_controlRenderGrid(int page,
   }
 
   MdvReader *mr = _gd.mread[page];
+
+  const auto renderTerrainMask = [this, mr]() {
+    MdvReader *terrain = _gd.layers.earth.terr;
+    if (!_gd.layers.earth.terrain_active || terrain == nullptr ||
+        !terrain->isValidH() || mr == nullptr || !mr->isValidH() ||
+        mr->composite_mode != FALSE || mr->ds_fhdr.nz <= 1 ||
+        mr->ds_fhdr.vlevel_type != Mdvx::VERT_TYPE_Z ||
+        mr->proj.getProjType() == Mdvx::PROJ_POLAR_RADAR ||
+        mr->h_fhdr.nz <= 0) {
+      return;
+    }
+
+    // Use the actual level returned by MDV rather than the requested value;
+    // a closest-plane request may legitimately select a neighboring level.
+    _zoom->renderTerrainMask(terrain, mr->h_vhdr.level[0],
+                             _params.terrain_height_scaler,
+                             _params.terrain_earth_color2);
+  };
  
   // Clear time lists
   // if(_gd.time_plot) _gd.time_plot->clear_grid_tlist();
@@ -1352,15 +1370,7 @@ int HorizView::_controlRenderGrid(int page,
 
   if(!_params.draw_main_on_top) {
     _renderFieldGrid(page, mr, start_time, end_time, 0);
-    if(_gd.layers.earth.terrain_active &&
-       (mr->ds_fhdr.nz > 1) &&
-       ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
-       (mr->composite_mode == FALSE) &&
-       mr->ds_fhdr.vlevel_type != Mdvx::VERT_TYPE_ELEV) {
-#ifdef HAVE_XID
-      render_h_terrain(xid, page);
-#endif
-    }
+    renderTerrainMask();
   }
      
   /* Render each of the gridded_overlay fields */
@@ -1373,14 +1383,7 @@ int HorizView::_controlRenderGrid(int page,
   
   if(_params.draw_main_on_top) {
     _renderFieldGrid(page, mr, start_time, end_time, 0);
-    if(_gd.layers.earth.terrain_active && 
-       ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
-       (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1)) {
-
-#ifdef HAVE_XID
-      render_h_terrain(xid, page);
-#endif
-    }
+    renderTerrainMask();
   }
 
   /* render contours if selected */

@@ -160,8 +160,8 @@ public:
   void movieStateChanged();
   void showMovieInteractionBlocked();
 
-  // Change the optional ground overlay without rebuilding the field section.
-  void setVerticalTerrainEnabled(bool enabled);
+  // Change the optional ground overlay without rebuilding either field view.
+  void setTerrainEnabled(bool enabled);
   
   // override event handling
 
@@ -296,8 +296,11 @@ private:
   bool _movieVerticalReady;
   int _movieVerticalRequestGeneration;
 
-  // Terrain uses its own vertical MDV request. A failed completion is still
-  // settled so optional ground data cannot stall movies or unattended output.
+  // Terrain uses independent horizontal and vertical MDV requests. Failed
+  // completions are settled so optional context cannot stall captured output.
+  int _terrainHorizontalRequestGeneration;
+  bool _terrainHorizontalSettled;
+  bool _terrainHorizontalRequestPending;
   int _terrainVerticalRequestGeneration;
   bool _terrainVerticalSettled;
   string _movieFieldLabel;
@@ -519,6 +522,8 @@ private:
   int _requestVerticalSection();
   int _requestVerticalWinds();
   int _requestVerticalTerrain();
+  bool _horizontalTerrainApplies() const;
+  int _requestHorizontalTerrain();
   void _setDisplayTime(time_t utime);
   void _setEndFrame(int num_frames);
   void _updateMoviePopup();
@@ -582,6 +587,8 @@ private slots:
 
   void _verticalRouteCompleted(const VsectionRoute &route);
   void _verticalReadComplete(MdvReader *reader);
+  void _terrainHorizontalReadComplete(MdvReader *reader, int generation,
+                                      bool success);
   void _terrainVerticalReadComplete(MdvReader *reader);
   
   // images

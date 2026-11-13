@@ -3380,6 +3380,135 @@ void WorldPlot::renderGridDistorted(int fieldNum,
 }
 
 //////////////////////////////////////////////////////////
+// mask horizontal data where terrain reaches the selected height
+
+void WorldPlot::renderTerrainMask(MdvReader *terrain,
+                                  double selectedHeight,
+                                  double heightScaler,
+                                  const char *coreColor)
+{
+  if (terrain == nullptr || !terrain->isValidH() ||
+      !std::isfinite(selectedHeight) || !std::isfinite(heightScaler)) {
+    return;
+  }
+
+  const int nx = terrain->h_fhdr.nx;
+  const int ny = terrain->h_fhdr.ny;
+  const size_t expectedDataSize = static_cast<size_t>(nx) *
+                                  static_cast<size_t>(ny);
+  if (_gridImage == nullptr || nx <= 0 || ny <= 0 ||
+      terrain->h_fl32_data.size() < expectedDataSize) {
+    return;
+  }
+
+  GridIndexBounds bounds;
+  if (!_computeVisibleGridBounds(*terrain, bounds)) {
+    bounds = {0, nx - 1, 0, ny - 1};
+  }
+  if (bounds.maxX < bounds.minX || bounds.maxY < bounds.minY) {
+    return;
+  }
+
+  QColor terrainColor(coreColor);
+  if (!terrainColor.isValid()) {
+    terrainColor = QColor(139, 0, 0); // X11 red4, the legacy default
+  }
+
+  QPainter painter(_gridImage);
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth, _plotHeight);
+  painter.setPen(Qt::NoPen);
+  painter.setBrush(terrainColor);
+
+  const double dx = terrain->h_fhdr.grid_dx;
+  const double dy = terrain->h_fhdr.grid_dy;
+  const double lowX = terrain->h_fhdr.grid_minx - dx / 2.0;
+  const double lowY = terrain->h_fhdr.grid_miny - dy / 2.0;
+  const fl32 missing = terrain->h_fhdr.missing_data_value;
+  const fl32 bad = terrain->h_fhdr.bad_data_value;
+  const bool matchingProjection =
+    terrain->proj.getPjgMath() == _proj.getPjgMath();
+
+  if (matchingProjection) {
+    for (int iy = bounds.minY; iy <= bounds.maxY; ++iy) {
+      const double y0 = getYPixel(lowY + iy * dy);
+      const double y1 = getYPixel(lowY + (iy + 1) * dy);
+      const double top = std::min(y0, y1);
+      const double height = std::abs(y1 - y0) + 1.0;
+      for (int ix = bounds.minX; ix <= bounds.maxX; ++ix) {
+        const size_t dataIndex = static_cast<size_t>(iy) * nx + ix;
+        const fl32 rawHeight = terrain->h_fl32_data[dataIndex];
+        if (!std::isfinite(rawHeight) || rawHeight == missing ||
+            rawHeight == bad || rawHeight * heightScaler < selectedHeight) {
+          continue;
+        }
+        const double x0 = getXPixel(lowX + ix * dx);
+        const double x1 = getXPixel(lowX + (ix + 1) * dx);
+        painter.fillRect(QRectF(std::min(x0, x1), top,
+                                std::abs(x1 - x0) + 1.0, height),
+                         terrainColor);
+      }
+    }
+    painter.restore();
+    return;
+  }
+
+  // Distorted terrain uses the same cell-corner projection as gridded data.
+  // Keeping the mask in the terrain grid avoids interpolation across steep
+  // topography while still supporting unlike Cartesian projections.
+  const int nVerticesX = bounds.maxX - bounds.minX + 2;
+  auto projectRow = [this, terrain, lowX, lowY, dx, dy,
+                     &bounds, nVerticesX]
+                    (int gridY, vector<QPointF> &row) {
+    row.clear();
+    row.reserve(nVerticesX);
+    const double dataY = lowY + gridY * dy;
+    for (int localX = 0; localX < nVerticesX; ++localX) {
+      const int gridX = bounds.minX + localX;
+      double lat = 0.0;
+      double lon = 0.0;
+      terrain->proj.xy2latlon(lowX + gridX * dx, dataY, lat, lon);
+      double displayX = 0.0;
+      double displayY = 0.0;
+      _proj.latlon2xy(lat, lon, displayX, displayY);
+      row.push_back(getPixelPointF(displayX, displayY));
+    }
+  };
+
+  vector<QPointF> lowerVertices;
+  vector<QPointF> upperVertices;
+  projectRow(bounds.minY, lowerVertices);
+  for (int iy = bounds.minY; iy <= bounds.maxY; ++iy) {
+    projectRow(iy + 1, upperVertices);
+    for (int ix = bounds.minX; ix <= bounds.maxX; ++ix) {
+      const size_t dataIndex = static_cast<size_t>(iy) * nx + ix;
+      const fl32 rawHeight = terrain->h_fl32_data[dataIndex];
+      if (!std::isfinite(rawHeight) || rawHeight == missing ||
+          rawHeight == bad || rawHeight * heightScaler < selectedHeight) {
+        continue;
+      }
+
+      const int localX = ix - bounds.minX;
+      const QPointF &p0 = lowerVertices[localX];
+      const QPointF &p1 = lowerVertices[localX + 1];
+      const QPointF &p2 = upperVertices[localX + 1];
+      const QPointF &p3 = upperVertices[localX];
+      if (!std::isfinite(p0.x()) || !std::isfinite(p0.y()) ||
+          !std::isfinite(p1.x()) || !std::isfinite(p1.y()) ||
+          !std::isfinite(p2.x()) || !std::isfinite(p2.y()) ||
+          !std::isfinite(p3.x()) || !std::isfinite(p3.y())) {
+        continue;
+      }
+      QPolygonF polygon;
+      polygon << p0 << p1 << p2 << p3;
+      painter.drawPolygon(polygon);
+    }
+    lowerVertices.swap(upperVertices);
+  }
+  painter.restore();
+}
+
+//////////////////////////////////////////////////////////
 // render filled contours
 // handles both matching and differing data/display projections
 

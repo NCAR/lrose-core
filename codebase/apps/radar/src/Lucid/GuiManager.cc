@@ -241,6 +241,9 @@ GuiManager::GuiManager() :
   _movieIncludesVertical = false;
   _movieVerticalReady = false;
   _movieVerticalRequestGeneration = -1;
+  _terrainHorizontalRequestGeneration = -1;
+  _terrainHorizontalSettled = true;
+  _terrainHorizontalRequestPending = false;
   _terrainVerticalRequestGeneration = -1;
   _terrainVerticalSettled = true;
 
@@ -425,6 +428,8 @@ void GuiManager::prepareMovieBuild(int frameCount)
     _vertWindow->isVisible() && _vsectionRoute.size() >= 2;
   _movieVerticalReady = !_movieIncludesVertical;
   _movieVerticalRequestGeneration = -1;
+  _terrainHorizontalSettled = true;
+  _terrainHorizontalRequestPending = false;
   _terrainVerticalSettled = true;
   _movieFieldLabel = getSelectedFieldLabel();
   if (_horiz) {
@@ -445,6 +450,8 @@ void GuiManager::beginMovieFrameBuild(int frameIndex)
   _movieGridReady = false;
   _movieVerticalReady = !_movieIncludesVertical;
   _movieVerticalRequestGeneration = -1;
+  _terrainHorizontalSettled = true;
+  _terrainHorizontalRequestPending = false;
   _terrainVerticalSettled = true;
   _horizontalRequestHasChanged = true;
   if (_horiz) {
@@ -745,9 +752,9 @@ void GuiManager::showMovieInteractionBlocked()
 }
 
 /////////////////////////////////////////////////////////////
-// set visibility and request state for vertical-section terrain
+// set visibility and request state for terrain in both field views
 
-void GuiManager::setVerticalTerrainEnabled(bool enabled)
+void GuiManager::setTerrainEnabled(bool enabled)
 {
   MdvReader *terrain = _gd.layers.earth.terr;
   const bool active = enabled && terrain != nullptr;
@@ -761,8 +768,17 @@ void GuiManager::setVerticalTerrainEnabled(bool enabled)
     if (terrain != nullptr && _terrainVerticalRequestGeneration >= 0) {
       terrain->cancelVertRequest(_terrainVerticalRequestGeneration);
     }
+    if (terrain != nullptr && _terrainHorizontalRequestGeneration >= 0) {
+      terrain->cancelHorizRequest(_terrainHorizontalRequestGeneration);
+    }
+    _terrainHorizontalRequestGeneration = -1;
+    _terrainHorizontalRequestPending = false;
+    _terrainHorizontalSettled = true;
     _terrainVerticalRequestGeneration = -1;
     _terrainVerticalSettled = true;
+    if (_horiz != nullptr) {
+      _horiz->rerenderGrid();
+    }
     if (_vert != nullptr) {
       _vert->rerenderTerrain();
     }
@@ -771,9 +787,13 @@ void GuiManager::setVerticalTerrainEnabled(bool enabled)
     return;
   }
 
-  // The route may have changed while terrain was hidden, so request its
-  // profile again instead of assuming the reader's cached section matches.
+  // Either view may have changed while terrain was hidden. Reissue each
+  // applicable request rather than assuming the cached geometry still fits.
+  _requestHorizontalTerrain();
   _requestVerticalTerrain();
+  if (_horiz != nullptr) {
+    _horiz->rerenderGrid();
+  }
   if (_vert != nullptr) {
     _vert->rerenderTerrain();
   }
@@ -798,6 +818,9 @@ void GuiManager::_checkMovieFrameReady()
     return;
   }
   if (_movieIncludesVertical && !_terrainVerticalSettled) {
+    return;
+  }
+  if (!_terrainHorizontalSettled) {
     return;
   }
 
@@ -2345,6 +2368,10 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
     if (_gd.movie.cur_frame < 0) {
       frameIndex = _gd.movie.num_frames - 1;
     }
+    // The main header determines whether its vertical coordinate can be
+    // compared meaningfully with MSL terrain. Start that optional request
+    // before rendering so a retained terrain plane can be used immediately.
+    _requestHorizontalTerrain();
     _horiz->triggerGridRendering(_gd.h_win.page, frameIndex);
     if (_automaticImagesActive &&
         _automaticImageGenerator->currentJobIsHorizontal() &&
@@ -3184,8 +3211,8 @@ void GuiManager::_checkAutomaticImageReady()
        _gd.wind_mgr->activeVerticalWindsSettled() :
        _gd.wind_mgr->activeWindsReady());
   const bool terrainReady =
-    !_automaticImageGenerator->currentJobIsVertical() ||
-    _terrainVerticalSettled;
+    _automaticImageGenerator->currentJobIsVertical() ?
+      _terrainVerticalSettled : _terrainHorizontalSettled;
   if (!_automaticImageGenerator->readyToSave(productsReady && windsReady &&
                                               terrainReady)) {
     return;
@@ -4843,6 +4870,63 @@ int GuiManager::_requestVerticalWinds()
 }
 
 /////////////////////////////////////////////////////////////
+// determine whether the selected plan view has a terrain height coordinate
+
+bool GuiManager::_horizontalTerrainApplies() const
+{
+  if (!_gd.layers.earth.terrain_active ||
+      _gd.layers.earth.terr == nullptr ||
+      _gd.h_win.page < 0 || _gd.h_win.page >= _gd.num_datafields) {
+    return false;
+  }
+
+  const MdvReader *field = _gd.mread[_gd.h_win.page];
+  return field != nullptr && field->isValidH() &&
+    field->ds_fhdr.nz > 1 && field->composite_mode == FALSE &&
+    field->ds_fhdr.vlevel_type == Mdvx::VERT_TYPE_Z &&
+    field->proj.getProjType() != Mdvx::PROJ_POLAR_RADAR;
+}
+
+/////////////////////////////////////////////////////////////
+// request the horizontal terrain plane for the current plan view
+
+int GuiManager::_requestHorizontalTerrain()
+{
+  MdvReader *terrain = _gd.layers.earth.terr;
+  _terrainHorizontalSettled = true;
+  if (!_horizontalTerrainApplies() || terrain == nullptr) {
+    _terrainHorizontalRequestGeneration = -1;
+    _terrainHorizontalRequestPending = false;
+    return -1;
+  }
+
+  connect(terrain, &MdvReader::horizontalReadComplete,
+          this, &GuiManager::_terrainHorizontalReadComplete,
+          Qt::UniqueConnection);
+
+  // Do not supersede a blocking library call: MdvReader cannot interrupt it,
+  // and bumping its generation would discard the result without starting the
+  // replacement. Queue the latest display state for that completion instead.
+  if (terrain->getReadBusyH()) {
+    _terrainHorizontalRequestPending = true;
+    _terrainHorizontalSettled = false;
+    return _terrainHorizontalRequestGeneration;
+  }
+
+  _terrainHorizontalRequestPending = false;
+  _terrainHorizontalSettled = false;
+  _terrainHorizontalRequestGeneration = terrain->requestHorizPlane(
+    _timeControl->getSelectedTime(), 0.0, _gd.h_win.page);
+
+  // An unchanged static request completes synchronously from retained data
+  // and therefore does not pass through readDoneH or emit a completion signal.
+  if (terrain->isNewH()) {
+    _terrainHorizontalSettled = true;
+  }
+  return _terrainHorizontalRequestGeneration;
+}
+
+/////////////////////////////////////////////////////////////
 // request the static elevation field along the retained section route
 
 int GuiManager::_requestVerticalTerrain()
@@ -4930,6 +5014,52 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
   _vertWindow->raise();
   _vertWindow->activateWindow();
   // statusBar()->showMessage("Vertical section ready", 5000);
+}
+
+/////////////////////////////////////////////////////////////
+// publish a completed horizontal terrain plane
+
+void GuiManager::_terrainHorizontalReadComplete(MdvReader *reader,
+                                                int generation,
+                                                bool success)
+{
+  if (reader == nullptr || reader != _gd.layers.earth.terr) {
+    return;
+  }
+
+  if (_terrainHorizontalRequestPending) {
+    // A field, level, time, or zoom changed while the previous static read was
+    // blocked. Its data are safe to install, but request the newest display
+    // state before declaring terrain ready for capture.
+    _terrainHorizontalRequestPending = false;
+    if (!success) {
+      reader->cancelHorizRequest(generation);
+    }
+    _requestHorizontalTerrain();
+    if (_horiz != nullptr) {
+      _horiz->rerenderGrid();
+    }
+    _checkMovieFrameReady();
+    _checkAutomaticImageReady();
+    return;
+  }
+
+  if (generation != _terrainHorizontalRequestGeneration) {
+    return;
+  }
+
+  _terrainHorizontalSettled = true;
+  if (!success) {
+    // Terrain is optional. Stop MdvReader's normal indefinite retry policy so
+    // a missing static file does not prevent movies or unattended images.
+    reader->cancelHorizRequest(generation);
+    _terrainHorizontalRequestGeneration = -1;
+  }
+  if (_horiz != nullptr) {
+    _horiz->rerenderGrid();
+  }
+  _checkMovieFrameReady();
+  _checkAutomaticImageReady();
 }
 
 /////////////////////////////////////////////////////////////

@@ -229,7 +229,7 @@ void VertManager::_createActions(VertView *vert)
   _terrainAct->setChecked(_gd.layers.earth.terrain_active != 0);
   _terrainAct->setEnabled(_gd.layers.earth.terr != nullptr);
   connect(_terrainAct, &QAction::toggled,
-          _guiManager, &GuiManager::setVerticalTerrainEnabled);
+          _guiManager, &GuiManager::setTerrainEnabled);
 
 }
 

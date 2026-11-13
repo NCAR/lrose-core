@@ -1374,6 +1374,10 @@ void MdvReader::readDoneH(int readStatus, int generation)
   // completion must neither publish data nor restart the retry sequence.
   if (generation != _horizGeneration) {
     _readBusyH = false;
+    // A caller may have queued replacement request details while the
+    // superseded blocking read was still running. Report that the worker has
+    // released the reader even though its data cannot be published.
+    emit horizontalReadComplete(this, generation, false);
     return;
   }
 
@@ -1391,6 +1395,7 @@ void MdvReader::readDoneH(int readStatus, int generation)
     _setNewH(false);
     _readBusyH = false;
     _scheduleRetryH();
+    emit horizontalReadComplete(this, generation, false);
     return;
   }
   _horizCompletedGeneration = generation;
@@ -1399,6 +1404,7 @@ void MdvReader::readDoneH(int readStatus, int generation)
   cerr << "readDone in ReadVolH worker thread" << endl;
   _readBusyH = false;
   _retryCountH = 0;
+  emit horizontalReadComplete(this, generation, true);
 }
 
 ////////////////////////////////////////////////////////
