@@ -1207,18 +1207,9 @@ int HorizView::_controlRenderGrid(int page,
                              _params.terrain_earth_color2);
   };
  
-  // Clear time lists
-  // if(_gd.time_plot) _gd.time_plot->clear_grid_tlist();
-  // if(_gd.time_plot) _gd.time_plot->clear_prod_tlist();
-
-  // if(_params.show_data_messages) {
-  //   // gui_label_h_frame("Rendering",-1);
-  // }
-
   // RENDER the LAND_USE field first
   if(_gd.layers.earth.landuse_active && _gd.layers.earth.land_use != NULL) {
     _renderFieldGrid(page, _gd.layers.earth.land_use, start_time, end_time,1);
-    // render_grid(xid,_gd.layers.earth.land_use,start_time,end_time,1);
   }
 
   if(!_params.draw_main_on_top) {
@@ -1230,7 +1221,6 @@ int HorizView::_controlRenderGrid(int page,
   for(int i=0; i < Constants::NUM_GRID_LAYERS; i++) {
     if(_gd.layers.overlay_field_on[i] && _gd.mread[_gd.layers.overlay_field[i]] != NULL) {
       _renderFieldGrid(page, _gd.mread[_gd.layers.overlay_field[i]],start_time,end_time,1);
-      // render_grid(xid,_gd.mread[_gd.layers.overlay_field[i]],start_time,end_time,1);
     }
   }
   
@@ -1238,59 +1228,6 @@ int HorizView::_controlRenderGrid(int page,
     _renderFieldGrid(page, mr, start_time, end_time, 0);
     renderTerrainMask();
   }
-
-  /* render contours if selected */
-  for(int i= 0; i < Constants::NUM_CONT_LAYERS; i++) {
-    if(_gd.layers.cont[i].active) {
-      if (_gd.layers.use_alt_contours) {
-#ifdef HAVE_XID
-        RenderLineContours(xid, &(_gd.layers.cont[i]));
-#endif
-      } else {
-#ifdef HAVE_XID
-        render_line_contours(xid, &(_gd.layers.cont[i]));
-#endif
-      }
-    }
-  }
-
-  /* render Winds if selected */
-  if(_gd.layers.wind_vectors) {
-    switch(_gd.layers.wind_mode) {
-      default:
-      case WIND_MODE_ON:  /* winds get rendered in each frame */
-#ifdef HAVE_XID
-        render_wind_vectors(xid,start_time,end_time);
-#endif
-        break;
-        
-      case WIND_MODE_LAST: /* Winds get rendered in last farame only */
-        if (_renderFrameIndex == _manager.getTimelineFrameCount() - 1)
-#ifdef HAVE_XID
-          render_wind_vectors(xid,start_time,end_time);
-#endif
-        break;
-
-      case WIND_MODE_STILL: /* Winds get rendered in the last frame only
-                             * if the movie loop is off
-                             */
-        if (!_manager.isMovieActive() &&
-            _renderFrameIndex == _manager.getTimelineFrameCount() - 1)
-#ifdef HAVE_XID
-          render_wind_vectors(xid,start_time,end_time);
-#endif
-        break;
-    }
-  }
-
-
-#ifdef HAVE_XID
-  render_top_layers(xid);  // Range rings X section reference etc.
-#endif
-
-#ifdef HAVE_XID
-  render_horiz_margins(xid,page,start_time,end_time);
-#endif
 
   return Constants::CIDD_SUCCESS;    /* avaliable data has been rendered */
 }
@@ -1349,169 +1286,6 @@ int HorizView::_renderFieldGrid(int page,
   if (mr->overlay_line_contours && projType != Mdvx::PROJ_POLAR_RADAR) {
     _zoom->renderLineContours(mr);
   }
-
-#ifdef NOTYET
-  
-  int out_of_date = 0;
-  int stretch_secs = (int) (60.0 * mr->time_allowance);
-  char message[1024];    /* Error message area */
-  
-  if(_params.check_data_times) {
-    if(mr->h_date.unix_time < start_time - stretch_secs) out_of_date = 1;
-    if(mr->h_date.unix_time > end_time + stretch_secs) out_of_date = 1;
-  }
-
-  // Add the list of times to the time plot
-  // if(mr->time_list.num_entries > 0) {
-  //   if(_gd.time_plot) _gd.time_plot->add_grid_tlist(mr->legend_name,mr->time_list.tim,
-  //                                                 mr->time_list.num_entries,
-  //                                                 mr->h_date.unix_time);
-  // }
-
-  /* For the Main Field - Clear the screen and  Print a special message 
-   * and draw the wall clock time if the data is not availible 
-   */
-  if(!is_overlay_field) {
-
-
-    /* If no data in current response or data is way out of date */
-    if( mr->h_data == NULL || out_of_date ) {
-
-      if(strncasecmp(mr->button_name,"None",4) &&
-         strncasecmp(mr->button_name,"Empty",5)) {
-        /* display "Data Not Available" message */
-        if(out_of_date) {
-          snprintf(message, 1023, "%s - Data too Old", _params.no_data_message);
-        } else {
-          STRcopy(message, _params.no_data_message, 1023);
-        }
-
-        int xmid,ymid;
-        Font font = choose_font(message, _gd.h_win.img_dim.width, _gd.h_win.img_dim.height, &xmid, &ymid);
-        XSetFont(_gd.dpy,_gd.legends.foreground_color->gc,font);
-        XDrawImageString(_gd.dpy,xid,_gd.legends.foreground_color->gc,
-                         _gd.h_win.margin.left + (_gd.h_win.img_dim.width /2) + xmid  ,
-                         _gd.h_win.margin.top + (_gd.h_win.img_dim.height /4) + ymid ,
-                         message,strlen(message));
-
-        if(_gd.debug2) {
-          fprintf(stderr, "No data from service: %s\n",
-                  _gd.io_info.mr->url );
-        }
-
-	if(_params.show_clock) {
-          /* draw a clock */
-          int ht = (int) (_gd.h_win.can_dim.height * 0.05);
-          int startx = _gd.h_win.can_dim.width - _gd.h_win.margin.right - ht - 5;
-          int starty = _gd.h_win.margin.top + ht + 5;
-          XUDRdraw_clock(_gd.dpy,xid,_gd.legends.foreground_color->gc,
-                         startx,starty,ht, (start_time + (end_time - start_time) /2),1);
-	}
-      }  // if mr->button_name != "None"
-
-      return CIDD_FAILURE;
-    }
-  }
-     
-  set_busy_state(1);
-
-#endif
-
-#ifdef NOTNOW
-  switch(mr->h_fhdr.proj_type) {
-    default: // Projections which need only matching types and origins.
-      // If the projections match - Can use fast Rectangle rendering.
-      if(mr->h_fhdr.proj_type == _proj.getProjType() &&
-         (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
-         (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
-        if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
-        _zoom->renderGridRect(page, mr,
-                              start_time, end_time,
-                              is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
-      } else { // Must use polygon rendering
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
-        _zoom->renderGridDistorted(page, mr,
-                                   start_time, end_time,
-                                   is_overlay_field);
-      }
-      break;
-
-    case  Mdvx::PROJ_FLAT: // Needs to test Param 1
-      // If the projections match - Can use fast Rectangle rendering.
-      if(mr->h_fhdr.proj_type == _proj.getProjType() &&
-         (fabs(_proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
-         (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
-         (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
-        
-        if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
-        _zoom->renderGridRect(page, mr,
-                              start_time, end_time,
-                              is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
-      } else { // Must use polygon rendering
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
-        _zoom->renderGridDistorted(page, mr,
-                                   start_time, end_time,
-                                   is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
-      }
-      break;
-      
-    case  Mdvx::PROJ_LAMBERT_CONF: // Needs to test param 1 & 2
-    case  Mdvx::PROJ_POLAR_STEREO: 
-    case  Mdvx::PROJ_OBLIQUE_STEREO:
-    case  Mdvx::PROJ_MERCATOR:
-      // If the projections match - Can use fast Rectangle rendering.
-      if(mr->h_fhdr.proj_type == _proj.getProjType() &&
-         (fabs(_proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
-         (fabs(_proj_param[1] - mr->h_fhdr.proj_param[1]) < 0.001) &&
-         (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
-         (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
-        if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
-        _zoom->renderGridRect(page, mr,
-                              start_time, end_time,
-                              is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
-      } else { // Must use polygon rendering
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
-        _zoom->renderGridDistorted(page, mr,
-                                   start_time, end_time,
-                                   is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
-      }
-      break;
-      
-    case  Mdvx::PROJ_LATLON:
-      if(mr->h_fhdr.proj_type == _proj.getProjType()) {
-        if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
-        _zoom->renderGridRect(page, mr,
-                              start_time, end_time,
-                              is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
-      } else {
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
-        _zoom->renderGridDistorted(page, mr,
-                                   start_time, end_time,
-                                   is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
-      }
-      break;
-      
-    case  Mdvx::PROJ_POLAR_RADAR:
-      if(_gd.debug2) fprintf(stderr,"render_polar_grid() selected\n");
-#ifdef NOTYET
-      render_polar_grid(page, mr,start_time, end_time, 
-                        is_overlay_field);
-#endif
-      if(_gd.debug2) fprintf(stderr,"render_polar_grid() done\n");
-      break;
-      
-  }
-
-  set_busy_state(0);
-
-#endif
 
   // plot legends
 
