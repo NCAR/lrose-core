@@ -688,6 +688,21 @@ bool GuiManager::isMovieActive() const
   return _timeControl && _timeControl->isMovieActive();
 }
 
+int GuiManager::getTimelineFrameCount() const
+{
+  return _timeControl ? _timeControl->getFrameCount() : 0;
+}
+
+int GuiManager::getTimelineFrameIndex() const
+{
+  return _timeControl ? _timeControl->getFrameIndex() : -1;
+}
+
+const TimelineFrame *GuiManager::getTimelineFrame(int frameIndex) const
+{
+  return _timeControl ? _timeControl->getFrame(frameIndex) : nullptr;
+}
+
 void GuiManager::movieStateChanged()
 {
   const bool building = isMovieBuilding();
@@ -2281,10 +2296,8 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
   
   // get new data if needed - data is retrieved in a thread
   
-  int frameIndex = _gd.movie.cur_frame;
-  if (_gd.movie.cur_frame < 0) {
-    frameIndex = _gd.movie.num_frames - 1;
-  }
+  const int frameIndex = _timeControl->getFrameIndex();
+  const TimelineFrame *frame = _timeControl->getFrame(frameIndex);
 
   if (stateHasChanged) {
     const int generation = mr->requestHorizPlane(
@@ -2304,10 +2317,8 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
         mr == _gd.mread[_fieldNum]) {
       _automaticImageGenerator->setExpectedGeneration(generation);
     }
-    if (_gd.prod_mgr && frameIndex >= 0 &&
-        frameIndex < _gd.movie.num_frames) {
-      const movie_frame_t &frame = _gd.movie.frame[frameIndex];
-      _gd.prod_mgr->requestData(frame.time_start, frame.time_end,
+    if (_gd.prod_mgr && frame) {
+      _gd.prod_mgr->requestData(frame->start, frame->end,
                                 _timeControl->getSelectedTime().utime(),
                                 _vlevelManager.getRequestedLevel(),
                                 *_horiz->getZoomWorld());
@@ -2323,13 +2334,11 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
     if (!mr->isValidH()) {
       cerr << "ERROR - GuiManager::timerEvent" << endl;
       cerr << "  mr->requestHorizPlane" << endl;
-      cerr << "  time_start: " << DateTime::strm(_gd.movie.frame[frameIndex].time_start) << endl;
-      cerr << "  time_end: " << DateTime::strm(_gd.movie.frame[frameIndex].time_end) << endl;
+      if (frame) {
+        cerr << "  time_start: " << DateTime::strm(frame->start) << endl;
+        cerr << "  time_end: " << DateTime::strm(frame->end) << endl;
+      }
       cerr << "  page: " << _fieldNum << endl;
-    }
-    int frameIndex = _gd.movie.cur_frame;
-    if (_gd.movie.cur_frame < 0) {
-      frameIndex = _gd.movie.num_frames - 1;
     }
     // The main header determines whether its vertical coordinate can be
     // compared meaningfully with MSL terrain. Start that optional request
@@ -4290,105 +4299,8 @@ void GuiManager::_readClickPoint()
 
 void GuiManager::_handleClientEvent()
 {
-
-#ifdef NOTNOW
-  
-  time_t clock;
-  
-  if(_gd.debug1) {
-    fprintf(stderr,
-            "Found Client Event: %d, Args: %s\n",
-            _gd.coord_expt->client_event,
-            _gd.coord_expt->client_args);
-  }
-  
-  switch(_gd.coord_expt->client_event) {
-    case NEW_MDV_AVAIL:
-      remote_new_mdv_avail(_gd.coord_expt->client_args);
-      break;
-      
-    case NEW_SPDB_AVAIL:
-      remote_new_spdb_avail(_gd.coord_expt->client_args);
-      break;
-
-    case RELOAD_DATA:
-      // invalidate_all_data();
-      // set_redraw_flags(1,1);
-      break;
-
-    case SET_FRAME_NUM:
-      int	frame;
-      if((sscanf(_gd.coord_expt->client_args,"%d",&frame)) == 1) {
-        /* Sanity Check */
-        if(frame <= 0 ) frame = 1;
-        if(frame > _gd.movie.num_frames ) frame = _gd.movie.num_frames ;
-
-        _gd.movie.cur_frame = frame - 1;
-      } else {
-        fprintf(stderr,"Invalid SET_FRAME_NUM: Args: %s\n",_gd.coord_expt->client_args);
-      }
-      break;
-
-    case SET_NUM_FRAMES:
-      int	nframes;
-      if((sscanf(_gd.coord_expt->client_args,"%d",&nframes)) == 1) {
-        _setEndFrame(nframes);
-      } else {
-        fprintf(stderr,"Invalid SET_NUM_FRAMES: Args: %s\n",_gd.coord_expt->client_args);
-      }
-      break;
-
-    case SET_REALTIME:
-      _gd.movie.mode = REALTIME_MODE;
-      _gd.movie.cur_frame = _gd.movie.num_frames -1;
-      _gd.movie.end_frame = _gd.movie.num_frames -1;
-      clock = time(0);
-      _gd.movie.start_time = clock - (time_t) ((_gd.movie.num_frames -1) *
-                                              _gd.movie.time_interval_mins * 60.0);
-      _gd.movie.start_time -= (_gd.movie.start_time % _gd.movie.round_to_seconds);
-      _gd.coord_expt->runtime_mode = RUNMODE_REALTIME;	
-      _gd.coord_expt->time_seq_num++;
-
-      // reset_time_points();
-      // invalidate_all_data();
-      // set_redraw_flags(1,1);
-
-      // Set forecast and past time choosers to "now"
-      // xv_set(_gd.fcast_pu->fcast_st,PANEL_VALUE,0,NULL);
-      // xv_set(_gd.past_pu->past_hr_st,PANEL_VALUE,0,NULL);
-      // Set movie mode widget to REALTIME 
-      // xv_set(_gd.movie_pu->movie_type_st,PANEL_VALUE,0,NULL);
-
-      break;
-
-    case SET_TIME:
-      UTIMstruct ts;
-      time_t interest_time;
-
-      if((sscanf(_gd.coord_expt->client_args,"%ld %ld %ld %ld %ld %ld",
-                 &ts.year,&ts.month,&ts.day, &ts.hour,&ts.min,&ts.sec)) == 6) {
-		
-        interest_time = UTIMdate_to_unix(&ts);
-
-        _setDisplayTime(interest_time);
-        // invalidate_all_data();
-        // set_redraw_flags(1,1);
-      } else {
-        fprintf(stderr,"Invalid SET_TIME Args: %s\n",_gd.coord_expt->client_args);
-      }
-      break;
-
-    default: {}
-
-  }
-
-  // Reset  the command
-  _gd.coord_expt->client_event = NO_MESSAGE;
-
-#endif
-  
+  // Remote CIDD client commands are not implemented by the Qt application.
 }
-
 
 ///////////////////////////////////////////
 // set text for GUI panels

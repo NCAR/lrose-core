@@ -242,8 +242,6 @@ int Lucid::RunApp(QApplication &app)
 int Lucid::_initDataSpace()
 {
 
-  UTIMstruct temp_utime;
-  
   if(!_gd.quiet_mode) {
     fprintf(stderr,"Lucid: Version %s\n", Constants::LUCID_VERSION);
     fprintf(stderr,"Copyright: %s\n\n", Constants::LUCID_COPYRIGHT);
@@ -513,110 +511,31 @@ int Lucid::_initDataSpace()
       
   }
   
-  // movies
-
-  int pid = getpid();
-  for(int ii = 0; ii < Constants::MAX_FRAMES; ii++) {
-    snprintf(_gd.movie.frame[ii].fname, Constants::NAME_LENGTH - 1,
-             "%s/cidd_im%d_%d.",
-             _params.images_output_dir, pid, ii);
-    _gd.movie.frame[ii].h_pdev = 0;
-    _gd.movie.frame[ii].v_pdev = 0;
-    _gd.movie.frame[ii].redraw_horiz = 1;
-    _gd.movie.frame[ii].redraw_vert = 1;
-  }
-
-  // copy movie info to other globals
-  
-  _gd.movie.movie_on = _params.movie_on;
-  if(_params.create_images_automatically) {
-    _gd.movie.movie_on = 0;
-  }
-  _gd.movie.magnify_factor = _params.movie_magnify_factor;
-  _gd.movie.time_interval_mins = _params.frame_interval_secs / 60.0;
-  _gd.movie.frame_span = _params.climo_frame_span_mins;
-  _gd.movie.num_frames = _params.n_movie_frames;
-  _gd.movie.reset_frames = _params.reset_frames;
-  _gd.movie.delay = _params.loop_delay_msecs;
-  _gd.movie.forecast_interval = _params.forecast_interval_hours;
-  _gd.movie.past_interval = _params.past_interval_hours;
-  _gd.movie.mr_stretch_factor = _params.time_search_stretch_factor;
-  _gd.movie.round_to_seconds = _params.temporal_rounding;
-  _gd.movie.display_time_msec = _params.movie_dwell_msecs;
-
-  _gd.movie.start_frame = 0;
-  _gd.movie.sweep_on = 0;
-  _gd.movie.sweep_dir = 1;
-  _gd.movie.end_frame = _gd.movie.num_frames -1 ;
-  _gd.movie.cur_frame = _gd.movie.num_frames -1;
-  _gd.movie.last_frame = _gd.movie.cur_frame;
-
-  // climatology mode for movies
-  
-  _gd.movie.climo_mode = (int) _params.climo_mode;
-
-  // Use cosine correction for computing range in polar data
-  // check if set by Args
-
-  if (_gd.use_cosine_correction < 0) {
-    // not set on command line
-    _gd.use_cosine_correction = _params.use_cosine_correction;
-  }
-  
-  // IF demo_time is set in the params
-  // Set into Archive Mode at the indicated time.
-  // If demo time param is not set and command line option hasn't set archive mode
-
-  if(_params.start_mode == Params::MODE_REALTIME) {
-    
-    /* REALTIME MODE */
-
-    _gd.movie.mode = REALTIME_MODE;
+  // Initialize the availability window used before the Qt controller exists.
+  // TimeControl becomes the authoritative owner of frame bounds when the GUI
+  // is constructed and republishes this request window at that point.
+  DateTime initialStart;
+  if (_params.start_mode == Params::MODE_REALTIME) {
+    const time_t now = time(nullptr);
+    initialStart.set(now - static_cast<time_t>(
+      (_params.n_movie_frames - 1) * _params.frame_interval_secs));
     _gd.coord_expt->runtime_mode = RUNMODE_REALTIME;
-    _gd.coord_expt->time_seq_num++;
-    /* set the first index's time based on current time  */
-    time_t clock = time(0);    /* get current time */
-    _gd.movie.start_time =
-      (time_t) (clock - ((_gd.movie.num_frames -1) * _gd.movie.time_interval_mins * 60.0));
-    _gd.movie.start_time -= (_gd.movie.start_time % _gd.movie.round_to_seconds);
-    _gd.movie.demo_time = 0; // Indicated REAL-TIME is Native
-    
-    UTIMunix_to_date(_gd.movie.start_time,&temp_utime);
-    _gd.movie.demo_mode = 0;
   } else {
-
-    /* ARCHIVE MODE */
-    
-    if(_gd.movie.mode != ARCHIVE_MODE) { /* if not set by command line args */
-      
-      _gd.movie.mode = ARCHIVE_MODE;     /* time_series */
-      _gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
-      _gd.coord_expt->time_seq_num++;
-      
-      DateTime startTime;
-      startTime.set(_params.archive_start_time);
-      _gd.movie.start_time = startTime.utime();
-    }
-    _gd.movie.demo_mode = 1;
-	 
-    /* Adjust the start time downward to the nearest round interval seconds */
-
-    _gd.movie.start_time -= (_gd.movie.start_time % _gd.movie.round_to_seconds);
-
-    if(_params.gather_data_mode == Params::CLOSEST_TO_FRAME_CENTER) {
-      // Offset movie frame by 1/2 frame interval so that interest time
-      // lies on frame mid point
-      _gd.movie.start_time -=  (time_t) (_gd.movie.time_interval_mins * 30.0);
-    }
-
-    _gd.movie.demo_time = _gd.movie.start_time;
-    UTIMunix_to_date(_gd.movie.start_time,&temp_utime);
-    
-    _gd.movie.cur_frame = 0;
-
-  } // if(strlen(_params.demo_time) < 8 && (_gd.movie.mode != ARCHIVE_MODE))
-
-  _initMovieFrameTimes();
+    initialStart.set(_params.archive_start_time);
+    _gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
+  }
+  const int roundingSecs = std::max(1, _params.temporal_rounding);
+  time_t initialStartSecs = initialStart.utime();
+  initialStartSecs -= initialStartSecs % roundingSecs;
+  if (_params.start_mode == Params::MODE_ARCHIVE &&
+      _params.gather_data_mode == Params::CLOSEST_TO_FRAME_CENTER) {
+    initialStartSecs -= static_cast<time_t>(
+      _params.frame_interval_secs / 2.0);
+  }
+  _gd.epoch_start = initialStartSecs;
+  _gd.epoch_end = initialStartSecs + static_cast<time_t>(
+    _params.n_movie_frames * _params.frame_interval_secs);
+  _gd.coord_expt->time_seq_num++;
 
   /////////////////////////////////////////////////
   // zooms
@@ -770,62 +689,6 @@ int Lucid::_initDataSpace()
 }
 
 ////////////////////////////////////////////////////
-// initialize the time bounds for each movie frame
-
-void Lucid::_initMovieFrameTimes()
-{
-  // Movie frames are the common time model for grids and symbolic products.
-  // Populate them only after start_time has received its final rounding and
-  // frame-centering adjustment, matching the original CIDD behavior.
-  switch (_params.climo_mode) {
-    case Params::CLIMO_REGULAR_INTERVAL: {
-      const double intervalSecs = _gd.movie.time_interval_mins * 60.0;
-      for (int ii = 0; ii < _gd.movie.num_frames; ++ii) {
-        movie_frame_t &frame = _gd.movie.frame[ii];
-        frame.time_start = static_cast<time_t>(
-          _gd.movie.start_time + ii * intervalSecs + 0.5);
-        frame.time_mid = static_cast<time_t>(
-          _gd.movie.start_time + (ii + 0.5) * intervalSecs + 0.5);
-        frame.time_end = static_cast<time_t>(
-          frame.time_start + intervalSecs + 0.5);
-      }
-      break;
-    }
-
-    case Params::CLIMO_DAILY_INTERVAL:
-      for (int ii = 0; ii < _gd.movie.num_frames; ++ii) {
-        movie_frame_t &frame = _gd.movie.frame[ii];
-        frame.time_start = static_cast<time_t>(
-          _gd.movie.start_time + ii * 1440.0 * 60.0);
-        frame.time_mid = static_cast<time_t>(
-          frame.time_start + _gd.movie.frame_span * 30.0);
-        frame.time_end = static_cast<time_t>(
-          frame.time_start + _gd.movie.frame_span * 60.0);
-      }
-      break;
-
-    case Params::CLIMO_YEARLY_INTERVAL: {
-      UTIMstruct frameDate;
-      UTIMunix_to_date(_gd.movie.start_time, &frameDate);
-      for (int ii = 0; ii < _gd.movie.num_frames; ++ii, ++frameDate.year) {
-        movie_frame_t &frame = _gd.movie.frame[ii];
-        frame.time_start = UTIMdate_to_unix(&frameDate);
-        frame.time_mid = static_cast<time_t>(
-          frame.time_start + _gd.movie.frame_span * 30.0);
-        frame.time_end = static_cast<time_t>(
-          frame.time_start + _gd.movie.frame_span * 60.0);
-      }
-      break;
-    }
-  }
-
-  _gd.epoch_start = _gd.movie.start_time;
-  _gd.epoch_end = _gd.movie.num_frames > 0 ?
-    _gd.movie.frame[_gd.movie.num_frames - 1].time_end :
-    _gd.epoch_start;
-}
-
-//////////////////////////////////
 // initialize the gridded fields
 
 int Lucid::_initGrids()
@@ -881,7 +744,8 @@ int Lucid::_initGrids()
     mread->cont_interv = fld.contour_interval;
     mread->overlay_line_contours = fld.overlay_line_contours;
 
-    mread->time_allowance = _gd.movie.mr_stretch_factor * _gd.movie.time_interval_mins;
+    mread->time_allowance = _params.time_search_stretch_factor *
+      _params.frame_interval_secs / 60.0;
 
     if (fld.render_mode == Params::POLYGONS) {
       mread->render_method = POLYGONS;
@@ -1108,7 +972,8 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   wrec->field_units = windp.units;
   wrec->currently_displayed = 1;
   
-  wrec->time_allowance = _gd.movie.mr_stretch_factor * _gd.movie.time_interval_mins;
+  wrec->time_allowance = _params.time_search_stretch_factor *
+    _params.frame_interval_secs / 60.0;
   wrec->h_fhdr.proj_origin_lon = 0.0;
   wrec->h_fhdr.proj_origin_lat = 0.0;
   
@@ -1237,7 +1102,8 @@ void Lucid::_initRouteWinds()
 
     mr->field_units = "unknown";
     mr->currently_displayed = 1;
-    mr->time_allowance = _gd.movie.mr_stretch_factor * _gd.movie.time_interval_mins;
+    mr->time_allowance = _params.time_search_stretch_factor *
+      _params.frame_interval_secs / 60.0;
     mr->h_fhdr.proj_origin_lon = 0.0;
     mr->h_fhdr.proj_origin_lat = 0.0;
 
@@ -1270,7 +1136,8 @@ void Lucid::_initRouteWinds()
     
     mr->field_units = "unknown";
     mr->currently_displayed = 1;
-    mr->time_allowance = _gd.movie.mr_stretch_factor * _gd.movie.time_interval_mins;
+    mr->time_allowance = _params.time_search_stretch_factor *
+      _params.frame_interval_secs / 60.0;
     mr->h_fhdr.proj_origin_lon = 0.0;
     mr->h_fhdr.proj_origin_lat = 0.0;
     
@@ -2670,9 +2537,10 @@ void Lucid::_initShared()
   _gd.coord_expt->epoch_start = _gd.epoch_start;
   _gd.coord_expt->epoch_end = _gd.epoch_end;
   
-  _gd.coord_expt->time_min = _gd.movie.frame[_gd.movie.num_frames -1].time_start;
-  _gd.coord_expt->time_max = _gd.movie.frame[_gd.movie.num_frames -1].time_end;
-  if(_gd.movie.movie_on) {
+  _gd.coord_expt->time_min = _gd.epoch_end -
+    static_cast<time_t>(_params.frame_interval_secs);
+  _gd.coord_expt->time_max = _gd.epoch_end;
+  if (_params.movie_on && !_params.create_images_automatically) {
     _gd.coord_expt->time_cent = _gd.epoch_end; 
   } else {
     _gd.coord_expt->time_cent = _gd.coord_expt->time_min +

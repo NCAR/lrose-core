@@ -25,6 +25,7 @@
 #include "HorizView.hh"
 #include "VertView.hh"
 #include "GuiManager.hh"
+#include "TimeControl.hh"
 #include "ProductMgr.hh"
 #include "SymprodRenderContext.hh"
 #include "WindManager.hh"
@@ -666,7 +667,7 @@ void HorizView::_updateProductPick(int mouseX, int mouseY)
 {
   if (_params.disable_pick_mode || !_gd.prod_mgr ||
       !_gd.prod.products_on || _renderFrameIndex < 0 ||
-      _renderFrameIndex >= _gd.movie.num_frames) {
+      _renderFrameIndex >= _manager.getTimelineFrameCount()) {
     if (_gd.prod_mgr) {
       _gd.prod_mgr->clearPickedObject();
     }
@@ -694,7 +695,11 @@ void HorizView::_updateProductPick(int mouseX, int mouseY)
       _gd.mread[fieldNum]) {
     dataTime = _gd.mread[fieldNum]->h_date.utime();
   }
-  const movie_frame_t &frame = _gd.movie.frame[_renderFrameIndex];
+  const TimelineFrame *frame = _manager.getTimelineFrame(_renderFrameIndex);
+  if (!frame) {
+    _gd.prod_mgr->clearPickedObject();
+    return;
+  }
   double iconScale = 1.0;
   if (_params.scale_constant > 0.0) {
     iconScale = log10(_params.scale_constant /
@@ -704,7 +709,7 @@ void HorizView::_updateProductPick(int mouseX, int mouseY)
     }
   }
   SymprodRenderContext context(*_zoom, _gd.epoch_start, _gd.epoch_end,
-                               frame.time_start, frame.time_end, dataTime,
+                               frame->start, frame->end, dataTime,
                                _gd.h_win.km_across_screen, iconScale);
   _gd.prod_mgr->pickClosestObject(lat, lon, context,
                                   _gd.h_win.km_across_screen / 20.0);
@@ -717,7 +722,7 @@ void HorizView::_drawPickedProduct(QPainter &painter)
 {
   if (_params.disable_pick_mode || !_gd.prod_mgr ||
       _renderFrameIndex < 0 ||
-      _renderFrameIndex >= _gd.movie.num_frames) {
+      _renderFrameIndex >= _manager.getTimelineFrameCount()) {
     return;
   }
 
@@ -727,7 +732,10 @@ void HorizView::_drawPickedProduct(QPainter &painter)
       _gd.mread[fieldNum]) {
     dataTime = _gd.mread[fieldNum]->h_date.utime();
   }
-  const movie_frame_t &frame = _gd.movie.frame[_renderFrameIndex];
+  const TimelineFrame *frame = _manager.getTimelineFrame(_renderFrameIndex);
+  if (!frame) {
+    return;
+  }
   double iconScale = 1.0;
   if (_params.scale_constant > 0.0) {
     iconScale = log10(_params.scale_constant /
@@ -737,7 +745,7 @@ void HorizView::_drawPickedProduct(QPainter &painter)
     }
   }
   SymprodRenderContext context(*_zoom, _gd.epoch_start, _gd.epoch_end,
-                               frame.time_start, frame.time_end, dataTime,
+                               frame->start, frame->end, dataTime,
                                _gd.h_win.km_across_screen, iconScale);
   painter.save();
   painter.setClipRect(QRect(std::min(_zoom->getXMinPixel(),
@@ -976,7 +984,7 @@ void HorizView::rerenderGrid()
 {
   const int fieldNum = _manager.getSelectedFieldIndex();
   if (_renderFrameIndex >= 0 &&
-      _renderFrameIndex < _gd.movie.num_frames &&
+      _renderFrameIndex < _manager.getTimelineFrameCount() &&
       fieldNum >= 0 && fieldNum < _gd.num_datafields &&
       _gd.mread[fieldNum] != nullptr &&
       _gd.mread[fieldNum]->isValidH()) {
@@ -1108,9 +1116,11 @@ void HorizView::_renderGrids()
             _renderFrameIndex, _renderFramePage);
   }
 
-  _controlRenderGrid(_renderFramePage,
-                     _gd.movie.frame[_renderFrameIndex].time_start,
-                     _gd.movie.frame[_renderFrameIndex].time_end);
+  const TimelineFrame *frame = _manager.getTimelineFrame(_renderFrameIndex);
+  if (!frame) {
+    return;
+  }
+  _controlRenderGrid(_renderFramePage, frame->start, frame->end);
   
 
   _gridsReady = true;
@@ -1127,7 +1137,7 @@ void HorizView::_renderGrids()
 void HorizView::_renderProducts()
 {
   if (!_zoom || !_gd.prod_mgr || _renderFrameIndex < 0 ||
-      _renderFrameIndex >= _gd.movie.num_frames) {
+      _renderFrameIndex >= _manager.getTimelineFrameCount()) {
     return;
   }
 
@@ -1137,10 +1147,13 @@ void HorizView::_renderProducts()
       _gd.mread[fieldNum] != nullptr) {
     dataTime = _gd.mread[fieldNum]->h_date.utime();
   }
-  const movie_frame_t &frame = _gd.movie.frame[_renderFrameIndex];
+  const TimelineFrame *frame = _manager.getTimelineFrame(_renderFrameIndex);
+  if (!frame) {
+    return;
+  }
   _zoom->renderSymprods(*_gd.prod_mgr,
                         _gd.epoch_start, _gd.epoch_end,
-                        frame.time_start, frame.time_end,
+                        frame->start, frame->end,
                         dataTime, _gd.h_win.km_across_screen);
 }
 
@@ -1252,7 +1265,7 @@ int HorizView::_controlRenderGrid(int page,
         break;
         
       case WIND_MODE_LAST: /* Winds get rendered in last farame only */
-        if(_gd.movie.cur_frame == _gd.movie.end_frame)
+        if (_renderFrameIndex == _manager.getTimelineFrameCount() - 1)
 #ifdef HAVE_XID
           render_wind_vectors(xid,start_time,end_time);
 #endif
@@ -1261,7 +1274,8 @@ int HorizView::_controlRenderGrid(int page,
       case WIND_MODE_STILL: /* Winds get rendered in the last frame only
                              * if the movie loop is off
                              */
-        if(!_gd.movie.movie_on && _gd.movie.cur_frame == _gd.movie.end_frame)
+        if (!_manager.isMovieActive() &&
+            _renderFrameIndex == _manager.getTimelineFrameCount() - 1)
 #ifdef HAVE_XID
           render_wind_vectors(xid,start_time,end_time);
 #endif
@@ -1277,8 +1291,6 @@ int HorizView::_controlRenderGrid(int page,
 #ifdef HAVE_XID
   render_horiz_margins(xid,page,start_time,end_time);
 #endif
-
-  // update_frame_time_msg(_gd.movie.cur_frame);
 
   return Constants::CIDD_SUCCESS;    /* avaliable data has been rendered */
 }

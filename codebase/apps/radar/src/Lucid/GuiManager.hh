@@ -90,6 +90,7 @@ class ZoomMenuItem;
 class TimeControl;
 class VlevelSelector;
 class AutomaticImageGenerator;
+struct TimelineFrame;
 
 class GuiManager : public QMainWindow {
   
@@ -158,6 +159,9 @@ public:
   bool isMovieBuilding() const;
   bool isMoviePlaying() const;
   bool isMovieActive() const;
+  int getTimelineFrameCount() const;
+  int getTimelineFrameIndex() const;
+  const TimelineFrame *getTimelineFrame(int frameIndex) const;
   void movieStateChanged();
   void showMovieInteractionBlocked();
 

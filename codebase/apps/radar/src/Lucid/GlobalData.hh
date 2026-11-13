@@ -44,11 +44,6 @@ class MdvReader;
 /////////////////////////////////////////////////////////////////
 // enums
 
-typedef enum ops_mode_t {
-  REALTIME_MODE = 0,
-  ARCHIVE_MODE = 1
-} ops_mode_t;
-
 typedef enum wind_mode_t {
   WIND_MODE_ON = 0,     /* Wind vectors on in each frame */
   WIND_MODE_LAST = 1,   /* Wind vectors on only in the last frame */
@@ -467,111 +462,6 @@ public:
 	 
 };
 
-////////////////////////////////////////////////////////////////
-// movie loops
-
-class movie_frame_t
-{
-public:
-  movie_frame_t() {
-    init();
-  }
-  movie_frame_t(const movie_frame_t &rhs) {
-    h_pdev = rhs.h_pdev;
-    v_pdev = rhs.v_pdev;
-    time_start = rhs.time_start;
-    time_end = rhs.time_end;
-    time_mid = rhs.time_mid;
-    redraw_horiz = rhs.redraw_horiz;
-    redraw_vert = rhs.redraw_vert;
-    memcpy(fname, rhs.fname, Constants::NAME_LENGTH);
-    memcpy(vfname, rhs.vfname, Constants::NAME_LENGTH);
-  }
-  void init() {
-    h_pdev = nullptr;
-    v_pdev = nullptr;
-    time_start = 0;
-    time_end = 0;
-    time_mid = 0;
-    redraw_horiz = 0;
-    redraw_vert = 0;
-    MEM_zero(fname);
-    MEM_zero(vfname);
-  }
-  QPixmap *h_pdev;       /* A memory pixmap for movie frames */
-  QPixmap *v_pdev;       /* A memory pixmap for movie frames */
-  time_t time_start;  /* Time at starting point of image */
-  time_t time_end;    /* Time at ending point of image */
-  time_t time_mid;    /* Time at mid point of image */
-  int redraw_horiz;       /* 1 = rerender */
-  int redraw_vert;        /* 1 = rerender */
-  char fname[Constants::NAME_LENGTH];   /* file name for this image */
-  char vfname[Constants::NAME_LENGTH];  /* file name for this image */
-};
-     
-
-class movie_control_t
-{
-
-public:
-
-  movie_control_t() {
-    active = 0;
-    mode = 0;
-    magnify_mode = 0;
-    sweep_on = 0;
-    sweep_dir = 0;
-    display_time_msec = 0;
-    num_frames = 0;
-    start_frame = 0;
-    end_frame = 0;
-    cur_frame = 0;
-    last_frame = 0;
-    movie_on = 0;
-    delay = 0;
-    round_to_seconds = 0;
-    magnify_factor = 0.0;
-    time_interval_mins = 0.0;
-    mr_stretch_factor = 0.0;
-    start_time = 0;
-    demo_time = 0;
-    demo_mode = 0;
-    reset_frames = 0;
-    climo_mode = 0;
-    forecast_interval = 0.0;
-    past_interval = 0.0;
-    frame_span = 0.0;
-  }
-
-  int active; /* Set to 1 when movie panel is open */
-  int mode; /* 0= realtime mode, 1= archive mode, 2 = elevation movie */
-  int magnify_mode; /* 1 = Magnify mode  turned on - When setting forecast mode. */
-  int sweep_on; /*  1 = Sweep instead of loop */
-  int sweep_dir; /*  Either +1 (forward)  or -1 (backward) */
-  int display_time_msec; /* TIme each movie frame should be displayed - msecs */
-  int num_frames; /* Total number of frames in loop */
-  int start_frame; /* The frame to start with */
-  int end_frame; /* The frame to end with */
-  int cur_frame; /* the currently visible frame number */
-  int last_frame; /* The last frame visible */
-  int movie_on; /* 0 = off, Other: movie is on */
-  int delay; /* Number of frame ticks to delay at end of loop */
-  int round_to_seconds; /* The number of seconds to round data times to */
-  int demo_mode; /* Starts up in demo mode */
-  int reset_frames; /* Reset valid flags on frames when frame index updates */
-  int climo_mode; /* Climotology mode - restricts the time span of data requests. */
-  double magnify_factor; /* Amount to magnify time scales when switching into forecast mode */
-  double time_interval_mins; /* in minutes */
-  double mr_stretch_factor; /* Factor to mult time_interval by for most recent data */
-  double forecast_interval; /* Interval to display menu options into the future in hours */
-  double past_interval; /* Interval to display menu options into the past in hours */
-  double frame_span; /* minutes spanning one movie frame - Used for climo mode  */
-  time_t start_time; /* Time of the first frame */
-  time_t demo_time; /* First frame in demo mode */
-  movie_frame_t frame[Constants::MAX_FRAMES]; /* info about each frame */
-
-};
-
 ///////////////////////////////////////////////////////////////////////
 // map overlays
 
@@ -852,8 +742,6 @@ public:
   // TimePlot *time_plot;
 
   // Control vartiables for movie looping
-  
-  movie_control_t movie;
   
   // I/O status infomation
   
