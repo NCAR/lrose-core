@@ -227,6 +227,7 @@ MdvReader::MdvReader(QObject* parent) :
   _vertSampleSpacingKm = 0.0;
   _vertTotalLengthKm = 0.0;
   _vertGeneration = 0;
+  _vertCompletedGeneration = -1;
 
   qRegisterMetaType<VertReadResultPtr>("VertReadResultPtr");
 
@@ -1629,6 +1630,8 @@ void MdvReader::readDoneV(VertReadResultPtr result)
   if (!result || result->generation != _vertGeneration) {
     return;
   }
+
+  _vertCompletedGeneration = result->generation;
 
   if (result->status != 0) {
     cerr << "ERROR - MdvReader vertical-section read failed for "

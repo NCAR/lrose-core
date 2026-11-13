@@ -202,6 +202,11 @@ class DLL_EXPORT VertView : public QWidget
   
   void refresh();
 
+  // Rebuild only the inexpensive wind overlay; the gridded section cache may
+  // contain filled contours and remains valid across an asynchronous U/V
+  // completion or a wind-menu change.
+  void rerenderWinds();
+
   // paint event
 
   void paintEvent(QPaintEvent *event);
@@ -369,6 +374,8 @@ class DLL_EXPORT VertView : public QWidget
 
   QPixmap _sectionPixmap;
   bool _sectionPixmapDirty;
+  QPixmap _windsPixmap;
+  bool _windsPixmapDirty;
   vector<QImage> _movieFrames;
   int _playbackFrameIndex;
 
@@ -404,6 +411,7 @@ class DLL_EXPORT VertView : public QWidget
   void _drawSectionCells(QPainter &painter);
   bool _drawSectionContours(QPainter &painter);
   void _drawSectionContourLines(QPainter &painter);
+  void _drawWinds(QPainter &painter);
   vector<double> _computeVerticalEdges() const;
   bool _sampleGridValue(int mouseX, int mouseY,
                         SectionSample &sample) const;

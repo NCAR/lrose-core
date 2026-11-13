@@ -57,6 +57,8 @@
 #include "VertManager.hh"
 #include "GlobalData.hh"
 #include "MdvReader.hh"
+#include "WindGlyphRenderer.hh"
+#include "WindManager.hh"
 
 using namespace std;
 
@@ -108,6 +110,7 @@ VertView::VertView(QWidget* parent,
   _pointClicked = false;
   _leftDragActive = false;
   _sectionPixmapDirty = true;
+  _windsPixmapDirty = true;
   _playbackFrameIndex = -1;
   _showValue = false;
   _mouseValueVisible = false;
@@ -517,6 +520,7 @@ void VertView::_refreshImages()
 {
 
   _sectionPixmapDirty = true;
+  _windsPixmapDirty = true;
 
   update();
   
@@ -551,6 +555,12 @@ void VertView::clear()
 void VertView::refresh()
 {
   _refreshImages();
+}
+
+void VertView::rerenderWinds()
+{
+  _windsPixmapDirty = true;
+  update();
 }
 
 /*************************************************************************
@@ -597,6 +607,18 @@ void VertView::paintEvent(QPaintEvent *event)
     _sectionPixmapDirty = false;
   }
   painter.drawPixmap(0, 0, _sectionPixmap);
+
+  // Winds are cached separately because their paired asynchronous requests
+  // often complete after the field section. Replacing this light overlay
+  // must not force filled-contour geometry to be regenerated.
+  if (_windsPixmapDirty || _windsPixmap.size() != size()) {
+    _windsPixmap = QPixmap(size());
+    _windsPixmap.fill(Qt::transparent);
+    QPainter windsPainter(&_windsPixmap);
+    _drawWinds(windsPainter);
+    _windsPixmapDirty = false;
+  }
+  painter.drawPixmap(0, 0, _windsPixmap);
 
   // add overlays
   
@@ -1466,6 +1488,234 @@ void VertView::_drawSectionContourLines(QPainter &painter)
                                                line.pts[ii].y));
       }
       painter.drawPath(path);
+    }
+  }
+  painter.restore();
+}
+
+/////////////////////////////////////////////////////////////
+// render earth-relative horizontal winds over the vertical section
+
+void VertView::_drawWinds(QPainter &painter)
+{
+  if (_sectionReader == nullptr || !_sectionReader->isValidV() ||
+      _gd.wind_mgr == nullptr || !_gd.wind_mgr->isEnabled()) {
+    return;
+  }
+
+  painter.save();
+  painter.setRenderHint(QPainter::Antialiasing, true);
+  painter.setRenderHint(QPainter::TextAntialiasing, true);
+  _zoomWorld.setClippingOn(painter);
+
+  const double xMin = min(_zoomWorld.getXMinWorld(),
+                          _zoomWorld.getXMaxWorld());
+  const double xMax = max(_zoomWorld.getXMinWorld(),
+                          _zoomWorld.getXMaxWorld());
+  const double yMin = min(_zoomWorld.getYMinWorld(),
+                          _zoomWorld.getYMaxWorld());
+  const double yMax = max(_zoomWorld.getYMinWorld(),
+                          _zoomWorld.getYMaxWorld());
+  const double pixelsPerKm = fabs(_zoomWorld.getXPixel(1.0) -
+                                  _zoomWorld.getXPixel(0.0));
+  const double scaleSeconds = _params.wind_scaler *
+    _params.wind_time_scale_interval * 60.0;
+  const double plotWidth = fabs(_zoomWorld.getXMaxPixel() -
+                                _zoomWorld.getXMinPixel());
+  const double plotHeight = fabs(_zoomWorld.getYMaxPixel() -
+                                 _zoomWorld.getYMinPixel());
+
+  bool referenceDrawn = false;
+  for (int layerIndex = 0;
+       layerIndex < _gd.wind_mgr->layerCount(); ++layerIndex) {
+    if (!_gd.wind_mgr->verticalLayerReady(layerIndex)) {
+      continue;
+    }
+
+    const wind_data_t &wind = _gd.layers.wind[layerIndex];
+    const MdvReader *uReader = wind.wind_u;
+    const MdvReader *vReader = wind.wind_v;
+    if (uReader == nullptr || vReader == nullptr ||
+        uReader->v_fhdr.vlevel_type != _sectionReader->v_fhdr.vlevel_type) {
+      // A glyph can be compass-oriented independently of the plot axes, but
+      // its anchor height cannot be translated reliably between unlike MDV
+      // vertical coordinates. Suppress such a layer rather than misplacing it.
+      if (_params.debug >= Params::DEBUG_VERBOSE && uReader != nullptr &&
+          uReader->v_fhdr.vlevel_type != _sectionReader->v_fhdr.vlevel_type) {
+        cerr << "Vertical wind layer " << layerIndex
+             << " uses an incompatible vertical coordinate" << endl;
+      }
+      continue;
+    }
+
+    const int nx = uReader->v_fhdr.nx;
+    const int nz = uReader->v_fhdr.nz;
+    vector<int> visibleX;
+    vector<int> visibleZ;
+    visibleX.reserve(nx);
+    visibleZ.reserve(nz);
+    for (int ix = 0; ix < nx; ++ix) {
+      const double distanceKm = uReader->v_fhdr.grid_minx +
+        ix * uReader->v_fhdr.grid_dx;
+      if (distanceKm >= xMin && distanceKm <= xMax) {
+        visibleX.push_back(ix);
+      }
+    }
+    for (int iz = 0; iz < nz; ++iz) {
+      const double level = uReader->v_vhdr.level[iz];
+      if (level >= yMin && level <= yMax) {
+        visibleZ.push_back(iz);
+      }
+    }
+    if (visibleX.empty() || visibleZ.empty()) {
+      continue;
+    }
+
+    // Density follows the visible subsection so zooming reveals detail
+    // without making a large downloaded model domain expensive to draw.
+    const int xStride = max(1, static_cast<int>(floor(
+      visibleX.size() /
+        static_cast<double>(max(1, _params.wind_ideal_x_vectors)) + 0.5)));
+    const int zStride = max(1, static_cast<int>(floor(
+      visibleZ.size() /
+        static_cast<double>(max(1, _params.wind_ideal_y_vectors)) + 0.5)));
+
+    QColor color(wind.color_name);
+    if (!color.isValid()) {
+      color = Qt::white;
+    }
+    const double lineWidth = max(1, wind.line_width);
+    const fl32 uMissing = uReader->v_fhdr.missing_data_value;
+    const fl32 uBad = uReader->v_fhdr.bad_data_value;
+    const fl32 vMissing = vReader->v_fhdr.missing_data_value;
+    const fl32 vBad = vReader->v_fhdr.bad_data_value;
+
+    for (size_t jz = 0; jz < visibleZ.size(); jz += zStride) {
+      const int iz = visibleZ[jz];
+      const double level = uReader->v_vhdr.level[iz];
+      for (size_t jx = 0; jx < visibleX.size(); jx += xStride) {
+        const int ix = visibleX[jx];
+        const size_t dataIndex = static_cast<size_t>(iz) * nx + ix;
+        const fl32 rawU = uReader->v_fl32_data[dataIndex];
+        const fl32 rawV = vReader->v_fl32_data[dataIndex];
+        if (!isfinite(rawU) || !isfinite(rawV) || rawU == uMissing ||
+            rawU == uBad || rawV == vMissing || rawV == vBad) {
+          continue;
+        }
+
+        const double uMps = rawU * wind.data_units_scale_to_mps;
+        const double vMps = rawV * wind.data_units_scale_to_mps;
+        const double speedMps = hypot(uMps, vMps);
+        if (!isfinite(speedMps)) {
+          continue;
+        }
+        const double distanceKm = uReader->v_fhdr.grid_minx +
+          ix * uReader->v_fhdr.grid_dx;
+        const QPointF anchor =
+          _zoomWorld.getPixelPointF(distanceKm, level);
+
+        // These are compass symbols superimposed on a distance-height plot.
+        // Use the distance-axis pixel scale for both components: east is
+        // screen-right and true north is screen-up. The height transform must
+        // not rotate or rescale the horizontal wind direction.
+        const QPointF screenVelocity(
+          uMps * scaleSeconds / 1000.0 * pixelsPerKm,
+          -vMps * scaleSeconds / 1000.0 * pixelsPerKm);
+        if (wind.marker_type == ARROWS || wind.marker_type == VECTOR ||
+            wind.marker_type == TUFT || wind.marker_type == TICKVECTOR) {
+          if (speedMps < 0.1 ||
+              fabs(screenVelocity.x()) >= plotWidth / 4.0 ||
+              fabs(screenVelocity.y()) >= plotHeight / 4.0) {
+            continue;
+          }
+          const QPointF tail = wind.marker_type == ARROWS ?
+            anchor - 0.5 * screenVelocity : anchor;
+          const QPointF head = wind.marker_type == ARROWS ?
+            anchor + 0.5 * screenVelocity : anchor + screenVelocity;
+          if (wind.marker_type == TUFT) {
+            painter.setPen(QPen(color, lineWidth));
+            painter.drawEllipse(anchor, 1.5, 1.5);
+            painter.drawLine(anchor, head);
+          } else {
+            WindGlyphRenderer::drawArrow(
+              painter, tail, head, color, lineWidth,
+              _params.wind_head_size + 3.0 * (lineWidth - 1.0),
+              _params.wind_head_angle);
+            if (wind.marker_type == TICKVECTOR) {
+              const int tickCount = max(1, _params.wind_scaler - 1);
+              const double length = hypot(screenVelocity.x(),
+                                          screenVelocity.y());
+              if (length > 0.5) {
+                const QPointF unit = screenVelocity / length;
+                const QPointF side(-unit.y(), unit.x());
+                painter.setPen(QPen(color, lineWidth));
+                for (int itick = 1; itick <= tickCount; ++itick) {
+                  const QPointF at = anchor + screenVelocity *
+                    (itick / static_cast<double>(tickCount + 1));
+                  painter.drawLine(at - 2.0 * side, at + 2.0 * side);
+                }
+              }
+            }
+          }
+          continue;
+        }
+
+        QPointF toward(uMps, -vMps);
+        if (speedMps < 1.0e-6) {
+          toward = QPointF(0.0, -1.0);
+        }
+        const double directionDeg = fmod(
+          atan2(-uMps, -vMps) * 180.0 / M_PI + 360.0, 360.0);
+        bool southern = false;
+        WindGlyphRenderer::LabelStyle labelStyle =
+          WindGlyphRenderer::LabelStyle::None;
+        if (wind.marker_type == BARB_SH ||
+            wind.marker_type == LABELEDBARB_SH) {
+          southern = true;
+        } else if (wind.marker_type == METBARB) {
+          double lat = 0.0;
+          double lon = 0.0;
+          if (_routeLocation(distanceKm, lat, lon)) {
+            southern = lat < 0.0;
+          }
+        }
+        if (wind.marker_type == LABELEDBARB ||
+            wind.marker_type == LABELEDBARB_SH) {
+          labelStyle = WindGlyphRenderer::LabelStyle::DirectionAtOrigin;
+        } else if (wind.marker_type == METBARB) {
+          labelStyle = WindGlyphRenderer::LabelStyle::DirectionTensAtTip;
+        }
+        WindGlyphRenderer::drawBarb(
+          painter, anchor, -toward, speedMps * 1.9438444924406,
+          _params.wind_barb_shaft_len, lineWidth, color, southern,
+          labelStyle, directionDeg);
+      }
+    }
+
+    if (!referenceDrawn && _params.display_ref_lines &&
+        _params.wind_legends_on && pixelsPerKm > 0.0 &&
+        (wind.marker_type == ARROWS || wind.marker_type == VECTOR ||
+         wind.marker_type == TUFT || wind.marker_type == TICKVECTOR)) {
+      const double referencePixels = wind.reference_speed *
+        wind.units_scale_factor * scaleSeconds / 1000.0 * pixelsPerKm;
+      if (referencePixels > 1.0 && referencePixels < plotWidth / 2.0) {
+        const QPointF tail(min(_zoomWorld.getXMinPixel(),
+                               _zoomWorld.getXMaxPixel()) + 12.0,
+                           min(_zoomWorld.getYMinPixel(),
+                               _zoomWorld.getYMaxPixel()) + 12.0);
+        const QPointF head = tail + QPointF(referencePixels, 0.0);
+        WindGlyphRenderer::drawArrow(
+          painter, tail, head, color, lineWidth,
+          _params.wind_head_size, _params.wind_head_angle);
+        painter.setPen(color);
+        painter.drawText(head + QPointF(5.0, 4.0),
+                         QString("%1: %2 %3")
+                           .arg(QString::fromStdString(
+                             wind.wind_u->legend_name))
+                           .arg(wind.reference_speed)
+                           .arg(wind.units_label ? wind.units_label : ""));
+        referenceDrawn = true;
+      }
     }
   }
   painter.restore();

@@ -20,6 +20,8 @@ WindManager::WindManager() :
         _enabled(_params.winds_on_at_startup),
         _requestSerial(0),
         _states(_gd.layers.wind.size()),
+        _verticalRequestSerial(0),
+        _verticalStates(_gd.layers.wind.size()),
         _requestedVLevel(0.0),
         _requestedPage(0)
 {
@@ -41,6 +43,9 @@ void WindManager::setEnabled(bool enabled)
     state.ready = false;
     state.requested = false;
   }
+  for (VerticalLayerState &state : _verticalStates) {
+    state = VerticalLayerState();
+  }
 }
 
 void WindManager::setLayerEnabled(int index, bool enabled)
@@ -53,6 +58,7 @@ void WindManager::setLayerEnabled(int index, bool enabled)
   state.ready = false;
   state.requested = false;
   state.error.clear();
+  _verticalStates[index] = VerticalLayerState();
 }
 
 bool WindManager::layerEnabled(int index) const
@@ -93,9 +99,45 @@ int WindManager::requestData(const DateTime &midTime,
   return _requestSerial;
 }
 
+int WindManager::requestVerticalData(const DateTime &midTime,
+                                     int page,
+                                     const WayPts &wayPts)
+{
+  ++_verticalRequestSerial;
+  for (int ii = 0; ii < static_cast<int>(_gd.layers.wind.size()); ++ii) {
+    VerticalLayerState &state = _verticalStates[ii];
+    state = VerticalLayerState();
+    state.requestSerial = _verticalRequestSerial;
+
+    wind_data_t &wind = _gd.layers.wind[ii];
+    if (!_enabled || !wind.active || wind.wind_u == nullptr ||
+        wind.wind_v == nullptr || wayPts.getNPoints() < 2) {
+      continue;
+    }
+
+    // Request the same route independently from U and V. Their results are
+    // never exposed until both current generations have completed and the
+    // returned section geometry has been revalidated.
+    state.requested = true;
+    state.expectedUGeneration =
+      wind.wind_u->requestVertSection(midTime, page, wayPts);
+    state.expectedVGeneration =
+      wind.wind_v->requestVertSection(midTime, page, wayPts);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Vertical wind request: layer="
+           << wind.wind_u->legend_name
+           << " time=" << midTime.asString(0)
+           << " U=" << wind.wind_u->field_label
+           << " V=" << wind.wind_v->field_label << endl;
+    }
+  }
+  return _verticalRequestSerial;
+}
+
 void WindManager::invalidate()
 {
   ++_requestSerial;
+  ++_verticalRequestSerial;
   for (int ii = 0; ii < static_cast<int>(_gd.layers.wind.size()); ++ii) {
     LayerState &state = _states[ii];
     state = LayerState();
@@ -106,6 +148,7 @@ void WindManager::invalidate()
     if (wind.wind_v) {
       wind.wind_v->invalidateTimeList();
     }
+    _verticalStates[ii] = VerticalLayerState();
   }
 }
 
@@ -167,6 +210,53 @@ bool WindManager::poll()
   return overlayChanged;
 }
 
+bool WindManager::pollVertical()
+{
+  bool overlayChanged = false;
+
+  for (int ii = 0; ii < static_cast<int>(_gd.layers.wind.size()); ++ii) {
+    VerticalLayerState &state = _verticalStates[ii];
+    wind_data_t &wind = _gd.layers.wind[ii];
+    if (!state.requested || state.settled || !_enabled || !wind.active ||
+        wind.wind_u == nullptr || wind.wind_v == nullptr) {
+      continue;
+    }
+
+    // Completion flags are consumed independently. The completed-generation
+    // values retain the association after the first component's flag clears.
+    wind.wind_u->isNewV();
+    wind.wind_v->isNewV();
+    const bool generationsComplete =
+      state.expectedUGeneration >= 0 && state.expectedVGeneration >= 0 &&
+      wind.wind_u->getVertCompletedGeneration() ==
+        state.expectedUGeneration &&
+      wind.wind_v->getVertCompletedGeneration() ==
+        state.expectedVGeneration;
+    if (!generationsComplete) {
+      continue;
+    }
+
+    string error;
+    state.ready = _validateVerticalPair(ii, error);
+    state.error = error;
+    state.settled = true;
+    overlayChanged = true;
+
+    if (state.ready && _params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Vertical wind layer ready: "
+           << wind.wind_u->legend_name
+           << " dataTime=" << wind.wind_u->v_date.asString(0)
+           << " grid=" << wind.wind_u->v_fhdr.nx << "x"
+           << wind.wind_u->v_fhdr.nz << endl;
+    } else if (!error.empty() && _params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Vertical wind layer " << ii << " is not renderable: "
+           << error << endl;
+    }
+  }
+
+  return overlayChanged;
+}
+
 void WindManager::_startPendingRequests(int index)
 {
   LayerState &state = _states[index];
@@ -198,10 +288,31 @@ bool WindManager::activeWindsReady() const
   return true;
 }
 
+bool WindManager::activeVerticalWindsSettled() const
+{
+  if (!_enabled) {
+    return true;
+  }
+  for (int ii = 0; ii < static_cast<int>(_verticalStates.size()); ++ii) {
+    if (_gd.layers.wind[ii].active &&
+        (!_verticalStates[ii].requested || !_verticalStates[ii].settled)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool WindManager::layerReady(int index) const
 {
   return _enabled && index >= 0 && index < static_cast<int>(_states.size()) &&
     _gd.layers.wind[index].active && _states[index].ready;
+}
+
+bool WindManager::verticalLayerReady(int index) const
+{
+  return _enabled && index >= 0 &&
+    index < static_cast<int>(_verticalStates.size()) &&
+    _gd.layers.wind[index].active && _verticalStates[index].ready;
 }
 
 int WindManager::layerCount() const
@@ -260,6 +371,55 @@ bool WindManager::_validatePair(int index, string &error) const
     ostringstream out;
     out << "U and V data times differ (" << u->h_date.utime()
         << " versus " << v->h_date.utime() << ")";
+    error = out.str();
+    return false;
+  }
+  return true;
+}
+
+bool WindManager::_validateVerticalPair(int index, string &error) const
+{
+  const wind_data_t &wind = _gd.layers.wind[index];
+  const MdvReader *u = wind.wind_u;
+  const MdvReader *v = wind.wind_v;
+  if (!u->isValidV() || !v->isValidV()) {
+    error = "one or both component section reads failed";
+    return false;
+  }
+
+  const Mdvx::field_header_t &uh = u->v_fhdr;
+  const Mdvx::field_header_t &vh = v->v_fhdr;
+  if (uh.nx < 1 || uh.nz < 1 || uh.ny != 1 || vh.ny != 1 ||
+      uh.nx != vh.nx || uh.nz != vh.nz) {
+    error = "U and V section dimensions differ";
+    return false;
+  }
+  const size_t expected = static_cast<size_t>(uh.nx) * uh.nz;
+  if (u->v_fl32_data.size() != expected ||
+      v->v_fl32_data.size() != expected) {
+    error = "U or V section data size does not match its grid";
+    return false;
+  }
+  if (uh.proj_type != Mdvx::PROJ_VSECTION ||
+      vh.proj_type != Mdvx::PROJ_VSECTION ||
+      uh.vlevel_type != vh.vlevel_type ||
+      !_nearlyEqual(uh.grid_minx, vh.grid_minx) ||
+      !_nearlyEqual(uh.grid_dx, vh.grid_dx) ||
+      !_nearlyEqual(u->getVertTotalLengthKm(),
+                    v->getVertTotalLengthKm())) {
+    error = "U and V section geometry differs";
+    return false;
+  }
+  for (int iz = 0; iz < uh.nz; ++iz) {
+    if (!_nearlyEqual(u->v_vhdr.level[iz], v->v_vhdr.level[iz])) {
+      error = "U and V vertical levels differ";
+      return false;
+    }
+  }
+  if (u->v_date.utime() != v->v_date.utime()) {
+    ostringstream out;
+    out << "U and V section data times differ (" << u->v_date.utime()
+        << " versus " << v->v_date.utime() << ")";
     error = out.str();
     return false;
   }

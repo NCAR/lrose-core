@@ -186,6 +186,9 @@ public:
   double getVertSampleSpacingKm() const { return _vertSampleSpacingKm; }
   double getVertTotalLengthKm() const { return _vertTotalLengthKm; }
   int getVertGeneration() const { return _vertGeneration; }
+  int getVertCompletedGeneration() const {
+    return _vertCompletedGeneration;
+  }
   void cancelVertRequest(int generation);
   
   // perform the vol read for Horiz
@@ -411,6 +414,7 @@ private:
   double _vertSampleSpacingKm;
   double _vertTotalLengthKm;
   int _vertGeneration;
+  int _vertCompletedGeneration;
 
   // private methods
 

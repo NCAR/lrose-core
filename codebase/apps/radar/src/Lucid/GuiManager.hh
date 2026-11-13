@@ -509,6 +509,7 @@ private:
   void _autoCreateFunc();
   void _setField(int value);
   int _requestVerticalSection();
+  int _requestVerticalWinds();
   void _setDisplayTime(time_t utime);
   void _setEndFrame(int num_frames);
   void _updateMoviePopup();

@@ -753,6 +753,10 @@ void GuiManager::_checkMovieFrameReady()
   if (_gd.wind_mgr && !_gd.wind_mgr->activeWindsReady()) {
     return;
   }
+  if (_movieIncludesVertical && _gd.wind_mgr &&
+      !_gd.wind_mgr->activeVerticalWindsSettled()) {
+    return;
+  }
 
   const int completedFrame = _movieBuildFrame;
   _movieBuildFrame = -1;
@@ -837,6 +841,13 @@ void GuiManager::timerEvent(QTimerEvent *event)
   if (_gd.wind_mgr && _gd.wind_mgr->poll()) {
     if (_horiz) {
       _horiz->rerenderWinds();
+    }
+    _checkMovieFrameReady();
+    _checkAutomaticImageReady();
+  }
+  if (_gd.wind_mgr && _gd.wind_mgr->pollVertical()) {
+    if (_vert) {
+      _vert->rerenderWinds();
     }
     _checkMovieFrameReady();
     _checkAutomaticImageReady();
@@ -1581,9 +1592,13 @@ void GuiManager::_populateWindsMenu()
         _gd.wind_mgr->requestData(_timeControl->getSelectedTime().utime(),
                                   _vlevelManager.getRequestedLevel(),
                                   _gd.h_win.page);
+        _requestVerticalWinds();
       }
       if (_horiz) {
         _horiz->rerenderWinds();
+      }
+      if (_vert) {
+        _vert->rerenderWinds();
       }
       _checkAutomaticImageReady();
     });
@@ -1608,9 +1623,13 @@ void GuiManager::_setWindsEnabled(bool enable)
     _gd.wind_mgr->requestData(_timeControl->getSelectedTime().utime(),
                               _vlevelManager.getRequestedLevel(),
                               _gd.h_win.page);
+    _requestVerticalWinds();
   }
   if (_horiz) {
     _horiz->rerenderWinds();
+  }
+  if (_vert) {
+    _vert->rerenderWinds();
   }
   _checkAutomaticImageReady();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -3116,11 +3135,11 @@ void GuiManager::_checkAutomaticImageReady()
     (_params.images_require_all_symprods ?
        _gd.prod_mgr->activeProductsReady() :
        _gd.prod_mgr->activeProductRequestsSettled());
-  const bool windsRelevant =
-    !_automaticImageGenerator->currentJobIsVertical() &&
-    _gd.wind_mgr && _gd.wind_mgr->isEnabled();
+  const bool windsRelevant = _gd.wind_mgr && _gd.wind_mgr->isEnabled();
   const bool windsReady = !windsRelevant ||
-    _gd.wind_mgr->activeWindsReady();
+    (_automaticImageGenerator->currentJobIsVertical() ?
+       _gd.wind_mgr->activeVerticalWindsSettled() :
+       _gd.wind_mgr->activeWindsReady());
   if (!_automaticImageGenerator->readyToSave(productsReady && windsReady)) {
     return;
   }
@@ -4752,8 +4771,27 @@ int GuiManager::_requestVerticalSection()
           this, &GuiManager::_verticalReadComplete,
           Qt::UniqueConnection);
   // statusBar()->showMessage("Requesting vertical section");
-  return reader->requestVertSection(_timeControl->getSelectedTime(),
-                                    _gd.h_win.page, wayPts);
+  const int generation = reader->requestVertSection(
+    _timeControl->getSelectedTime(), _gd.h_win.page, wayPts);
+  _requestVerticalWinds();
+  return generation;
+}
+
+/////////////////////////////////////////////////////////////
+// request horizontal U/V components along the retained section route
+
+int GuiManager::_requestVerticalWinds()
+{
+  if (_gd.wind_mgr == nullptr || _vsectionRoute.size() < 2) {
+    return -1;
+  }
+
+  WayPts wayPts;
+  for (const VsectionRoute::Point &point : _vsectionRoute.points()) {
+    wayPts.addPoint(point.lat, point.lon);
+  }
+  return _gd.wind_mgr->requestVerticalData(
+    _timeControl->getSelectedTime(), _gd.h_win.page, wayPts);
 }
 
 /////////////////////////////////////////////////////////////
