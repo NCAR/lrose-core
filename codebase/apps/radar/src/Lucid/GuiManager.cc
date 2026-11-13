@@ -449,7 +449,8 @@ int GuiManager::run(QApplication &app)
 
 void GuiManager::enableUnzoomButtons(bool val) const
 {
-  const bool spatialChangesAllowed = !isMovieActive();
+  const bool spatialChangesAllowed =
+    !_params.create_images_automatically && !isMovieActive();
   _zoomBackAct->setEnabled(spatialChangesAllowed && val);
   _zoomOutAct->setEnabled(spatialChangesAllowed && val);
   if (!spatialChangesAllowed) {
@@ -595,43 +596,45 @@ void GuiManager::movieStateChanged()
 {
   const bool building = isMovieBuilding();
   const bool active = isMovieActive();
+  const bool interactive = !_params.create_images_automatically;
 
   // A movie build must capture one stable display configuration. Playback is
   // less restrictive: field and level choices may update the hidden live
   // state and become visible after Stop, but spatial transforms would make
-  // the immutable cached frames incompatible with that state.
+  // the immutable cached frames incompatible with that state. Automated image
+  // instances remain permanently non-interactive even as movie state changes.
   if (_fieldTable) {
-    _fieldTable->setEnabled(!building);
+    _fieldTable->setEnabled(interactive && !building);
   }
   if (_vlevelSelector) {
-    _vlevelSelector->setEnabled(!building);
+    _vlevelSelector->setEnabled(interactive && !building);
   }
   if (_mapsMenu) {
-    _mapsMenu->setEnabled(!building);
+    _mapsMenu->setEnabled(interactive && !building);
   }
   if (_windsMenu) {
-    _windsMenu->setEnabled(!building);
+    _windsMenu->setEnabled(interactive && !building);
   }
   if (_productsMenu) {
-    _productsMenu->setEnabled(!building);
+    _productsMenu->setEnabled(interactive && !building);
   }
   if (_overlaysMenu) {
-    _overlaysMenu->setEnabled(!building);
+    _overlaysMenu->setEnabled(interactive && !building);
   }
   if (_reloadAct) {
-    _reloadAct->setEnabled(!building);
+    _reloadAct->setEnabled(interactive && !building);
   }
   if (_clearAct) {
-    _clearAct->setEnabled(!building);
+    _clearAct->setEnabled(interactive && !building);
   }
   if (_zoomsMenu) {
-    _zoomsMenu->setEnabled(!active);
+    _zoomsMenu->setEnabled(interactive && !active);
   }
   if (_showValueAct) {
-    _showValueAct->setEnabled(!active);
+    _showValueAct->setEnabled(interactive && !active);
   }
   if (_showClickAct) {
-    _showClickAct->setEnabled(!active);
+    _showClickAct->setEnabled(interactive && !active);
   }
   if (_horiz) {
     _horiz->setMovieInteractionActive(active);
@@ -643,8 +646,8 @@ void GuiManager::movieStateChanged()
     // A cached vertical loop may be hidden and reopened. If no vertical cache
     // was selected at Start, opening a live section during horizontal-only
     // playback would imply synchronization which does not exist.
-    _showVertAct->setEnabled(!active ||
-                             _movieManager->includesVertical());
+    _showVertAct->setEnabled(
+      interactive && (!active || _movieManager->includesVertical()));
   }
 
   enableUnzoomButtons(_horiz && !_horiz->getCustomZooms().empty());
@@ -859,6 +862,14 @@ void GuiManager::_resizeFinished()
 ////////////////////////////////////////////////////////////////
 void GuiManager::keyPressEvent(QKeyEvent * e)
 {
+
+  // Automatic image instances are display engines rather than interactive
+  // viewers. Consume main-window shortcuts here because disabling the child
+  // controls alone does not prevent field, time, or level keyboard actions.
+  if (_params.create_images_automatically) {
+    e->accept();
+    return;
+  }
 
   // get key pressed
   
@@ -1088,7 +1099,52 @@ void GuiManager::_setupWindows()
           "  padding: 4px 6px;"
           "}"
                              );
+
+  _configureAutomaticImageUi();
   
+}
+
+/////////////////////////////////////////////////////////////
+// reserve an automatic-image instance for unattended rendering
+
+void GuiManager::_configureAutomaticImageUi()
+{
+  if (!_params.create_images_automatically) {
+    return;
+  }
+
+  // The generator still drives these objects programmatically. Disable their
+  // user input at the widget and action boundary so an unattended run cannot
+  // have its field, time, geometry, or overlays changed midway through a job.
+  _fieldMenu->setDisabled(true);
+  _timeControl->setDisabled(true);
+  _vlevelSelector->setDisabled(true);
+  _horiz->setDisabled(true);
+  _vertWindow->setDisabled(true);
+
+  // Image dimensions are part of the unattended product definition. Preserve
+  // the configured startup geometry while still leaving window Close and the
+  // File/Exit action available for operational shutdown.
+  setFixedSize(size());
+  _vertWindow->setFixedSize(_vertWindow->size());
+
+  _showFieldMenuAct->setEnabled(false);
+  _showTimeControlAct->setEnabled(false);
+  _saveImageAct->setEnabled(false);
+  _reloadAct->setEnabled(false);
+  _clearAct->setEnabled(false);
+  _zoomBackAct->setEnabled(false);
+  _zoomOutAct->setEnabled(false);
+  _mapsMenu->setEnabled(false);
+  _productsMenu->setEnabled(false);
+  _windsMenu->setEnabled(false);
+  _zoomsMenu->setEnabled(false);
+  _overlaysMenu->setEnabled(false);
+  _showMenu->setEnabled(false);
+
+  _clickReportDialog->hide();
+  statusBar()->showMessage(
+    tr("Automatic image generation: interactive controls are disabled"));
 }
 
 ///////////////////////////////////////////////////////

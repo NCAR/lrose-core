@@ -412,6 +412,7 @@ private:
   
   void _clear();
   void _setupWindows();
+  void _configureAutomaticImageUi();
   void _createActions();
   void _createMenus();
   void _populateMapsMenu();

@@ -16,28 +16,28 @@
 //
 // Parameter sections in this file:.
 //
-// 	<DEBUGGING> - set debug levels
-// 	<PROCESS_CONTROL> - and interprocess communication
-// 	<FIELDS> - fields to be displayed
-// 	<DATA_RETRIEVAL> - how to read the data
-// 	<MAPS> - map overlays
-// 	<PROJECTION> - world coordinate projection for main window
-// 	<MOVIE_LOOPS> - animations
-// 	<ZOOM_DOMAINS> - pre-defined zooms
-// 	<GUI> - User interface
-// 	<WINDOWS> - window size and placement
-// 	<HORIZ_VIEW> - horizontal plan-view display
-// 	<VERT_VIEW> - vertical cross-section display
-// 	<COLORS> - colors for display elements
-// 	<OVERLAYS> - geometric overlays and legends
-// 	<RENDERING> - details on rendering
-// 	<SYMBOLIC_PRODUCTS> - rendering products as overlays
-// 	<TERRAIN> - getting and rendering terrain data
-// 	<WINDS> - getting and rendering gridded winds
-// 	<IMAGE_GENERATION> - image generation
-// 	<AUTO_VERT> - predefined vertical sections for image generation
-// 	<PLUGINS> - Communicating with other applications
-// 	<HELP> - user help.
+// 	<DEBUGGING> - diagnostic output levels
+// 	<PROCESS_CONTROL> - process registration, caching, and startup mode
+// 	<FIELDS> - gridded data fields and their rendering configuration
+// 	<DATA_RETRIEVAL> - data request and server-access policies
+// 	<MAPS> - map overlay sources and display options
+// 	<PROJECTION> - horizontal display projection and origin
+// 	<MOVIE_LOOPS> - movie timing and playback controls
+// 	<ZOOM_DOMAINS> - predefined display domains
+// 	<GUI> - menus, controls, and vertical-level selector
+// 	<HORIZ_VIEW> - horizontal-view window and plot layout
+// 	<VSECTION_VIEW> - vertical-section selection, window, and plot 
+//   layout
+// 	<COLORS> - shared display colors
+// 	<OVERLAYS> - range rings, labels, and other plot overlays
+// 	<RENDERING> - contours, overlay fields, and rendering details
+// 	<SYMBOLIC_PRODUCTS> - symbolic-product retrieval and rendering
+// 	<TERRAIN> - terrain and land-use data
+// 	<WINDS> - gridded wind fields and rendering
+// 	<IMAGE_GENERATION> - automatic image output and vertical-section 
+//   specifications
+// 	<PLUGINS> - communication with external applications
+// 	<HELP> - user-help configuration.
 //
 //======================================================================
  
@@ -832,7 +832,7 @@ proj_tangent_lat = 20;
 //
 // This applies to OBLIQUE_STEREO and POLAR_STEREO.
 //
-// Type: double
+/// Type: double
 
 proj_tangent_lon = -104;
 
@@ -2967,14 +2967,6 @@ scale_units_label = "km";
 //
 //======================================================================
  
-///////////// products_on /////////////////////////////
-//
-// Render all of the products in the overlay menu.
-//
-// Type: boolean
-
-products_on = TRUE;
-
 ///////////// product_line_width //////////////////////
 //
 // Line width for rendering products.
@@ -3035,10 +3027,10 @@ product_adjustments = {
  
 ///////////// symprods_enabled_at_startup /////////////
 //
-// Enable symprods at start.
+// Enable symbolic products at startup.
 //
-// If FALSE, symbolic products will not be emabled at startup. You will 
-//   have to turn them on via the products menu.
+// If FALSE, symbolic products remain disabled until they are turned on 
+//   from the products menu.
 //
 // Type: boolean
 
@@ -3210,7 +3202,7 @@ symprod_prod_info = {
 //
 // Type: boolean
 
-terrain_active = FALSE;
+terrain_active = TRUE;
 
 ///////////// terrain_id_label ////////////////////////
 //
@@ -3233,7 +3225,7 @@ terrain_id_label = "Terrain";
 //
 // Type: string
 
-terrain_url = "/home/dixon/data/lucid/precip/mdv/terrain&Elevation";
+terrain_url = "mdvp::terrain//localhost:0:/home/dixon/data/lucid/precip/mdv/terrain&Elevation";
 
 ///////////// terrain_height_scaler ///////////////////
 //
@@ -3596,6 +3588,8 @@ movie_convert_script = "make_anim.csh";
 //
 // Option to create images automatically.
 //
+// See images_creation_mode below.
+//
 // Type: boolean
 
 create_images_automatically = TRUE;
@@ -3621,7 +3615,7 @@ create_images_automatically = TRUE;
 //     CREATE_IMAGES_ON_REALTIME_SCHEDULE
 //     CREATE_IMAGES_ON_ARCHIVE_SCHEDULE
 
-images_creation_mode = CREATE_IMAGES_THEN_EXIT;
+images_creation_mode = CREATE_IMAGES_ON_REALTIME_SCHEDULE;
 
 ///////////// images_schedule_interval_secs ///////////
 //
@@ -3658,27 +3652,41 @@ images_schedule_delay_secs = 60;
 
 images_request_timeout_secs = 120;
 
+///////////// images_require_all_symprods /////////////
+//
+// Require every enabled symbolic product before saving an automatic 
+//   horizontal image.
+//
+// If TRUE, an unavailable symbolic-product server causes the image job 
+//   to wait until images_request_timeout_secs expires. If FALSE, Lucid 
+//   waits for the current product requests to finish and then saves the 
+//   image with whichever symbolic products were available.
+//
+// Type: boolean
+
+images_require_all_symprods = FALSE;
+
 ///////////// images_archive_start_time ///////////////
 //
 // Start time for image generation in archive mode.
 //
-// Image generation starts with a seach at this time, and the proceeds 
-//   at increments of images_schedule_interval_secs.
+// Image generation starts with a search at this time, then proceeds at 
+//   increments of images_archive_interval_secs.
 //
 // Type: string
 
-images_archive_start_time = "2022 06 08 02 00 00";
+images_archive_start_time = "1970 01 01 00 00 00";
 
 ///////////// images_archive_end_time /////////////////
 //
 // End time for image generation in archive mode.
 //
 // Image generation is terminated when the search time exceeds this end 
-//   time.
+//   time. Only applicable for archive image generation.
 //
 // Type: string
 
-images_archive_end_time = "2022 06 08 03 00 00";
+images_archive_end_time = "1970 01 01 00 00 00";
 
 ///////////// images_archive_interval_secs ////////////
 //
@@ -3691,6 +3699,9 @@ images_archive_interval_secs = 300;
 ///////////// images_write_to_day_dir /////////////////
 //
 // Option to create a subdirectory for each day.
+//
+// If true, a subdirectory named YYYYMMDD will be appended to 
+//   images_output_dir.
 //
 // Type: boolean
 
@@ -3811,12 +3822,38 @@ images_set_height_list = FALSE;
 //
 // List of heights for image generation.
 //
-// See 'images_set_height_list'.
+// See 'images_set_height_list'. When more than one height is 
+//   configured, a normalized height in km is added to each horizontal 
+//   image file name to keep the outputs distinct.
 //
 // Type: double
 // 1D array - variable length.
 
 images_height_list = { 1, 2, 4 };
+
+///////////// images_set_zoom_list ////////////////////
+//
+// Option to specify the predefined zooms for image generation.
+//
+// If TRUE, every label in images_zoom_list is processed. If FALSE, only 
+//   the first entry in zoom_levels is processed.
+//
+// Type: boolean
+
+images_set_zoom_list = FALSE;
+
+///////////// images_zoom_list ////////////////////////
+//
+// List of predefined zoom labels for image generation.
+//
+// Each value must exactly match a label in zoom_levels. When more than 
+//   one zoom is configured, its label is added to each horizontal image 
+//   file name to keep the outputs distinct.
+//
+// Type: string
+// 1D array - variable length.
+
+images_zoom_list = { "100km" };
 
 ///////////// images_output_geo_xml ///////////////////
 //
@@ -3844,6 +3881,10 @@ images_use_latlon_in_geo_xml = FALSE;
 ///////////// images_write_latest_data_info ///////////
 //
 // Option to write latest_data_info files when an image is created.
+//
+// If true, a _latest_data_info file is written in each view-specific 
+//   image subdirectory, and the file write is registered with the 
+//   DataMapper.
 //
 // Type: boolean
 
@@ -3922,152 +3963,6 @@ images_vsection_spec = {
 //======================================================================
 //
 // </IMAGE_GENERATION>.
-//
-//======================================================================
- 
-//======================================================================
-//
-// <AUTO_VERT>.
-//
-// Predefined vertical sections for image generation.
-//
-//======================================================================
- 
-///////////// route_winds_active //////////////////////
-//
-// Activates route winds vert section.
-//
-// If FALSE, no route winds functionality is available.
-//
-// Type: boolean
-
-route_winds_active = TRUE;
-
-///////////// route_debug /////////////////////////////
-//
-// Set to DEBUG_NORM or DEBUG_VERBOSE for diagnostic output.
-//
-// Type: enum
-// Options:
-//     ROUTE_DEBUG_OFF
-//     ROUTE_DEBUG_NORM
-//     ROUTE_DEBUG_VERBOSE
-
-route_debug = ROUTE_DEBUG_OFF;
-
-///////////// route_font_height ///////////////////////
-//
-//  Maximum height in Pixels of labels.
-//
-// Type: int
-
-route_font_height = 13;
-
-///////////// route_add_waypoints_labels //////////////
-//
-// Default state of the add_waypoints_labels.
-//
-// 0 = off, 1 = on.
-//
-// Type: int
-
-route_add_waypoints_labels = 1;
-
-///////////// route_add_wind_text /////////////////////
-//
-// Default state of the add_wind_text labels.
-//
-// 0 = off, 1 = on.
-//
-// Type: int
-
-route_add_wind_text = 1;
-
-///////////// route_label_style ///////////////////////
-//
-// How to space the labels along the route.
-//
-// REGULAR_INTERVALS: use total_length / label_interval. 
-//   EQUAL_DIVISIONS: use num_labels.
-//
-// Type: enum
-// Options:
-//     ROUTE_REGULAR_INTERVALS
-//     ROUTE_EQUAL_DIVISIONS
-
-route_label_style = ROUTE_REGULAR_INTERVALS;
-
-///////////// route_label_interval ////////////////////
-//
-// Distance in km between winds labels.
-//
-// Used if label_style is set to REGULAR_INTERVALS.
-//
-// Type: double
-
-route_label_interval = 55.6;
-
-///////////// route_num_labels ////////////////////////
-//
-// number of route wind labels to plot along the route.
-//
-// Typically this should be set between 5 and 20.
-//
-// Minimum val: 2
-// Maximum val: 100
-//
-// Type: int
-
-route_num_labels = 10;
-
-///////////// route_track_line_width //////////////////
-//
-// Width in pixels of the route winds track.
-//
-// Minimum val: 1
-// Maximum val: 20
-//
-// Type: int
-
-route_track_line_width = 3;
-
-///////////// route_u_url /////////////////////////////
-//
-// U Wind Componet.
-//
-//  URL's take the form  mdvp::[paramfile]//host.dom::dir/dir&fieldname.
-//
-// Type: string
-
-route_u_url = "mdvp::zoom_mds//neptune::mdv/mm5&U";
-
-///////////// route_v_url /////////////////////////////
-//
-// v Wind Componet.
-//
-// Type: string
-
-route_v_url = "mdvp::zoom_mds//neptune::mdv/mm5&V";
-
-///////////// route_paths /////////////////////////////
-//
-//  Route path strings - Format of each string isROUTE_LABEL NPOINTS  
-//   ID_String Lat Lon ID_String LAT Lon ...
-//
-// ROUTE_LABEL will be used in the menu, 
-// NPoints = Number of way points in route 
-//   Followed by NPoint triplets of the following:
-// ID_string -> usually a Airport or VOR 
-// Lat Lon :  decimal degrees.
-//
-// Type: string
-// 1D array - variable length.
-
-route_paths = { "A-1 8 BULAN 27.0917 124.0000 OSTAR 26.3317 123.0000 SHARK 25.8333 122.3583 ANNNA 25.5717 122.0217 APU 25.1767 121.5233 HLG 24.6400 120.7833 MKG 23.5583 119.6283 ELATO 22.3333 117.5000 ", "M-750 12 MOLKA 26.6583 124.0000 MORSU 25.9100 123.0000 LEKOS 25.5100 122.4717 ROBIN 25.4200 122.2083 NOKAS 25.1317 121.9917 SANAS 24.8967 121.6917 PILOX 24.4150 121.0250 ANLOT 23.9417 120.5233 TOROX 23.3533 119.9083 RENOT 22.5683 118.5117 DADON 22.2767 118.0033 ENVAR 21.9917 117.5000 ", "G-581 7 IGURU 23.9500 124.0000 TULTO 23.3233 123.0000 HCN 21.9283 120.8433 PARPA 22.0150 120.1683 CYRUS 22.2167 118.5317 DADON 22.2767 118.0033 ELATO 22.3333 117.5000 ", "B-591 9 APU 25.1767 121.5233 SANAS 24.8967 121.6917 TINHO 24.3533 122.0283 TITUS 23.8283 121.8517 TACLE 22.9933 121.5867 GID 22.6733 121.4867 TUNNY 22.3600 121.2150 HCN 21.9283 120.8433 DOREX 21.0000 120.7833 ", "R-583 5 BORDO 26.0167 124.0000 KIKIT 25.8817 123.5917 PABSO 25.6517 122.8750 LEKOS 25.5100 122.4717 APU 25.1767 121.5233 ", "G-86 3 HCN 21.9283 120.8433 ANDRE 21.7783 120.1683 KAPLI 21.1667 117.5000 ", "B-576 3 SALMI 28.3150 124.0000 BERBA 27.0783 123.0000 APU 25.1767 121.5233 " };
-
-//======================================================================
-//
-// </AUTO_VERT>.
 //
 //======================================================================
  
