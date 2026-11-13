@@ -168,11 +168,12 @@ GuiManager* GuiManager::Instance()
 GuiManager::GuiManager() :
         _params(Params::Instance()),
         _gd(GlobalData::Instance()),
-        _vertWindowDisplayed(false)
+        _automaticSavedVertWindowVisible(false)
 {
 
   _timerEventCount = 0;
   _archiveMode = true;
+  _mapsEnabled = _params.maps_enabled_at_startup;
   
   m_pInstance = this;
 
@@ -1513,8 +1514,19 @@ void GuiManager::_populateMapsMenu()
 void GuiManager::_setMapsEnabled(bool enable)
 {
   _mapsEnabled = enable;
+  mapDisplayChanged();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> maps enabled? " << (_mapsEnabled?"Y":"N") << endl;
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// rebuild cached map graphics without invalidating field data
+
+void GuiManager::mapDisplayChanged()
+{
+  if (_horiz != nullptr) {
+    _horiz->rerenderMaps();
   }
 }
 
@@ -2502,6 +2514,8 @@ void GuiManager::_saveAutomaticDisplayState()
   _automaticSavedFrameIntervalSecs = _timeControl->getFrameIntervalSecs();
   _automaticSavedFrameIndex = _timeControl->getFrameIndex();
   _automaticSavedRealtime = _timeControl->isRealtime();
+  _automaticSavedVertWindowVisible =
+    _vertWindow != nullptr && _vertWindow->isVisible();
   _automaticSavedVsectionRoute = _vsectionRoute;
   _automaticDisplayStateSaved = true;
 }
@@ -2526,7 +2540,7 @@ void GuiManager::_restoreAutomaticDisplayState()
     _selectAutomaticImageField(_automaticSavedField);
   }
   _vsectionRoute = _automaticSavedVsectionRoute;
-  if (_vsectionRoute.size() >= 2 && _vertWindowDisplayed) {
+  if (_vsectionRoute.size() >= 2 && _automaticSavedVertWindowVisible) {
     _requestVerticalSection();
   }
   _automaticDisplayStateSaved = false;

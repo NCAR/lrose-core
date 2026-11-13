@@ -132,6 +132,7 @@ class DLL_EXPORT HorizView : public QWidget
 
   void rerenderGrid();
 
+  void rerenderMaps();
   void rerenderProducts();
   void rerenderWinds();
 

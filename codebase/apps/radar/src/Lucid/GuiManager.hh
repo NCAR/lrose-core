@@ -129,11 +129,13 @@ public:
   const string &getSelectedFieldName() const;
   const string &getSelectedFieldUnits() const;
   int getSelectedFieldIndex() const { return _fieldNum; }
+  bool mapsEnabled() const { return _mapsEnabled; }
 
   // set flag to indicate changes
 
   void setVlevelHasChanged(bool val) { _vlevelHasChanged = val; }
   void setOverlaysHaveChanged(bool val) { _overlaysHaveChanged = val; }
+  void mapDisplayChanged();
   
   // set title bar str
   
@@ -208,8 +210,6 @@ private:
 
   VertManager *_vertWindow;
   VertView *_vert;
-  bool _vertWindowDisplayed;
-
   // Keep the most recently completed route independently of the canvas so a
   // later field or time change can request the same vertical section.
 
@@ -307,6 +307,7 @@ private:
   double _automaticSavedFrameIntervalSecs;
   int _automaticSavedFrameIndex;
   bool _automaticSavedRealtime;
+  bool _automaticSavedVertWindowVisible;
   VsectionRoute _automaticSavedVsectionRoute;
 
   void _saveAutomaticDisplayState();

@@ -338,7 +338,9 @@ void HorizView::paintEvent(QPaintEvent *event)
 
   if (_gridsReady && _mapsReady) {
     painter.drawImage(0, 0, *_zoom->getGridImage());
-    painter.drawImage(0, 0, *_zoom->getMapsImage());
+    if (_manager.mapsEnabled()) {
+      painter.drawImage(0, 0, *_zoom->getMapsImage());
+    }
     painter.drawImage(0, 0, *_zoom->getWindsImage());
   }
 
@@ -962,6 +964,17 @@ void HorizView::rerenderGrid()
   // A horizontal read temporarily invalidates the reader while its buffers
   // are replaced. Avoid regenerating the cached grid in that interval, but
   // still repaint live annotations such as an interactively edited color bar.
+  repaint();
+}
+
+/////////////////////////////////////////////////////////////
+// rebuild map overlays after their menu state changes
+
+void HorizView::rerenderMaps()
+{
+  // Maps are cached independently from the gridded data. Rebuild only that
+  // image so a display-only menu change neither waits for nor requests MDV.
+  _renderMaps();
   repaint();
 }
 

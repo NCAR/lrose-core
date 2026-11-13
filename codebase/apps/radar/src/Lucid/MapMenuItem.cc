@@ -87,7 +87,7 @@ void MapMenuItem::toggled(bool checked)
   }
 
   if (_manager != NULL) {
-    _manager->setOverlaysHaveChanged(true);
+    _manager->mapDisplayChanged();
   }
 
 }

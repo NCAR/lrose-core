@@ -2125,7 +2125,17 @@ void Lucid::_initContours()
     _gd.layers.overlay_field[ii] = 0;
   }
 
-  for(int ii = 0; ii < _params.contour_fields_n; ii++ ) {
+  // The retained CIDD contour store has a fixed capacity. Ignore excess
+  // legacy entries rather than allowing a parameter file to corrupt the
+  // adjacent layer state during startup.
+  if (_params.contour_fields_n > Constants::NUM_CONT_LAYERS) {
+    cerr << "WARNING - contour_fields contains "
+         << _params.contour_fields_n << " entries; only the first "
+         << Constants::NUM_CONT_LAYERS << " are supported" << endl;
+  }
+  const int numContourFields =
+    min(_params.contour_fields_n, Constants::NUM_CONT_LAYERS);
+  for(int ii = 0; ii < numContourFields; ii++ ) {
     
     Params::contour_field_t &cfield = _params._contour_fields[ii];
     
@@ -2169,7 +2179,17 @@ void Lucid::_initOverlayFields()
 
 {
 
-  for (int ii = 0; ii < _params.layer_fields_n; ii++) {
+  // Overlay rendering still uses a fixed CIDD-compatible layer array. Bound
+  // variable-length TDRP input here so malformed or expanded configurations
+  // cannot overwrite unrelated GlobalData members.
+  if (_params.layer_fields_n > Constants::NUM_GRID_LAYERS) {
+    cerr << "WARNING - layer_fields contains " << _params.layer_fields_n
+         << " entries; only the first " << Constants::NUM_GRID_LAYERS
+         << " are supported" << endl;
+  }
+  const int numLayerFields =
+    min(_params.layer_fields_n, Constants::NUM_GRID_LAYERS);
+  for (int ii = 0; ii < numLayerFields; ii++) {
 
     Params::layer_field_t &lfield = _params._layer_fields[ii];
 
