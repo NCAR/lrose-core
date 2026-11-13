@@ -431,7 +431,7 @@ GuiManager::~GuiManager()
 {
 
   // Stop the manager-owned timers and release callbacks into this object
-  // before tearing down any views or data managers they may reference.
+  // before Qt tears down child views or data managers they may reference.
   delete _imageGenerationManager;
   _imageGenerationManager = nullptr;
   delete _movieManager;
@@ -441,14 +441,6 @@ GuiManager::~GuiManager()
     _gd.prod_mgr->setProductsChangedCallback(std::function<void()>());
     _gd.prod_mgr->setStatusCallback(
       std::function<void(const string &, bool)>());
-  }
-
-  if (_horiz) {
-    delete _horiz;
-  }
-
-  if (_vert) {
-    delete _vert;
   }
 
 }
@@ -1302,13 +1294,17 @@ void GuiManager::_createActions()
   // file chooser for Open
   _openFileAct = new QAction(tr("O&pen"), this);
   _openFileAct->setShortcut(tr("Ctrl+F"));
-  _openFileAct->setStatusTip(tr("Open File"));
+  _openFileAct->setStatusTip(
+    tr("Open a new parameter file (not yet implemented)"));
+  _openFileAct->setEnabled(false);
   connect(_openFileAct, &QAction::triggered, this, &GuiManager::_openFile);
 
   // file chooser for Save
   _saveFileAct = new QAction(tr("S&ave"), this);
   //_saveFileAct->setShortcut(tr("Ctrl+S"));
-  _saveFileAct->setStatusTip(tr("Save File"));
+  _saveFileAct->setStatusTip(
+    tr("Save interactive settings to a parameter file (not yet implemented)"));
+  _saveFileAct->setEnabled(false);
   connect(_saveFileAct, &QAction::triggered, this, &GuiManager::_saveFile);
 
   // unzoom

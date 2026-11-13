@@ -173,14 +173,10 @@ HorizView::HorizView(QWidget* parent,
  * Destructor
  */
 
-HorizView::~HorizView()
-{
+// Child widgets, including the rubber band, are released by QObject parent
+// ownership when the view is destroyed.
 
-  if (!_rubberBand) {
-    delete _rubberBand;
-  }
-
-}
+HorizView::~HorizView() = default;
 
 /*************************************************************************
  * clear()
