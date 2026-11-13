@@ -256,12 +256,17 @@ GuiManager::GuiManager() :
     return -1;
   };
   movieCallbacks.captureFrame =
-    [this](int frameIndex, bool includeVertical) {
-      const bool horizCaptured =
-        _horiz && _horiz->captureMovieFrame(frameIndex);
-      const bool vertCaptured = !includeVertical ||
-        (_vert && _vert->captureMovieFrame(frameIndex));
-      return horizCaptured && vertCaptured;
+    [this](int frameIndex, bool includeVertical, QString &error) {
+      if (!_horiz || !_horiz->captureMovieFrame(frameIndex)) {
+        error = tr("Could not capture the horizontal view");
+        return false;
+      }
+      if (includeVertical &&
+          (!_vert || !_vert->captureMovieFrame(frameIndex))) {
+        error = tr("Could not capture the vertical-section view");
+        return false;
+      }
+      return true;
     };
   movieCallbacks.showFrame =
     [this](int frameIndex, bool includeVertical) {
@@ -298,6 +303,12 @@ GuiManager::GuiManager() :
       _timeControl->movieFrameRendered(frameIndex);
     }
   };
+  movieCallbacks.frameCaptureFailed =
+    [this](int frameIndex, const QString &error) {
+      if (_timeControl) {
+        _timeControl->movieFrameCaptureFailed(frameIndex, error);
+      }
+    };
   movieCallbacks.showProgress = [this](const QString &message) {
     statusBar()->showMessage(message);
   };

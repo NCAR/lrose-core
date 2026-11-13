@@ -978,6 +978,27 @@ void TimeControl::movieFrameRendered(int frameIndex)
   }
 }
 
+/////////////////////////////////////////////////////////////
+// leave Building state when a ready frame cannot be captured
+
+void TimeControl::movieFrameCaptureFailed(int frameIndex,
+                                          const QString &error)
+{
+  if (_movieState != MovieState::Building ||
+      frameIndex != _buildingFrameIndex) {
+    return;
+  }
+
+  const QString message = tr("Movie frame %1 capture failed: %2")
+    .arg(frameIndex + 1).arg(error);
+
+  // Use the normal stop path so cached playback, disabled controls, and the
+  // live data request are restored together. Replace its routine Stop message
+  // with the actionable failure after that cleanup has completed.
+  _stopMovie();
+  _manager->statusBar()->showMessage(message, 15000);
+}
+
 void TimeControl::_startMoviePlayback()
 {
   _movieState = MovieState::Playing;

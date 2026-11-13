@@ -122,10 +122,30 @@ void MovieManager::checkFrameReady(bool dependenciesReady)
   _buildFrame = -1;
   _gridReady = false;
   _verticalReady = false;
-  if (_callbacks.captureFrame &&
-      _callbacks.captureFrame(completedFrame, _includesVertical) &&
-      _callbacks.frameRendered) {
+
+  // Capture and completion callbacks are synchronous and may immediately
+  // start the next frame. Clear this frame's state first, then report capture
+  // failure explicitly so TimeControl cannot remain indefinitely in Building.
+  QString error;
+  bool captured = false;
+  if (_callbacks.captureFrame) {
+    captured = _callbacks.captureFrame(
+      completedFrame, _includesVertical, error);
+  } else {
+    error = tr("No movie frame capture callback is available");
+  }
+  if (captured && _callbacks.frameRendered) {
     _callbacks.frameRendered(completedFrame);
+    return;
+  }
+
+  if (error.isEmpty()) {
+    error = captured ?
+      tr("The movie controller cannot accept the captured frame") :
+      tr("Could not capture the movie frame");
+  }
+  if (_callbacks.frameCaptureFailed) {
+    _callbacks.frameCaptureFailed(completedFrame, error);
   }
 }
 

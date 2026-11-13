@@ -31,12 +31,13 @@ public:
     std::function<void(int, bool)> clearFrames;
     std::function<void()> resetProducts;
     std::function<int(bool)> beginFrameRequest;
-    std::function<bool(int, bool)> captureFrame;
+    std::function<bool(int, bool, QString &)> captureFrame;
     std::function<bool(int, bool)> showFrame;
     std::function<bool(int, bool)> hasFrame;
     std::function<QImage(int, bool)> frameImage;
     std::function<void()> stopPlayback;
     std::function<void(int)> frameRendered;
+    std::function<void(int, const QString &)> frameCaptureFailed;
     std::function<void(const QString &)> showProgress;
   };
 

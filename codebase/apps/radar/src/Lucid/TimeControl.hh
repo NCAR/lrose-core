@@ -166,6 +166,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   // captured into the immutable playback cache.
   void movieFrameRendered(int frameIndex);
 
+  // Abort a build whose fully rendered widget could not be copied into the
+  // immutable movie cache.
+  void movieFrameCaptureFailed(int frameIndex, const QString &error);
+
  private:
 
   // Singleton instance pointer.
