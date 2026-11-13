@@ -36,6 +36,7 @@
 #include "WorldPlot.hh"
 #include "WindGlyphRenderer.hh"
 #include "Product.hh"
+#include <algorithm>
 #include <Spdb/Symprod.hh>
 #include <Spdb/Product_defines.hh>
 #include <dataport/bigend.h>
@@ -158,6 +159,28 @@ void drawPath(QPainter &painter, const QPainterPath &path,
   painter.setBrush(brush);
   painter.drawPath(path);
   painter.restore();
+}
+
+double nearestIconOriginDistance(const Symprod::wpt_t *origins,
+                                 int numOrigins,
+                                 double lat, double lon)
+{
+  double nearest = 999999.99;
+  if (!origins || numOrigins < 1) {
+    return nearest;
+  }
+
+  // A Symprod object may render the same icon at several locations. Picking
+  // represents the complete object, so any rendered instance must be able to
+  // select its shared container.
+  for (int ii = 0; ii < numOrigins; ++ii) {
+    double distance = nearest;
+    double theta = 0.0;
+    PJGLatLon2RTheta(origins[ii].lat, origins[ii].lon,
+                     lat, lon, &distance, &theta);
+    nearest = std::min(nearest, distance);
+  }
+  return nearest;
 }
 
 } // namespace
@@ -648,15 +671,8 @@ void SymprodRenderNamedIcon::drawQt(
 
 double SymprodRenderNamedIcon::dist(double lat, double lon)
 {
-  double d = 999999.99; // A huge distance by default.
-  double theta = 0.0;
-
-  if (_props.num_icons > 0 && _iconOrigins) {
-    PJGLatLon2RTheta(_iconOrigins[0].lat, _iconOrigins[0].lon,
-                     lat, lon, &d, &theta);
-  }
-
-  return d;
+  return nearestIconOriginDistance(_iconOrigins, _props.num_icons,
+                                   lat, lon);
 }
 
 void SymprodRenderNamedIcon::fill_export_fields( vector<world_pt_t> &wpt, string &label)
@@ -743,15 +759,8 @@ void SymprodRenderBitmapIcon::drawQt(
 
 double SymprodRenderBitmapIcon::dist(double lat, double lon)
 {
-  double d = 999999.99; // A huge distance by default.
-  double theta = 0.0;
-
-  if (_props.num_icons > 0 && _iconOrigins) {
-    PJGLatLon2RTheta(_iconOrigins[0].lat, _iconOrigins[0].lon,
-                     lat, lon, &d, &theta);
-  }
-
-  return d;
+  return nearestIconOriginDistance(_iconOrigins, _props.num_icons,
+                                   lat, lon);
 }
 
 void SymprodRenderBitmapIcon::fill_export_fields( vector<world_pt_t> &wpt, string &label)
