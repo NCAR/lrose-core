@@ -882,9 +882,8 @@ RadxField* RadxRay::addField(const string &name,
 /// Add a previously-created field to the ray. The field must have
 /// been dynamically allocted using new(). Memory management for
 /// this field passes to the ray, which will free the field object
-/// using delete().
-///
-///
+/// using delete(). If the field has no range geometry, it copies
+/// the ray's geometry.
 
 void RadxRay::addField(RadxField *field)
 {
@@ -913,6 +912,10 @@ void RadxRay::addField(RadxField *field)
       }
     } else {
       _nGates = field->getNPoints();
+    }
+
+    if (!field->getRangeGeomSet() && getRangeGeomSet()) {
+      field->copyRangeGeom(*this);
     }
     
     _fields.push_back(field);
