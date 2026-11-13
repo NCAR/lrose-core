@@ -728,6 +728,8 @@ public:
 
   int movie_dwell_msecs;
 
+  int movie_frame_request_timeout_secs;
+
   int movie_min_dwell_msecs;
 
   int movie_max_dwell_msecs;
@@ -1267,7 +1269,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[382];
+  mutable TDRPtable _table[383];
 
   const char *_className;
 

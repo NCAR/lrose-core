@@ -1833,7 +1833,21 @@ Params *Params::_instance = (Params *) NULL;
     tt->max_val.i = 9999;
     tt->single_val.i = 75;
     tt++;
-    
+
+    // Parameter 'movie_frame_request_timeout_secs'
+    // ctype is 'int'
+
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("movie_frame_request_timeout_secs");
+    tt->descr = tdrpStrDup("Maximum time to wait for all data layers needed by one movie frame (secs).");
+    tt->help = tdrpStrDup("If the horizontal grid or an enabled overlay does not become ready within this interval, Lucid stops building the movie and reports the outstanding layers. This prevents an unavailable data server from leaving the movie permanently in the Building state.");
+    tt->val_offset = (char *) &movie_frame_request_timeout_secs - &_start_;
+    tt->has_min = TRUE;
+    tt->min_val.i = 1;
+    tt->single_val.i = 120;
+    tt++;
+
     // Parameter 'movie_min_dwell_msecs'
     // ctype is 'int'
     

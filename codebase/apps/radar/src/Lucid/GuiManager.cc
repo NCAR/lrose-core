@@ -309,6 +309,28 @@ GuiManager::GuiManager() :
         _timeControl->movieFrameCaptureFailed(frameIndex, error);
       }
     };
+  movieCallbacks.pendingDependencies = [this]() {
+    QStringList pending;
+    if (_gd.prod.products_on && _gd.prod_mgr &&
+        !_gd.prod_mgr->activeProductsReady()) {
+      pending << tr("symbolic products");
+    }
+    if (_gd.wind_mgr && !_gd.wind_mgr->activeWindsReady()) {
+      pending << tr("horizontal winds");
+    }
+    if (_movieManager && _movieManager->includesVertical() &&
+        _gd.wind_mgr && !_gd.wind_mgr->activeVerticalWindsSettled()) {
+      pending << tr("vertical winds");
+    }
+    if (!_terrainHorizontalSettled) {
+      pending << tr("horizontal terrain");
+    }
+    if (_movieManager && _movieManager->includesVertical() &&
+        !_terrainVerticalSettled) {
+      pending << tr("vertical terrain");
+    }
+    return pending;
+  };
   movieCallbacks.showProgress = [this](const QString &message) {
     statusBar()->showMessage(message);
   };

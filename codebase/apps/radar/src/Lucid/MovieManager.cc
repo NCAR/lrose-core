@@ -8,6 +8,7 @@
 
 #include "MovieManager.hh"
 
+#include <algorithm>
 #include <utility>
 
 #include <QDateTime>
@@ -16,6 +17,7 @@
 #include <QProcess>
 #include <QRegularExpression>
 #include <QStringList>
+#include <QTimer>
 #include <QTimeZone>
 
 MovieManager::MovieManager(const Params &params,
@@ -28,8 +30,12 @@ MovieManager::MovieManager(const Params &params,
         _gridReady(false),
         _includesVertical(false),
         _verticalReady(false),
-        _verticalRequestGeneration(-1)
+        _verticalRequestGeneration(-1),
+        _frameTimeoutTimer(new QTimer(this))
 {
+  _frameTimeoutTimer->setSingleShot(true);
+  connect(_frameTimeoutTimer, &QTimer::timeout,
+          this, &MovieManager::_frameTimedOut);
 }
 
 /////////////////////////////////////////////////////////////
@@ -39,6 +45,7 @@ void MovieManager::prepareBuild(int frameCount,
                                 bool includeVertical,
                                 const QString &fieldLabel)
 {
+  _frameTimeoutTimer->stop();
   _buildFrame = -1;
   _gridReady = false;
   _includesVertical = includeVertical;
@@ -80,10 +87,18 @@ void MovieManager::beginFrameBuild(int frameIndex, int frameCount)
       tr("Building movie frame %1 of %2")
         .arg(frameIndex + 1).arg(frameCount));
   }
+
+  // One deadline covers the complete frame snapshot. Individual readers may
+  // retry indefinitely for the live display, but a movie build must either
+  // capture a coherent frame or return control to the user.
+  const int timeoutSecs =
+    std::max(1, _params.movie_frame_request_timeout_secs);
+  _frameTimeoutTimer->start(timeoutSecs * 1000);
 }
 
 void MovieManager::cancelBuild()
 {
+  _frameTimeoutTimer->stop();
   _buildFrame = -1;
   _gridReady = false;
   _includesVertical = false;
@@ -119,6 +134,7 @@ void MovieManager::checkFrameReady(bool dependenciesReady)
   }
 
   const int completedFrame = _buildFrame;
+  _frameTimeoutTimer->stop();
   _buildFrame = -1;
   _gridReady = false;
   _verticalReady = false;
@@ -146,6 +162,45 @@ void MovieManager::checkFrameReady(bool dependenciesReady)
   }
   if (_callbacks.frameCaptureFailed) {
     _callbacks.frameCaptureFailed(completedFrame, error);
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// terminate a frame whose required data layers never became ready
+
+void MovieManager::_frameTimedOut()
+{
+  if (_buildFrame < 0) {
+    return;
+  }
+
+  QStringList pending;
+  if (!_gridReady) {
+    pending << tr("horizontal grid");
+  }
+  if (!_verticalReady) {
+    pending << tr("vertical section");
+  }
+  if (_callbacks.pendingDependencies) {
+    pending.append(_callbacks.pendingDependencies());
+  }
+  if (pending.isEmpty()) {
+    pending << tr("display layers");
+  }
+
+  // Clear the timed-out generation before invoking TimeControl. Its failure
+  // callback synchronously follows the normal stop path and may immediately
+  // restore live requests through GuiManager.
+  const int timedOutFrame = _buildFrame;
+  _buildFrame = -1;
+  _gridReady = false;
+  _verticalReady = false;
+  if (_callbacks.frameCaptureFailed) {
+    _callbacks.frameCaptureFailed(
+      timedOutFrame,
+      tr("Timed out after %1 seconds waiting for %2")
+        .arg(std::max(1, _params.movie_frame_request_timeout_secs))
+        .arg(pending.join(tr(", "))));
   }
 }
 

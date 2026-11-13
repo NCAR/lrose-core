@@ -699,6 +699,13 @@ paramdef int {
 } movie_dwell_msecs;
 
 paramdef int {
+  p_default = 120;
+  p_min = 1;
+  p_descr = "Maximum time to wait for all data layers needed by one movie frame (secs).";
+  p_help = "If the horizontal grid or an enabled overlay does not become ready within this interval, Lucid stops building the movie and reports the outstanding layers. This prevents an unavailable data server from leaving the movie permanently in the Building state.";
+} movie_frame_request_timeout_secs;
+
+paramdef int {
   p_default = 30;
   p_descr = "Minimum dwell of the movie loop (msec per frame).";
   p_help = "This yields the fastest movie rate.";

@@ -14,10 +14,13 @@
 #include <QImage>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 #include <toolsa/DateTime.hh>
 
 #include "Params.hh"
+
+class QTimer;
 
 // Own the immutable movie cache lifecycle without owning display widgets.
 // GuiManager supplies synchronous callbacks for view capture and MDV request
@@ -38,6 +41,7 @@ public:
     std::function<void()> stopPlayback;
     std::function<void(int)> frameRendered;
     std::function<void(int, const QString &)> frameCaptureFailed;
+    std::function<QStringList()> pendingDependencies;
     std::function<void(const QString &)> showProgress;
   };
 
@@ -76,7 +80,9 @@ private:
   bool _verticalReady;
   int _verticalRequestGeneration;
   QString _fieldLabel;
+  QTimer *_frameTimeoutTimer;
 
+  void _frameTimedOut();
   static QString _safeFileNameComponent(QString value);
 };
 
