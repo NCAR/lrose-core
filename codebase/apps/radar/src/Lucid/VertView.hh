@@ -118,6 +118,7 @@ class DLL_EXPORT VertView : public QWidget
   bool hasMovieFrame(int frameIndex) const;
   QImage movieFrameImage(int frameIndex) const;
   bool captureMovieFrame(int frameIndex);
+  QImage captureImageWithoutInteractions();
   bool showMovieFrame(int frameIndex);
   void stopMoviePlayback();
   void setMovieInteractionActive(bool active);
@@ -378,6 +379,7 @@ class DLL_EXPORT VertView : public QWidget
   bool _terrainPixmapDirty;
   vector<QImage> _movieFrames;
   int _playbackFrameIndex;
+  bool _suppressInteractionGraphics;
 
   bool _showValue;
   bool _mouseValueVisible;

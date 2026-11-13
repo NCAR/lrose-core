@@ -36,6 +36,7 @@
 #include <QPainterPath>
 #include <QPen>
 #include <QResizeEvent>
+#include <QScopedValueRollback>
 #include <QStylePainter>
 #include <QToolTip>
 #include <QMenu>
@@ -113,6 +114,7 @@ VertView::VertView(QWidget* parent,
   _windsPixmapDirty = true;
   _terrainPixmapDirty = true;
   _playbackFrameIndex = -1;
+  _suppressInteractionGraphics = false;
   _showValue = false;
   _mouseValueVisible = false;
   _mouseValueX = 0;
@@ -455,7 +457,7 @@ void VertView::_drawOverlays(QPainter &painter)
     
   // click point cross hairs
   
-  if (_pointClicked) {
+  if (!_suppressInteractionGraphics && _pointClicked) {
 
     int startX = _mouseReleaseX - _params.click_cross_size / 2;
     int endX = _mouseReleaseX + _params.click_cross_size / 2;
@@ -660,7 +662,7 @@ void VertView::paintEvent(QPaintEvent *event)
 
   // show mouse value if needed
 
-  if (_showValue && _mouseValueVisible) {
+  if (!_suppressInteractionGraphics && _showValue && _mouseValueVisible) {
     _drawMouseValue(painter);
   }
   
@@ -717,14 +719,39 @@ bool VertView::captureMovieFrame(int frameIndex)
   }
 
   _playbackFrameIndex = -1;
-  QImage frame(size(), QImage::Format_ARGB32_Premultiplied);
-  frame.fill(_backgroundBrush.color());
   // QWidget::render() invokes paintEvent synchronously, so the expensive
   // section pixmap and all legends represent this exact MDV completion even
   // when the vertical window is obscured.
-  render(&frame);
-  _movieFrames[frameIndex] = std::move(frame);
+  _movieFrames[frameIndex] = captureImageWithoutInteractions();
   return !_movieFrames[frameIndex].isNull();
+}
+
+/////////////////////////////////////////////////////////////
+// capture configured section layers without live interaction graphics
+
+QImage VertView::captureImageWithoutInteractions()
+{
+  if (width() <= 0 || height() <= 0) {
+    return QImage();
+  }
+
+  const bool restoreRubberBand = _rubberBand && _rubberBand->isVisible();
+  if (restoreRubberBand) {
+    _rubberBand->hide();
+  }
+
+  QImage image(size(), QImage::Format_ARGB32_Premultiplied);
+  image.fill(_backgroundBrush.color());
+  {
+    QScopedValueRollback<bool> suppress(
+      _suppressInteractionGraphics, true);
+    render(&image);
+  }
+
+  if (restoreRubberBand) {
+    _rubberBand->show();
+  }
+  return image;
 }
 
 bool VertView::showMovieFrame(int frameIndex)

@@ -2726,9 +2726,11 @@ bool GuiManager::_captureAutomaticImage(QImage &image,
       error = tr("The vertical view has no drawable area");
       return false;
     }
-    image = QImage(_vert->size(), QImage::Format_ARGB32_Premultiplied);
-    image.fill(QColor(_params.background_color));
-    _vert->render(&image);
+    image = _vert->captureImageWithoutInteractions();
+    if (image.isNull()) {
+      error = tr("Could not capture the vertical-section view");
+      return false;
+    }
     dataTime = DateTime(reader->v_date);
     return true;
   }
@@ -2739,7 +2741,7 @@ bool GuiManager::_captureAutomaticImage(QImage &image,
     error = tr("The completed horizontal data do not match the requested field");
     return false;
   }
-  image = _horiz->grab().toImage();
+  image = _horiz->captureImageWithoutInteractions();
   if (image.isNull()) {
     error = tr("Could not capture the horizontal view");
     return false;
@@ -2848,13 +2850,13 @@ void GuiManager::_saveViewImages()
 
   QStringList savedPaths;
   QStringList failedPaths;
-  if (_horiz->grab().save(horizPath, "PNG")) {
+  if (_horiz->captureImageWithoutInteractions().save(horizPath, "PNG")) {
     savedPaths.push_back(horizPath);
   } else {
     failedPaths.push_back(horizPath);
   }
   if (saveVertical) {
-    if (_vert->grab().save(vertPath, "PNG")) {
+    if (_vert->captureImageWithoutInteractions().save(vertPath, "PNG")) {
       savedPaths.push_back(vertPath);
     } else {
       failedPaths.push_back(vertPath);

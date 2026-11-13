@@ -139,6 +139,7 @@ class DLL_EXPORT HorizView : public QWidget
   bool hasMovieFrame(int frameIndex) const;
   QImage movieFrameImage(int frameIndex) const;
   bool captureMovieFrame(int frameIndex);
+  QImage captureImageWithoutInteractions();
   bool showMovieFrame(int frameIndex);
   void stopMoviePlayback();
   void setMovieInteractionActive(bool active);
@@ -263,6 +264,10 @@ class DLL_EXPORT HorizView : public QWidget
   Qt::MouseButton _activeMouseButton;
   bool _panPreviewActive;
   int _panPreviewX, _panPreviewY;
+
+  // Synchronous image capture retains configured overlays while omitting
+  // momentary mouse gestures and reports from the published output.
+  bool _suppressInteractionGraphics;
 
   // Route coordinates remain in display-world and geographic space so the
   // selected section continues to line up after a zoom, pan or resize.

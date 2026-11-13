@@ -35,6 +35,7 @@
 #include <QKeyEvent>
 #include <QRect>
 #include <QPainterPath>
+#include <QScopedValueRollback>
 #include <algorithm>
 #include <cmath>
 
@@ -115,6 +116,7 @@ HorizView::HorizView(QWidget* parent,
   _panPreviewActive = false;
   _panPreviewX = 0;
   _panPreviewY = 0;
+  _suppressInteractionGraphics = false;
   _vsectionRouteEditing = false;
   _vsectionPreviewX = 0;
   _vsectionPreviewY = 0;
@@ -323,7 +325,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
   painter.save();
-  if (_panPreviewActive) {
+  if (_panPreviewActive && !_suppressInteractionGraphics) {
     const QRect plotRect(_zoom->getXMinPixel(), _zoom->getYMaxPixel(),
                          _zoom->getPlotWidth(), _zoom->getPlotHeight());
     painter.setClipRect(plotRect);
@@ -350,7 +352,9 @@ void HorizView::paintEvent(QPaintEvent *event)
 
   if (_gd.prod_mgr && _gd.prod.products_on) {
     painter.drawImage(0, 0, *_zoom->getProductsImage());
-    _drawPickedProduct(painter);
+    if (!_suppressInteractionGraphics) {
+      _drawPickedProduct(painter);
+    }
   }
   painter.restore();
   
@@ -391,18 +395,20 @@ void HorizView::paintEvent(QPaintEvent *event)
   // cached data layer.  It therefore remains visible while fields rerender and
   // can be transformed again whenever the view changes.
 
-  _drawVsectionRoute(painter);
+  if (!_suppressInteractionGraphics || !_vsectionRouteEditing) {
+    _drawVsectionRoute(painter);
+  }
 
   // Draw cursor values directly on the widget so they remain transient rather
   // than becoming part of the cached data or map images.
 
-  if (_showValue && _mouseValueVisible) {
+  if (!_suppressInteractionGraphics && _showValue && _mouseValueVisible) {
     _drawMouseValue(painter);
   }
   
   // click point cross hairs
   
-  if (_pointClicked) {
+  if (!_suppressInteractionGraphics && _pointClicked) {
 
     painter.save();
 
@@ -1019,8 +1025,33 @@ bool HorizView::captureMovieFrame(int frameIndex)
   }
   _playbackFrameIndex = -1;
   repaint();
-  _movieFrames[frameIndex] = grab().toImage();
+  _movieFrames[frameIndex] = captureImageWithoutInteractions();
   return !_movieFrames[frameIndex].isNull();
+}
+
+/////////////////////////////////////////////////////////////
+// capture configured display layers without live interaction graphics
+
+QImage HorizView::captureImageWithoutInteractions()
+{
+  const bool restoreRubberBand = _rubberBand && _rubberBand->isVisible();
+  if (restoreRubberBand) {
+    _rubberBand->hide();
+  }
+
+  QImage image;
+  {
+    // QWidget::grab() paints synchronously, so this scoped flag cannot leak
+    // into the normal display even when capture is invoked between events.
+    QScopedValueRollback<bool> suppress(
+      _suppressInteractionGraphics, true);
+    image = grab().toImage();
+  }
+
+  if (restoreRubberBand) {
+    _rubberBand->show();
+  }
+  return image;
 }
 
 bool HorizView::showMovieFrame(int frameIndex)
@@ -1857,7 +1888,7 @@ void HorizView::_drawVsectionRoute(QPainter &painter)
                        std::abs(_zoom->getPlotWidth()),
                        std::abs(_zoom->getPlotHeight()));
   painter.setClipRect(plotRect);
-  if (_panPreviewActive) {
+  if (_panPreviewActive && !_suppressInteractionGraphics) {
     painter.translate(_panPreviewX - _mousePressX,
                       _panPreviewY - _mousePressY);
   }
