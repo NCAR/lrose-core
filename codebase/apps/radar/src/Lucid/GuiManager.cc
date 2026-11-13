@@ -241,6 +241,8 @@ GuiManager::GuiManager() :
   _movieIncludesVertical = false;
   _movieVerticalReady = false;
   _movieVerticalRequestGeneration = -1;
+  _terrainVerticalRequestGeneration = -1;
+  _terrainVerticalSettled = true;
 
   _automaticImagesStarted = false;
   _automaticImagesActive = false;
@@ -423,6 +425,7 @@ void GuiManager::prepareMovieBuild(int frameCount)
     _vertWindow->isVisible() && _vsectionRoute.size() >= 2;
   _movieVerticalReady = !_movieIncludesVertical;
   _movieVerticalRequestGeneration = -1;
+  _terrainVerticalSettled = true;
   _movieFieldLabel = getSelectedFieldLabel();
   if (_horiz) {
     _horiz->clearMovieFrames(frameCount);
@@ -442,6 +445,7 @@ void GuiManager::beginMovieFrameBuild(int frameIndex)
   _movieGridReady = false;
   _movieVerticalReady = !_movieIncludesVertical;
   _movieVerticalRequestGeneration = -1;
+  _terrainVerticalSettled = true;
   _horizontalRequestHasChanged = true;
   if (_horiz) {
     _horiz->stopMoviePlayback();
@@ -468,6 +472,7 @@ void GuiManager::cancelMovieBuild()
   _movieIncludesVertical = false;
   _movieVerticalReady = false;
   _movieVerticalRequestGeneration = -1;
+  _terrainVerticalSettled = true;
 }
 
 bool GuiManager::showMovieFrame(int frameIndex)
@@ -755,6 +760,9 @@ void GuiManager::_checkMovieFrameReady()
   }
   if (_movieIncludesVertical && _gd.wind_mgr &&
       !_gd.wind_mgr->activeVerticalWindsSettled()) {
+    return;
+  }
+  if (_movieIncludesVertical && !_terrainVerticalSettled) {
     return;
   }
 
@@ -3140,7 +3148,11 @@ void GuiManager::_checkAutomaticImageReady()
     (_automaticImageGenerator->currentJobIsVertical() ?
        _gd.wind_mgr->activeVerticalWindsSettled() :
        _gd.wind_mgr->activeWindsReady());
-  if (!_automaticImageGenerator->readyToSave(productsReady && windsReady)) {
+  const bool terrainReady =
+    !_automaticImageGenerator->currentJobIsVertical() ||
+    _terrainVerticalSettled;
+  if (!_automaticImageGenerator->readyToSave(productsReady && windsReady &&
+                                              terrainReady)) {
     return;
   }
 
@@ -4774,6 +4786,7 @@ int GuiManager::_requestVerticalSection()
   const int generation = reader->requestVertSection(
     _timeControl->getSelectedTime(), _gd.h_win.page, wayPts);
   _requestVerticalWinds();
+  _requestVerticalTerrain();
   return generation;
 }
 
@@ -4792,6 +4805,32 @@ int GuiManager::_requestVerticalWinds()
   }
   return _gd.wind_mgr->requestVerticalData(
     _timeControl->getSelectedTime(), _gd.h_win.page, wayPts);
+}
+
+/////////////////////////////////////////////////////////////
+// request the static elevation field along the retained section route
+
+int GuiManager::_requestVerticalTerrain()
+{
+  _terrainVerticalRequestGeneration = -1;
+  _terrainVerticalSettled = true;
+  MdvReader *terrain = _gd.layers.earth.terr;
+  if (!_gd.layers.earth.terrain_active || terrain == nullptr ||
+      _vsectionRoute.size() < 2) {
+    return -1;
+  }
+
+  WayPts wayPts;
+  for (const VsectionRoute::Point &point : _vsectionRoute.points()) {
+    wayPts.addPoint(point.lat, point.lon);
+  }
+  connect(terrain, &MdvReader::verticalReadComplete,
+          this, &GuiManager::_terrainVerticalReadComplete,
+          Qt::UniqueConnection);
+  _terrainVerticalRequestGeneration = terrain->requestVertSection(
+    _timeControl->getSelectedTime(), _gd.h_win.page, wayPts);
+  _terrainVerticalSettled = _terrainVerticalRequestGeneration < 0;
+  return _terrainVerticalRequestGeneration;
 }
 
 /////////////////////////////////////////////////////////////
@@ -4856,6 +4895,27 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
   _vertWindow->raise();
   _vertWindow->activateWindow();
   // statusBar()->showMessage("Vertical section ready", 5000);
+}
+
+/////////////////////////////////////////////////////////////
+// publish a completed terrain profile without disturbing the field section
+
+void GuiManager::_terrainVerticalReadComplete(MdvReader *reader)
+{
+  if (reader == nullptr || reader != _gd.layers.earth.terr ||
+      reader->getVertGeneration() != _terrainVerticalRequestGeneration) {
+    return;
+  }
+
+  // Terrain is optional display context. Completion, including a failed MDV
+  // read, releases movie and automatic-image readiness; VertView simply omits
+  // the profile when the reader is invalid.
+  _terrainVerticalSettled = true;
+  if (_vert) {
+    _vert->rerenderTerrain();
+  }
+  _checkMovieFrameReady();
+  _checkAutomaticImageReady();
 }
 
 /////////////////////////////

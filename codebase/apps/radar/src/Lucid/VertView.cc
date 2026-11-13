@@ -111,6 +111,7 @@ VertView::VertView(QWidget* parent,
   _leftDragActive = false;
   _sectionPixmapDirty = true;
   _windsPixmapDirty = true;
+  _terrainPixmapDirty = true;
   _playbackFrameIndex = -1;
   _showValue = false;
   _mouseValueVisible = false;
@@ -521,6 +522,7 @@ void VertView::_refreshImages()
 
   _sectionPixmapDirty = true;
   _windsPixmapDirty = true;
+  _terrainPixmapDirty = true;
 
   update();
   
@@ -560,6 +562,12 @@ void VertView::refresh()
 void VertView::rerenderWinds()
 {
   _windsPixmapDirty = true;
+  update();
+}
+
+void VertView::rerenderTerrain()
+{
+  _terrainPixmapDirty = true;
   update();
 }
 
@@ -619,6 +627,17 @@ void VertView::paintEvent(QPaintEvent *event)
     _windsPixmapDirty = false;
   }
   painter.drawPixmap(0, 0, _windsPixmap);
+
+  // Ground is an opaque mask, not a basemap. Draw it after field and wind
+  // data so nothing below the sampled surface remains visible.
+  if (_terrainPixmapDirty || _terrainPixmap.size() != size()) {
+    _terrainPixmap = QPixmap(size());
+    _terrainPixmap.fill(Qt::transparent);
+    QPainter terrainPainter(&_terrainPixmap);
+    _drawTerrain(terrainPainter);
+    _terrainPixmapDirty = false;
+  }
+  painter.drawPixmap(0, 0, _terrainPixmap);
 
   // add overlays
   
@@ -1718,6 +1737,97 @@ void VertView::_drawWinds(QPainter &painter)
       }
     }
   }
+  painter.restore();
+}
+
+/////////////////////////////////////////////////////////////
+// draw the sampled terrain surface and mask the earth below it
+
+void VertView::_drawTerrain(QPainter &painter)
+{
+  const MdvReader *terrain = _gd.layers.earth.terr;
+  if (_sectionReader == nullptr || !_sectionReader->isValidV() ||
+      _sectionReader->v_fhdr.vlevel_type != Mdvx::VERT_TYPE_Z ||
+      !_gd.layers.earth.terrain_active || terrain == nullptr ||
+      !terrain->isValidV() ||
+      !isfinite(_params.terrain_height_scaler)) {
+    return;
+  }
+
+  const int nx = terrain->v_fhdr.nx;
+  if (nx < 2 || terrain->v_fl32_data.size() < static_cast<size_t>(nx)) {
+    return;
+  }
+
+  QColor skinColor(_params.terrain_earth_color1);
+  QColor coreColor(_params.terrain_earth_color2);
+  if (!skinColor.isValid()) {
+    skinColor = QColor("sienna");
+  }
+  if (!coreColor.isValid()) {
+    coreColor = QColor(139, 0, 0); // X11 red4, the legacy default
+  }
+
+  painter.save();
+  painter.setRenderHint(QPainter::Antialiasing, true);
+  _zoomWorld.setClippingOn(painter);
+
+  const double plotBottom = max(_zoomWorld.getYMinPixel(),
+                                _zoomWorld.getYMaxPixel());
+  const fl32 missing = terrain->v_fhdr.missing_data_value;
+  const fl32 bad = terrain->v_fhdr.bad_data_value;
+  vector<QPointF> surface;
+  surface.reserve(nx);
+
+  // Invalid terrain samples delimit independent ground polygons. Bridging a
+  // data gap would hide valid section data beneath an invented surface.
+  const auto drawSurface = [&]() {
+    if (surface.size() < 2) {
+      surface.clear();
+      return;
+    }
+
+    QPainterPath ground;
+    ground.moveTo(surface.front());
+    for (size_t ii = 1; ii < surface.size(); ++ii) {
+      ground.lineTo(surface[ii]);
+    }
+    ground.lineTo(surface.back().x(), plotBottom);
+    ground.lineTo(surface.front().x(), plotBottom);
+    ground.closeSubpath();
+    painter.fillPath(ground, coreColor);
+
+    QPainterPath skin;
+    skin.moveTo(surface.front());
+    for (size_t ii = 1; ii < surface.size(); ++ii) {
+      skin.lineTo(surface[ii]);
+    }
+    QPen skinPen(skinColor, 3.0);
+    skinPen.setCapStyle(Qt::RoundCap);
+    skinPen.setJoinStyle(Qt::RoundJoin);
+    painter.setPen(skinPen);
+    painter.setBrush(Qt::NoBrush);
+    painter.drawPath(skin);
+    surface.clear();
+  };
+
+  for (int ix = 0; ix < nx; ++ix) {
+    const fl32 rawHeight = terrain->v_fl32_data[ix];
+    if (!isfinite(rawHeight) || rawHeight == missing || rawHeight == bad) {
+      drawSurface();
+      continue;
+    }
+
+    const double distanceKm = terrain->v_fhdr.grid_minx +
+      ix * terrain->v_fhdr.grid_dx;
+    const double height = rawHeight * _params.terrain_height_scaler;
+    if (!isfinite(distanceKm) || !isfinite(height)) {
+      drawSurface();
+      continue;
+    }
+    surface.push_back(_zoomWorld.getPixelPointF(distanceKm, height));
+  }
+  drawSurface();
   painter.restore();
 }
 

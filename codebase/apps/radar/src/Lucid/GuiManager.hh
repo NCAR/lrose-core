@@ -292,6 +292,11 @@ private:
   bool _movieIncludesVertical;
   bool _movieVerticalReady;
   int _movieVerticalRequestGeneration;
+
+  // Terrain uses its own vertical MDV request. A failed completion is still
+  // settled so optional ground data cannot stall movies or unattended output.
+  int _terrainVerticalRequestGeneration;
+  bool _terrainVerticalSettled;
   string _movieFieldLabel;
 
   void _checkMovieFrameReady();
@@ -510,6 +515,7 @@ private:
   void _setField(int value);
   int _requestVerticalSection();
   int _requestVerticalWinds();
+  int _requestVerticalTerrain();
   void _setDisplayTime(time_t utime);
   void _setEndFrame(int num_frames);
   void _updateMoviePopup();
@@ -573,6 +579,7 @@ private slots:
 
   void _verticalRouteCompleted(const VsectionRoute &route);
   void _verticalReadComplete(MdvReader *reader);
+  void _terrainVerticalReadComplete(MdvReader *reader);
   
   // images
 

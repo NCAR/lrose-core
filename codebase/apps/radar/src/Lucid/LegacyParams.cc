@@ -3036,8 +3036,10 @@ int LegacyParams::_readImageGenTdrp()
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
     
   if (image_gen_active) {
-    
-    fprintf(_tdrpFile, "terrain_active = TRUE;\n");
+
+    // Image-generation settings do not own terrain visibility. The legacy
+    // terrain section is translated independently, so writing that parameter
+    // here made the result depend on which unrelated section appeared last.
     switch (images.debug) {
       case Cimages_P::DEBUG_OFF:
         fprintf(_tdrpFile, "images_debug = IMAGE_DEBUG_OFF;\n");
@@ -3071,10 +3073,6 @@ int LegacyParams::_readImageGenTdrp()
       }
     } // ii
     fprintf(_tdrpFile, "};\n");
-
-  } else {
-
-    fprintf(_tdrpFile, "terrain_active = FALSE;\n");
 
   }
   

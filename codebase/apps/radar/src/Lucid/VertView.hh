@@ -206,6 +206,7 @@ class DLL_EXPORT VertView : public QWidget
   // contain filled contours and remains valid across an asynchronous U/V
   // completion or a wind-menu change.
   void rerenderWinds();
+  void rerenderTerrain();
 
   // paint event
 
@@ -376,6 +377,8 @@ class DLL_EXPORT VertView : public QWidget
   bool _sectionPixmapDirty;
   QPixmap _windsPixmap;
   bool _windsPixmapDirty;
+  QPixmap _terrainPixmap;
+  bool _terrainPixmapDirty;
   vector<QImage> _movieFrames;
   int _playbackFrameIndex;
 
@@ -412,6 +415,7 @@ class DLL_EXPORT VertView : public QWidget
   bool _drawSectionContours(QPainter &painter);
   void _drawSectionContourLines(QPainter &painter);
   void _drawWinds(QPainter &painter);
+  void _drawTerrain(QPainter &painter);
   vector<double> _computeVerticalEdges() const;
   bool _sampleGridValue(int mouseX, int mouseY,
                         SectionSample &sample) const;

@@ -1210,26 +1210,35 @@ void Lucid::_initWindComponent(MdvReader *wrec,
 void Lucid::_initTerrain()
 {
 
-  if (strlen(_params.terrain_url) > 0) {
-    
-    _gd.layers.earth.terrain_active = 1;
-    _gd.layers.earth.terr = new MdvReader(this);
-    if(_gd.layers.earth.terr == NULL) {
-      fprintf(stderr,"Cannot allocate space for terrain data\n");
-      exit(-1);
+  if (_params.terrain_active && strlen(_params.terrain_url) > 0) {
+
+    // Legacy terrain parameters combine the MDV URL and field after the last
+    // ampersand. MdvReader deliberately stores those separately, as normal
+    // Lucid fields do, so split the compatibility syntax at initialization.
+    const string terrainSpec(_params.terrain_url);
+    const size_t fieldSep = terrainSpec.rfind('&');
+    if (fieldSep == string::npos || fieldSep == 0 ||
+        fieldSep + 1 >= terrainSpec.size()) {
+      cerr << "ERROR - invalid terrain_url, expected URL&field: "
+           << terrainSpec << endl;
+    } else {
+      _gd.layers.earth.terrain_active = 1;
+      _gd.layers.earth.terr = new MdvReader(this);
+      if(_gd.layers.earth.terr == NULL) {
+        fprintf(stderr,"Cannot allocate space for terrain data\n");
+        exit(-1);
+      }
+
+      // Static terrain commonly predates the weather archive by decades.
+      // Keep a broad search window, but below the signed-integer seconds
+      // limit used when MdvReader packages an asynchronous request.
+      _gd.layers.earth.terr->time_allowance = 35000000; // about 66 years
+      _gd.layers.earth.terr->color_file = _params.landuse_colorscale;
+      _gd.layers.earth.terr->button_name = _params.terrain_id_label;
+      _gd.layers.earth.terr->legend_name = _params.terrain_id_label;
+      _gd.layers.earth.terr->url = terrainSpec.substr(0, fieldSep);
+      _gd.layers.earth.terr->field_label = terrainSpec.substr(fieldSep + 1);
     }
-    
-    _gd.layers.earth.terr->time_allowance = 1000000000; // 30+ years
-    _gd.layers.earth.terr->color_file = _params.landuse_colorscale;
-    _gd.layers.earth.terr->button_name = _params.terrain_id_label;
-    _gd.layers.earth.terr->legend_name = _params.terrain_id_label;
-    _gd.layers.earth.terr->url = _params.terrain_url;
-    
-    // _gd.layers.earth.terr->h_mdvx = new DsMdvx;
-    // _gd.layers.earth.terr->v_mdvx = new DsMdvx;
-    // _gd.layers.earth.terr->h_mdvx_int16 = new MdvxField;
-    // _gd.layers.earth.terr->v_mdvx_int16 = new MdvxField;
-    // _gd.layers.earth.terr->proj =  new MdvxProj;
 
   }
   
