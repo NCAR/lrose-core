@@ -25,6 +25,11 @@ For a project we use 2 main environment variables:
   $PROJ_DIR - the top level of a project hierarchy, e.g. ~/git/spol-configuration/projDir.
   $DATA_DIR - the top level of the data directory hierarchy.
 
+The dot files for shells are generally created as links as follows:
+
+  .cshrc -> $PROJ_DIR/system/dotfiles/cshrc
+  .bashrc -> $PROJ_DIR/system/dotfiles/bashrc
+
 System level params and scripts are located at:
 
   $PROJ_DIR/system/params

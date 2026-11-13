@@ -53,10 +53,12 @@ HEADERS += XyBox.hh
 HEADERS += ZoomMenuItem.hh
 HEADERS += AutomaticImageGenerator.hh
 HEADERS += ImageGenerationManager.hh
+HEADERS += MovieManager.hh
 
 SOURCES += Args.cc
 SOURCES += AutomaticImageGenerator.cc
 SOURCES += ImageGenerationManager.cc
+SOURCES += MovieManager.cc
 SOURCES += GuiManager.cc
 SOURCES += Cdraw_P.cc
 SOURCES += Cgui_P.cc

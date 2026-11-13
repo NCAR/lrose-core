@@ -54,6 +54,7 @@ HDRS = \
 	$(PARAMS_HH) \
 	AutomaticImageGenerator.hh \
 	ImageGenerationManager.hh \
+	MovieManager.hh \
 	Args.hh \
 	GlobalData.hh \
 	GuiManager.hh \
@@ -112,6 +113,7 @@ NORM_SRCS = \
 	$(PARAMS_CC) \
 	AutomaticImageGenerator.cc \
 	ImageGenerationManager.cc \
+	MovieManager.cc \
 	Args.cc \
 	Cdraw_P.cc \
 	Cgui_P.cc \

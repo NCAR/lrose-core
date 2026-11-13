@@ -54,7 +54,6 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
-#include <QProcess>
 #include <QStatusBar>
 #include <QDateTime>
 #include <QDateTimeEdit>
@@ -93,6 +92,7 @@
 
 #include "GuiManager.hh"
 #include "ImageGenerationManager.hh"
+#include "MovieManager.hh"
 #include "ProductMgr.hh"
 #include "FieldTableItem.hh"
 #include "HorizView.hh"
@@ -224,11 +224,86 @@ GuiManager::GuiManager() :
   _vlevelHasChanged = true;
   
   _overlaysHaveChanged = true;
-  _movieBuildFrame = -1;
-  _movieGridReady = false;
-  _movieIncludesVertical = false;
-  _movieVerticalReady = false;
-  _movieVerticalRequestGeneration = -1;
+  // MovieManager owns the immutable cache lifecycle. These callbacks retain
+  // request and widget operations in the display controller.
+  MovieManager::Callbacks movieCallbacks;
+  movieCallbacks.clearFrames =
+    [this](int frameCount, bool includeVertical) {
+      if (_horiz) {
+        _horiz->clearMovieFrames(frameCount);
+      }
+      if (_vert) {
+        _vert->clearMovieFrames(includeVertical ? frameCount : 0);
+      }
+    };
+  movieCallbacks.resetProducts = [this]() {
+    if (_gd.prod_mgr) {
+      _gd.prod_mgr->reset_product_valid_flags();
+    }
+  };
+  movieCallbacks.beginFrameRequest = [this](bool includeVertical) {
+    _terrainHorizontalSettled = true;
+    _terrainHorizontalRequestPending = false;
+    _terrainVerticalSettled = true;
+    _horizontalRequestHasChanged = true;
+    if (_horiz) {
+      _horiz->stopMoviePlayback();
+    }
+    if (includeVertical && _vert) {
+      _vert->stopMoviePlayback();
+      return _requestVerticalSection();
+    }
+    return -1;
+  };
+  movieCallbacks.captureFrame =
+    [this](int frameIndex, bool includeVertical) {
+      const bool horizCaptured =
+        _horiz && _horiz->captureMovieFrame(frameIndex);
+      const bool vertCaptured = !includeVertical ||
+        (_vert && _vert->captureMovieFrame(frameIndex));
+      return horizCaptured && vertCaptured;
+    };
+  movieCallbacks.showFrame =
+    [this](int frameIndex, bool includeVertical) {
+      if (!_horiz || !_horiz->hasMovieFrame(frameIndex) ||
+          (includeVertical &&
+           (!_vert || !_vert->hasMovieFrame(frameIndex)))) {
+        return false;
+      }
+      if (!_horiz->showMovieFrame(frameIndex)) {
+        return false;
+      }
+      return !includeVertical || _vert->showMovieFrame(frameIndex);
+    };
+  movieCallbacks.hasFrame =
+    [this](int frameIndex, bool vertical) {
+      return vertical ? (_vert && _vert->hasMovieFrame(frameIndex)) :
+                        (_horiz && _horiz->hasMovieFrame(frameIndex));
+    };
+  movieCallbacks.frameImage =
+    [this](int frameIndex, bool vertical) {
+      return vertical ? _vert->movieFrameImage(frameIndex) :
+                        _horiz->movieFrameImage(frameIndex);
+    };
+  movieCallbacks.stopPlayback = [this]() {
+    if (_horiz) {
+      _horiz->stopMoviePlayback();
+    }
+    if (_vert) {
+      _vert->stopMoviePlayback();
+    }
+  };
+  movieCallbacks.frameRendered = [this](int frameIndex) {
+    if (_timeControl) {
+      _timeControl->movieFrameRendered(frameIndex);
+    }
+  };
+  movieCallbacks.showProgress = [this](const QString &message) {
+    statusBar()->showMessage(message);
+  };
+  _movieManager = new MovieManager(
+    _params, std::move(movieCallbacks), this);
+
   _terrainHorizontalRequestGeneration = -1;
   _terrainHorizontalSettled = true;
   _terrainHorizontalRequestPending = false;
@@ -325,6 +400,8 @@ GuiManager::~GuiManager()
   // before tearing down any views or data managers they may reference.
   delete _imageGenerationManager;
   _imageGenerationManager = nullptr;
+  delete _movieManager;
+  _movieManager = nullptr;
 
   if (_gd.prod_mgr) {
     _gd.prod_mgr->setProductsChangedCallback(std::function<void()>());
@@ -425,238 +502,46 @@ void GuiManager::setArchiveMode(bool state)
 
 void GuiManager::prepareMovieBuild(int frameCount)
 {
-  _movieBuildFrame = -1;
-  _movieGridReady = false;
-  _movieIncludesVertical = _vertWindow && _vert &&
+  const bool includeVertical = _vertWindow && _vert &&
     _vertWindow->isVisible() && _vsectionRoute.size() >= 2;
-  _movieVerticalReady = !_movieIncludesVertical;
-  _movieVerticalRequestGeneration = -1;
   _terrainHorizontalSettled = true;
   _terrainHorizontalRequestPending = false;
   _terrainVerticalSettled = true;
-  _movieFieldLabel = getSelectedFieldLabel();
-  if (_horiz) {
-    _horiz->clearMovieFrames(frameCount);
-  }
-  if (_vert) {
-    _vert->clearMovieFrames(_movieIncludesVertical ? frameCount : 0);
-  }
-  // Force frame zero to be rebuilt even when it is already the live frame.
-  if (_gd.prod_mgr) {
-    _gd.prod_mgr->reset_product_valid_flags();
-  }
+  _movieManager->prepareBuild(
+    frameCount, includeVertical,
+    QString::fromStdString(getSelectedFieldLabel()));
 }
 
 void GuiManager::beginMovieFrameBuild(int frameIndex)
 {
-  _movieBuildFrame = frameIndex;
-  _movieGridReady = false;
-  _movieVerticalReady = !_movieIncludesVertical;
-  _movieVerticalRequestGeneration = -1;
-  _terrainHorizontalSettled = true;
-  _terrainHorizontalRequestPending = false;
-  _terrainVerticalSettled = true;
-  _horizontalRequestHasChanged = true;
-  if (_horiz) {
-    _horiz->stopMoviePlayback();
-  }
-  if (_movieIncludesVertical && _vert) {
-    _vert->stopMoviePlayback();
-    _movieVerticalRequestGeneration = _requestVerticalSection();
-    if (_movieVerticalRequestGeneration < 0) {
-      // Do not deadlock movie construction if the retained route can no
-      // longer produce a request. The captured vertical frame will show the
-      // current no-data state for this time.
-      _movieVerticalReady = true;
-    }
-  }
-  statusBar()->showMessage(
-    tr("Building movie frame %1 of %2")
-      .arg(frameIndex + 1).arg(_timeControl->getNFramesMovie()));
+  _movieManager->beginFrameBuild(
+    frameIndex, _timeControl ? _timeControl->getNFramesMovie() : 0);
 }
 
 void GuiManager::cancelMovieBuild()
 {
-  _movieBuildFrame = -1;
-  _movieGridReady = false;
-  _movieIncludesVertical = false;
-  _movieVerticalReady = false;
-  _movieVerticalRequestGeneration = -1;
+  _movieManager->cancelBuild();
   _terrainVerticalSettled = true;
 }
 
 bool GuiManager::showMovieFrame(int frameIndex)
 {
-  if (!_horiz || !_horiz->hasMovieFrame(frameIndex) ||
-      (_movieIncludesVertical &&
-       (!_vert || !_vert->hasMovieFrame(frameIndex)))) {
-    return false;
-  }
-  if (!_horiz->showMovieFrame(frameIndex)) {
-    return false;
-  }
-  return !_movieIncludesVertical || _vert->showMovieFrame(frameIndex);
+  return _movieManager->showFrame(frameIndex);
 }
 
 bool GuiManager::exportMovieLoop(QString &message)
 {
-  message.clear();
-  if (!_timeControl || !_horiz) {
-    message = tr("The movie views are not available.");
+  if (!_timeControl) {
+    message = tr("The movie time controller is not available.");
     return false;
   }
-
-  const int frameCount = _timeControl->getNFramesMovie();
-  if (frameCount < 1) {
-    message = tr("The movie contains no frames.");
-    return false;
-  }
-  for (int frameIndex = 0; frameIndex < frameCount; ++frameIndex) {
-    if (!_horiz->hasMovieFrame(frameIndex) ||
-        (_movieIncludesVertical &&
-         (!_vert || !_vert->hasMovieFrame(frameIndex)))) {
-      message = tr("Movie frame %1 is not ready for output.")
-        .arg(frameIndex + 1);
-      return false;
-    }
-  }
-
-  QString outputDirPath = QString::fromUtf8(_params.images_output_dir);
-  outputDirPath.replace("$(HOME)", QDir::homePath());
-  if (outputDirPath.startsWith("$HOME")) {
-    outputDirPath.replace(0, 5, QDir::homePath());
-  }
-  if (outputDirPath.trimmed().isEmpty()) {
-    message = tr("images_output_dir is empty.");
-    return false;
-  }
-  outputDirPath = QDir::cleanPath(outputDirPath);
-  QDir outputDir;
-  if (!outputDir.mkpath(outputDirPath)) {
-    message = tr("Cannot create the output directory:\n%1")
-      .arg(outputDirPath);
-    return false;
-  }
-  outputDir.setPath(outputDirPath);
-
-  QString extension = safeFileNameComponent(
-    QString::fromUtf8(_params.images_file_name_extension)).toLower();
-  if (extension.startsWith('.')) {
-    extension.remove(0, 1);
-  }
-  if (extension.isEmpty() || extension == "field") {
-    extension = "png";
-  }
-  // Playback permits the live field selection to change, so name the files
-  // from the display configuration captured when this cache was built.
-  const QString fieldPart = safeFileNameComponent(
-    QString::fromStdString(_movieFieldLabel));
-  const QString startPart = QDateTime::fromSecsSinceEpoch(
-          _timeControl->getStartTime().utime(), QTimeZone(QTimeZone::UTC))
-    .toString("yyyyMMdd_HHmmss'_UTC'");
-
-  // One shared suffix keeps the horizontal and vertical sequences paired.
-  // Checking every target prevents a repeated export from replacing even a
-  // partially retained earlier sequence.
-  QString seriesSuffix;
-  for (int sequence = 1; ; ++sequence) {
-    seriesSuffix = sequence == 1 ? QString() :
-      QString("_%1").arg(sequence, 2, 10, QChar('0'));
-    bool collision = false;
-    for (int frameIndex = 0; frameIndex < frameCount; ++frameIndex) {
-      const QString framePart = QString("_%1.%2")
-        .arg(frameIndex + 1, 3, 10, QChar('0')).arg(extension);
-      const QString commonPart = fieldPart + "_" + startPart +
-        seriesSuffix + framePart;
-      collision = QFileInfo::exists(outputDir.filePath(
-        "lucid_horiz_" + commonPart)) ||
-        (_movieIncludesVertical && QFileInfo::exists(outputDir.filePath(
-          "lucid_vert_" + commonPart)));
-      if (collision) {
-        break;
-      }
-    }
-    if (!collision) {
-      break;
-    }
-  }
-
-  QStringList horizontalFiles;
-  QStringList verticalFiles;
-  for (int frameIndex = 0; frameIndex < frameCount; ++frameIndex) {
-    const QString framePart = QString("_%1.%2")
-      .arg(frameIndex + 1, 3, 10, QChar('0')).arg(extension);
-    const QString commonPart = fieldPart + "_" + startPart +
-      seriesSuffix + framePart;
-    const QString horizontalPath = outputDir.filePath(
-      "lucid_horiz_" + commonPart);
-    if (!_horiz->movieFrameImage(frameIndex).save(horizontalPath)) {
-      message = tr("Could not save movie frame:\n%1").arg(horizontalPath);
-      return false;
-    }
-    horizontalFiles.push_back(horizontalPath);
-
-    if (_movieIncludesVertical) {
-      const QString verticalPath = outputDir.filePath(
-        "lucid_vert_" + commonPart);
-      if (!_vert->movieFrameImage(frameIndex).save(verticalPath)) {
-        message = tr("Could not save movie frame:\n%1").arg(verticalPath);
-        return false;
-      }
-      verticalFiles.push_back(verticalPath);
-    }
-  }
-
-  QStringList convertersStarted;
-  const QString converter = QString::fromUtf8(
-    _params.movie_convert_script).trimmed();
-  auto startConverter = [&](const QStringList &files,
-                            const QString &viewName) {
-    if (converter.isEmpty()) {
-      return true;
-    }
-    QStringList command = QProcess::splitCommand(converter);
-    if (command.isEmpty()) {
-      return true;
-    }
-    const QString program = command.takeFirst();
-    command.append(files);
-    if (!QProcess::startDetached(program, command, outputDirPath)) {
-      message = tr("Saved %1 frames in:\n%2\n\n"
-                   "Could not start converter: %3")
-        .arg(frameCount).arg(outputDirPath, converter);
-      return false;
-    }
-    convertersStarted.push_back(viewName);
-    return true;
-  };
-
-  if (!startConverter(horizontalFiles, tr("horizontal")) ||
-      (_movieIncludesVertical &&
-       !startConverter(verticalFiles, tr("vertical")))) {
-    return false;
-  }
-
-  const int fileCount = horizontalFiles.size() + verticalFiles.size();
-  message = tr("Saved %1 image files in:\n%2")
-    .arg(fileCount).arg(outputDirPath);
-  if (!convertersStarted.isEmpty()) {
-    message += tr("\n\nStarted %1 for the %2 sequence(s).")
-      .arg(converter, convertersStarted.join(tr(" and ")));
-  } else {
-    message += tr("\n\nNo animation converter was configured.");
-  }
-  return true;
+  return _movieManager->exportLoop(
+    _timeControl->getNFramesMovie(), _timeControl->getStartTime(), message);
 }
 
 void GuiManager::stopMoviePlayback()
 {
-  if (_horiz) {
-    _horiz->stopMoviePlayback();
-  }
-  if (_vert) {
-    _vert->stopMoviePlayback();
-  }
+  _movieManager->stopPlayback();
 }
 
 void GuiManager::restoreLiveDisplayAfterMovie()
@@ -758,7 +643,8 @@ void GuiManager::movieStateChanged()
     // A cached vertical loop may be hidden and reopened. If no vertical cache
     // was selected at Start, opening a live section during horizontal-only
     // playback would imply synchronization which does not exist.
-    _showVertAct->setEnabled(!active || _movieIncludesVertical);
+    _showVertAct->setEnabled(!active ||
+                             _movieManager->includesVertical());
   }
 
   enableUnzoomButtons(_horiz && !_horiz->getCustomZooms().empty());
@@ -819,39 +705,21 @@ void GuiManager::setTerrainEnabled(bool enabled)
 
 void GuiManager::_checkMovieFrameReady()
 {
-  if (_movieBuildFrame < 0 || !_movieGridReady || !_movieVerticalReady ||
-      !_horiz || !_timeControl) {
+  if (!_movieManager || _movieManager->buildFrame() < 0) {
     return;
   }
   const bool productsReady = !_gd.prod.products_on || !_gd.prod_mgr ||
     _gd.prod_mgr->activeProductsReady();
-  if (!productsReady) {
-    return;
-  }
-  if (_gd.wind_mgr && !_gd.wind_mgr->activeWindsReady()) {
-    return;
-  }
-  if (_movieIncludesVertical && _gd.wind_mgr &&
-      !_gd.wind_mgr->activeVerticalWindsSettled()) {
-    return;
-  }
-  if (_movieIncludesVertical && !_terrainVerticalSettled) {
-    return;
-  }
-  if (!_terrainHorizontalSettled) {
-    return;
-  }
-
-  const int completedFrame = _movieBuildFrame;
-  _movieBuildFrame = -1;
-  _movieGridReady = false;
-  _movieVerticalReady = false;
-  const bool horizCaptured = _horiz->captureMovieFrame(completedFrame);
-  const bool vertCaptured = !_movieIncludesVertical ||
-    (_vert && _vert->captureMovieFrame(completedFrame));
-  if (horizCaptured && vertCaptured) {
-    _timeControl->movieFrameRendered(completedFrame);
-  }
+  const bool horizontalWindsReady = !_gd.wind_mgr ||
+    _gd.wind_mgr->activeWindsReady();
+  const bool verticalWindsReady =
+    !_movieManager->includesVertical() || !_gd.wind_mgr ||
+    _gd.wind_mgr->activeVerticalWindsSettled();
+  const bool verticalTerrainReady =
+    !_movieManager->includesVertical() || _terrainVerticalSettled;
+  _movieManager->checkFrameReady(
+    productsReady && horizontalWindsReady && verticalWindsReady &&
+    _terrainHorizontalSettled && verticalTerrainReady);
 }
 
 //////////////////////////////////////////////////
@@ -2342,8 +2210,8 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
           mr->getHorizCompletedGeneration())) {
       _checkAutomaticImageReady();
     }
-    if (_movieBuildFrame == frameIndex) {
-      _movieGridReady = true;
+    if (_movieManager->buildFrame() == frameIndex) {
+      _movieManager->markGridReady(frameIndex);
       _checkMovieFrameReady();
     }
     if (_fieldNum < _gd.num_datafields) {
@@ -3288,10 +3156,8 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
     return;
   }
 
-  if (isMovieBuilding() && _movieIncludesVertical &&
-      _movieBuildFrame >= 0 &&
-      reader->getVertGeneration() == _movieVerticalRequestGeneration) {
-    _movieVerticalReady = true;
+  if (isMovieBuilding() &&
+      _movieManager->markVerticalReady(reader->getVertGeneration())) {
     _checkMovieFrameReady();
     return;
   }

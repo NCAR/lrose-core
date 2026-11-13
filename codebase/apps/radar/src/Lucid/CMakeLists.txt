@@ -17,6 +17,7 @@ set (SRCS
       Params.cc
       AutomaticImageGenerator.cc
       ImageGenerationManager.cc
+      MovieManager.cc
       Args.cc
       Cdraw_P.cc
       Cgui_P.cc

@@ -84,6 +84,7 @@ class ZoomMenuItem;
 class TimeControl;
 class VlevelSelector;
 class ImageGenerationManager;
+class MovieManager;
 class WorldPlot;
 struct TimelineFrame;
 
@@ -278,11 +279,7 @@ private:
   bool _fieldHasChanged;
   bool _horizontalRequestHasChanged;
 
-  int _movieBuildFrame;
-  bool _movieGridReady;
-  bool _movieIncludesVertical;
-  bool _movieVerticalReady;
-  int _movieVerticalRequestGeneration;
+  MovieManager *_movieManager;
 
   // Terrain uses independent horizontal and vertical MDV requests. Failed
   // completions are settled so optional context cannot stall captured output.
@@ -291,8 +288,6 @@ private:
   bool _terrainHorizontalRequestPending;
   int _terrainVerticalRequestGeneration;
   bool _terrainVerticalSettled;
-  string _movieFieldLabel;
-
   void _checkMovieFrameReady();
 
   // The image manager owns unattended scheduling and publication. GuiManager
