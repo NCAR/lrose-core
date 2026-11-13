@@ -744,6 +744,41 @@ void GuiManager::showMovieInteractionBlocked()
   statusBar()->showMessage(tr("Stop the movie to change the view"), 3000);
 }
 
+/////////////////////////////////////////////////////////////
+// set visibility and request state for vertical-section terrain
+
+void GuiManager::setVerticalTerrainEnabled(bool enabled)
+{
+  MdvReader *terrain = _gd.layers.earth.terr;
+  const bool active = enabled && terrain != nullptr;
+  _params.terrain_active = active ? pTRUE : pFALSE;
+  _gd.layers.earth.terrain_active = active ? 1 : 0;
+
+  if (!active) {
+    // A hidden optional layer must not hold a movie or automatic image open.
+    // Supersede its asynchronous request so a late completion cannot restore
+    // terrain after the user has switched it off.
+    if (terrain != nullptr && _terrainVerticalRequestGeneration >= 0) {
+      terrain->cancelVertRequest(_terrainVerticalRequestGeneration);
+    }
+    _terrainVerticalRequestGeneration = -1;
+    _terrainVerticalSettled = true;
+    if (_vert != nullptr) {
+      _vert->rerenderTerrain();
+    }
+    _checkMovieFrameReady();
+    _checkAutomaticImageReady();
+    return;
+  }
+
+  // The route may have changed while terrain was hidden, so request its
+  // profile again instead of assuming the reader's cached section matches.
+  _requestVerticalTerrain();
+  if (_vert != nullptr) {
+    _vert->rerenderTerrain();
+  }
+}
+
 void GuiManager::_checkMovieFrameReady()
 {
   if (_movieBuildFrame < 0 || !_movieGridReady || !_movieVerticalReady ||

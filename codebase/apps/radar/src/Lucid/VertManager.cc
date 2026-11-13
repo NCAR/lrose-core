@@ -219,6 +219,18 @@ void VertManager::_createActions(VertView *vert)
             vert->setPlotSelectedHorizHeight(enabled);
           });
 
+  // Terrain is retained independently of the gridded field section, allowing
+  // this inexpensive overlay to be hidden or restored without another field
+  // request.
+  _terrainAct = new QAction(tr("Show terrain"), this);
+  _terrainAct->setStatusTip(
+    tr("Show the terrain surface and earth mask on the vertical section"));
+  _terrainAct->setCheckable(true);
+  _terrainAct->setChecked(_gd.layers.earth.terrain_active != 0);
+  _terrainAct->setEnabled(_gd.layers.earth.terr != nullptr);
+  connect(_terrainAct, &QAction::toggled,
+          _guiManager, &GuiManager::setVerticalTerrainEnabled);
+
 }
 
 //////////////////////////////////////////////////
@@ -324,6 +336,7 @@ void VertManager::_createMenus()
   _configurationMenu->addAction(_maximumHeightAct);
   _configurationMenu->addSeparator();
   _configurationMenu->addAction(_plotSelectedHorizHeightAct);
+  _configurationMenu->addAction(_terrainAct);
 
   menuBar()->addAction(_unzoomAct);
 }

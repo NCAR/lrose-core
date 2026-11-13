@@ -159,6 +159,9 @@ public:
   bool isMovieActive() const;
   void movieStateChanged();
   void showMovieInteractionBlocked();
+
+  // Change the optional ground overlay without rebuilding the field section.
+  void setVerticalTerrainEnabled(bool enabled);
   
   // override event handling
 

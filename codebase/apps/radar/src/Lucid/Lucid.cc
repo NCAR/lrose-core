@@ -1210,7 +1210,7 @@ void Lucid::_initWindComponent(MdvReader *wrec,
 void Lucid::_initTerrain()
 {
 
-  if (_params.terrain_active && strlen(_params.terrain_url) > 0) {
+  if (strlen(_params.terrain_url) > 0) {
 
     // Legacy terrain parameters combine the MDV URL and field after the last
     // ampersand. MdvReader deliberately stores those separately, as normal
@@ -1222,7 +1222,10 @@ void Lucid::_initTerrain()
       cerr << "ERROR - invalid terrain_url, expected URL&field: "
            << terrainSpec << endl;
     } else {
-      _gd.layers.earth.terrain_active = 1;
+      // Keep a configured source available even when it starts hidden so the
+      // vertical-window menu can enable it without reconstructing a reader.
+      _gd.layers.earth.terrain_active =
+        _params.terrain_active ? 1 : 0;
       _gd.layers.earth.terr = new MdvReader(this);
       if(_gd.layers.earth.terr == NULL) {
         fprintf(stderr,"Cannot allocate space for terrain data\n");
