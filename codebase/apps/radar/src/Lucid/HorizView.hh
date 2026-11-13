@@ -127,10 +127,6 @@ class DLL_EXPORT HorizView : public QWidget
                      double elevationDeg,
                      double rangeKm);
 
-  // display the context menu
-  
-  void ShowContextMenu(const QPoint &pos /*, RadxVol *vol */);
-
   // The method that is called when a repaint event is triggered.
 
   void paintEvent(QPaintEvent *event);
@@ -154,10 +150,7 @@ class DLL_EXPORT HorizView : public QWidget
   void stopMoviePlayback();
   void setMovieInteractionActive(bool active);
   
-  // virtual void ShowContextMenu(const QPoint &pos, RadxVol *vol);
-
   void setFont();
-  virtual void informationMessage();
 
   // clear the field data queue
   
@@ -210,15 +203,6 @@ class DLL_EXPORT HorizView : public QWidget
 
   void clear();
 
-  // context menu handling
-  
-  virtual void contextMenuCancel();
-  virtual void contextMenuParameterColors();
-  virtual void contextMenuView();
-  virtual void contextMenuEditor();
-  virtual void contextMenuExamine(); // const QPoint &pos);
-  virtual void contextMenuDataWidget();
-  
  protected:
 
   ///////////////////////

@@ -1147,12 +1147,10 @@ void GuiManager::_setupWindows()
           this, &GuiManager::_vertLocationClicked);
 #endif
 
-  // add a right-click context menu to the image
-  setContextMenuPolicy(Qt::CustomContextMenu);
-
-  // customContextMenuRequested(e->pos());
+  // Right-button gestures select vertical sections, so HorizView emits this
+  // request only for the explicit Shift-right-click help gesture.
   connect(_horiz, &HorizView::customContextMenuRequested,
-	  this, &GuiManager::ShowContextMenu);
+	  this, &GuiManager::_showInteractionHelp);
 
   // vlevel selector
 
@@ -4132,8 +4130,46 @@ void GuiManager::_saveViewImages()
   }
 }
 
-void GuiManager::ShowContextMenu(const QPoint &pos) {
-  _horiz->ShowContextMenu(pos /*, &_vol*/);
+void GuiManager::_showInteractionHelp(const QPoint &pos)
+{
+  QMenu menu(_horiz);
+  QWidgetAction *helpAction = new QWidgetAction(&menu);
+  QLabel *helpText = new QLabel(&menu);
+  helpText->setTextFormat(Qt::RichText);
+  helpText->setTextInteractionFlags(Qt::TextSelectableByMouse);
+  helpText->setWordWrap(true);
+  helpText->setMinimumWidth(390);
+  helpText->setContentsMargins(12, 10, 12, 10);
+
+  QString vsectionHelp;
+  if (_params.single_segment_vsection) {
+    vsectionHelp = tr(
+      "<b>Vertical section</b><br>"
+      "Right-drag and release to select one segment. "
+      "On macOS, Control-drag is the right-button alternative.");
+  } else {
+    vsectionHelp = tr(
+      "<b>Vertical section</b><br>"
+      "Right-drag to start, then right-click to add segments. "
+      "Double-click to finish; Backspace removes the last point and Escape cancels. "
+      "On macOS, Control-click is the right-button alternative.");
+  }
+
+  // Keep the popup as one passive item: it documents canvas and selector
+  // gestures without suggesting that the inherited HawkEye actions still
+  // perform operations in Lucid.
+  helpText->setText(tr(
+    "<b>Plan-view controls</b><br><br>"
+    "<b>Zoom</b><br>Left-drag a rectangle over the plot.<br><br>"
+    "<b>Pan</b><br>Middle-button drag, or Option-left-drag.<br><br>"
+    "%1<br><br>"
+    "<b>Height selector</b><br>"
+    "Click or drag vertically in the selector to the right of the plot to choose a level."
+  ).arg(vsectionHelp));
+
+  helpAction->setDefaultWidget(helpText);
+  menu.addAction(helpAction);
+  menu.exec(_horiz->mapToGlobal(pos));
 }
 
 
@@ -4748,7 +4784,7 @@ void GuiManager::_howto()
     text += "Right-click to add segments and double-click to finish.\n";
     text += "Use Backspace to remove a point or Escape to cancel.\n";
   }
-  text += "Use Shift-right-click for the context menu.\n";
+  text += "Use Shift-right-click for plan-view interaction help.\n";
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
 

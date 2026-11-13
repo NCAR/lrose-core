@@ -32,14 +32,6 @@
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
-#include <toolsa/LogStream.hh>
-#include <QApplication>
-#include <QMenu>
-#include <QAction>
-#include <QLabel>
-#include <QLayout>
-#include <QMessageBox>
-#include <QErrorMessage>
 #include <QKeyEvent>
 #include <QRect>
 #include <QPainterPath>
@@ -1474,8 +1466,8 @@ void HorizView::mousePressEvent(QMouseEvent *e)
   if (_activeMouseButton == Qt::RightButton) {
     if (e->modifiers() & Qt::ShiftModifier) {
       // Ordinary right-button gestures belong to vertical-section selection.
-      // Retain access to the existing context menu through an explicit
-      // modifier so the two interactions cannot become ambiguous.
+      // Use an explicit modifier for interaction help so the two gestures
+      // cannot become ambiguous.
       _activeMouseButton = Qt::NoButton;
       emit customContextMenuRequested(pos.toPoint());
       return;
@@ -2057,171 +2049,5 @@ void HorizView::_renderMaps()
   _zoom->drawMaps();
   _mapsReady = true;
   
-}
-
-void HorizView::informationMessage()
-{
-  
-  // QMessageBox::StandardButton reply;
-  // QLabel *informationLabel;
-  
-  // reply = QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
-  QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
-  //  if (reply == QMessageBox::Ok)
-  //  informationLabel->setText("OK");
-  //else
-  //  informationLabel->setText("Escape");
-
-}
-
-/////////////////////////////////////////////////////////////////////////////////////
-// slots for context editing; create and show the associated modeless dialog and return                                   
-
-void HorizView::contextMenuCancel()
-{
-  // informationMessage();
-  // notImplemented();                                                                                                     
-}
-
-void HorizView::contextMenuParameterColors()
-{
-
-#ifdef NOTNOW
-  
-  LOG(DEBUG_VERBOSE) << "enter";
-
-  //DisplayField selectedField;                                                                             
-
-  // const DisplayField &field = _manager.getSelectedField();
-  // const ColorMap &colorMapForSelectedField = field.getColorMap();
-  ParameterColorView *parameterColorView = new ParameterColorView(this);
-  vector<DisplayField *> displayFields = _manager.getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
-  DisplayField selectedField = _manager.getSelectedField();
-  string emphasis_color = "white";
-  string annotation_color = "white";
-  DisplayFieldModel *displayFieldModel = 
-    new DisplayFieldModel(displayFields, selectedField.getName(),
-			  _params.grid_and_range_ring_color,
-			  emphasis_color,
-			  annotation_color,
-			  _params.background_color);
-  FieldColorController *fieldColorController = new FieldColorController(parameterColorView, displayFieldModel);
-  // connect some signals and slots in order to retrieve information
-  // and send changes back to display
-                                                                         
-  //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
-  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
-  	  &_manager, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
-  //  GuiManager::colorMapRedefineReceived(string, ColorMap)
-  //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
-  //	  this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
-
-  /* TODO: combine with replot
-     connect(fieldColorController, SIGNAL(backgroundColorSet(QColor)),
-     this, SLOT(backgroundColor(QColor)));
-  */
-
-  fieldColorController->startUp(); 
-
-  //connect(parameterColorView, SIGNAL(needFieldNames()), this, SLOT(getFieldNames()));
-  //connect(this, SIGNAL(fieldNamesSupplied(vector<string>)), 
-  //  parameterColorView, SLOT(fieldNamesSupplied(vector<string>));
-  // TODO: move this call to the controller?                                                                
-  // parameterColorView.exec();
-
-  //  if(parameterColorController.Changes()) {
-  // TODO: what are changes?  new displayField(s)?                                                        
-  //}
- 
-  LOG(DEBUG_VERBOSE) << "exit ";
-
-#endif
-  
-  informationMessage();
-  
-}
-
-void HorizView::contextMenuView()
-{
-  informationMessage();
-  //  notImplemented();                                                                                                   
-}
-
-void HorizView::contextMenuExamine()         
-{
-  informationMessage();                                                                                                 
-
-}
-
-void HorizView::contextMenuDataWidget()
-{
-  informationMessage();
-  //  notImplemented();                                                                                                   
-}
-
-void HorizView::contextMenuEditor()
-{
-  LOG(DEBUG_VERBOSE) << "enter";
-
-  // get click location in world coords
-  // by using the location stored in class variables
-#ifdef JUNK
-  double x_km = _worldPressX;
-  double y_km = _worldPressY;
-
-  // get ray closest to click point
-  const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-  // TODO: make sure the point is in the valid area
-  if (closestRay == NULL) {
-    // report error
-    QMessageBox::information(this, QString::fromStdString(""), QString::fromStdString("No ray found at location clicked"));
-    // TODO: move to this ...  errorMessage("", "No ray found at location clicked");
-  } else {
-    // ExamineEdit(closestRay);
-  }
-  LOG(DEBUG_VERBOSE) << "exit";
-#endif
-  
-}
-
-void HorizView::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
-{
-
-  if (_manager.isMovieActive()) {
-    _manager.showMovieInteractionBlocked();
-    return;
-  }
-
-  // _vol = vol;
-
-  QMenu contextMenu("Context menu", this);
-  
-  QAction action1("Cancel", this);
-  connect(&action1, SIGNAL(triggered()), this, SLOT(contextMenuCancel()));
-  contextMenu.addAction(&action1);
-
-  QAction action3("Parameters + Colors", this);
-  connect(&action3, SIGNAL(triggered()), this, SLOT(contextMenuParameterColors()));
-  contextMenu.addAction(&action3);
-
-  QAction action4("View", this);
-  connect(&action4, SIGNAL(triggered()), this, SLOT(contextMenuView()));
-  contextMenu.addAction(&action4);
-
-  QAction action5("Editor", this);
-  connect(&action5, SIGNAL(triggered()), this, SLOT(contextMenuEditor()));
-  contextMenu.addAction(&action5);
-  
-  QAction action6("Examine", this);
-  connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine()));
-  contextMenu.addAction(&action6);
-
-  /*
-    QAction action7("Data Widget", this);
-    connect(&action7, SIGNAL(triggered()), this, SLOT(contextMenuDataWidget()));
-    contextMenu.addAction(&action7);
-  */
-
-  contextMenu.exec(this->mapToGlobal(pos));
 }
 
