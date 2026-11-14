@@ -1,109 +1,73 @@
-## Possible bugs
+# Lucid bug status
 
-Horizontal MDV cache reuse is currently unreachable — high priority
+Snapshot: 2026-11-14
 
-requestHorizPlane() (MdvReader.cc:298) clears _validH before calling _checkRequestChangedH() (MdvReader.cc:735). That function only reuses existing data when _validH is true.
+This file records the disposition of the concrete defects from the previous
+code review. All seven identified defects have been handled. The remaining
+items below are validation work, not known open bugs.
 
-Consequently, every requested refresh performs another MDV read, even when the time, level, and domain are unchanged. This particularly affects:
-Zooming when clip_to_current_zoom_on_mdv_request is false.
-Static horizontal terrain requests.
-Resize and redraw operations.
-Repeated requests for identical movie/image state.
+## Resolved
 
-The request comparison should happen before invalidating the installed data. Its cache key should also include column-max mode and its height limits; otherwise fixing the validity ordering could accidentally reuse a non-composite plane for a composite request.
+1. Horizontal MDV cache reuse was unreachable — RESOLVED
 
-A new horizontal request can be discarded while another read is active
+   `MdvReader::requestHorizPlane()` now compares a complete immutable request
+   key before invalidating installed data. The key includes column-max state
+   and height limits, so a composite plane cannot be confused with a normal
+   level request.
 
-startReadVolH() (MdvReader.cc:1326) simply ignores a request when _readBusyH is true. The generation and mutable request details may already have been changed, causing the old result to be rejected as stale without starting the replacement.
+2. A horizontal request could be lost while a worker was active — RESOLVED
 
-Most current callers guard against this, and the new terrain path explicitly queues its latest state. However, that policy should live inside MdvReader: retain one “latest pending request” and start it after the worker completes. An immutable horizontal request object, similar to the vertical-section implementation, would also eliminate mutable cross-thread request state.
+   `MdvReader` now retains one latest-pending immutable horizontal request.
+   Completion of the active worker starts the newest pending state, while
+   generations prevent superseded results from being published.
 
-Movie construction can wait indefinitely after a failed dependency
+3. Movie dependency waits were unbounded — RESOLVED
 
-_checkMovieFrameReady() (GuiManager.cc:802) waits for the grid, products, winds, terrain, and optional vertical section, but movie construction has no per-frame timeout or failure policy.
+   `MovieManager` owns a configurable per-frame timeout. Failures identify
+   outstanding grid, Product, wind, terrain, or vertical-section dependencies
+   and follow the normal movie-stop path. Capture failures also release the
+   Building state.
 
-Examples:
-An unavailable required SPDB product leaves activeProductsReady() false.
-A failed primary MDV or wind request continues retrying indefinitely.
-The UI remains in “Building” until the user stops it.
+4. A picked symbolic product could survive a movie-frame change — RESOLVED
 
-Automatic image generation already has bounded request timeouts. Movie construction should adopt a similar watchdog, with an error message identifying the dependency that failed.
+   Entering movie interaction clears the live Product pick. Cached playback
+   therefore cannot draw a selection inherited from a different frame.
 
-Picked symbolic products are not revalidated when the movie frame changes
+5. Only the first instance of a multi-icon Product was pickable — RESOLVED
 
-drawPickedQt() (ProductMgr.cc:565) draws the previously selected Symprod container directly. It bypasses Product::_selectForDisplay(), which applies the current frame’s validity rules.
+   Named- and bitmap-icon picking now computes the minimum distance across all
+   rendered origins.
 
-If the movie advances without another mouse move, a product selected in the previous frame can remain highlighted even when it is not valid in the displayed frame. Clear the pick on a frame change or verify that its container remains selected for the new context.
+6. Filled gridded overlays erased the base image — RESOLVED
 
-Only the first instance of a multi-icon symbolic product is pickable
+   Grid-image preparation now honors overlay composition for rectangular,
+   distorted, filled-contour, and polar rendering. Line-only `NONE` rendering
+   also preserves the underlying field.
 
-Named-icon picking uses only _iconOrigins[0] in SymprodRenderNamedIcon::dist() (SymprodRenderObj.cc:649). Bitmap icons do the same in SymprodRenderBitmapIcon::dist() (SymprodRenderObj.cc:697).
+7. A failed-read diagnostic assumed a valid movie-frame index — RESOLVED
 
-Rendering correctly draws every origin, but hovering over any icon other than the first may not select it. The distance should be the minimum across all origins.
+   Timeline lookup is bounds checked and diagnostics only access frame times
+   when a valid `TimelineFrame` is available. The obsolete global movie array
+   no longer exists.
 
-Filled grid renderers do not honor overlay composition
+## Additional recently resolved behavior
 
-renderGridRect(), renderGridDistorted(), renderFilledContours(), and polar rendering accept is_overlay_field, but each clears the complete grid image before drawing—for example renderGridRect() (WorldPlot.cc:3043) and renderFilledContours() (WorldPlot.cc:3515).
+- Native polar RHIs returned by `DsMdvServer` now render as range/elevation
+  gate polygons transformed into ground-distance/height coordinates.
+  `FILLED_CONTOURS` deliberately falls back to polygons and `NONE` is unfilled.
+- Polar RHI cursor values and click reports invert the same beam geometry used
+  for drawing.
+- When the server replaces the selected RHI endpoint with its full-range
+  endpoint, `HorizView` redraws the returned route. The original user route is
+  retained as the request definition, and terrain is re-requested along an
+  adjusted returned route.
 
-Line-only rendering already preserves the underlying image for an overlay. Filled overlays would erase the base field. This is mostly latent while multi-field gridded overlays remain disabled, but it should be addressed before implementing the overlay use case discussed earlier.
+## Validation still required
 
-A diagnostic error path assumes a valid movie frame index
-
-In _checkAndReadH() (GuiManager.cc:2292), the failed-read diagnostic indexes _gd.movie.frame[frameIndex] without validating frameIndex. Normal initialization probably ensures at least one frame, but an early failure or incomplete setup could make this error reporting path itself unsafe.
-
-## Cleanup recommendations
-
-Consolidate request state
-
-MdvReader currently has two validity systems: public legacy flags such as h_data_valid and private state such as _validH, _newH, generations, and busy flags. This invites inconsistent state. A single request/result state machine would simplify ordinary display, movie, terrain, winds, and automatic-image handling.
-
-Split GuiManager by responsibility
-
-GuiManager.cc (GuiManager.cc) is over 5,500 lines and currently coordinates:
-Menu construction.
-MDV scheduling.
-Movies.
-Automatic images.
-Terrain and winds.
-Symbolic products.
-Vertical sections.
-Dialogs and status reporting.
-
-The first useful extractions would be a movie-build coordinator and an automatic-image coordinator. They share readiness concepts but currently maintain separate state and timeout policies.
-
-Separate rendering orchestration from drawing primitives
-
-WorldPlot, HorizView, and VertView still contain mixtures of geometry, data validation, image ownership, color handling, and UI state. Small renderer classes for grids, contours, terrain, winds, and symbolic products would make composition rules explicit and easier to test.
-
-Replace unconditional terminal output with controlled logging
-
-There are many unconditional cerr calls, including worker start/completion messages in MdvReader.cc (MdvReader.cc:1316). Use the existing debug levels consistently or introduce QLoggingCategory categories for MDV, SPDB, movies, rendering, and automatic images.
-
-Remove or disable nonfunctional UI actions
-
-Open and Save are visible menu actions, but _openFile() and _saveFile() (GuiManager.cc:2515) are empty. Until implemented, hiding or disabling them would avoid misleading users.
-
-Retire legacy inactive code in stages
-
-The active source still contains numerous NOTYET, NOTNOW, and commented legacy blocks, in addition to the old/ reference implementation. I would:
-Keep old/ temporarily as an explicit reference snapshot.
-Remove inactive blocks from active classes once the corresponding feature is accepted.
-Remove route-winds remnants as already planned.
-Record intentional omissions in one design document rather than scattered preprocessor blocks.
-
-Clarify Qt ownership
-
-GuiManager::~GuiManager() (GuiManager.cc:320) manually deletes _horiz and _vert, although both participate in Qt parent ownership. This currently works because Qt removes deleted children from their parent, but consistently relying on QObject ownership—or documenting exceptions—would make shutdown behavior easier to reason about.
-
-Add focused regression tests
-
-The highest-value tests would cover:
-Horizontal request-key equality and cache reuse.
-Request replacement while a worker is busy.
-Movie dependency failure and timeout.
-Symbolic-product frame selection and multi-icon picking.
-Base-field plus overlay composition.
-Color-scale bounds, missing values, and reset behavior.
-Vertical route and terrain/wind readiness across field and frame changes.
-
-My recommended order is: fix the horizontal request/cache state first, add the movie watchdog second, then resolve the two symbolic-product picking bugs. Those are contained changes with clear behavioral tests.
+- Exercise delayed, missing, and recovering MDV/SPDB inputs under realtime and
+  archive simulation.
+- Stress request replacement, movie timeouts, and automatic-image scheduler
+  coalescing with controlled data arrival.
+- Compare native RHI rendering and returned-route updates with CIDD over a
+  range of azimuths, fields, times, and radar altitudes.
+- Add automated regression coverage; current GUI validation is interactive.

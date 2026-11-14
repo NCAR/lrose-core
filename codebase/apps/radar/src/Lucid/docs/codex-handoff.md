@@ -1,8 +1,9 @@
 # Lucid Codex handoff
 
-Snapshot: 2026-11-13. Source and supporting documentation are committed and
-pushed through `e5815f2e0`. The current worktree contains only this handoff
-update.
+Snapshot: 2026-11-14. Source and test changes through native polar RHI
+rendering and returned-route display are committed and pushed in `421c363fc`
+(`implementing polar RHIs`). The current worktree contains only the three
+documentation updates described here.
 
 ## Architecture
 
@@ -31,8 +32,9 @@ transitional and retains some CIDD-style shared structures.
   values, click reports, vertical-section selection, Product hover picking,
   and immutable movie composites.
 - `VertManager` owns the vertical-section window and configuration menu;
-  `VertView` renders the section, cursor/click values, and selected horizontal
-  height or radar beam-height curve.
+  `VertView` renders Cartesian sections and native polar RHIs, cursor/click
+  values, terrain and wind overlays, and the selected horizontal height or
+  radar beam-height curve.
 - `TimeControl` owns the accepted timeline, pending time edits, and playback
   controls. `TimePlotWidget` renders the time axis, availability, build
   progress, and interval gestures.
@@ -78,6 +80,18 @@ transitional and retains some CIDD-style shared structures.
 - Vertical sections support single-segment and multi-segment selection. The
   vertical window refreshes immediately on field and render-configuration
   changes.
+- Native measured RHIs returned by `DsMdvServer` are detected from
+  `PROJ_RHI_RADAR` plus `VERT_TYPE_AZ`. Their range/elevation gates are
+  transformed with `BeamHeight` and rendered as distance/height polygons.
+  `NONE` is unfilled; `FILLED_CONTOURS` deliberately falls back to polygons.
+- Polar RHI cursor and click lookup invert the same beam geometry. The title
+  includes the returned azimuth and the displayed axes remain ground distance
+  and height MSL in km.
+- `DsMdvServer` normally returns the complete measured RHI from the radar to
+  maximum range. `MdvReader` retains those returned waypoints and `HorizView`
+  redraws the actual path when it differs from the user's shorter selection.
+  The original route remains the request definition; adjusted terrain is
+  requested against the returned geometry without repeating the primary read.
 - The vertical configuration menu controls selection mode, height bounds, and
   the selected-horizontal-height overlay.
 - For polar fields, the selected elevation is converted to a radar beam-height
@@ -85,6 +99,12 @@ transitional and retains some CIDD-style shared structures.
   the curve.
 - Cursor values and click reports work in both views. Filled-contour cursor
   values are sampled from the underlying grid without regenerating contours.
+- Model U/V winds can be rendered over horizontal and vertical fields using
+  vectors or weather-map barbs. Vertical symbols retain their true-north
+  orientation rather than representing along-section or vertical velocity.
+- Terrain can mask model plan views where terrain exceeds the selected height,
+  and can be drawn and toggled in the vertical section. It is not applied to
+  polar plan-view radar grids.
 - Concurrent MDV NetCDF/HDF5 access is serialized because the deployed stack
   was observed to crash when horizontal and vertical workers entered it
   concurrently.
@@ -255,6 +275,9 @@ sidecars, transparency, multiple heights/zooms, and vertical images.
 - `docs/lrose-process-data-management.md` summarizes the LROSE process and
   data layers and records the intended approach for a Lucid realtime
   simulator.
+- `docs/bug_status.txt` now records all seven concrete review defects as
+  resolved. `docs/cleanup_status.txt` distinguishes completed structural work
+  from lower-priority cleanup best deferred until simulator testing.
 
 ## Important design decisions
 
@@ -275,6 +298,9 @@ sidecars, transparency, multiple heights/zooms, and vertical images.
   active vertical caches share the same frame index and request generation.
 - Vertical routes are display geometry, not field-specific state, and survive
   field changes.
+- Preserve the user's selected vertical route as the request definition, but
+  display server-returned geometry when an MDV service adjusts the route.
+  Response geometry must not cause a recursive primary-data request.
 - Missing/bad grid values remain holes unless explicit mapping says otherwise.
   Invalid contour topology falls back to polygon rendering.
 - Automatic image work is serialized through the GUI display state; fixed
@@ -282,28 +308,37 @@ sidecars, transparency, multiple heights/zooms, and vertical images.
 
 ## Outstanding work
 
-1. Build the realtime/archive simulation environment described conceptually in
-   `docs/lrose-process-data-management.md`. Select the archive replay boundary,
-   project layout, process list, datasets, and late-data thresholds.
-2. Create a repeatable image-generation test matrix covering success, timeout,
+1. Build the realtime/archive simulation environment described in
+   `docs/lrose-process-data-management.md`. This is the next development
+   focus and should begin in a new Codex thread.
+2. Select the replay boundary and source datasets. Prefer immutable archive
+   input and a separate writable realtime tree populated through normal LROSE
+   file/latest-data or FMQ interfaces; Lucid should remain an ordinary client.
+3. Define the simulation project layout, process instances, `proc_list`,
+   `data_list`, logs, servers, replay clock/rate, looping policy, and late-data
+   thresholds. Keep it isolated from operational data and shared-memory keys.
+4. Create a repeatable image-generation test matrix covering success, timeout,
    stale completion, recovery, and scheduler coalescing.
-3. Verify automatic PNG transparency, geo XML, `_latest_data_info`, day
+5. Verify automatic PNG transparency, geo XML, `_latest_data_info`, day
    directories, and DataMapper behavior with downstream consumers.
-4. Exercise automatic combinations of multiple fields, heights, zooms, and
+6. Exercise automatic combinations of multiple fields, heights, zooms, and
    vertical routes, including filename uniqueness and state restoration.
-5. Continue visual comparison of symbolic products with CIDD and decide the
+7. Continue visual comparison of symbolic products with CIDD and decide the
    desired zero-chunk snapshot policy.
-6. Consolidate `MdvReader`'s remaining public legacy validity flags with its
+8. Exercise native polar RHIs against CIDD, including full-range returned
+   routes, terrain, click values, movies, and Cartesian fallback when no
+   measured RHI matches.
+9. Consolidate `MdvReader`'s remaining public legacy validity flags with its
    private request/result state.
-7. Continue removing demonstrably unused `GlobalData::layers` state and
+10. Continue removing demonstrably unused `GlobalData::layers` state and
    simplify terrain/wind request queuing where `MdvReader` now provides the
    latest-request policy.
-8. Continue vertical-window presentation cleanup and regression testing.
-9. Remove Route Winds completely when the current commented history is no
+11. Continue vertical-window presentation cleanup and regression testing.
+12. Remove Route Winds completely when the current commented history is no
    longer needed.
-10. Work through `docs/parameter_status.txt` incrementally as affected features
+13. Work through `docs/parameter_status.txt` incrementally as affected features
    are cleaned up.
-11. There are no automated GUI tests yet; current validation is interactive.
+14. There are no automated GUI tests yet; current validation is interactive.
 
 ## Build and test
 
@@ -321,19 +356,23 @@ Suggested interactive smoke test:
    column-max changes in the horizontal view.
 2. Select single- and multi-segment vertical sections; change fields and render
    settings while the vertical window is open.
-3. Exercise horizontal and vertical cursor values and click reports.
-4. Toggle Products globally and individually, then compare METAR placement and
+3. Request a measured polar RHI and compare it with
+   `RHI_polar_rendering.png` and CIDD. Verify polygon geometry, km axes, RHI
+   title azimuth, cursor/click values, the full-range line in `HorizView`, and
+   fallback to a Cartesian section when no measured RHI is suitable.
+4. Exercise horizontal and vertical cursor values and click reports.
+5. Toggle Products globally and individually, then compare METAR placement and
    timing with CIDD.
-5. Build and play horizontal-only and horizontal-plus-vertical movies. Verify
+6. Build and play horizontal-only and horizontal-plus-vertical movies. Verify
    progress colors, displayed-frame gray, Stop, field selection after Stop,
    dwell, endpoint delay, and sweep playback.
-6. Test time-canvas selection, zoom, pan, automatic extension, right-drag plus
+7. Test time-canvas selection, zoom, pan, automatic extension, right-drag plus
    Accept, and interval editing.
-7. Exercise Reload with an open vertical section and enabled Products.
-8. Test interactive Save-Image and Output Loop without overwriting prior files.
-9. Run automatic create-once, archive schedule, and realtime schedule modes;
+8. Exercise Reload with an open vertical section and enabled Products.
+9. Test interactive Save-Image and Output Loop without overwriting prior files.
+10. Run automatic create-once, archive schedule, and realtime schedule modes;
    inspect image names, summaries, optional sidecars, and exit status.
-10. Press Ctrl-C during active MDV/SPDB/image requests and verify orderly
+11. Press Ctrl-C during active MDV/SPDB/image requests and verify orderly
     shutdown.
 
 Before committing, run `git status --short`. Preserve unrelated worktree files
@@ -348,6 +387,10 @@ repository, run its `install.sh` if links need refreshing, and start Codex in
 this directory. A useful opening request is:
 
 ```text
-Read AGENTS.md, docs/codex-handoff.md, and docs/parameter_status.txt. Then
-review the recent Lucid git history and current worktree before changing code.
+Read AGENTS.md, docs/codex-handoff.md,
+docs/lrose-process-data-management.md, docs/bug_status.txt, and
+docs/cleanup_status.txt. Review the current worktree and recent Lucid history,
+then help design and build the isolated realtime/archive simulator described
+in the handoff. Do not modify Lucid display code unless simulator testing
+identifies a concrete need.
 ```

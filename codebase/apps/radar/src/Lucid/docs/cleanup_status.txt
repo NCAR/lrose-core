@@ -1,111 +1,98 @@
+# Lucid cleanup status
 
-## Possible bugs
+Snapshot: 2026-11-14
 
-Horizontal MDV cache reuse is currently unreachable — high priority
+## Completed or substantially handled
 
-requestHorizPlane() (MdvReader.cc:298) clears _validH before calling _checkRequestChangedH() (MdvReader.cc:735). That function only reuses existing data when _validH is true.
+1. Split major responsibilities out of `GuiManager` — SUBSTANTIALLY HANDLED
 
-Consequently, every requested refresh performs another MDV read, even when the time, level, and domain are unchanged. This particularly affects:
-Zooming when clip_to_current_zoom_on_mdv_request is false.
-Static horizontal terrain requests.
-Resize and redraw operations.
-Repeated requests for identical movie/image state.
+   `MovieManager` now owns movie build, timeout, capture, playback, and export
+   state. `ImageGenerationManager` owns automatic-image scheduling, readiness,
+   timeout, publication, summaries, and lifecycle. `GuiManager` retains the
+   widget-facing callbacks and broader display coordination.
 
-The request comparison should happen before invalidating the installed data. Its cache key should also include column-max mode and its height limits; otherwise fixing the validity ordering could accidentally reuse a non-composite plane for a composite request.
+2. Clarify Qt ownership — HANDLED
 
-A new horizontal request can be discarded while another read is active
+   Views and menu helpers have QObject parents. `GuiManager` no longer
+   explicitly deletes `_horiz` or `_vert`. Manager objects are deliberately
+   destroyed early so their timers and callbacks stop before Qt destroys the
+   child widgets.
 
-startReadVolH() (MdvReader.cc:1326) simply ignores a request when _readBusyH is true. The generation and mutable request details may already have been changed, causing the old result to be rejected as stale without starting the replacement.
+3. Nonfunctional Open and parameter Save actions — HANDLED FOR NOW
 
-Most current callers guard against this, and the new terrain path explicitly queues its latest state. However, that policy should live inside MdvReader: retain one “latest pending request” and start it after the worker completes. An immutable horizontal request object, similar to the vertical-section implementation, would also eliminate mutable cross-thread request state.
+   They remain visible but disabled, reserving their intended future roles.
+   Save-Image remains available for individual display captures.
 
-Movie construction can wait indefinitely after a failed dependency
+4. Remove obsolete manager and global state — HANDLED
 
-_checkMovieFrameReady() (GuiManager.cc:802) waits for the grid, products, winds, terrain, and optional vertical section, but movie construction has no per-frame timeout or failure policy.
+   The `GuiManager` singleton interface, archive mirrors, legacy timing state,
+   dead clear method, unused field getters, and the global CIDD movie structure
+   were removed. `TimeControl` owns the accepted timeline.
 
-Examples:
-An unavailable required SPDB product leaves activeProductsReady() false.
-A failed primary MDV or wind request continues retrying indefinitely.
-The UI remains in “Building” until the user stops it.
+5. Remove obsolete rendering branches and unsafe legacy indexing — HANDLED
 
-Automatic image generation already has bounded request timeouts. Movie construction should adopt a similar watchdog, with an error message identifying the dependency that failed.
+   The residual `DYNAMIC_CONTOURS` path was removed. Variable-length legacy
+   contour and layer-field input is bounded before fixed-array indexing.
 
-Picked symbolic products are not revalidated when the movie frame changes
+6. Remove incorrect manual view destruction — HANDLED
 
-drawPickedQt() (ProductMgr.cc:565) draws the previously selected Symprod container directly. It bypasses Product::_selectForDisplay(), which applies the current frame’s validity rules.
+   The inherited `HorizView` destructor cleanup and explicit `_horiz`/`_vert`
+   deletion were removed in favor of Qt ownership.
 
-If the movie advances without another mouse move, a product selected in the previous frame can remain highlighted even when it is not valid in the displayed frame. Clear the pick on a frame change or verify that its container remains selected for the new context.
+7. Reduce routine terminal noise — PARTIALLY HANDLED
 
-Only the first instance of a multi-icon symbolic product is pickable
+   Routine successful horizontal-read diagnostics are gated by debug settings;
+   errors remain unconditional. A broader logging pass is still outstanding.
 
-Named-icon picking uses only _iconOrigins[0] in SymprodRenderNamedIcon::dist() (SymprodRenderObj.cc:649). Bitmap icons do the same in SymprodRenderBitmapIcon::dist() (SymprodRenderObj.cc:697).
+## Still useful cleanup
 
-Rendering correctly draws every origin, but hovering over any icon other than the first may not select it. The distance should be the minimum across all origins.
+1. Consolidate `MdvReader` request state
 
-Filled grid renderers do not honor overlay composition
+   Immutable requests, generations, cache keys, and latest-pending replacement
+   are now established, but public legacy flags such as `h_data_valid` still
+   coexist with private validity and completion state. Consolidate these only
+   after simulator testing provides regression coverage.
 
-renderGridRect(), renderGridDistorted(), renderFilledContours(), and polar rendering accept is_overlay_field, but each clears the complete grid image before drawing—for example renderGridRect() (WorldPlot.cc:3043) and renderFilledContours() (WorldPlot.cc:3515).
+2. Continue reducing `GuiManager`
 
-Line-only rendering already preserves the underlying image for an overlay. Filled overlays would erase the base field. This is mostly latent while multi-field gridded overlays remain disabled, but it should be addressed before implementing the overlay use case discussed earlier.
+   The two largest coordinators have been extracted, but `GuiManager` still
+   owns menus, MDV orchestration, Products, winds, terrain, vertical-section
+   coordination, dialogs, and status reporting. Avoid another extraction
+   until simulator testing shows which boundaries are stable.
 
-A diagnostic error path assumes a valid movie frame index
+3. Separate drawing primitives from orchestration
 
-In _checkAndReadH() (GuiManager.cc:2292), the failed-read diagnostic indexes _gd.movie.frame[frameIndex] without validating frameIndex. Normal initialization probably ensures at least one frame, but an early failure or incomplete setup could make this error reporting path itself unsafe.
+   `WorldPlot`, `HorizView`, and `VertView` still mix geometry, validation,
+   image ownership, color policy, and UI state. Focused renderer classes could
+   help, but this is lower priority than operational testing.
 
-## Cleanup recommendations
+4. Adopt consistent logging
 
-Consolidate request state
+   Replace remaining unconditional informational `cerr` output with existing
+   debug levels or `QLoggingCategory` categories for MDV, SPDB, movies,
+   rendering, and automatic images. Preserve unconditional error diagnostics.
 
-MdvReader currently has two validity systems: public legacy flags such as h_data_valid and private state such as _validH, _newH, generations, and busy flags. This invites inconsistent state. A single request/result state machine would simplify ordinary display, movie, terrain, winds, and automatic-image handling.
+5. Retire inactive legacy code in stages
 
-Split GuiManager by responsibility
+   Keep `old/` as an explicit CIDD comparison snapshot for now. Later remove
+   accepted inactive blocks, commented Route Winds code and parameters, and
+   scattered legacy preprocessor remnants. Route Winds will not be implemented.
 
-GuiManager.cc (GuiManager.cc) is over 5,500 lines and currently coordinates:
-Menu construction.
-MDV scheduling.
-Movies.
-Automatic images.
-Terrain and winds.
-Symbolic products.
-Vertical sections.
-Dialogs and status reporting.
+6. Continue parameter cleanup
 
-The first useful extractions would be a movie-build coordinator and an automatic-image coordinator. They share readiness concepts but currently maintain separate state and timeout policies.
+   Work through `docs/parameter_status.txt` as affected features stabilize.
+   TDRP parameter design is still evolving and checked-in Lucid test files may
+   lag the generated schema.
 
-Separate rendering orchestration from drawing primitives
+7. Add focused regression tests
 
-WorldPlot, HorizView, and VertView still contain mixtures of geometry, data validation, image ownership, color handling, and UI state. Small renderer classes for grids, contours, terrain, winds, and symbolic products would make composition rules explicit and easier to test.
+   Cover request-key reuse and replacement, dependency timeout and recovery,
+   Products, overlay composition, color scales, vertical routes, terrain,
+   winds, native RHIs, and automated output. The realtime/archive simulator is
+   the immediate foundation for these tests.
 
-Replace unconditional terminal output with controlled logging
+## Recommended next direction
 
-There are many unconditional cerr calls, including worker start/completion messages in MdvReader.cc (MdvReader.cc:1316). Use the existing debug levels consistently or introduce QLoggingCategory categories for MDV, SPDB, movies, rendering, and automatic images.
-
-Remove or disable nonfunctional UI actions
-
-Open and Save are visible menu actions, but _openFile() and _saveFile() (GuiManager.cc:2515) are empty. Until implemented, hiding or disabling them would avoid misleading users.
-
-Retire legacy inactive code in stages
-
-The active source still contains numerous NOTYET, NOTNOW, and commented legacy blocks, in addition to the old/ reference implementation. I would:
-Keep old/ temporarily as an explicit reference snapshot.
-Remove inactive blocks from active classes once the corresponding feature is accepted.
-Remove route-winds remnants as already planned.
-Record intentional omissions in one design document rather than scattered preprocessor blocks.
-
-Clarify Qt ownership
-
-GuiManager::~GuiManager() (GuiManager.cc:320) manually deletes _horiz and _vert, although both participate in Qt parent ownership. This currently works because Qt removes deleted children from their parent, but consistently relying on QObject ownership—or documenting exceptions—would make shutdown behavior easier to reason about.
-
-Add focused regression tests
-
-The highest-value tests would cover:
-Horizontal request-key equality and cache reuse.
-Request replacement while a worker is busy.
-Movie dependency failure and timeout.
-Symbolic-product frame selection and multi-icon picking.
-Base-field plus overlay composition.
-Color-scale bounds, missing values, and reset behavior.
-Vertical route and terrain/wind readiness across field and frame changes.
-
-My recommended order is: fix the horizontal request/cache state first, add the movie watchdog second, then resolve the two symbolic-product picking bugs. Those are contained changes with clear behavioral tests.
-
+Build the isolated realtime/archive simulator before undertaking more
+structural cleanup. It should expose timing, recovery, and process/data-layer
+defects while the current architecture is still familiar.
