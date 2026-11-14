@@ -1,0 +1,123 @@
+/*********************************************************
+ * parameter definitions for RadxSim
+ */
+
+commentdef {
+  p_header = "RadxSim replays archive radar volumes as a realtime CfRadial file feed.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS REGISTRATION";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, diagnostic messages are printed to stderr.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for procmap registration.";
+} instance;
+
+commentdef {
+  p_header = "INPUT SELECTION";
+}
+
+typedef enum {
+  FILE_LIST, ARCHIVE
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = FILE_LIST;
+  p_descr = "Input selection mode.";
+  p_help = "FILE_LIST uses input_file_paths or paths supplied with -f. ARCHIVE searches input_dir over the inclusive archive time range.";
+} input_mode;
+
+paramdef string {
+  p_default = {};
+  p_descr = "Input radar file paths.";
+  p_help = "Used in FILE_LIST mode. Command-line paths supplied with -f are appended.";
+} input_file_paths[];
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Archive input directory.";
+  p_help = "Used in ARCHIVE mode.";
+} input_dir;
+
+paramdef string {
+  p_default = "2020 01 01 00 00 00";
+  p_descr = "Inclusive archive start time.";
+  p_help = "Format: yyyy mm dd hh mm ss. May be overridden with -start.";
+} archive_start_time;
+
+paramdef string {
+  p_default = "2020 01 01 01 00 00";
+  p_descr = "Inclusive archive end time.";
+  p_help = "Format: yyyy mm dd hh mm ss. May be overridden with -end.";
+} archive_end_time;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Continue after an unreadable or unsupported input file.";
+  p_help = "If FALSE, the first input read error terminates the replay.";
+} continue_on_input_error;
+
+commentdef {
+  p_header = "REPLAY CLOCK";
+}
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Replay speed multiplier.";
+  p_help = "Must be greater than zero. 1 is realtime, 2 is twice realtime, and 0.5 is half realtime.";
+} replay_rate;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Offset applied to output data times, seconds.";
+  p_help = "The offset changes data timestamps without changing replay waits.";
+} time_offset_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Repeat the resolved input sequence.";
+} repeat_replay;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Gap between repeated replay cycles, seconds.";
+  p_help = "Must be greater than zero when repeat_replay is TRUE.";
+} inter_cycle_gap_secs;
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+paramdef string {
+  p_default = "./output/RadxSim";
+  p_descr = "CfRadial output directory.";
+} output_dir;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Append a yyyyMMdd day directory to output_dir.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Append a yyyy year directory above the optional day directory.";
+} append_year_dir_to_output_dir;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "NetCDF compression level.";
+  p_help = "Valid range is 0 through 9.";
+} compression_level;
+
