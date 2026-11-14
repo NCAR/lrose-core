@@ -50,20 +50,25 @@ Radx can read, but writes CfRadial output.
 ## Replay clock and timestamps
 
 The canonical timing mode preserves the relative timing in the archive and
-scales it by a positive `replay_rate`:
+scales it by a positive `replay_rate`. Data timestamps and wait deadlines use
+parallel anchors:
 
 ```
-output_time = cycle_start
+output_time = data_cycle_start
             + (input_time - archive_start) / replay_rate
-            + time_offset
+
+deadline = monotonic_cycle_start
+         + (input_time - archive_start) / replay_rate
 ```
 
 - `archive_start` is the earliest ray time in the resolved input sequence.
-- `cycle_start` is captured from wall-clock time when a replay cycle begins.
+- For the first cycle, `data_cycle_start` is the wall-clock start plus the
+  configured `time_offset`, and `monotonic_cycle_start` is captured from the
+  monotonic clock at the same point.
 - `replay_rate` must be greater than zero. A value of 1.0 is realtime, 2.0 is
   twice realtime, and 0.5 is half realtime.
-- `time_offset` is an optional constant applied to every output timestamp. It
-  changes the data time but not the duration of waits within a cycle.
+- `time_offset` is an optional constant applied to the first data-time anchor.
+  It shifts every output timestamp equally without changing replay waits.
 - Original inter-ray and inter-volume timing is preserved after scaling.
   Fixed synthetic ray spacing is not part of phase one.
 
@@ -88,26 +93,27 @@ observable in phase one.
 
 ### Looping
 
-The input sequence may run once or repeat according to a TDRP parameter. At
-the start of each repeated cycle, compute a new `cycle_start` after the prior
-cycle's final mapped ray time plus a configurable nonnegative
-`inter_cycle_gap`. Never reuse timestamps from the previous cycle. Output ray
-times and publication times must remain strictly increasing across the loop
-boundary.
+The input sequence may run once or repeat according to a TDRP parameter. For
+each repeated cycle, set both new cycle anchors immediately after their prior
+final mapped ray or deadline plus a configurable positive `inter_cycle_gap`.
+The initial `time_offset` is not added again. Never reuse timestamps from the
+previous cycle; output times and publication deadlines must increase across
+the loop boundary.
 
 ## Output publication
 
-Use `RadxFile::writeToDir()` to write CfRadial output. The CfRadial writer
-writes a temporary file in the destination directory and renames it to its
-final path only after the write succeeds, so consumers do not observe a
-partial data file.
+Configure `RadxFile` for CfRadial output and use `writeToDir()` to publish each
+volume. The CfRadial writer writes a temporary file in the destination
+directory and renames it to its final path only after the write succeeds, so
+consumers do not observe a partial data file.
 
 After the final file is visible:
 
 1. Construct `DsLdataInfo` for the output directory.
 2. Set its relative data path to the published file and its writer to
    `RadxSim`.
-3. Call `DsLdataInfo::write()` with the output volume's data time.
+3. Call `DsLdataInfo::write()` with `RadxVol::getStartTimeSecs()`, matching the
+   established Radx file-publication convention.
 
 Publishing `_latest_data_info` only after a successful data-file rename makes
 the data file the commit point. `DsLdataInfo::write()` also registers the
@@ -126,7 +132,7 @@ least:
 - process instance and debug level;
 - input mode, paths, archive directory, and inclusive time range;
 - output directory and day/year subdirectory choices;
-- replay rate, time offset, run-once/repeat mode, and inter-cycle gap;
+- replay rate, time offset, run-once/repeat mode, and positive inter-cycle gap;
 - continue-on-input-error versus strict input handling.
 
 `RadxSim` registers and sends heartbeats through procmap, responds promptly to
@@ -140,8 +146,9 @@ keys.
 
 Automated or repeatable integration tests must verify:
 
-1. Ray, sweep, and volume timestamps are internally consistent and strictly
-   monotonic.
+1. Ray times are nondecreasing within a volume, and ray, sweep, and volume
+   timestamps are internally consistent. Successive volume and cycle times
+   increase.
 2. Sweep structure, fields, radar metadata, and ray data survive replay.
 3. Data files become visible atomically and `_latest_data_info` never names a
    partial or nonexistent file.
