@@ -1,27 +1,167 @@
 # SIMULATOR DESIGN
 
-The data flow paradigm in LROSE is for a process to read data, perform some process, and then write out results.
+The LROSE data-flow model is for a process to read data, perform some
+processing, and publish the result. Most applications use files; some use a
+Fast Message Queue (FMQ). The first simulator phase will concentrate on file
+I/O and will publish complete CfRadial volumes.
 
-This is mostly: read input files, process, write output files.
+## RadxSim application
 
-Sometimes it is: read Fast Message Queue (FMQ), process, write FMQ or output files.
+`RadxSim` replays immutable archive CfRadial data into a separate writable
+realtime directory. It is an ordinary LROSE realtime process: downstream
+applications discover its output through the completed data files and
+`_latest_data_info`, without any simulator-specific behavior.
 
-For the simulator, let's begin by concentrating on file IO.
+### Phase-one scope
 
-## RadxSim
+Phase one is a volume-by-volume file publisher, not a ray-stream simulator.
+The radar acquisition time is represented by the rewritten ray times and the
+publication schedule, but consumers see a volume only after its complete file
+has been published. This matches file-based radar feeds in which a scan is not
+available to downstream applications until the volume is complete.
 
-We need an app for simulating Radx-type polar radar files. Let's call it RadxSim.
+FMQ replay, sweep-by-sweep publication, and deliberate fault injection are
+deferred. A later phase will add deterministic missing, delayed, duplicated,
+out-of-order, paused, and recovering-data scenarios for Lucid timeout and
+scheduler testing.
 
-Design:
+## Input selection
 
-1. Read existing CfRadial files from a directory. The primary class is RadxVol.
+Input selection will follow established Radx application conventions, using
+TDRP parameters and command-line overrides modeled on applications such as
+`Radx2Grid`.
 
-2. Overwrite the times in the rays, to wallclock-time, possibly with an offset. Specify the time between rays in seconds. In this way we can speed up or slow down the data arrival.
+1. Accept either an explicit list of paths or an archive directory plus start
+   and end times. Start and end times are inclusive.
+2. Resolve the complete input list before replay starts. Sort valid volumes by
+   their data start time, using canonical path as the deterministic tie-breaker.
+3. Keep archive input immutable and require the output directory to be
+   separate from every input directory.
+4. Diagnose unreadable, unsupported, or empty files and continue to the next
+   input by default. A strict parameter may instead terminate on the first
+   input error.
+5. Reject an empty resolved input list before registering the replay as
+   active.
 
-3. Sleep between rays to simulate realtime.
+`RadxFile::readFromPath()` performs format-independent input, and `RadxVol`
+holds the in-memory volume. The initial implementation accepts any format that
+Radx can read, but writes CfRadial output.
 
-4. Ensure the sweep and volume metadata is updated, using loadSweepInfoFromRays() and loadVolumeInfoFromRays().
+## Replay clock and timestamps
 
-5. When the volume is complete, write it out to a new directory.
+The canonical timing mode preserves the relative timing in the archive and
+scales it by a positive `replay_rate`:
 
+```
+output_time = cycle_start
+            + (input_time - archive_start) / replay_rate
+            + time_offset
+```
+
+- `archive_start` is the earliest ray time in the resolved input sequence.
+- `cycle_start` is captured from wall-clock time when a replay cycle begins.
+- `replay_rate` must be greater than zero. A value of 1.0 is realtime, 2.0 is
+  twice realtime, and 0.5 is half realtime.
+- `time_offset` is an optional constant applied to every output timestamp. It
+  changes the data time but not the duration of waits within a cycle.
+- Original inter-ray and inter-volume timing is preserved after scaling.
+  Fixed synthetic ray spacing is not part of phase one.
+
+Every ray receives its mapped output time. After retiming, call
+`RadxVol::loadSweepInfoFromRays()` and
+`RadxVol::loadVolumeInfoFromRays()` so sweep bounds, volume bounds, and
+start/end flags agree with the rays. Inputs containing time-bearing platform
+or georeference metadata must either have those times shifted consistently or
+be rejected until that case is supported; phase one is intended for fixed
+radar data.
+
+Waits use absolute replay deadlines rather than a chain of relative sleeps.
+Elapsed waits use a monotonic clock so wall-clock adjustments and per-ray
+processing time do not accumulate schedule drift. Waiting is interruptible,
+and long waits continue procmap heartbeat registration. If processing is late,
+the simulator publishes as soon as possible and records the lateness instead
+of adding another delay.
+
+Although the implementation may visit ray deadlines to model acquisition and
+support diagnostics, only the volume completion deadline is externally
+observable in phase one.
+
+### Looping
+
+The input sequence may run once or repeat according to a TDRP parameter. At
+the start of each repeated cycle, compute a new `cycle_start` after the prior
+cycle's final mapped ray time plus a configurable nonnegative
+`inter_cycle_gap`. Never reuse timestamps from the previous cycle. Output ray
+times and publication times must remain strictly increasing across the loop
+boundary.
+
+## Output publication
+
+Use `RadxFile::writeToDir()` to write CfRadial output. The CfRadial writer
+writes a temporary file in the destination directory and renames it to its
+final path only after the write succeeds, so consumers do not observe a
+partial data file.
+
+After the final file is visible:
+
+1. Construct `DsLdataInfo` for the output directory.
+2. Set its relative data path to the published file and its writer to
+   `RadxSim`.
+3. Call `DsLdataInfo::write()` with the output volume's data time.
+
+Publishing `_latest_data_info` only after a successful data-file rename makes
+the data file the commit point. `DsLdataInfo::write()` also registers the
+latest time with DataMapper. Failure to publish latest-data state is reported
+as an output failure; the completed data file is retained so it can be
+diagnosed and recovered without rewriting partial data.
+
+Output naming must derive from rewritten data times, remain unique across
+cycles, and support the usual optional day and year subdirectories.
+
+## Realtime-system integration
+
+TDRP parameters should follow existing LROSE conventions and include at
+least:
+
+- process instance and debug level;
+- input mode, paths, archive directory, and inclusive time range;
+- output directory and day/year subdirectory choices;
+- replay rate, time offset, run-once/repeat mode, and inter-cycle gap;
+- continue-on-input-error versus strict input handling.
+
+`RadxSim` registers and sends heartbeats through procmap, responds promptly to
+normal termination signals during waits and I/O, and produces messages
+suitable for normal LROSE log handling. A simulator project will give each
+instance isolated parameters, `proc_list` and `data_list` entries, logs, and a
+dedicated output tree. It must not reuse operational paths or shared-memory
+keys.
+
+## Acceptance criteria
+
+Automated or repeatable integration tests must verify:
+
+1. Ray, sweep, and volume timestamps are internally consistent and strictly
+   monotonic.
+2. Sweep structure, fields, radar metadata, and ray data survive replay.
+3. Data files become visible atomically and `_latest_data_info` never names a
+   partial or nonexistent file.
+4. `DsLdataInfo` updates DataMapper and triggers a normal downstream realtime
+   consumer.
+5. Explicit-path and archive-range inputs produce the same deterministic
+   ordering, including equal-time tie-breaking.
+6. Measured publication intervals match the configured replay rate within a
+   documented scheduling tolerance and do not accumulate relative-sleep drift.
+7. Repeated cycles remain strictly increasing in data and publication time and
+   honor the configured inter-cycle gap.
+8. Termination during a wait or write exits cleanly without publishing
+   `_latest_data_info` for incomplete output.
+9. Corrupt or unsupported input follows the configured continue or strict
+   error policy.
+10. Procmap reports useful state during input, waiting, writing, and error
+    handling.
+
+Later fault-injection acceptance tests will cover missing volumes, added
+latency, pauses, recovery, duplicates, out-of-order publication, and replay
+restart. Those tests will drive Lucid's movie, automatic-image, Product, and
+request-timeout validation.
 
