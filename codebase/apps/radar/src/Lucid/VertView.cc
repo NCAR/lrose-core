@@ -182,12 +182,24 @@ void VertView::configureWorldCoords(int zoomLevel)
   if (_sectionReader != nullptr && _sectionReader->isValidV()) {
     xMax = _sectionReader->getVertTotalLengthKm();
     if (xMax <= 0.0) {
-      xMax = (_sectionReader->v_fhdr.nx - 1) *
-             _sectionReader->v_fhdr.grid_dx;
+      if (_isPolarRhi()) {
+        vector<QPointF> corners;
+        if (_buildPolarRhiCorners(corners)) {
+          xMax = 0.0;
+          for (const QPointF &corner : corners) {
+            xMax = std::max(xMax, corner.x());
+          }
+        }
+      } else {
+        xMax = (_sectionReader->v_fhdr.nx - 1) *
+               _sectionReader->v_fhdr.grid_dx;
+      }
     }
     // Height limits are in km MSL. Preserve native limits for sections whose
-    // vertical coordinate uses other units, such as pressure or elevation.
-    if (_sectionReader->v_fhdr.vlevel_type != Mdvx::VERT_TYPE_Z) {
+    // vertical coordinate uses other units, such as pressure. A native RHI is
+    // stored by elevation angle but transformed to height before display.
+    if (_sectionReader->v_fhdr.vlevel_type != Mdvx::VERT_TYPE_Z &&
+        !_isPolarRhi()) {
       const vector<double> edges = _computeVerticalEdges();
       if (edges.size() >= 2) {
         const auto limits = std::minmax_element(edges.begin(), edges.end());
@@ -690,7 +702,14 @@ void VertView::paintEvent(QPaintEvent *event)
     // competing with it.
     _zoomWorld.drawColorScale(_sectionReader->colorMap, painter,
                               _params.horiz_axis_label_font_size);
-    _zoomWorld.drawTitleTopCenter(painter, _sectionReader->fieldLabelVert());
+    string title = _sectionReader->fieldLabelVert();
+    if (_isPolarRhi()) {
+      char rhiAzimuth[128];
+      snprintf(rhiAzimuth, sizeof(rhiAzimuth), "  RHI: %g deg",
+               _sectionReader->v_fhdr.grid_minz);
+      title += rhiAzimuth;
+    }
+    _zoomWorld.drawTitleTopCenter(painter, title);
   }
 
   // show mouse value if needed
@@ -711,7 +730,8 @@ void VertView::setSection(const MdvReader *reader)
   _mouseValueText.clear();
   _verticalUnits.clear();
   if (_sectionReader != nullptr) {
-    _verticalUnits = Mdvx::vertTypeZUnits(_sectionReader->v_fhdr.vlevel_type);
+    _verticalUnits = _isPolarRhi() ? "km" :
+      Mdvx::vertTypeZUnits(_sectionReader->v_fhdr.vlevel_type);
   }
   _rebuildSelectedHorizHeightCurve();
   _savedZooms.clear();
@@ -1008,6 +1028,10 @@ bool VertView::_sampleGridValue(int mouseX, int mouseY,
     return false;
   }
 
+  if (_isPolarRhi()) {
+    return _samplePolarRhiValue(mouseX, mouseY, sample);
+  }
+
   const int nx = _sectionReader->v_fhdr.nx;
   const int nz = _sectionReader->v_fhdr.nz;
   const double dx = _sectionReader->v_fhdr.grid_dx;
@@ -1094,6 +1118,87 @@ bool VertView::_sampleGridValue(int mouseX, int mouseY,
 }
 
 /////////////////////////////////////////////////////////////
+// sample a native RHI by inverting distance/height to range/elevation
+
+bool VertView::_samplePolarRhiValue(int mouseX, int mouseY,
+                                    SectionSample &sample) const
+{
+  const Mdvx::field_header_t &fhdr = _sectionReader->v_fhdr;
+  if (fhdr.nx <= 0 || fhdr.ny <= 0 || fhdr.nz != 1 ||
+      fhdr.grid_dx == 0.0 || fhdr.grid_dy == 0.0 ||
+      _sectionReader->v_fl32_data.size() !=
+        static_cast<size_t>(fhdr.nx) * fhdr.ny) {
+    return false;
+  }
+
+  double radarLat, radarLon, radarAltitudeKm;
+  if (!_getRadarLocation(radarLat, radarLon, radarAltitudeKm)) {
+    return false;
+  }
+  (void) radarLat;
+  (void) radarLon;
+
+  sample.distanceKm = _zoomWorld.getXWorld(mouseX);
+  sample.verticalCoord = _zoomWorld.getYWorld(mouseY);
+  if (!std::isfinite(sample.distanceKm) || sample.distanceKm < 0.0 ||
+      !std::isfinite(sample.verticalCoord)) {
+    return false;
+  }
+
+  // The display is in ground distance and MSL height, while the returned
+  // array is indexed by slant range and elevation. Use the same beam model as
+  // rendering so a visible gate and its reported value cannot diverge.
+
+  BeamHeight beamHeight;
+  beamHeight.setInstrumentHtKm(radarAltitudeKm);
+  const double elevationDeg = beamHeight.computeElevationDeg(
+    sample.verticalCoord, sample.distanceKm);
+  const double slantRangeKm = beamHeight.getSlantRangeKm();
+  if (!std::isfinite(elevationDeg) || !std::isfinite(slantRangeKm)) {
+    return false;
+  }
+
+  const double firstRangeEdge = fhdr.grid_minx - 0.5 * fhdr.grid_dx;
+  const double lastRangeEdge =
+    fhdr.grid_minx + (fhdr.nx - 0.5) * fhdr.grid_dx;
+  const double firstElevEdge = fhdr.grid_miny - 0.5 * fhdr.grid_dy;
+  const double lastElevEdge =
+    fhdr.grid_miny + (fhdr.ny - 0.5) * fhdr.grid_dy;
+  if (slantRangeKm < std::min(firstRangeEdge, lastRangeEdge) ||
+      slantRangeKm > std::max(firstRangeEdge, lastRangeEdge) ||
+      elevationDeg < std::min(firstElevEdge, lastElevEdge) ||
+      elevationDeg > std::max(firstElevEdge, lastElevEdge)) {
+    return false;
+  }
+
+  int ix = (int) std::llround(
+    (slantRangeKm - fhdr.grid_minx) / fhdr.grid_dx);
+  int iy = (int) std::llround(
+    (elevationDeg - fhdr.grid_miny) / fhdr.grid_dy);
+  ix = std::max(0, std::min(ix, static_cast<int>(fhdr.nx) - 1));
+  iy = std::max(0, std::min(iy, static_cast<int>(fhdr.ny) - 1));
+
+  const fl32 missing = fhdr.missing_data_value;
+  const fl32 bad = fhdr.bad_data_value;
+  double value =
+    _sectionReader->v_fl32_data[static_cast<size_t>(iy) * fhdr.nx + ix];
+  if (!std::isfinite(value) || value == missing || value == bad) {
+    return false;
+  }
+  if (fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
+    value = exp(value);
+  }
+  if (!std::isfinite(value)) {
+    return false;
+  }
+  if (fabs(value) < 0.0001) {
+    value = 0.0;
+  }
+  sample.value = value;
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
 // add geographic metadata needed only by a click report
 
 bool VertView::_sampleSection(int mouseX, int mouseY,
@@ -1166,7 +1271,8 @@ ClickReport VertView::_createClickReport(const SectionSample &sample) const
   report.longitude = sample.longitude;
   report.height = sample.verticalCoord;
   report.heightLabel =
-    (_sectionReader->v_fhdr.vlevel_type == Mdvx::VERT_TYPE_Z) ?
+    (_sectionReader->v_fhdr.vlevel_type == Mdvx::VERT_TYPE_Z ||
+     _isPolarRhi()) ?
     "Height" : "Vertical";
   report.heightUnits = _verticalUnits;
   report.x = sample.distanceKm;
@@ -1299,6 +1405,68 @@ vector<double> VertView::_computeVerticalEdges() const
 }
 
 /////////////////////////////////////////////////////////////
+// identify a measured RHI returned in its native polar geometry
+
+bool VertView::_isPolarRhi() const
+{
+  return _sectionReader != nullptr &&
+    _sectionReader->v_fhdr.proj_type == Mdvx::PROJ_RHI_RADAR &&
+    _sectionReader->v_fhdr.vlevel_type == Mdvx::VERT_TYPE_AZ;
+}
+
+/////////////////////////////////////////////////////////////
+// transform all native RHI gate corners to distance and height in km
+
+bool VertView::_buildPolarRhiCorners(vector<QPointF> &corners) const
+{
+  corners.clear();
+  if (!_isPolarRhi()) {
+    return false;
+  }
+
+  const Mdvx::field_header_t &fhdr = _sectionReader->v_fhdr;
+  if (fhdr.nx <= 0 || fhdr.ny <= 0 || fhdr.nz != 1 ||
+      !std::isfinite(fhdr.grid_minx) || !std::isfinite(fhdr.grid_dx) ||
+      !std::isfinite(fhdr.grid_miny) || !std::isfinite(fhdr.grid_dy) ||
+      fhdr.grid_dx == 0.0 || fhdr.grid_dy == 0.0) {
+    return false;
+  }
+
+  double radarLat, radarLon, radarAltitudeKm;
+  if (!_getRadarLocation(radarLat, radarLon, radarAltitudeKm)) {
+    return false;
+  }
+  (void) radarLat;
+  (void) radarLon;
+
+  // A polar response stores gate range along X and ray elevation along Y.
+  // Transform the shared corners once so adjacent gates meet exactly and the
+  // standard refracted-earth calculation includes the radar altitude.
+
+  BeamHeight beamHeight;
+  beamHeight.setInstrumentHtKm(radarAltitudeKm);
+  corners.resize(static_cast<size_t>(fhdr.nx + 1) * (fhdr.ny + 1));
+  for (int iy = 0; iy <= fhdr.ny; ++iy) {
+    const double elevationDeg =
+      fhdr.grid_miny + (iy - 0.5) * fhdr.grid_dy;
+    for (int ix = 0; ix <= fhdr.nx; ++ix) {
+      const double slantRangeKm = std::max(
+        0.0, fhdr.grid_minx + (ix - 0.5) * fhdr.grid_dx);
+      const double heightKm =
+        beamHeight.computeHtKm(elevationDeg, slantRangeKm);
+      const double groundRangeKm = beamHeight.getGndRangeKm();
+      if (!std::isfinite(groundRangeKm) || !std::isfinite(heightKm)) {
+        corners.clear();
+        return false;
+      }
+      corners[static_cast<size_t>(iy) * (fhdr.nx + 1) + ix] =
+        QPointF(groundRangeKm, heightKm);
+    }
+  }
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
 // render the MDV section using the selected field's rendering mode
 
 void VertView::_drawSection(QPainter &painter)
@@ -1307,24 +1475,40 @@ void VertView::_drawSection(QPainter &painter)
     return;
   }
 
-  const int nx = _sectionReader->v_fhdr.nx;
-  const int nz = _sectionReader->v_fhdr.nz;
-  if (nx <= 0 || nz <= 0 ||
-      _sectionReader->v_fl32_data.size() != (size_t) nx * (size_t) nz) {
+  const Mdvx::field_header_t &fhdr = _sectionReader->v_fhdr;
+  const bool polarRhi = _isPolarRhi();
+  if (fhdr.nx <= 0 || fhdr.nz <= 0 ||
+      (polarRhi && (fhdr.ny <= 0 || fhdr.nz != 1))) {
+    return;
+  }
+  const size_t expectedSize = polarRhi ?
+    static_cast<size_t>(fhdr.nx) * fhdr.ny :
+    static_cast<size_t>(fhdr.nx) * fhdr.nz;
+  if (_sectionReader->v_fl32_data.size() != expectedSize) {
     return;
   }
 
   // Both cell and contour renderers leave missing data unpainted. Initialize
   // only the plot area so these holes use the missing color while margins
   // and axes retain the widget background.
-  if (string(_params.missing_data_color) != "transparent") {
+  if ((!polarRhi || _sectionReader->render_method != NONE) &&
+      string(_params.missing_data_color) != "transparent") {
     painter.save();
     _zoomWorld.setClippingOn(painter);
     painter.fillRect(rect(), QColor(_params.missing_data_color));
     painter.restore();
   }
 
-  if (_sectionReader->render_method == FILLED_CONTOURS) {
+  if (polarRhi) {
+    // Contours in range/elevation space do not map directly onto the curved
+    // distance/height display. Match CIDD by using native gate polygons for
+    // both filled rendering choices and leaving NONE completely unfilled.
+    if (_sectionReader->render_method == POLYGONS ||
+        _sectionReader->render_method == FILLED_CONTOURS) {
+      _drawPolarRhiCells(painter);
+    }
+    return;
+  } else if (_sectionReader->render_method == FILLED_CONTOURS) {
     // A contour failure falls back to cells so valid data is not lost. NONE
     // deliberately bypasses both fill paths while retaining optional lines.
     if (!_drawSectionContours(painter)) {
@@ -1336,6 +1520,53 @@ void VertView::_drawSection(QPainter &painter)
   if (_sectionReader->overlay_line_contours) {
     _drawSectionContourLines(painter);
   }
+}
+
+/////////////////////////////////////////////////////////////
+// render a measured RHI as curved range/elevation gate polygons
+
+void VertView::_drawPolarRhiCells(QPainter &painter)
+{
+  vector<QPointF> corners;
+  if (!_buildPolarRhiCorners(corners)) {
+    return;
+  }
+
+  const Mdvx::field_header_t &fhdr = _sectionReader->v_fhdr;
+  const fl32 missing = fhdr.missing_data_value;
+  const fl32 bad = fhdr.bad_data_value;
+  const int cornerStride = fhdr.nx + 1;
+
+  painter.save();
+  _zoomWorld.setClippingOn(painter);
+  painter.setPen(Qt::NoPen);
+  for (int iy = 0; iy < fhdr.ny; ++iy) {
+    for (int ix = 0; ix < fhdr.nx; ++ix) {
+      const fl32 value =
+        _sectionReader->v_fl32_data[static_cast<size_t>(iy) * fhdr.nx + ix];
+      if (value == missing || value == bad || !std::isfinite(value) ||
+          !_sectionReader->colorMap.withinValidRange(value)) {
+        continue;
+      }
+
+      QPolygonF gate;
+      gate << _zoomWorld.getPixelPointF(
+                corners[static_cast<size_t>(iy) * cornerStride + ix].x(),
+                corners[static_cast<size_t>(iy) * cornerStride + ix].y())
+           << _zoomWorld.getPixelPointF(
+                corners[static_cast<size_t>(iy + 1) * cornerStride + ix].x(),
+                corners[static_cast<size_t>(iy + 1) * cornerStride + ix].y())
+           << _zoomWorld.getPixelPointF(
+                corners[static_cast<size_t>(iy + 1) * cornerStride + ix + 1].x(),
+                corners[static_cast<size_t>(iy + 1) * cornerStride + ix + 1].y())
+           << _zoomWorld.getPixelPointF(
+                corners[static_cast<size_t>(iy) * cornerStride + ix + 1].x(),
+                corners[static_cast<size_t>(iy) * cornerStride + ix + 1].y());
+      painter.setBrush(*_sectionReader->colorMap.dataBrush(value));
+      painter.drawPolygon(gate);
+    }
+  }
+  painter.restore();
 }
 
 /////////////////////////////////////////////////////////////
@@ -1807,7 +2038,8 @@ void VertView::_drawTerrain(QPainter &painter)
 {
   const MdvReader *terrain = _gd.layers.earth.terr;
   if (_sectionReader == nullptr || !_sectionReader->isValidV() ||
-      _sectionReader->v_fhdr.vlevel_type != Mdvx::VERT_TYPE_Z ||
+      (_sectionReader->v_fhdr.vlevel_type != Mdvx::VERT_TYPE_Z &&
+       !_isPolarRhi()) ||
       !_gd.layers.earth.terrain_active || terrain == nullptr ||
       !terrain->isValidV() ||
       !isfinite(_params.terrain_height_scaler)) {

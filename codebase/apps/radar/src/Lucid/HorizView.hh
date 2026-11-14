@@ -119,6 +119,11 @@ class DLL_EXPORT HorizView : public QWidget
   // show values
 
   void setShowValue(bool state);
+
+  // Replace the displayed section path with the geometry accepted or
+  // adjusted by the MDV server. The user's request is retained by GuiManager.
+
+  void setVsectionRoute(const VsectionRoute &route);
   
   // The method that is called when a repaint event is triggered.
 

@@ -454,6 +454,21 @@ void HorizView::setShowValue(bool state)
 }
 
 ////////////////////////////////////////////////////////
+// install the route actually returned with the vertical section
+
+void HorizView::setVsectionRoute(const VsectionRoute &route)
+{
+  // Do not let completion of an earlier request erase a new route which the
+  // user is still drawing. Once that route is submitted, its own response
+  // will install the corresponding server geometry.
+  if (_vsectionRouteEditing || route.size() < 2) {
+    return;
+  }
+  _vsectionRoute = route;
+  update();
+}
+
+////////////////////////////////////////////////////////
 // set vertical-section route selection mode
 
 void HorizView::setSingleSegmentVsection(bool enabled)

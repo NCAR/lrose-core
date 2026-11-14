@@ -85,6 +85,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/pjg.h>
 #include <toolsa/TaStr.hh>
 #include <radar/RadarComplex.hh>
 #include <toolsa/DateTime.hh>
@@ -152,6 +153,31 @@ QString safeFileNameComponent(QString value)
   value.replace(QRegularExpression("[^A-Za-z0-9._-]+"), "_");
   value.remove(QRegularExpression("^_+|_+$"));
   return value.isEmpty() ? QString("field") : value;
+}
+
+// Returned RHI endpoints can move by many kilometers, while ordinary MDV
+// sections may acquire harmless coordinate roundoff. Compare geographically
+// so the decision is independent of the current map projection.
+
+bool routesEquivalent(const VsectionRoute &left,
+                      const VsectionRoute &right)
+{
+  if (left.size() != right.size()) {
+    return false;
+  }
+  const vector<VsectionRoute::Point> &leftPoints = left.points();
+  const vector<VsectionRoute::Point> &rightPoints = right.points();
+  for (size_t ii = 0; ii < leftPoints.size(); ++ii) {
+    double distanceKm = 0.0;
+    double azimuthDeg = 0.0;
+    PJGLatLon2RTheta(leftPoints[ii].lat, leftPoints[ii].lon,
+                    rightPoints[ii].lat, rightPoints[ii].lon,
+                    &distanceKm, &azimuthDeg);
+    if (!std::isfinite(distanceKm) || distanceKm > 0.01) {
+      return false;
+    }
+  }
+  return true;
 }
 
 } // namespace
@@ -3127,16 +3153,24 @@ int GuiManager::_requestHorizontalTerrain()
 
 int GuiManager::_requestVerticalTerrain()
 {
+  return _requestVerticalTerrain(_vsectionRoute);
+}
+
+/////////////////////////////////////////////////////////////
+// request terrain along a specific accepted section route
+
+int GuiManager::_requestVerticalTerrain(const VsectionRoute &route)
+{
   _terrainVerticalRequestGeneration = -1;
   _terrainVerticalSettled = true;
   MdvReader *terrain = _gd.layers.earth.terr;
   if (!_gd.layers.earth.terrain_active || terrain == nullptr ||
-      _vsectionRoute.size() < 2) {
+      route.size() < 2) {
     return -1;
   }
 
   WayPts wayPts;
-  for (const VsectionRoute::Point &point : _vsectionRoute.points()) {
+  for (const VsectionRoute::Point &point : route.points()) {
     wayPts.addPoint(point.lat, point.lon);
   }
   connect(terrain, &MdvReader::verticalReadComplete,
@@ -3162,10 +3196,36 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
     return;
   }
 
-  // if (reader == nullptr || !reader->isValidV()) {
-  //   statusBar()->showMessage("Vertical section data are not available", 5000);
-  //   return;
-  // }
+  // DsMdvServer may replace a short radial selection with the measured RHI's
+  // radar-to-max-range path. Keep the user's route as the request definition,
+  // but draw and sample optional terrain against the geometry actually
+  // returned with this response.
+
+  if (reader->isValidV() && reader->getVertWayPts().getNPoints() >= 2) {
+    VsectionRoute returnedRoute;
+    const WayPts &returnedWayPoints = reader->getVertWayPts();
+    for (size_t ii = 0; ii < returnedWayPoints.getNPoints(); ++ii) {
+      double lat = 0.0;
+      double lon = 0.0;
+      returnedWayPoints.getPoint(ii, lat, lon);
+      double x = 0.0;
+      double y = 0.0;
+      _gd.proj.latlon2xy(lat, lon, x, y);
+      if (std::isfinite(x) && std::isfinite(y)) {
+        returnedRoute.append(x, y, lat, lon);
+      }
+    }
+    if (returnedRoute.size() >= 2) {
+      const bool routeAdjusted =
+        !routesEquivalent(_vsectionRoute, returnedRoute);
+      if (_horiz != nullptr) {
+        _horiz->setVsectionRoute(returnedRoute);
+      }
+      if (routeAdjusted) {
+        _requestVerticalTerrain(returnedRoute);
+      }
+    }
+  }
 
   _vert->setSection(reader);
   _vertWindow->setSectionInfo(_params._fields[_fieldNum].field_name,

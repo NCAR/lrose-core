@@ -411,13 +411,18 @@ class DLL_EXPORT VertView : public QWidget
 
   void _drawSection(QPainter &painter);
   void _drawSectionCells(QPainter &painter);
+  void _drawPolarRhiCells(QPainter &painter);
   bool _drawSectionContours(QPainter &painter);
   void _drawSectionContourLines(QPainter &painter);
   void _drawWinds(QPainter &painter);
   void _drawTerrain(QPainter &painter);
   vector<double> _computeVerticalEdges() const;
+  bool _isPolarRhi() const;
+  bool _buildPolarRhiCorners(vector<QPointF> &corners) const;
   bool _sampleGridValue(int mouseX, int mouseY,
                         SectionSample &sample) const;
+  bool _samplePolarRhiValue(int mouseX, int mouseY,
+                            SectionSample &sample) const;
   bool _sampleSection(int mouseX, int mouseY,
                       SectionSample &sample) const;
   bool _routeLocation(double distanceKm, double &latitude,

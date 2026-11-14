@@ -102,20 +102,20 @@ field_list = {
 
 # SPOL MOMENTS
 
-SPOL_DBZ_F   SPOL_DBZ_F   $(HOME)/data/lucid/precip/cfradial/spol/sur&DBZ_F   dbz.colors   dBZ -5 80 5 radial 1 0
-SPOL_VEL_F   SPOL_VEL_F   $(HOME)/data/lucid/precip/cfradial/spol/sur&VEL_F   vel.colors   m/s -5 80 5 radial 1 0
-SPOL_WIDTH_F SPOL_WIDTH_F $(HOME)/data/lucid/precip/cfradial/spol/sur&WIDTH_F  width.colors m/s -5 80 5 radial 1 0
-SPOL_ZDR_F   SPOL_ZDR_F   $(HOME)/data/lucid/precip/cfradial/spol/sur&ZDR_F zdr.colors   dB  -5 80 5 radial 1 0
+SPOL_DBZ_F   SPOL_DBZ_F   mdvp:://localhost:0:$(HOME)/data/lucid/precip/cfradial/spol/sur&DBZ_F   dbz.colors   dBZ -5 80 5 radial 1 0
+SPOL_VEL_F   SPOL_VEL_F   mdvp:://localhost:0:$(HOME)/data/lucid/precip/cfradial/spol/sur&VEL_F   vel.colors   m/s -5 80 5 radial 1 0
+SPOL_WIDTH_F SPOL_WIDTH_F mdvp:://localhost:0:$(HOME)/data/lucid/precip/cfradial/spol/sur&WIDTH_F  width.colors m/s -5 80 5 radial 1 0
+SPOL_ZDR_F   SPOL_ZDR_F   mdvp:://localhost:0:$(HOME)/data/lucid/precip/cfradial/spol/sur&ZDR_F zdr.colors   dB  -5 80 5 radial 1 0
 
-SPOL_KDP_F   SPOL_KDP_F    $(HOME)/data/lucid/precip/cfradial/spol/sur&KDP_F  kdp_sband.colors   deg/km -5 80 5 radial 1 0     
-SPOL_PHIDP_F SPOL_PHIDP_F  $(HOME)/data/lucid/precip/cfradial/spol/sur&PHIDP_F phidp.colors deg -5 80 5 radial 1 0
-SPOL_RHOHV_F SPOL_RHOHV_F  $(HOME)/data/lucid/precip/cfradial/spol/sur&RHOHV_F rhohv.colors _   -5 80 5 radial 1 0
-SPOL_RHOHV_F SPOL_RHOHV_F  $(HOME)/data/lucid/precip/cfradial/spol/sur&RHOHV_F rhohv.colors _   -5 80 5 radial 1 0
+SPOL_KDP_F   SPOL_KDP_F    mdvp:://localhost:0:$(HOME)/data/lucid/precip/cfradial/spol/sur&KDP_F  kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+SPOL_PHIDP_F SPOL_PHIDP_F  mdvp:://localhost:0:$(HOME)/data/lucid/precip/cfradial/spol/sur&PHIDP_F phidp.colors deg -5 80 5 radial 1 0
+SPOL_RHOHV_F SPOL_RHOHV_F  mdvp:://localhost:0:$(HOME)/data/lucid/precip/cfradial/spol/sur&RHOHV_F rhohv.colors _   -5 80 5 radial 1 0
+SPOL_RHOHV_F SPOL_RHOHV_F  mdvp:://localhost:0:$(HOME)/data/lucid/precip/cfradial/spol/sur&RHOHV_F rhohv.colors _   -5 80 5 radial 1 0
 
-SPOL_SNRHC_F   SPOL_SNRHC_F  $(HOME)/data/lucid/precip/cfradial/spol/sur&SNRHC_F  snr.colors   dB     -5 80 5 radial 1 0
-SPOL_SNRVC_F   SPOL_SNRVC_F  $(HOME)/data/lucid/precip/cfradial/spol/sur&SNRVC_F  snr.colors   dB     -5 80 5 radial 1 0
-SPOL_DBMHC_F  SPOL_DBMHC_F   $(HOME)/data/lucid/precip/cfradial/spol/sur&DBMHC_F  dbmlow.colors dBm -5 80 5 radial 1 0
-SPOL_DBMVC_F  SPOL_DBMVC_F   $(HOME)/data/lucid/precip/cfradial/spol/sur&DBMVC_F  dbmlow.colors dBm -5 80 5 radial 1 0
+SPOL_SNRHC_F   SPOL_SNRHC_F  mdvp:://localhost:0:$(HOME)/data/lucid/precip/cfradial/spol/sur&SNRHC_F  snr.colors   dB     -5 80 5 radial 1 0
+SPOL_SNRVC_F   SPOL_SNRVC_F  mdvp:://localhost:0:$(HOME)/data/lucid/precip/cfradial/spol/sur&SNRVC_F  snr.colors   dB     -5 80 5 radial 1 0
+SPOL_DBMHC_F  SPOL_DBMHC_F   mdvp:://localhost:0:$(HOME)/data/lucid/precip/cfradial/spol/sur&DBMHC_F  dbmlow.colors dBm -5 80 5 radial 1 0
+SPOL_DBMVC_F  SPOL_DBMVC_F   mdvp:://localhost:0:$(HOME)/data/lucid/precip/cfradial/spol/sur&DBMVC_F  dbmlow.colors dBm -5 80 5 radial 1 0
 
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
 ========       ========       mdvp::static//front.eol.ucar.edu:8080:/spacer&Elevation  none.colors   m   -5   80  5  dcont   1 0
@@ -1310,7 +1310,7 @@ prod_info = {
     url = "spdbp:Rhi2Symprod:ticks//localhost::$(HOME)/data/lucid/precip/spdb/spol_rhi",
     data_type = 0,
     render_type = RENDER_ALL,
-    on_by_default = FALSE,
+    on_by_default = TRUE,
     minutes_allow_before = 20,
     minutes_allow_after = 10,
     text_off_threshold = 0.4,

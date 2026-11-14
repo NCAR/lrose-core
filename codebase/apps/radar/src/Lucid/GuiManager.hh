@@ -420,6 +420,7 @@ private:
   int _requestVerticalSection();
   int _requestVerticalWinds();
   int _requestVerticalTerrain();
+  int _requestVerticalTerrain(const VsectionRoute &route);
   bool _horizontalTerrainApplies() const;
   int _requestHorizontalTerrain();
                           
