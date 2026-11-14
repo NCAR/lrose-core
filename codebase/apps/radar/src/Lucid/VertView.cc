@@ -481,20 +481,53 @@ void VertView::_drawOverlays(QPainter &painter)
 
 void VertView::_drawLegends(QPainter &painter)
 {
-
-  // add legends with time, field name and elevation angle
-  
   vector<string> legends;
   char text[1024];
-    
-  // route distance
-  
-  snprintf(text, 1024, "Vsection length (km): %g", _routeLengthKm);
-  legends.push_back(text);
-    
+
+  if (_sectionReader != nullptr && _sectionReader->isValidV() &&
+      _sectionReader->getVertWayPts().getNPoints() >= 2) {
+    const WayPts &wayPoints = _sectionReader->getVertWayPts();
+    const vector<Mdvx::vsect_segment_t> &segments =
+      _sectionReader->getVertSegments();
+    for (size_t ii = 0; ii + 1 < wayPoints.getNPoints(); ++ii) {
+      double startLat = 0.0;
+      double startLon = 0.0;
+      double endLat = 0.0;
+      double endLon = 0.0;
+      wayPoints.getPoint(ii, startLat, startLon);
+      wayPoints.getPoint(ii + 1, endLat, endLon);
+
+      double lengthKm = 0.0;
+      if (ii < segments.size() && std::isfinite(segments[ii].length) &&
+          segments[ii].length > 0.0) {
+        lengthKm = segments[ii].length;
+      } else {
+        double azimuthDeg = 0.0;
+        PJGLatLon2RTheta(startLat, startLon, endLat, endLon,
+                        &lengthKm, &azimuthDeg);
+      }
+      if (!std::isfinite(lengthKm) || lengthKm < 0.0) {
+        lengthKm = 0.0;
+      }
+
+      if (ii == 0) {
+        snprintf(text, sizeof(text),
+                 "Start lat/lon: %.5f, %.5f  End lat/lon: %.5f, %.5f  Length: %.1f km",
+                 startLat, startLon, endLat, endLon, lengthKm);
+      } else {
+        snprintf(text, sizeof(text),
+                 "End lat/lon: %.5f, %.5f  Length: %.1f km",
+                 endLat, endLon, lengthKm);
+      }
+      legends.push_back(text);
+    }
+  } else {
+    snprintf(text, sizeof(text), "Vsection length (km): %g", _routeLengthKm);
+    legends.push_back(text);
+  }
+
   painter.save();
   painter.setPen(QColor(_params.text_color));
-  
   switch (_params.vsection_main_legend_pos) {
     case Params::LEGEND_TOP_LEFT:
       _zoomWorld.drawLegendsTopLeft(painter, legends);

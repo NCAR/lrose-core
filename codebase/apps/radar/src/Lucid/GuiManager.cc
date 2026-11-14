@@ -346,6 +346,7 @@ GuiManager::GuiManager() :
   // ImageGenerationManager owns all unattended lifecycle state. These
   // callbacks are the narrow boundary for operations which must touch the
   // live display and its asynchronous MDV readers.
+
   ImageGenerationManager::Callbacks imageCallbacks;
   imageCallbacks.batchStarted = [this](const DateTime &imageTime) {
     _timeControl->configureAutomaticImageTime(imageTime);
@@ -383,10 +384,6 @@ GuiManager::GuiManager() :
   
   _timeControl = NULL;
   _timeControlPlaced = false;
-
-  // set up ray locators
-
-  // _rayLoc.resize(RayLoc::RAY_LOC_N);
 
   // set up windows
 
