@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("RadxSim replays archive radar volumes as a realtime CfRadial file feed.");
+    tt->comment_hdr = tdrpStrDup("RadxSim is intended to simulate Radx-type files in a realtime scenario.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     

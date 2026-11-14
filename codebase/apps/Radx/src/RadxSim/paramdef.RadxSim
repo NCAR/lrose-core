@@ -1,9 +1,14 @@
 /*********************************************************
  * parameter definitions for RadxSim
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Nov 2026
  */
 
 commentdef {
-  p_header = "RadxSim replays archive radar volumes as a realtime CfRadial file feed.";
+  p_header = "RadxSim is intended to simulate Radx-type files in a realtime scenario.";
+  p_text = "RadxSim loops through a set of polar CfRadial files,  modifies the ray times to wall-clock time, and writes modified files to an output dir."
 }
 
 commentdef {

@@ -733,6 +733,7 @@ codebase/apps/Radx/src/RadxPrint/RadxPrint
 codebase/apps/Radx/src/RadxQpe/RadxQpe
 codebase/apps/Radx/src/RadxQc/RadxQc
 codebase/apps/Radx/src/RadxRate/RadxRate
+codebase/apps/Radx/src/RadxSim/RadxSim
 codebase/apps/Radx/src/RadxStats/RadxStats
 codebase/apps/Radx/src/RadxSunMon/RadxSunMon
 codebase/apps/Radx/src/RadxTest/RadxTest
