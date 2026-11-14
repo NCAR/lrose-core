@@ -1,0 +1,27 @@
+# SIMULATOR DESIGN
+
+The data flow paradigm in LROSE is for a process to read data, perform some process, and then write out results.
+
+This is mostly: read input files, process, write output files.
+
+Sometimes it is: read Fast Message Queue (FMQ), process, write FMQ or output files.
+
+For the simulator, let's begin by concentrating on file IO.
+
+## RadxSim
+
+We need an app for simulating Radx-type polar radar files. Let's call it RadxSim.
+
+Design:
+
+1. Read existing CfRadial files from a directory. The primary class is RadxVol.
+
+2. Overwrite the times in the rays, to wallclock-time, possibly with an offset. Specify the time between rays in seconds. In this way we can speed up or slow down the data arrival.
+
+3. Sleep between rays to simulate realtime.
+
+4. Ensure the sweep and volume metadata is updated, using loadSweepInfoFromRays() and loadVolumeInfoFromRays().
+
+5. When the volume is complete, write it out to a new directory.
+
+
