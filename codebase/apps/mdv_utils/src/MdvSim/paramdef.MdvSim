@@ -1,9 +1,14 @@
 /*********************************************************
  * parameter definitions for MdvSim
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+  *
+ * Nov 2026
  */
 
 commentdef {
   p_header = "MdvSim replays archive MDV data as a realtime file feed.";
+  p_text = "MdvSim loops through a set of MDV files,  modifies the times to wall-clock time, and writes modified files to an output dir."
 }
 
 commentdef {

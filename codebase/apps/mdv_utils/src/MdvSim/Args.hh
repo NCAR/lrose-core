@@ -8,6 +8,15 @@
 // ** copyright notice, conditions, and disclaimer are retained.
 // ** THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT EXPRESS OR IMPLIED WARRANTY.
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+///////////////////////////////////////////////////////////////
+//
+// Args.hh
+//
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Nov 2026
+//
+///////////////////////////////////////////////////////////////
 
 #ifndef MDV_SIM_ARGS_HH
 #define MDV_SIM_ARGS_HH

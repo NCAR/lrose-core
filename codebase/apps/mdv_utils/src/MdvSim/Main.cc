@@ -8,6 +8,24 @@
 // ** copyright notice, conditions, and disclaimer are retained.
 // ** THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT EXPRESS OR IMPLIED WARRANTY.
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+///////////////////////////////////////////////////////////////
+//
+// Main for MdvSim
+//
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Nov 2026
+//
+///////////////////////////////////////////////////////////////
+//
+// MdvSim is intended to simulate MDV files in a realtime
+// scenario.
+//
+// MdvSim loops through a set of MDV files,
+// modifies the header times to wall-clock time, and writes the
+// modified files to an output dir.
+//
+///////////////////////////////////////////////////////////////
 
 #include "MdvSim.hh"
 
