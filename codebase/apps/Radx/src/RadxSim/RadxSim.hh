@@ -53,16 +53,19 @@
 class RadxVol;
 
 class RadxSim {
+
 public:
+
   RadxSim(int argc, char **argv);
   ~RadxSim();
-
+  
   int Run();
   void requestStop() { _stopRequested = 1; }
 
   int OK;
 
 private:
+
   struct InputFile {
     std::string path;
     double startTime;

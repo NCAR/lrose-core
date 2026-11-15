@@ -67,6 +67,9 @@
 
 using namespace std;
 
+//////////////////////////////////////////////////////////////////////
+// constructor
+
 RadxSim::RadxSim(int argc, char **argv) :
         OK(TRUE),
         _progName("RadxSim"),
@@ -77,17 +80,27 @@ RadxSim::RadxSim(int argc, char **argv) :
         _archiveEnd(0.0),
         _publicationSequence(0)
 {
+
+  // parse command line args
+  
   if (_args.parse(argc, argv, _progName)) {
     cerr << "ERROR - " << _progName << ": invalid command line" << endl;
     OK = FALSE;
     return;
   }
+
+  // load parameter file
+  
   if (_params.loadFromArgs(argc, argv, _args.override.list, &_paramsPath)) {
     cerr << "ERROR - " << _progName << ": cannot load TDRP parameters"
          << endl;
     OK = FALSE;
   }
+  
 }
+
+//////////////////////////////////////////////////////////////////////
+// destructor
 
 RadxSim::~RadxSim()
 {
@@ -96,31 +109,49 @@ RadxSim::~RadxSim()
   }
 }
 
+/////////////////////////////////////////////////////////////////////
+// main run method
+
 int RadxSim::Run()
 {
+
+  // check for valid input data
+  
   if (_validateParams() || _resolveInputs()) {
     return -1;
   }
 
+  // initialize process registration
+  
   PMU_auto_init(_progName.c_str(), _params.instance,
                 PROCMAP_REGISTER_INTERVAL);
   _procmapRegistered = true;
   PMU_auto_register("Starting replay");
 
+  // run the simulation
+  
   return _runCycles();
+  
 }
+
+////////////////////////////////////////////////////////////////////////
+// check the parameter states
 
 int RadxSim::_validateParams() const
 {
+
   bool valid = true;
+
   if (!std::isfinite(_params.replay_rate) || _params.replay_rate <= 0.0) {
     cerr << "ERROR - replay_rate must be finite and greater than zero" << endl;
     valid = false;
   }
+
   if (!std::isfinite(_params.time_offset_secs)) {
     cerr << "ERROR - time_offset_secs must be finite" << endl;
     valid = false;
   }
+
   if (_params.repeat_replay &&
       (!std::isfinite(_params.inter_cycle_gap_secs) ||
        _params.inter_cycle_gap_secs <= 0.0)) {
@@ -128,19 +159,29 @@ int RadxSim::_validateParams() const
          << "zero when repeat is enabled" << endl;
     valid = false;
   }
+
   if (_params.compression_level < 0 || _params.compression_level > 9) {
     cerr << "ERROR - compression_level must be between 0 and 9" << endl;
     valid = false;
   }
+
   if (strlen(_params.output_dir) == 0) {
     cerr << "ERROR - output_dir may not be empty" << endl;
     valid = false;
   }
+
   return valid ? 0 : -1;
+  
 }
+
+/////////////////////////////////////////////////////////////////
+// get input file list
 
 int RadxSim::_collectCandidatePaths(vector<string> &paths) const
 {
+
+  // file list mode
+  
   if (_params.input_mode == Params::FILE_LIST) {
     for (int ii = 0; ii < _params.input_file_paths_n; ++ii) {
       paths.push_back(_params._input_file_paths[ii]);
@@ -154,6 +195,8 @@ int RadxSim::_collectCandidatePaths(vector<string> &paths) const
     }
     return 0;
   }
+
+  // archive mode
 
   time_t startTime = _args.startTime;
   time_t endTime = _args.endTime;
@@ -169,6 +212,8 @@ int RadxSim::_collectCandidatePaths(vector<string> &paths) const
     return -1;
   }
 
+  // time list
+  
   RadxTimeList timeList;
   timeList.setDir(_params.input_dir);
   timeList.setModeInterval(startTime, endTime);
@@ -178,6 +223,9 @@ int RadxSim::_collectCandidatePaths(vector<string> &paths) const
     cerr << timeList.getErrStr() << endl;
     return -1;
   }
+
+  // get paths
+  
   paths = timeList.getPathList();
   if (paths.empty()) {
     cerr << "ERROR - no archive inputs found in: " << _params.input_dir
@@ -186,6 +234,8 @@ int RadxSim::_collectCandidatePaths(vector<string> &paths) const
   }
   return 0;
 }
+
+
 
 int RadxSim::_resolveInputs()
 {
@@ -199,6 +249,7 @@ int RadxSim::_resolveInputs()
          << _params.output_dir << ": " << strerror(errno) << endl;
     return -1;
   }
+
   const string canonicalOutput = _canonicalPath(_params.output_dir);
   if (_params.input_mode == Params::ARCHIVE) {
     const string canonicalInputRoot = _canonicalPath(_params.input_dir);
@@ -270,6 +321,9 @@ int RadxSim::_resolveInputs()
   return 0;
 }
 
+//////////////////////////////////////////////////////////////
+// check inputs
+
 int RadxSim::_inspectInput(const string &path, InputFile &input) const
 {
   RadxVol vol;
@@ -307,6 +361,9 @@ int RadxSim::_inspectInput(const string &path, InputFile &input) const
   return 0;
 }
 
+////////////////////////////////////////////////////////////////
+// read an input volume
+
 int RadxSim::_readVolume(const string &path, RadxVol &vol) const
 {
   GenericRadxFile inFile;
@@ -323,6 +380,9 @@ int RadxSim::_readVolume(const string &path, RadxVol &vol) const
   }
   return 0;
 }
+
+/////////////////////////////////////////////////////////////////
+// run the simulation as needed
 
 int RadxSim::_runCycles()
 {
@@ -349,9 +409,14 @@ int RadxSim::_runCycles()
   return 0;
 }
 
+////////////////////////////////////////////////////////////////////
+// run through the file list
+
 int RadxSim::_runCycle(double dataCycleStart, double monotonicCycleStart)
 {
+
   for (size_t ii = 0; ii < _inputs.size() && !_stopRequested; ++ii) {
+
     const InputFile &input = _inputs[ii];
     RadxVol vol;
     PMU_auto_register("Reading input volume");
@@ -361,27 +426,38 @@ int RadxSim::_runCycle(double dataCycleStart, double monotonicCycleStart)
       }
       return -1;
     }
+
     if (_retimeVolume(vol, dataCycleStart)) {
       return -1;
     }
 
     const double deadline = monotonicCycleStart +
         (input.endTime - _archiveStart) / _params.replay_rate;
+
     if (_waitUntil(deadline, "Waiting for volume completion")) {
       return -1;
     }
+
     if (_stopRequested) {
       return 0;
     }
+
     if (_publishVolume(vol)) {
       return -1;
     }
-  }
+
+  } // ii
+  
   return 0;
+  
 }
+
+///////////////////////////////////////////////////////////////////
+// adjust the time on the volume
 
 int RadxSim::_retimeVolume(RadxVol &vol, double dataCycleStart) const
 {
+
   vector<RadxRay *> &rays = vol.getRays();
   if (rays.empty()) {
     return -1;
@@ -395,6 +471,7 @@ int RadxSim::_retimeVolume(RadxVol &vol, double dataCycleStart) const
 
   // Ray time is authoritative; rebuild every summary and boundary flag after
   // the complete immutable mapping has been applied.
+
   vol.loadSweepInfoFromRays();
   vol.loadVolumeInfoFromRays();
 
@@ -409,6 +486,7 @@ int RadxSim::_retimeVolume(RadxVol &vol, double dataCycleStart) const
           << '\n';
   vol.setHistory(history.str());
   return 0;
+
 }
 
 int RadxSim::_waitUntil(double deadline, const string &activity)
@@ -437,9 +515,15 @@ int RadxSim::_waitUntil(double deadline, const string &activity)
   return -1;
 }
 
+///////////////////////////////////////////////////////////////////
+// write the simulated volume
+
 int RadxSim::_publishVolume(RadxVol &vol)
+
 {
+
   PMU_auto_register("Writing output volume");
+
   GenericRadxFile outFile;
   if (_params.debug) {
     outFile.setDebug(true);
@@ -486,8 +570,13 @@ int RadxSim::_publishVolume(RadxVol &vol)
   if (_params.debug) {
     cerr << "Published: " << outputPath << endl;
   }
+
   return 0;
+
 }
+
+///////////////////////////////////////////////////////////////
+// get wall clock time
 
 double RadxSim::_wallClockNow()
 {
@@ -496,12 +585,18 @@ double RadxSim::_wallClockNow()
   return now.tv_sec + now.tv_usec / 1.0e6;
 }
 
+///////////////////////////////////////////////////////////////
+// get monotonic clock time
+
 double RadxSim::_monotonicNow()
 {
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
   return now.tv_sec + now.tv_nsec / 1.0e9;
 }
+
+///////////////////////////////////////////////////////////
+// resolve the path, free of links etc
 
 string RadxSim::_canonicalPath(const string &path)
 {
@@ -511,6 +606,9 @@ string RadxSim::_canonicalPath(const string &path)
   }
   return path;
 }
+
+//////////////////////////////////////////////////////////////
+// comparison for file path order
 
 bool RadxSim::_inputLess(const InputFile &lhs, const InputFile &rhs)
 {

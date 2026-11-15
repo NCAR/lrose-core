@@ -66,9 +66,9 @@ int Args::parse(int argc, char **argv, const string &progName)
         !strcmp(argv[ii], "-help") || !strcmp(argv[ii], "-man")) {
       _usage(cout);
       exit(0);
-    } else if (!strcmp(argv[ii], "-debug")) {
+    } else if (!strcmp(argv[ii], "-debug") || !strcmp(argv[ii], "-d")) {
       TDRP_add_override(&override, "debug = DEBUG_NORM;");
-    } else if (!strcmp(argv[ii], "-verbose")) {
+    } else if (!strcmp(argv[ii], "-verbose") || !strcmp(argv[ii], "-v")) {
       TDRP_add_override(&override, "debug = DEBUG_VERBOSE;");
     } else if (!strcmp(argv[ii], "-instance") && ii < argc - 1) {
       snprintf(tmp, sizeof(tmp), "instance = \"%s\";", argv[++ii]);
@@ -128,7 +128,8 @@ void Args::_usage(ostream &out)
       << "  -rate multiplier         replay speed\n"
       << "  -offset seconds          output data-time offset\n"
       << "  -loop | -once            loop or stop after one cycle\n"
-      << "  -debug | -verbose        diagnostics\n"
+      << "  -debug, -d               normal debugging\n"
+      << "  -verbose, -v             verbose debugging\n"
       << "  -h | -help | -man        this message\n\n";
   Params::usage(out);
 }
