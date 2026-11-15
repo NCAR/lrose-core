@@ -235,10 +235,12 @@ int RadxSim::_collectCandidatePaths(vector<string> &paths) const
   return 0;
 }
 
-
+//////////////////////////////////////////////
+// ensure inputs are valid and in order
 
 int RadxSim::_resolveInputs()
 {
+
   vector<string> candidates;
   if (_collectCandidatePaths(candidates)) {
     return -1;
@@ -301,24 +303,23 @@ int RadxSim::_resolveInputs()
   sort(_inputs.begin(), _inputs.end(), _inputLess);
   _archiveStart = _inputs.front().startTime;
   _archiveEnd = _inputs.front().endTime;
+
   for (size_t ii = 1; ii < _inputs.size(); ++ii) {
     _archiveStart = min(_archiveStart, _inputs[ii].startTime);
     _archiveEnd = max(_archiveEnd, _inputs[ii].endTime);
   }
 
   if (_params.debug) {
-    cerr << "Resolved " << _inputs.size() << " input volumes" << endl;
+    cerr << "Simulation using " << _inputs.size() << " input volumes" << endl;
     if (inputErrors > 0) {
       cerr << "Skipped " << inputErrors << " invalid inputs" << endl;
     }
-    const time_t startSecs = (time_t) floor(_archiveStart);
-    const time_t endSecs = (time_t) floor(_archiveEnd);
-    const RadxTime startTime(startSecs, _archiveStart - startSecs);
-    const RadxTime endTime(endSecs, _archiveEnd - endSecs);
-    cerr << "Archive span: " << startTime.asString(6)
-         << " to " << endTime.asString(6) << endl;
+    cerr << "Archive span: " << _archiveStart.asString(3)
+         << " to " << _archiveEnd.asString(3) << endl;
   }
+
   return 0;
+
 }
 
 //////////////////////////////////////////////////////////////
@@ -326,59 +327,55 @@ int RadxSim::_resolveInputs()
 
 int RadxSim::_inspectInput(const string &path, InputFile &input) const
 {
-  RadxVol vol;
-  if (_readVolume(path, vol)) {
-    return -1;
-  }
 
-  const vector<RadxRay *> &rays = vol.getRays();
-  if (rays.empty()) {
-    cerr << "ERROR - input volume contains no rays: " << path << endl;
-    return -1;
+  RadxVol vol;
+  GenericRadxFile inFile;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    inFile.setDebug(true);
   }
-  if (vol.getPlatformType() != Radx::PLATFORM_TYPE_NOT_SET &&
-      vol.getPlatformType() != Radx::PLATFORM_TYPE_FIXED) {
-    cerr << "ERROR - phase one supports only fixed-platform input: "
-         << path << endl;
+  inFile.setReadTimesOnly(true);
+  if (inFile.readFromPath(path, vol)) {
+    cerr << "ERROR - _inspectInput" << endl;
+    cerr << "  Cannot read input volume: " << path << endl;
+    cerr << inFile.getErrStr() << endl;
     return -1;
-  }
-  for (size_t ii = 0; ii < rays.size(); ++ii) {
-    if (rays[ii]->getGeoreference() != NULL) {
-      cerr << "ERROR - phase one does not retime ray georeference metadata: "
-           << path << endl;
-      return -1;
-    }
-    if (ii > 0 && rays[ii]->getTimeDouble() <
-                    rays[ii - 1]->getTimeDouble()) {
-      cerr << "ERROR - ray times decrease in input volume: " << path << endl;
-      return -1;
-    }
   }
 
   input.path = path;
-  input.startTime = rays.front()->getTimeDouble();
-  input.endTime = rays.back()->getTimeDouble();
+  input.startTime = vol.getStartRadxTime();
+  input.endTime = vol.getEndRadxTime();
+
+  if (_params.debug) {
+    cerr << "Using file path: " << path << endl;
+    cerr << "  ==>> startTime: " << vol.getStartRadxTime().asString(3) << endl;
+    cerr << "  ==>> endTime: " << vol.getEndRadxTime().asString(3) << endl;
+  }
+
   return 0;
+
 }
 
 ////////////////////////////////////////////////////////////////
 // read an input volume
 
-int RadxSim::_readVolume(const string &path, RadxVol &vol) const
+int RadxSim::_readVolume(const string &path,
+                         RadxVol &vol) const
 {
+
   GenericRadxFile inFile;
-  if (_params.debug) {
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     inFile.setDebug(true);
   }
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    inFile.setVerbose(true);
-  }
+
   if (inFile.readFromPath(path, vol)) {
     cerr << "ERROR - cannot read input volume: " << path << endl;
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
+
   return 0;
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -386,8 +383,9 @@ int RadxSim::_readVolume(const string &path, RadxVol &vol) const
 
 int RadxSim::_runCycles()
 {
-  double dataCycleStart = _wallClockNow() + _params.time_offset_secs;
-  double monotonicCycleStart = _monotonicNow();
+
+  RadxTime dataCycleStart = _wallClockNow() + _params.time_offset_secs;
+  RadxTime monotonicCycleStart = _monotonicNow();
 
   do {
     if (_runCycle(dataCycleStart, monotonicCycleStart)) {
@@ -412,7 +410,7 @@ int RadxSim::_runCycles()
 ////////////////////////////////////////////////////////////////////
 // run through the file list
 
-int RadxSim::_runCycle(double dataCycleStart, double monotonicCycleStart)
+int RadxSim::_runCycle(RadxTime dataCycleStart, RadxTime monotonicCycleStart)
 {
 
   for (size_t ii = 0; ii < _inputs.size() && !_stopRequested; ++ii) {
@@ -431,7 +429,7 @@ int RadxSim::_runCycle(double dataCycleStart, double monotonicCycleStart)
       return -1;
     }
 
-    const double deadline = monotonicCycleStart +
+    const RadxTime deadline = monotonicCycleStart +
         (input.endTime - _archiveStart) / _params.replay_rate;
 
     if (_waitUntil(deadline, "Waiting for volume completion")) {
@@ -455,7 +453,7 @@ int RadxSim::_runCycle(double dataCycleStart, double monotonicCycleStart)
 ///////////////////////////////////////////////////////////////////
 // adjust the time on the volume
 
-int RadxSim::_retimeVolume(RadxVol &vol, double dataCycleStart) const
+int RadxSim::_retimeVolume(RadxVol &vol, RadxTime dataCycleStart) const
 {
 
   vector<RadxRay *> &rays = vol.getRays();
@@ -464,8 +462,8 @@ int RadxSim::_retimeVolume(RadxVol &vol, double dataCycleStart) const
   }
 
   for (size_t ii = 0; ii < rays.size(); ++ii) {
-    const double mappedTime = dataCycleStart +
-        (rays[ii]->getTimeDouble() - _archiveStart) / _params.replay_rate;
+    const RadxTime mappedTime = dataCycleStart +
+      (rays[ii]->getRadxTime() - _archiveStart) / _params.replay_rate;
     rays[ii]->setTime(mappedTime);
   }
 
@@ -489,7 +487,7 @@ int RadxSim::_retimeVolume(RadxVol &vol, double dataCycleStart) const
 
 }
 
-int RadxSim::_waitUntil(double deadline, const string &activity)
+int RadxSim::_waitUntil(RadxTime deadline, const string &activity)
 {
   while (!_stopRequested) {
     const double remaining = deadline - _monotonicNow();
@@ -578,21 +576,21 @@ int RadxSim::_publishVolume(RadxVol &vol)
 ///////////////////////////////////////////////////////////////
 // get wall clock time
 
-double RadxSim::_wallClockNow()
+RadxTime RadxSim::_wallClockNow()
 {
   struct timeval now;
   gettimeofday(&now, NULL);
-  return now.tv_sec + now.tv_usec / 1.0e6;
+  return RadxTime(now.tv_sec, now.tv_usec / 1.0e6);
 }
 
 ///////////////////////////////////////////////////////////////
 // get monotonic clock time
 
-double RadxSim::_monotonicNow()
+RadxTime RadxSim::_monotonicNow()
 {
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
-  return now.tv_sec + now.tv_nsec / 1.0e9;
+  return RadxTime(now.tv_sec, now.tv_nsec / 1.0e9);
 }
 
 ///////////////////////////////////////////////////////////

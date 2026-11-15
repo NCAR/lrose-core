@@ -50,6 +50,8 @@
 #include <string>
 #include <vector>
 
+#include <Radx/RadxTime.hh>
+
 class RadxVol;
 
 class RadxSim {
@@ -68,8 +70,8 @@ private:
 
   struct InputFile {
     std::string path;
-    double startTime;
-    double endTime;
+    RadxTime startTime;
+    RadxTime endTime;
   };
 
   std::string _progName;
@@ -79,8 +81,8 @@ private:
   volatile sig_atomic_t _stopRequested;
   bool _procmapRegistered;
   std::vector<InputFile> _inputs;
-  double _archiveStart;
-  double _archiveEnd;
+  RadxTime _archiveStart;
+  RadxTime _archiveEnd;
   unsigned long long _publicationSequence;
 
   int _validateParams() const;
@@ -88,14 +90,14 @@ private:
   int _collectCandidatePaths(std::vector<std::string> &paths) const;
   int _inspectInput(const std::string &path, InputFile &input) const;
   int _runCycles();
-  int _runCycle(double dataCycleStart, double monotonicCycleStart);
+  int _runCycle(RadxTime dataCycleStart, RadxTime monotonicCycleStart);
   int _readVolume(const std::string &path, RadxVol &vol) const;
-  int _retimeVolume(RadxVol &vol, double dataCycleStart) const;
-  int _waitUntil(double deadline, const std::string &activity);
+  int _retimeVolume(RadxVol &vol, RadxTime dataCycleStart) const;
+  int _waitUntil(RadxTime deadline, const std::string &activity);
   int _publishVolume(RadxVol &vol);
-
-  static double _wallClockNow();
-  static double _monotonicNow();
+  
+  static RadxTime _wallClockNow();
+  static RadxTime _monotonicNow();
   static std::string _canonicalPath(const std::string &path);
   static bool _inputLess(const InputFile &lhs, const InputFile &rhs);
 };
