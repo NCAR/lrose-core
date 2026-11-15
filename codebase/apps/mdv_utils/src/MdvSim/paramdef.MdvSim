@@ -30,7 +30,7 @@ paramdef string {
 } instance;
 
 commentdef {
-  p_header = "INPUT SELECTION";
+  p_header = "INPUT FILE SELECTION";
 }
 
 typedef enum {

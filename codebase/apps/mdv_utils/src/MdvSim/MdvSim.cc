@@ -51,6 +51,9 @@
 
 using namespace std;
 
+//////////////////////////////////////////////////
+// constructor
+
 MdvSim::MdvSim(int argc, char **argv) :
         OK(TRUE),
         _progName("MdvSim"),
@@ -60,37 +63,64 @@ MdvSim::MdvSim(int argc, char **argv) :
         _archiveStart(0),
         _archiveEnd(0)
 {
+
+  // read command line args
+  
   if (_args.parse(argc, argv, _progName)) {
     cerr << "ERROR - " << _progName << ": invalid command line" << endl;
     OK = FALSE;
     return;
   }
+
+  // load parameters
+  
   if (_params.loadFromArgs(argc, argv, _args.override.list, &_paramsPath)) {
     cerr << "ERROR - " << _progName << ": cannot load TDRP parameters"
          << endl;
     OK = FALSE;
   }
+
 }
+
+//////////////////////////////////////////////////
+// destructor
 
 MdvSim::~MdvSim()
 {
+  // unregister in procmap
   if (_procmapRegistered) {
     PMU_auto_unregister();
   }
 }
 
+//////////////////////////
+// main run method
+
 int MdvSim::Run()
 {
+
+  // check params and input files
+  
   if (_validateParams() || _resolveInputs()) {
     return -1;
   }
 
+  // initialize procmap registration
+  
   PMU_auto_init(_progName.c_str(), _params.instance,
                 PROCMAP_REGISTER_INTERVAL);
   _procmapRegistered = true;
+  
   PMU_auto_register("Starting replay");
+
+  // run the simulation
+  
   return _runCycles();
+
 }
+
+///////////////////////////////////////////////////////////////////////
+// check the parameters make sense
 
 int MdvSim::_validateParams() const
 {
@@ -122,6 +152,9 @@ int MdvSim::_validateParams() const
   }
   return valid ? 0 : -1;
 }
+
+////////////////////////////////////////////////////////////////////
+// get input file list
 
 int MdvSim::_collectCandidates(vector<InputFile> &candidates) const
 {
@@ -217,8 +250,12 @@ int MdvSim::_collectCandidates(vector<InputFile> &candidates) const
   return 0;
 }
 
+//////////////////////////////////////////////////////////
+// check input files are valid
+
 int MdvSim::_resolveInputs()
 {
+  
   vector<InputFile> candidates;
   if (_collectCandidates(candidates)) {
     return -1;
@@ -301,8 +338,12 @@ int MdvSim::_resolveInputs()
   return 0;
 }
 
+////////////////////////////////////////////
+// check input files
+
 int MdvSim::_inspectInput(InputFile &input) const
 {
+
   DsMdvx mdvx;
   if (_readInput(input, mdvx)) {
     return -1;
@@ -379,6 +420,9 @@ int MdvSim::_inspectInput(InputFile &input) const
   return 0;
 }
 
+////////////////////////////////////////////////////////////////
+// read MDV file
+
 int MdvSim::_readInput(const InputFile &input, DsMdvx &mdvx) const
 {
   if (_params.debug) {
@@ -403,6 +447,9 @@ int MdvSim::_readInput(const InputFile &input, DsMdvx &mdvx) const
   return 0;
 }
 
+///////////////////////////////////////////////////////////
+// get scheduled time for file in cycle
+
 time_t MdvSim::_mappedSchedule(const InputFile &input,
                                time_t dataCycleStart) const
 {
@@ -410,6 +457,9 @@ time_t MdvSim::_mappedSchedule(const InputFile &input,
       (input.scheduleTime - _archiveStart) / _params.replay_rate;
   return dataCycleStart + (time_t) llround(scaled);
 }
+
+//////////////////////////////////////////////////////////////////
+// check next cycle
 
 int MdvSim::_preflightCycle(time_t dataCycleStart) const
 {
@@ -433,6 +483,9 @@ int MdvSim::_preflightCycle(time_t dataCycleStart) const
   }
   return 0;
 }
+
+////////////////////////////////////////////////////////////
+// run through file cycles, repeatedly
 
 int MdvSim::_runCycles()
 {
@@ -463,6 +516,9 @@ int MdvSim::_runCycles()
 
   return 0;
 }
+
+/////////////////////////////////////////////////////////////////////
+// run through one cycle of files
 
 int MdvSim::_runCycle(time_t dataCycleStart, double deadlineCycleStart)
 {
@@ -495,6 +551,9 @@ int MdvSim::_runCycle(time_t dataCycleStart, double deadlineCycleStart)
   }
   return 0;
 }
+
+////////////////////////////////////////////////////////////////
+// modify times in MDV object
 
 int MdvSim::_retime(DsMdvx &mdvx, time_t mappedSchedule) const
 {
@@ -540,8 +599,12 @@ int MdvSim::_retime(DsMdvx &mdvx, time_t mappedSchedule) const
   return 0;
 }
 
+////////////////////////////////////////////////////////////
+// wait before writing next file
+
 int MdvSim::_waitUntil(double deadline, const string &activity)
 {
+
   while (!_stopRequested) {
     const double remaining = deadline - _monotonicNow();
     if (remaining <= 0.0) {
@@ -564,6 +627,9 @@ int MdvSim::_waitUntil(double deadline, const string &activity)
   }
   return -1;
 }
+
+////////////////////////////////////////////////////////////////
+// write the files
 
 int MdvSim::_publish(DsMdvx &mdvx, const InputFile &input)
 {
@@ -599,6 +665,7 @@ int MdvSim::_publish(DsMdvx &mdvx, const InputFile &input)
   // otherwise resets the format to NCF. MdvSim is deliberately single
   // threaded, so setting this process-wide directive per product safely
   // supports PRESERVE_INPUT even when a file list contains both formats.
+
   const char *formatEnv = outputFormat == Mdvx::FORMAT_MDV ?
                           "FORMAT_MDV" : "FORMAT_NCF";
   if (setenv("MDV_WRITE_FORMAT", formatEnv, 1)) {
@@ -606,6 +673,7 @@ int MdvSim::_publish(DsMdvx &mdvx, const InputFile &input)
          << endl;
     return -1;
   }
+
   if (_params.debug) {
     cerr << "Output format: " << Mdvx::format2Str(mdvx.getWriteFormat())
          << ", uncompressed MDV bytes: " << mdvx.getWriteLen32()
@@ -653,12 +721,18 @@ int MdvSim::_publish(DsMdvx &mdvx, const InputFile &input)
   return 0;
 }
 
+///////////////////////////////////////////////////////////////
+// get monotonic clock time
+
 double MdvSim::_monotonicNow()
 {
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
   return now.tv_sec + now.tv_nsec / 1.0e9;
 }
+
+///////////////////////////////////////////////////////////
+// resolve the path, free of links etc
 
 string MdvSim::_canonicalPath(const string &path)
 {
@@ -668,6 +742,9 @@ string MdvSim::_canonicalPath(const string &path)
   }
   return path;
 }
+
+//////////////////////////////////////////////////////////////
+// comparison for file path order
 
 bool MdvSim::_inputLess(const InputFile &lhs, const InputFile &rhs)
 {

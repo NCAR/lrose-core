@@ -611,7 +611,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("INPUT SELECTION");
+    tt->comment_hdr = tdrpStrDup("INPUT FILE SELECTION");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
