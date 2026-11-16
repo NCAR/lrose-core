@@ -603,6 +603,7 @@ codebase/apps/spdb_utils/src/Sigmet2Mdv/Sigmet2Mdv
 codebase/apps/spdb_utils/src/Sndg2Ascii/Sndg2Ascii
 codebase/apps/spdb_utils/src/SpdbBdry2Axf/SpdbBdry2Axf
 codebase/apps/spdb_utils/src/SpdbMultSim/SpdbMultSim
+codebase/apps/spdb_utils/src/SpdbSim/SpdbSim
 codebase/apps/spdb_utils/src/SpdbXmlPut/SpdbXmlPut
 codebase/apps/spdb_utils/src/StationCompare/StationCompare
 codebase/apps/spdb_utils/src/Taf2Spdb/Taf2Spdb

@@ -14,6 +14,7 @@ SUB_DIRS = \
         PrintSigAirMet \
         PrintSpdbMetar \
 	Rhi2Spdb \
+	SpdbSim \
 	spdb_merge \
         Taf2Spdb
 
