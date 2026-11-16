@@ -192,8 +192,8 @@ int NowcastQueue::init( const char* fmqURL,
 			openMode mode, 
 			openPosition position,
 			bool compression, 
-			int64_t numSlots,
-			int32_t bufSize,
+			int32_t numSlots,
+			int64_t bufSize,
 			int32_t msecSleep,
 			MsgLog *msgLog )
 {
@@ -210,8 +210,8 @@ int NowcastQueue::init( const char* fmqURL,
 			openMode mode, 
 			openPosition position,
 			bool compression, 
-			int64_t numSlots,
-			int32_t bufSize,
+			int32_t numSlots,
+			int64_t bufSize,
 			int32_t msecSleep,
 			MsgLog *msgLog )
 {

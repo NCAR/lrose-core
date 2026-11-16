@@ -222,8 +222,8 @@ public:
 	     openMode mode = READ_WRITE, 
 	     openPosition position = END,
 	     bool compression = false, 
-	     int64_t numSlots = 1024,
-	     int32_t bufSize = 1000000,
+	     int32_t numSlots = 1024,
+	     int64_t bufSize = 1000000,
 	     int32_t msecSleep = -1,
 	     MsgLog *msgLog = NULL );
 
@@ -234,8 +234,8 @@ public:
 	     openMode mode = READ_WRITE, 
 	     openPosition position = END,
 	     bool compression = false, 
-	     int64_t numSlots = 1024,
-	     int32_t bufSize = 1000000,
+	     int32_t numSlots = 1024,
+	     int64_t bufSize = 1000000,
 	     int32_t msecSleep = -1,
 	     MsgLog *msgLog = NULL );
 

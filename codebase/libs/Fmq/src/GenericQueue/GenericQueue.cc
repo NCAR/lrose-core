@@ -136,6 +136,10 @@ int GenericQueue::nextTrigger(string &says_who,
       *forecast_time = (time_t)BE_to_si32(trigger.forecast_time);
       says_who = trigger.says_who;
     }
+    else {
+      // neither a 64-bit nor a 32-bit trigger message
+      return -1;
+    }
 
 
 

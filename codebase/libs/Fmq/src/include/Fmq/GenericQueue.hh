@@ -100,7 +100,7 @@ public:
   // Public types //
   //////////////////
 
-  enum msgType { TRIGGER_MSG = 10000 };
+  enum msgType { TRIGGER_MSG = 100000 };
 
 
   ////////////////////////////////

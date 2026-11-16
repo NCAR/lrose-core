@@ -294,7 +294,7 @@ int64_t FmqDeviceFile::_read(const string &path, int fd, void *mess, int64_t len
     bytes_read = read(fd, ptr, target_len);
     if(bytes_read <= 0) {
       if (errno != EINTR) { // system call was not interrupted
-        // err_count++;
+        err_count++;
       }
       if(err_count >= retries) {
         int errNum = errno;
@@ -351,7 +351,7 @@ int64_t FmqDeviceFile::_write(const string &path, int fd, const void *mess, int6
     if(bytes_written <= 0) {
       
       if (errno != EINTR) { // system call was not interrupted
-        // err_count++;
+        err_count++;
       }
       
       if(err_count >= retries) {
