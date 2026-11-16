@@ -5,8 +5,8 @@ TARGET_FILE = SpdbSim
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = \
-	-lSpdb -lrapformats -ldsserver -ldidss -ltoolsa \
-	-ldataport -ltdrp -lpthread $(NETCDF4_LIBS) -lbz2 -lz
+	-lSpdb -lrapformats -ldsserver -ldidss -leuclid -lrapmath -ltoolsa \
+	-ldataport -ltdrp -lphysics -lpthread $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

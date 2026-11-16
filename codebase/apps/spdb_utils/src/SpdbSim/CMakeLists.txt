@@ -18,7 +18,7 @@ include_directories (../../../../libs/toolsa/src/include)
 include_directories (${CMAKE_INSTALL_PREFIX}/include)
 
 link_directories (${CMAKE_INSTALL_PREFIX}/lib)
-link_libraries (Spdb rapformats dsserver didss toolsa dataport tdrp pthread)
+link_libraries (Spdb rapformats dsserver didss euclid rapmath toolsa dataport tdrp physics pthread)
 link_libraries (netcdf hdf5_hl hdf5 bz2 z)
 
 makeTdrpParams()
