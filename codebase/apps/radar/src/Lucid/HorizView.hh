@@ -87,7 +87,7 @@ class DLL_EXPORT HorizView : public QWidget
    * @param[in] parent   Parent widget.
    * @param[in] params   TDRP parameters.
    */
-  
+
   explicit HorizView(QWidget* parent,
                      GuiManager &manager);
 
@@ -111,6 +111,7 @@ class DLL_EXPORT HorizView : public QWidget
   
   const WorldPlot *getZoomWorld() const { return _zoom; }
   const vector<WorldPlot> &getCustomZooms() const { return _customZooms; }
+  int getZoomIndex() const { return _zoomLevel; }
   void clearCustomZooms() { _customZooms.clear(); }
   void setZoomIndex(int zoomIndex);
   bool checkForZoomChange();
@@ -118,18 +119,12 @@ class DLL_EXPORT HorizView : public QWidget
   // show values
 
   void setShowValue(bool state);
+
+  // Replace the displayed section path with the geometry accepted or
+  // adjusted by the MDV server. The user's request is retained by GuiManager.
+
+  void setVsectionRoute(const VsectionRoute &route);
   
-  // react to click point from remote display - Sprite
-  // redraw the click point cursor
-
-  void setClickPoint(double azimuthDeg,
-                     double elevationDeg,
-                     double rangeKm);
-
-  // display the context menu
-  
-  void ShowContextMenu(const QPoint &pos /*, RadxVol *vol */);
-
   // The method that is called when a repaint event is triggered.
 
   void paintEvent(QPaintEvent *event);
@@ -142,24 +137,20 @@ class DLL_EXPORT HorizView : public QWidget
 
   void rerenderGrid();
 
+  void rerenderMaps();
   void rerenderProducts();
+  void rerenderWinds();
 
   void clearMovieFrames(int frameCount);
   bool hasMovieFrame(int frameIndex) const;
   QImage movieFrameImage(int frameIndex) const;
   bool captureMovieFrame(int frameIndex);
+  QImage captureImageWithoutInteractions();
   bool showMovieFrame(int frameIndex);
   void stopMoviePlayback();
   void setMovieInteractionActive(bool active);
   
-  // set flags to render invalid images
-  
-  void setRenderInvalidImages(int index, VertView *vert);
-
-  // virtual void ShowContextMenu(const QPoint &pos, RadxVol *vol);
-
   void setFont();
-  virtual void informationMessage();
 
   // clear the field data queue
   
@@ -171,7 +162,7 @@ class DLL_EXPORT HorizView : public QWidget
 
  signals:
  
-  void locationClicked(double xkm, double ykm);
+  void clickReportAvailable(const ClickReport &report);
   void verticalRouteCompleted(const VsectionRoute &route);
 
   //////////////
@@ -212,15 +203,6 @@ class DLL_EXPORT HorizView : public QWidget
 
   void clear();
 
-  // context menu handling
-  
-  virtual void contextMenuCancel();
-  virtual void contextMenuParameterColors();
-  virtual void contextMenuView();
-  virtual void contextMenuEditor();
-  virtual void contextMenuExamine(); // const QPoint &pos);
-  virtual void contextMenuDataWidget();
-  
  protected:
 
   ///////////////////////
@@ -245,10 +227,6 @@ class DLL_EXPORT HorizView : public QWidget
 
   int _renderFrameIndex;
   int _renderFramePage;
-  
-  bool _renderInvalidImages;
-  int _invalidImagesFrameIndex;
-  VertView *_vert;
   
   bool _zoomChanged;
   bool _zoomRequestPending;
@@ -292,6 +270,10 @@ class DLL_EXPORT HorizView : public QWidget
   Qt::MouseButton _activeMouseButton;
   bool _panPreviewActive;
   int _panPreviewX, _panPreviewY;
+
+  // Synchronous image capture retains configured overlays while omitting
+  // momentary mouse gestures and reports from the published output.
+  bool _suppressInteractionGraphics;
 
   // Route coordinates remain in display-world and geographic space so the
   // selected section continues to line up after a zoom, pan or resize.
@@ -370,6 +352,7 @@ class DLL_EXPORT HorizView : public QWidget
   void _renderGrids();
 
   void _renderProducts();
+  void _renderWinds();
   
   // render the maps
   
@@ -397,8 +380,6 @@ class DLL_EXPORT HorizView : public QWidget
                        MdvReader *mr,
                        time_t start_time, time_t end_time,
                        bool is_overlay_field);
-  
-  void _doRenderInvalidImages(int index, VertView *vert);
 
   // save field data to queue
 

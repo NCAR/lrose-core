@@ -41,6 +41,7 @@
 #include "LegacyParams.hh"
 #include "MdvReader.hh"
 #include "ProductMgr.hh"
+#include "WindManager.hh"
 #include <toolsa/mem.h>
 #include <toolsa/pmu.h>
 #include <toolsa/utim.h>
@@ -56,18 +57,48 @@
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxProj.hh>
-#include <Fmq/RemoteUIQueue.hh>
-#include <Spdb/StationLoc.hh> // Station locator class 
 
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <cctype>
 #include <QApplication>
 #include <QErrorMessage>
 
-// #define THIS_IS_MAIN 1 /* This is the main module */
-
 using namespace std;
+
+namespace {
+
+double windDataScaleToMps(string units, double legacyFallback)
+{
+  transform(units.begin(), units.end(), units.begin(),
+            [](unsigned char ch) { return static_cast<char>(tolower(ch)); });
+  units.erase(remove_if(units.begin(), units.end(),
+                        [](unsigned char ch) { return isspace(ch); }),
+              units.end());
+  if (units == "m/s" || units == "m/sec" || units == "mps" ||
+      units == "ms-1" || units == "m.s-1") {
+    return 1.0;
+  }
+  if (units == "km/h" || units == "km/hr" || units == "kph") {
+    return 1.0 / 3.6;
+  }
+  if (units == "kt" || units == "kts" || units == "knot" ||
+      units == "knots") {
+    return 0.514444444444;
+  }
+  if (units == "mph") {
+    return 0.44704;
+  }
+
+  // Legacy configurations used the global factor for sources whose unit
+  // spelling was site-specific. Preserve that behavior when the explicit
+  // per-layer units cannot be recognized.
+  return legacyFallback;
+
+}
+
+} // namespace
 
 // Constructor
 
@@ -92,7 +123,6 @@ Lucid::Lucid(int argc, char **argv) :
   char tdrpParamsPath[5000];
   bool usingLegacyParams = false;
   if (_args.getLegacyParamsPath(argc, (const char **) argv, legacyParamsPath) == 0) {
-    // _gd.db_name = strdup(legacyParamsPath.c_str());
     Path lpPath(legacyParamsPath);
     snprintf(tdrpParamsPath, 4999,
              "/tmp/Lucid.%s.%d.tdrp", lpPath.getFile().c_str(), getpid());
@@ -180,8 +210,15 @@ Lucid::~Lucid()
 
   // Product workers must finish before their GUI-owned snapshots are released.
   // GuiManager has already detached its repaint and status callbacks.
+
   delete _gd.prod_mgr;
   _gd.prod_mgr = nullptr;
+
+  // WindManager coordinates readers owned by this Lucid QObject, so release
+  // the coordinator before QObject tears down those reader children.
+
+  delete _gd.wind_mgr;
+  _gd.wind_mgr = nullptr;
 
 }
 
@@ -190,8 +227,6 @@ Lucid::~Lucid()
 
 int Lucid::RunApp(QApplication &app)
 {
-
-  _gd.finished_init = 1;
 
   // create cartesian display
   
@@ -207,8 +242,6 @@ int Lucid::RunApp(QApplication &app)
 int Lucid::_initDataSpace()
 {
 
-  UTIMstruct temp_utime;
-  
   if(!_gd.quiet_mode) {
     fprintf(stderr,"Lucid: Version %s\n", Constants::LUCID_VERSION);
     fprintf(stderr,"Copyright: %s\n\n", Constants::LUCID_COPYRIGHT);
@@ -255,34 +288,18 @@ int Lucid::_initDataSpace()
   
   PMU_auto_register("Initializing SHMEM");
   
-  // html mode
+  // starting zoom level
   
-  if(_params.run_once_and_exit) _params.html_mode = pTRUE;
   _gd.h_win.zoom_level = 0;
   
   // image generation
-  
-  STRcopy(_gd.h_win.image_dir, _params.image_dir, MAX_PATH_LEN);
-  STRcopy(_gd.v_win.image_dir, _params.image_dir, MAX_PATH_LEN);
-  
-  STRcopy(_gd.h_win.image_fname, _params.horiz_image_fname, MAX_PATH_LEN);
-  STRcopy(_gd.h_win.image_command, _params.horiz_image_command, MAX_PATH_LEN);
 
-  STRcopy(_gd.v_win.image_fname, _params.vsection_image_fname, MAX_PATH_LEN);
-  STRcopy(_gd.v_win.image_command, _params.vsection_image_command, MAX_PATH_LEN);
-
-  // If individual horiz and vert scripts have not been set
-  // use the general one.
+  snprintf(_gd.h_win.image_dir, MAX_PATH_LEN, "%s%s%s",
+           _params.images_output_dir, PATH_DELIM, _params.images_horiz_subdir);
+  snprintf(_gd.v_win.image_dir, MAX_PATH_LEN, "%s%s%s",
+           _params.images_output_dir, PATH_DELIM, _params.images_vsect_subdir);
   
-  if(strlen(_gd.h_win.image_command) < 3) {
-    STRcopy(_gd.h_win.image_command, _params.image_convert_script, MAX_PATH_LEN);
-  }
-  
-  if(strlen(_gd.v_win.image_command) < 3) {
-    STRcopy(_gd.v_win.image_command, _params.image_convert_script, MAX_PATH_LEN);
-  }
-
-  if(_params.idle_reset_seconds <= 0 || _params.html_mode == 1) {
+  if(_params.idle_reset_seconds <= 0) {
     _params.idle_reset_seconds = 1000000000; // 30+ years
   }
 
@@ -301,7 +318,7 @@ int Lucid::_initDataSpace()
 
   // products
   
-  _gd.prod.products_on = _params.products_on;
+  _gd.prod.products_on = _params.symprods_enabled_at_startup;
   _gd.prod.prod_line_width = _params.product_line_width;
   _gd.prod.prod_font_num = _params.product_font_size;
   
@@ -315,20 +332,9 @@ int Lucid::_initDataSpace()
   // if domain follows data, do not clip or decimate
   
   if (_params.zoom_domain_follows_data) {
-    // _params.always_get_full_domain = pTRUE;
     _params.clip_to_current_zoom_on_mdv_request = pFALSE;
     _params.decimate_resolution_on_mdv_request = pFALSE;
   }
-
-  // Bookmarks for a menu of URLS - Index starts at 1
-  
-  // if(_params.bookmarks_n > 0) {
-  //   _gd.bookmark = new bookmark_t[_params.bookmarks_n];
-  // }
-  // for(int ii = 0; ii < _params.bookmarks_n; ii++) {
-  //   _gd.bookmark[ii].url = strdup(_params._bookmarks[ii].url);
-  //   _gd.bookmark[ii].label = strdup(_params._bookmarks[ii].label);
-  // }
 
   // origin latitude and longitude
   
@@ -477,142 +483,31 @@ int Lucid::_initDataSpace()
       
   }
   
-  _gd.h_win.prev_page = -1;
-  _gd.v_win.prev_page = -1;
-
-  // global redraw flags
-
-  // _gd.redraw_horiz = true;
-  _gd.redraw_vert = true;
-
-  _gd.time_has_changed = true;
-  _gd.field_has_changed = true;
-  _gd.zoom_has_changed = true;
-  _gd.vsect_has_changed = true;
-  _gd.ht_has_changed = true;
-
-  _gd.prev_time = -1;
-  _gd.prev_field = -1;
-  _gd.prev_ht = -9999.0;
-  
-  _gd.selected_time = -2;
-  _gd.selected_field = -2;
-  _gd.selected_ht = -9998.0;
-  
-  // movies
-
-  int pid = getpid();
-  for(int ii = 0; ii < Constants::MAX_FRAMES; ii++) {
-    snprintf(_gd.movie.frame[ii].fname, Constants::NAME_LENGTH - 1,
-             "%s/cidd_im%d_%d.",
-             _params.image_dir, pid, ii);
-    _gd.movie.frame[ii].h_pdev = 0;
-    _gd.movie.frame[ii].v_pdev = 0;
-    _gd.movie.frame[ii].redraw_horiz = 1;
-    _gd.movie.frame[ii].redraw_vert = 1;
-  }
-
-  // copy movie info to other globals
-  
-  _gd.movie.movie_on = _params.movie_on;
-  if(_params.html_mode) {
-    _gd.movie.movie_on = 0;
-  }
-  _gd.movie.magnify_factor = _params.movie_magnify_factor;
-  _gd.movie.time_interval_mins = _params.frame_interval_secs / 60.0;
-  _gd.movie.frame_span = _params.climo_frame_span_mins;
-  _gd.movie.num_frames = _params.n_movie_frames;
-  _gd.movie.reset_frames = _params.reset_frames;
-  _gd.movie.delay = _params.loop_delay_msecs;
-  _gd.movie.forecast_interval = _params.forecast_interval_hours;
-  _gd.movie.past_interval = _params.past_interval_hours;
-  _gd.movie.mr_stretch_factor = _params.time_search_stretch_factor;
-  _gd.movie.round_to_seconds = _params.temporal_rounding;
-  _gd.movie.display_time_msec = _params.movie_dwell_msecs;
-
-  _gd.movie.start_frame = 0;
-  _gd.movie.sweep_on = 0;
-  _gd.movie.sweep_dir = 1;
-  _gd.movie.end_frame = _gd.movie.num_frames -1 ;
-  _gd.movie.cur_frame = _gd.movie.num_frames -1;
-  _gd.movie.last_frame = _gd.movie.cur_frame;
-
-  // climatology mode for movies
-  
-  _gd.movie.climo_mode = (int) _params.climo_mode;
-
-  // Use cosine correction for computing range in polar data
-  // check if set by Args
-
-  if (_gd.use_cosine_correction < 0) {
-    // not set on command line
-    _gd.use_cosine_correction = _params.use_cosine_correction;
-  }
-  
-  // IF demo_time is set in the params
-  // Set into Archive Mode at the indicated time.
-  // If demo time param is not set and command line option hasn't set archive mode
-
-  if(_params.start_mode == Params::MODE_REALTIME) {
-    
-    /* REALTIME MODE */
-
-    _gd.movie.mode = REALTIME_MODE;
+  // Initialize the availability window used before the Qt controller exists.
+  // TimeControl becomes the authoritative owner of frame bounds when the GUI
+  // is constructed and republishes this request window at that point.
+  DateTime initialStart;
+  if (_params.start_mode == Params::MODE_REALTIME) {
+    const time_t now = time(nullptr);
+    initialStart.set(now - static_cast<time_t>(
+      (_params.n_movie_frames - 1) * _params.frame_interval_secs));
     _gd.coord_expt->runtime_mode = RUNMODE_REALTIME;
-    _gd.coord_expt->time_seq_num++;
-    _gd.forecast_mode = 0;
-    
-    /* set the first index's time based on current time  */
-    time_t clock = time(0);    /* get current time */
-    _gd.movie.start_time =
-      (time_t) (clock - ((_gd.movie.num_frames -1) * _gd.movie.time_interval_mins * 60.0));
-    _gd.movie.start_time -= (_gd.movie.start_time % _gd.movie.round_to_seconds);
-    _gd.movie.demo_time = 0; // Indicated REAL-TIME is Native
-    
-    UTIMunix_to_date(_gd.movie.start_time,&temp_utime);
-    _gd.movie.demo_mode = 0;
-    _gd.selected_time = clock;
-    
   } else {
-
-    /* ARCHIVE MODE */
-    
-    if(_gd.movie.mode != ARCHIVE_MODE) { /* if not set by command line args */
-      
-      _gd.movie.mode = ARCHIVE_MODE;     /* time_series */
-      _gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
-      _gd.coord_expt->time_seq_num++;
-      
-      DateTime startTime;
-      startTime.set(_params.archive_start_time);
-      _gd.movie.start_time = startTime.utime();
-      _gd.selected_time = startTime.utime();
-      
-    }
-    _gd.movie.demo_mode = 1;
-	 
-    /* Adjust the start time downward to the nearest round interval seconds */
-
-    _gd.movie.start_time -= (_gd.movie.start_time % _gd.movie.round_to_seconds);
-
-    if(_params.gather_data_mode == Params::CLOSEST_TO_FRAME_CENTER) {
-      // Offset movie frame by 1/2 frame interval so that interest time
-      // lies on frame mid point
-      _gd.movie.start_time -=  (time_t) (_gd.movie.time_interval_mins * 30.0);
-    }
-
-    _gd.movie.demo_time = _gd.movie.start_time;
-    UTIMunix_to_date(_gd.movie.start_time,&temp_utime);
-    
-    _gd.h_win.movie_page = _gd.h_win.page;
-    _gd.v_win.movie_page = _gd.v_win.page;
-    _gd.selected_field = _gd.h_win.page;
-    
-    _gd.movie.cur_frame = 0;
-
-  } // if(strlen(_params.demo_time) < 8 && (_gd.movie.mode != ARCHIVE_MODE))
-
-  _initMovieFrameTimes();
+    initialStart.set(_params.archive_start_time);
+    _gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
+  }
+  const int roundingSecs = std::max(1, _params.temporal_rounding);
+  time_t initialStartSecs = initialStart.utime();
+  initialStartSecs -= initialStartSecs % roundingSecs;
+  if (_params.start_mode == Params::MODE_ARCHIVE &&
+      _params.gather_data_mode == Params::CLOSEST_TO_FRAME_CENTER) {
+    initialStartSecs -= static_cast<time_t>(
+      _params.frame_interval_secs / 2.0);
+  }
+  _gd.epoch_start = initialStartSecs;
+  _gd.epoch_end = initialStartSecs + static_cast<time_t>(
+    _params.n_movie_frames * _params.frame_interval_secs);
+  _gd.coord_expt->time_seq_num++;
 
   /////////////////////////////////////////////////
   // zooms
@@ -624,16 +519,6 @@ int Lucid::_initDataSpace()
   //////////////////////////////////////////
   // heights
   
-  _gd.h_win.min_ht = _params.vsection_min_ht_km;
-  _gd.h_win.max_ht = _params.vsection_max_ht_km;
-
-  // Otherwise set in the command line arguments
-
-  if(_gd.num_render_heights == 0) {
-    _gd.h_win.cur_ht = _params.start_ht_km;
-    _gd.selected_ht = _params.start_ht_km;
-  }
-
   /////////////////////////////////////////////
   // Fix limits as needed
 
@@ -680,13 +565,6 @@ int Lucid::_initDataSpace()
             _gd.h_win.min_y,_gd.h_win.max_y );
   }
   
-  // init current zoom
-  
-  // _gd.h_win.cmin_x = _gd.h_win.zmin_x[_gd.h_win.zoom_level];
-  // _gd.h_win.cmax_x = _gd.h_win.zmax_x[_gd.h_win.zoom_level];
-  // _gd.h_win.cmin_y = _gd.h_win.zmin_y[_gd.h_win.zoom_level];
-  // _gd.h_win.cmax_y = _gd.h_win.zmax_y[_gd.h_win.zoom_level];
-
   if(_gd.debug) {
     printf("CUR X: %g,%g   Y: %g,%g,\n",
            _gd.h_win.cmin_x,_gd.h_win.cmax_x,
@@ -718,8 +596,6 @@ int Lucid::_initDataSpace()
   _gd.v_win.max_x = _gd.h_win.max_x;
   _gd.v_win.min_y = _gd.h_win.min_y;
   _gd.v_win.max_y = _gd.h_win.max_y;
-  _gd.v_win.min_ht = _gd.h_win.min_ht;
-  _gd.v_win.max_ht = _gd.h_win.max_ht;
 
   // Set Vertical window route  params
 
@@ -742,9 +618,6 @@ int Lucid::_initDataSpace()
   _gd.layers.wind_mode = WIND_MODE_ON;
   _gd.layers.wind_time_scale_interval = _params.wind_time_scale_interval;
   _gd.layers.wind_scaler = _params.wind_scaler;
-  // _gd.legends.range = _params.range_rings;
-  // int plot_azimuths = _params.azimuth_lines;
-  // _gd.legends.azimuths = plot_azimuths ? AZIMUTH_BIT : 0;
 
   _initWinds();
 
@@ -752,44 +625,12 @@ int Lucid::_initDataSpace()
 
   _initTerrain();
   
-  // initialize route winds
-  
-  _initRouteWinds();
-  
-  // Establish and initialize Draw-Export params 
-
-  _initDrawExport();
-
   // initialize the map overlays
 
   if (_initMaps()) {
     iret = -1;
   }
   
-  // Instantiate the Station locator classes and params.
-
-  if (_initStationLoc()) {
-    iret = -1;
-  }
-
-  /////////////////////
-  // remote command queue
-  
-  if(strlen(_params.remote_ui_url) > 1) {
-    _gd.remote_ui = new RemoteUIQueue();
-    // Create the FMQ with 4096 slots - Total size 1M
-    bool compression = false;
-    if (_gd.remote_ui->initReadWrite( _params.remote_ui_url,
-                                      (char *) "CIDD",
-                                      (bool) _gd.debug2,
-                                      DsFmq::END, compression,
-                                      4096, 4096*256 ) != 0 ) { 
-      fprintf(stderr,
-              "Problems initialising Remote Command Fmq: %s - aborting\n",
-              _params.remote_ui_url);
-    }
-  }
-
   // initialize contours
 
   _initContours();
@@ -807,62 +648,6 @@ int Lucid::_initDataSpace()
 }
 
 ////////////////////////////////////////////////////
-// initialize the time bounds for each movie frame
-
-void Lucid::_initMovieFrameTimes()
-{
-  // Movie frames are the common time model for grids and symbolic products.
-  // Populate them only after start_time has received its final rounding and
-  // frame-centering adjustment, matching the original CIDD behavior.
-  switch (_params.climo_mode) {
-    case Params::CLIMO_REGULAR_INTERVAL: {
-      const double intervalSecs = _gd.movie.time_interval_mins * 60.0;
-      for (int ii = 0; ii < _gd.movie.num_frames; ++ii) {
-        movie_frame_t &frame = _gd.movie.frame[ii];
-        frame.time_start = static_cast<time_t>(
-          _gd.movie.start_time + ii * intervalSecs + 0.5);
-        frame.time_mid = static_cast<time_t>(
-          _gd.movie.start_time + (ii + 0.5) * intervalSecs + 0.5);
-        frame.time_end = static_cast<time_t>(
-          frame.time_start + intervalSecs + 0.5);
-      }
-      break;
-    }
-
-    case Params::CLIMO_DAILY_INTERVAL:
-      for (int ii = 0; ii < _gd.movie.num_frames; ++ii) {
-        movie_frame_t &frame = _gd.movie.frame[ii];
-        frame.time_start = static_cast<time_t>(
-          _gd.movie.start_time + ii * 1440.0 * 60.0);
-        frame.time_mid = static_cast<time_t>(
-          frame.time_start + _gd.movie.frame_span * 30.0);
-        frame.time_end = static_cast<time_t>(
-          frame.time_start + _gd.movie.frame_span * 60.0);
-      }
-      break;
-
-    case Params::CLIMO_YEARLY_INTERVAL: {
-      UTIMstruct frameDate;
-      UTIMunix_to_date(_gd.movie.start_time, &frameDate);
-      for (int ii = 0; ii < _gd.movie.num_frames; ++ii, ++frameDate.year) {
-        movie_frame_t &frame = _gd.movie.frame[ii];
-        frame.time_start = UTIMdate_to_unix(&frameDate);
-        frame.time_mid = static_cast<time_t>(
-          frame.time_start + _gd.movie.frame_span * 30.0);
-        frame.time_end = static_cast<time_t>(
-          frame.time_start + _gd.movie.frame_span * 60.0);
-      }
-      break;
-    }
-  }
-
-  _gd.epoch_start = _gd.movie.start_time;
-  _gd.epoch_end = _gd.movie.num_frames > 0 ?
-    _gd.movie.frame[_gd.movie.num_frames - 1].time_end :
-    _gd.epoch_start;
-}
-
-//////////////////////////////////
 // initialize the gridded fields
 
 int Lucid::_initGrids()
@@ -888,7 +673,7 @@ int Lucid::_initGrids()
     mread->legend_name = fld.legend_label;
     mread->button_name = fld.button_label;
     
-    if(_params.html_mode == 0 && _params.replace_underscores) {
+    if(_params.replace_underscores) {
       /* Replace Underscores with spaces in names */
       for(int jj = (int) mread->button_name.size() -1 ; jj >= 0; jj--) {
         if(mread->button_name[jj] == '_') {
@@ -918,7 +703,8 @@ int Lucid::_initGrids()
     mread->cont_interv = fld.contour_interval;
     mread->overlay_line_contours = fld.overlay_line_contours;
 
-    mread->time_allowance = _gd.movie.mr_stretch_factor * _gd.movie.time_interval_mins;
+    mread->time_allowance = _params.time_search_stretch_factor *
+      _params.frame_interval_secs / 60.0;
 
     if (fld.render_mode == Params::POLYGONS) {
       mread->render_method = POLYGONS;
@@ -942,14 +728,11 @@ int Lucid::_initGrids()
       mread->currently_displayed = 0;
     }
     
-    if(_params.run_once_and_exit) {
+    if(_params.images_creation_mode == Params::CREATE_IMAGES_THEN_EXIT) {
       mread->auto_render = 1;
     } else {
       mread->auto_render = fld.auto_render;
     }
-    
-    // mread->last_elev = (char *)NULL;
-    // mread->elev_size = 0;
     
     mread->plane = 0;
     mread->h_data_valid = 0;
@@ -966,21 +749,11 @@ int Lucid::_initGrids()
     mread->v_last_transform  = -1;
     mread->h_fhdr.proj_origin_lat  = 0.0;
     mread->h_fhdr.proj_origin_lon  = 0.0;
-    // mread->time_list.num_alloc_entries = 0;
-    // mread->time_list.num_entries = 0;
     
     mread->units_label_cols = "KM";
     mread->units_label_rows = "KM";
     mread->units_label_sects = "KM";
     
-    // instantiate classes
-    // mread->h_mdvx = new DsMdvx;
-    // mread->v_mdvx = new DsMdvx;
-    // mread->h_mdvx_int16 = new MdvxField;
-    // mread->v_mdvx_int16 = new MdvxField;
-    // mread->proj = new MdvxProj;
-
-    // mread->colorMap = NULL;
     mread->color_file = fld.color_map;
     string colorscaleCachePath;
     if (_getColorscaleCachePath(mread->color_file, colorscaleCachePath)) {
@@ -988,8 +761,10 @@ int Lucid::_initGrids()
     }
     mread->colorMap.setDebug(_params.debug >= Params::DEBUG_EXTRA);
     mread->colorMap.readMap(colorscaleCachePath);
+
     // Interactive range edits are session state.  Retain the range loaded
     // from the configured color map so the field menu can restore it exactly.
+
     mread->colorMap.saveOriginalRange();
     mread->colorMap.setName(fld.color_map);
     mread->colorMap.setUnits(mread->field_units);
@@ -997,6 +772,7 @@ int Lucid::_initGrids()
   } // ifld
   
   /* Make sure the first field is always on */
+
   _gd.mread[0]->currently_displayed = 1;
 
   return iret;
@@ -1009,8 +785,8 @@ int Lucid::_initGrids()
 void Lucid::_initWinds()
 {
 
-
   if (_params.winds_n == 0) {
+    _gd.wind_mgr = new WindManager;
     return;
   }
 
@@ -1082,10 +858,14 @@ void Lucid::_initWinds()
     }
 
     lwind.units_scale_factor = _params.wind_units_scale_factor;
+    lwind.data_units_scale_to_mps =
+      windDataScaleToMps(windp.units, _params.wind_units_scale_factor);
     lwind.reference_speed = _params.wind_reference_speed;
     lwind.units_label = _params.wind_units_label;
 
   }
+
+  _gd.wind_mgr = new WindManager;
 
 }
 
@@ -1100,12 +880,8 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   
   wrec->h_data_valid = 0;
   wrec->v_data_valid = 0;
-  wrec->h_vcm.nentries = 0;
-  wrec->v_vcm.nentries = 0;
   wrec->h_fhdr.scale = -1.0;
   wrec->h_last_scale = 0.0;
-  // wrec->time_list.num_alloc_entries = 0;
-  // wrec->time_list.num_entries = 0;
   
   wrec->legend_name = windp.legend_label;
   if (isW) {
@@ -1118,7 +894,8 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   wrec->url = windp.url;
   
   /* Replace Underscores with spaces in names */
-  if(_params.html_mode == 0 && _params.replace_underscores) {
+
+  if(_params.create_images_automatically == 0 && _params.replace_underscores) {
     for(int jj = (int) wrec->button_name.size() - 1; jj >= 0; jj--) {
       if(wrec->button_name[jj] == '_') {
         wrec->button_name[jj] = ' ';
@@ -1143,21 +920,11 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   wrec->field_units = windp.units;
   wrec->currently_displayed = 1;
   
-  wrec->time_allowance = _gd.movie.mr_stretch_factor * _gd.movie.time_interval_mins;
+  wrec->time_allowance = _params.time_search_stretch_factor *
+    _params.frame_interval_secs / 60.0;
   wrec->h_fhdr.proj_origin_lon = 0.0;
   wrec->h_fhdr.proj_origin_lat = 0.0;
   
-  // instantiate classes for data retrieval
-  
-  // wrec->h_mdvx = new DsMdvx;
-  // wrec->v_mdvx = new DsMdvx;
-  // wrec->h_mdvx_int16 = new MdvxField;
-  // wrec->v_mdvx_int16 = new MdvxField;
-
-  // projection
-  
-  // wrec->proj = new MdvxProj;
-
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1167,25 +934,43 @@ void Lucid::_initTerrain()
 {
 
   if (strlen(_params.terrain_url) > 0) {
-    
-    _gd.layers.earth.terrain_active = 1;
-    _gd.layers.earth.terr = new MdvReader(this);
-    if(_gd.layers.earth.terr == NULL) {
-      fprintf(stderr,"Cannot allocate space for terrain data\n");
-      exit(-1);
+
+    // Legacy terrain parameters combine the MDV URL and field after the last
+    // ampersand. MdvReader deliberately stores those separately, as normal
+    // Lucid fields do, so split the compatibility syntax at initialization.
+
+    const string terrainSpec(_params.terrain_url);
+    const size_t fieldSep = terrainSpec.rfind('&');
+
+    if (fieldSep == string::npos || fieldSep == 0 ||
+        fieldSep + 1 >= terrainSpec.size()) {
+      cerr << "ERROR - invalid terrain_url, expected URL&field: "
+           << terrainSpec << endl;
+    } else {
+
+      // Keep a configured source available even when it starts hidden so the
+      // vertical-window menu can enable it without reconstructing a reader.
+
+      _gd.layers.earth.terrain_active =
+        _params.terrain_active ? 1 : 0;
+      _gd.layers.earth.terr = new MdvReader(this);
+      if(_gd.layers.earth.terr == NULL) {
+        fprintf(stderr,"Cannot allocate space for terrain data\n");
+        exit(-1);
+      }
+
+      // Static terrain commonly predates the weather archive by decades.
+      // Keep a broad search window, but below the signed-integer seconds
+      // limit used when MdvReader packages an asynchronous request.
+
+      _gd.layers.earth.terr->time_allowance = 35000000; // about 66 years
+      _gd.layers.earth.terr->color_file = _params.landuse_colorscale;
+      _gd.layers.earth.terr->button_name = _params.terrain_id_label;
+      _gd.layers.earth.terr->legend_name = _params.terrain_id_label;
+      _gd.layers.earth.terr->url = terrainSpec.substr(0, fieldSep);
+      _gd.layers.earth.terr->field_label = terrainSpec.substr(fieldSep + 1);
+
     }
-    
-    _gd.layers.earth.terr->time_allowance = 1000000000; // 30+ years
-    _gd.layers.earth.terr->color_file = _params.landuse_colorscale;
-    _gd.layers.earth.terr->button_name = _params.terrain_id_label;
-    _gd.layers.earth.terr->legend_name = _params.terrain_id_label;
-    _gd.layers.earth.terr->url = _params.terrain_url;
-    
-    // _gd.layers.earth.terr->h_mdvx = new DsMdvx;
-    // _gd.layers.earth.terr->v_mdvx = new DsMdvx;
-    // _gd.layers.earth.terr->h_mdvx_int16 = new MdvxField;
-    // _gd.layers.earth.terr->v_mdvx_int16 = new MdvxField;
-    // _gd.layers.earth.terr->proj =  new MdvxProj;
 
   }
   
@@ -1204,12 +989,6 @@ void Lucid::_initTerrain()
     _gd.layers.earth.land_use->legend_name = _params.terrain_id_label;
     _gd.layers.earth.land_use->url = _params.landuse_url;
     
-    // _gd.layers.earth.land_use->h_mdvx = new DsMdvx;
-    // _gd.layers.earth.land_use->v_mdvx = new DsMdvx;
-    // _gd.layers.earth.land_use->h_mdvx_int16 = new MdvxField;
-    // _gd.layers.earth.land_use->v_mdvx_int16 = new MdvxField;
-    // _gd.layers.earth.land_use->proj =  new MdvxProj;
-    
     switch(_params.landuse_render_method) {
       default:
       case Params::TERRAIN_RENDER_RECTANGLES:
@@ -1225,242 +1004,6 @@ void Lucid::_initTerrain()
         break;
     }
     
-  }
-
-}
-
-////////////////////////////////////////////////////////////////
-// INIT_DRAW_EXPORT_LINKS:  Scan param file and setup links to
-//  for drawn and exported points 
-
-void Lucid::_initDrawExport()
-{
-
-  _gd.draw.num_draw_products = _params.draw_export_info_n;
-  _gd.draw.dexport = new draw_export_info_t[_gd.draw.num_draw_products];
-  if (_gd.draw.dexport == NULL) {
-    fprintf(stderr,"Unable to allocate space for %d draw.dexport sets\n",
-            _gd.draw.num_draw_products);
-    perror("Lucid");
-    exit(-1);
-  }
-  
-  for(int ii = 0; ii < _params.draw_export_info_n;  ii++) {
-    
-    Params::draw_export_t &dinfo = _params._draw_export_info[ii];
-    draw_export_info_t &dexp = _gd.draw.dexport[ii];
-
-    // Product ID label
-    int len = strlen(dinfo.id_label) + 1;
-    dexp.product_id_label = (char *) calloc(1, len);
-    STRcopy(dexp.product_id_label, dinfo.id_label, len);
-    
-    // product_label_text
-    dexp.product_label_text = (char *) calloc(1,Constants::TITLE_LENGTH);
-    STRcopy(dexp.product_label_text, dinfo.default_label, Constants::TITLE_LENGTH);
-    
-    // FMQ URL 
-    len = strlen(dinfo.url) + 1;
-    if(len > Constants::NAME_LENGTH) {
-      fprintf(stderr,"URL: %s too long - Must be less than %d chars. Sorry.",
-              dinfo.url,Constants::URL_LENGTH);
-      exit(-1);
-    }
-    dexp.product_fmq_url = (char *) calloc(1, Constants::URL_LENGTH);
-    STRcopy(dexp.product_fmq_url, dinfo.url, Constants::URL_LENGTH);
-    
-    // Get the Default valid time  
-    dexp.default_valid_minutes = dinfo.valid_minutes;
-    
-    // Get the Default ID   
-    dexp.default_serial_no = dinfo.default_id_no;
-    
-  } // ii
-
-}
-
-////////////////////////////////////////////////////////////////
-// Initialize route winds
-
-void Lucid::_initRouteWinds()
-{
-
-  // U WINDS Met Record
-
-  if(strlen(_params.route_u_url) > 1) {
-
-    MdvReader *mr = new MdvReader(this);
-    if(mr == NULL) {
-      fprintf(stderr,"Unable to allocate space for Route U Wind\n");
-      perror("cidd_init::_initRouteWinds");
-      exit(-1);
-    }
-    _gd.layers.route_wind.u_wind = mr;
-    mr->h_data_valid = 0;
-    mr->v_data_valid = 0;
-    mr->v_vcm.nentries = 0;
-    mr->h_vcm.nentries = 0;
-    mr->h_fhdr.scale = -1.0;
-    mr->h_last_scale = 0.0;
-    mr->legend_name = "ROUTE_U_WIND";
-    mr->button_name = "ROUTE_U_WIND";
-    mr->url = _params.route_u_url;
-
-    mr->field_units = "unknown";
-    mr->currently_displayed = 1;
-    mr->time_allowance = _gd.movie.mr_stretch_factor * _gd.movie.time_interval_mins;
-    mr->h_fhdr.proj_origin_lon = 0.0;
-    mr->h_fhdr.proj_origin_lat = 0.0;
-
-    // instantiate DsMdvx class
-    // mr->v_mdvx = new DsMdvx;
-    // mr->v_mdvx_int16 = new MdvxField;
-
-  } // U WINDS
-
-  // V WINDS Met Record
-  
-  if(strlen(_params.route_v_url) > 1) {
-    
-    MdvReader *mr = new MdvReader(this);
-    if(mr == NULL) {
-      fprintf(stderr,"Unable to allocate space for Route V Wind\n");
-      perror("cidd_init::_initRouteWinds");
-      exit(-1);
-    }
-    _gd.layers.route_wind.v_wind = mr;
-    mr->h_data_valid = 0;
-    mr->v_data_valid = 0;
-    mr->v_vcm.nentries = 0;
-    mr->h_vcm.nentries = 0;
-    mr->h_fhdr.scale = -1.0;
-    mr->h_last_scale = 0.0;
-    mr->legend_name = "ROUTE_V_WIND";
-    mr->button_name = "ROUTE_V_WIND";
-    mr->url = _params.route_v_url;
-    
-    mr->field_units = "unknown";
-    mr->currently_displayed = 1;
-    mr->time_allowance = _gd.movie.mr_stretch_factor * _gd.movie.time_interval_mins;
-    mr->h_fhdr.proj_origin_lon = 0.0;
-    mr->h_fhdr.proj_origin_lat = 0.0;
-    
-    // instantiate DsMdvx class
-    // mr->v_mdvx = new DsMdvx;
-    // mr->v_mdvx_int16 = new MdvxField;
-
-  } // V WINDS
-
-  // How many are route are defined in the file
-  _gd.layers.route_wind.num_predef_routes = _params.route_paths_n;
-
-  // Allocate space for num_predef_routes + 1 for the custom/user defined route
-
-  if((_gd.layers.route_wind.route =(route_track_t *) 
-      calloc(_gd.layers.route_wind.num_predef_routes + 1, sizeof(route_track_t))) == NULL) {
-    fprintf(stderr,"Unable to allocate space for %d Routes\n",
-            _gd.layers.route_wind.num_predef_routes + 1);
-    perror("CIDD route_winds_init");
-    exit(-1);
-  }
-  
-  char *cfield[Constants::NUM_PARSE_FIELDS];
-  for(int ii = 0; ii < Constants::NUM_PARSE_FIELDS; ii++) {
-    cfield[ii] =(char *) calloc(Constants::PARSE_FIELD_SIZE, 1);
-  }
-  
-  for(int ii = 0; ii < _gd.layers.route_wind.num_predef_routes; ii++) {
-    
-    int num_fields = STRparse(_params._route_paths[ii], cfield,
-                              strlen(_params._route_paths[ii]),
-                              Constants::NUM_PARSE_FIELDS, Constants::PARSE_FIELD_SIZE);
-    if(num_fields == Constants::NUM_PARSE_FIELDS) {
-      fprintf(stderr,"Warning: Route path: %s\n Too long. Only %d segments allowed \n",
-              _params._route_paths[ii], Constants::MAX_ROUTE);
-    }
-    
-    // Collect Label
-    strncpy(_gd.layers.route_wind.route[ii].route_label, cfield[0], 62);
-    
-    // Collect the number of points  & segments 
-    _gd.layers.route_wind.route[ii].num_segments = atoi(cfield[1]) -1;
-    if(_params.route_debug) {
-      fprintf(stderr,"\nRoute: %s - %d segments\n",
-              _gd.layers.route_wind.route[ii].route_label,
-              _gd.layers.route_wind.route[ii].num_segments);
-    }
-
-    // Sanity check
-    if(_gd.layers.route_wind.route[ii].num_segments <= 0 || 
-       _gd.layers.route_wind.route[ii].num_segments >  Constants::MAX_ROUTE) {
-      fprintf(stderr,"Warning: Route path: %s\n Error Only 1-%d segments allowed \n",
-              _params._route_paths[ii], Constants::MAX_ROUTE);
-      continue;
-    }
-    
-    int index = 2; // The first triplet.
-    // Pick up each triplet
-    for(int kk = 0; kk <= _gd.layers.route_wind.route[ii].num_segments; kk++, index+=3 ) {
-
-      strncpy(_gd.layers.route_wind.route[ii].navaid_id[kk], cfield[index], 16);
-      _gd.layers.route_wind.route[ii].y_world[kk] = atof(cfield[index +1]);
-      _gd.layers.route_wind.route[ii].x_world[kk] = atof(cfield[index +2]);
-
-      switch (_gd.display_projection) {
-        case  Mdvx::PROJ_LATLON:
-          _normalizeLongitude(_gd.h_win.min_x, _gd.h_win.max_x,
-                              &_gd.layers.route_wind.route[ii].x_world[kk]);
-          break;
-
-        default :
-          _normalizeLongitude(-180.0, 180.0,
-                              &_gd.layers.route_wind.route[ii].x_world[kk]);
-          break;
-
-      } 
-
-      _gd.proj.latlon2xy(_gd.layers.route_wind.route[ii].y_world[kk],
-                         _gd.layers.route_wind.route[ii].x_world[kk],
-                         _gd.layers.route_wind.route[ii].x_world[kk],
-                         _gd.layers.route_wind.route[ii].y_world[kk]);
-
-      if(_params.route_debug) {
-        fprintf(stderr,"%s:  %g,    %g\n",
-                _gd.layers.route_wind.route[ii].navaid_id[kk],
-                _gd.layers.route_wind.route[ii].x_world[kk],
-                _gd.layers.route_wind.route[ii].y_world[kk]);
-      }
-    }
-    
-    // Compute the segment lengths
-    _gd.layers.route_wind.route[ii].total_length = 0.0;
-    for(int kk = 0; kk < _gd.layers.route_wind.route[ii].num_segments; kk++) {
-      _gd.layers.route_wind.route[ii].seg_length[kk] = 
-        _dispProjDist(_gd.layers.route_wind.route[ii].x_world[kk],
-                      _gd.layers.route_wind.route[ii].y_world[kk],
-                      _gd.layers.route_wind.route[ii].x_world[kk+1],
-                      _gd.layers.route_wind.route[ii].y_world[kk+1]);
-      _gd.layers.route_wind.route[ii].total_length +=
-        _gd.layers.route_wind.route[ii].seg_length[kk];
-    }
-    
-  } // ii
-
-  // Copy the initial route definition into the space reserved for the Custom route
-  memcpy(_gd.layers.route_wind.route + _gd.layers.route_wind.num_predef_routes,
-         &_gd.h_win.route,sizeof(route_track_t));
-
-  /* free temp space */
-  for(int ii = 0; ii < Constants::NUM_PARSE_FIELDS; ii++) {
-    free(cfield[ii]);
-  }
-  
-  if (_params.route_winds_active) {
-    _gd.layers.route_wind.has_params = 1;
-    // Use the first route as the default.
-    memcpy(&_gd.h_win.route, _gd.layers.route_wind.route, sizeof(route_track_t)); 
-  } else {
-    _gd.layers.route_wind.has_params = 0;
   }
 
 }
@@ -1555,7 +1098,6 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
   int len,point;
   int num_points;        
   int num_fields;  /* number of fields (tokens) found in input line */
-  // int ret_stat;
   char name_buf[2048];  /* Buffer for input lines */
   char *lasts;
 
@@ -2138,6 +1680,7 @@ int Lucid::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const stri
     }
 
     if(SO != NULL) SHPDestroyObject(SO);
+
   }  // End of each object
 
   return 0;
@@ -2416,49 +1959,6 @@ void Lucid::_calcMapCoordsLatLon()
 
 }
 
-///////////////////////////////////////////////////////
-// Instantiate the Station locator classes and params.
-  
-int Lucid::_initStationLoc()
-
-{
-
-  if (strlen(_params.station_loc_url) < 1) {
-    return 0;
-  }
-    
-  if(_gd.debug || _gd.debug1) {
-    fprintf(stderr,"Loading Station data from: %s\n", _params.station_loc_url);
-  }
-  _gd.station_loc =  new StationLoc();
-  if(_gd.station_loc == NULL) {
-    fprintf(stderr,"CIDD: Fatal alloc constructing new stationLoc()\n");
-    exit(-1);
-  }
-
-  // download station location file into cache
-  
-  Path locPath(_params.station_loc_url);
-  string stationlocCachePath;
-  if (_getResourceCachePath(_gd.stationlocCacheDir, locPath.getDirectory(),
-                            locPath.getFile(), stationlocCachePath)) {
-    fprintf(stderr, "CIDD: Can't find Station Data from %s\n", _params.station_loc_url);
-    return -1;
-  }
-  
-  if(_gd.station_loc->ReadData(stationlocCachePath.c_str()) < 0) {
-    fprintf(stderr, "CIDD: Can't load Station Data from cache path %s\n", stationlocCachePath.c_str());
-    return -1;
-  }
-  
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    _gd.station_loc->PrintAll();
-  }
-
-  return 0;
-  
-}
-
 /////////////////////////////////////////////////
 // zooms
 
@@ -2479,13 +1979,10 @@ int Lucid::_initZooms()
     _params.num_cache_zooms = 1 ;
   }
   
-  _gd.h_win.can_pdev = new QPixmap*[_params.num_cache_zooms];
-  _gd.v_win.can_pdev = new QPixmap*[_params.num_cache_zooms];
-  
   _gd.h_win.num_zoom_levels = _params.zoom_levels_n;
 
   _gd.h_win.start_zoom_level = 0;
-  if (!_params.html_mode && _params.zoom_levels_n > 0) {
+  if (!_params.create_images_automatically && _params.zoom_levels_n > 0) {
     bool zoomLabelFound = false;
     for (int ii = 0; ii < _params.zoom_levels_n; ii++) {
       if (strcmp(_params._zoom_levels[ii].label, _params.start_zoom_label) == 0) {
@@ -2497,7 +1994,7 @@ int Lucid::_initZooms()
       cerr << "WARNING - start zoom label not found: " << _params.start_zoom_label << endl;
       cerr << "  Using first zoom level instead: " << _params._zoom_levels[0].label << endl;
     }
-  } // if (!_params.html_mode)
+  } // if (!_params.create_images_automatically)
   _gd.h_win.zoom_level = _gd.h_win.start_zoom_level;
   _gd.h_win.prev_zoom_level = _gd.h_win.zoom_level;
   
@@ -2544,11 +2041,6 @@ int Lucid::_initZooms()
 
     }
     
-    // _gd.h_win.zmin_x[izoom] = minx;
-    // _gd.h_win.zmin_y[izoom] = miny;
-    // _gd.h_win.zmax_x[izoom] = maxx;
-    // _gd.h_win.zmax_y[izoom] = maxy;
-    
     double delta_x = maxx - minx;
     double delta_y = maxy - miny;
 
@@ -2584,20 +2076,15 @@ int Lucid::_initZooms()
       miny =  _gd.h_win.max_y - delta_y;
     }
 
-    // if(_params.horiz_aspect_ratio <= 0.0) {
-    //   _params.horiz_aspect_ratio = fabs(delta_x/delta_y);
-    // }
-    
     _gd.aspect_correction =
       cos(((maxy + miny)/2.0) * Constants::LUCID_DEG_TO_RAD);
-
+    
     /* Make sure domains are consistant with the window aspect ratio */
 
     if (_gd.display_projection == Mdvx::PROJ_LATLON) {
       /* forshorten the Y coords to make things look better */
       delta_y /= _gd.aspect_correction;
     }
-    // delta_x /= _params.aspect_ratio;
 
     if(delta_x > delta_y) {
       maxy += ((delta_x - delta_y) /2.0) ;
@@ -2638,12 +2125,17 @@ void Lucid::_initContours()
     _gd.layers.overlay_field[ii] = 0;
   }
 
-  for(int ii = 0; ii < _gd.num_datafields; ii++) {
-    _gd.h_win.redraw_flag[ii] = 1;
-    _gd.v_win.redraw_flag[ii] = 1;
+  // The retained CIDD contour store has a fixed capacity. Ignore excess
+  // legacy entries rather than allowing a parameter file to corrupt the
+  // adjacent layer state during startup.
+  if (_params.contour_fields_n > Constants::NUM_CONT_LAYERS) {
+    cerr << "WARNING - contour_fields contains "
+         << _params.contour_fields_n << " entries; only the first "
+         << Constants::NUM_CONT_LAYERS << " are supported" << endl;
   }
-
-  for(int ii = 0; ii < _params.contour_fields_n; ii++ ) {
+  const int numContourFields =
+    min(_params.contour_fields_n, Constants::NUM_CONT_LAYERS);
+  for(int ii = 0; ii < numContourFields; ii++ ) {
     
     Params::contour_field_t &cfield = _params._contour_fields[ii];
     
@@ -2651,7 +2143,7 @@ void Lucid::_initContours()
     
     /* Replace underscores with spaces in contour field names */
     char *contourFieldName = cfield.field_name;
-    if(_params.html_mode == 0 && _params.replace_underscores) {
+    if(_params.create_images_automatically == 0 && _params.replace_underscores) {
       for(int jj = strlen(contourFieldName) - 1; jj >= 0; jj--) {
         if (contourFieldName[jj] == '_') {
           contourFieldName[jj] = ' ';
@@ -2687,14 +2179,24 @@ void Lucid::_initOverlayFields()
 
 {
 
-  for (int ii = 0; ii < _params.layer_fields_n; ii++) {
+  // Overlay rendering still uses a fixed CIDD-compatible layer array. Bound
+  // variable-length TDRP input here so malformed or expanded configurations
+  // cannot overwrite unrelated GlobalData members.
+  if (_params.layer_fields_n > Constants::NUM_GRID_LAYERS) {
+    cerr << "WARNING - layer_fields contains " << _params.layer_fields_n
+         << " entries; only the first " << Constants::NUM_GRID_LAYERS
+         << " are supported" << endl;
+  }
+  const int numLayerFields =
+    min(_params.layer_fields_n, Constants::NUM_GRID_LAYERS);
+  for (int ii = 0; ii < numLayerFields; ii++) {
 
     Params::layer_field_t &lfield = _params._layer_fields[ii];
 
     char *fieldName = lfield.field_name;
     
     /* Replace Underscores with spaces in field names */
-    if(_params.html_mode == 0 && _params.replace_underscores) {
+    if(_params.create_images_automatically == 0 && _params.replace_underscores) {
       for(int jj = strlen(fieldName) - 1; jj >= 0; jj--) {
         if(fieldName[jj] == '_') {
           fieldName[jj] = ' ';
@@ -2724,53 +2226,18 @@ void Lucid::_initSymprods()
 
   _gd.prod_mgr = new ProductMgr;
   
-  if(_params.symprod_prod_info_n <= 32) {
-    int value = 0;
-    for (int ii = 0; ii < _params.symprod_prod_info_n && ii < 32; ii++) {
-      if(_params._symprod_prod_info[ii].on_by_default == TRUE) {
-        value |= 1 << ii;
-      }
-      _gd.prod_mgr->set_product_active
-        (ii, (int) _params._symprod_prod_info[ii].on_by_default);
-    } // ii
-
-    // Set the widget's value and size the panel to fit the widget
-    
-    if(!_gd.run_unmapped) {
-      // xv_set(_gd.prod_pu->prod_st, PANEL_VALUE, value,XV_SHOW,TRUE,XV_X,0,XV_Y,0, NULL);
-      // xv_set(_gd.prod_pu->prod_pu,XV_HEIGHT,xv_get(_gd.prod_pu->prod_st,XV_HEIGHT),NULL);
-      // xv_set(_gd.prod_pu->prod_pu,XV_WIDTH,xv_get(_gd.prod_pu->prod_st,XV_WIDTH),NULL);
+  int value = 0;
+  for (int ii = 0; ii < _params.symprod_prod_info_n && ii < 32; ii++) {
+    if(_params._symprod_prod_info[ii].on_by_default == TRUE) {
+      value |= 1 << ii;
     }
-    
-  } else { // Use a  scrolling list when over 32 products are configured in
-    
-    for (int i = 0; i < _params.symprod_prod_info_n ; i++) {
-      if(!_gd.run_unmapped) {
-        // xv_set(_gd.prod_pu->prod_lst,
-        //      PANEL_LIST_INSERT, i,
-        //      PANEL_LIST_STRING, i, _params._symprod_prod_info[i].menu_label,
-        //      PANEL_LIST_CLIENT_DATA, i, i,
-        //      NULL);
-        
-        if(_params._symprod_prod_info[i].on_by_default == TRUE) {
-          // xv_set(_gd.prod_pu->prod_lst,
-          //      PANEL_LIST_SELECT, i, TRUE,
-          //      NULL);
-        }
-      }
-
-      _gd.prod_mgr->set_product_active(i,(int) _params._symprod_prod_info[i].on_by_default);
-    }
-
-    if(!_gd.run_unmapped) {
-      // Set the widget's value and size the panel to fit the widget
-      // xv_set(_gd.prod_pu->prod_st,XV_SHOW,FALSE, NULL);
-      // xv_set(_gd.prod_pu->prod_lst, XV_SHOW,TRUE,XV_X,0,XV_Y,0, NULL);
-      // xv_set(_gd.prod_pu->prod_pu,XV_HEIGHT,xv_get(_gd.prod_pu->prod_lst,XV_HEIGHT),NULL);
-      // xv_set(_gd.prod_pu->prod_pu,XV_WIDTH,xv_get(_gd.prod_pu->prod_lst,XV_WIDTH),NULL);
-    }
+    _gd.prod_mgr->set_product_active
+      (ii, (int) _params._symprod_prod_info[ii].on_by_default);
+  } // ii
+  
+  if(!_gd.run_unmapped) {
   }
-
+  
 }
 
 /************************************************************************
@@ -2790,9 +2257,10 @@ void Lucid::_initShared()
   _gd.coord_expt->epoch_start = _gd.epoch_start;
   _gd.coord_expt->epoch_end = _gd.epoch_end;
   
-  _gd.coord_expt->time_min = _gd.movie.frame[_gd.movie.num_frames -1].time_start;
-  _gd.coord_expt->time_max = _gd.movie.frame[_gd.movie.num_frames -1].time_end;
-  if(_gd.movie.movie_on) {
+  _gd.coord_expt->time_min = _gd.epoch_end -
+    static_cast<time_t>(_params.frame_interval_secs);
+  _gd.coord_expt->time_max = _gd.epoch_end;
+  if (_params.movie_on && !_params.create_images_automatically) {
     _gd.coord_expt->time_cent = _gd.epoch_end; 
   } else {
     _gd.coord_expt->time_cent = _gd.coord_expt->time_min +
@@ -2853,15 +2321,6 @@ int Lucid::_createCacheDirs()
     int err = errno;
     cerr << "ERROR - Lucid" << endl;
     cerr << "Cannot make color scales cache dir: " << _gd.colorscaleCacheDir << endl;
-    cerr << "  " << strerror(err) << endl;
-    return -1;
-  }
-
-  _gd.stationlocCacheDir = _gd.cacheDir + PATH_DELIM + "stationloc";
-  if (ta_makedir_recurse(_gd.stationlocCacheDir.c_str())) {
-    int err = errno;
-    cerr << "ERROR - Lucid" << endl;
-    cerr << "Cannot make station locator cache dir: " << _gd.stationlocCacheDir << endl;
     cerr << "  " << strerror(err) << endl;
     return -1;
   }

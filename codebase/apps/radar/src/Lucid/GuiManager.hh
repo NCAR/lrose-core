@@ -52,15 +52,10 @@
 #include "VsectionRoute.hh"
 
 #include <QMainWindow>
-#include <QListWidgetItem>
 #include <euclid/SunPosn.hh>
-#include <Radx/RadxRay.hh>
 
 class QActionGroup;
-class QButtonGroup;
-class QRadioButton;
 class QPushButton;
-class QListWidget;
 class QFrame;
 class QDialog;
 class QLabel;
@@ -70,9 +65,12 @@ class QHBoxLayout;
 class QVBoxLayout;
 class QDateTime;
 class QDateTimeEdit;
+class QByteArray;
 class QFileDialog;
+class QImage;
 class QTableWidget;
 class QString;
+class QTimer;
 
 class HorizView;
 class VertView;
@@ -85,14 +83,16 @@ class WindMenuItem;
 class ZoomMenuItem;
 class TimeControl;
 class VlevelSelector;
+class ImageGenerationManager;
+class MovieManager;
+class WorldPlot;
+struct TimelineFrame;
 
 class GuiManager : public QMainWindow {
   
   Q_OBJECT
 
 public:
-
-  static GuiManager* Instance();
 
   // constructor
   
@@ -116,21 +116,17 @@ public:
 
   // void setXyZoom(double minY, double maxY, double minX, double maxX);
 
-  // set/get archive mode
-  
-  void setArchiveMode(bool state);
-  bool getArchiveMode() const { return _archiveMode; }
-
   // get selected name and units
 
-  const string &getSelectedFieldLabel() const { return _selectedLabel; }
-  const string &getSelectedFieldName() const { return _selectedName; }
-  const string &getSelectedFieldUnits() const { return _selectedUnits; }
+  const string &getSelectedFieldLabel() const;
+  int getSelectedFieldIndex() const { return _fieldNum; }
+  bool mapsEnabled() const { return _mapsEnabled; }
 
   // set flag to indicate changes
 
   void setVlevelHasChanged(bool val) { _vlevelHasChanged = val; }
   void setOverlaysHaveChanged(bool val) { _overlaysHaveChanged = val; }
+  void mapDisplayChanged();
   
   // set title bar str
   
@@ -152,8 +148,14 @@ public:
   bool isMovieBuilding() const;
   bool isMoviePlaying() const;
   bool isMovieActive() const;
+  int getTimelineFrameCount() const;
+  int getTimelineFrameIndex() const;
+  const TimelineFrame *getTimelineFrame(int frameIndex) const;
   void movieStateChanged();
   void showMovieInteractionBlocked();
+
+  // Change the optional ground overlay without rebuilding either field view.
+  void setTerrainEnabled(bool enabled);
   
   // override event handling
 
@@ -179,7 +181,6 @@ private:
 
   int _mainTimerId;
   int _timerEventCount;
-  static GuiManager* m_pInstance;
 
   // main window frame
 
@@ -199,30 +200,17 @@ private:
 
   VertManager *_vertWindow;
   VertView *_vert;
-  bool _vertWindowDisplayed;
-  bool _vertMode;
-
   // Keep the most recently completed route independently of the canvas so a
   // later field or time change can request the same vertical section.
 
   VsectionRoute _vsectionRoute;
   
-  // times for data
-
-  DateTime _plotStartTime;
-  DateTime _plotEndTime;
-
   // vlevels
 
   VlevelManager _vlevelManager;
   VlevelSelector *_vlevelSelector;
   bool _vlevelHasChanged;
 
-  // archive mode
-  
-  bool _archiveMode; // false for realtime mode
-  DateTime _archiveStartTime; // start time for archive mode
-  
   // top-level menus
 
   QMenu *_fileMenu;
@@ -240,7 +228,6 @@ private:
 
   QAction *_showValueAct;
   QAction *_showClickAct;
-  QAction *_showBoundaryEditorAct;
 
   QAction *_gridsAct;
   QAction *_fixedRingsAct;
@@ -274,22 +261,58 @@ private:
   int _prevFieldTableCol;
   int _prevFieldTableRow;
 
-  string _selectedName;
-  string _selectedLabel;
-  string _selectedUnits;
-  QLabel *_valueLabel;
-  
   bool _fieldHasChanged;
   bool _horizontalRequestHasChanged;
 
-  int _movieBuildFrame;
-  bool _movieGridReady;
-  bool _movieIncludesVertical;
-  bool _movieVerticalReady;
-  int _movieVerticalRequestGeneration;
-  string _movieFieldLabel;
+  MovieManager *_movieManager;
 
+  // Terrain uses independent horizontal and vertical MDV requests. Failed
+  // completions are settled so optional context cannot stall captured output.
+  int _terrainHorizontalRequestGeneration;
+  bool _terrainHorizontalSettled;
+  bool _terrainHorizontalRequestPending;
+  int _terrainVerticalRequestGeneration;
+  bool _terrainVerticalSettled;
   void _checkMovieFrameReady();
+
+  // The image manager owns unattended scheduling and publication. GuiManager
+  // retains only the live display state which must be restored between
+  // realtime catalog batches.
+  ImageGenerationManager *_imageGenerationManager;
+
+  // Realtime scheduling temporarily drives the display through the catalog
+  // matrix. Preserve the accepted interactive state so the interval between
+  // batches remains a normal live display rather than the last output job.
+  bool _automaticDisplayStateSaved;
+  int _automaticSavedField;
+  int _automaticSavedZoom;
+  double _automaticSavedHeight;
+  DateTime _automaticSavedStartTime;
+  int _automaticSavedFrameCount;
+  double _automaticSavedFrameIntervalSecs;
+  int _automaticSavedFrameIndex;
+  bool _automaticSavedRealtime;
+  bool _automaticSavedVertWindowVisible;
+  VsectionRoute _automaticSavedVsectionRoute;
+
+  void _saveAutomaticDisplayState();
+  void _restoreAutomaticDisplayState();
+  void _startAutomaticImageJob();
+  void _startAutomaticHorizontalJob();
+  void _startAutomaticVerticalJob();
+  void _selectAutomaticImageField(int fieldIndex,
+                                  bool requestHorizontal = true);
+  void _checkAutomaticImageReady();
+  bool _captureAutomaticImage(QImage &image,
+                              DateTime &dataTime,
+                              const WorldPlot *&world,
+                              bool &writeGeoXml,
+                              QString &error);
+  void _cancelTimedOutImageRequest(int fieldIndex,
+                                   bool vertical,
+                                   int expectedGeneration);
+  bool _buildAutomaticVsectionRoute(VsectionRoute &route,
+                                    QString &error) const;
 
   // maps
 
@@ -351,31 +374,6 @@ private:
   QTableWidget *_clickFieldsTable;
   bool _clickReportPlaced;
 
-  // creating images in archive mode
-  
-  vector<string> _archiveFileList;
-  bool _archiveFilesHaveDayDir;
-  DateTime _archiveIntermediateTime;
-
-  // saving images in real time mode
-
-  DateTime _imagesScheduledTime;
-  DateTime _imagesStartTime;
-  DateTime _imagesEndTime;
-  int _imagesScanIntervalSecs;
-
-  // for timer
-  
-  int redraw_interv;
-  int update_interv;
-  int update_due;
-
-  struct timeval cur_tm;
-  struct timeval last_frame_tm;
-  struct timeval last_dcheck_tm;
-  time_t last_tick = 0;
-  long client_seq_num = 0;
-  
   //////////////////////////////
   // private methods
   
@@ -386,8 +384,8 @@ private:
 
   // local methods
   
-  void _clear();
   void _setupWindows();
+  void _configureAutomaticImageUi();
   void _createActions();
   void _createMenus();
   void _populateMapsMenu();
@@ -413,30 +411,18 @@ private:
   bool _checkForStateChange();
   // bool _checkForZoomChange();
   void _handleFirstTimerEvent();
-  void _readClickPoint();
     
   // for timer
   
   void _handleClientEvent();
-  void _handleImageCreationEvent();
 
-  void _checkForExpiredData(time_t tm);
-  void _checkForDataUpdates(time_t tm);
-  void _checkWhatNeedsRendering(int frame_index);
        
-  // setting text
-
-  void _setText(char *text, size_t maxTextLen, const char *format, int val);
-  void _setText(char *text, size_t maxTextLen, const char *format, double val);
-
-  // legacy
-  
-  void _autoCreateFunc();
-  void _setField(int value);
   int _requestVerticalSection();
-  void _setDisplayTime(time_t utime);
-  void _setEndFrame(int num_frames);
-  void _updateMoviePopup();
+  int _requestVerticalWinds();
+  int _requestVerticalTerrain();
+  int _requestVerticalTerrain(const VsectionRoute &route);
+  bool _horizontalTerrainApplies() const;
+  int _requestHorizontalTerrain();
                           
 private slots:
 
@@ -497,16 +483,13 @@ private slots:
 
   void _verticalRouteCompleted(const VsectionRoute &route);
   void _verticalReadComplete(MdvReader *reader);
+  void _terrainHorizontalReadComplete(MdvReader *reader, int generation,
+                                      bool success);
+  void _terrainVerticalReadComplete(MdvReader *reader);
   
   // images
 
   void _saveViewImages();
-  void _saveImageToFile(bool interactive = true);
-  void _createRealtimeImageFiles();
-  void _createArchiveImageFiles();
-  void _createImageFilesAllLevels();
-  void _createImageFiles();
-  string _getOutputPath(bool interactive, string &outputDir, string fileExt);
 
   // open file 
 
@@ -514,9 +497,9 @@ private slots:
   // void _refreshFileChooserDialog();
   // void _showFileChooserDialog();
   
-  // context editing
-  
-  void ShowContextMenu(const QPoint &pos);
+  // interaction help
+
+  void _showInteractionHelp(const QPoint &pos);
   
 };
 

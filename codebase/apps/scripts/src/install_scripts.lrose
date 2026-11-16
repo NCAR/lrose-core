@@ -70,6 +70,11 @@ mkdir -p $bin_dir
     sync2files \
     tkdiff \
     utime_decode \
+    ProcmapAutoRestart.py \
+    ProcmapListCheck.py \
+    ProcmapListKill.py \
+    ProcmapListStart.py \
+    procmap_control.py \
     auto_restart \
     auto_restart_stats \
     DataMapper_list_check \

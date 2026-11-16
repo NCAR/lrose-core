@@ -1,0 +1,73 @@
+# Lucid bug status
+
+Snapshot: 2026-11-14
+
+This file records the disposition of the concrete defects from the previous
+code review. All seven identified defects have been handled. The remaining
+items below are validation work, not known open bugs.
+
+## Resolved
+
+1. Horizontal MDV cache reuse was unreachable — RESOLVED
+
+   `MdvReader::requestHorizPlane()` now compares a complete immutable request
+   key before invalidating installed data. The key includes column-max state
+   and height limits, so a composite plane cannot be confused with a normal
+   level request.
+
+2. A horizontal request could be lost while a worker was active — RESOLVED
+
+   `MdvReader` now retains one latest-pending immutable horizontal request.
+   Completion of the active worker starts the newest pending state, while
+   generations prevent superseded results from being published.
+
+3. Movie dependency waits were unbounded — RESOLVED
+
+   `MovieManager` owns a configurable per-frame timeout. Failures identify
+   outstanding grid, Product, wind, terrain, or vertical-section dependencies
+   and follow the normal movie-stop path. Capture failures also release the
+   Building state.
+
+4. A picked symbolic product could survive a movie-frame change — RESOLVED
+
+   Entering movie interaction clears the live Product pick. Cached playback
+   therefore cannot draw a selection inherited from a different frame.
+
+5. Only the first instance of a multi-icon Product was pickable — RESOLVED
+
+   Named- and bitmap-icon picking now computes the minimum distance across all
+   rendered origins.
+
+6. Filled gridded overlays erased the base image — RESOLVED
+
+   Grid-image preparation now honors overlay composition for rectangular,
+   distorted, filled-contour, and polar rendering. Line-only `NONE` rendering
+   also preserves the underlying field.
+
+7. A failed-read diagnostic assumed a valid movie-frame index — RESOLVED
+
+   Timeline lookup is bounds checked and diagnostics only access frame times
+   when a valid `TimelineFrame` is available. The obsolete global movie array
+   no longer exists.
+
+## Additional recently resolved behavior
+
+- Native polar RHIs returned by `DsMdvServer` now render as range/elevation
+  gate polygons transformed into ground-distance/height coordinates.
+  `FILLED_CONTOURS` deliberately falls back to polygons and `NONE` is unfilled.
+- Polar RHI cursor values and click reports invert the same beam geometry used
+  for drawing.
+- When the server replaces the selected RHI endpoint with its full-range
+  endpoint, `HorizView` redraws the returned route. The original user route is
+  retained as the request definition, and terrain is re-requested along an
+  adjusted returned route.
+
+## Validation still required
+
+- Exercise delayed, missing, and recovering MDV/SPDB inputs under realtime and
+  archive simulation.
+- Stress request replacement, movie timeouts, and automatic-image scheduler
+  coalescing with controlled data arrival.
+- Compare native RHI rendering and returned-route updates with CIDD over a
+  range of azimuths, fields, times, and radar altitudes.
+- Add automated regression coverage; current GUI validation is interactive.

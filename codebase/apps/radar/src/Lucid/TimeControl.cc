@@ -46,6 +46,7 @@
 #include <QSignalBlocker>
 #include <QStatusBar>
 #include <QTimer>
+#include <toolsa/utim.h>
 #include "TimeControl.hh"
 #include "TimePlotWidget.hh"
 #include "GuiManager.hh"
@@ -103,10 +104,30 @@ TimeControl::TimeControl(GuiManager *parent) :
   _loopDwellSelector = NULL;
   _loopDelaySelector = NULL;
   
-  _startTime.set(_params.archive_start_time);
   _nFramesMovie = _params.n_movie_frames;
   _frameIntervalSecs = _params.frame_interval_secs;
-  _frameIndex = 0;
+  _isRealtime = (_params.start_mode == Params::MODE_REALTIME);
+
+  // Establish the initial accepted timeline here rather than mirroring CIDD's
+  // startup calculations in GlobalData. Archive frame-centering retains the
+  // original request semantics used by closest-to-frame-center mode.
+  time_t initialStart = 0;
+  if (_isRealtime) {
+    initialStart = time(nullptr) - static_cast<time_t>(
+      (_nFramesMovie - 1) * _frameIntervalSecs);
+    _frameIndex = std::max(0, _nFramesMovie - 1);
+  } else {
+    _startTime.set(_params.archive_start_time);
+    initialStart = _startTime.utime();
+    _frameIndex = 0;
+  }
+  const int roundingSecs = std::max(1, _params.temporal_rounding);
+  initialStart -= initialStart % roundingSecs;
+  if (!_isRealtime &&
+      _params.gather_data_mode == Params::CLOSEST_TO_FRAME_CENTER) {
+    initialStart -= static_cast<time_t>(_frameIntervalSecs / 2.0);
+  }
+  _startTime.set(initialStart);
   
   _guiStartTime = _startTime;
   _guiNFramesMovie = _nFramesMovie;
@@ -116,7 +137,6 @@ TimeControl::TimeControl(GuiManager *parent) :
   _loopDwellMsecs = _params.movie_dwell_msecs;
   _loopDelayMsecs = _params.loop_delay_msecs;
   
-  _isRealtime = (_params.start_mode == Params::MODE_REALTIME);
   _isSweep = false;
   _outputAfterBuild = false;
   _movieState = MovieState::Idle;
@@ -137,6 +157,7 @@ TimeControl::TimeControl(GuiManager *parent) :
   // set the GUI times
 
   _updateTimesInGui();
+  _publishTimelineRange();
 
   // disable these buttons at startup
 
@@ -275,7 +296,6 @@ void TimeControl::_populateGui()
 
   _realtimeSelector = new QCheckBox(realtimeFrame);
   _realtimeSelector->setChecked(_isRealtime);
-  _manager->setArchiveMode(!_isRealtime);
 
   realtimeFrameLayout->addWidget(realtimeTitle, 0,
                                  Qt::AlignTop | Qt::AlignCenter);
@@ -688,8 +708,16 @@ void TimeControl::setEnabled(bool val)
 
 DateTime TimeControl::getSelectedTime() const
 {
-  DateTime stime(_startTime + _frameIndex * _frameIntervalSecs);
-  return stime;
+  const TimelineFrame *frame = getFrame(_frameIndex);
+  return frame ? DateTime(frame->start) : _startTime;
+}
+
+const TimelineFrame *TimeControl::getFrame(int frameIndex) const
+{
+  if (frameIndex < 0 || frameIndex >= static_cast<int>(_timelineFrames.size())) {
+    return nullptr;
+  }
+  return &_timelineFrames[frameIndex];
 }
 
 DateTime TimeControl::_getGuiSelectedTime() const
@@ -703,14 +731,89 @@ DateTime TimeControl::_getGuiSelectedTime() const
 
 DateTime TimeControl::getEndTime() const
 {
-  DateTime stime(_startTime + (_nFramesMovie - 1) * _frameIntervalSecs);
-  return stime;
+  const TimelineFrame *frame = getFrame(_nFramesMovie - 1);
+  return frame ? DateTime(frame->start) : _startTime;
 }
 
 DateTime TimeControl::_getGuiEndTime() const
 {
   DateTime stime(_guiStartTime + (_guiNFramesMovie - 1) * _guiFrameIntervalSecs);
   return stime;
+}
+
+/////////////////////////////////////////////////////////////
+// configure a single accepted frame for automatic image output
+
+void TimeControl::configureAutomaticImageTime(const DateTime &imageTime)
+{
+  if (_movieState != MovieState::Idle) {
+    _stopMovie();
+  }
+
+  _startTime = imageTime;
+  _nFramesMovie = 1;
+  _frameIndex = 0;
+  _guiStartTime = _startTime;
+  _guiNFramesMovie = _nFramesMovie;
+  _guiFrameIntervalSecs = _frameIntervalSecs;
+  _guiFrameIndex = _frameIndex;
+  _computeFrameTimes();
+
+  _publishTimelineRange();
+  for (int ii = 0; ii < _gd.num_datafields; ++ii) {
+    if (_gd.mread[ii]) {
+      _gd.mread[ii]->invalidateTimeList();
+    }
+  }
+  if (_gd.prod_mgr) {
+    _gd.prod_mgr->reset_product_valid_flags();
+  }
+
+  _updateTimesInGui();
+  _enableAcceptCancel(false);
+  _timeHasChanged = true;
+}
+
+/////////////////////////////////////////////////////////////
+// restore accepted display state after a scheduled output batch
+
+void TimeControl::restoreAfterAutomaticImages(const DateTime &startTime,
+                                              int frameCount,
+                                              double frameIntervalSecs,
+                                              int frameIndex,
+                                              bool realtime)
+{
+  if (_movieState != MovieState::Idle) {
+    _stopMovie();
+  }
+
+  _startTime = startTime;
+  _nFramesMovie = std::max(1, frameCount);
+  _frameIntervalSecs = std::max(1.0, frameIntervalSecs);
+  _frameIndex = std::clamp(frameIndex, 0, _nFramesMovie - 1);
+  _guiStartTime = _startTime;
+  _guiNFramesMovie = _nFramesMovie;
+  _guiFrameIntervalSecs = _frameIntervalSecs;
+  _guiFrameIndex = _frameIndex;
+  _isRealtime = realtime;
+
+  // Updating the checkbox must not route this internal restoration back
+  // through the user-mode handler while the remaining state is incomplete.
+  const QSignalBlocker realtimeBlocker(_realtimeSelector);
+  _realtimeSelector->setChecked(_isRealtime);
+  _computeFrameTimes();
+  _publishTimelineRange();
+  for (int ii = 0; ii < _gd.num_datafields; ++ii) {
+    if (_gd.mread[ii]) {
+      _gd.mread[ii]->invalidateTimeList();
+    }
+  }
+  if (_gd.prod_mgr) {
+    _gd.prod_mgr->reset_product_valid_flags();
+  }
+  _updateTimesInGui();
+  _enableAcceptCancel(false);
+  _timeHasChanged = true;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -746,9 +849,7 @@ void TimeControl::_acceptGuiSelections()
   if (movieRangeChanged) {
     // Keep the legacy request epoch synchronized with this dialog. Its end is
     // the end of the final frame, matching the canvas band and CIDD semantics.
-    _gd.epoch_start = _startTime.utime();
-    _gd.epoch_end = static_cast<time_t>(
-      _startTime.utime() + _nFramesMovie * _frameIntervalSecs);
+    _publishTimelineRange();
     // MDV time lists are queried over the movie domain. Force each field to
     // publish a matching list after a pending movie edit is accepted.
     for (int ii = 0; ii < _gd.num_datafields; ++ii) {
@@ -759,6 +860,8 @@ void TimeControl::_acceptGuiSelections()
     if (_gd.prod_mgr) {
       _gd.prod_mgr->reset_product_valid_flags();
     }
+  } else {
+    _publishSelectedFrame();
   }
   _timeHasChanged = true;
 }
@@ -797,7 +900,6 @@ void TimeControl::_beginMovieBuild(bool outputAfterBuild)
 
   _movieState = MovieState::Building;
   _outputAfterBuild = outputAfterBuild;
-  _gd.movie.movie_on = 1;
   _setMovieDefinitionControlsEnabled(false);
   _manager->movieStateChanged();
   _renderedMovieFrames.assign(_nFramesMovie, false);
@@ -817,7 +919,6 @@ void TimeControl::_stopMovie()
   _manager->cancelMovieBuild();
   _movieState = MovieState::Idle;
   _outputAfterBuild = false;
-  _gd.movie.movie_on = 0;
   _setMovieDefinitionControlsEnabled(true);
   _enableAcceptCancel(false);
   _manager->movieStateChanged();
@@ -875,6 +976,27 @@ void TimeControl::movieFrameRendered(int frameIndex)
   }
 }
 
+/////////////////////////////////////////////////////////////
+// leave Building state when a ready frame cannot be captured
+
+void TimeControl::movieFrameCaptureFailed(int frameIndex,
+                                          const QString &error)
+{
+  if (_movieState != MovieState::Building ||
+      frameIndex != _buildingFrameIndex) {
+    return;
+  }
+
+  const QString message = tr("Movie frame %1 capture failed: %2")
+    .arg(frameIndex + 1).arg(error);
+
+  // Use the normal stop path so cached playback, disabled controls, and the
+  // live data request are restored together. Replace its routine Stop message
+  // with the actionable failure after that cleanup has completed.
+  _stopMovie();
+  _manager->statusBar()->showMessage(message, 15000);
+}
+
 void TimeControl::_startMoviePlayback()
 {
   _movieState = MovieState::Playing;
@@ -896,7 +1018,7 @@ void TimeControl::_showPlaybackFrame(int frameIndex, bool firstFrame)
   _playbackFrameIndex = frameIndex;
   _frameIndex = frameIndex;
   _guiFrameIndex = frameIndex;
-  _gd.movie.cur_frame = frameIndex;
+  _publishSelectedFrame();
   {
     const QSignalBlocker sliderBlocker(_timeSlider);
     _timeSlider->setSliderPosition(frameIndex);
@@ -1074,8 +1196,9 @@ void TimeControl::refreshDataAvailability()
 
   TimePlotSeries gridSeries;
   time_t selectedGridTime = 0;
-  if (_gd.h_win.page >= 0 && _gd.h_win.page < _gd.num_datafields) {
-    const MdvReader *reader = _gd.mread[_gd.h_win.page];
+  const int fieldIndex = _manager->getSelectedFieldIndex();
+  if (fieldIndex >= 0 && fieldIndex < _gd.num_datafields) {
+    const MdvReader *reader = _gd.mread[fieldIndex];
     if (reader) {
       gridSeries.label = reader->legend_name;
       gridSeries.times = reader->getTimeList();
@@ -1136,6 +1259,10 @@ void TimeControl::_retrieveForTimeRange(time_t startTime, time_t endTime)
   }
   _gd.epoch_start = startTime;
   _gd.epoch_end = endTime;
+  if (_gd.coord_expt) {
+    _gd.coord_expt->epoch_start = startTime;
+    _gd.coord_expt->epoch_end = endTime;
+  }
   // Availability ranges are part of the request domain. Invalidate both
   // caches and let the normal GUI timer issue one coherent full retrieval.
   for (int ii = 0; ii < _gd.num_datafields; ++ii) {
@@ -1436,28 +1563,75 @@ void TimeControl::_setFrameIntervalSecs(double val)
 
 void TimeControl::_computeFrameTimes()
 {
-  _frameTimes.clear();
-  for (int ii = 0; ii < _nFramesMovie; ii++) {
-    DateTime frameTime(_startTime + ii * _frameIntervalSecs);
-    _frameTimes.push_back(frameTime);
+  _timelineFrames.clear();
+  _timelineFrames.reserve(_nFramesMovie);
 
-    // Legacy renderers still consume GlobalData movie bounds. Keep them in
-    // lockstep with the accepted Qt controller so cached frames are rendered
-    // for the same interval shown by the time canvas.
-    movie_frame_t &frame = _gd.movie.frame[ii];
-    frame.time_start = frameTime.utime();
-    frame.time_mid = static_cast<time_t>(
-      frame.time_start + _frameIntervalSecs / 2.0);
-    frame.time_end = static_cast<time_t>(
-      frame.time_start + _frameIntervalSecs);
+  UTIMstruct frameDate;
+  if (_params.climo_mode == Params::CLIMO_YEARLY_INTERVAL) {
+    UTIMunix_to_date(_startTime.utime(), &frameDate);
   }
-  _gd.movie.start_time = _startTime.utime();
-  _gd.movie.time_interval_mins = _frameIntervalSecs / 60.0;
-  _gd.movie.num_frames = _nFramesMovie;
-  _gd.movie.start_frame = 0;
-  _gd.movie.end_frame = std::max(0, _nFramesMovie - 1);
-  _gd.movie.cur_frame = std::clamp(_frameIndex, 0,
-                                   std::max(0, _nFramesMovie - 1));
+
+  for (int ii = 0; ii < _nFramesMovie; ++ii) {
+    TimelineFrame frame;
+    switch (_params.climo_mode) {
+      case Params::CLIMO_DAILY_INTERVAL:
+        frame.start = static_cast<time_t>(
+          _startTime.utime() + ii * 1440.0 * 60.0);
+        frame.mid = static_cast<time_t>(
+          frame.start + _params.climo_frame_span_mins * 30.0);
+        frame.end = static_cast<time_t>(
+          frame.start + _params.climo_frame_span_mins * 60.0);
+        break;
+
+      case Params::CLIMO_YEARLY_INTERVAL:
+        frameDate.year += ii == 0 ? 0 : 1;
+        frame.start = UTIMdate_to_unix(&frameDate);
+        frame.mid = static_cast<time_t>(
+          frame.start + _params.climo_frame_span_mins * 30.0);
+        frame.end = static_cast<time_t>(
+          frame.start + _params.climo_frame_span_mins * 60.0);
+        break;
+
+      case Params::CLIMO_REGULAR_INTERVAL:
+      default:
+        frame.start = static_cast<time_t>(
+          _startTime.utime() + ii * _frameIntervalSecs + 0.5);
+        frame.mid = static_cast<time_t>(
+          _startTime.utime() + (ii + 0.5) * _frameIntervalSecs + 0.5);
+        frame.end = static_cast<time_t>(
+          frame.start + _frameIntervalSecs + 0.5);
+        break;
+    }
+    _timelineFrames.push_back(frame);
+  }
+
+  _frameIndex = std::clamp(_frameIndex, 0, std::max(0, _nFramesMovie - 1));
+}
+
+void TimeControl::_publishTimelineRange()
+{
+  if (_timelineFrames.empty()) {
+    return;
+  }
+
+  _gd.epoch_start = _timelineFrames.front().start;
+  _gd.epoch_end = _timelineFrames.back().end;
+  if (_gd.coord_expt) {
+    _gd.coord_expt->epoch_start = _gd.epoch_start;
+    _gd.coord_expt->epoch_end = _gd.epoch_end;
+  }
+  _publishSelectedFrame();
+}
+
+void TimeControl::_publishSelectedFrame()
+{
+  const TimelineFrame *frame = getFrame(_frameIndex);
+  if (!frame || !_gd.coord_expt) {
+    return;
+  }
+  _gd.coord_expt->time_min = frame->start;
+  _gd.coord_expt->time_max = frame->end;
+  _gd.coord_expt->time_cent = frame->mid;
 }
 
 // realtime mode?
@@ -1472,7 +1646,6 @@ void TimeControl::_setRealtime(Qt::CheckState val)
     _isRealtime = false;
     cerr << "Archive mode" << endl;
   }
-  _manager->setArchiveMode(!_isRealtime);
 }
 #else
 void TimeControl::_setRealtime(int val)
@@ -1484,7 +1657,6 @@ void TimeControl::_setRealtime(int val)
     _isRealtime = true;
     cerr << "Realtime mode" << endl;
   }
-  _manager->setArchiveMode(!_isRealtime);
 }
 #endif
 

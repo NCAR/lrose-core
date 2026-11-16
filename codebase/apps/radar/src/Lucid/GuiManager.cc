@@ -34,11 +34,12 @@
 
 #include <string>
 #include <cmath>
+#include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <utility>
 #include <QActionGroup>
 #include <QApplication>
-#include <QButtonGroup>
 #include <QFrame>
 #include <QFont>
 #include <QLabel>
@@ -53,13 +54,11 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
-#include <QProcess>
-#include <QListWidget>
-#include <QListWidgetItem>
-#include <QRadioButton>
 #include <QStatusBar>
 #include <QDateTime>
 #include <QDateTimeEdit>
+#include <QTimeZone>
+#include <QColor>
 #include <QDir>
 #include <QDoubleSpinBox>
 #include <QLineEdit>
@@ -84,20 +83,17 @@
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
-#include <toolsa/file_io.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/pjg.h>
 #include <toolsa/TaStr.hh>
-#include <dsserver/DsLdataInfo.hh>
 #include <radar/RadarComplex.hh>
-#include <Radx/RadxFile.hh>
-#include <Radx/NcfRadxFile.hh>
-#include <Radx/RadxSweep.hh>
 #include <toolsa/DateTime.hh>
-#include <Radx/RadxPath.hh>
 #include <Ncxx/H5x.hh>
 
 #include "GuiManager.hh"
+#include "ImageGenerationManager.hh"
+#include "MovieManager.hh"
 #include "ProductMgr.hh"
 #include "FieldTableItem.hh"
 #include "HorizView.hh"
@@ -109,6 +105,7 @@
 #include "VertView.hh"
 #include "VertManager.hh"
 #include "WindMenuItem.hh"
+#include "WindManager.hh"
 #include "ZoomMenuItem.hh"
 
 // GlobalData.hh must be included AFTER qt includes because of #define None in X11/X.h
@@ -158,27 +155,43 @@ QString safeFileNameComponent(QString value)
   return value.isEmpty() ? QString("field") : value;
 }
 
-} // namespace
+// Returned RHI endpoints can move by many kilometers, while ordinary MDV
+// sections may acquire harmless coordinate roundoff. Compare geographically
+// so the decision is independent of the current map projection.
 
-GuiManager* GuiManager::m_pInstance = NULL;
-
-GuiManager* GuiManager::Instance()
+bool routesEquivalent(const VsectionRoute &left,
+                      const VsectionRoute &right)
 {
-  return m_pInstance;
+  if (left.size() != right.size()) {
+    return false;
+  }
+  const vector<VsectionRoute::Point> &leftPoints = left.points();
+  const vector<VsectionRoute::Point> &rightPoints = right.points();
+  for (size_t ii = 0; ii < leftPoints.size(); ++ii) {
+    double distanceKm = 0.0;
+    double azimuthDeg = 0.0;
+    PJGLatLon2RTheta(leftPoints[ii].lat, leftPoints[ii].lon,
+                    rightPoints[ii].lat, rightPoints[ii].lon,
+                    &distanceKm, &azimuthDeg);
+    if (!std::isfinite(distanceKm) || distanceKm > 0.01) {
+      return false;
+    }
+  }
+  return true;
 }
+
+} // namespace
 
 // Constructor
 
 GuiManager::GuiManager() :
         _params(Params::Instance()),
         _gd(GlobalData::Instance()),
-        _vertWindowDisplayed(false)
+        _automaticSavedVertWindowVisible(false)
 {
 
   _timerEventCount = 0;
-  _archiveMode = true;
-  
-  m_pInstance = this;
+  _mapsEnabled = _params.maps_enabled_at_startup;
 
   // initialize
 
@@ -228,41 +241,179 @@ GuiManager::GuiManager() :
   _vlevelHasChanged = true;
   
   _overlaysHaveChanged = true;
-  _movieBuildFrame = -1;
-  _movieGridReady = false;
-  _movieIncludesVertical = false;
-  _movieVerticalReady = false;
-  _movieVerticalRequestGeneration = -1;
+  // MovieManager owns the immutable cache lifecycle. These callbacks retain
+  // request and widget operations in the display controller.
+  MovieManager::Callbacks movieCallbacks;
+  movieCallbacks.clearFrames =
+    [this](int frameCount, bool includeVertical) {
+      if (_horiz) {
+        _horiz->clearMovieFrames(frameCount);
+      }
+      if (_vert) {
+        _vert->clearMovieFrames(includeVertical ? frameCount : 0);
+      }
+    };
+  movieCallbacks.resetProducts = [this]() {
+    if (_gd.prod_mgr) {
+      _gd.prod_mgr->reset_product_valid_flags();
+    }
+  };
+  movieCallbacks.beginFrameRequest = [this](bool includeVertical) {
+    _terrainHorizontalSettled = true;
+    _terrainHorizontalRequestPending = false;
+    _terrainVerticalSettled = true;
+    _horizontalRequestHasChanged = true;
+    if (_horiz) {
+      _horiz->stopMoviePlayback();
+    }
+    if (includeVertical && _vert) {
+      _vert->stopMoviePlayback();
+      return _requestVerticalSection();
+    }
+    return -1;
+  };
+  movieCallbacks.captureFrame =
+    [this](int frameIndex, bool includeVertical, QString &error) {
+      if (!_horiz || !_horiz->captureMovieFrame(frameIndex)) {
+        error = tr("Could not capture the horizontal view");
+        return false;
+      }
+      if (includeVertical &&
+          (!_vert || !_vert->captureMovieFrame(frameIndex))) {
+        error = tr("Could not capture the vertical-section view");
+        return false;
+      }
+      return true;
+    };
+  movieCallbacks.showFrame =
+    [this](int frameIndex, bool includeVertical) {
+      if (!_horiz || !_horiz->hasMovieFrame(frameIndex) ||
+          (includeVertical &&
+           (!_vert || !_vert->hasMovieFrame(frameIndex)))) {
+        return false;
+      }
+      if (!_horiz->showMovieFrame(frameIndex)) {
+        return false;
+      }
+      return !includeVertical || _vert->showMovieFrame(frameIndex);
+    };
+  movieCallbacks.hasFrame =
+    [this](int frameIndex, bool vertical) {
+      return vertical ? (_vert && _vert->hasMovieFrame(frameIndex)) :
+                        (_horiz && _horiz->hasMovieFrame(frameIndex));
+    };
+  movieCallbacks.frameImage =
+    [this](int frameIndex, bool vertical) {
+      return vertical ? _vert->movieFrameImage(frameIndex) :
+                        _horiz->movieFrameImage(frameIndex);
+    };
+  movieCallbacks.stopPlayback = [this]() {
+    if (_horiz) {
+      _horiz->stopMoviePlayback();
+    }
+    if (_vert) {
+      _vert->stopMoviePlayback();
+    }
+  };
+  movieCallbacks.frameRendered = [this](int frameIndex) {
+    if (_timeControl) {
+      _timeControl->movieFrameRendered(frameIndex);
+    }
+  };
+  movieCallbacks.frameCaptureFailed =
+    [this](int frameIndex, const QString &error) {
+      if (_timeControl) {
+        _timeControl->movieFrameCaptureFailed(frameIndex, error);
+      }
+    };
+  movieCallbacks.pendingDependencies = [this]() {
+    QStringList pending;
+    if (_gd.prod.products_on && _gd.prod_mgr &&
+        !_gd.prod_mgr->activeProductsReady()) {
+      pending << tr("symbolic products");
+    }
+    if (_gd.wind_mgr && !_gd.wind_mgr->activeWindsReady()) {
+      pending << tr("horizontal winds");
+    }
+    if (_movieManager && _movieManager->includesVertical() &&
+        _gd.wind_mgr && !_gd.wind_mgr->activeVerticalWindsSettled()) {
+      pending << tr("vertical winds");
+    }
+    if (!_terrainHorizontalSettled) {
+      pending << tr("horizontal terrain");
+    }
+    if (_movieManager && _movieManager->includesVertical() &&
+        !_terrainVerticalSettled) {
+      pending << tr("vertical terrain");
+    }
+    return pending;
+  };
+  movieCallbacks.showProgress = [this](const QString &message) {
+    statusBar()->showMessage(message);
+  };
+  _movieManager = new MovieManager(
+    _params, std::move(movieCallbacks), this);
+
+  _terrainHorizontalRequestGeneration = -1;
+  _terrainHorizontalSettled = true;
+  _terrainHorizontalRequestPending = false;
+  _terrainVerticalRequestGeneration = -1;
+  _terrainVerticalSettled = true;
+
+  _automaticDisplayStateSaved = false;
+  _automaticSavedField = -1;
+  _automaticSavedZoom = 0;
+  _automaticSavedHeight = 0.0;
+  _automaticSavedFrameCount = 1;
+  _automaticSavedFrameIntervalSecs = 1.0;
+  _automaticSavedFrameIndex = 0;
+  _automaticSavedRealtime = false;
+
+  // ImageGenerationManager owns all unattended lifecycle state. These
+  // callbacks are the narrow boundary for operations which must touch the
+  // live display and its asynchronous MDV readers.
+
+  ImageGenerationManager::Callbacks imageCallbacks;
+  imageCallbacks.batchStarted = [this](const DateTime &imageTime) {
+    _timeControl->configureAutomaticImageTime(imageTime);
+  };
+  imageCallbacks.saveDisplayState = [this]() {
+    _saveAutomaticDisplayState();
+  };
+  imageCallbacks.restoreDisplayState = [this]() {
+    _restoreAutomaticDisplayState();
+  };
+  imageCallbacks.jobRequested = [this]() {
+    _startAutomaticImageJob();
+  };
+  imageCallbacks.cancelTimedOutRequest =
+    [this](const AutomaticImageGenerator::Job &job,
+           int expectedGeneration) {
+      _cancelTimedOutImageRequest(
+        job.fieldIndex,
+        job.type == AutomaticImageGenerator::JobType::Vertical,
+        expectedGeneration);
+    };
+  imageCallbacks.captureCurrentJob =
+    [this](ImageGenerationManager::Capture &capture, QString &error) {
+      return _captureAutomaticImage(
+        capture.image, capture.dataTime, capture.world,
+        capture.writeGeoXml, error);
+    };
+  imageCallbacks.runFinished = [](bool success) {
+    QTimer::singleShot(0, qApp, [success]() {
+      QCoreApplication::exit(success ? EXIT_SUCCESS : EXIT_FAILURE);
+    });
+  };
+  _imageGenerationManager = new ImageGenerationManager(
+    _params, _gd.num_datafields, std::move(imageCallbacks), this);
   
   _timeControl = NULL;
   _timeControlPlaced = false;
 
-  _imagesStartTime.set(_params.images_archive_start_time);
-  _imagesEndTime.set(_params.images_archive_end_time);
-  _imagesScanIntervalSecs = _params.images_scan_interval_secs;
-
-  // set up ray locators
-
-  // _rayLoc.resize(RayLoc::RAY_LOC_N);
-
   // set up windows
 
   _setupWindows();
-
-  // init for timer
-  
-  redraw_interv = _params.redraw_interval;
-  update_interv = _params.update_interval;
-  update_due = 0;
-  last_frame_tm = {0,0};
-  last_dcheck_tm = {0,0};
-  last_tick = 0;
-  client_seq_num = 0;
-
-  // startup mode
-  
-  setArchiveMode(_params.start_mode == Params::MODE_ARCHIVE);
-  _archiveStartTime.set(_params.archive_start_time);
 
   // qt attributes
   
@@ -277,18 +428,17 @@ GuiManager::~GuiManager()
 
 {
 
+  // Stop the manager-owned timers and release callbacks into this object
+  // before Qt tears down child views or data managers they may reference.
+  delete _imageGenerationManager;
+  _imageGenerationManager = nullptr;
+  delete _movieManager;
+  _movieManager = nullptr;
+
   if (_gd.prod_mgr) {
     _gd.prod_mgr->setProductsChangedCallback(std::function<void()>());
     _gd.prod_mgr->setStatusCallback(
       std::function<void(const string &, bool)>());
-  }
-
-  if (_horiz) {
-    delete _horiz;
-  }
-
-  if (_vert) {
-    delete _vert;
   }
 
 }
@@ -323,7 +473,8 @@ int GuiManager::run(QApplication &app)
 
 void GuiManager::enableUnzoomButtons(bool val) const
 {
-  const bool spatialChangesAllowed = !isMovieActive();
+  const bool spatialChangesAllowed =
+    !_params.create_images_automatically && !isMovieActive();
   _zoomBackAct->setEnabled(spatialChangesAllowed && val);
   _zoomOutAct->setEnabled(spatialChangesAllowed && val);
   if (!spatialChangesAllowed) {
@@ -361,246 +512,51 @@ void GuiManager::setZoomIndex(int zoomIndex)
 //   _horiz->setXyZoom(minY, maxY, minX, maxX);
 // }
 
-/////////////////////////////////////
-// set archive mode
-
-void GuiManager::setArchiveMode(bool state)
-{
-
-  _archiveMode = state;
-  
-}
-
 ////////////////////////////////////////////////////////
 // initialize storage and request state for a new movie build
 
 void GuiManager::prepareMovieBuild(int frameCount)
 {
-  _movieBuildFrame = -1;
-  _movieGridReady = false;
-  _movieIncludesVertical = _vertWindow && _vert &&
+  const bool includeVertical = _vertWindow && _vert &&
     _vertWindow->isVisible() && _vsectionRoute.size() >= 2;
-  _movieVerticalReady = !_movieIncludesVertical;
-  _movieVerticalRequestGeneration = -1;
-  _movieFieldLabel = getSelectedFieldLabel();
-  if (_horiz) {
-    _horiz->clearMovieFrames(frameCount);
-  }
-  if (_vert) {
-    _vert->clearMovieFrames(_movieIncludesVertical ? frameCount : 0);
-  }
-  // Force frame zero to be rebuilt even when it is already the live frame.
-  if (_gd.prod_mgr) {
-    _gd.prod_mgr->reset_product_valid_flags();
-  }
+  _terrainHorizontalSettled = true;
+  _terrainHorizontalRequestPending = false;
+  _terrainVerticalSettled = true;
+  _movieManager->prepareBuild(
+    frameCount, includeVertical,
+    QString::fromStdString(getSelectedFieldLabel()));
 }
 
 void GuiManager::beginMovieFrameBuild(int frameIndex)
 {
-  _movieBuildFrame = frameIndex;
-  _movieGridReady = false;
-  _movieVerticalReady = !_movieIncludesVertical;
-  _movieVerticalRequestGeneration = -1;
-  _horizontalRequestHasChanged = true;
-  if (_horiz) {
-    _horiz->stopMoviePlayback();
-  }
-  if (_movieIncludesVertical && _vert) {
-    _vert->stopMoviePlayback();
-    _movieVerticalRequestGeneration = _requestVerticalSection();
-    if (_movieVerticalRequestGeneration < 0) {
-      // Do not deadlock movie construction if the retained route can no
-      // longer produce a request. The captured vertical frame will show the
-      // current no-data state for this time.
-      _movieVerticalReady = true;
-    }
-  }
-  statusBar()->showMessage(
-    tr("Building movie frame %1 of %2")
-      .arg(frameIndex + 1).arg(_timeControl->getNFramesMovie()));
+  _movieManager->beginFrameBuild(
+    frameIndex, _timeControl ? _timeControl->getNFramesMovie() : 0);
 }
 
 void GuiManager::cancelMovieBuild()
 {
-  _movieBuildFrame = -1;
-  _movieGridReady = false;
-  _movieIncludesVertical = false;
-  _movieVerticalReady = false;
-  _movieVerticalRequestGeneration = -1;
+  _movieManager->cancelBuild();
+  _terrainVerticalSettled = true;
 }
 
 bool GuiManager::showMovieFrame(int frameIndex)
 {
-  if (!_horiz || !_horiz->hasMovieFrame(frameIndex) ||
-      (_movieIncludesVertical &&
-       (!_vert || !_vert->hasMovieFrame(frameIndex)))) {
-    return false;
-  }
-  if (!_horiz->showMovieFrame(frameIndex)) {
-    return false;
-  }
-  return !_movieIncludesVertical || _vert->showMovieFrame(frameIndex);
+  return _movieManager->showFrame(frameIndex);
 }
 
 bool GuiManager::exportMovieLoop(QString &message)
 {
-  message.clear();
-  if (!_timeControl || !_horiz) {
-    message = tr("The movie views are not available.");
+  if (!_timeControl) {
+    message = tr("The movie time controller is not available.");
     return false;
   }
-
-  const int frameCount = _timeControl->getNFramesMovie();
-  if (frameCount < 1) {
-    message = tr("The movie contains no frames.");
-    return false;
-  }
-  for (int frameIndex = 0; frameIndex < frameCount; ++frameIndex) {
-    if (!_horiz->hasMovieFrame(frameIndex) ||
-        (_movieIncludesVertical &&
-         (!_vert || !_vert->hasMovieFrame(frameIndex)))) {
-      message = tr("Movie frame %1 is not ready for output.")
-        .arg(frameIndex + 1);
-      return false;
-    }
-  }
-
-  QString outputDirPath = QString::fromUtf8(_params.images_output_dir);
-  outputDirPath.replace("$(HOME)", QDir::homePath());
-  if (outputDirPath.startsWith("$HOME")) {
-    outputDirPath.replace(0, 5, QDir::homePath());
-  }
-  if (outputDirPath.trimmed().isEmpty()) {
-    message = tr("images_output_dir is empty.");
-    return false;
-  }
-  outputDirPath = QDir::cleanPath(outputDirPath);
-  QDir outputDir;
-  if (!outputDir.mkpath(outputDirPath)) {
-    message = tr("Cannot create the output directory:\n%1")
-      .arg(outputDirPath);
-    return false;
-  }
-  outputDir.setPath(outputDirPath);
-
-  QString extension = safeFileNameComponent(
-    QString::fromUtf8(_params.images_file_name_extension)).toLower();
-  if (extension.startsWith('.')) {
-    extension.remove(0, 1);
-  }
-  if (extension.isEmpty() || extension == "field") {
-    extension = "png";
-  }
-  // Playback permits the live field selection to change, so name the files
-  // from the display configuration captured when this cache was built.
-  const QString fieldPart = safeFileNameComponent(
-    QString::fromStdString(_movieFieldLabel));
-  const QString startPart = QDateTime::fromSecsSinceEpoch(
-    _timeControl->getStartTime().utime(), Qt::UTC)
-    .toString("yyyyMMdd_HHmmss'_UTC'");
-
-  // One shared suffix keeps the horizontal and vertical sequences paired.
-  // Checking every target prevents a repeated export from replacing even a
-  // partially retained earlier sequence.
-  QString seriesSuffix;
-  for (int sequence = 1; ; ++sequence) {
-    seriesSuffix = sequence == 1 ? QString() :
-      QString("_%1").arg(sequence, 2, 10, QChar('0'));
-    bool collision = false;
-    for (int frameIndex = 0; frameIndex < frameCount; ++frameIndex) {
-      const QString framePart = QString("_%1.%2")
-        .arg(frameIndex + 1, 3, 10, QChar('0')).arg(extension);
-      const QString commonPart = fieldPart + "_" + startPart +
-        seriesSuffix + framePart;
-      collision = QFileInfo::exists(outputDir.filePath(
-        "lucid_horiz_" + commonPart)) ||
-        (_movieIncludesVertical && QFileInfo::exists(outputDir.filePath(
-          "lucid_vert_" + commonPart)));
-      if (collision) {
-        break;
-      }
-    }
-    if (!collision) {
-      break;
-    }
-  }
-
-  QStringList horizontalFiles;
-  QStringList verticalFiles;
-  for (int frameIndex = 0; frameIndex < frameCount; ++frameIndex) {
-    const QString framePart = QString("_%1.%2")
-      .arg(frameIndex + 1, 3, 10, QChar('0')).arg(extension);
-    const QString commonPart = fieldPart + "_" + startPart +
-      seriesSuffix + framePart;
-    const QString horizontalPath = outputDir.filePath(
-      "lucid_horiz_" + commonPart);
-    if (!_horiz->movieFrameImage(frameIndex).save(horizontalPath)) {
-      message = tr("Could not save movie frame:\n%1").arg(horizontalPath);
-      return false;
-    }
-    horizontalFiles.push_back(horizontalPath);
-
-    if (_movieIncludesVertical) {
-      const QString verticalPath = outputDir.filePath(
-        "lucid_vert_" + commonPart);
-      if (!_vert->movieFrameImage(frameIndex).save(verticalPath)) {
-        message = tr("Could not save movie frame:\n%1").arg(verticalPath);
-        return false;
-      }
-      verticalFiles.push_back(verticalPath);
-    }
-  }
-
-  QStringList convertersStarted;
-  const QString converter = QString::fromUtf8(
-    _params.series_convert_script).trimmed();
-  auto startConverter = [&](const QStringList &files,
-                            const QString &viewName) {
-    if (converter.isEmpty()) {
-      return true;
-    }
-    QStringList command = QProcess::splitCommand(converter);
-    if (command.isEmpty()) {
-      return true;
-    }
-    const QString program = command.takeFirst();
-    command.append(files);
-    if (!QProcess::startDetached(program, command, outputDirPath)) {
-      message = tr("Saved %1 frames in:\n%2\n\n"
-                   "Could not start converter: %3")
-        .arg(frameCount).arg(outputDirPath, converter);
-      return false;
-    }
-    convertersStarted.push_back(viewName);
-    return true;
-  };
-
-  if (!startConverter(horizontalFiles, tr("horizontal")) ||
-      (_movieIncludesVertical &&
-       !startConverter(verticalFiles, tr("vertical")))) {
-    return false;
-  }
-
-  const int fileCount = horizontalFiles.size() + verticalFiles.size();
-  message = tr("Saved %1 image files in:\n%2")
-    .arg(fileCount).arg(outputDirPath);
-  if (!convertersStarted.isEmpty()) {
-    message += tr("\n\nStarted %1 for the %2 sequence(s).")
-      .arg(converter, convertersStarted.join(tr(" and ")));
-  } else {
-    message += tr("\n\nNo animation converter was configured.");
-  }
-  return true;
+  return _movieManager->exportLoop(
+    _timeControl->getNFramesMovie(), _timeControl->getStartTime(), message);
 }
 
 void GuiManager::stopMoviePlayback()
 {
-  if (_horiz) {
-    _horiz->stopMoviePlayback();
-  }
-  if (_vert) {
-    _vert->stopMoviePlayback();
-  }
+  _movieManager->stopPlayback();
 }
 
 void GuiManager::restoreLiveDisplayAfterMovie()
@@ -635,47 +591,64 @@ bool GuiManager::isMovieActive() const
   return _timeControl && _timeControl->isMovieActive();
 }
 
+int GuiManager::getTimelineFrameCount() const
+{
+  return _timeControl ? _timeControl->getFrameCount() : 0;
+}
+
+int GuiManager::getTimelineFrameIndex() const
+{
+  return _timeControl ? _timeControl->getFrameIndex() : -1;
+}
+
+const TimelineFrame *GuiManager::getTimelineFrame(int frameIndex) const
+{
+  return _timeControl ? _timeControl->getFrame(frameIndex) : nullptr;
+}
+
 void GuiManager::movieStateChanged()
 {
   const bool building = isMovieBuilding();
   const bool active = isMovieActive();
+  const bool interactive = !_params.create_images_automatically;
 
   // A movie build must capture one stable display configuration. Playback is
   // less restrictive: field and level choices may update the hidden live
   // state and become visible after Stop, but spatial transforms would make
-  // the immutable cached frames incompatible with that state.
+  // the immutable cached frames incompatible with that state. Automated image
+  // instances remain permanently non-interactive even as movie state changes.
   if (_fieldTable) {
-    _fieldTable->setEnabled(!building);
+    _fieldTable->setEnabled(interactive && !building);
   }
   if (_vlevelSelector) {
-    _vlevelSelector->setEnabled(!building);
+    _vlevelSelector->setEnabled(interactive && !building);
   }
   if (_mapsMenu) {
-    _mapsMenu->setEnabled(!building);
+    _mapsMenu->setEnabled(interactive && !building);
   }
   if (_windsMenu) {
-    _windsMenu->setEnabled(!building);
+    _windsMenu->setEnabled(interactive && !building);
   }
   if (_productsMenu) {
-    _productsMenu->setEnabled(!building);
+    _productsMenu->setEnabled(interactive && !building);
   }
   if (_overlaysMenu) {
-    _overlaysMenu->setEnabled(!building);
+    _overlaysMenu->setEnabled(interactive && !building);
   }
   if (_reloadAct) {
-    _reloadAct->setEnabled(!building);
+    _reloadAct->setEnabled(interactive && !building);
   }
   if (_clearAct) {
-    _clearAct->setEnabled(!building);
+    _clearAct->setEnabled(interactive && !building);
   }
   if (_zoomsMenu) {
-    _zoomsMenu->setEnabled(!active);
+    _zoomsMenu->setEnabled(interactive && !active);
   }
   if (_showValueAct) {
-    _showValueAct->setEnabled(!active);
+    _showValueAct->setEnabled(interactive && !active);
   }
   if (_showClickAct) {
-    _showClickAct->setEnabled(!active);
+    _showClickAct->setEnabled(interactive && !active);
   }
   if (_horiz) {
     _horiz->setMovieInteractionActive(active);
@@ -687,7 +660,8 @@ void GuiManager::movieStateChanged()
     // A cached vertical loop may be hidden and reopened. If no vertical cache
     // was selected at Start, opening a live section during horizontal-only
     // playback would imply synchronization which does not exist.
-    _showVertAct->setEnabled(!active || _movieIncludesVertical);
+    _showVertAct->setEnabled(
+      interactive && (!active || _movieManager->includesVertical()));
   }
 
   enableUnzoomButtons(_horiz && !_horiz->getCustomZooms().empty());
@@ -698,28 +672,71 @@ void GuiManager::showMovieInteractionBlocked()
   statusBar()->showMessage(tr("Stop the movie to change the view"), 3000);
 }
 
+/////////////////////////////////////////////////////////////
+// set visibility and request state for terrain in both field views
+
+void GuiManager::setTerrainEnabled(bool enabled)
+{
+  MdvReader *terrain = _gd.layers.earth.terr;
+  const bool active = enabled && terrain != nullptr;
+  _params.terrain_active = active ? pTRUE : pFALSE;
+  _gd.layers.earth.terrain_active = active ? 1 : 0;
+
+  if (!active) {
+    // A hidden optional layer must not hold a movie or automatic image open.
+    // Supersede its asynchronous request so a late completion cannot restore
+    // terrain after the user has switched it off.
+    if (terrain != nullptr && _terrainVerticalRequestGeneration >= 0) {
+      terrain->cancelVertRequest(_terrainVerticalRequestGeneration);
+    }
+    if (terrain != nullptr && _terrainHorizontalRequestGeneration >= 0) {
+      terrain->cancelHorizRequest(_terrainHorizontalRequestGeneration);
+    }
+    _terrainHorizontalRequestGeneration = -1;
+    _terrainHorizontalRequestPending = false;
+    _terrainHorizontalSettled = true;
+    _terrainVerticalRequestGeneration = -1;
+    _terrainVerticalSettled = true;
+    if (_horiz != nullptr) {
+      _horiz->rerenderGrid();
+    }
+    if (_vert != nullptr) {
+      _vert->rerenderTerrain();
+    }
+    _checkMovieFrameReady();
+    _checkAutomaticImageReady();
+    return;
+  }
+
+  // Either view may have changed while terrain was hidden. Reissue each
+  // applicable request rather than assuming the cached geometry still fits.
+  _requestHorizontalTerrain();
+  _requestVerticalTerrain();
+  if (_horiz != nullptr) {
+    _horiz->rerenderGrid();
+  }
+  if (_vert != nullptr) {
+    _vert->rerenderTerrain();
+  }
+}
+
 void GuiManager::_checkMovieFrameReady()
 {
-  if (_movieBuildFrame < 0 || !_movieGridReady || !_movieVerticalReady ||
-      !_horiz || !_timeControl) {
+  if (!_movieManager || _movieManager->buildFrame() < 0) {
     return;
   }
   const bool productsReady = !_gd.prod.products_on || !_gd.prod_mgr ||
     _gd.prod_mgr->activeProductsReady();
-  if (!productsReady) {
-    return;
-  }
-
-  const int completedFrame = _movieBuildFrame;
-  _movieBuildFrame = -1;
-  _movieGridReady = false;
-  _movieVerticalReady = false;
-  const bool horizCaptured = _horiz->captureMovieFrame(completedFrame);
-  const bool vertCaptured = !_movieIncludesVertical ||
-    (_vert && _vert->captureMovieFrame(completedFrame));
-  if (horizCaptured && vertCaptured) {
-    _timeControl->movieFrameRendered(completedFrame);
-  }
+  const bool horizontalWindsReady = !_gd.wind_mgr ||
+    _gd.wind_mgr->activeWindsReady();
+  const bool verticalWindsReady =
+    !_movieManager->includesVertical() || !_gd.wind_mgr ||
+    _gd.wind_mgr->activeVerticalWindsSettled();
+  const bool verticalTerrainReady =
+    !_movieManager->includesVertical() || _terrainVerticalSettled;
+  _movieManager->checkFrameReady(
+    productsReady && horizontalWindsReady && verticalWindsReady &&
+    _terrainHorizontalSettled && verticalTerrainReady);
 }
 
 //////////////////////////////////////////////////
@@ -729,7 +746,17 @@ void GuiManager::setTitleBarStr(const string &titleStr)
 {
   setWindowTitle(tr(titleStr.c_str()));
 }
-  
+
+//////////////////////////////////////////////////
+// selected field metadata
+
+const string &GuiManager::getSelectedFieldLabel() const
+{
+  static const string empty;
+  return _fieldNum >= 0 && _fieldNum < _gd.num_datafields &&
+    _gd.mread[_fieldNum] ? _gd.mread[_fieldNum]->legend_name : empty;
+}
+
 //////////////////////////////////////////////////////////////
 // respond to timer events
   
@@ -762,10 +789,15 @@ void GuiManager::timerEvent(QTimerEvent *event)
     _placeTimeControl();
   }
 
-  // read click point info from FMQ
-  
-  _readClickPoint();
-  
+  // Wait until the initial show/resize events have settled. Automatic output
+  // captures the configured canvas geometry, so starting during the resize
+  // debounce could associate a completed read with an obsolete transform.
+  if (_params.create_images_automatically &&
+      !_imageGenerationManager->isStarted() &&
+      _timerEventCount > 10 && !_resizeTimer->isActive()) {
+    _imageGenerationManager->start();
+  }
+
   // handle client events
   
   if(_gd.coord_expt->client_event != NO_MESSAGE) {
@@ -778,6 +810,23 @@ void GuiManager::timerEvent(QTimerEvent *event)
   if (!mr->getReadBusyH()) {
     // read the H data if needed
     _checkAndReadH(mr);
+  }
+
+  // U and V complete independently. Publish a new wind overlay only after
+  // the manager has revalidated the pair for the current display request.
+  if (_gd.wind_mgr && _gd.wind_mgr->poll()) {
+    if (_horiz) {
+      _horiz->rerenderWinds();
+    }
+    _checkMovieFrameReady();
+    _checkAutomaticImageReady();
+  }
+  if (_gd.wind_mgr && _gd.wind_mgr->pollVertical()) {
+    if (_vert) {
+      _vert->rerenderWinds();
+    }
+    _checkMovieFrameReady();
+    _checkAutomaticImageReady();
   }
   
 }
@@ -813,6 +862,14 @@ void GuiManager::_resizeFinished()
 ////////////////////////////////////////////////////////////////
 void GuiManager::keyPressEvent(QKeyEvent * e)
 {
+
+  // Automatic image instances are display engines rather than interactive
+  // viewers. Consume main-window shortcuts here because disabling the child
+  // controls alone does not prevent field, time, or level keyboard actions.
+  if (_params.create_images_automatically) {
+    e->accept();
+    return;
+  }
 
   // get key pressed
   
@@ -881,19 +938,6 @@ void GuiManager::keyPressEvent(QKeyEvent * e)
 
 }
 
-/////////////////////////////////////
-// clear display widgets
-
-void GuiManager::_clear()
-{
-  if (_horiz) {
-    _horiz->clear();
-  }
-  if (_vert) {
-    _vert->clear();
-  }
-}
-
 //////////////////////////////////////////////////
 // set up windows and widgets
   
@@ -931,6 +975,7 @@ void GuiManager::_setupWindows()
         _timeControl->refreshDataAvailability();
       }
       _checkMovieFrameReady();
+      _checkAutomaticImageReady();
     });
     _gd.prod_mgr->setStatusCallback(
       [this](const string &message, bool isError) {
@@ -953,27 +998,21 @@ void GuiManager::_setupWindows()
   // set pointer to the vertWidget
   
   _vert = _vertWindow->getView();
+  // Each view owns the projection-specific sampling while GuiManager owns
+  // the one shared dialog and its visibility policy.
+  const auto displayClickReport = [this](const ClickReport &report) {
+    updateClickReport(report);
+    showClickDialog();
+  };
+  connect(_horiz, &HorizView::clickReportAvailable,
+          this, displayClickReport);
   connect(_vert, &VertView::clickReportAvailable,
-          this, [this](const ClickReport &report) {
-            updateClickReport(report);
-            showClickDialog();
-          });
-  
-  // connect slots for location
+          this, displayClickReport);
 
-#ifdef NOTNOW
-  connect(_horiz, &HorizView::locationClicked,
-          this, &GuiManager::_horizLocationClicked);
-  connect(_vert, &VertWidget::locationClicked,
-          this, &GuiManager::_vertLocationClicked);
-#endif
-
-  // add a right-click context menu to the image
-  setContextMenuPolicy(Qt::CustomContextMenu);
-
-  // customContextMenuRequested(e->pos());
+  // Right-button gestures select vertical sections, so HorizView emits this
+  // request only for the explicit Shift-right-click help gesture.
   connect(_horiz, &HorizView::customContextMenuRequested,
-	  this, &GuiManager::ShowContextMenu);
+	  this, &GuiManager::_showInteractionHelp);
 
   // vlevel selector
 
@@ -1035,14 +1074,8 @@ void GuiManager::_setupWindows()
   _vertWindow->move(vertX, vertY);
 
   // set up click report dialog
+
   _createClickReportDialog();
-
-  // createBoundaryEditorDialog();
-
-  // if (_archiveMode) {
-  //   _showTimeControl();
-  // }
-  // _setVlevelPanelVisibility();
 
   // set up status bar
 
@@ -1053,7 +1086,52 @@ void GuiManager::_setupWindows()
           "  padding: 4px 6px;"
           "}"
                              );
+
+  _configureAutomaticImageUi();
   
+}
+
+/////////////////////////////////////////////////////////////
+// reserve an automatic-image instance for unattended rendering
+
+void GuiManager::_configureAutomaticImageUi()
+{
+  if (!_params.create_images_automatically) {
+    return;
+  }
+
+  // The generator still drives these objects programmatically. Disable their
+  // user input at the widget and action boundary so an unattended run cannot
+  // have its field, time, geometry, or overlays changed midway through a job.
+  _fieldMenu->setDisabled(true);
+  _timeControl->setDisabled(true);
+  _vlevelSelector->setDisabled(true);
+  _horiz->setDisabled(true);
+  _vertWindow->setDisabled(true);
+
+  // Image dimensions are part of the unattended product definition. Preserve
+  // the configured startup geometry while still leaving window Close and the
+  // File/Exit action available for operational shutdown.
+  setFixedSize(size());
+  _vertWindow->setFixedSize(_vertWindow->size());
+
+  _showFieldMenuAct->setEnabled(false);
+  _showTimeControlAct->setEnabled(false);
+  _saveImageAct->setEnabled(false);
+  _reloadAct->setEnabled(false);
+  _clearAct->setEnabled(false);
+  _zoomBackAct->setEnabled(false);
+  _zoomOutAct->setEnabled(false);
+  _mapsMenu->setEnabled(false);
+  _productsMenu->setEnabled(false);
+  _windsMenu->setEnabled(false);
+  _zoomsMenu->setEnabled(false);
+  _overlaysMenu->setEnabled(false);
+  _showMenu->setEnabled(false);
+
+  _clickReportDialog->hide();
+  statusBar()->showMessage(
+    tr("Automatic image generation: interactive controls are disabled"));
 }
 
 ///////////////////////////////////////////////////////
@@ -1177,13 +1255,17 @@ void GuiManager::_createActions()
   // file chooser for Open
   _openFileAct = new QAction(tr("O&pen"), this);
   _openFileAct->setShortcut(tr("Ctrl+F"));
-  _openFileAct->setStatusTip(tr("Open File"));
+  _openFileAct->setStatusTip(
+    tr("Open a new parameter file (not yet implemented)"));
+  _openFileAct->setEnabled(false);
   connect(_openFileAct, &QAction::triggered, this, &GuiManager::_openFile);
 
   // file chooser for Save
   _saveFileAct = new QAction(tr("S&ave"), this);
   //_saveFileAct->setShortcut(tr("Ctrl+S"));
-  _saveFileAct->setStatusTip(tr("Save File"));
+  _saveFileAct->setStatusTip(
+    tr("Save interactive settings to a parameter file (not yet implemented)"));
+  _saveFileAct->setEnabled(false);
   connect(_saveFileAct, &QAction::triggered, this, &GuiManager::_saveFile);
 
   // unzoom
@@ -1358,8 +1440,8 @@ void GuiManager::_populateMapsMenu()
 
     // create action for this entry
 
-    MapMenuItem *item = new MapMenuItem(nullptr, this);
-    QAction *act = new QAction;
+    MapMenuItem *item = new MapMenuItem(this, this);
+    QAction *act = new QAction(item);
     item->setMapParams(&mparams);
     item->setMapIndex(imap);
     item->setOverlay(_gd.overlays[imap]);
@@ -1389,8 +1471,19 @@ void GuiManager::_populateMapsMenu()
 void GuiManager::_setMapsEnabled(bool enable)
 {
   _mapsEnabled = enable;
+  mapDisplayChanged();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> maps enabled? " << (_mapsEnabled?"Y":"N") << endl;
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// rebuild cached map graphics without invalidating field data
+
+void GuiManager::mapDisplayChanged()
+{
+  if (_horiz != nullptr) {
+    _horiz->rerenderMaps();
   }
 }
 
@@ -1422,9 +1515,9 @@ void GuiManager::_populateProductsMenu()
     
     // create action for this entry
 
-    ProdMenuItem *item = new ProdMenuItem;
+    ProdMenuItem *item = new ProdMenuItem(this);
     const Product *product = _gd.prod_mgr->getProduct(iprod);
-    QAction *act = new QAction;
+    QAction *act = new QAction(item);
     item->setProdParams(&prodParams);
     item->setProduct(product);
     item->setProdIndex(iprod);
@@ -1504,22 +1597,30 @@ void GuiManager::_populateWindsMenu()
 
     // create action for this entry
 
-    WindMenuItem *item = new WindMenuItem;
-    QAction *act = new QAction;
-    item->setWindParams(&wparams);
-    item->setWindIndex(iwind);
-    item->setWindData(&_gd.layers.wind[iwind]);
-    item->setAction(act);
+    QAction *act = new QAction(_windsMenu);
     act->setText(wparams.button_label);
     act->setStatusTip(tr("Turn wind layer on/off"));
     act->setCheckable(true);
     act->setChecked(wparams.on_at_startup);
-    connect(act, &QAction::toggled,
-            item, &WindMenuItem::toggled);
-    
-    // add item for wind selection
-    
-    _windMenuItems.push_back(item);
+    connect(act, &QAction::toggled, this,
+            [this, iwind](bool checked) {
+      _params._winds[iwind].on_at_startup =
+        static_cast<tdrp_bool_t>(checked);
+      if (_gd.wind_mgr) {
+        _gd.wind_mgr->setLayerEnabled(iwind, checked);
+        _gd.wind_mgr->requestData(_timeControl->getSelectedTime().utime(),
+                                  _vlevelManager.getRequestedLevel(),
+                                  _fieldNum);
+        _requestVerticalWinds();
+      }
+      if (_horiz) {
+        _horiz->rerenderWinds();
+      }
+      if (_vert) {
+        _vert->rerenderWinds();
+      }
+      _checkAutomaticImageReady();
+    });
 
     // add to winds menu
 
@@ -1535,6 +1636,21 @@ void GuiManager::_populateWindsMenu()
 void GuiManager::_setWindsEnabled(bool enable)
 {
   _windsEnabled = enable;
+  _params.winds_on_at_startup = static_cast<tdrp_bool_t>(enable);
+  if (_gd.wind_mgr) {
+    _gd.wind_mgr->setEnabled(enable);
+    _gd.wind_mgr->requestData(_timeControl->getSelectedTime().utime(),
+                              _vlevelManager.getRequestedLevel(),
+                              _fieldNum);
+    _requestVerticalWinds();
+  }
+  if (_horiz) {
+    _horiz->rerenderWinds();
+  }
+  if (_vert) {
+    _vert->rerenderWinds();
+  }
+  _checkAutomaticImageReady();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "==>> winds enabled? " << (_windsEnabled?"Y":"N") << endl;
   }
@@ -1568,13 +1684,13 @@ void GuiManager::_populateZoomsMenu()
     
     // create item for this entry
     
-    ZoomMenuItem *item = new ZoomMenuItem(nullptr, this);
+    ZoomMenuItem *item = new ZoomMenuItem(this, this);
     item->setZoomParams(&zparams);
     item->setZoomIndex(izoom);
 
     // create action for the item
     
-    QAction *act = new QAction;
+    QAction *act = new QAction(item);
     item->setAction(act);
     act->setText(zparams.label);
     act->setStatusTip(tr("Select predefined zoom"));
@@ -2036,8 +2152,6 @@ void GuiManager::_fieldTableCellClicked(int row, int col)
     return;
   }
   
-  _gd.prev_field = _gd.h_win.page;
-  _setField(_fieldNum);
   _gd.mread[_fieldNum]->h_data_valid = 0;
 
   if (_params.debug) {
@@ -2050,11 +2164,6 @@ void GuiManager::_fieldTableCellClicked(int row, int col)
     cerr << "      legend_name: " << _gd.mread[_fieldNum]->legend_name << endl;
   }
 
-  // _gd.redraw_horiz = true;
-  _gd.field_has_changed = true;
-  _gd.selected_field = _fieldNum;
-  _gd.h_win.page = _fieldNum;
-
   _fieldHasChanged = true;
 
   // A completed route describes display geometry rather than a particular
@@ -2066,61 +2175,6 @@ void GuiManager::_fieldTableCellClicked(int row, int col)
   }
   
 }
-
-/*************************************************************************
- * Set proper flags which switching fields 
- */
-
-void GuiManager::_setField(int value)
-{
-
-  static int last_page = 0;
-  static int last_value = 0;
-  static int cur_value = 0;
-  
-  if(value < 0) {
-    int tmp = last_page;
-    last_page = _gd.h_win.page;
-    _gd.h_win.page = tmp;
-    _gd.v_win.page = tmp;
-    tmp = cur_value;
-    cur_value = last_value;
-    value = last_value;
-    last_value = tmp;
-  } else {
-    last_page = _gd.h_win.page;
-    last_value = cur_value;
-    cur_value = value;
-    _gd.h_win.page = _gd.field_index[value];
-    _gd.v_win.page = _gd.field_index[value];
-  }
-  
-  for(int i=0; i < _gd.num_datafields; i++) {
-    if(_gd.mread[i]->auto_render == 0) _gd.h_win.redraw_flag[i] = 1;
-  }
-  
-  if(_gd.mread[_gd.h_win.page]->auto_render && 
-     _gd.h_win.page_pdev[_gd.h_win.page] != 0 &&
-     _gd.h_win.redraw_flag[_gd.h_win.page] == 0) {
-
-#ifdef NOTNOW
-    save_h_movie_frame(_gd.movie.cur_frame,
-                       _gd.h_win.page_pdev[_gd.h_win.page],
-                       _gd.h_win.page);
-#endif
-    
-  }
-  
-  for(int i=0; i < Constants::MAX_FRAMES; i++) {
-    _gd.movie.frame[i].redraw_horiz = 1;
-  }
-  
-  if(_gd.movie.movie_on ) {
-    // reset_data_valid_flags(1,0);
-  }
-  
-}
-
 
 //////////////////////////////////////////////////////////////
 // check if we need new H data, and read accordingly
@@ -2156,19 +2210,29 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
   
   // get new data if needed - data is retrieved in a thread
   
-  int frameIndex = _gd.movie.cur_frame;
-  if (_gd.movie.cur_frame < 0) {
-    frameIndex = _gd.movie.num_frames - 1;
-  }
+  const int frameIndex = _timeControl->getFrameIndex();
+  const TimelineFrame *frame = _timeControl->getFrame(frameIndex);
 
   if (stateHasChanged) {
-    mr->requestHorizPlane(_timeControl->getSelectedTime().utime(),
-                          _vlevelManager.getRequestedLevel(),
-                          _gd.h_win.page);
-    if (_gd.prod_mgr && frameIndex >= 0 &&
-        frameIndex < _gd.movie.num_frames) {
-      const movie_frame_t &frame = _gd.movie.frame[frameIndex];
-      _gd.prod_mgr->requestData(frame.time_start, frame.time_end,
+    const int generation = mr->requestHorizPlane(
+      _timeControl->getSelectedTime().utime(),
+      _vlevelManager.getRequestedLevel(),
+      _fieldNum,
+      true);
+    if (_gd.wind_mgr) {
+      _gd.wind_mgr->requestData(_timeControl->getSelectedTime().utime(),
+                                _vlevelManager.getRequestedLevel(),
+                                _fieldNum);
+    }
+    if (_imageGenerationManager->isActive() &&
+        _imageGenerationManager->currentJobIsHorizontal() &&
+        _imageGenerationManager->hasCurrentJob() &&
+        _fieldNum == _imageGenerationManager->currentJob().fieldIndex &&
+        mr == _gd.mread[_fieldNum]) {
+      _imageGenerationManager->setExpectedGeneration(generation);
+    }
+    if (_gd.prod_mgr && frame) {
+      _gd.prod_mgr->requestData(frame->start, frame->end,
                                 _timeControl->getSelectedTime().utime(),
                                 _vlevelManager.getRequestedLevel(),
                                 *_horiz->getZoomWorld());
@@ -2184,21 +2248,32 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
     if (!mr->isValidH()) {
       cerr << "ERROR - GuiManager::timerEvent" << endl;
       cerr << "  mr->requestHorizPlane" << endl;
-      cerr << "  time_start: " << DateTime::strm(_gd.movie.frame[frameIndex].time_start) << endl;
-      cerr << "  time_end: " << DateTime::strm(_gd.movie.frame[frameIndex].time_end) << endl;
-      cerr << "  page: " << _gd.h_win.page << endl;
+      if (frame) {
+        cerr << "  time_start: " << DateTime::strm(frame->start) << endl;
+        cerr << "  time_end: " << DateTime::strm(frame->end) << endl;
+      }
+      cerr << "  page: " << _fieldNum << endl;
     }
-    int frameIndex = _gd.movie.cur_frame;
-    if (_gd.movie.cur_frame < 0) {
-      frameIndex = _gd.movie.num_frames - 1;
+    // The main header determines whether its vertical coordinate can be
+    // compared meaningfully with MSL terrain. Start that optional request
+    // before rendering so a retained terrain plane can be used immediately.
+    _requestHorizontalTerrain();
+    _horiz->triggerGridRendering(_fieldNum, frameIndex);
+    if (_imageGenerationManager->isActive() &&
+        _imageGenerationManager->currentJobIsHorizontal() &&
+        _imageGenerationManager->hasCurrentJob() &&
+        _fieldNum == _imageGenerationManager->currentJob().fieldIndex &&
+        mr == _gd.mread[_fieldNum] && mr->isValidH() &&
+        _imageGenerationManager->acceptDataCompletion(
+          mr->getHorizCompletedGeneration())) {
+      _checkAutomaticImageReady();
     }
-    _horiz->triggerGridRendering(_gd.h_win.page, frameIndex);
-    if (_movieBuildFrame == frameIndex) {
-      _movieGridReady = true;
+    if (_movieManager->buildFrame() == frameIndex) {
+      _movieManager->markGridReady(frameIndex);
       _checkMovieFrameReady();
     }
-    if (_gd.h_win.page < _gd.num_datafields) {
-      _vlevelManager.set(*_gd.mread[_gd.h_win.page]);
+    if (_fieldNum < _gd.num_datafields) {
+      _vlevelManager.set(*_gd.mread[_fieldNum]);
     }
     _vert->setSelectedHorizHeight(_vlevelManager.getSelectedLevel());
     _vlevelSelector->update();
@@ -2299,13 +2374,16 @@ void GuiManager::_reloadData()
   // Use the normal request path so a reload waits for any active horizontal
   // read and preserves the displayed image until replacement data arrive.
   _horizontalRequestHasChanged = true;
-  if (_gd.h_win.page >= 0 && _gd.h_win.page < _gd.num_datafields &&
-      _gd.mread[_gd.h_win.page]) {
-    _gd.mread[_gd.h_win.page]->invalidateTimeList();
+  if (_fieldNum >= 0 && _fieldNum < _gd.num_datafields &&
+      _gd.mread[_fieldNum]) {
+    _gd.mread[_fieldNum]->invalidateTimeList();
   }
   if (_gd.prod_mgr) {
     _gd.prod_mgr->reset_product_valid_flags();
     _gd.prod_mgr->refreshActiveProducts();
+  }
+  if (_gd.wind_mgr) {
+    _gd.wind_mgr->invalidate();
   }
 
   // A visible vertical section is part of the current display state.  Reuse
@@ -2327,189 +2405,6 @@ void GuiManager::_saveFile() {
 }
 
 
-#ifdef NOTNOW
-
-///////////////////////////////////////////////////
-// respond to a change in click location on the HORIZ
-
-void GuiManager::_horizLocationClicked(double xkm, double ykm, 
-                                       const RadxRay *closestRay)
-
-{
-
-  // find the relevant ray
-  // ignore closest ray sent in
-  
-  double azDeg = 0.0;
-  if (xkm != 0 || ykm != 0) {
-    azDeg = atan2(xkm, ykm) * RAD_TO_DEG;
-    if (azDeg < 0) {
-      azDeg += 360.0;
-    }
-  }
-  if (_params.debug) {
-    cerr << "    azDeg = " << azDeg << endl;
-  }
-  
-  int rayIndex = ((int) (azDeg * RayLoc::RAY_LOC_RES)) % RayLoc::RAY_LOC_N;
-  if (_params.debug) {
-    cerr << "    rayIndex = " << rayIndex << endl;
-  }
-  
-  const RadxRay *ray = _rayLoc[rayIndex].ray;
-  if (ray == NULL) {
-    // no ray data yet
-    if (_params.debug) {
-      cerr << "    No ray data yet..." << endl;
-      cerr << "      active = " << _rayLoc[rayIndex].active << endl;
-      cerr << "      startIndex = " << _rayLoc[rayIndex].startIndex << endl;
-      cerr << "      endIndex = " << _rayLoc[rayIndex].endIndex << endl;
-    }
-    return;
-  }
-
-  _locationClicked(xkm, ykm, ray);
-
-}
-
-///////////////////////////////////////////////////
-// respond to a change in click location on the VERT
-
-void GuiManager::_vertLocationClicked(double xkm, double ykm, 
-                                      const RadxRay *closestRay)
-  
-{
-
-  _locationClicked(xkm, ykm, closestRay);
-
-}
-
-////////////////////////////////////////////////////////////////////////
-// respond to a change in click location on one of the windows
-
-void GuiManager::_locationClicked(double xkm, double ykm,
-                                  const RadxRay *ray)
-  
-{
-
-  if (_params.debug) {
-    cerr << "*** Entering GuiManager::_locationClicked()" << endl;
-  }
-  
-  double rangeKm = sqrt(xkm * xkm + ykm * ykm);
-  int gateNum = (int) 
-    ((rangeKm - ray->getStartRangeKm()) / ray->getGateSpacingKm() + 0.5);
-
-  if (gateNum < 0 || gateNum >= (int) ray->getNGates()) {
-    //user clicked outside of ray
-    return;
-  }
-
-  if (_params.debug) {
-    cerr << "Clicked on location: xkm, ykm: " << xkm << ", " << ykm << endl;
-    cerr << "  rangeKm, gateNum: " << rangeKm << ", " << gateNum << endl;
-    cerr << "  az, el from ray: "
-         << ray->getAzimuthDeg() << ", "
-         << ray->getElevationDeg() << endl;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      ray->print(cerr);
-    }
-  }
-
-  DateTime rayTime(ray->getTimeSecs());
-  char text[256];
-  snprintf(text, 256, "%.4d/%.2d/%.2d",
-           rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
-  _dateClicked->setText(text);
-
-  snprintf(text, 256, "%.2d:%.2d:%.2d.%.3d",
-           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
-           ((int) (ray->getNanoSecs() / 1000000)));
-  _timeClicked->setText(text);
-  
-  _setText(text, sizeof(text), "%6.2f", ray->getElevationDeg());
-  _elevClicked->setText(text);
-  
-  _setText(text, sizeof(text), "%6.2f", ray->getAzimuthDeg());
-  _azClicked->setText(text);
-  
-  _setText(text, sizeof(text), "%d", gateNum);
-  _gateNumClicked->setText(text);
-  
-  _setText(text, sizeof(text), "%6.2f", rangeKm);
-  _rangeClicked->setText(text);
-
-  if (_radarAltKm > -9990) {
-    double gateHtKm = _beamHt.computeHtKm(ray->getElevationDeg(), rangeKm);
-    _setText(text, sizeof(text), "%6.2f (km)", gateHtKm);
-    _altitudeClicked->setText(text);
-  }
-
-  for (size_t ii = 0; ii < _fields.size(); ii++) {
-    _fields[ii]->setSelectValue(-9999.0);
-    _fields[ii]->setDialogText("----");
-  }
-
-  vector<RadxField *> rflds = ray->getFields();
-  for (size_t ifield = 0; ifield < rflds.size(); ifield++) {
-    const RadxField *field = rflds[ifield];
-  
-    const string fieldName = field->getName();
-    if (fieldName.size() == 0) {
-      continue;
-    }
-    Radx::fl32 *data = (Radx::fl32 *) field->getData();
-    double val = data[gateNum];
-    const string fieldUnits = field->getUnits();
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Field name, selected name: "
-	   << fieldName << ", "
-	   << _selectedName << endl;
-    }
-    if (fieldName == _selectedName) {
-      char text[128];
-      if (fabs(val) < 10000) {
-        snprintf(text, 128, "%g %s", val, fieldUnits.c_str());
-      } else {
-        snprintf(text, 128, "%g %s", -9999.0, fieldUnits.c_str());
-      }
-      _valueLabel->setText(text);
-    }
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Field name, units, val: "
-	   << field->getName() << ", "
-	   << field->getUnits() << ", "
-	   << val << endl;
-    }
-    for (size_t ii = 0; ii < _fields.size(); ii++) {
-      if (_fields[ii]->getName() == fieldName) {
-	_fields[ii]->setSelectValue(val);
-        char text[128];
-        if (fabs(val) > 10000) {
-          snprintf(text, 128, "----");
-        } else if (fabs(val) > 10) {
-          snprintf(text, 128, "%.2f", val);
-        } else {
-          snprintf(text, 128, "%.3f", val);
-        }
-        _fields[ii]->setDialogText(text);
-      }
-    }
-
-  } // ifield
-
-  // update the status panel
-  
-  _updateStatusPanel(ray);
-
-  // write the click location to FMQ
-
-  _writeClickPointXml2Fmq(ray, rangeKm, gateNum);
-  
-}
-
-#endif
-  
 /////////////////////////////////////
 // show the time controller dialog
 
@@ -2560,379 +2455,330 @@ void GuiManager::_placeTimeControl()
   
 }
 
-/////////////////////////////////////////////////////
-// creating image files in realtime mode
+/////////////////////////////////////////////////////////////
+// preserve the live display while a realtime catalog batch takes control
 
-void GuiManager::_createRealtimeImageFiles()
+void GuiManager::_saveAutomaticDisplayState()
 {
-
-  // int interval = _params.images_schedule_interval_secs;
-  // int delay = _params.images_schedule_delay_secs;
-  // time_t latestRayTime = _readerRayTime.utime();
-  
-  // initialize the schedule if required
-
-  if (_imagesScheduledTime.utime() == 0) {
-    // if (latestRayTime == 0) {
-    //   // no data yet
-    //   return;
-    // }
-    // time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
-    // _imagesScheduledTime.set(nextUtime + delay);
-    // if (_params.debug) {
-    //   cerr << "Next scheduled time for images: " 
-    //        << _imagesScheduledTime.asString() << endl;
-    // }
+  if (_automaticDisplayStateSaved) {
+    return;
   }
-  
-  // if (_readerRayTime > _imagesScheduledTime) {
-    
-  //   // create images
-
-  //   _timeControl->setArchiveEndTime(_imagesScheduledTime - delay);
-  //   _timeControl->setArchiveStartTime
-  //     (_timeControl->getArchiveEndTime() - _imagesScanIntervalSecs);
-  //   _createImageFilesAllSweeps();
-
-  //   // set next scheduled time
-    
-  //   time_t nextUtime = ((latestRayTime / interval) + 1) * interval;
-  //   _imagesScheduledTime.set(nextUtime + delay);
-  //   if (_params.debug) {
-  //     cerr << "Next scheduled time for images: "
-  //          << _imagesScheduledTime.asString() << endl;
-  //   }
-
-  // }
-
+  _automaticSavedField = _fieldNum;
+  _automaticSavedZoom = _horiz ? _horiz->getZoomIndex() : 0;
+  _automaticSavedHeight = _vlevelManager.getRequestedLevel();
+  _automaticSavedStartTime = _timeControl->getStartTime();
+  _automaticSavedFrameCount = _timeControl->getNFramesMovie();
+  _automaticSavedFrameIntervalSecs = _timeControl->getFrameIntervalSecs();
+  _automaticSavedFrameIndex = _timeControl->getFrameIndex();
+  _automaticSavedRealtime = _timeControl->isRealtime();
+  _automaticSavedVertWindowVisible =
+    _vertWindow != nullptr && _vertWindow->isVisible();
+  _automaticSavedVsectionRoute = _vsectionRoute;
+  _automaticDisplayStateSaved = true;
 }
 
-/////////////////////////////////////////////////////
-// creating image files in archive mode
+/////////////////////////////////////////////////////////////
+// return control to the accepted display between realtime batches
 
-void GuiManager::_createArchiveImageFiles()
+void GuiManager::_restoreAutomaticDisplayState()
 {
-
-  if (_params.images_creation_mode ==
-      Params::CREATE_IMAGES_THEN_EXIT) {
-    
-    if (_archiveFileList.size() > 0) {
-
-      // using input file list to drive image generation
-
-      while (_archiveFileList.size() > 0) {
-        _createImageFilesAllLevels();
-        _archiveFileList.erase(_archiveFileList.begin(), 
-                               _archiveFileList.begin() + 1);
-      }
-      
-    } else {
-      
-      // using archive time to drive image generation
-      
-      while (_timeControl->getStartTime() <= _imagesEndTime) {
-        _createImageFilesAllLevels();
-        // _timeControl->setStartTime(_timeControl->getStartTime() +
-        //                            _imagesScanIntervalSecs);
-      }
-      
-    }
-    
-  } else if (_params.images_creation_mode ==
-             Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE) {
-    
-    for (DateTime stime = _imagesStartTime;
-         stime <= _imagesEndTime;
-         stime += _params.images_schedule_interval_secs) {
-      
-      // _timeControl->setStartTime(stime);
-      // _timeControl->setEndTime(_timeControl->getStartTime() +
-      //                          _imagesScanIntervalSecs);
-      
-      _createImageFilesAllLevels();
-      
-    } // stime
-    
-  } // if (_params.images_creation_mode ...
-
+  if (!_automaticDisplayStateSaved) {
+    return;
+  }
+  _timeControl->restoreAfterAutomaticImages(
+    _automaticSavedStartTime, _automaticSavedFrameCount,
+    _automaticSavedFrameIntervalSecs, _automaticSavedFrameIndex,
+    _automaticSavedRealtime);
+  _vlevelManager.requestLevel(_automaticSavedHeight);
+  _vlevelHasChanged = true;
+  setZoomIndex(_automaticSavedZoom);
+  if (_automaticSavedField >= 0 &&
+      _automaticSavedField < _gd.num_datafields) {
+    _selectAutomaticImageField(_automaticSavedField);
+  }
+  _vsectionRoute = _automaticSavedVsectionRoute;
+  if (_vsectionRoute.size() >= 2 && _automaticSavedVertWindowVisible) {
+    _requestVerticalSection();
+  }
+  _automaticDisplayStateSaved = false;
 }
 
-/////////////////////////////////////////////////////
-// creating one image per field, for each level
+/////////////////////////////////////////////////////////////
+// apply the current generator job to the live display
 
-void GuiManager::_createImageFilesAllLevels()
+void GuiManager::_startAutomaticImageJob()
 {
-  
-  // if (_params.images_set_sweep_index_list) {
-    
-  //   for (int ii = 0; ii < _params.images_sweep_index_list_n; ii++) {
-  //     int index = _params._images_sweep_index_list[ii];
-  //     if (index >= 0 && index < (int) _vol.getNSweeps()) {
-  //       // _sweepManager.setFileIndex(index);
-  //       _createImageFiles();
-  //     }
-  //   }
-    
-  // } else {
-    
-  //   for (size_t index = 0; index < _vol.getNSweeps(); index++) {
-  //     // _sweepManager.setFileIndex(index);
-  //     _createImageFiles();
-  //   }
-    
-  // }
-
-}
-
-/////////////////////////////////////////////////////
-// creating one image per field
-
-void GuiManager::_createImageFiles()
-{
-
-  if (_params.debug) {
-    cerr << "GuiManager::_createImageFiles()" << endl;
+  if (!_imageGenerationManager->isActive() ||
+      !_imageGenerationManager->hasCurrentJob()) {
+    return;
   }
-
-  PMU_auto_register("createImageFiles");
-
-  // plot the data
-
-  // _horiz->setStartOfSweep(true);
-  // _vert->setStartOfSweep(true);
-  // _handleArchiveData();
-
-  // set times from plots
-
-#ifdef NOTYET
-  
-  if (_vertMode) {
-    _plotStartTime = _vert->getPlotStartTime();
-    _plotEndTime = _vert->getPlotEndTime();
-  } else {
-    _plotStartTime = _horiz->getPlotStartTime();
-    _plotEndTime = _horiz->getPlotEndTime();
-  }
-
-  // save current field
-
-  int fieldNum = _fieldNum;
-  
-  // loop through fields
-
-  for (size_t ii = 0; ii < _fields.size(); ii++) {
-    
-    // select field
-    
-    _changeField(ii, false);
-    
-    // create plot
-    
-    if (_params.debug) {
-      cerr << "Creating image for field: " << getSelectedFieldLabel() << endl;
-    }
-    
-    // save image for plot
-    
-    _saveImageToFile(false);
-
-  }
-
-  // change field back
-
-  _changeField(fieldNum, false);
-
-#endif
-  
-  if (_params.debug) {
-    cerr << "Done creating image files" << endl;
-  }
-
-}
-
-string GuiManager::_getOutputPath(bool interactive, string &outputDir, string fileExt)
-{
-  // set times from plots
-
-  if (_vertMode) {
-    // _plotStartTime = _vert->getPlotStartTime();
-    // _plotEndTime = _vert->getPlotEndTime();
-  } else {
-    // _plotStartTime = _horiz->getPlotStartTime();
-    // _plotEndTime = _horiz->getPlotEndTime();
-  }
-
-  // compute output dir
-  outputDir = _params.images_output_dir;
-  char dayStr[1024];
-  if (_params.images_write_to_day_dir)
-  {
-    snprintf(dayStr, 1024, "%.4d%.2d%.2d", _plotStartTime.getYear(), _plotStartTime.getMonth(), _plotStartTime.getDay());
-    outputDir += PATH_DELIM;
-    outputDir += dayStr;
-  }
-
-  // make sure output dir exists
-
-  if (ta_makedir_recurse(outputDir.c_str())) {
-    string errmsg("Cannot create output dir: " + outputDir);
-    cerr << "ERROR - GuiManager::_saveImageToFile()" << endl;
-    cerr << "  " << errmsg << endl;
-    if (interactive) {
-      QMessageBox::critical(this, "Error", errmsg.c_str());
-    }
-    return(NULL);
-  }
-
-  // compute file name
-
-  string fileName;
-
-  // category
-
-  if (strlen(_params.images_file_name_category) > 0) {
-    fileName += _params.images_file_name_category;
-  }
-
-  // platform
-
-  if (strlen(_params.images_file_name_platform) > 0) {
-    fileName += _params.images_file_name_delimiter;
-    fileName += _params.images_file_name_platform;
-  }
-
-  // time
-
-  if (_params.images_include_time_part_in_file_name) {
-    fileName += _params.images_file_name_delimiter;
-    char timeStr[1024];
-    if (_params.images_include_seconds_in_time_part) {
-      snprintf(timeStr, 1024, "%.4d%.2d%.2d%.2d%.2d%.2d",
-               _plotStartTime.getYear(),
-               _plotStartTime.getMonth(),
-               _plotStartTime.getDay(),
-               _plotStartTime.getHour(),
-               _plotStartTime.getMin(),
-               _plotStartTime.getSec());
-    } else {
-      snprintf(timeStr, 1024, "%.4d%.2d%.2d%.2d%.2d",
-               _plotStartTime.getYear(),
-               _plotStartTime.getMonth(),
-               _plotStartTime.getDay(),
-               _plotStartTime.getHour(),
-               _plotStartTime.getMin());
-    }
-    fileName += timeStr;
-  }
-
-  // field label
-
-  if (_params.images_include_field_label_in_file_name) {
-    fileName += _params.images_file_name_delimiter;
-    fileName += getSelectedFieldLabel();
-  }
-    
-  // scan Id
-
-  // if (_params.images_include_scan_id_in_file_name) {
-  //   fileName += _params.images_file_name_delimiter;
-  //   fileName += std::to_string(_vol.getScanId());
-  // }
-
-  // scan type
-
-  // if (_params.images_include_scan_type_in_file_name) {
-  //   fileName += _params.images_file_name_delimiter;
-  //   string scanType = "SUR";
-  //   if (_vol.getSweeps().size() > 0) {
-  //     Radx::SweepMode_t predomSweepMode = _vol.getPredomSweepMode();
-  //     scanType = Radx::sweepModeToShortStr(predomSweepMode);
-  //   }
-  //   fileName += scanType;
-  // }
-
-  // extension
-
-  fileName += ".";
-  fileName += fileExt;
-
-  // compute output path
-
-  string outputPath(outputDir);
-  outputPath += PATH_DELIM;
-  outputPath += fileName;
-
-  return(outputPath);
-}
-
-/////////////////////////////////////////////////////
-// save image to file
-// If interactive is true, use dialog boxes to indicate errors or report
-// where the image was saved.
-
-void GuiManager::_saveImageToFile(bool interactive)
-{
-
-  cerr << "SSSSSSSSSSSSSSSSSSSSSSSSSSSSS" << endl;
-  return;
-  
-  // create image
-  QPixmap pixmap;
-  if (_vertMode)
-    pixmap = _vert->grab();
-  else
-    pixmap = _horiz->grab();
-  QImage image = pixmap.toImage();
-
-  string outputDir;
-  string outputPath = _getOutputPath(interactive, outputDir, _params.images_file_name_extension);
-
-  // write the file
-  if (!image.save(outputPath.c_str())) {
-    string errmsg("Cannot save image to file: " + outputPath);
-    cerr << "ERROR - GuiManager::_saveImageToFile()" << endl;
-    cerr << "  " << errmsg << endl;
-    if (interactive) {
-      QMessageBox::critical(this, "Error", errmsg.c_str());
-    }
+  const AutomaticImageGenerator::Job &job =
+    _imageGenerationManager->currentJob();
+  const int fieldIndex = job.fieldIndex;
+  if (fieldIndex < 0 || _gd.mread[fieldIndex] == nullptr) {
+    _imageGenerationManager->failCurrentJob(
+      tr("Field %1 has no MDV reader").arg(fieldIndex));
     return;
   }
 
-  if (interactive) {
-    string infoMsg("Saved image to file " + outputPath);
-    QMessageBox::information(this, "Image Saved", infoMsg.c_str());
+  if (_imageGenerationManager->currentJobIsVertical()) {
+    _startAutomaticVerticalJob();
+  } else {
+    _startAutomaticHorizontalJob();
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// apply one horizontal height/zoom/field job
+
+void GuiManager::_startAutomaticHorizontalJob()
+{
+  const AutomaticImageGenerator::Job &job =
+    _imageGenerationManager->currentJob();
+  const int fieldIndex = job.fieldIndex;
+
+  // Apply both outer dimensions before selecting the field. Their normal
+  // invalidation paths then let the timer issue one request containing the
+  // complete height, geometry, and field state for this job.
+  _vlevelManager.requestLevel(job.heightKm);
+  _vlevelHasChanged = true;
+  setZoomIndex(job.zoomIndex);
+  _selectAutomaticImageField(fieldIndex);
+
+  const QString fieldName = QString::fromUtf8(
+    _params._fields[fieldIndex].field_name);
+  statusBar()->showMessage(
+    tr("Creating automatic image %1 of %2: %3 at %4 km, zoom %5")
+      .arg(_imageGenerationManager->currentJobNumber())
+      .arg(_imageGenerationManager->jobCount())
+      .arg(fieldName).arg(job.heightKm).arg(job.zoomName));
+  if (_params.images_debug != Params::IMAGE_DEBUG_OFF) {
+    cerr << "Automatic image: requesting field " << fieldName.toStdString()
+         << " at " << job.heightKm << " km, zoom "
+         << job.zoomName.toStdString() << " ("
+         << _imageGenerationManager->currentJobNumber() << " of "
+         << _imageGenerationManager->jobCount() << ")" << endl;
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// request one configured route for the selected field
+
+void GuiManager::_startAutomaticVerticalJob()
+{
+  const AutomaticImageGenerator::Job &job =
+    _imageGenerationManager->currentJob();
+  VsectionRoute route;
+  QString error;
+  if (!_buildAutomaticVsectionRoute(route, error)) {
+    _imageGenerationManager->failCurrentJob(error);
+    return;
   }
 
-  if (_params.debug) {
-    cerr << "==>> saved image to file: " << outputPath << endl;
+  _selectAutomaticImageField(job.fieldIndex, false);
+  _vsectionRoute = route;
+  const int generation = _requestVerticalSection();
+  if (generation < 0) {
+    _imageGenerationManager->failCurrentJob(
+      tr("Could not start vertical-section request"));
+    return;
+  }
+  _imageGenerationManager->setExpectedGeneration(generation);
+
+  const QString fieldName = QString::fromUtf8(
+    _params._fields[job.fieldIndex].field_name);
+  statusBar()->showMessage(
+    tr("Creating automatic image %1 of %2: %3, vertical section %4")
+      .arg(_imageGenerationManager->currentJobNumber())
+      .arg(_imageGenerationManager->jobCount())
+      .arg(fieldName)
+      .arg(_imageGenerationManager->currentRoute().name));
+  if (_params.images_debug != Params::IMAGE_DEBUG_OFF) {
+    cerr << "Automatic image: requesting vertical field "
+         << fieldName.toStdString() << ", route "
+         << _imageGenerationManager->currentRoute().name.toStdString()
+         << " (" << _imageGenerationManager->currentJobNumber() << " of "
+         << _imageGenerationManager->jobCount() << ")" << endl;
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// update field state without synthesizing a table interaction
+
+void GuiManager::_selectAutomaticImageField(int fieldIndex,
+                                            bool requestHorizontal)
+{
+  _prevFieldNum = _fieldNum;
+  _fieldNum = fieldIndex;
+  _fieldHasChanged = requestHorizontal;
+
+  // Keep the visible selector consistent for diagnostics without routing the
+  // programmatic change back through its user-click handler.
+  const int ncols = std::max(1, _params.num_field_menu_cols);
+  _fieldTableRow = fieldIndex / ncols;
+  _fieldTableCol = fieldIndex % ncols;
+  if (_fieldTable) {
+    _fieldTable->setCurrentCell(_fieldTableRow, _fieldTableCol);
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// save only after the grid and the configured Product policy are ready
+
+void GuiManager::_checkAutomaticImageReady()
+{
+  if (!_imageGenerationManager->isActive() ||
+      !_imageGenerationManager->hasCurrentJob()) {
+    return;
   }
 
-  // write latest data info
+  const bool productsRelevant =
+    !_imageGenerationManager->currentJobIsVertical() &&
+    _gd.prod.products_on && _gd.prod_mgr;
+  const bool productsReady = !productsRelevant ||
+    (_params.images_require_all_symprods ?
+       _gd.prod_mgr->activeProductsReady() :
+       _gd.prod_mgr->activeProductRequestsSettled());
+  const bool windsRelevant = _gd.wind_mgr && _gd.wind_mgr->isEnabled();
+  const bool windsReady = !windsRelevant ||
+    (_imageGenerationManager->currentJobIsVertical() ?
+       _gd.wind_mgr->activeVerticalWindsSettled() :
+       _gd.wind_mgr->activeWindsReady());
+  const bool terrainReady =
+    _imageGenerationManager->currentJobIsVertical() ?
+      _terrainVerticalSettled : _terrainHorizontalSettled;
+  const int unavailableProducts =
+    productsRelevant && !_params.images_require_all_symprods ?
+      _gd.prod_mgr->numActiveProductsUnavailable() : 0;
+  _imageGenerationManager->checkReady(
+    productsReady && windsReady && terrainReady, unavailableProducts);
+}
 
-  if (_params.images_write_latest_data_info) {
-    
-    DsLdataInfo ldataInfo(_params.images_output_dir);
-    
-    string relPath;
-    RadxPath::stripDir(_params.images_output_dir, outputPath, relPath);
-    
-    if(_params.debug) {
-      ldataInfo.setDebug();
-    }
-    ldataInfo.setLatestTime(_plotStartTime.utime());
-    ldataInfo.setWriter("Lucid");
-    ldataInfo.setDataFileExt(_params.images_file_name_extension);
-    ldataInfo.setDataType(_params.images_file_name_extension);
-    ldataInfo.setRelDataPath(relPath);
-    
-    if(ldataInfo.write(_plotStartTime.utime())) {
-      cerr << "ERROR - GuiManager::_saveImageToFile()" << endl;
-      cerr << "  Cannot write _latest_data_info to dir: " << outputDir << endl;
-      return;
-    }
-    
-  } // if (_params.images_write_latest_data_info)
+/////////////////////////////////////////////////////////////
+// cancel the exact request generation selected by a timed-out job
 
+void GuiManager::_cancelTimedOutImageRequest(int fieldIndex,
+                                             bool vertical,
+                                             int expectedGeneration)
+{
+  if (fieldIndex < 0 || fieldIndex >= _gd.num_datafields ||
+      !_gd.mread[fieldIndex]) {
+    return;
+  }
+  if (vertical) {
+    const int generation = expectedGeneration >= 0 ? expectedGeneration :
+      _gd.mread[fieldIndex]->getVertGeneration();
+    _gd.mread[fieldIndex]->cancelVertRequest(generation);
+  } else {
+    const int generation = expectedGeneration >= 0 ? expectedGeneration :
+      _gd.mread[fieldIndex]->getHorizGeneration();
+    _gd.mread[fieldIndex]->cancelHorizRequest(generation);
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// capture the current job after the manager declares its inputs ready
+
+bool GuiManager::_captureAutomaticImage(QImage &image,
+                                        DateTime &dataTime,
+                                        const WorldPlot *&world,
+                                        bool &writeGeoXml,
+                                        QString &error)
+{
+  image = QImage();
+  world = nullptr;
+  writeGeoXml = false;
+  error.clear();
+  if (!_imageGenerationManager->hasCurrentJob()) {
+    error = tr("No automatic image job is active");
+    return false;
+  }
+
+  const int fieldIndex =
+    _imageGenerationManager->currentJob().fieldIndex;
+  MdvReader *reader = _gd.mread[fieldIndex];
+  if (_imageGenerationManager->currentJobIsVertical()) {
+    if (!_vert || !_vertWindow || !reader || !reader->isValidV() ||
+        reader->getVertGeneration() !=
+          _imageGenerationManager->expectedGeneration()) {
+      error = tr("The completed vertical data do not match the requested field");
+      return false;
+    }
+
+    // A hidden automatic window still needs finalized layouts before QWidget
+    // can synchronously render the configured section at its intended size.
+    _vertWindow->ensurePolished();
+    if (_vertWindow->layout()) {
+      _vertWindow->layout()->activate();
+    }
+    if (_vertWindow->centralWidget() &&
+        _vertWindow->centralWidget()->layout()) {
+      _vertWindow->centralWidget()->layout()->activate();
+    }
+    if (_vert->width() < 1 || _vert->height() < 1) {
+      error = tr("The vertical view has no drawable area");
+      return false;
+    }
+    image = _vert->captureImageWithoutInteractions();
+    if (image.isNull()) {
+      error = tr("Could not capture the vertical-section view");
+      return false;
+    }
+    dataTime = DateTime(reader->v_date);
+    return true;
+  }
+
+  if (!_horiz || !reader || !reader->isValidH() ||
+      reader->getHorizCompletedGeneration() !=
+        _imageGenerationManager->expectedGeneration()) {
+    error = tr("The completed horizontal data do not match the requested field");
+    return false;
+  }
+  image = _horiz->captureImageWithoutInteractions();
+  if (image.isNull()) {
+    error = tr("Could not capture the horizontal view");
+    return false;
+  }
+  dataTime = DateTime(reader->h_date);
+  world = _horiz->getZoomWorld();
+  writeGeoXml = true;
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
+// convert one configured route into the display and MDV coordinate forms
+
+bool GuiManager::_buildAutomaticVsectionRoute(VsectionRoute &route,
+                                               QString &error) const
+{
+  route.clear();
+  error.clear();
+  if (!_imageGenerationManager->currentJobIsVertical()) {
+    error = tr("No automatic vertical-section job is active");
+    return false;
+  }
+
+  for (const QPointF &point :
+       _imageGenerationManager->currentRoute().points) {
+    double x = point.x();
+    double y = point.y();
+    double lat = 0.0;
+    double lon = 0.0;
+    if (_params.images_vsection_waypts_in_latlon) {
+      lat = point.x();
+      lon = point.y();
+      _gd.proj.latlon2xy(lat, lon, x, y);
+    } else {
+      _gd.proj.xy2latlon(x, y, lat, lon);
+    }
+    route.append(x, y, lat, lon);
+  }
+  if (route.size() < 2 || route.totalLengthKm() <= 0.0) {
+    error = tr("Vertical section %1 has zero usable length")
+      .arg(_imageGenerationManager->currentRoute().name);
+    return false;
+  }
+  return true;
 }
 
 /////////////////////////////////////////////////////
@@ -2969,7 +2815,8 @@ void GuiManager::_saveViewImages()
   const time_t selectedTime = _timeControl ?
     _timeControl->getSelectedTime().utime() : time(nullptr);
   const QString timePart = QDateTime::fromSecsSinceEpoch(
-    selectedTime, Qt::UTC).toString("yyyyMMdd_HHmmss'_UTC'");
+    selectedTime, QTimeZone(QTimeZone::UTC))
+    .toString("yyyyMMdd_HHmmss'_UTC'");
   const QString fieldPart = safeFileNameComponent(
     QString::fromStdString(getSelectedFieldLabel()));
   const QString commonPart = fieldPart + "_" + timePart;
@@ -2996,13 +2843,13 @@ void GuiManager::_saveViewImages()
 
   QStringList savedPaths;
   QStringList failedPaths;
-  if (_horiz->grab().save(horizPath, "PNG")) {
+  if (_horiz->captureImageWithoutInteractions().save(horizPath, "PNG")) {
     savedPaths.push_back(horizPath);
   } else {
     failedPaths.push_back(horizPath);
   }
   if (saveVertical) {
-    if (_vert->grab().save(vertPath, "PNG")) {
+    if (_vert->captureImageWithoutInteractions().save(vertPath, "PNG")) {
       savedPaths.push_back(vertPath);
     } else {
       failedPaths.push_back(vertPath);
@@ -3020,536 +2867,56 @@ void GuiManager::_saveViewImages()
   }
 }
 
-void GuiManager::ShowContextMenu(const QPoint &pos) {
-  _horiz->ShowContextMenu(pos /*, &_vol*/);
-}
-
-
-#ifdef NOTNOW
-// Creates the boundary editor dialog and associated event slots
-void GuiManager::_createBoundaryEditorDialog()
+void GuiManager::_showInteractionHelp(const QPoint &pos)
 {
-  _boundaryEditorDialog = new QDialog(this);
-  _boundaryEditorDialog->setMaximumHeight(368);
-  _boundaryEditorDialog->setWindowTitle("Boundary Editor");
+  QMenu menu(_horiz);
+  QWidgetAction *helpAction = new QWidgetAction(&menu);
+  QLabel *helpText = new QLabel(&menu);
+  helpText->setTextFormat(Qt::RichText);
+  helpText->setTextInteractionFlags(Qt::TextSelectableByMouse);
+  helpText->setWordWrap(true);
+  helpText->setMinimumWidth(390);
+  helpText->setContentsMargins(12, 10, 12, 10);
 
-  Qt::Alignment alignCenter(Qt::AlignCenter);
-  // Qt::Alignment alignRight(Qt::AlignRight);
-
-  _boundaryEditorDialogLayout = new QGridLayout(_boundaryEditorDialog);
-  _boundaryEditorDialogLayout->setVerticalSpacing(4);
-
-  int row = 0;
-  _boundaryEditorInfoLabel = new QLabel("Boundary Editor allows you to select\nan area of your radar image", _boundaryEditorDialog);
-  _boundaryEditorDialogLayout->addWidget(_boundaryEditorInfoLabel, row, 0, 1, 2, alignCenter);
-  
-  _boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog), ++row, 0, 1, 2, alignCenter);
-
-  QLabel *toolsCaption = new QLabel("Editor Tools:", _boundaryEditorDialog);
-  _boundaryEditorDialogLayout->addWidget(toolsCaption, ++row, 0, 1, 2, alignCenter);
-
-  _boundaryEditorPolygonBtn = new QPushButton(_boundaryEditorDialog);
-  _boundaryEditorPolygonBtn->setMaximumWidth(130);
-  _boundaryEditorPolygonBtn->setText(" Polygon");
-  _boundaryEditorPolygonBtn->setIcon(QIcon("images/polygon.png"));
-  _boundaryEditorPolygonBtn->setCheckable(TRUE);
-  _boundaryEditorPolygonBtn->setFocusPolicy(Qt::NoFocus);
-  _boundaryEditorDialogLayout->addWidget(_boundaryEditorPolygonBtn, ++row, 0);
-  connect(_boundaryEditorPolygonBtn, &QPushButton::clicked,
-          this, &GuiManager::polygonBtnBoundaryEditorClick);
-
-  _boundaryEditorCircleBtn = new QPushButton(_boundaryEditorDialog);
-  _boundaryEditorCircleBtn->setMaximumWidth(130);
-  _boundaryEditorCircleBtn->setText(" Circle  ");
-  _boundaryEditorCircleBtn->setIcon(QIcon("images/circle.png"));
-  _boundaryEditorCircleBtn->setCheckable(TRUE);
-  _boundaryEditorCircleBtn->setFocusPolicy(Qt::NoFocus);
-  _boundaryEditorDialogLayout->addWidget(_boundaryEditorCircleBtn, ++row, 0);
-  connect(_boundaryEditorCircleBtn, &QPushButton::clicked,
-          this, &GuiManager::circleBtnBoundaryEditorClick());
-
-  _circleRadiusSlider = new QSlider(Qt::Horizontal);
-  _circleRadiusSlider->setFocusPolicy(Qt::StrongFocus);
-  _circleRadiusSlider->setTracking(true);
-  _circleRadiusSlider->setSingleStep(1);
-  _circleRadiusSlider->setPageStep(0);
-  _circleRadiusSlider->setFixedWidth(100);
-  _circleRadiusSlider->setToolTip("Set the circle radius");
-  _circleRadiusSlider->setMaximumWidth(180);
-  _circleRadiusSlider->setValue(50);
-  _circleRadiusSlider->setMinimum(8);
-  _circleRadiusSlider->setMaximum(200);
-  _boundaryEditorDialogLayout->addWidget(_circleRadiusSlider, row, 1);
-  connect(_circleRadiusSlider, SIGNAL(valueChanged(int)),
-          this, &GuiManager::_circleRadiusSliderValueChanged(int));
-
-  _boundaryEditorBrushBtn = new QPushButton(_boundaryEditorDialog);
-  _boundaryEditorBrushBtn->setMaximumWidth(130);
-  _boundaryEditorBrushBtn->setText(" Brush ");
-  _boundaryEditorBrushBtn->setIcon(QIcon("images/brush.png"));
-  _boundaryEditorBrushBtn->setCheckable(TRUE);
-  _boundaryEditorBrushBtn->setFocusPolicy(Qt::NoFocus);
-  _boundaryEditorDialogLayout->addWidget(_boundaryEditorBrushBtn, ++row, 0);
-  connect(_boundaryEditorBrushBtn, &QPushButton::clicked,
-          this, &GuiManager::brushBtnBoundaryEditorClick());
-
-  _brushRadiusSlider = new QSlider(Qt::Horizontal);
-  _brushRadiusSlider->setFocusPolicy(Qt::StrongFocus);
-  _brushRadiusSlider->setTracking(true);
-  _brushRadiusSlider->setSingleStep(1);
-  _brushRadiusSlider->setPageStep(0);
-  _brushRadiusSlider->setFixedWidth(100);
-  _brushRadiusSlider->setToolTip("Set the smart brush radius");
-  _brushRadiusSlider->setMaximumWidth(180);
-  _brushRadiusSlider->setValue(18);
-  _brushRadiusSlider->setMinimum(12);
-  _brushRadiusSlider->setMaximum(75);
-  _boundaryEditorDialogLayout->addWidget(_brushRadiusSlider, row, 1);
-  connect(_brushRadiusSlider, SIGNAL(valueChanged(int)),
-          this, &GuiManager::_brushRadiusSliderValueChanged(int));
-
-  _boundaryEditorBrushBtn->setChecked(TRUE);
-  _boundaryEditorDialogLayout->addWidget(new QLabel(" ", _boundaryEditorDialog),
-                                         ++row, 0, 1, 2, alignCenter);
-  
-  _boundaryEditorList = new QListWidget(_boundaryEditorDialog);
-  QListWidgetItem *newItem5 = new QListWidgetItem;
-  newItem5->setText("Boundary5 <none>");
-  _boundaryEditorList->insertItem(0, newItem5);
-  QListWidgetItem *newItem4 = new QListWidgetItem;
-  newItem4->setText("Boundary4 <none>");
-  _boundaryEditorList->insertItem(0, newItem4);
-  QListWidgetItem *newItem3 = new QListWidgetItem;
-  newItem3->setText("Boundary3 <none>");
-  _boundaryEditorList->insertItem(0, newItem3);
-  QListWidgetItem *newItem2 = new QListWidgetItem;
-  newItem2->setText("Boundary2 <none>");
-  _boundaryEditorList->insertItem(0, newItem2);
-  QListWidgetItem *newItem1 = new QListWidgetItem;
-  newItem1->setText("Boundary1");
-  _boundaryEditorList->insertItem(0, newItem1);
-  _boundaryEditorDialogLayout->addWidget(_boundaryEditorList, ++row, 0, 1, 2);
-  connect(_boundaryEditorList, SIGNAL(itemClicked(QListWidgetItem*)),
-          this, &GuiManager::onBoundaryEditorListItemClicked(QListWidgetItem*));
-
-  // horizontal layout contains the "Clear", "Help", and "Save" buttons
-  QHBoxLayout *hLayout = new QHBoxLayout;
-  _boundaryEditorDialogLayout->addLayout(hLayout, ++row, 0, 1, 2);
-  
-  _boundaryEditorClearBtn = new QPushButton(_boundaryEditorDialog);
-  _boundaryEditorClearBtn->setText("Clear");
-  hLayout->addWidget(_boundaryEditorClearBtn);
-  connect(_boundaryEditorClearBtn, &QPushButton::clicked,
-          this, &GuiManager::clearBoundaryEditorClick());
-
-  _boundaryEditorHelpBtn = new QPushButton(_boundaryEditorDialog);
-  _boundaryEditorHelpBtn->setText("Help");
-  hLayout->addWidget(_boundaryEditorHelpBtn);
-  connect(_boundaryEditorHelpBtn, &QPushButton::clicked,
-          this, &GuiManager::helpBoundaryEditorClick());
-  
-  _boundaryEditorSaveBtn = new QPushButton(_boundaryEditorDialog);
-  _boundaryEditorSaveBtn->setText("Save");
-  hLayout->addWidget(_boundaryEditorSaveBtn);
-
-}
-#endif
-
-/////////////////////////////////////////////////////////
-// read click point from FMQ - i.e. from another app
-
-void GuiManager::_readClickPoint()
-{
-
-#ifdef NOTNOW
-  bool gotNew = false;
-  
-  if (_readClickPointFmq(gotNew) == 0) {
-    if (gotNew) {
-      if (_params.debug) {
-        cerr << "====>> gotNewClickInfo" << endl;
-      }
-      if (_horiz) {
-        _horiz->setClickPoint(_clickPointFmq.getAzimuth(),
-                              _clickPointFmq.getElevation(),
-                              _clickPointFmq.getRangeKm());
-      }
-    }
+  QString vsectionHelp;
+  if (_params.single_segment_vsection) {
+    vsectionHelp = tr(
+      "<b>Vertical section</b><br>"
+      "Right-drag and release to select one segment. "
+      "On macOS, Control-drag is the right-button alternative.");
+  } else {
+    vsectionHelp = tr(
+      "<b>Vertical section</b><br>"
+      "Right-drag to start, then right-click to add segments. "
+      "Double-click to finish; Backspace removes the last point and Escape cancels. "
+      "On macOS, Control-click is the right-button alternative.");
   }
-#endif
-  
+
+  // Keep the popup as one passive item: it documents canvas and selector
+  // gestures without suggesting that the inherited HawkEye actions still
+  // perform operations in Lucid.
+  helpText->setText(tr(
+    "<b>Plan-view controls</b><br><br>"
+    "<b>Zoom</b><br>Left-drag a rectangle over the plot.<br><br>"
+    "<b>Pan</b><br>Middle-button drag, or Option-left-drag.<br><br>"
+    "%1<br><br>"
+    "<b>Height selector</b><br>"
+    "Click or drag vertically in the selector to the right of the plot to choose a level."
+  ).arg(vsectionHelp));
+
+  helpAction->setDefaultWidget(helpText);
+  menu.addAction(helpAction);
+  menu.exec(_horiz->mapToGlobal(pos));
 }
 
-  
+
 /**********************************************************************
  * HANDLE_CLIENT_EVENT: 
  */
 
 void GuiManager::_handleClientEvent()
 {
-
-#ifdef NOTNOW
-  
-  time_t clock;
-  
-  if(_gd.debug1) {
-    fprintf(stderr,
-            "Found Client Event: %d, Args: %s\n",
-            _gd.coord_expt->client_event,
-            _gd.coord_expt->client_args);
-  }
-  
-  switch(_gd.coord_expt->client_event) {
-    case NEW_MDV_AVAIL:
-      remote_new_mdv_avail(_gd.coord_expt->client_args);
-      break;
-      
-    case NEW_SPDB_AVAIL:
-      remote_new_spdb_avail(_gd.coord_expt->client_args);
-      break;
-
-    case RELOAD_DATA:
-      // invalidate_all_data();
-      // set_redraw_flags(1,1);
-      break;
-
-    case SET_FRAME_NUM:
-      int	frame;
-      if((sscanf(_gd.coord_expt->client_args,"%d",&frame)) == 1) {
-        /* Sanity Check */
-        if(frame <= 0 ) frame = 1;
-        if(frame > _gd.movie.num_frames ) frame = _gd.movie.num_frames ;
-
-        _gd.movie.cur_frame = frame - 1;
-      } else {
-        fprintf(stderr,"Invalid SET_FRAME_NUM: Args: %s\n",_gd.coord_expt->client_args);
-      }
-      break;
-
-    case SET_NUM_FRAMES:
-      int	nframes;
-      if((sscanf(_gd.coord_expt->client_args,"%d",&nframes)) == 1) {
-        _setEndFrame(nframes);
-      } else {
-        fprintf(stderr,"Invalid SET_NUM_FRAMES: Args: %s\n",_gd.coord_expt->client_args);
-      }
-      break;
-
-    case SET_REALTIME:
-      _gd.movie.mode = REALTIME_MODE;
-      _gd.movie.cur_frame = _gd.movie.num_frames -1;
-      _gd.movie.end_frame = _gd.movie.num_frames -1;
-      clock = time(0);
-      _gd.movie.start_time = clock - (time_t) ((_gd.movie.num_frames -1) *
-                                              _gd.movie.time_interval_mins * 60.0);
-      _gd.movie.start_time -= (_gd.movie.start_time % _gd.movie.round_to_seconds);
-      _gd.coord_expt->runtime_mode = RUNMODE_REALTIME;	
-      _gd.coord_expt->time_seq_num++;
-
-      // reset_time_points();
-      // invalidate_all_data();
-      // set_redraw_flags(1,1);
-
-      // Set forecast and past time choosers to "now"
-      // xv_set(_gd.fcast_pu->fcast_st,PANEL_VALUE,0,NULL);
-      // xv_set(_gd.past_pu->past_hr_st,PANEL_VALUE,0,NULL);
-      // Set movie mode widget to REALTIME 
-      // xv_set(_gd.movie_pu->movie_type_st,PANEL_VALUE,0,NULL);
-
-      break;
-
-    case SET_TIME:
-      UTIMstruct ts;
-      time_t interest_time;
-
-      if((sscanf(_gd.coord_expt->client_args,"%ld %ld %ld %ld %ld %ld",
-                 &ts.year,&ts.month,&ts.day, &ts.hour,&ts.min,&ts.sec)) == 6) {
-		
-        interest_time = UTIMdate_to_unix(&ts);
-
-        _setDisplayTime(interest_time);
-        // invalidate_all_data();
-        // set_redraw_flags(1,1);
-      } else {
-        fprintf(stderr,"Invalid SET_TIME Args: %s\n",_gd.coord_expt->client_args);
-      }
-      break;
-
-    default: {}
-
-  }
-
-  // Reset  the command
-  _gd.coord_expt->client_event = NO_MESSAGE;
-
-#endif
-  
-}
-
-
-/**********************************************************************
- * CHECK_FOR_EXPIRED_DATA: Check all data and determine if 
- * the data's expiration time has been exceeded - Mark it invalid if so.
- */
-
-void GuiManager::_checkForExpiredData(time_t tm)
-{
-  int i;
-
-  // Mark all data past the expiration data as invalid
-  /* look thru primary data fields */
-  for (i=0; i < _gd.num_datafields; i++) {
-    /* if data has expired or field should be updated */
-    if (_gd.mread[i]->h_mhdr.time_expire < tm ) {
-      //        if(_gd.debug1) fprintf(stderr,"Field: %s expired at %s\n",
-      //		 _gd.mread[i]->button_name,
-      //		 asctime(gmtime(&((time_t) _gd.mread[i]->h_mhdr.time_expire))));
-      _gd.mread[i]->h_data_valid = 0;
-      _gd.mread[i]->v_data_valid = 0;
-    }
-  }
-
-  /* Look through wind field data too */
-  for (i=0; i < _gd.layers.num_wind_sets; i++ ) {
-    if (_gd.layers.wind[i].active) {
-      if (_gd.layers.wind[i].wind_u->h_mhdr.time_expire < tm) {
-        _gd.layers.wind[i].wind_u->h_data_valid = 0;
-        _gd.layers.wind[i].wind_u->v_data_valid = 0;
-      }
-      if (_gd.layers.wind[i].wind_v->h_mhdr.time_expire < tm) {
-        _gd.layers.wind[i].wind_v->h_data_valid = 0;
-        _gd.layers.wind[i].wind_v->v_data_valid = 0;
-      }
-      if (_gd.layers.wind[i].wind_w != NULL && _gd.layers.wind[i].wind_w->h_mhdr.time_expire < tm) {
-        _gd.layers.wind[i].wind_w->h_data_valid = 0;
-        _gd.layers.wind[i].wind_w->v_data_valid = 0;
-      }
-    }
-  }
-}
-
-/**********************************************************************
- * _CHECKFORDATAUPDATES: Check all data and determine if 
- * new data has arrived - Mark it invalid if so.
- */
-
-void GuiManager::_checkForDataUpdates(time_t tm)
-{
-  DmapAccess dmap;
-  int i,j;
-  char *start_ptr, *end_ptr;
-  char dir_buf[MAX_PATH_LEN];
-
-  if( strlen(_params.datamap_host) < 2 || dmap.reqAllInfo(_params.datamap_host) != 0) {
-
-    // Force a reload of the data
-    // reset_data_valid_flags(1,1);
-    if (_gd.prod_mgr) {
-      _gd.prod_mgr->reset_product_valid_flags();
-    }
-
-  } else {   // Got valid  data back from the Data Mapper
-
-    int nsets = dmap.getNInfo();
-
-
-    if(_gd.debug1) fprintf(stderr,"Found %d Datamapper info sets\n",nsets);
-
-    /* look thru all data fields */
-
-    for (i=0; i < _gd.num_datafields; i++) {
-
-      // pull out dir from URL
-
-      char tmpUrl[MAX_PATH_LEN];
-      strncpy(tmpUrl, _gd.mread[i]->url.c_str(), MAX_PATH_LEN - 1);
-      end_ptr = strrchr(tmpUrl, '&');
-      if(end_ptr == NULL) continue;  // broken URL.
-      
-      start_ptr =  strrchr(tmpUrl, ':');
-      if(start_ptr == NULL) {
-	start_ptr =  tmpUrl; // Must be a local file/dir based URL
-      } else {
-	start_ptr++;  // Move up one character
-      }
-
-      strncpy(dir_buf,start_ptr,(size_t) (end_ptr - start_ptr + 1));
-      dir_buf[(size_t) (end_ptr - start_ptr)] = '\0'; // Null terminate
-	
-      // Look through the data mapper info
-      for(j = 0;  j < nsets; j++) {
-	const DMAP_info_t &info = dmap.getInfo(j);
-
-	// See if any data matches
-	if(strstr(info.dir,dir_buf) != NULL) {
-          // Note unix_time is signed (time_t)  and info.end_time is unsigned int
-          if (_gd.mread[i]->h_date.utime() < (time_t) info.end_time) {
-            _gd.mread[i]->h_data_valid = 0;
-            _gd.mread[i]->v_data_valid = 0;
-          }
-	}
-      }
-    }
-    
-    for (i=0; i < _gd.layers.num_wind_sets; i++ ) {
-      /* Look through wind field data too */
-      if (_gd.layers.wind[i].active) {
-	// pull out dir from URL
-
-        char tmpUrl[MAX_PATH_LEN];
-        strncpy(tmpUrl, _gd.mread[i]->url.c_str(), MAX_PATH_LEN - 1);
-        
-        char tmp2[MAX_PATH_LEN];
-        strncpy(tmp2, _gd.layers.wind[i].wind_u->url.c_str(), MAX_PATH_LEN - 1);
-	end_ptr = strrchr(tmp2,'&');
-	if(end_ptr == NULL) continue;  // broken URL.
-        
-	start_ptr =  strrchr(tmp2,':');
-	if(start_ptr == NULL) {
-          start_ptr = tmpUrl; // Must be a local file/dir based URL
-	} else {
-          start_ptr++;  // Move up one character
-	}
-
-	strncpy(dir_buf,start_ptr,(size_t) (end_ptr - start_ptr + 1));
-	dir_buf[(size_t) (end_ptr - start_ptr)] = '\0'; // Null terminate
-	
-	// Look through the data mapper info
-	for(j = 0;  j < nsets; j++) {
-          const DMAP_info_t &info = dmap.getInfo(j);
-          // See if any data matches
-          if(strstr(info.dir,dir_buf) != NULL) {
-            // Check if that data is more current
-            if (_gd.layers.wind[i].wind_u->h_date.utime() < (time_t) info.end_time) {
-              _gd.layers.wind[i].wind_u->h_data_valid = 0;
-              _gd.layers.wind[i].wind_u->v_data_valid = 0;
-              _gd.layers.wind[i].wind_v->h_data_valid = 0;
-              _gd.layers.wind[i].wind_v->v_data_valid = 0;
-              if (_gd.layers.wind[i].wind_w != NULL) {
-		_gd.layers.wind[i].wind_w->h_data_valid = 0;
-		_gd.layers.wind[i].wind_w->v_data_valid = 0;
-              }
-            }
-          }  // If a match
-	} // For all data mapper info
-      }   // If wind layer is active
-    }     // For all wind layers
-
-    _gd.prod_mgr->check_product_validity(tm, dmap);
-  } // If data mapper info is availible
-}
-
-////////////////////////////////////////////////////////////////// 
-// _checkWhatNeedsRendering:
-
-void GuiManager::_checkWhatNeedsRendering(int frame_index)
-{
-  int i;
-  
-  // If data used to draw plan view is invalid
-  // Indicate plan view image needs rerendering
-  
-  if (_gd.mread[_gd.h_win.page]->h_data_valid == 0 ||
-      _gd.prod_mgr->num_products_invalid() > 0) {
-    _gd.movie.frame[frame_index].redraw_horiz = 1;
-    _gd.h_win.redraw_flag[_gd.h_win.page] = 1;
-  }
-
-  for ( i=0; i < _gd.layers.num_wind_sets; i++ ) {
-    // Look through wind field data too
-    if (_gd.layers.wind[i].active) {
-      if (_gd.layers.wind[i].wind_u->h_data_valid == 0) {
-        _gd.movie.frame[frame_index].redraw_horiz = 1;
-        _gd.h_win.redraw_flag[_gd.h_win.page] = 1;
-      }
-      if (_gd.layers.wind[i].wind_v->h_data_valid == 0) {
-        _gd.movie.frame[frame_index].redraw_horiz = 1;
-        _gd.h_win.redraw_flag[_gd.h_win.page] = 1;
-      }
-      if (_gd.layers.wind[i].wind_w != NULL &&
-          _gd.layers.wind[i].wind_w->h_data_valid == 0) {
-        _gd.movie.frame[frame_index].redraw_horiz = 1;
-        _gd.h_win.redraw_flag[_gd.h_win.page] = 1;
-      }
-    }
-  }
-
-  // Check overlay contours if active
-
-  for(i= 0; i < Constants::NUM_CONT_LAYERS; i++) {
-    if(_gd.layers.cont[i].active) {
-      if(_gd.mread[_gd.layers.cont[i].field]->h_data_valid == 0) {
-	_gd.movie.frame[frame_index].redraw_horiz = 1;
-	_gd.h_win.redraw_flag[_gd.h_win.page] = 1;
-      }
-    }
-  } 
-
-  // If data used to draw cross section is invalid
-  // Indicate pcross section image needs rerendering
-  
-  if (_gd.v_win.active ) {
-    if(_gd.mread[_gd.v_win.page]->v_data_valid == 0)  {
-      _gd.movie.frame[frame_index].redraw_vert = 1;
-      _gd.v_win.redraw_flag[_gd.v_win.page] = 1;
-    }
-
-    for ( i=0; i < _gd.layers.num_wind_sets; i++ ) {
-      /* Look through wind field data too */
-      if (_gd.layers.wind[i].active) {
-	if (_gd.layers.wind[i].wind_u->v_data_valid == 0) {
-          _gd.movie.frame[frame_index].redraw_vert = 1;
-          _gd.v_win.redraw_flag[_gd.v_win.page] = 1;
-	}
-	if (_gd.layers.wind[i].wind_v->v_data_valid == 0) {
-          _gd.movie.frame[frame_index].redraw_vert = 1;
-          _gd.v_win.redraw_flag[_gd.v_win.page] = 1;
-	}
-	if (_gd.layers.wind[i].wind_w != NULL &&
-            _gd.layers.wind[i].wind_w->v_data_valid == 0) {
-          _gd.movie.frame[frame_index].redraw_vert = 1;
-          _gd.v_win.redraw_flag[_gd.v_win.page] = 1;
-	}
-      }
-    }
-
-    /* Check overlay contours if active */
-    for(i= 0; i < Constants::NUM_CONT_LAYERS; i++) {
-      if(_gd.layers.cont[i].active) {
-	if(_gd.mread[_gd.layers.cont[i].field]->v_data_valid == 0) {
-          _gd.movie.frame[frame_index].redraw_vert = 1;
-          _gd.v_win.redraw_flag[_gd.v_win.page] = 1;
-	}
-      }
-    } 
-  }
-}
-
-///////////////////////////////////////////
-// set text for GUI panels
-
-void GuiManager::_setText(char *text,
-                          size_t maxTextLen,
-                          const char *format,
-                          int val)
-{
-  if (abs(val) < 9999) {
-    snprintf(text, maxTextLen, format, val);
-  } else {
-    snprintf(text, maxTextLen, format, -9999);
-  }
-}
-
-void GuiManager::_setText(char *text,
-                          size_t maxTextLen,
-                          const char *format,
-                          double val)
-{
-  if (fabs(val) < 9999) {
-    snprintf(text, maxTextLen, format, val);
-  } else {
-    snprintf(text, maxTextLen, format, -9999.0);
-  }
+  // Remote CIDD client commands are not implemented by the Qt application.
 }
 
 /////////////////////////////
@@ -3663,7 +3030,7 @@ void GuiManager::_verticalRouteCompleted(const VsectionRoute &route)
            route.size(), route.totalLengthKm());
   // statusBar()->showMessage(message, 5000);
 
-  if (_params.debug || _params.route_debug != Params::ROUTE_DEBUG_OFF) {
+  if (_params.debug) {
     cerr << "Vertical section route completed" << endl;
     cerr << "  points: " << route.size() << endl;
     cerr << "  total length km: " << route.totalLengthKm() << endl;
@@ -3686,7 +3053,7 @@ void GuiManager::_verticalRouteCompleted(const VsectionRoute &route)
 int GuiManager::_requestVerticalSection()
 {
   if (_vsectionRoute.size() < 2 ||
-      _gd.h_win.page < 0 || _gd.h_win.page >= _gd.num_datafields) {
+      _fieldNum < 0 || _fieldNum >= _gd.num_datafields) {
     return -1;
   }
 
@@ -3695,13 +3062,124 @@ int GuiManager::_requestVerticalSection()
     wayPts.addPoint(point.lat, point.lon);
   }
 
-  MdvReader *reader = _gd.mread[_gd.h_win.page];
+  MdvReader *reader = _gd.mread[_fieldNum];
   connect(reader, &MdvReader::verticalReadComplete,
           this, &GuiManager::_verticalReadComplete,
           Qt::UniqueConnection);
   // statusBar()->showMessage("Requesting vertical section");
-  return reader->requestVertSection(_timeControl->getSelectedTime(),
-                                    _gd.h_win.page, wayPts);
+  const int generation = reader->requestVertSection(
+    _timeControl->getSelectedTime(), _fieldNum, wayPts);
+  _requestVerticalWinds();
+  _requestVerticalTerrain();
+  return generation;
+}
+
+/////////////////////////////////////////////////////////////
+// request horizontal U/V components along the retained section route
+
+int GuiManager::_requestVerticalWinds()
+{
+  if (_gd.wind_mgr == nullptr || _vsectionRoute.size() < 2) {
+    return -1;
+  }
+
+  WayPts wayPts;
+  for (const VsectionRoute::Point &point : _vsectionRoute.points()) {
+    wayPts.addPoint(point.lat, point.lon);
+  }
+  return _gd.wind_mgr->requestVerticalData(
+    _timeControl->getSelectedTime(), _fieldNum, wayPts);
+}
+
+/////////////////////////////////////////////////////////////
+// determine whether the selected plan view has a terrain height coordinate
+
+bool GuiManager::_horizontalTerrainApplies() const
+{
+  if (!_gd.layers.earth.terrain_active ||
+      _gd.layers.earth.terr == nullptr ||
+      _fieldNum < 0 || _fieldNum >= _gd.num_datafields) {
+    return false;
+  }
+
+  const MdvReader *field = _gd.mread[_fieldNum];
+  return field != nullptr && field->isValidH() &&
+    field->ds_fhdr.nz > 1 && field->composite_mode == FALSE &&
+    field->ds_fhdr.vlevel_type == Mdvx::VERT_TYPE_Z &&
+    field->proj.getProjType() != Mdvx::PROJ_POLAR_RADAR;
+}
+
+/////////////////////////////////////////////////////////////
+// request the horizontal terrain plane for the current plan view
+
+int GuiManager::_requestHorizontalTerrain()
+{
+  MdvReader *terrain = _gd.layers.earth.terr;
+  _terrainHorizontalSettled = true;
+  if (!_horizontalTerrainApplies() || terrain == nullptr) {
+    _terrainHorizontalRequestGeneration = -1;
+    _terrainHorizontalRequestPending = false;
+    return -1;
+  }
+
+  connect(terrain, &MdvReader::horizontalReadComplete,
+          this, &GuiManager::_terrainHorizontalReadComplete,
+          Qt::UniqueConnection);
+
+  // Do not supersede a blocking library call: MdvReader cannot interrupt it,
+  // and bumping its generation would discard the result without starting the
+  // replacement. Queue the latest display state for that completion instead.
+  if (terrain->getReadBusyH()) {
+    _terrainHorizontalRequestPending = true;
+    _terrainHorizontalSettled = false;
+    return _terrainHorizontalRequestGeneration;
+  }
+
+  _terrainHorizontalRequestPending = false;
+  _terrainHorizontalSettled = false;
+  _terrainHorizontalRequestGeneration = terrain->requestHorizPlane(
+    _timeControl->getSelectedTime(), 0.0, _fieldNum);
+
+  // An unchanged static request completes synchronously from retained data
+  // and therefore does not pass through readDoneH or emit a completion signal.
+  if (terrain->isNewH()) {
+    _terrainHorizontalSettled = true;
+  }
+  return _terrainHorizontalRequestGeneration;
+}
+
+/////////////////////////////////////////////////////////////
+// request the static elevation field along the retained section route
+
+int GuiManager::_requestVerticalTerrain()
+{
+  return _requestVerticalTerrain(_vsectionRoute);
+}
+
+/////////////////////////////////////////////////////////////
+// request terrain along a specific accepted section route
+
+int GuiManager::_requestVerticalTerrain(const VsectionRoute &route)
+{
+  _terrainVerticalRequestGeneration = -1;
+  _terrainVerticalSettled = true;
+  MdvReader *terrain = _gd.layers.earth.terr;
+  if (!_gd.layers.earth.terrain_active || terrain == nullptr ||
+      route.size() < 2) {
+    return -1;
+  }
+
+  WayPts wayPts;
+  for (const VsectionRoute::Point &point : route.points()) {
+    wayPts.addPoint(point.lat, point.lon);
+  }
+  connect(terrain, &MdvReader::verticalReadComplete,
+          this, &GuiManager::_terrainVerticalReadComplete,
+          Qt::UniqueConnection);
+  _terrainVerticalRequestGeneration = terrain->requestVertSection(
+    _timeControl->getSelectedTime(), _fieldNum, wayPts);
+  _terrainVerticalSettled = _terrainVerticalRequestGeneration < 0;
+  return _terrainVerticalRequestGeneration;
 }
 
 /////////////////////////////////////////////////////////////
@@ -3713,25 +3191,69 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
   // field which was superseded while its request was in flight; the selected
   // field has its own request pending (or has already completed).
 
-  if (_gd.h_win.page < 0 || _gd.h_win.page >= _gd.num_datafields ||
-      reader != _gd.mread[_gd.h_win.page]) {
+  if (_fieldNum < 0 || _fieldNum >= _gd.num_datafields ||
+      reader != _gd.mread[_fieldNum]) {
     return;
   }
 
-  // if (reader == nullptr || !reader->isValidV()) {
-  //   statusBar()->showMessage("Vertical section data are not available", 5000);
-  //   return;
-  // }
+  // DsMdvServer may replace a short radial selection with the measured RHI's
+  // radar-to-max-range path. Keep the user's route as the request definition,
+  // but draw and sample optional terrain against the geometry actually
+  // returned with this response.
+
+  if (reader->isValidV() && reader->getVertWayPts().getNPoints() >= 2) {
+    VsectionRoute returnedRoute;
+    const WayPts &returnedWayPoints = reader->getVertWayPts();
+    for (size_t ii = 0; ii < returnedWayPoints.getNPoints(); ++ii) {
+      double lat = 0.0;
+      double lon = 0.0;
+      returnedWayPoints.getPoint(ii, lat, lon);
+      double x = 0.0;
+      double y = 0.0;
+      _gd.proj.latlon2xy(lat, lon, x, y);
+      if (std::isfinite(x) && std::isfinite(y)) {
+        returnedRoute.append(x, y, lat, lon);
+      }
+    }
+    if (returnedRoute.size() >= 2) {
+      const bool routeAdjusted =
+        !routesEquivalent(_vsectionRoute, returnedRoute);
+      if (_horiz != nullptr) {
+        _horiz->setVsectionRoute(returnedRoute);
+      }
+      if (routeAdjusted) {
+        _requestVerticalTerrain(returnedRoute);
+      }
+    }
+  }
 
   _vert->setSection(reader);
-  _vertWindow->setSectionInfo(_params._fields[_gd.h_win.page].field_name,
+  _vertWindow->setSectionInfo(_params._fields[_fieldNum].field_name,
                               reader->v_date,
                               reader->getVertTotalLengthKm());
 
-  if (isMovieBuilding() && _movieIncludesVertical &&
-      _movieBuildFrame >= 0 &&
-      reader->getVertGeneration() == _movieVerticalRequestGeneration) {
-    _movieVerticalReady = true;
+  // Automatic vertical output is tied to the exact request generation. A
+  // failed completion advances immediately; waiting for the timeout would
+  // only delay an unattended batch after the MDV layer has already answered.
+  if (_imageGenerationManager->isActive() &&
+      _imageGenerationManager->currentJobIsVertical() &&
+      reader == _gd.mread[
+        _imageGenerationManager->currentJob().fieldIndex] &&
+      reader->getVertGeneration() ==
+        _imageGenerationManager->expectedGeneration()) {
+    if (!reader->isValidV()) {
+      _imageGenerationManager->failCurrentJob(
+        tr("Vertical-section data are not available for %1")
+          .arg(_params._fields[_fieldNum].field_name));
+    } else if (_imageGenerationManager->acceptDataCompletion(
+                 reader->getVertGeneration())) {
+      _checkAutomaticImageReady();
+    }
+    return;
+  }
+
+  if (isMovieBuilding() &&
+      _movieManager->markVerticalReady(reader->getVertGeneration())) {
     _checkMovieFrameReady();
     return;
   }
@@ -3747,6 +3269,73 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
   _vertWindow->raise();
   _vertWindow->activateWindow();
   // statusBar()->showMessage("Vertical section ready", 5000);
+}
+
+/////////////////////////////////////////////////////////////
+// publish a completed horizontal terrain plane
+
+void GuiManager::_terrainHorizontalReadComplete(MdvReader *reader,
+                                                int generation,
+                                                bool success)
+{
+  if (reader == nullptr || reader != _gd.layers.earth.terr) {
+    return;
+  }
+
+  if (_terrainHorizontalRequestPending) {
+    // A field, level, time, or zoom changed while the previous static read was
+    // blocked. Its data are safe to install, but request the newest display
+    // state before declaring terrain ready for capture.
+    _terrainHorizontalRequestPending = false;
+    if (!success) {
+      reader->cancelHorizRequest(generation);
+    }
+    _requestHorizontalTerrain();
+    if (_horiz != nullptr) {
+      _horiz->rerenderGrid();
+    }
+    _checkMovieFrameReady();
+    _checkAutomaticImageReady();
+    return;
+  }
+
+  if (generation != _terrainHorizontalRequestGeneration) {
+    return;
+  }
+
+  _terrainHorizontalSettled = true;
+  if (!success) {
+    // Terrain is optional. Stop MdvReader's normal indefinite retry policy so
+    // a missing static file does not prevent movies or unattended images.
+    reader->cancelHorizRequest(generation);
+    _terrainHorizontalRequestGeneration = -1;
+  }
+  if (_horiz != nullptr) {
+    _horiz->rerenderGrid();
+  }
+  _checkMovieFrameReady();
+  _checkAutomaticImageReady();
+}
+
+/////////////////////////////////////////////////////////////
+// publish a completed terrain profile without disturbing the field section
+
+void GuiManager::_terrainVerticalReadComplete(MdvReader *reader)
+{
+  if (reader == nullptr || reader != _gd.layers.earth.terr ||
+      reader->getVertGeneration() != _terrainVerticalRequestGeneration) {
+    return;
+  }
+
+  // Terrain is optional display context. Completion, including a failed MDV
+  // read, releases movie and automatic-image readiness; VertView simply omits
+  // the profile when the reader is invalid.
+  _terrainVerticalSettled = true;
+  if (_vert) {
+    _vert->rerenderTerrain();
+  }
+  _checkMovieFrameReady();
+  _checkAutomaticImageReady();
 }
 
 /////////////////////////////
@@ -3782,7 +3371,7 @@ void GuiManager::_howto()
     text += "Right-click to add segments and double-click to finish.\n";
     text += "Use Backspace to remove a point or Escape to cancel.\n";
   }
-  text += "Use Shift-right-click for the context menu.\n";
+  text += "Use Shift-right-click for plan-view interaction help.\n";
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
 
@@ -3821,378 +3410,4 @@ void GuiManager::_about()
   text += " WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.";  
 
   QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// Legacy - to be remove later
-//////////////////////////////////////////////////////////////////////////////
-
-
-/************************************************************************
- * TIMER_FUNC: This routine acts as the main branch point for most of the
- * threads involved in the display. This function gets called through
- * XView's notifier mechanism, which is built on sigalarm().
- * This is parameterized, and usually runs on a 5-100 msec interval.
- * First, any pending IO is handled.
- * Current time tickers, and the display's shmem communications are updated
- * Checks for out-of date images and expired Data are initiated periodically
- * Animation and Rendering are handled.
- * Finally Background Rendering is scheduled
- *
- */
-
-void GuiManager::_autoCreateFunc()
-{
-
-    // handle image creation
-
-  if (_params.images_auto_create) {
-
-    // if we are just creating files in archive mode
-    // and then exiting, do that now
-    
-    if ((_params.images_creation_mode ==
-         Params::CREATE_IMAGES_THEN_EXIT) ||
-        (_params.images_creation_mode ==
-         Params::CREATE_IMAGES_ON_ARCHIVE_SCHEDULE)) {
-      _createArchiveImageFiles();
-      close();
-      return;
-    }
-    
-    // if we are creating files in realtime mode, do that now
-    
-    if (_params.images_creation_mode ==
-        Params::CREATE_IMAGES_ON_REALTIME_SCHEDULE) {
-      // _handleRealtimeData();
-      // _createRealtimeImageFiles();
-      return;
-    }
-    
-  } // if (_params.images_auto_create)
-
-}
-
-
-/*************************************************************************
- * SET_DISPLAY_TIME
- */
-
-void GuiManager::_setDisplayTime(time_t utime)
-{
-  int i,j,found;
-  time_t    last_time;
-  time_t    target_time;
-
-  movie_frame_t    tmp_frame[Constants::MAX_FRAMES];    /* info about each frame */
-
-  last_time = _gd.movie.start_time;
-     
-  // Round to the nearest even interval 
-  utime -= (utime % _gd.movie.round_to_seconds);
-
-  // Already set to this time
-  if(utime == _gd.movie.start_time) return;
-
-  /* if starting time moves more than 2 volume intervals, assume we want archive mode */
-  if(abs(last_time - utime) > (2 * _gd.movie.time_interval_mins * 60)) {
-    _gd.movie.mode = ARCHIVE_MODE;
-    _gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
-    _gd.coord_expt->time_seq_num++;
-    // xv_set(_gd.movie_pu->movie_type_st,PANEL_VALUE,ARCHIVE_MODE,NULL);
-
-  } else {
-    if(_gd.movie.mode == REALTIME_MODE) {
-      _gd.coord_expt->runtime_mode = RUNMODE_REALTIME;
-      _gd.coord_expt->time_seq_num++;
-
-      // Not Sensible to change start times in real time mode - Ignore;
-      _updateMoviePopup();
-      return ;
-    }
-  }
-
-  _gd.movie.start_time = utime;
-
-  // Record the time we're currently on
-  target_time = _gd.movie.frame[_gd.movie.cur_frame].time_start;
-
-  // Make a temporary copy
-  // Zero out global array
-  for (int ii = 0; ii < Constants::MAX_FRAMES; ii++) {
-    tmp_frame[ii] = _gd.movie.frame[ii];
-    _gd.movie.frame[ii].init();
-  }
-  // memcpy(tmp_frame,_gd.movie.frame,sizeof(movie_frame_t) * Constants::MAX_FRAMES);
-  
-  
-  // Fill in time points on global array
-  // reset_time_points();
-
-  // Search for frames already rendered for this interval and use them
-  for(i=0 ; i < _gd.movie.num_frames; i++) {
-    found = 0;
-    for(j=0; j < Constants::MAX_FRAMES && !found; j++) {
-      if(_gd.movie.frame[i].time_start == tmp_frame[j].time_start) {
-        found = 1;
-        _gd.movie.frame[i] = tmp_frame[j];
-        // Render a new time selector for this frame
-#ifdef NOTYET
-        draw_hwin_bot_margin(_gd.movie.frame[i].h_xid,_gd.h_win.page,
-                             _gd.movie.frame[i].time_start,
-                             _gd.movie.frame[i].time_end);
-#endif
-        tmp_frame[j].init();
-      }
-	 
-    }
-  }
-
-  // Reuse pixmaps in unused frames
-  for(i=0 ; i < _gd.movie.num_frames; i++) {
-    if(_gd.movie.frame[i].h_pdev) continue; // Alreday is accounted for.
-
-    found = 0;
-#ifdef NOTYET
-    for(j=0; j < Constants::MAX_FRAMES && !found; j++) {
-      if(tmp_frame[j].h_xid) {
-        found = 1;
-        _gd.movie.frame[i].h_xid = tmp_frame[j].h_xid;
-        _gd.movie.frame[i].v_xid = tmp_frame[j].v_xid;
-        _gd.movie.frame[i].redraw_horiz = 1;
-        _gd.movie.frame[i].redraw_vert = 1;
-        memset(&tmp_frame[j],0,sizeof(movie_frame_t));
-      }
-    }
-#endif
-  }
-
-  _gd.movie.cur_frame = 0;
-  for(i=0; i < _gd.movie.num_frames; i++) {
-    if(target_time >= _gd.movie.frame[i].time_start &&
-       target_time <= _gd.movie.frame[i].time_end) {
-
-      _gd.movie.cur_frame = i;
-    }
-  }
-
-  // Reset gridded and product data validity flags
-  // invalidate_all_data();
-
-  _updateMoviePopup();
-     
-}
-
-/*************************************************************************
- *  SET_END_FRAME
- */
-void GuiManager::_setEndFrame(int num_frames)
-  
-{
-  int i,j;
-  time_t    target_time;
-  movie_frame_t    tmp_frame[Constants::MAX_FRAMES];    /* info about each frame */
-  int old_frames;
-
-  _gd.movie.end_frame = num_frames -1;
-  
-  // Sanity check
-  if(_gd.movie.end_frame < 0) _gd.movie.end_frame = 0;
-  if(_gd.movie.end_frame >= Constants::MAX_FRAMES) _gd.movie.end_frame = Constants::MAX_FRAMES -1;
-  old_frames = _gd.movie.num_frames;
-  _gd.movie.num_frames = _gd.movie.end_frame +1;
-  
-  if(_gd.movie.num_frames > 1) {
-    // xv_set(_gd.movie_pu->movie_frame_sl,XV_SHOW,TRUE,NULL);
-  } else {
-    // xv_set(_gd.movie_pu->movie_frame_sl,XV_SHOW,FALSE,NULL);
-  }
-
-  target_time = _gd.movie.frame[_gd.movie.cur_frame].time_start;
-
-  if(_gd.movie.mode == REALTIME_MODE) {
-    _gd.movie.cur_frame = _gd.movie.end_frame;
-    // Make a temporary copy
-    // Zero out global array
-    for (int ii = 0; ii < Constants::MAX_FRAMES; ii++) {
-      tmp_frame[ii] = _gd.movie.frame[ii];
-      _gd.movie.frame[ii].init();
-    }
-    
-    // Start point changes
-    _gd.movie.start_time -= (time_t) ((_gd.movie.time_interval_mins * 60.0) *
-                                      (_gd.movie.num_frames - old_frames));
-    
-    // reset_time_points();
-    
-    if(_gd.movie.num_frames > old_frames) {
-      // copy original frames
-      for(i = _gd.movie.num_frames - old_frames, j = 0; j < old_frames; i++, j++) {
-        _gd.movie.frame[i] = tmp_frame[j];
-        
-        // Render time selector in reused frame
-#ifdef NOTYET
-        draw_hwin_bot_margin(_gd.movie.frame[i].h_xid,_gd.h_win.page,
-                             _gd.movie.frame[i].time_start,
-                             _gd.movie.frame[i].time_end);
-#endif
-      }
-      
-      // Mark new frames for allocation & redrawing
-      j = _gd.movie.num_frames - old_frames;
-      for(i = 0; i < j; i++) {
-        _gd.movie.frame[i].redraw_horiz = 1;
-        _gd.movie.frame[i].redraw_vert = 1;
-      }
-    } else {
-      for(i = 0, j = old_frames - _gd.movie.num_frames ; j < old_frames; i++, j++) {
-        _gd.movie.frame[i] = tmp_frame[j];
-        // Render time selector in reused frame
-#ifdef NOTYET
-        draw_hwin_bot_margin(_gd.movie.frame[i].h_xid,_gd.h_win.page,
-                             _gd.movie.frame[i].time_start,
-                             _gd.movie.frame[i].time_end);
-#endif
-      }
-      // Copy unused frames too so they get de-allocated
-      for(j = 0, i = _gd.movie.num_frames; j < old_frames - _gd.movie.num_frames; i++, j++) {
-        _gd.movie.frame[i] = tmp_frame[j];
-      }
-    }
-  } else {
-    _gd.movie.cur_frame = 0;
-    // Start point remains the same
-    // reset_time_points();
-
-    if(_gd.movie.num_frames > old_frames) {
-      for(i = _gd.movie.num_frames -1; i < old_frames; i++) {
-        _gd.movie.frame[i].redraw_horiz = 1;
-        _gd.movie.frame[i].redraw_vert = 1;
-      }
-      // Render time selector in reused frames
-      for(i= 0; i < old_frames; i++) {
-#ifdef NOTYET
-       draw_hwin_bot_margin(_gd.movie.frame[i].h_xid,_gd.h_win.page,
-                             _gd.movie.frame[i].time_start,
-                             _gd.movie.frame[i].time_end);
-#endif
-      }
-    } else {
-      // Render time selector in reused frames
-      for(i= 0; i < _gd.movie.num_frames; i++) {
-#ifdef NOTYET
-        draw_hwin_bot_margin(_gd.movie.frame[i].h_xid,_gd.h_win.page,
-                             _gd.movie.frame[i].time_start,
-                             _gd.movie.frame[i].time_end);
-#endif
-      }
-    }
-  }
-     
-  for(i=0; i < _gd.movie.num_frames; i++) {
-    if(target_time >= _gd.movie.frame[i].time_start &&
-       target_time <= _gd.movie.frame[i].time_end) {
-
-      _gd.movie.cur_frame = i;
-    }
-  }
-  // Reset gridded and product data validity flags
-  // invalidate_all_data();
-     
-  _updateMoviePopup();
-
-  // adjust_pixmap_allocation();
-     
-  return;
-}
-
-/*************************************************************************
- * UPDATE_MOVIE_PU: Update critical displayed values on the movie popup
- */
-
-void GuiManager::_updateMoviePopup()
-{
-  int        index;
-  char    text[64];
-  char    fmt_text[128];
-  struct tm tms;
-
-  if(_gd.movie.cur_frame < 0) {
-    index =  _gd.movie.num_frames - 1;
-  } else {
-    index = _gd.movie.cur_frame;
-  }
- 
-  /* Update the Current Frame Begin Time text */
-  snprintf(fmt_text,128,"Frame %d: %%H:%%M %%m/%%d/%%Y",index+1);
-  if(_params.use_local_timestamps) {
-    strftime (text,64,fmt_text,localtime_r(&_gd.movie.frame[index].time_mid,&tms));
-  } else {
-    strftime (text,64,fmt_text,gmtime_r(&_gd.movie.frame[index].time_mid,&tms));
-  }
-  // xv_set(_gd.movie_pu->fr_begin_msg,PANEL_LABEL_STRING,text,NULL);
-  
-  // Update the movie time start text
-  if(_params.use_local_timestamps) {
-    strftime (text, 64, _params.moviestart_time_format,
-              localtime_r(&_gd.movie.start_time,&tms));
-  } else {
-    strftime (text, 64, _params.moviestart_time_format,
-              gmtime_r(&_gd.movie.start_time,&tms));
-  }
-  // xv_set(_gd.movie_pu->start_time_tx,PANEL_VALUE,text,NULL);
-
-  // xv_set(_gd.movie_pu->movie_type_st,PANEL_VALUE,_gd.movie.mode,NULL);
-
-  if(_gd.debug1) printf("Time Start: %ld, End: %ld\n",_gd.movie.frame[index].time_start,
-                       _gd.movie.frame[index].time_end);
-   
-  /* update the time_interval  text */
-  switch(_gd.movie.climo_mode) {
-    case Params::CLIMO_REGULAR_INTERVAL:
-      snprintf(text,64,"%.2f",_gd.movie.time_interval_mins);
-      // xv_set(_gd.movie_pu->time_interval_tx,PANEL_VALUE,text,NULL);
-      // xv_set(_gd.movie_pu->min_msg,PANEL_LABEL_STRING,"min",NULL);
-      break;
-
-    case Params::CLIMO_DAILY_INTERVAL:
-      // xv_set(_gd.movie_pu->time_interval_tx,PANEL_VALUE,"1",NULL);
-      // xv_set(_gd.movie_pu->min_msg,PANEL_LABEL_STRING,"day",NULL);
-      break;
-
-    case Params::CLIMO_YEARLY_INTERVAL:
-      // xv_set(_gd.movie_pu->time_interval_tx,PANEL_VALUE,"1",NULL);
-      // xv_set(_gd.movie_pu->min_msg,PANEL_LABEL_STRING,"yr",NULL);
-      break;
-
-  }
-
-  /* update the forecast period text */
-  snprintf(text,64,"%.2f",_gd.movie.forecast_interval);
-  // xv_set(_gd.movie_pu->fcast_per_tx,PANEL_VALUE,text,NULL);
-
-  // xv_set(_gd.movie_pu->movie_frame_sl,
-  //        PANEL_MIN_VALUE,_gd.movie.start_frame + 1,
-  //        PANEL_MAX_VALUE,_gd.movie.end_frame + 1,
-  //        PANEL_VALUE,_gd.movie.cur_frame +1,
-  //        NULL);
-
-  /* update the start/end frames text */
-  snprintf(text,64,"%d",_gd.movie.end_frame +1);
-  // xv_set(_gd.movie_pu->end_frame_tx,PANEL_VALUE,text,NULL);
-
-#ifdef NOTYET
-  if(_gd.time_plot)
-  {
-    _gd.time_plot->Set_times((time_t) _gd.epoch_start,
-                            (time_t) _gd.epoch_end,
-                            (time_t) _gd.movie.frame[_gd.movie.cur_frame].time_start,
-                            (time_t) _gd.movie.frame[_gd.movie.cur_frame].time_end,
-                            (time_t)((_gd.movie.time_interval_mins * 60.0) + 0.5),
-                            _gd.movie.num_frames);
-    _gd.time_plot->Draw(); 
-  }
-#endif
-    
-
 }

@@ -436,13 +436,11 @@ void ProductMgr::_handleResult(SymprodReadResult *rawResult)
   _requestInFlight[index] = false;
 
   Product &product = *_products[index];
-  bool availabilityChanged = false;
   if (result->timeListStatus == 0) {
     product.setAvailableTimes(result->availableTimes);
     _timeListValid[index] = true;
     _timeListStarts[index] = result->timeListStart;
     _timeListEnds[index] = result->timeListEnd;
-    availabilityChanged = true;
   } else if (!result->timeListError.empty()) {
     // Availability is supplementary: preserve the previous ticks and allow
     // a successful graphics request to be installed normally.
@@ -463,7 +461,7 @@ void ProductMgr::_handleResult(SymprodReadResult *rawResult)
                       string(product._prodInfo.menu_label) + ": " +
                       result->error, true);
     }
-    if (availabilityChanged && _productsChangedCallback) {
+    if (_productsChangedCallback) {
       _productsChangedCallback();
     }
     return;
@@ -480,7 +478,7 @@ void ProductMgr::_handleResult(SymprodReadResult *rawResult)
                       string(product._prodInfo.menu_label) + ": " +
                       decodeError, true);
     }
-    if (availabilityChanged && _productsChangedCallback) {
+    if (_productsChangedCallback) {
       _productsChangedCallback();
     }
     return;
@@ -714,6 +712,29 @@ bool ProductMgr::activeProductsReady() const
     }
   }
   return true;
+}
+
+bool ProductMgr::activeProductRequestsSettled() const
+{
+  for (size_t ii = 0; ii < _products.size(); ++ii) {
+    if (_products[ii]->_active && _requestInFlight[ii]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+int ProductMgr::numActiveProductsUnavailable() const
+{
+  int unavailable = 0;
+  for (size_t ii = 0; ii < _products.size(); ++ii) {
+    if (_products[ii]->_active &&
+        (!_installedKeyValid[ii] ||
+         !(_installedKeys[ii] == _desiredKeys[ii]))) {
+      ++unavailable;
+    }
+  }
+  return unavailable;
 }
 
 

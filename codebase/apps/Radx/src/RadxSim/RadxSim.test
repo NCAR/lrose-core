@@ -1,0 +1,24 @@
+// Example RadxSim parameters.
+
+debug = DEBUG_NORM;
+instance = "test";
+
+// Supply paths here or use -f on the command line.
+input_mode = FILE_LIST;
+input_file_paths = {};
+
+// ARCHIVE mode uses this directory and inclusive range instead.
+input_dir = ".";
+archive_start_time = "2020 01 01 00 00 00";
+archive_end_time = "2020 01 01 01 00 00";
+continue_on_input_error = TRUE;
+
+replay_rate = 1.0;
+time_offset_secs = 0.0;
+repeat_replay = FALSE;
+inter_cycle_gap_secs = 1.0;
+
+output_dir = "./output/RadxSim";
+append_day_dir_to_output_dir = TRUE;
+append_year_dir_to_output_dir = FALSE;
+compression_level = 4;

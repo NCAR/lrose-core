@@ -60,6 +60,7 @@ SUB_DIRS = \
 	MdvPointExtract \
 	MdvPull \
 	MdvScatterPlot \
+	MdvSim \
 	MdvSmooth \
 	MdvSpdDir2UV \
 	MdvStats \

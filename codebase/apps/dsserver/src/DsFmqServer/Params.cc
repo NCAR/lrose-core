@@ -668,6 +668,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'run_read_only'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("run_read_only");
+    tt->descr = tdrpStrDup("Option to run in read-only mode.");
+    tt->help = tdrpStrDup("If TRUE, the server will only let clients read. It rejects requests to open a queue for writing (CREATE, READ_WRITE, BLOCKING_READ_WRITE), and rejects writes.");
+    tt->val_offset = (char *) &run_read_only - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

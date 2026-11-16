@@ -94,7 +94,6 @@ private:
   // methods
   
   int _initDataSpace();
-  void _initMovieFrameTimes();
 
   int _initGrids();
   void _initWinds();
@@ -102,8 +101,7 @@ private:
                           const Params::wind_t &windp,
                           bool isU, bool isV, bool isW);
   void _initTerrain();
-  void _initDrawExport();
-  void _initRouteWinds();
+  // void _initRouteWinds();
 
   int _initMaps();
   int _loadRapMap(MapOverlay_t *ov,
@@ -115,7 +113,6 @@ private:
   
   void _calcMapCoordsProj();
   void _calcMapCoordsLatLon();
-  int _initStationLoc();
   
   int _initZooms();
   void _initContours();

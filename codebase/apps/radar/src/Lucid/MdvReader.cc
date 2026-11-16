@@ -209,28 +209,29 @@ MdvReader::MdvReader(QObject* parent) :
 
   isRadar = false;
   
-  _vLevelReq = -9999.0;
-  _compositeModeReq = false;
-  _compositeMinHtReq = 0.0;
-  _compositeMaxHtReq = 0.0;
   _validH = false;
   _validV = false;
   _newH = false;
   _newV = false;
 
-  _page = 0;
   _timeListValid = false;
-  _vLevel = 0;
+  _pendingTimeListValid = false;
   _readBusyH = false;
+  _horizGeneration = 0;
+  _horizCompletedGeneration = -1;
+  _activeHRequestValid = false;
+  _pendingHRequestValid = false;
+  _installedHRequestValid = false;
   _vertSampleSpacingKm = 0.0;
   _vertTotalLengthKm = 0.0;
   _vertGeneration = 0;
+  _vertCompletedGeneration = -1;
 
   qRegisterMetaType<VertReadResultPtr>("VertReadResultPtr");
 
   // Use a Qt timer for retries so the MdvReader remains responsive between
-  // attempts.  The timer belongs to this object and therefore fires on the
-  // main Qt thread, where it is safe to start and account for another worker.
+  // attempts. The active request remains immutable across retries; any newer
+  // display request replaces the single pending slot and cancels this timer.
 
   _retryCountH = 0;
   _shuttingDown = false;
@@ -252,10 +253,10 @@ MdvReader::~MdvReader()
   _shuttingDown = true;
   _retryTimerH->stop();
 
-  // getHorizPlane() currently operates directly on this MdvReader.  Do not
-  // allow the object to be destroyed until every outstanding read has
-  // returned.  quit() stops each thread's event loop after the blocking MDV
-  // request completes; the request timeout therefore bounds this wait.
+  // Each worker owns an immutable request, but the blocking MDV call writes
+  // its transient result into this reader for later installation on the Qt
+  // thread. Do not destroy the reader until every such call has returned.
+  // The configured MDV timeout therefore bounds this shutdown wait.
 
   const QSet<QThread *> threads = _readThreadsH;
   for (QThread *thread : threads) {
@@ -292,19 +293,23 @@ MdvReader::~MdvReader()
  * On error, isValidH is set to false.
  */
 
-void MdvReader::requestHorizPlane(const DateTime &midTime,
-                                  double vLevel,
-                                  int page)
+int MdvReader::requestHorizPlane(const DateTime &midTime,
+                                 double vLevel,
+                                 int page,
+                                 bool primaryDisplayField)
 {
+  const int generation = ++_horizGeneration;
+  const HorizReadRequest request = _createHorizReadRequest(
+    midTime, vLevel, page, primaryDisplayField, generation);
 
-  // This is a new user request, so cancel a pending retry and restart the
-  // backoff sequence for the new request details.
-
+  // A new display request supersedes retry policy for the previous state.
+  // Installed data remains intact, but is not advertised as current until the
+  // new request either reuses that exact cache key or installs a fresh result.
   _retryTimerH->stop();
   _retryCountH = 0;
-
-  _setValidH(false);
   _setNewH(false);
+  _setValidH(false);
+  h_data_valid = 0;
   
   if(_gd.debug1) {
     cerr << "=====>>> MdvReader::requestHorizPlane()" << endl;
@@ -313,31 +318,120 @@ void MdvReader::requestHorizPlane(const DateTime &midTime,
     cerr << "   page: " << page << endl;
   }
   
-  _midTime = midTime;
-  _page = page;
-
-  // The GUI can change column-max mode while a worker is active.  Capture it
-  // with the other request details so an in-flight MDV request remains
-  // internally consistent; a queued GUI change will start a subsequent read.
-  _compositeModeReq = (composite_mode != FALSE);
-  _compositeMinHtReq = _gd.h_win.min_ht;
-  _compositeMaxHtReq = _gd.h_win.max_ht;
-  
-  // check for change in request details
-  
-  if (!_checkRequestChangedH(_midTime, vLevel)) {
-    // no changes to the request, use what we have, mark as new
+  if (!_readBusyH && _installedHRequestValid && _timeListValid &&
+      _sameHorizDataRequest(request, _installedHRequest)) {
     if(_gd.debug2) {
       cerr << "======>> requestHorizPlane - no change <<<<==" << endl;
     }
-    _setNewH(true);
-    return;
+    _pendingHRequestValid = false;
+    _publishCachedHorizRequest(request, false);
+    return generation;
   }
 
-  // Initiate the request in thread
-  
+  if (_readBusyH) {
+    // Only the latest requested display state matters. Replacing this slot
+    // bounds the queue while the blocking MDV call completes.
+    _pendingHRequest = request;
+    _pendingHRequestValid = true;
+    return generation;
+  }
+
+  _pendingHRequestValid = false;
+  _activeHRequest = request;
+  _activeHRequestValid = true;
   startReadVolH();
-  
+  return generation;
+}
+
+////////////////////////////////////////////////////////
+// construct the complete identity and worker state for one horizontal read
+
+HorizReadRequest MdvReader::_createHorizReadRequest(
+        const DateTime &midTime,
+        double vLevel,
+        int page,
+        bool primaryDisplayField,
+        int generation)
+{
+  HorizReadRequest request;
+  request.midTime = midTime;
+  _computeReqTime(midTime, request.requestTime);
+  request.vLevel = vLevel;
+  request.page = page;
+  request.generation = generation;
+  request.compositeMode = (composite_mode != FALSE);
+  request.primaryDisplayField = primaryDisplayField;
+  request.compositeMinHt = _params.vsection_min_ht_km;
+  request.compositeMaxHt = _params.vsection_max_ht_km;
+  request.requestTimeList = !_timeListValid;
+  if (_params.decimate_resolution_on_mdv_request) {
+    request.decimateResolution =
+      _gd.h_win.img_dim.width * _gd.h_win.img_dim.width;
+  }
+
+  if (_params.clip_to_current_zoom_on_mdv_request) {
+    double minLat, maxLat, minLon, maxLon;
+    _getBoundingBox(minLat, maxLat, minLon, maxLon);
+    request.zoomBox.setLimits(minLat, maxLat, minLon, maxLon);
+  } else {
+    request.zoomBox.clearLimits();
+  }
+  return request;
+}
+
+////////////////////////////////////////////////////////
+// compare every option which changes the returned horizontal grid
+
+bool MdvReader::_sameHorizDataRequest(const HorizReadRequest &lhs,
+                                      const HorizReadRequest &rhs)
+{
+  const auto close = [](double aa, double bb) {
+    return fabs(aa - bb) <= 1.0e-5;
+  };
+  const bool sameZoom =
+    close(lhs.zoomBox.getMinLat(), rhs.zoomBox.getMinLat()) &&
+    close(lhs.zoomBox.getMaxLat(), rhs.zoomBox.getMaxLat()) &&
+    close(lhs.zoomBox.getMinLon(), rhs.zoomBox.getMinLon()) &&
+    close(lhs.zoomBox.getMaxLon(), rhs.zoomBox.getMaxLon());
+  const bool sameVerticalRequest = lhs.compositeMode ?
+    close(lhs.compositeMinHt, rhs.compositeMinHt) &&
+      close(lhs.compositeMaxHt, rhs.compositeMaxHt) :
+    close(lhs.vLevel, rhs.vLevel);
+
+  return lhs.requestTime == rhs.requestTime && sameZoom &&
+    lhs.compositeMode == rhs.compositeMode && sameVerticalRequest &&
+    lhs.primaryDisplayField == rhs.primaryDisplayField &&
+    lhs.decimateResolution == rhs.decimateResolution;
+}
+
+////////////////////////////////////////////////////////
+// publish retained data as the completion of a new equivalent generation
+
+void MdvReader::_publishCachedHorizRequest(
+        const HorizReadRequest &request,
+        bool emitCompletion)
+{
+  _horizCompletedGeneration = request.generation;
+  h_data_valid = 1;
+  _setValidH(true);
+  _setNewH(true);
+  if (emitCompletion) {
+    emit horizontalReadComplete(this, request.generation, true);
+  }
+}
+
+////////////////////////////////////////////////////////
+// prevent a timed-out request from continuing its retry policy
+
+void MdvReader::cancelHorizRequest(int generation)
+{
+  if (generation != _horizGeneration) {
+    return;
+  }
+  _retryTimerH->stop();
+  ++_horizGeneration;
+  _pendingHRequestValid = false;
+  _setNewH(false);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -347,15 +441,11 @@ void MdvReader::requestHorizPlane(const DateTime &midTime,
 // Once complete, the data is copied back to the MdvReader object.
 /////////////////////////////////////////////////////////////////////
 
-int MdvReader::getHorizPlane()
+int MdvReader::getHorizPlane(const HorizReadRequest &request)
 {
   QMutexLocker libraryReadLock(&mdvLibraryReadMutex);
-  
-  // initialize
-  
-  h_rgba32_data.clear();
-  h_fl32_data.clear();
-  h_data_valid = 0;
+
+  _pendingTimeListValid = false;
     
   // Construct URL, check is valid.
   
@@ -374,10 +464,10 @@ int MdvReader::getHorizPlane()
   
   // get time list
   
-  if(!_timeListValid) {
-    if (_getTimeList(fullUrl, _midTime,  _page, h_mdvx)) {
+  if (request.requestTimeList) {
+    if (_getTimeList(fullUrl, request.midTime, request.page,
+                     request.zoomBox, h_mdvx)) {
       cerr << "MdvReader::getHorizPlane()::_getTimeList() failed" << endl;
-      _timeListValid = false;
       return -1;
     }
   }
@@ -389,40 +479,43 @@ int MdvReader::getHorizPlane()
   
   // read times
   
-  _setReadTimes(fullUrl, _timeReq, h_mdvx);
+  _setReadTimes(fullUrl, request.requestTime, h_mdvx);
   
   // vlevel
   
-  if (_compositeModeReq) {
+  if (request.compositeMode) {
     // A composite must include the configured vertical domain.  Restricting
     // this request to the selected plan-view level leaves MDV no column over
     // which to compute the maximum.
-    h_mdvx.setReadVlevelLimits(_compositeMinHtReq, _compositeMaxHtReq);
+    h_mdvx.setReadVlevelLimits(request.compositeMinHt,
+                               request.compositeMaxHt);
     h_mdvx.setReadComposite();
   } else {
-    h_mdvx.setReadVlevelLimits(_vLevelReq, _vLevelReq);
+    h_mdvx.setReadVlevelLimits(request.vLevel, request.vLevel);
   }
   
   // clip to zoom limits
 
   if (_params.clip_to_current_zoom_on_mdv_request) {
     
-    double dlat = _zoomBoxReq.getMaxLat() - _zoomBoxReq.getMinLat();
-    double dlon = _zoomBoxReq.getMaxLon() - _zoomBoxReq.getMinLon();
+    double dlat = request.zoomBox.getMaxLat() -
+      request.zoomBox.getMinLat();
+    double dlon = request.zoomBox.getMaxLon() -
+      request.zoomBox.getMinLon();
     double dlatExtra = fabs(dlat) / 4.0;
     double dlonExtra = fabs(dlon) / 4.0;
     
-    h_mdvx.setReadHorizLimits(_zoomBoxReq.getMinLat() - dlatExtra,
-                              _zoomBoxReq.getMinLon() - dlonExtra,
-                              _zoomBoxReq.getMaxLat() + dlatExtra,
-                              _zoomBoxReq.getMaxLon() + dlonExtra);
+    h_mdvx.setReadHorizLimits(request.zoomBox.getMinLat() - dlatExtra,
+                              request.zoomBox.getMinLon() - dlonExtra,
+                              request.zoomBox.getMaxLat() + dlatExtra,
+                              request.zoomBox.getMaxLon() + dlonExtra);
 
   }
   
   // Mdvx Decimation is based on the sqrt of the value. - Choose the longer edge 
 
-  if (_params.decimate_resolution_on_mdv_request) {
-    h_mdvx.setReadDecimate(_gd.h_win.img_dim.width * _gd.h_win.img_dim.width);
+  if (request.decimateResolution > 0) {
+    h_mdvx.setReadDecimate(request.decimateResolution);
   }
   
   h_mdvx.setReadEncodingType(Mdvx::ENCODING_ASIS);
@@ -440,7 +533,8 @@ int MdvReader::getHorizPlane()
   h_mdvx.setReadFieldFileHeaders();
   
   if(_gd.debug1) {
-    fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n", _page, fullUrl.c_str());
+    fprintf(stderr, "Get MDVX Horiz Plane - page : %d  -  %s\n",
+            request.page, fullUrl.c_str());
   }
 
   //////////////////////////////////////////
@@ -471,15 +565,6 @@ int MdvReader::getHorizPlane()
     } // if (hfld)
   } // if (iret == 0)
 
-  // get radar info if applicable
-  
-  if (mdvxRadar.loadFromMdvx(h_mdvx) == 0) {
-    isRadar = true;
-    radarParams = mdvxRadar.getRadarParams();
-  } else {
-    isRadar = false;
-  }
-
   return 0;
   
 }
@@ -490,7 +575,7 @@ int MdvReader::getHorizPlane()
 // This is run in the main thread.
 /////////////////////////////////////////////////////////////////////
 
-int MdvReader::_handleHorizReadDone()
+int MdvReader::_handleHorizReadDone(const HorizReadRequest &request)
 {
 
   // save time
@@ -516,7 +601,10 @@ int MdvReader::_handleHorizReadDone()
   // success - data is in
 
   h_data_valid = 1;
-  _timeList = _pendingTimeList;
+  if (request.requestTimeList && _pendingTimeListValid) {
+    _timeList = _pendingTimeList;
+    _timeListValid = true;
+  }
   
   // copy the requested field
 
@@ -528,6 +616,7 @@ int MdvReader::_handleHorizReadDone()
 
     // save the data to the rgba32 vector
     
+    h_fl32_data.clear();
     h_rgba32_data.resize(nptsPlane);
     memcpy(h_rgba32_data.data(), hfld->getVol(), nptsPlane * sizeof(ui32));
     
@@ -535,6 +624,7 @@ int MdvReader::_handleHorizReadDone()
     
     // save the data to the fl32 vector
     
+    h_rgba32_data.clear();
     h_fl32_data.resize(nptsPlane);
     memcpy(h_fl32_data.data(), hfld->getVol(), nptsPlane * sizeof(fl32));
     
@@ -545,6 +635,15 @@ int MdvReader::_handleHorizReadDone()
   h_mhdr = h_mdvx.getMasterHeader();
   h_fhdr = hfld->getFieldHeader();
   h_vhdr = hfld->getVlevelHeader();
+
+  // Radar metadata belongs to the same installed generation as the grid. Do
+  // not expose worker-owned transient state before this result is accepted.
+  if (mdvxRadar.loadFromMdvx(h_mdvx) == 0) {
+    isRadar = true;
+    radarParams = mdvxRadar.getRadarParams();
+  } else {
+    isRadar = false;
+  }
     
   // Init projection
 
@@ -557,7 +656,7 @@ int MdvReader::_handleHorizReadDone()
   // Implemented for MOBILE RADARS - 
 
   if (_params.zoom_domain_follows_data &&
-      this == _gd.mread[_gd.h_win.page]) { // Only for the primary field
+      request.primaryDisplayField) {
 
     double dx,locx;
     double dy,locy;
@@ -707,83 +806,6 @@ int MdvReader::_handleHorizReadDone()
   
 }
 
-////////////////////////////////////////////////////////////
-// check whether H request has changed
-// returns true if changed, false if no change
-
-bool MdvReader::_checkRequestChangedH(const DateTime &midTime,
-                                      double vLevel)
-{
-
-  DateTime reqTime;
-  _computeReqTime(midTime, reqTime);
-  
-  // compute requested zoom domain
-
-  LatLonBox zoomBoxReq;
-  if(_params.clip_to_current_zoom_on_mdv_request) {
-    double min_lat, max_lat, min_lon, max_lon;
-    _getBoundingBox(min_lat, max_lat, min_lon, max_lon);
-    zoomBoxReq.setLimits(min_lat, max_lat, min_lon, max_lon);
-  } else {
-    zoomBoxReq.clearLimits();
-  }
-
-  // check if vlevel has changed
-  
-  bool vLevelChanged = false;
-  if(!composite_mode) {
-    if (fabs(vLevel - _vLevelReq) > 1.0e-5) {
-      vLevelChanged = true;
-    }
-  }
-
-  // check if request is unchanged from previous call
-
-  if(_gd.debug1) {
-    cerr << "MdvReader::_checkRequestChangedH" << endl;
-    if (!_validH) {
-      cerr << "  _validH is false" << endl;
-    }
-    if (reqTime != _timeReq) {
-      cerr << "  reqTime has changed: "
-           << _timeReq.asString(0) << " to " << reqTime.asString(0) << endl;
-    }
-    if (zoomBoxReq != _zoomBoxReq) {
-      cerr << "  zoomBoxReq has changed:" << endl;
-      _zoomBoxReq.print(cerr);
-      cerr << "  to:" << endl;
-      zoomBoxReq.print(cerr);
-    }
-    if (vLevelChanged) {
-      cerr << "vLevelChanged, vLevel, _vLevelReq, vLevelChanged: "
-           << vLevel << ", " << _vLevelReq << endl;
-    }
-  }
-  
-  QMutexLocker locker(&_statusMutex);
-  if (_validH &&
-      reqTime == _timeReq &&
-      zoomBoxReq == _zoomBoxReq &&
-      !vLevelChanged) {
-    // no changes, use what we have, mark as new
-    return false;
-  }
-  
-  if(_gd.debug2) {
-    cerr << "MdvReader::_checkRequestChangedH - TRUE" << endl;
-  }
-  
-  // save request for comparison next time
-
-  _timeReq = reqTime;
-  _zoomBoxReq = zoomBoxReq;
-  _vLevelReq = vLevel;
-  
-  return true;
-
-}
-
 /**********************************************************************
  * Request data for a vertical section
  */
@@ -836,6 +858,17 @@ int MdvReader::requestVertSection(const DateTime &midTime,
   return request.generation;
 }
 
+////////////////////////////////////////////////////////
+// prevent an abandoned vertical read from publishing its eventual result
+
+void MdvReader::cancelVertRequest(int generation)
+{
+  if (generation == _vertGeneration) {
+    ++_vertGeneration;
+    _setNewV(false);
+  }
+}
+
 ////////////////////////////////////////////////////////////
 // compute request time from mid time
 
@@ -876,8 +909,6 @@ void MdvReader::_setReadTimes(const string &url,
                               const DateTime &reqTime,
                               Mdvx &mdvx)
 {
-  
-  _gd.data_request_time = reqTime.utime();
   
   switch(_params.gather_data_mode ) {
     
@@ -958,6 +989,7 @@ void MdvReader::_setReadTimes(const string &url,
 int MdvReader::_getTimeList(const string &url,
                             const DateTime &midTime,
                             int page,
+                            const LatLonBox &zoomBox,
                             Mdvx &mdvx)
 {
 
@@ -988,8 +1020,10 @@ int MdvReader::_getTimeList(const string &url,
   char label[1024];
   snprintf(label, 1024, "Requesting time list for %s data", legend_name.c_str());
 
-  double min_lat, max_lat, min_lon, max_lon;
-  _getBoundingBox(min_lat, max_lat, min_lon, max_lon);
+  const double min_lat = zoomBox.getMinLat();
+  const double max_lat = zoomBox.getMaxLat();
+  const double min_lon = zoomBox.getMinLon();
+  const double max_lon = zoomBox.getMaxLon();
   
   if (_params.clip_to_current_zoom_on_mdv_request) {
     mdvx.setReadHorizLimits(min_lat, min_lon, max_lat, max_lon);
@@ -1010,17 +1044,16 @@ int MdvReader::_getTimeList(const string &url,
     if (mdvx.compileTimeList()) {
       cerr << "ERROR -CIDD:  setTimeListModeValid" << endl;
       cerr << mdvx.getErrStr();
-      _timeListValid = false;
       // Availability is supplementary display information. Preserve the
       // previous list and continue the primary grid read if this query fails.
       return 0;
     }
     _pendingTimeList = mdvx.getTimeList();
-    _timeListValid = true;
+    _pendingTimeListValid = true;
   } else {
     // _gd.io_info.outstanding_request = 0;
     _pendingTimeList.clear();
-    _timeListValid = true;
+    _pendingTimeListValid = true;
   }
 
   return 0;  // return from this request.
@@ -1278,15 +1311,24 @@ void MdvReader::_adjustBoundingBox(double lat, double lon,
 ///////////////////////////////////////////////
 // Worker for read H volume in thread
 
-ReadVolH::ReadVolH(MdvReader* parentObject, QObject* parent) :
-        QObject(parent), _mr(parentObject)
+ReadVolH::ReadVolH(MdvReader *parentObject,
+                   const HorizReadRequest &request,
+                   bool debug,
+                   QObject *parent) :
+        QObject(parent), _mr(parentObject), _request(request), _debug(debug)
 {
 }
 
 void ReadVolH::doRead() {
-  cerr << "ReadVolH thread started. Parent object:" << _mr << endl;
-  int iret = _mr->getHorizPlane();
-  cerr << "ReadVolH returned, iret: " << iret << endl;
+  // Capture the debug policy with the immutable request so the worker does
+  // not consult mutable GUI-owned state from its background thread.
+  if (_debug) {
+    cerr << "ReadVolH thread started. Parent object:" << _mr << endl;
+  }
+  int iret = _mr->getHorizPlane(_request);
+  if (_debug) {
+    cerr << "ReadVolH returned, iret: " << iret << endl;
+  }
   emit readDone(iret);
 }
 
@@ -1294,21 +1336,22 @@ void ReadVolH::doRead() {
 // start H vol read in thread
 
 void MdvReader::startReadVolH() {
-  if (_shuttingDown) {
+  if (_shuttingDown || !_activeHRequestValid ||
+      _activeHRequest.generation != _horizGeneration) {
     return;
   }
   if (_readBusyH) {
-    cerr << "readVolH() is already in progress. Ignoring new request." << endl;
     return;
   }
   _readBusyH = true;
+  const HorizReadRequest request = _activeHRequest;
 
   // Each request gets its own worker and thread.  The worker performs the
   // blocking MDV call, while all interpretation of the result remains on the
   // MdvReader's Qt thread.  Retain the QThread until it finishes so shutdown
   // can wait for any worker that still refers to this MdvReader.
 
-  ReadVolH* worker = new ReadVolH(this); // Pass the current object as reference
+  ReadVolH* worker = new ReadVolH(this, request, _gd.debug != 0);
   QThread* thread = new QThread;
   _readThreadsH.insert(thread);
   worker->moveToThread(thread);
@@ -1319,7 +1362,10 @@ void MdvReader::startReadVolH() {
   // removal from the tracked set occur after the thread has actually stopped.
 
   connect(thread, &QThread::started, worker, &ReadVolH::doRead);
-  connect(worker, &ReadVolH::readDone, this, &MdvReader::readDoneH);
+  connect(worker, &ReadVolH::readDone, this,
+          [this, request](int readStatus) {
+            readDoneH(readStatus, request.generation);
+          });
   connect(worker, &ReadVolH::readDone, thread, &QThread::quit,
           Qt::DirectConnection);
   connect(thread, &QThread::finished, worker, &ReadVolH::deleteLater);
@@ -1333,8 +1379,24 @@ void MdvReader::startReadVolH() {
 ////////////////////////
 // done with H vol read
 
-void MdvReader::readDoneH(int readStatus)
+void MdvReader::readDoneH(int readStatus, int generation)
 {
+  // An unattended image job may abandon a request after its bounded wait.
+  // The blocking library call cannot be interrupted safely, but its eventual
+  // completion must neither publish data nor restart the retry sequence.
+  if (generation != _horizGeneration) {
+    _readBusyH = false;
+    _activeHRequestValid = false;
+    // A caller may have queued replacement request details while the
+    // superseded blocking read was still running. Report that the worker has
+    // released the reader even though its data cannot be published.
+    emit horizontalReadComplete(this, generation, false);
+    if (!_readBusyH) {
+      _startPendingHorizRequest();
+    }
+    return;
+  }
+
   // A successful worker read has produced raw MDV data that still needs to be
   // installed in the display state on this Qt thread.  If either phase fails,
   // leave the data invalid and retry the same stored request.  A subsequent
@@ -1342,20 +1404,54 @@ void MdvReader::readDoneH(int readStatus)
 
   int iret = readStatus;
   if (iret == 0) {
-    iret = _handleHorizReadDone();
+    iret = _handleHorizReadDone(_activeHRequest);
   }
   if (iret || !h_data_valid) {
+    h_data_valid = 0;
     _setValidH(false);
     _setNewH(false);
     _readBusyH = false;
     _scheduleRetryH();
+    emit horizontalReadComplete(this, generation, false);
     return;
   }
+  _installedHRequest = _activeHRequest;
+  _installedHRequestValid = true;
+  _horizCompletedGeneration = generation;
   _setValidH(iret_h_mdvx_read == 0);
   _setNewH(true);
-  cerr << "readDone in ReadVolH worker thread" << endl;
+  if (_gd.debug) {
+    cerr << "readDone in ReadVolH worker thread" << endl;
+  }
   _readBusyH = false;
   _retryCountH = 0;
+  emit horizontalReadComplete(this, generation, true);
+}
+
+////////////////////////////////////////////////////////
+// advance from a superseded blocking read to the latest requested state
+
+void MdvReader::_startPendingHorizRequest()
+{
+  if (_shuttingDown || _readBusyH || !_pendingHRequestValid) {
+    return;
+  }
+
+  const HorizReadRequest request = _pendingHRequest;
+  _pendingHRequestValid = false;
+  if (request.generation != _horizGeneration) {
+    return;
+  }
+
+  if (_installedHRequestValid && _timeListValid &&
+      _sameHorizDataRequest(request, _installedHRequest)) {
+    _publishCachedHorizRequest(request, true);
+    return;
+  }
+
+  _activeHRequest = request;
+  _activeHRequestValid = true;
+  startReadVolH();
 }
 
 ////////////////////////////////////////////////////////
@@ -1588,6 +1684,8 @@ void MdvReader::readDoneV(VertReadResultPtr result)
     return;
   }
 
+  _vertCompletedGeneration = result->generation;
+
   if (result->status != 0) {
     cerr << "ERROR - MdvReader vertical-section read failed for "
          << field_label << endl;
@@ -1619,28 +1717,6 @@ void MdvReader::readDoneV(VertReadResultPtr result)
   _setValidV(true);
   _setNewV(true);
   emit verticalReadComplete(this);
-}
-
-/*****************************************************************
- * AUTOSCALE_VCM: Autoscale the value-color mapping
- *        color to use
- *
- */
-
-void MdvReader::_autoscaleVcm(Valcolormap_t *vcm, double min, double max)
-{
-  int    i;
-  double delta;
-  
-  delta = (max - min) / (double) vcm->nentries;
-  
-  if(delta == 0.0) delta = 0.1;
-
-  for(i=0; i < vcm->nentries; i++) {
-    vcm->vc[i]->min = min + (delta * i);
-    vcm->vc[i]->max = vcm->vc[i]->min + delta;
-  }
-
 }
 
 /**********************************************************************
@@ -1767,40 +1843,3 @@ string MdvReader::fieldLabelVert() const
 /*************************************************************************
  * HEIGHT_LABEL: Return the height label
  */
-string MdvReader::heightLabel() const
-{
-
-  static char label[1024];
-  
-  switch(h_vhdr.type[0]) {
-    case Mdvx::VERT_TYPE_SURFACE:
-      strcpy(label,"   " );    // For Now-  Because many Taiwan fields are wrongly
-      // set to "Surface", example: Freezing Level.
-      //strcpy(label,"Surface" );
-      break;
-      
-    case 0:
-    case Mdvx::VERT_VARIABLE_ELEV:
-    case Mdvx::VERT_FIELDS_VAR_ELEV:
-    case Mdvx::VERT_TYPE_COMPOSITE:
-      strcpy(label,"   " );
-      break;
-      
-    case Mdvx::VERT_SATELLITE_IMAGE:
-      strcpy(label,"Sat Image" );
-      break;
-      
-    case Mdvx::VERT_FLIGHT_LEVEL:
-      snprintf(label,1024,"Flight Level %03d", (int)_gd.h_win.cur_ht);
-      break;
-      
-    default:
-      snprintf(label,1024,"%g %s", _gd.h_win.cur_ht,
-               units_label_sects.c_str());
-      break;
-  }
-  
-  return label;
-  
-}
-

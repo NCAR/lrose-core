@@ -51,6 +51,7 @@
 
 #include <string>
 #include <vector>
+#include <ctime>
 
 #include <QWidget>
 #include <QDialog>
@@ -67,6 +68,13 @@ class QVBoxLayout;
 class QTimer;
 class GuiManager;
 class TimePlotWidget;
+
+struct TimelineFrame
+{
+  time_t start = 0;
+  time_t mid = 0;
+  time_t end = 0;
+};
 
 #include <toolsa/DateTime.hh>
 #include "GlobalData.hh"
@@ -108,6 +116,10 @@ class DLL_EXPORT TimeControl : public QDialog {
     return _nFramesMovie * _frameIntervalSecs;
   }
   int getFrameIndex() const { return _frameIndex; }
+  int getFrameCount() const {
+    return static_cast<int>(_timelineFrames.size());
+  }
+  const TimelineFrame *getFrame(int frameIndex) const;
   double getLoopDwellMsecs() const { return _loopDwellMsecs; }
   bool isMovieBuilding() const { return _movieState == MovieState::Building; }
   bool isMoviePlaying() const { return _movieState == MovieState::Playing; }
@@ -116,6 +128,20 @@ class DLL_EXPORT TimeControl : public QDialog {
   // Leave cached playback and restore the live display after an external
   // interaction, such as resizing the main window, invalidates movie frames.
   void stopMovie() { _stopMovie(); }
+
+  // Configure the single frame used by unattended catalog generation. This
+  // keeps legacy frame bounds and Product request intervals synchronized with
+  // the requested archive time before the first asynchronous read begins.
+  void configureAutomaticImageTime(const DateTime &imageTime);
+
+  // Restore the accepted controller state after a scheduled image batch has
+  // temporarily reduced the display to one archive frame.
+  void restoreAfterAutomaticImages(const DateTime &startTime,
+                                   int frameCount,
+                                   double frameIntervalSecs,
+                                   int frameIndex,
+                                   bool realtime);
+  bool isRealtime() const { return _isRealtime; }
 
   // convert between Qt and Radx date/time objects
   
@@ -139,6 +165,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   // Called by GuiManager after all layers for the requested frame have been
   // captured into the immutable playback cache.
   void movieFrameRendered(int frameIndex);
+
+  // Abort a build whose fully rendered widget could not be copied into the
+  // immutable movie cache.
+  void movieFrameCaptureFailed(int frameIndex, const QString &error);
 
  private:
 
@@ -200,7 +230,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   int _nFramesMovie;
   double _frameIntervalSecs;
   int _frameIndex;
-  vector<DateTime> _frameTimes;
+  // TimeControl is the sole owner of accepted frame bounds. Renderers receive
+  // immutable frame values through accessors, so GUI edits cannot leave a
+  // second GlobalData movie model out of sync.
+  vector<TimelineFrame> _timelineFrames;
 
   // parameters
   
@@ -258,6 +291,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _setMovieDefinitionControlsEnabled(bool enabled);
                                      
   void _computeFrameTimes();
+  void _publishTimelineRange();
+  void _publishSelectedFrame();
                            
  private slots:
 

@@ -1,0 +1,131 @@
+/*********************************************************
+ * parameter definitions for SpdbSim
+ */
+
+commentdef {
+  p_header = "SpdbSim replays archive SPDB chunks as a realtime feed.";
+  p_text = "SpdbSim loops through a set of chunks in Spdb files, modifies the times to wall-clock time, and writes modified Spdb data to an output dir."
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for procmap registration.";
+} instance;
+
+commentdef {
+  p_header = "INPUT AND OUTPUT";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "SPDB archive input URL.";
+} input_url;
+
+paramdef string {
+  p_default = "./output/SpdbSim";
+  p_descr = "SPDB output URL.";
+} output_url;
+
+paramdef string {
+  p_default = "2020 01 01 00 00 00";
+  p_descr = "Inclusive archive start time.";
+} archive_start_time;
+
+paramdef string {
+  p_default = "2020 01 01 01 00 00";
+  p_descr = "Inclusive archive end time.";
+} archive_end_time;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Optional SPDB data_type filter.";
+  p_help = "Zero requests all data types unless respect_zero_types is TRUE.";
+} data_type;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Optional SPDB data_type2 filter.";
+} data_type2;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Treat zero data type filters as literal zero values.";
+} respect_zero_types;
+
+typedef enum {
+  ERROR_ON_UNSUPPORTED, COPY_UNSUPPORTED
+} unsupported_payload_policy_t;
+
+paramdef enum unsupported_payload_policy_t {
+  p_default = ERROR_ON_UNSUPPORTED;
+  p_descr = "Policy for product IDs without a payload retimer.";
+  p_help = "COPY_UNSUPPORTED shifts only SPDB chunk metadata and leaves the opaque payload unchanged.";
+} unsupported_payload_policy;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Skip malformed chunks instead of rejecting the replay.";
+} continue_on_chunk_error;
+
+commentdef {
+  p_header = "REPLAY CLOCK";
+}
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Replay speed multiplier.";
+  p_help = "Must be finite and greater than zero.";
+} replay_rate;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Offset of the first output data time from startup, seconds.";
+} time_offset_secs;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Publication delay relative to mapped product time, seconds.";
+} delivery_delay_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Repeat the resolved archive sequence.";
+} repeat_replay;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Gap between repeated cycles, seconds.";
+  p_help = "Must be at least one second when repeat_replay is TRUE.";
+} inter_cycle_gap_secs;
+
+commentdef {
+  p_header = "OUTPUT STORAGE";
+}
+
+typedef enum {
+  PRESERVE_COMPRESSION, NO_COMPRESSION, GZIP_COMPRESSION, BZIP2_COMPRESSION
+} output_compression_t;
+
+paramdef enum output_compression_t {
+  p_default = PRESERVE_COMPRESSION;
+  p_descr = "Chunk compression used in the output database.";
+} output_compression;
+
+typedef enum {
+  LEAD_TIME_NONE, LEAD_TIME_DATA_TYPE, LEAD_TIME_DATA_TYPE2
+} lead_time_storage_t;
+
+paramdef enum lead_time_storage_t {
+  p_default = LEAD_TIME_NONE;
+  p_descr = "Where forecast lead seconds are stored, for latest-data metadata.";
+} lead_time_storage;
+

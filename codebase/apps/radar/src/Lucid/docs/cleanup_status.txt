@@ -1,0 +1,98 @@
+# Lucid cleanup status
+
+Snapshot: 2026-11-14
+
+## Completed or substantially handled
+
+1. Split major responsibilities out of `GuiManager` — SUBSTANTIALLY HANDLED
+
+   `MovieManager` now owns movie build, timeout, capture, playback, and export
+   state. `ImageGenerationManager` owns automatic-image scheduling, readiness,
+   timeout, publication, summaries, and lifecycle. `GuiManager` retains the
+   widget-facing callbacks and broader display coordination.
+
+2. Clarify Qt ownership — HANDLED
+
+   Views and menu helpers have QObject parents. `GuiManager` no longer
+   explicitly deletes `_horiz` or `_vert`. Manager objects are deliberately
+   destroyed early so their timers and callbacks stop before Qt destroys the
+   child widgets.
+
+3. Nonfunctional Open and parameter Save actions — HANDLED FOR NOW
+
+   They remain visible but disabled, reserving their intended future roles.
+   Save-Image remains available for individual display captures.
+
+4. Remove obsolete manager and global state — HANDLED
+
+   The `GuiManager` singleton interface, archive mirrors, legacy timing state,
+   dead clear method, unused field getters, and the global CIDD movie structure
+   were removed. `TimeControl` owns the accepted timeline.
+
+5. Remove obsolete rendering branches and unsafe legacy indexing — HANDLED
+
+   The residual `DYNAMIC_CONTOURS` path was removed. Variable-length legacy
+   contour and layer-field input is bounded before fixed-array indexing.
+
+6. Remove incorrect manual view destruction — HANDLED
+
+   The inherited `HorizView` destructor cleanup and explicit `_horiz`/`_vert`
+   deletion were removed in favor of Qt ownership.
+
+7. Reduce routine terminal noise — PARTIALLY HANDLED
+
+   Routine successful horizontal-read diagnostics are gated by debug settings;
+   errors remain unconditional. A broader logging pass is still outstanding.
+
+## Still useful cleanup
+
+1. Consolidate `MdvReader` request state
+
+   Immutable requests, generations, cache keys, and latest-pending replacement
+   are now established, but public legacy flags such as `h_data_valid` still
+   coexist with private validity and completion state. Consolidate these only
+   after simulator testing provides regression coverage.
+
+2. Continue reducing `GuiManager`
+
+   The two largest coordinators have been extracted, but `GuiManager` still
+   owns menus, MDV orchestration, Products, winds, terrain, vertical-section
+   coordination, dialogs, and status reporting. Avoid another extraction
+   until simulator testing shows which boundaries are stable.
+
+3. Separate drawing primitives from orchestration
+
+   `WorldPlot`, `HorizView`, and `VertView` still mix geometry, validation,
+   image ownership, color policy, and UI state. Focused renderer classes could
+   help, but this is lower priority than operational testing.
+
+4. Adopt consistent logging
+
+   Replace remaining unconditional informational `cerr` output with existing
+   debug levels or `QLoggingCategory` categories for MDV, SPDB, movies,
+   rendering, and automatic images. Preserve unconditional error diagnostics.
+
+5. Retire inactive legacy code in stages
+
+   Keep `old/` as an explicit CIDD comparison snapshot for now. Later remove
+   accepted inactive blocks, commented Route Winds code and parameters, and
+   scattered legacy preprocessor remnants. Route Winds will not be implemented.
+
+6. Continue parameter cleanup
+
+   Work through `docs/parameter_status.txt` as affected features stabilize.
+   TDRP parameter design is still evolving and checked-in Lucid test files may
+   lag the generated schema.
+
+7. Add focused regression tests
+
+   Cover request-key reuse and replacement, dependency timeout and recovery,
+   Products, overlay composition, color scales, vertical routes, terrain,
+   winds, native RHIs, and automated output. The realtime/archive simulator is
+   the immediate foundation for these tests.
+
+## Recommended next direction
+
+Build the isolated realtime/archive simulator before undertaking more
+structural cleanup. It should expose timing, recovery, and process/data-layer
+defects while the current architecture is still familiar.

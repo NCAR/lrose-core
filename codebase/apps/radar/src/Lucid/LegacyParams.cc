@@ -34,7 +34,7 @@
 #include "Constants.hh"
 #include "LegacyParams.hh"
 #include "Cimages_P.hh"
-#include "Croutes_P.hh"
+// #include "Croutes_P.hh"
 #include "Csyprod_P.hh"
 #include "Cterrain_P.hh"
 #include "Cdraw_P.hh"
@@ -171,9 +171,9 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     
   // read in route winds from old tdrp section, write to main params
   
-  if (_readRouteWindsTdrp()) {
-    return -1;
-  }
+  // if (_readRouteWindsTdrp()) {
+  //   return -1;
+  // }
     
   // read in draw export from old tdrp section, write to main params
   
@@ -831,7 +831,7 @@ int LegacyParams::_loadKeyValPairsDefault(char* &db_buf, int &db_len)
   Cdraw_P draw_P;
   Cimages_P images_P;
   Cterrain_P terrain_P;
-  Croutes_P routes_P;
+  // Croutes_P routes_P;
   
   string params_text = ParamsTextMasterHeader;
   params_text += _getDefaultTdrpParams("GUI_CONFIG", &gui_P);
@@ -843,7 +843,7 @@ int LegacyParams::_loadKeyValPairsDefault(char* &db_buf, int &db_len)
   params_text += _getDefaultTdrpParams("IMAGE_GENERATION", &images_P);
   params_text += _getDefaultTdrpParams("SYMPRODS", &syprod_P);
   params_text += _getDefaultTdrpParams("TERRAIN", &terrain_P);
-  params_text += _getDefaultTdrpParams("ROUTE_WINDS", &routes_P);
+  // params_text += _getDefaultTdrpParams("ROUTE_WINDS", &routes_P);
   
   // Allocate space for the buffer copy
   
@@ -1081,8 +1081,8 @@ int LegacyParams::_readMainParams()
   _getDouble("cidd.past_interval", 0.0, true, "past_interval_hours");
   _getDouble("cidd.movie_magnify_factor",1.0);
   _getBoolean("cidd.check_data_times", 0);
-  _getString("cidd.movieframe_time_format", "%H%M");
-  _getLong("cidd.movieframe_time_mode", 0);
+  // _getString("cidd.movieframe_time_format", "%H%M");
+  // _getLong("cidd.movieframe_time_mode", 0);
 
   // clipping for rendering
   _getBoolean("cidd.check_clipping", 0);
@@ -1122,41 +1122,55 @@ int LegacyParams::_readMainParams()
 
   // image generation in html mode
 
-  _getBoolean("cidd.html_mode", 0);
-  _runOnceAndExit = _getBoolean("cidd.run_once_and_exit",0);
-  _getBoolean("cidd.transparent_images", 0);
-  _getString("cidd.image_dir", "/tmp/image_dir");
-  _getBoolean("cidd.save_images_to_day_subdir", 0);
-  _getString("cidd.image_ext", "png");
-  _getString("cidd.image_horiz_prefix", "CP");
-  _getString("cidd.image_vert_prefix", "CV");
-  _getString("cidd.image_name_separator", "_");
+  const bool htmlMode = _getBoolean("cidd.html_mode", 0, false);
+  _runOnceAndExit = _getBoolean("cidd.run_once_and_exit", 0, false);
+  fprintf(_tdrpFile, "create_images_automatically = %s;\n",
+          htmlMode ? "TRUE" : "FALSE");
+  fprintf(_tdrpFile, "images_creation_mode = %s;\n",
+          _runOnceAndExit ? "CREATE_IMAGES_THEN_EXIT" :
+                            "CREATE_IMAGES_ON_REALTIME_SCHEDULE");
+  const string imageDemoTime = _getString("cidd.demo_time", "", false);
+  if (htmlMode && imageDemoTime.size() >= 12) {
+    DateTime imageTime;
+    _parseStringIntoTime(imageDemoTime, imageTime);
+    fprintf(_tdrpFile,
+            "images_archive_start_time = \"%.4d %.2d %.2d %.2d %.2d %.2d\";\n",
+            imageTime.getYear(), imageTime.getMonth(), imageTime.getDay(),
+            imageTime.getHour(), imageTime.getMin(), imageTime.getSec());
+  }
+  _getString("cidd.image_dir", "$(HOME)/Downloads/Lucid/images", true, "images_output_dir");
+  _getBoolean("cidd.transparent_images", 0, true, "make_images_transparent");
+  _getBoolean("cidd.save_images_to_day_subdir", 0, true, "images_write_to_day_dir");
+  _getString("cidd.image_ext", "png", true, "images_file_name_extension");
+  _getString("cidd.image_horiz_prefix", "Horiz", true, "image_field_suffix_horiz");
+  _getString("cidd.image_vert_prefix", "Vsect", true, "image_field_suffix_vsect");
+  _getString("cidd.image_name_separator", ".", true, "images_file_name_delimiter");
 
   // output image file names
   
-  _getBoolean("cidd.add_height_to_filename",0);
-  _getBoolean("cidd.add_frame_time_to_filename",1);
-  _getBoolean("cidd.add_button_name_to_filename",0);
-  _getBoolean("cidd.add_frame_num_to_filename",1);
-  _getBoolean("cidd.add_gen_time_to_filename",0);
-  _getBoolean("cidd.add_valid_time_to_filename",0);
-  _getString("cidd.horiz_image_dir", "/tmp/cidd_horiz_image_dir");
-  _getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
-  _getString("cidd.horiz_image_command", "");
-  _getString("cidd.vert_image_dir", "/tmp/cidd_vert_image_dir", true,
-             "vsection_image_dir");
-  _getString("cidd.vert_image_fname", "cidd_vert_view.png", true,
-             "vsection_image_fname");
-  _getString("cidd.vert_image_command", "", true,
-             "vsection_image_command");
-  _getBoolean("cidd.output_geo_xml", 0);
-  _getBoolean("cidd.use_latlon_in_geo_xml", 0);
+  // _getBoolean("cidd.add_height_to_filename",0);
+  // _getBoolean("cidd.add_frame_time_to_filename",1);
+  // _getBoolean("cidd.add_button_name_to_filename",0);
+  // _getBoolean("cidd.add_frame_num_to_filename",1);
+  // _getBoolean("cidd.add_gen_time_to_filename",0);
+  // _getBoolean("cidd.add_valid_time_to_filename",0);
+  // _getString("cidd.horiz_image_dir", "/tmp/cidd_horiz_image_dir");
+  // _getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
+  // _getString("cidd.horiz_image_command", "");
+  // _getString("cidd.vert_image_dir", "/tmp/cidd_vert_image_dir", true,
+  //            "vsection_image_dir");
+  // _getString("cidd.vert_image_fname", "cidd_vert_view.png", true,
+  //            "vsection_image_fname");
+  // _getString("cidd.vert_image_command", "", true,
+  //            "vsection_image_command");
+  _getBoolean("cidd.output_geo_xml", 0, true, "images_output_geo_xml");
+  _getBoolean("cidd.use_latlon_in_geo_xml", 0, true, "images_use_latlon_in_geo_xml");
 
   // script to run after generating image
   
-  _getString("cidd.image_convert_script", "convert_image.csh");
-  _getString("cidd.print_script", "");
-  _getString("cidd.series_convert_script", "make_anim.csh");
+  // _getString("cidd.image_convert_script", "convert_image.csh");
+  // _getString("cidd.print_script", "");
+  _getString("cidd.series_convert_script", "make_anim.csh", true, "movie_convert_script");
 
   // data compression from server
   
@@ -1224,7 +1238,7 @@ int LegacyParams::_readMainParams()
   
   /* Toggle for enabling a Save Image Panel */
 
-  _getBoolean("cidd.enable_save_image_panel", 0);
+  // _getBoolean("cidd.enable_save_image_panel", 0);
 
   // domain limits
 
@@ -1747,7 +1761,8 @@ int LegacyParams::_readMainParams()
   
   fprintf(_tdrpFile, "// <PRODUCTS>\n");
 
-  _getBoolean("cidd.products_on", 1);
+  _getBoolean("cidd.products_on", 1, true,
+              "symprods_enabled_at_startup");
   _getLong("cidd.product_line_width", 1);
   _getLong("cidd.product_font_size", 1);
   _getDouble("cidd.scale_constant", 300.0);
@@ -2788,6 +2803,8 @@ int LegacyParams::_readTerrainTdrp()
   
 }
 
+#ifdef NOT_ANY_MORE
+
 /************************************************************************
  * Read in route winds params
  */
@@ -2890,6 +2907,8 @@ int LegacyParams::_readRouteWindsTdrp()
   return 0;
   
 }
+
+#endif
 
 /************************************************************************
  * Read in draw export params
@@ -3017,26 +3036,28 @@ int LegacyParams::_readImageGenTdrp()
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
     
   if (image_gen_active) {
-    
-    fprintf(_tdrpFile, "terrain_active = TRUE;\n");
+
+    // Image-generation settings do not own terrain visibility. The legacy
+    // terrain section is translated independently, so writing that parameter
+    // here made the result depend on which unrelated section appeared last.
     switch (images.debug) {
       case Cimages_P::DEBUG_OFF:
-        fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_OFF;\n");
+        fprintf(_tdrpFile, "images_debug = IMAGE_DEBUG_OFF;\n");
         break;
       case Cimages_P::DEBUG_NORM:
-        fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_NORM;\n");
+        fprintf(_tdrpFile, "images_debug = IMAGE_DEBUG_NORM;\n");
         break;
       case Cimages_P::DEBUG_VERBOSE:
-        fprintf(_tdrpFile, "image_debug = IMAGE_DEBUG_VERBOSE;\n");
+        fprintf(_tdrpFile, "images_debug = IMAGE_DEBUG_VERBOSE;\n");
         break;
     }
     
-    fprintf(_tdrpFile, "image_generate_vsection = %s;\n",
+    fprintf(_tdrpFile, "generate_vsection_images = %s;\n",
             (images.generate_vsection_images?"TRUE":"FALSE"));
-    fprintf(_tdrpFile, "image_vsection_waypts_in_latlon = %s;\n",
+    fprintf(_tdrpFile, "images_vsection_waypts_in_latlon = %s;\n",
             (images.vsection_waypts_in_latlon?"TRUE":"FALSE"));
     
-    fprintf(_tdrpFile, "image_vsection_spec = {\n");
+    fprintf(_tdrpFile, "images_vsection_spec = {\n");
     
     for (int ii = 0; ii < images.vsection_spec_n; ii++) {
       
@@ -3052,10 +3073,6 @@ int LegacyParams::_readImageGenTdrp()
       }
     } // ii
     fprintf(_tdrpFile, "};\n");
-
-  } else {
-
-    fprintf(_tdrpFile, "terrain_active = FALSE;\n");
 
   }
   
@@ -3082,7 +3099,7 @@ void LegacyParams::printLegacyDefaults(ostream &out)
   Cdraw_P draw_P;
   Cimages_P images_P;
   Cterrain_P terrain_P;
-  Croutes_P routes_P;
+  // Croutes_P routes_P;
   
   string params_text = ParamsTextMasterHeader;
   params_text += _getDefaultTdrpParams("GUI_CONFIG", &gui_P);
@@ -3094,7 +3111,7 @@ void LegacyParams::printLegacyDefaults(ostream &out)
   params_text += _getDefaultTdrpParams("IMAGE_GENERATION", &images_P);
   params_text += _getDefaultTdrpParams("SYMPRODS", &syprod_P);
   params_text += _getDefaultTdrpParams("TERRAIN", &terrain_P);
-  params_text += _getDefaultTdrpParams("ROUTE_WINDS", &routes_P);
+  // params_text += _getDefaultTdrpParams("ROUTE_WINDS", &routes_P);
 
   out << params_text << endl;
 

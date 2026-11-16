@@ -15,6 +15,7 @@ SCRIPTS = \
 	ipcrm_linux \
 	ldd_smart \
 	loop_cmd \
+	make_anim.csh \
 	make_cdrom \
 	make_cdrom2 \
 	make_dvd+rw \
@@ -49,6 +50,11 @@ SCRIPTS = \
 	snuff_usr1 \
 	sync2files \
 	utime_decode \
+	ProcmapAutoRestart.py \
+	ProcmapListCheck.py \
+	ProcmapListKill.py \
+	ProcmapListStart.py \
+	procmap_control.py \
 	auto_restart \
 	auto_restart_stats \
 	DataMapper_list_check \

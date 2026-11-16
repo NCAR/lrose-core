@@ -25,22 +25,17 @@
 #include "HorizView.hh"
 #include "VertView.hh"
 #include "GuiManager.hh"
+#include "TimeControl.hh"
 #include "ProductMgr.hh"
 #include "SymprodRenderContext.hh"
+#include "WindManager.hh"
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
-#include <toolsa/LogStream.hh>
-#include <QApplication>
-#include <QMenu>
-#include <QAction>
-#include <QLabel>
-#include <QLayout>
-#include <QMessageBox>
-#include <QErrorMessage>
 #include <QKeyEvent>
 #include <QRect>
 #include <QPainterPath>
+#include <QScopedValueRollback>
 #include <algorithm>
 #include <cmath>
 
@@ -121,6 +116,7 @@ HorizView::HorizView(QWidget* parent,
   _panPreviewActive = false;
   _panPreviewX = 0;
   _panPreviewY = 0;
+  _suppressInteractionGraphics = false;
   _vsectionRouteEditing = false;
   _vsectionPreviewX = 0;
   _vsectionPreviewY = 0;
@@ -144,10 +140,6 @@ HorizView::HorizView(QWidget* parent,
   _renderFrameIndex = 0;
   _playbackFrameIndex = -1;
   _renderFramePage = 0;
-
-  _renderInvalidImages = false;
-  _invalidImagesFrameIndex = 0;
-  _vert = NULL;
 
   _gridsReady = false;
   _mapsReady = false;
@@ -181,14 +173,10 @@ HorizView::HorizView(QWidget* parent,
  * Destructor
  */
 
-HorizView::~HorizView()
-{
+// Child widgets, including the rubber band, are released by QObject parent
+// ownership when the view is destroyed.
 
-  if (!_rubberBand) {
-    delete _rubberBand;
-  }
-
-}
+HorizView::~HorizView() = default;
 
 /*************************************************************************
  * clear()
@@ -309,7 +297,7 @@ void HorizView::paintEvent(QPaintEvent *event)
     return;
   }
 
-  int fieldNum = _gd.h_win.page;
+  const int fieldNum = _manager.getSelectedFieldIndex();
 
   // render data grids to grid image in WorldPlot
 
@@ -333,7 +321,7 @@ void HorizView::paintEvent(QPaintEvent *event)
   painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
   painter.save();
-  if (_panPreviewActive) {
+  if (_panPreviewActive && !_suppressInteractionGraphics) {
     const QRect plotRect(_zoom->getXMinPixel(), _zoom->getYMaxPixel(),
                          _zoom->getPlotWidth(), _zoom->getPlotHeight());
     painter.setClipRect(plotRect);
@@ -346,7 +334,10 @@ void HorizView::paintEvent(QPaintEvent *event)
 
   if (_gridsReady && _mapsReady) {
     painter.drawImage(0, 0, *_zoom->getGridImage());
-    painter.drawImage(0, 0, *_zoom->getMapsImage());
+    if (_manager.mapsEnabled()) {
+      painter.drawImage(0, 0, *_zoom->getMapsImage());
+    }
+    painter.drawImage(0, 0, *_zoom->getWindsImage());
   }
 
   // render the range rings
@@ -359,7 +350,9 @@ void HorizView::paintEvent(QPaintEvent *event)
 
   if (_gd.prod_mgr && _gd.prod.products_on) {
     painter.drawImage(0, 0, *_zoom->getProductsImage());
-    _drawPickedProduct(painter);
+    if (!_suppressInteractionGraphics) {
+      _drawPickedProduct(painter);
+    }
   }
   painter.restore();
   
@@ -400,25 +393,31 @@ void HorizView::paintEvent(QPaintEvent *event)
   // cached data layer.  It therefore remains visible while fields rerender and
   // can be transformed again whenever the view changes.
 
-  _drawVsectionRoute(painter);
+  if (!_suppressInteractionGraphics || !_vsectionRouteEditing) {
+    _drawVsectionRoute(painter);
+  }
 
   // Draw cursor values directly on the widget so they remain transient rather
   // than becoming part of the cached data or map images.
 
-  if (_showValue && _mouseValueVisible) {
+  if (!_suppressInteractionGraphics && _showValue && _mouseValueVisible) {
     _drawMouseValue(painter);
   }
   
   // click point cross hairs
   
-  if (_pointClicked) {
+  if (!_suppressInteractionGraphics && _pointClicked) {
 
     painter.save();
 
-    int startX = _mouseReleaseX - _params.click_cross_size / 2;
-    int endX = _mouseReleaseX + _params.click_cross_size / 2;
-    int startY = _mouseReleaseY - _params.click_cross_size / 2;
-    int endY = _mouseReleaseY + _params.click_cross_size / 2;
+    // The click is retained in world coordinates so its marker follows the
+    // same location when a resize or view transform changes pixel geometry.
+    const int clickX = _zoom->getIxPixel(_worldClickX);
+    const int clickY = _zoom->getIyPixel(_worldClickY);
+    int startX = clickX - _params.click_cross_size / 2;
+    int endX = clickX + _params.click_cross_size / 2;
+    int startY = clickY - _params.click_cross_size / 2;
+    int endY = clickY + _params.click_cross_size / 2;
 
     QPen pen(painter.pen());
     pen.setColor(_params.click_cross_color);
@@ -426,21 +425,10 @@ void HorizView::paintEvent(QPaintEvent *event)
     pen.setWidth(_params.click_cross_line_width);
     painter.setPen(pen);
 
-    painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
-    painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
+    painter.drawLine(startX, clickY, endX, clickY);
+    painter.drawLine(clickX, startY, clickX, endY);
     
     painter.restore();
-
-    char titleStr[1024];
-    if (_proj.getProjType() == Mdvx::PROJ_LATLON) {
-      snprintf(titleStr, 1023, "Click lat,lon: (%.3f, %.3f)",
-               _worldClickLat, _worldClickLon);
-    } else {
-      snprintf(titleStr, 1023, "Click lat,lon:(%.3f, %.3f) x,y:(%.3f, %.3f)",
-               _worldClickLat, _worldClickLon, _worldClickX, _worldClickY);
-    }
-    _manager.setTitleBarStr(titleStr);
-             
   }
 
   _sizeChanged = false;
@@ -462,6 +450,21 @@ void HorizView::setShowValue(bool state)
     _mouseValueVisible = false;
     _mouseValueText.clear();
   }
+  update();
+}
+
+////////////////////////////////////////////////////////
+// install the route actually returned with the vertical section
+
+void HorizView::setVsectionRoute(const VsectionRoute &route)
+{
+  // Do not let completion of an earlier request erase a new route which the
+  // user is still drawing. Once that route is submitted, its own response
+  // will install the corresponding server geometry.
+  if (_vsectionRouteEditing || route.size() < 2) {
+    return;
+  }
+  _vsectionRoute = route;
   update();
 }
 
@@ -601,7 +604,7 @@ void HorizView::_updateClickReport()
       Mdvx::vertTypeZUnits(primaryField.fhdr.vlevel_type);
   }
   report.fields = _getFieldValues(_worldClickLat, _worldClickLon);
-  _manager.updateClickReport(report);
+  emit clickReportAvailable(report);
 }
 
 ////////////////////////////////////////////////////////
@@ -668,7 +671,7 @@ void HorizView::_updateProductPick(int mouseX, int mouseY)
 {
   if (_params.disable_pick_mode || !_gd.prod_mgr ||
       !_gd.prod.products_on || _renderFrameIndex < 0 ||
-      _renderFrameIndex >= _gd.movie.num_frames) {
+      _renderFrameIndex >= _manager.getTimelineFrameCount()) {
     if (_gd.prod_mgr) {
       _gd.prod_mgr->clearPickedObject();
     }
@@ -691,12 +694,16 @@ void HorizView::_updateProductPick(int mouseX, int mouseY)
   _proj.xy2latlon(worldX, worldY, lat, lon);
 
   time_t dataTime = 0;
-  const int fieldNum = _gd.h_win.page;
+  const int fieldNum = _manager.getSelectedFieldIndex();
   if (fieldNum >= 0 && fieldNum < _gd.num_datafields &&
       _gd.mread[fieldNum]) {
     dataTime = _gd.mread[fieldNum]->h_date.utime();
   }
-  const movie_frame_t &frame = _gd.movie.frame[_renderFrameIndex];
+  const TimelineFrame *frame = _manager.getTimelineFrame(_renderFrameIndex);
+  if (!frame) {
+    _gd.prod_mgr->clearPickedObject();
+    return;
+  }
   double iconScale = 1.0;
   if (_params.scale_constant > 0.0) {
     iconScale = log10(_params.scale_constant /
@@ -706,7 +713,7 @@ void HorizView::_updateProductPick(int mouseX, int mouseY)
     }
   }
   SymprodRenderContext context(*_zoom, _gd.epoch_start, _gd.epoch_end,
-                               frame.time_start, frame.time_end, dataTime,
+                               frame->start, frame->end, dataTime,
                                _gd.h_win.km_across_screen, iconScale);
   _gd.prod_mgr->pickClosestObject(lat, lon, context,
                                   _gd.h_win.km_across_screen / 20.0);
@@ -719,17 +726,20 @@ void HorizView::_drawPickedProduct(QPainter &painter)
 {
   if (_params.disable_pick_mode || !_gd.prod_mgr ||
       _renderFrameIndex < 0 ||
-      _renderFrameIndex >= _gd.movie.num_frames) {
+      _renderFrameIndex >= _manager.getTimelineFrameCount()) {
     return;
   }
 
   time_t dataTime = 0;
-  const int fieldNum = _gd.h_win.page;
+  const int fieldNum = _manager.getSelectedFieldIndex();
   if (fieldNum >= 0 && fieldNum < _gd.num_datafields &&
       _gd.mread[fieldNum]) {
     dataTime = _gd.mread[fieldNum]->h_date.utime();
   }
-  const movie_frame_t &frame = _gd.movie.frame[_renderFrameIndex];
+  const TimelineFrame *frame = _manager.getTimelineFrame(_renderFrameIndex);
+  if (!frame) {
+    return;
+  }
   double iconScale = 1.0;
   if (_params.scale_constant > 0.0) {
     iconScale = log10(_params.scale_constant /
@@ -739,7 +749,7 @@ void HorizView::_drawPickedProduct(QPainter &painter)
     }
   }
   SymprodRenderContext context(*_zoom, _gd.epoch_start, _gd.epoch_end,
-                               frame.time_start, frame.time_end, dataTime,
+                               frame->start, frame->end, dataTime,
                                _gd.h_win.km_across_screen, iconScale);
   painter.save();
   painter.setClipRect(QRect(std::min(_zoom->getXMinPixel(),
@@ -752,29 +762,6 @@ void HorizView::_drawPickedProduct(QPainter &painter)
                                 _zoom->getYMinPixel()) + 1));
   _gd.prod_mgr->drawPickedQt(painter, context);
   painter.restore();
-}
-
-/*************************************************************************
- * react to click point from remote display - Sprite
- * redraw the click point cursor
- */
-
-void HorizView::setClickPoint(double azimuthDeg,
-                              double elevationDeg,
-                              double rangeKm)
-{
-
-  double x_km =
-    rangeKm * sin(azimuthDeg * DEG_TO_RAD) * cos(elevationDeg * DEG_TO_RAD);
-  double y_km =
-    rangeKm * cos(azimuthDeg * DEG_TO_RAD) * cos(elevationDeg * DEG_TO_RAD);
-
-  _mouseReleaseX = _zoom->getIxPixel(x_km);
-  _mouseReleaseY = _zoom->getIyPixel(y_km);
-  _pointClicked = true;
-
-  update();
-
 }
 
 /*************************************************************************
@@ -964,13 +951,6 @@ void HorizView::triggerGridRendering(int page, int index)
   
   _renderGrids();
   
-  // render invalid images
-  
-  if (_renderInvalidImages) {
-    _doRenderInvalidImages(_invalidImagesFrameIndex, _vert);
-    _renderInvalidImages = false;
-  }
-  
   // A rendered field and its live color scale form one visual update. Force a
   // complete paint now so the inexpensive scale redraw cannot lag the cached
   // grid image.
@@ -983,9 +963,9 @@ void HorizView::triggerGridRendering(int page, int index)
 
 void HorizView::rerenderGrid()
 {
-  const int fieldNum = _gd.h_win.page;
+  const int fieldNum = _manager.getSelectedFieldIndex();
   if (_renderFrameIndex >= 0 &&
-      _renderFrameIndex < _gd.movie.num_frames &&
+      _renderFrameIndex < _manager.getTimelineFrameCount() &&
       fieldNum >= 0 && fieldNum < _gd.num_datafields &&
       _gd.mread[fieldNum] != nullptr &&
       _gd.mread[fieldNum]->isValidH()) {
@@ -999,12 +979,40 @@ void HorizView::rerenderGrid()
 }
 
 /////////////////////////////////////////////////////////////
+// rebuild map overlays after their menu state changes
+
+void HorizView::rerenderMaps()
+{
+  // Maps are cached independently from the gridded data. Rebuild only that
+  // image so a display-only menu change neither waits for nor requests MDV.
+  _renderMaps();
+  repaint();
+}
+
+/////////////////////////////////////////////////////////////
 // rerender symbolic products from the retained SPDB data
 
 void HorizView::rerenderProducts()
 {
   _renderProducts();
   repaint();
+}
+
+/////////////////////////////////////////////////////////////
+// rerender model winds from retained paired U/V data
+
+void HorizView::rerenderWinds()
+{
+  _renderWinds();
+  repaint();
+}
+
+void HorizView::_renderWinds()
+{
+  if (!_zoom || !_gd.wind_mgr) {
+    return;
+  }
+  _zoom->renderWinds(*_gd.wind_mgr);
 }
 
 /////////////////////////////////////////////////////////////
@@ -1041,8 +1049,33 @@ bool HorizView::captureMovieFrame(int frameIndex)
   }
   _playbackFrameIndex = -1;
   repaint();
-  _movieFrames[frameIndex] = grab().toImage();
+  _movieFrames[frameIndex] = captureImageWithoutInteractions();
   return !_movieFrames[frameIndex].isNull();
+}
+
+/////////////////////////////////////////////////////////////
+// capture configured display layers without live interaction graphics
+
+QImage HorizView::captureImageWithoutInteractions()
+{
+  const bool restoreRubberBand = _rubberBand && _rubberBand->isVisible();
+  if (restoreRubberBand) {
+    _rubberBand->hide();
+  }
+
+  QImage image;
+  {
+    // QWidget::grab() paints synchronously, so this scoped flag cannot leak
+    // into the normal display even when capture is invoked between events.
+    QScopedValueRollback<bool> suppress(
+      _suppressInteractionGraphics, true);
+    image = grab().toImage();
+  }
+
+  if (restoreRubberBand) {
+    _rubberBand->show();
+  }
+  return image;
 }
 
 bool HorizView::showMovieFrame(int frameIndex)
@@ -1087,18 +1120,6 @@ void HorizView::setMovieInteractionActive(bool active)
   update();
 }
   
-//////////////////////////////////////////
-// set flags to check for invalid images
-
-void HorizView::setRenderInvalidImages(int index, VertView *vert)
-
-{
-  _renderInvalidImages = true;
-  _invalidImagesFrameIndex = index;
-  _vert = vert;
-  update(); // call paint event
-}
-  
 /*************************************************************************
  * _renderGrids()
  */
@@ -1112,12 +1133,16 @@ void HorizView::_renderGrids()
             _renderFrameIndex, _renderFramePage);
   }
 
-  _controlRenderGrid(_renderFramePage,
-                     _gd.movie.frame[_renderFrameIndex].time_start,
-                     _gd.movie.frame[_renderFrameIndex].time_end);
+  const TimelineFrame *frame = _manager.getTimelineFrame(_renderFrameIndex);
+  if (!frame) {
+    return;
+  }
+  _controlRenderGrid(_renderFramePage, frame->start, frame->end);
   
 
   _gridsReady = true;
+
+  _renderWinds();
 
   _renderProducts();
   
@@ -1129,158 +1154,24 @@ void HorizView::_renderGrids()
 void HorizView::_renderProducts()
 {
   if (!_zoom || !_gd.prod_mgr || _renderFrameIndex < 0 ||
-      _renderFrameIndex >= _gd.movie.num_frames) {
+      _renderFrameIndex >= _manager.getTimelineFrameCount()) {
     return;
   }
 
   time_t dataTime = 0;
-  const int fieldNum = _gd.h_win.page;
+  const int fieldNum = _manager.getSelectedFieldIndex();
   if (fieldNum >= 0 && fieldNum < _gd.num_datafields &&
       _gd.mread[fieldNum] != nullptr) {
     dataTime = _gd.mread[fieldNum]->h_date.utime();
   }
-  const movie_frame_t &frame = _gd.movie.frame[_renderFrameIndex];
+  const TimelineFrame *frame = _manager.getTimelineFrame(_renderFrameIndex);
+  if (!frame) {
+    return;
+  }
   _zoom->renderSymprods(*_gd.prod_mgr,
                         _gd.epoch_start, _gd.epoch_end,
-                        frame.time_start, frame.time_end,
+                        frame->start, frame->end,
                         dataTime, _gd.h_win.km_across_screen);
-}
-
-/************************************************************************
- * RENDER_INVALID_IMAGES: Check for images in which the data 
- * are no longer valid. Look for the "best" invalid  image to 
- *  render.
- *
- */
-
-void HorizView::_doRenderInvalidImages(int index, VertView *vert)
-{
-
-#ifdef JUNK
-  
-  int i;
-  int h_image,v_image;
-  int stat;
-  int none_found = 1;
-  QPaintDevice *pdev;
-  
-  h_image = _gd.h_win.page + 1;
-  v_image = _gd.v_win.page + 1;
-  if(!_params.run_once_and_exit)  PMU_auto_register("Checking Images (OK)");
-  
-  /* look through the rest of the images  */
-  for (i=0; i < _gd.num_datafields-1; i++) {    
-    
-    /*
-     * Render horizontal image, if necessary.
-     */
-    
-    if (h_image >= _gd.num_datafields) {
-      h_image = 0;
-    }
-    
-    if (_gd.mread[h_image]->currently_displayed && _gd.mread[h_image]->auto_render) {
-      
-      if (_gd.h_win.redraw_flag[h_image] || (_gd.mread[h_image]->h_data_valid == 0)) {
-        none_found = 0;
-        stat = gather_hwin_data(h_image,
-                                _gd.movie.frame[index].time_start,
-                                _gd.movie.frame[index].time_end);
-        if (stat == CIDD_SUCCESS) {
-          if(_gd.mread[h_image]->auto_render) {
-            pdev = _gd.h_win.page_pdev[h_image];
-          } else {
-            pdev = _gd.h_win.tmp_pdev;
-          }
-          QPainter painter(this);
-          _controlRenderGrid(painter,
-                             h_image,
-                             _gd.movie.frame[index].time_start,
-                             _gd.movie.frame[index].time_end);
-          
-          save_h_movie_frame(index,pdev,h_image);
-          
-          _gd.h_win.redraw_flag[h_image] = 0;
-        } else {
-          return;
-        }
-        if (h_image == _gd.h_win.prev_page && _gd.h_win.redraw_flag[h_image] == 0) {
-          _gd.h_copy_flag = 1;
-        }
-      } // if (_gd.h_win.redraw_flag[h_image] ...
-    } // if (_gd.mread[h_image]->currently_displayed ...
-    h_image++;
-
-    /*
-     * Render vertical image, if necessary.
-     */
-
-    if (v_image >= _gd.num_datafields) v_image = 0;
-
-    if (_gd.mread[v_image]->currently_displayed && _gd.mread[v_image]->auto_render) {
-      if ((_gd.v_win.active) && (_gd.v_win.redraw_flag[v_image] || (_gd.mread[v_image]->v_data_valid == 0))) {
-        stat = gather_vwin_data(v_image, _gd.movie.frame[index].time_start,
-                                _gd.movie.frame[index].time_end);
-        if (stat == CIDD_SUCCESS) {
-          if(_gd.mread[v_image]->auto_render) {
-            pdev = _gd.v_win.page_pdev[v_image];
-          } else {
-            pdev = _gd.v_win.tmp_pdev;
-          }
-          QPainter painter(this);
-#ifdef NOTYET
-          vert->renderVertDisplay(painter, v_image, _gd.movie.frame[index].time_start,
-                                  _gd.movie.frame[index].time_end);
-#endif
-          _gd.v_win.redraw_flag[v_image] = 0;
-        } else {
-          return;
-        }
-        if (v_image == _gd.v_win.prev_page && _gd.v_win.redraw_flag[v_image] == 0) _gd.v_copy_flag = 1;
-      }
-    }
-        
-    v_image++;
-  }
-
-  // At this point all background images have been rendered. and nothing else is
-  //  happening
-
-  // In html mode, cycle through all zooms and heights
-  if(none_found && _params.html_mode && _gd.io_info.outstanding_request == 0) {
-    
-    /* If more zoom levels to render */
-    if(_gd.h_win.zoom_level < (_gd.h_win.num_zoom_levels -  NUM_CUSTOM_ZOOMS - 2)) {
-
-      /* Set zoom to next level */
-      _gd.h_win.zoom_level++;
-      // set_domain_proc(_gd.zoom_pu->domain_st,_gd.h_win.zoom_level,NULL);
-
-      // If more heights to render
-    } else if (_gd.cur_render_height < _gd.num_render_heights -1) {
-
-      // Set height to next level
-      _gd.cur_render_height++;
-      if(_gd.debug) fprintf(stderr,"HTML_MODE: Height now: %g\n",_gd.h_win.cur_ht);
-      _gd.h_win.cur_ht = _gd.height_array[_gd.cur_render_height];
-
-      // Reset Zoom back to first  level
-      _gd.h_win.zoom_level = 0;
-      // set_domain_proc(_gd.zoom_pu->domain_st,_gd.h_win.zoom_level,NULL);
-
-      // Make sure new data gets loaded
-      reset_data_valid_flags(1,0);
-      reset_terrain_valid_flags(1,0);
-               
-      // No more heights and no more zooms to render
-    } else if(_params.run_once_and_exit) {
-      if(!_gd.quiet_mode)  fprintf(stderr,"Exiting\n");
-      // xv_destroy(_gd.h_win_horiz_bw->horiz_bw);
-      exit(-1);
-    }
-  }
-#endif
-  return;
 }
 
 /**********************************************************************
@@ -1293,7 +1184,10 @@ int HorizView::_controlRenderGrid(int page,
                                   time_t end_time)
 {
 
-  if(!_params.run_once_and_exit)  PMU_auto_register("Rendering (OK)");
+  if(_params.images_creation_mode != Params::CREATE_IMAGES_THEN_EXIT) {
+    PMU_auto_register("Rendering (OK)");
+  }
+
   if(_gd.debug2) fprintf(stderr,"Rendering Plan View Image, page :%d\n",page);
 
   // compute distance across the image for setting font sizes, etc.
@@ -1311,107 +1205,46 @@ int HorizView::_controlRenderGrid(int page,
   }
 
   MdvReader *mr = _gd.mread[page];
+
+  const auto renderTerrainMask = [this, mr]() {
+    MdvReader *terrain = _gd.layers.earth.terr;
+    if (!_gd.layers.earth.terrain_active || terrain == nullptr ||
+        !terrain->isValidH() || mr == nullptr || !mr->isValidH() ||
+        mr->composite_mode != FALSE || mr->ds_fhdr.nz <= 1 ||
+        mr->ds_fhdr.vlevel_type != Mdvx::VERT_TYPE_Z ||
+        mr->proj.getProjType() == Mdvx::PROJ_POLAR_RADAR ||
+        mr->h_fhdr.nz <= 0) {
+      return;
+    }
+
+    // Use the actual level returned by MDV rather than the requested value;
+    // a closest-plane request may legitimately select a neighboring level.
+    _zoom->renderTerrainMask(terrain, mr->h_vhdr.level[0],
+                             _params.terrain_height_scaler,
+                             _params.terrain_earth_color2);
+  };
  
-  // Clear time lists
-  // if(_gd.time_plot) _gd.time_plot->clear_grid_tlist();
-  // if(_gd.time_plot) _gd.time_plot->clear_prod_tlist();
-
-  // if(_params.show_data_messages) {
-  //   // gui_label_h_frame("Rendering",-1);
-  // }
-
   // RENDER the LAND_USE field first
   if(_gd.layers.earth.landuse_active && _gd.layers.earth.land_use != NULL) {
     _renderFieldGrid(page, _gd.layers.earth.land_use, start_time, end_time,1);
-    // render_grid(xid,_gd.layers.earth.land_use,start_time,end_time,1);
   }
 
   if(!_params.draw_main_on_top) {
     _renderFieldGrid(page, mr, start_time, end_time, 0);
-    if(_gd.layers.earth.terrain_active &&
-       (mr->ds_fhdr.nz > 1) &&
-       ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
-       (mr->composite_mode == FALSE) &&
-       mr->ds_fhdr.vlevel_type != Mdvx::VERT_TYPE_ELEV) {
-#ifdef HAVE_XID
-      render_h_terrain(xid, page);
-#endif
-    }
+    renderTerrainMask();
   }
      
   /* Render each of the gridded_overlay fields */
   for(int i=0; i < Constants::NUM_GRID_LAYERS; i++) {
     if(_gd.layers.overlay_field_on[i] && _gd.mread[_gd.layers.overlay_field[i]] != NULL) {
       _renderFieldGrid(page, _gd.mread[_gd.layers.overlay_field[i]],start_time,end_time,1);
-      // render_grid(xid,_gd.mread[_gd.layers.overlay_field[i]],start_time,end_time,1);
     }
   }
   
   if(_params.draw_main_on_top) {
     _renderFieldGrid(page, mr, start_time, end_time, 0);
-    if(_gd.layers.earth.terrain_active && 
-       ((mr->vert[mr->ds_fhdr.nz -1].max - mr->vert[0].min) != 0.0) &&
-       (mr->composite_mode == FALSE) && (mr->ds_fhdr.nz > 1)) {
-
-#ifdef HAVE_XID
-      render_h_terrain(xid, page);
-#endif
-    }
+    renderTerrainMask();
   }
-
-  /* render contours if selected */
-  for(int i= 0; i < Constants::NUM_CONT_LAYERS; i++) {
-    if(_gd.layers.cont[i].active) {
-      if (_gd.layers.use_alt_contours) {
-#ifdef HAVE_XID
-        RenderLineContours(xid, &(_gd.layers.cont[i]));
-#endif
-      } else {
-#ifdef HAVE_XID
-        render_line_contours(xid, &(_gd.layers.cont[i]));
-#endif
-      }
-    }
-  }
-
-  /* render Winds if selected */
-  if(_gd.layers.wind_vectors) {
-    switch(_gd.layers.wind_mode) {
-      default:
-      case WIND_MODE_ON:  /* winds get rendered in each frame */
-#ifdef HAVE_XID
-        render_wind_vectors(xid,start_time,end_time);
-#endif
-        break;
-        
-      case WIND_MODE_LAST: /* Winds get rendered in last farame only */
-        if(_gd.movie.cur_frame == _gd.movie.end_frame)
-#ifdef HAVE_XID
-          render_wind_vectors(xid,start_time,end_time);
-#endif
-        break;
-
-      case WIND_MODE_STILL: /* Winds get rendered in the last frame only
-                             * if the movie loop is off
-                             */
-        if(!_gd.movie.movie_on && _gd.movie.cur_frame == _gd.movie.end_frame)
-#ifdef HAVE_XID
-          render_wind_vectors(xid,start_time,end_time);
-#endif
-        break;
-    }
-  }
-
-
-#ifdef HAVE_XID
-  render_top_layers(xid);  // Range rings X section reference etc.
-#endif
-
-#ifdef HAVE_XID
-  render_horiz_margins(xid,page,start_time,end_time);
-#endif
-
-  // update_frame_time_msg(_gd.movie.cur_frame);
 
   return Constants::CIDD_SUCCESS;    /* avaliable data has been rendered */
 }
@@ -1445,10 +1278,7 @@ int HorizView::_renderFieldGrid(int page,
     _zoom->renderGridRadarPolar(page, mr,
                                 start_time, end_time,
                                 is_overlay_field);
-  } else if (mr->render_method == FILLED_CONTOURS ||
-             (mr->render_method == DYNAMIC_CONTOURS &&
-              (int64_t) mr->h_fhdr.nx * mr->h_fhdr.ny <
-                _params.dynamic_contour_threshold)) {
+  } else if (mr->render_method == FILLED_CONTOURS) {
     // Polar data retains its gate polygons, while Cartesian grids share one
     // contour path which handles any projection distortion internally.
     _zoom->renderFilledContours(page, mr,
@@ -1470,169 +1300,6 @@ int HorizView::_renderFieldGrid(int page,
   if (mr->overlay_line_contours && projType != Mdvx::PROJ_POLAR_RADAR) {
     _zoom->renderLineContours(mr);
   }
-
-#ifdef NOTYET
-  
-  int out_of_date = 0;
-  int stretch_secs = (int) (60.0 * mr->time_allowance);
-  char message[1024];    /* Error message area */
-  
-  if(_params.check_data_times) {
-    if(mr->h_date.unix_time < start_time - stretch_secs) out_of_date = 1;
-    if(mr->h_date.unix_time > end_time + stretch_secs) out_of_date = 1;
-  }
-
-  // Add the list of times to the time plot
-  // if(mr->time_list.num_entries > 0) {
-  //   if(_gd.time_plot) _gd.time_plot->add_grid_tlist(mr->legend_name,mr->time_list.tim,
-  //                                                 mr->time_list.num_entries,
-  //                                                 mr->h_date.unix_time);
-  // }
-
-  /* For the Main Field - Clear the screen and  Print a special message 
-   * and draw the wall clock time if the data is not availible 
-   */
-  if(!is_overlay_field) {
-
-
-    /* If no data in current response or data is way out of date */
-    if( mr->h_data == NULL || out_of_date ) {
-
-      if(strncasecmp(mr->button_name,"None",4) &&
-         strncasecmp(mr->button_name,"Empty",5)) {
-        /* display "Data Not Available" message */
-        if(out_of_date) {
-          snprintf(message, 1023, "%s - Data too Old", _params.no_data_message);
-        } else {
-          STRcopy(message, _params.no_data_message, 1023);
-        }
-
-        int xmid,ymid;
-        Font font = choose_font(message, _gd.h_win.img_dim.width, _gd.h_win.img_dim.height, &xmid, &ymid);
-        XSetFont(_gd.dpy,_gd.legends.foreground_color->gc,font);
-        XDrawImageString(_gd.dpy,xid,_gd.legends.foreground_color->gc,
-                         _gd.h_win.margin.left + (_gd.h_win.img_dim.width /2) + xmid  ,
-                         _gd.h_win.margin.top + (_gd.h_win.img_dim.height /4) + ymid ,
-                         message,strlen(message));
-
-        if(_gd.debug2) {
-          fprintf(stderr, "No data from service: %s\n",
-                  _gd.io_info.mr->url );
-        }
-
-	if(_params.show_clock) {
-          /* draw a clock */
-          int ht = (int) (_gd.h_win.can_dim.height * 0.05);
-          int startx = _gd.h_win.can_dim.width - _gd.h_win.margin.right - ht - 5;
-          int starty = _gd.h_win.margin.top + ht + 5;
-          XUDRdraw_clock(_gd.dpy,xid,_gd.legends.foreground_color->gc,
-                         startx,starty,ht, (start_time + (end_time - start_time) /2),1);
-	}
-      }  // if mr->button_name != "None"
-
-      return CIDD_FAILURE;
-    }
-  }
-     
-  set_busy_state(1);
-
-#endif
-
-#ifdef NOTNOW
-  switch(mr->h_fhdr.proj_type) {
-    default: // Projections which need only matching types and origins.
-      // If the projections match - Can use fast Rectangle rendering.
-      if(mr->h_fhdr.proj_type == _proj.getProjType() &&
-         (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
-         (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
-        if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
-        _zoom->renderGridRect(page, mr,
-                              start_time, end_time,
-                              is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
-      } else { // Must use polygon rendering
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
-        _zoom->renderGridDistorted(page, mr,
-                                   start_time, end_time,
-                                   is_overlay_field);
-      }
-      break;
-
-    case  Mdvx::PROJ_FLAT: // Needs to test Param 1
-      // If the projections match - Can use fast Rectangle rendering.
-      if(mr->h_fhdr.proj_type == _proj.getProjType() &&
-         (fabs(_proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
-         (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
-         (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
-        
-        if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
-        _zoom->renderGridRect(page, mr,
-                              start_time, end_time,
-                              is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
-      } else { // Must use polygon rendering
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
-        _zoom->renderGridDistorted(page, mr,
-                                   start_time, end_time,
-                                   is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
-      }
-      break;
-      
-    case  Mdvx::PROJ_LAMBERT_CONF: // Needs to test param 1 & 2
-    case  Mdvx::PROJ_POLAR_STEREO: 
-    case  Mdvx::PROJ_OBLIQUE_STEREO:
-    case  Mdvx::PROJ_MERCATOR:
-      // If the projections match - Can use fast Rectangle rendering.
-      if(mr->h_fhdr.proj_type == _proj.getProjType() &&
-         (fabs(_proj_param[0] - mr->h_fhdr.proj_param[0]) < 0.001) &&
-         (fabs(_proj_param[1] - mr->h_fhdr.proj_param[1]) < 0.001) &&
-         (fabs(_gd.h_win.origin_lat - mr->h_fhdr.proj_origin_lat) < 0.001) &&
-         (fabs(_gd.h_win.origin_lon - mr->h_fhdr.proj_origin_lon) < 0.001)) {
-        if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
-        _zoom->renderGridRect(page, mr,
-                              start_time, end_time,
-                              is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
-      } else { // Must use polygon rendering
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
-        _zoom->renderGridDistorted(page, mr,
-                                   start_time, end_time,
-                                   is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
-      }
-      break;
-      
-    case  Mdvx::PROJ_LATLON:
-      if(mr->h_fhdr.proj_type == _proj.getProjType()) {
-        if(_gd.debug2) fprintf(stderr,"renderGrid() selected\n");
-        _zoom->renderGridRect(page, mr,
-                              start_time, end_time,
-                              is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGrid() done\n");
-      } else {
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() selected\n");
-        _zoom->renderGridDistorted(page, mr,
-                                   start_time, end_time,
-                                   is_overlay_field);
-        if(_gd.debug2) fprintf(stderr,"renderGridDistorted() done\n");
-      }
-      break;
-      
-    case  Mdvx::PROJ_POLAR_RADAR:
-      if(_gd.debug2) fprintf(stderr,"render_polar_grid() selected\n");
-#ifdef NOTYET
-      render_polar_grid(page, mr,start_time, end_time, 
-                        is_overlay_field);
-#endif
-      if(_gd.debug2) fprintf(stderr,"render_polar_grid() done\n");
-      break;
-      
-  }
-
-  set_busy_state(0);
-
-#endif
 
   // plot legends
 
@@ -1821,8 +1488,8 @@ void HorizView::mousePressEvent(QMouseEvent *e)
   if (_activeMouseButton == Qt::RightButton) {
     if (e->modifiers() & Qt::ShiftModifier) {
       // Ordinary right-button gestures belong to vertical-section selection.
-      // Retain access to the existing context menu through an explicit
-      // modifier so the two interactions cannot become ambiguous.
+      // Use an explicit modifier for interaction help so the two gestures
+      // cannot become ambiguous.
       _activeMouseButton = Qt::NoButton;
       emit customContextMenuRequested(pos.toPoint());
       return;
@@ -2051,17 +1718,10 @@ void HorizView::mouseReleaseEvent(QMouseEvent *e)
     _worldClickY = _worldReleaseY;
     _proj.xy2latlon(_worldClickX, _worldClickY, _worldClickLat, _worldClickLon);
     _haveClickLocation = true;
-    _manager.setOverlaysHaveChanged(true);
 
-    // Build the report from the primary field's actual returned metadata and
-    // sample every cached field at the same geographic point.
+    // HorizView owns coordinate conversion and grid sampling; GuiManager
+    // receives a view-independent report and owns its presentation.
     _updateClickReport();
-    _manager.showClickDialog();
-    
-    // Emit a signal to indicate that the click location has changed
-
-    emit locationClicked(_worldClickX, _worldClickY);
-    
     update();
 
   } else {
@@ -2249,7 +1909,7 @@ void HorizView::_drawVsectionRoute(QPainter &painter)
                        std::abs(_zoom->getPlotWidth()),
                        std::abs(_zoom->getPlotHeight()));
   painter.setClipRect(plotRect);
-  if (_panPreviewActive) {
+  if (_panPreviewActive && !_suppressInteractionGraphics) {
     painter.translate(_panPreviewX - _mousePressX,
                       _panPreviewY - _mousePressY);
   }
@@ -2404,171 +2064,5 @@ void HorizView::_renderMaps()
   _zoom->drawMaps();
   _mapsReady = true;
   
-}
-
-void HorizView::informationMessage()
-{
-  
-  // QMessageBox::StandardButton reply;
-  // QLabel *informationLabel;
-  
-  // reply = QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
-  QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
-  //  if (reply == QMessageBox::Ok)
-  //  informationLabel->setText("OK");
-  //else
-  //  informationLabel->setText("Escape");
-
-}
-
-/////////////////////////////////////////////////////////////////////////////////////
-// slots for context editing; create and show the associated modeless dialog and return                                   
-
-void HorizView::contextMenuCancel()
-{
-  // informationMessage();
-  // notImplemented();                                                                                                     
-}
-
-void HorizView::contextMenuParameterColors()
-{
-
-#ifdef NOTNOW
-  
-  LOG(DEBUG_VERBOSE) << "enter";
-
-  //DisplayField selectedField;                                                                             
-
-  // const DisplayField &field = _manager.getSelectedField();
-  // const ColorMap &colorMapForSelectedField = field.getColorMap();
-  ParameterColorView *parameterColorView = new ParameterColorView(this);
-  vector<DisplayField *> displayFields = _manager.getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
-  DisplayField selectedField = _manager.getSelectedField();
-  string emphasis_color = "white";
-  string annotation_color = "white";
-  DisplayFieldModel *displayFieldModel = 
-    new DisplayFieldModel(displayFields, selectedField.getName(),
-			  _params.grid_and_range_ring_color,
-			  emphasis_color,
-			  annotation_color,
-			  _params.background_color);
-  FieldColorController *fieldColorController = new FieldColorController(parameterColorView, displayFieldModel);
-  // connect some signals and slots in order to retrieve information
-  // and send changes back to display
-                                                                         
-  //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
-  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
-  	  &_manager, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
-  //  GuiManager::colorMapRedefineReceived(string, ColorMap)
-  //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
-  //	  this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
-
-  /* TODO: combine with replot
-     connect(fieldColorController, SIGNAL(backgroundColorSet(QColor)),
-     this, SLOT(backgroundColor(QColor)));
-  */
-
-  fieldColorController->startUp(); 
-
-  //connect(parameterColorView, SIGNAL(needFieldNames()), this, SLOT(getFieldNames()));
-  //connect(this, SIGNAL(fieldNamesSupplied(vector<string>)), 
-  //  parameterColorView, SLOT(fieldNamesSupplied(vector<string>));
-  // TODO: move this call to the controller?                                                                
-  // parameterColorView.exec();
-
-  //  if(parameterColorController.Changes()) {
-  // TODO: what are changes?  new displayField(s)?                                                        
-  //}
- 
-  LOG(DEBUG_VERBOSE) << "exit ";
-
-#endif
-  
-  informationMessage();
-  
-}
-
-void HorizView::contextMenuView()
-{
-  informationMessage();
-  //  notImplemented();                                                                                                   
-}
-
-void HorizView::contextMenuExamine()         
-{
-  informationMessage();                                                                                                 
-
-}
-
-void HorizView::contextMenuDataWidget()
-{
-  informationMessage();
-  //  notImplemented();                                                                                                   
-}
-
-void HorizView::contextMenuEditor()
-{
-  LOG(DEBUG_VERBOSE) << "enter";
-
-  // get click location in world coords
-  // by using the location stored in class variables
-#ifdef JUNK
-  double x_km = _worldPressX;
-  double y_km = _worldPressY;
-
-  // get ray closest to click point
-  const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-  // TODO: make sure the point is in the valid area
-  if (closestRay == NULL) {
-    // report error
-    QMessageBox::information(this, QString::fromStdString(""), QString::fromStdString("No ray found at location clicked"));
-    // TODO: move to this ...  errorMessage("", "No ray found at location clicked");
-  } else {
-    // ExamineEdit(closestRay);
-  }
-  LOG(DEBUG_VERBOSE) << "exit";
-#endif
-  
-}
-
-void HorizView::ShowContextMenu(const QPoint &pos/* , RadxVol *vol */)
-{
-
-  if (_manager.isMovieActive()) {
-    _manager.showMovieInteractionBlocked();
-    return;
-  }
-
-  // _vol = vol;
-
-  QMenu contextMenu("Context menu", this);
-  
-  QAction action1("Cancel", this);
-  connect(&action1, SIGNAL(triggered()), this, SLOT(contextMenuCancel()));
-  contextMenu.addAction(&action1);
-
-  QAction action3("Parameters + Colors", this);
-  connect(&action3, SIGNAL(triggered()), this, SLOT(contextMenuParameterColors()));
-  contextMenu.addAction(&action3);
-
-  QAction action4("View", this);
-  connect(&action4, SIGNAL(triggered()), this, SLOT(contextMenuView()));
-  contextMenu.addAction(&action4);
-
-  QAction action5("Editor", this);
-  connect(&action5, SIGNAL(triggered()), this, SLOT(contextMenuEditor()));
-  contextMenu.addAction(&action5);
-  
-  QAction action6("Examine", this);
-  connect(&action6, SIGNAL(triggered()), this, SLOT(contextMenuExamine()));
-  contextMenu.addAction(&action6);
-
-  /*
-    QAction action7("Data Widget", this);
-    connect(&action7, SIGNAL(triggered()), this, SLOT(contextMenuDataWidget()));
-    contextMenu.addAction(&action7);
-  */
-
-  contextMenu.exec(this->mapToGlobal(pos));
 }
 

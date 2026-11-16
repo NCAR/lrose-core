@@ -118,14 +118,13 @@ class DLL_EXPORT VertView : public QWidget
   bool hasMovieFrame(int frameIndex) const;
   QImage movieFrameImage(int frameIndex) const;
   bool captureMovieFrame(int frameIndex);
+  QImage captureImageWithoutInteractions();
   bool showMovieFrame(int frameIndex);
   void stopMoviePlayback();
   void setMovieInteractionActive(bool active);
 
   // render frame based on movie index
   
-  int renderVMovieFrame(int index, QPainter &painter);
-
   /**
    * @brief Specify the background color.
    *
@@ -175,7 +174,6 @@ class DLL_EXPORT VertView : public QWidget
   // Qt signals //
   ////////////////
 
-  void locationClicked(double xkm, double ykm, const RadxRay *closestRay);
   void clickReportAvailable(const ClickReport &report);
   
   //////////////
@@ -201,6 +199,12 @@ class DLL_EXPORT VertView : public QWidget
    */
   
   void refresh();
+
+  // Rebuild only the inexpensive wind overlay; the gridded section cache may
+  // contain filled contours and remains valid across an asynchronous U/V
+  // completion or a wind-menu change.
+  void rerenderWinds();
+  void rerenderTerrain();
 
   // paint event
 
@@ -369,8 +373,13 @@ class DLL_EXPORT VertView : public QWidget
 
   QPixmap _sectionPixmap;
   bool _sectionPixmapDirty;
+  QPixmap _windsPixmap;
+  bool _windsPixmapDirty;
+  QPixmap _terrainPixmap;
+  bool _terrainPixmapDirty;
   vector<QImage> _movieFrames;
   int _playbackFrameIndex;
+  bool _suppressInteractionGraphics;
 
   bool _showValue;
   bool _mouseValueVisible;
@@ -402,11 +411,18 @@ class DLL_EXPORT VertView : public QWidget
 
   void _drawSection(QPainter &painter);
   void _drawSectionCells(QPainter &painter);
+  void _drawPolarRhiCells(QPainter &painter);
   bool _drawSectionContours(QPainter &painter);
   void _drawSectionContourLines(QPainter &painter);
+  void _drawWinds(QPainter &painter);
+  void _drawTerrain(QPainter &painter);
   vector<double> _computeVerticalEdges() const;
+  bool _isPolarRhi() const;
+  bool _buildPolarRhiCorners(vector<QPointF> &corners) const;
   bool _sampleGridValue(int mouseX, int mouseY,
                         SectionSample &sample) const;
+  bool _samplePolarRhiValue(int mouseX, int mouseY,
+                            SectionSample &sample) const;
   bool _sampleSection(int mouseX, int mouseY,
                       SectionSample &sample) const;
   bool _routeLocation(double distanceKm, double &latitude,

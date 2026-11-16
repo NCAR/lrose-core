@@ -90,7 +90,6 @@ class DLL_EXPORT ZoomMenuItem : public QObject {
 
  protected:
   
-  QObject *_parent;
   GuiManager *_manager;
   Params &_params;
   GlobalData &_gd;

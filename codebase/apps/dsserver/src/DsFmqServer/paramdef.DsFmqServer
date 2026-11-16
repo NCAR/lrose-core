@@ -82,3 +82,9 @@ paramdef boolean {
   p_descr = "Option to run in secure mode.";
   p_help = "If TRUE, the server will reject any URLs which specify an absolute path, or a path with .. in it. This prevents the server from writing any files which are not below DATA_DIR in the directory tree.";
 } run_secure;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to run in read-only mode.";
+  p_help = "If TRUE, the server will only let clients read. It rejects requests to open a queue for writing (CREATE, READ_WRITE, BLOCKING_READ_WRITE), and rejects writes.";
+} run_read_only;

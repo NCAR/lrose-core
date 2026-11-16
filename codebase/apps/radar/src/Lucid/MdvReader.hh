@@ -85,9 +85,27 @@ private:
   double _originalRangeMax;
 };
 
-// Vertical reads use self-contained request and result objects.  The blocking
-// worker never mutates MdvReader, so horizontal and vertical requests can be
-// in flight together without sharing transient request state.
+// Horizontal workers read one immutable request. MdvReader retains at most one
+// newer pending request, replacing it as the display changes, so completion of
+// a blocking MDV call always advances to the latest requested state.
+
+struct HorizReadRequest {
+  DateTime midTime;
+  DateTime requestTime;
+  LatLonBox zoomBox;
+  double vLevel = 0.0;
+  double compositeMinHt = 0.0;
+  double compositeMaxHt = 0.0;
+  int page = 0;
+  int generation = -1;
+  int decimateResolution = 0;
+  bool compositeMode = false;
+  bool primaryDisplayField = false;
+  bool requestTimeList = false;
+};
+
+// Vertical workers own both their request and result. Horizontal and vertical
+// reads can therefore overlap without sharing their transient MDV state.
 
 struct VertReadRequest {
   DateTime requestTime;
@@ -161,11 +179,18 @@ public:
   // This is implemented in a thread.
   // On error, isValidH is set to false.
 
-  void requestHorizPlane(const DateTime &midTime,
-                         double vLevel,
-                         int page);
+  int requestHorizPlane(const DateTime &midTime,
+                        double vLevel,
+                        int page,
+                        bool primaryDisplayField = false);
 
-  int getHorizPlane();
+  int getHorizGeneration() const { return _horizGeneration; }
+  int getHorizCompletedGeneration() const {
+    return _horizCompletedGeneration;
+  }
+  void cancelHorizRequest(int generation);
+
+  int getHorizPlane(const HorizReadRequest &request);
   
   // Get data for a vert section
 
@@ -180,6 +205,10 @@ public:
   double getVertSampleSpacingKm() const { return _vertSampleSpacingKm; }
   double getVertTotalLengthKm() const { return _vertTotalLengthKm; }
   int getVertGeneration() const { return _vertGeneration; }
+  int getVertCompletedGeneration() const {
+    return _vertCompletedGeneration;
+  }
+  void cancelVertRequest(int generation);
   
   // perform the vol read for Horiz
 
@@ -190,7 +219,6 @@ public:
   string vlevelLabel() const;
   string fieldLabelHoriz() const;
   string fieldLabelVert() const;
-  string heightLabel() const;
   
   // public data members
   
@@ -279,8 +307,6 @@ public:
   // time_list_t time_list; // A list of data times
   
   /* Dynamic - Depends on scale & bias factors */
-  Valcolormap_t h_vcm; /* Data value to X color info */
-  Valcolormap_t v_vcm; /* Data value to X color info */
   
   DateTime h_date; /* date and time stamp of latest data - Horiz */
   DateTime v_date; /* date and time stamp of latest data - Vert */
@@ -343,10 +369,12 @@ public:
   };
 
 signals:
+  void horizontalReadComplete(MdvReader *reader, int generation,
+                              bool success);
   void verticalReadComplete(MdvReader *reader);
 
 public slots:
-  void readDoneH(int readStatus);
+  void readDoneH(int readStatus, int generation);
   void readDoneV(VertReadResultPtr result);
 
 private:
@@ -357,35 +385,32 @@ private:
   
   mutable QMutex _statusMutex;
 
-  // data request details
-  
-  DateTime _midTime;
-  DateTime _timeReq;
-  LatLonBox _zoomBoxReq;                 // horiz data
-  double _vLevelReq;                     // horiz data
-  bool _compositeModeReq;                // immutable for an active H read
-  double _compositeMinHtReq;
-  double _compositeMaxHtReq;
-  
   bool _validH, _validV;
   mutable bool _newH, _newV;
 
   // data read and returned
   
-  int _page;
   bool _timeListValid;
   // The worker fills the pending list; successful horizontal completion
   // publishes it on the GUI thread alongside the matching grid data.
   vector<time_t> _pendingTimeList;
+  bool _pendingTimeListValid;
   vector<time_t> _timeList;
-  double _vLevel;
   bool _readBusyH;
+  int _horizGeneration;
+  int _horizCompletedGeneration;
+
+  HorizReadRequest _activeHRequest;
+  bool _activeHRequestValid;
+  HorizReadRequest _pendingHRequest;
+  bool _pendingHRequestValid;
+  HorizReadRequest _installedHRequest;
+  bool _installedHRequestValid;
 
   // Horizontal MDV reads are performed by short-lived worker threads.  Keep
   // track of every thread because the worker calls back into this MdvReader;
-  // destruction must wait until those calls have returned.  Failed reads are
-  // retried from the Qt event loop using a single-shot timer, with the most
-  // recent request details still stored in this object.
+  // destruction must wait until those calls have returned. Failed reads retry
+  // the immutable active request; a newer pending request takes precedence.
 
   QSet<QThread *> _readThreadsH;
   QSet<QThread *> _readThreadsV;
@@ -402,17 +427,26 @@ private:
   double _vertSampleSpacingKm;
   double _vertTotalLengthKm;
   int _vertGeneration;
+  int _vertCompletedGeneration;
 
   // private methods
 
-  int _handleHorizReadDone();
+  int _handleHorizReadDone(const HorizReadRequest &request);
 
   void _scheduleRetryH();
+  void _startPendingHorizRequest();
+  void _publishCachedHorizRequest(const HorizReadRequest &request,
+                                  bool emitCompletion);
+  HorizReadRequest _createHorizReadRequest(const DateTime &midTime,
+                                           double vLevel,
+                                           int page,
+                                           bool primaryDisplayField,
+                                           int generation);
+  static bool _sameHorizDataRequest(const HorizReadRequest &lhs,
+                                    const HorizReadRequest &rhs);
 
   void _startReadVolV(const VertReadRequest &request);
   
-  bool _checkRequestChangedH(const DateTime &midTime, double vLevel);
-
   void _computeReqTime(const DateTime &midTime,
                        DateTime &reqTime);
   
@@ -423,6 +457,7 @@ private:
   int _getTimeList(const string &url,
                    const DateTime &midTime,
                    int page,
+                   const LatLonBox &zoomBox,
                    Mdvx &mdvx);
   
   string _getFullUrl();
@@ -441,7 +476,6 @@ private:
                           double &minLat, double &maxLat,
                           double &minLon, double &maxLon);
 
-  void _autoscaleVcm(Valcolormap_t *vcm, double min, double max);
   
 };
 
@@ -453,7 +487,10 @@ class ReadVolH : public QObject {
 
 public:
   
-  ReadVolH(MdvReader* parentObject, QObject* parent = nullptr);
+  ReadVolH(MdvReader *parentObject,
+           const HorizReadRequest &request,
+           bool debug,
+           QObject *parent = nullptr);
 
 public slots:
   void doRead();
@@ -463,6 +500,8 @@ signals:
 
 private:
   MdvReader* _mr;
+  HorizReadRequest _request;
+  bool _debug;
 
 };
 

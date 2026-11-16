@@ -1,0 +1,146 @@
+/*********************************************************
+ * parameter definitions for MdvSim
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+  *
+ * Nov 2026
+ */
+
+commentdef {
+  p_header = "MdvSim replays archive MDV data as a realtime file feed.";
+  p_text = "MdvSim loops through a set of MDV files,  modifies the times to wall-clock time, and writes modified files to an output dir."
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS REGISTRATION";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option.";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for procmap registration.";
+} instance;
+
+commentdef {
+  p_header = "INPUT FILE SELECTION";
+}
+
+typedef enum {
+  FILE_LIST, ARCHIVE
+} input_mode_t;
+
+paramdef enum input_mode_t {
+  p_default = FILE_LIST;
+  p_descr = "Input selection mode.";
+  p_help = "FILE_LIST uses input_file_paths or paths supplied with -f. ARCHIVE searches input_url over the inclusive archive range.";
+} input_mode;
+
+typedef enum {
+  NON_FORECAST, FORECAST
+} input_data_type_t;
+
+paramdef enum input_data_type_t {
+  p_default = NON_FORECAST;
+  p_descr = "Whether the input uses normal valid-time or forecast hierarchy.";
+  p_help = "All inputs in one MdvSim instance must use the same type.";
+} input_data_type;
+
+paramdef string {
+  p_default = {};
+  p_descr = "Explicit MDV input paths.";
+  p_help = "Used in FILE_LIST mode. Paths supplied with -f are appended.";
+} input_file_paths[];
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Archive MDV input URL.";
+  p_help = "Used in ARCHIVE mode.";
+} input_url;
+
+paramdef string {
+  p_default = "2020 01 01 00 00 00";
+  p_descr = "Inclusive archive start time.";
+  p_help = "For forecast input this selects generation times.";
+} archive_start_time;
+
+paramdef string {
+  p_default = "2020 01 01 01 00 00";
+  p_descr = "Inclusive archive end time.";
+  p_help = "For forecast input this selects generation times.";
+} archive_end_time;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Continue after unreadable or unsupported input.";
+} continue_on_input_error;
+
+commentdef {
+  p_header = "REPLAY CLOCK";
+}
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Replay speed multiplier.";
+  p_help = "Must be greater than zero. This scales intervals between input products, not the time relationships within a product.";
+} replay_rate;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Offset applied to output data times, seconds.";
+  p_help = "This changes header times without changing replay waits.";
+} time_offset_secs;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Delivery delay relative to the mapped product time, seconds.";
+  p_help = "This changes publication deadlines without changing header times. It may be negative.";
+} delivery_delay_secs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Repeat the resolved input sequence.";
+} repeat_replay;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Gap between repeated cycles, seconds.";
+  p_help = "Must be at least one second when repeat_replay is TRUE because standard MDV paths have one-second resolution.";
+} inter_cycle_gap_secs;
+
+commentdef {
+  p_header = "OUTPUT";
+}
+
+paramdef string {
+  p_default = "./output/MdvSim";
+  p_descr = "Local realtime output directory.";
+} output_dir;
+
+typedef enum {
+  PRESERVE_INPUT, OUTPUT_MDV, OUTPUT_NCF
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = PRESERVE_INPUT;
+  p_descr = "Output file format.";
+  p_help = "PRESERVE_INPUT retains MDV versus NCF representation. OUTPUT_MDV writes classic MDV where its time range permits. OUTPUT_NCF writes NetCDF.";
+} output_format;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Use extended MDV output paths.";
+} write_using_extended_paths;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Add a year directory above the day directory.";
+} append_year_dir_to_output_dir;
+

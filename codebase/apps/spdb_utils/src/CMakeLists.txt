@@ -19,6 +19,7 @@ add_subdirectory (PrintHydroStation)
 add_subdirectory (PrintSigAirMet)
 add_subdirectory (PrintSpdbMetar)
 add_subdirectory (Rhi2Spdb)
+add_subdirectory (SpdbSim)
 add_subdirectory (spdb_merge)
 add_subdirectory (Taf2Spdb)
 

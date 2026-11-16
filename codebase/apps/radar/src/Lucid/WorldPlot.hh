@@ -57,6 +57,7 @@
 
 class ColorMap;
 class ProductMgr;
+class WindManager;
 
 using namespace std;
 
@@ -611,6 +612,13 @@ public:
 
   void renderLineContours(MdvReader *mr);
 
+  // Mask plan-view cells where the physical terrain surface reaches or
+  // exceeds the selected height of the primary field.
+  void renderTerrainMask(MdvReader *terrain,
+                         double selectedHeight,
+                         double heightScaler,
+                         const char *coreColor);
+
   // Establish an empty grid layer for a line-only field. Main fields replace
   // stale data; overlays preserve the field already rendered beneath them.
 
@@ -642,6 +650,9 @@ public:
                       time_t frameEnd,
                       time_t dataTime,
                       double kmAcrossScreen);
+
+  // Render all ready model-wind layers into an independent transparent cache.
+  void renderWinds(const WindManager &windManager);
   
   // get images after rendering
   
@@ -649,6 +660,7 @@ public:
   const QImage *getMapsImage();
   const QImage *getRingsImage();
   const QImage *getProductsImage();
+  const QImage *getWindsImage();
 
   // print
   
@@ -684,6 +696,7 @@ private:
   QImage *_mapsImage;
   QImage *_ringsImage;
   QImage *_productsImage;
+  QImage *_windsImage;
 
   // offset of the window in pixels
   // from the top-left of the main canvas
@@ -807,6 +820,7 @@ private:
   // create images for rendering
   
   void _createImage(QImage* &image);
+  void _prepareGridImageForField(bool isOverlayField);
   
   void _drawRangeRingsHoriz(QPainter &painter,
                             double originLat,

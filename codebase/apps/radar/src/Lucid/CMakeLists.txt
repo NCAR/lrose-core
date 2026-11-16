@@ -15,6 +15,9 @@ project (Lucid)
 
 set (SRCS
       Params.cc
+      AutomaticImageGenerator.cc
+      ImageGenerationManager.cc
+      MovieManager.cc
       Args.cc
       Cdraw_P.cc
       Cgui_P.cc
@@ -38,6 +41,8 @@ set (SRCS
       VlevelManager.cc
       VsectionRoute.cc
       WayPts.cc
+      WindGlyphRenderer.cc
+      WindManager.cc
       WorldPlot.cc
       XyBox.cc
       Lucid.cc

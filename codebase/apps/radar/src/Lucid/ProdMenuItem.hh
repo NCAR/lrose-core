@@ -91,7 +91,6 @@ class DLL_EXPORT ProdMenuItem : public QObject {
 
  protected:
 
-  QObject *_parent;
   Params &_params;
   GlobalData &_gd;
   Params::symprod_prod_info_t *_prodParams;

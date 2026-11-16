@@ -34,7 +34,9 @@
 
 #include "SymprodRenderObj.hh"
 #include "WorldPlot.hh"
+#include "WindGlyphRenderer.hh"
 #include "Product.hh"
+#include <algorithm>
 #include <Spdb/Symprod.hh>
 #include <Spdb/Product_defines.hh>
 #include <dataport/bigend.h>
@@ -157,6 +159,28 @@ void drawPath(QPainter &painter, const QPainterPath &path,
   painter.setBrush(brush);
   painter.drawPath(path);
   painter.restore();
+}
+
+double nearestIconOriginDistance(const Symprod::wpt_t *origins,
+                                 int numOrigins,
+                                 double lat, double lon)
+{
+  double nearest = 999999.99;
+  if (!origins || numOrigins < 1) {
+    return nearest;
+  }
+
+  // A Symprod object may render the same icon at several locations. Picking
+  // represents the complete object, so any rendered instance must be able to
+  // select its shared container.
+  for (int ii = 0; ii < numOrigins; ++ii) {
+    double distance = nearest;
+    double theta = 0.0;
+    PJGLatLon2RTheta(origins[ii].lat, origins[ii].lon,
+                     lat, lon, &distance, &theta);
+    nearest = std::min(nearest, distance);
+  }
+  return nearest;
 }
 
 } // namespace
@@ -647,15 +671,8 @@ void SymprodRenderNamedIcon::drawQt(
 
 double SymprodRenderNamedIcon::dist(double lat, double lon)
 {
-  double d = 999999.99; // A huge distance by default.
-  double theta = 0.0;
-
-  if (_props.num_icons > 0 && _iconOrigins) {
-    PJGLatLon2RTheta(_iconOrigins[0].lat, _iconOrigins[0].lon,
-                     lat, lon, &d, &theta);
-  }
-
-  return d;
+  return nearestIconOriginDistance(_iconOrigins, _props.num_icons,
+                                   lat, lon);
 }
 
 void SymprodRenderNamedIcon::fill_export_fields( vector<world_pt_t> &wpt, string &label)
@@ -742,15 +759,8 @@ void SymprodRenderBitmapIcon::drawQt(
 
 double SymprodRenderBitmapIcon::dist(double lat, double lon)
 {
-  double d = 999999.99; // A huge distance by default.
-  double theta = 0.0;
-
-  if (_props.num_icons > 0 && _iconOrigins) {
-    PJGLatLon2RTheta(_iconOrigins[0].lat, _iconOrigins[0].lon,
-                     lat, lon, &d, &theta);
-  }
-
-  return d;
+  return nearestIconOriginDistance(_iconOrigins, _props.num_icons,
+                                   lat, lon);
 }
 
 void SymprodRenderBitmapIcon::fill_export_fields( vector<world_pt_t> &wpt, string &label)
@@ -1103,37 +1113,12 @@ void SymprodRenderChunk::_drawStationQt(
       _params.wind_barb_shaft_len * qMax(0.25, scale));
     const double direction = station.winddir * M_PI / 180.0;
     const QPointF unit(sin(direction), -cos(direction));
-    const QPointF side(-unit.y(), unit.x());
-    const QPointF tip = origin + shaftLength * unit;
-    painter.setPen(QPen(foreground, 1));
-    painter.drawLine(origin, tip);
-
-    // Wind speed is encoded with the conventional 50/10/5 knot flags.
-    // Draw from the outer end inward so the station-model layout remains
-    // stable as flags are added or removed.
-    int knots = qMax(0, static_cast<int>(floor(station.windspd *
-                                               NMH_PER_MS / 5.0 + 0.5)) * 5);
-    QPointF flagAt = tip;
-    const double spacing = qMax(2.0, 3.0 * qMax(0.5, scale));
-    const double flagLength = qMax(4.0, shaftLength * 0.35);
-    while (knots >= 50) {
-      QPolygonF pennant;
-      pennant << flagAt << flagAt - spacing * unit
-              << flagAt - spacing * unit + flagLength * side;
-      painter.setBrush(foreground);
-      painter.drawPolygon(pennant);
-      painter.setBrush(Qt::NoBrush);
-      flagAt -= spacing * unit;
-      knots -= 50;
-    }
-    while (knots >= 10) {
-      painter.drawLine(flagAt, flagAt + flagLength * side);
-      flagAt -= spacing * unit;
-      knots -= 10;
-    }
-    if (knots >= 5) {
-      painter.drawLine(flagAt, flagAt + 0.5 * flagLength * side);
-    }
+    // Station and gridded winds share one glyph implementation so their
+    // speed flags and hemisphere convention remain visually consistent.
+    WindGlyphRenderer::drawBarb(painter, origin, unit,
+                                station.windspd * NMH_PER_MS,
+                                shaftLength, 1.0, foreground,
+                                station.lat < 0.0);
   }
   painter.restore();
 }

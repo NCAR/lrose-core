@@ -89,7 +89,7 @@ void DsFmqMsg::assembleRequestInit(const string &url,
   STRncopy(_initInfo.procName, procName.c_str(), PROC_NAME_LEN);
   _initInfo.debug = (si32) debug;
   _initInfo.openMode = (si32) openMode;
-  _initInfo.openPosition = (si32) openMode;
+  _initInfo.openPosition = (si32) openPosition;
   _initInfo.compress = (si32) compress;
   _initInfo.numSlots = (si32) numSlots;
   _initInfo.bufSize = (si32) bufSize;

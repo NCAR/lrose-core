@@ -156,15 +156,32 @@ int Args::parse (const int argc, const char **argv)
       
     } else if (!strcmp(argv[i], "-realtime")) {
       
-      snprintf(tmp_str, BUFSIZ,  "begin_in_archive_mode = FALSE;");
+      snprintf(tmp_str, BUFSIZ,  "start_mode = MODE_REALTIME;");
       TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-start_time")) {
       
       if (i < argc - 1) {
-        snprintf(tmp_str, BUFSIZ,  "archive_start_time = \"%s\";", argv[++i]);
+        const char *startArg = argv[++i];
+        char normalizedStart[64];
+        if (strncmp(startArg, "minus", strlen("minus")) == 0) {
+          long lookbackSecs = 0;
+          if (sscanf(startArg, "minus%ld", &lookbackSecs) != 1) {
+            iret = -1;
+            continue;
+          }
+          UTIMstruct startDate;
+          const time_t startSecs = time(nullptr) - lookbackSecs;
+          UTIMunix_to_date(startSecs, &startDate);
+          snprintf(normalizedStart, sizeof(normalizedStart),
+                   "%04ld %02ld %02ld %02ld %02ld %02ld",
+                   startDate.year, startDate.month, startDate.day,
+                   startDate.hour, startDate.min, startDate.sec);
+          startArg = normalizedStart;
+        }
+        snprintf(tmp_str, BUFSIZ,  "archive_start_time = \"%s\";", startArg);
         TDRP_add_override(&override, tmp_str);
-        snprintf(tmp_str, BUFSIZ,  "begin_in_archive_mode = TRUE;");
+        snprintf(tmp_str, BUFSIZ,  "start_mode = MODE_ARCHIVE;");
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -192,6 +209,11 @@ int Args::parse (const int argc, const char **argv)
       
       if (i < argc - 1) {
         snprintf(tmp_str, BUFSIZ,  "images_schedule_interval_secs = %s;", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+        // The command-line interval predates the separate archive and
+        // realtime parameters. Apply it to both so it retains its generic
+        // meaning regardless of the selected automatic-image mode.
+        snprintf(tmp_str, BUFSIZ,  "images_archive_interval_secs = %s;", argv[i]);
         TDRP_add_override(&override, tmp_str);
       } else {
 	iret = -1;
@@ -364,7 +386,6 @@ int Args::_processLegacyArgs(int argc, const char **argv)
 
   int n_fields;
   const char *app_ptr;
-  const char *token;
   UTIMstruct temp_utime;
 
   TDRP_str_replace(&_params.http_proxy_url, "");
@@ -434,17 +455,13 @@ int Args::_processLegacyArgs(int argc, const char **argv)
       
       if (ii < argc - 1) {
         const char *optarg = argv[++ii];
-        _gd.num_render_heights = 0;
-        _gd.cur_render_height = 0;
-        token = strtok((char *) optarg,","); // Prime strtok
-        _gd.h_win.cur_ht = atof(token);
-        while(token != NULL && _gd.num_render_heights < Constants::MAX_SECTS) {
-          _gd.height_array[_gd.num_render_heights] = atof(token);
-          _gd.num_render_heights++;
-          token = strtok(NULL,","); // get next rtoken strtok
+        // The Qt display has one authoritative requested level in
+        // VlevelManager. Preserve the legacy option for its first value, but
+        // do not retain CIDD's disabled HTML-mode height sequence.
+        _params.start_ht_km = atof(optarg);
+        if(!_gd.quiet_mode) {
+          printf("Lucid start height: %g\n", _params.start_ht_km);
         }
-        if(!_gd.quiet_mode) printf("CIDD Found %d heights starting at: %g\n",
-                                  _gd.num_render_heights,_gd.h_win.cur_ht);
       } else {
 	iret = -1;
       }
@@ -471,9 +488,6 @@ int Args::_processLegacyArgs(int argc, const char **argv)
             fprintf(stderr,"Use: -t minus3600 to look back one hour\n");
           } else {
             time_t minusTime = time(NULL) - throwBack;
-            _gd.movie.mode = ARCHIVE_MODE;
-            _gd.movie.start_time = minusTime;
-            _gd.movie.demo_time = minusTime;
             if(!_gd.quiet_mode)
               printf("11 CIDD Starting in ARCHIVE mode with Data time: %s\n",
                      DateTime::strm(minusTime).c_str());
@@ -496,9 +510,6 @@ int Args::_processLegacyArgs(int argc, const char **argv)
             
             if(n_fields == 6) {
               temp_utime.unix_time = UTIMdate_to_unix(&temp_utime);
-              _gd.movie.mode = ARCHIVE_MODE;
-              _gd.movie.start_time = temp_utime.unix_time;
-              _gd.movie.demo_time = temp_utime.unix_time;
               if(!_gd.quiet_mode)
                 printf("22 CIDD Starting in ARCHIVE mode with Data time: %s\n",
                        DateTime::strm(temp_utime.unix_time).c_str());
@@ -521,9 +532,6 @@ int Args::_processLegacyArgs(int argc, const char **argv)
             if(n_fields == 5) {
               temp_utime.sec = 0;
               temp_utime.unix_time = UTIMdate_to_unix(&temp_utime);
-              _gd.movie.mode = ARCHIVE_MODE;
-              _gd.movie.start_time = temp_utime.unix_time;
-              _gd.movie.demo_time = temp_utime.unix_time;
               if(!_gd.quiet_mode) 
                 printf("33 CIDD Starting in ARCHIVE mode with Data time: %s\n",
                        DateTime::strm(temp_utime.unix_time).c_str());

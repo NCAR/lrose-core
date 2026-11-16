@@ -36,6 +36,7 @@
 #include <QPainterPath>
 #include <QPen>
 #include <QResizeEvent>
+#include <QScopedValueRollback>
 #include <QStylePainter>
 #include <QToolTip>
 #include <QMenu>
@@ -57,6 +58,8 @@
 #include "VertManager.hh"
 #include "GlobalData.hh"
 #include "MdvReader.hh"
+#include "WindGlyphRenderer.hh"
+#include "WindManager.hh"
 
 using namespace std;
 
@@ -108,7 +111,10 @@ VertView::VertView(QWidget* parent,
   _pointClicked = false;
   _leftDragActive = false;
   _sectionPixmapDirty = true;
+  _windsPixmapDirty = true;
+  _terrainPixmapDirty = true;
   _playbackFrameIndex = -1;
+  _suppressInteractionGraphics = false;
   _showValue = false;
   _mouseValueVisible = false;
   _mouseValueX = 0;
@@ -176,12 +182,24 @@ void VertView::configureWorldCoords(int zoomLevel)
   if (_sectionReader != nullptr && _sectionReader->isValidV()) {
     xMax = _sectionReader->getVertTotalLengthKm();
     if (xMax <= 0.0) {
-      xMax = (_sectionReader->v_fhdr.nx - 1) *
-             _sectionReader->v_fhdr.grid_dx;
+      if (_isPolarRhi()) {
+        vector<QPointF> corners;
+        if (_buildPolarRhiCorners(corners)) {
+          xMax = 0.0;
+          for (const QPointF &corner : corners) {
+            xMax = std::max(xMax, corner.x());
+          }
+        }
+      } else {
+        xMax = (_sectionReader->v_fhdr.nx - 1) *
+               _sectionReader->v_fhdr.grid_dx;
+      }
     }
     // Height limits are in km MSL. Preserve native limits for sections whose
-    // vertical coordinate uses other units, such as pressure or elevation.
-    if (_sectionReader->v_fhdr.vlevel_type != Mdvx::VERT_TYPE_Z) {
+    // vertical coordinate uses other units, such as pressure. A native RHI is
+    // stored by elevation angle but transformed to height before display.
+    if (_sectionReader->v_fhdr.vlevel_type != Mdvx::VERT_TYPE_Z &&
+        !_isPolarRhi()) {
       const vector<double> edges = _computeVerticalEdges();
       if (edges.size() >= 2) {
         const auto limits = std::minmax_element(edges.begin(), edges.end());
@@ -451,7 +469,7 @@ void VertView::_drawOverlays(QPainter &painter)
     
   // click point cross hairs
   
-  if (_pointClicked) {
+  if (!_suppressInteractionGraphics && _pointClicked) {
 
     int startX = _mouseReleaseX - _params.click_cross_size / 2;
     int endX = _mouseReleaseX + _params.click_cross_size / 2;
@@ -475,20 +493,53 @@ void VertView::_drawOverlays(QPainter &painter)
 
 void VertView::_drawLegends(QPainter &painter)
 {
-
-  // add legends with time, field name and elevation angle
-  
   vector<string> legends;
   char text[1024];
-    
-  // route distance
-  
-  snprintf(text, 1024, "Vsection length (km): %g", _routeLengthKm);
-  legends.push_back(text);
-    
+
+  if (_sectionReader != nullptr && _sectionReader->isValidV() &&
+      _sectionReader->getVertWayPts().getNPoints() >= 2) {
+    const WayPts &wayPoints = _sectionReader->getVertWayPts();
+    const vector<Mdvx::vsect_segment_t> &segments =
+      _sectionReader->getVertSegments();
+    for (size_t ii = 0; ii + 1 < wayPoints.getNPoints(); ++ii) {
+      double startLat = 0.0;
+      double startLon = 0.0;
+      double endLat = 0.0;
+      double endLon = 0.0;
+      wayPoints.getPoint(ii, startLat, startLon);
+      wayPoints.getPoint(ii + 1, endLat, endLon);
+
+      double lengthKm = 0.0;
+      if (ii < segments.size() && std::isfinite(segments[ii].length) &&
+          segments[ii].length > 0.0) {
+        lengthKm = segments[ii].length;
+      } else {
+        double azimuthDeg = 0.0;
+        PJGLatLon2RTheta(startLat, startLon, endLat, endLon,
+                        &lengthKm, &azimuthDeg);
+      }
+      if (!std::isfinite(lengthKm) || lengthKm < 0.0) {
+        lengthKm = 0.0;
+      }
+
+      if (ii == 0) {
+        snprintf(text, sizeof(text),
+                 "Start lat/lon: %.5f, %.5f  End lat/lon: %.5f, %.5f  Length: %.1f km",
+                 startLat, startLon, endLat, endLon, lengthKm);
+      } else {
+        snprintf(text, sizeof(text),
+                 "End lat/lon: %.5f, %.5f  Length: %.1f km",
+                 endLat, endLon, lengthKm);
+      }
+      legends.push_back(text);
+    }
+  } else {
+    snprintf(text, sizeof(text), "Vsection length (km): %g", _routeLengthKm);
+    legends.push_back(text);
+  }
+
   painter.save();
   painter.setPen(QColor(_params.text_color));
-  
   switch (_params.vsection_main_legend_pos) {
     case Params::LEGEND_TOP_LEFT:
       _zoomWorld.drawLegendsTopLeft(painter, legends);
@@ -517,6 +568,8 @@ void VertView::_refreshImages()
 {
 
   _sectionPixmapDirty = true;
+  _windsPixmapDirty = true;
+  _terrainPixmapDirty = true;
 
   update();
   
@@ -551,6 +604,18 @@ void VertView::clear()
 void VertView::refresh()
 {
   _refreshImages();
+}
+
+void VertView::rerenderWinds()
+{
+  _windsPixmapDirty = true;
+  update();
+}
+
+void VertView::rerenderTerrain()
+{
+  _terrainPixmapDirty = true;
+  update();
 }
 
 /*************************************************************************
@@ -598,6 +663,29 @@ void VertView::paintEvent(QPaintEvent *event)
   }
   painter.drawPixmap(0, 0, _sectionPixmap);
 
+  // Winds are cached separately because their paired asynchronous requests
+  // often complete after the field section. Replacing this light overlay
+  // must not force filled-contour geometry to be regenerated.
+  if (_windsPixmapDirty || _windsPixmap.size() != size()) {
+    _windsPixmap = QPixmap(size());
+    _windsPixmap.fill(Qt::transparent);
+    QPainter windsPainter(&_windsPixmap);
+    _drawWinds(windsPainter);
+    _windsPixmapDirty = false;
+  }
+  painter.drawPixmap(0, 0, _windsPixmap);
+
+  // Ground is an opaque mask, not a basemap. Draw it after field and wind
+  // data so nothing below the sampled surface remains visible.
+  if (_terrainPixmapDirty || _terrainPixmap.size() != size()) {
+    _terrainPixmap = QPixmap(size());
+    _terrainPixmap.fill(Qt::transparent);
+    QPainter terrainPainter(&_terrainPixmap);
+    _drawTerrain(terrainPainter);
+    _terrainPixmapDirty = false;
+  }
+  painter.drawPixmap(0, 0, _terrainPixmap);
+
   // add overlays
   
   _drawOverlays(painter);
@@ -614,12 +702,19 @@ void VertView::paintEvent(QPaintEvent *event)
     // competing with it.
     _zoomWorld.drawColorScale(_sectionReader->colorMap, painter,
                               _params.horiz_axis_label_font_size);
-    _zoomWorld.drawTitleTopCenter(painter, _sectionReader->fieldLabelVert());
+    string title = _sectionReader->fieldLabelVert();
+    if (_isPolarRhi()) {
+      char rhiAzimuth[128];
+      snprintf(rhiAzimuth, sizeof(rhiAzimuth), "  RHI: %g deg",
+               _sectionReader->v_fhdr.grid_minz);
+      title += rhiAzimuth;
+    }
+    _zoomWorld.drawTitleTopCenter(painter, title);
   }
 
   // show mouse value if needed
 
-  if (_showValue && _mouseValueVisible) {
+  if (!_suppressInteractionGraphics && _showValue && _mouseValueVisible) {
     _drawMouseValue(painter);
   }
   
@@ -635,7 +730,8 @@ void VertView::setSection(const MdvReader *reader)
   _mouseValueText.clear();
   _verticalUnits.clear();
   if (_sectionReader != nullptr) {
-    _verticalUnits = Mdvx::vertTypeZUnits(_sectionReader->v_fhdr.vlevel_type);
+    _verticalUnits = _isPolarRhi() ? "km" :
+      Mdvx::vertTypeZUnits(_sectionReader->v_fhdr.vlevel_type);
   }
   _rebuildSelectedHorizHeightCurve();
   _savedZooms.clear();
@@ -676,14 +772,39 @@ bool VertView::captureMovieFrame(int frameIndex)
   }
 
   _playbackFrameIndex = -1;
-  QImage frame(size(), QImage::Format_ARGB32_Premultiplied);
-  frame.fill(_backgroundBrush.color());
   // QWidget::render() invokes paintEvent synchronously, so the expensive
   // section pixmap and all legends represent this exact MDV completion even
   // when the vertical window is obscured.
-  render(&frame);
-  _movieFrames[frameIndex] = std::move(frame);
+  _movieFrames[frameIndex] = captureImageWithoutInteractions();
   return !_movieFrames[frameIndex].isNull();
+}
+
+/////////////////////////////////////////////////////////////
+// capture configured section layers without live interaction graphics
+
+QImage VertView::captureImageWithoutInteractions()
+{
+  if (width() <= 0 || height() <= 0) {
+    return QImage();
+  }
+
+  const bool restoreRubberBand = _rubberBand && _rubberBand->isVisible();
+  if (restoreRubberBand) {
+    _rubberBand->hide();
+  }
+
+  QImage image(size(), QImage::Format_ARGB32_Premultiplied);
+  image.fill(_backgroundBrush.color());
+  {
+    QScopedValueRollback<bool> suppress(
+      _suppressInteractionGraphics, true);
+    render(&image);
+  }
+
+  if (restoreRubberBand) {
+    _rubberBand->show();
+  }
+  return image;
 }
 
 bool VertView::showMovieFrame(int frameIndex)
@@ -907,6 +1028,10 @@ bool VertView::_sampleGridValue(int mouseX, int mouseY,
     return false;
   }
 
+  if (_isPolarRhi()) {
+    return _samplePolarRhiValue(mouseX, mouseY, sample);
+  }
+
   const int nx = _sectionReader->v_fhdr.nx;
   const int nz = _sectionReader->v_fhdr.nz;
   const double dx = _sectionReader->v_fhdr.grid_dx;
@@ -993,6 +1118,87 @@ bool VertView::_sampleGridValue(int mouseX, int mouseY,
 }
 
 /////////////////////////////////////////////////////////////
+// sample a native RHI by inverting distance/height to range/elevation
+
+bool VertView::_samplePolarRhiValue(int mouseX, int mouseY,
+                                    SectionSample &sample) const
+{
+  const Mdvx::field_header_t &fhdr = _sectionReader->v_fhdr;
+  if (fhdr.nx <= 0 || fhdr.ny <= 0 || fhdr.nz != 1 ||
+      fhdr.grid_dx == 0.0 || fhdr.grid_dy == 0.0 ||
+      _sectionReader->v_fl32_data.size() !=
+        static_cast<size_t>(fhdr.nx) * fhdr.ny) {
+    return false;
+  }
+
+  double radarLat, radarLon, radarAltitudeKm;
+  if (!_getRadarLocation(radarLat, radarLon, radarAltitudeKm)) {
+    return false;
+  }
+  (void) radarLat;
+  (void) radarLon;
+
+  sample.distanceKm = _zoomWorld.getXWorld(mouseX);
+  sample.verticalCoord = _zoomWorld.getYWorld(mouseY);
+  if (!std::isfinite(sample.distanceKm) || sample.distanceKm < 0.0 ||
+      !std::isfinite(sample.verticalCoord)) {
+    return false;
+  }
+
+  // The display is in ground distance and MSL height, while the returned
+  // array is indexed by slant range and elevation. Use the same beam model as
+  // rendering so a visible gate and its reported value cannot diverge.
+
+  BeamHeight beamHeight;
+  beamHeight.setInstrumentHtKm(radarAltitudeKm);
+  const double elevationDeg = beamHeight.computeElevationDeg(
+    sample.verticalCoord, sample.distanceKm);
+  const double slantRangeKm = beamHeight.getSlantRangeKm();
+  if (!std::isfinite(elevationDeg) || !std::isfinite(slantRangeKm)) {
+    return false;
+  }
+
+  const double firstRangeEdge = fhdr.grid_minx - 0.5 * fhdr.grid_dx;
+  const double lastRangeEdge =
+    fhdr.grid_minx + (fhdr.nx - 0.5) * fhdr.grid_dx;
+  const double firstElevEdge = fhdr.grid_miny - 0.5 * fhdr.grid_dy;
+  const double lastElevEdge =
+    fhdr.grid_miny + (fhdr.ny - 0.5) * fhdr.grid_dy;
+  if (slantRangeKm < std::min(firstRangeEdge, lastRangeEdge) ||
+      slantRangeKm > std::max(firstRangeEdge, lastRangeEdge) ||
+      elevationDeg < std::min(firstElevEdge, lastElevEdge) ||
+      elevationDeg > std::max(firstElevEdge, lastElevEdge)) {
+    return false;
+  }
+
+  int ix = (int) std::llround(
+    (slantRangeKm - fhdr.grid_minx) / fhdr.grid_dx);
+  int iy = (int) std::llround(
+    (elevationDeg - fhdr.grid_miny) / fhdr.grid_dy);
+  ix = std::max(0, std::min(ix, static_cast<int>(fhdr.nx) - 1));
+  iy = std::max(0, std::min(iy, static_cast<int>(fhdr.ny) - 1));
+
+  const fl32 missing = fhdr.missing_data_value;
+  const fl32 bad = fhdr.bad_data_value;
+  double value =
+    _sectionReader->v_fl32_data[static_cast<size_t>(iy) * fhdr.nx + ix];
+  if (!std::isfinite(value) || value == missing || value == bad) {
+    return false;
+  }
+  if (fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
+    value = exp(value);
+  }
+  if (!std::isfinite(value)) {
+    return false;
+  }
+  if (fabs(value) < 0.0001) {
+    value = 0.0;
+  }
+  sample.value = value;
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
 // add geographic metadata needed only by a click report
 
 bool VertView::_sampleSection(int mouseX, int mouseY,
@@ -1065,7 +1271,8 @@ ClickReport VertView::_createClickReport(const SectionSample &sample) const
   report.longitude = sample.longitude;
   report.height = sample.verticalCoord;
   report.heightLabel =
-    (_sectionReader->v_fhdr.vlevel_type == Mdvx::VERT_TYPE_Z) ?
+    (_sectionReader->v_fhdr.vlevel_type == Mdvx::VERT_TYPE_Z ||
+     _isPolarRhi()) ?
     "Height" : "Vertical";
   report.heightUnits = _verticalUnits;
   report.x = sample.distanceKm;
@@ -1198,6 +1405,68 @@ vector<double> VertView::_computeVerticalEdges() const
 }
 
 /////////////////////////////////////////////////////////////
+// identify a measured RHI returned in its native polar geometry
+
+bool VertView::_isPolarRhi() const
+{
+  return _sectionReader != nullptr &&
+    _sectionReader->v_fhdr.proj_type == Mdvx::PROJ_RHI_RADAR &&
+    _sectionReader->v_fhdr.vlevel_type == Mdvx::VERT_TYPE_AZ;
+}
+
+/////////////////////////////////////////////////////////////
+// transform all native RHI gate corners to distance and height in km
+
+bool VertView::_buildPolarRhiCorners(vector<QPointF> &corners) const
+{
+  corners.clear();
+  if (!_isPolarRhi()) {
+    return false;
+  }
+
+  const Mdvx::field_header_t &fhdr = _sectionReader->v_fhdr;
+  if (fhdr.nx <= 0 || fhdr.ny <= 0 || fhdr.nz != 1 ||
+      !std::isfinite(fhdr.grid_minx) || !std::isfinite(fhdr.grid_dx) ||
+      !std::isfinite(fhdr.grid_miny) || !std::isfinite(fhdr.grid_dy) ||
+      fhdr.grid_dx == 0.0 || fhdr.grid_dy == 0.0) {
+    return false;
+  }
+
+  double radarLat, radarLon, radarAltitudeKm;
+  if (!_getRadarLocation(radarLat, radarLon, radarAltitudeKm)) {
+    return false;
+  }
+  (void) radarLat;
+  (void) radarLon;
+
+  // A polar response stores gate range along X and ray elevation along Y.
+  // Transform the shared corners once so adjacent gates meet exactly and the
+  // standard refracted-earth calculation includes the radar altitude.
+
+  BeamHeight beamHeight;
+  beamHeight.setInstrumentHtKm(radarAltitudeKm);
+  corners.resize(static_cast<size_t>(fhdr.nx + 1) * (fhdr.ny + 1));
+  for (int iy = 0; iy <= fhdr.ny; ++iy) {
+    const double elevationDeg =
+      fhdr.grid_miny + (iy - 0.5) * fhdr.grid_dy;
+    for (int ix = 0; ix <= fhdr.nx; ++ix) {
+      const double slantRangeKm = std::max(
+        0.0, fhdr.grid_minx + (ix - 0.5) * fhdr.grid_dx);
+      const double heightKm =
+        beamHeight.computeHtKm(elevationDeg, slantRangeKm);
+      const double groundRangeKm = beamHeight.getGndRangeKm();
+      if (!std::isfinite(groundRangeKm) || !std::isfinite(heightKm)) {
+        corners.clear();
+        return false;
+      }
+      corners[static_cast<size_t>(iy) * (fhdr.nx + 1) + ix] =
+        QPointF(groundRangeKm, heightKm);
+    }
+  }
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
 // render the MDV section using the selected field's rendering mode
 
 void VertView::_drawSection(QPainter &painter)
@@ -1206,24 +1475,40 @@ void VertView::_drawSection(QPainter &painter)
     return;
   }
 
-  const int nx = _sectionReader->v_fhdr.nx;
-  const int nz = _sectionReader->v_fhdr.nz;
-  if (nx <= 0 || nz <= 0 ||
-      _sectionReader->v_fl32_data.size() != (size_t) nx * (size_t) nz) {
+  const Mdvx::field_header_t &fhdr = _sectionReader->v_fhdr;
+  const bool polarRhi = _isPolarRhi();
+  if (fhdr.nx <= 0 || fhdr.nz <= 0 ||
+      (polarRhi && (fhdr.ny <= 0 || fhdr.nz != 1))) {
+    return;
+  }
+  const size_t expectedSize = polarRhi ?
+    static_cast<size_t>(fhdr.nx) * fhdr.ny :
+    static_cast<size_t>(fhdr.nx) * fhdr.nz;
+  if (_sectionReader->v_fl32_data.size() != expectedSize) {
     return;
   }
 
   // Both cell and contour renderers leave missing data unpainted. Initialize
   // only the plot area so these holes use the missing color while margins
   // and axes retain the widget background.
-  if (string(_params.missing_data_color) != "transparent") {
+  if ((!polarRhi || _sectionReader->render_method != NONE) &&
+      string(_params.missing_data_color) != "transparent") {
     painter.save();
     _zoomWorld.setClippingOn(painter);
     painter.fillRect(rect(), QColor(_params.missing_data_color));
     painter.restore();
   }
 
-  if (_sectionReader->render_method == FILLED_CONTOURS) {
+  if (polarRhi) {
+    // Contours in range/elevation space do not map directly onto the curved
+    // distance/height display. Match CIDD by using native gate polygons for
+    // both filled rendering choices and leaving NONE completely unfilled.
+    if (_sectionReader->render_method == POLYGONS ||
+        _sectionReader->render_method == FILLED_CONTOURS) {
+      _drawPolarRhiCells(painter);
+    }
+    return;
+  } else if (_sectionReader->render_method == FILLED_CONTOURS) {
     // A contour failure falls back to cells so valid data is not lost. NONE
     // deliberately bypasses both fill paths while retaining optional lines.
     if (!_drawSectionContours(painter)) {
@@ -1235,6 +1520,53 @@ void VertView::_drawSection(QPainter &painter)
   if (_sectionReader->overlay_line_contours) {
     _drawSectionContourLines(painter);
   }
+}
+
+/////////////////////////////////////////////////////////////
+// render a measured RHI as curved range/elevation gate polygons
+
+void VertView::_drawPolarRhiCells(QPainter &painter)
+{
+  vector<QPointF> corners;
+  if (!_buildPolarRhiCorners(corners)) {
+    return;
+  }
+
+  const Mdvx::field_header_t &fhdr = _sectionReader->v_fhdr;
+  const fl32 missing = fhdr.missing_data_value;
+  const fl32 bad = fhdr.bad_data_value;
+  const int cornerStride = fhdr.nx + 1;
+
+  painter.save();
+  _zoomWorld.setClippingOn(painter);
+  painter.setPen(Qt::NoPen);
+  for (int iy = 0; iy < fhdr.ny; ++iy) {
+    for (int ix = 0; ix < fhdr.nx; ++ix) {
+      const fl32 value =
+        _sectionReader->v_fl32_data[static_cast<size_t>(iy) * fhdr.nx + ix];
+      if (value == missing || value == bad || !std::isfinite(value) ||
+          !_sectionReader->colorMap.withinValidRange(value)) {
+        continue;
+      }
+
+      QPolygonF gate;
+      gate << _zoomWorld.getPixelPointF(
+                corners[static_cast<size_t>(iy) * cornerStride + ix].x(),
+                corners[static_cast<size_t>(iy) * cornerStride + ix].y())
+           << _zoomWorld.getPixelPointF(
+                corners[static_cast<size_t>(iy + 1) * cornerStride + ix].x(),
+                corners[static_cast<size_t>(iy + 1) * cornerStride + ix].y())
+           << _zoomWorld.getPixelPointF(
+                corners[static_cast<size_t>(iy + 1) * cornerStride + ix + 1].x(),
+                corners[static_cast<size_t>(iy + 1) * cornerStride + ix + 1].y())
+           << _zoomWorld.getPixelPointF(
+                corners[static_cast<size_t>(iy) * cornerStride + ix + 1].x(),
+                corners[static_cast<size_t>(iy) * cornerStride + ix + 1].y());
+      painter.setBrush(*_sectionReader->colorMap.dataBrush(value));
+      painter.drawPolygon(gate);
+    }
+  }
+  painter.restore();
 }
 
 /////////////////////////////////////////////////////////////
@@ -1471,30 +1803,324 @@ void VertView::_drawSectionContourLines(QPainter &painter)
   painter.restore();
 }
 
-/*************************************************************************
- * RENDER_V_MOVIE_FRAME:
- */
+/////////////////////////////////////////////////////////////
+// render earth-relative horizontal winds over the vertical section
 
-int VertView::renderVMovieFrame(int index, QPainter &painter)
+void VertView::_drawWinds(QPainter &painter)
 {
-  int stat = 0;
-#ifdef NOTYET
-  int c_field = _gd.v_win.page;
-  
-  if(_gd.debug2) fprintf(stderr, "Rendering Vertical movie_frame %d - field %d\n", index, c_field);
-
-  
-  switch(_gd.movie.mode) {
-    case REALTIME_MODE:
-    case ARCHIVE_MODE:
-      stat = render_vert_display(xid, c_field,
-                                 _gd.movie.frame[index].time_start,
-                                 _gd.movie.frame[index].time_end);
-      break;
-         
+  if (_sectionReader == nullptr || !_sectionReader->isValidV() ||
+      _gd.wind_mgr == nullptr || !_gd.wind_mgr->isEnabled()) {
+    return;
   }
-#endif
-  return stat;
+
+  painter.save();
+  painter.setRenderHint(QPainter::Antialiasing, true);
+  painter.setRenderHint(QPainter::TextAntialiasing, true);
+  _zoomWorld.setClippingOn(painter);
+
+  const double xMin = min(_zoomWorld.getXMinWorld(),
+                          _zoomWorld.getXMaxWorld());
+  const double xMax = max(_zoomWorld.getXMinWorld(),
+                          _zoomWorld.getXMaxWorld());
+  const double yMin = min(_zoomWorld.getYMinWorld(),
+                          _zoomWorld.getYMaxWorld());
+  const double yMax = max(_zoomWorld.getYMinWorld(),
+                          _zoomWorld.getYMaxWorld());
+  const double pixelsPerKm = fabs(_zoomWorld.getXPixel(1.0) -
+                                  _zoomWorld.getXPixel(0.0));
+  const double scaleSeconds = _params.wind_scaler *
+    _params.wind_time_scale_interval * 60.0;
+  const double plotWidth = fabs(_zoomWorld.getXMaxPixel() -
+                                _zoomWorld.getXMinPixel());
+  const double plotHeight = fabs(_zoomWorld.getYMaxPixel() -
+                                 _zoomWorld.getYMinPixel());
+
+  bool referenceDrawn = false;
+  for (int layerIndex = 0;
+       layerIndex < _gd.wind_mgr->layerCount(); ++layerIndex) {
+    if (!_gd.wind_mgr->verticalLayerReady(layerIndex)) {
+      continue;
+    }
+
+    const wind_data_t &wind = _gd.layers.wind[layerIndex];
+    const MdvReader *uReader = wind.wind_u;
+    const MdvReader *vReader = wind.wind_v;
+    if (uReader == nullptr || vReader == nullptr ||
+        uReader->v_fhdr.vlevel_type != _sectionReader->v_fhdr.vlevel_type) {
+      // A glyph can be compass-oriented independently of the plot axes, but
+      // its anchor height cannot be translated reliably between unlike MDV
+      // vertical coordinates. Suppress such a layer rather than misplacing it.
+      if (_params.debug >= Params::DEBUG_VERBOSE && uReader != nullptr &&
+          uReader->v_fhdr.vlevel_type != _sectionReader->v_fhdr.vlevel_type) {
+        cerr << "Vertical wind layer " << layerIndex
+             << " uses an incompatible vertical coordinate" << endl;
+      }
+      continue;
+    }
+
+    const int nx = uReader->v_fhdr.nx;
+    const int nz = uReader->v_fhdr.nz;
+    vector<int> visibleX;
+    vector<int> visibleZ;
+    visibleX.reserve(nx);
+    visibleZ.reserve(nz);
+    for (int ix = 0; ix < nx; ++ix) {
+      const double distanceKm = uReader->v_fhdr.grid_minx +
+        ix * uReader->v_fhdr.grid_dx;
+      if (distanceKm >= xMin && distanceKm <= xMax) {
+        visibleX.push_back(ix);
+      }
+    }
+    for (int iz = 0; iz < nz; ++iz) {
+      const double level = uReader->v_vhdr.level[iz];
+      if (level >= yMin && level <= yMax) {
+        visibleZ.push_back(iz);
+      }
+    }
+    if (visibleX.empty() || visibleZ.empty()) {
+      continue;
+    }
+
+    // Density follows the visible subsection so zooming reveals detail
+    // without making a large downloaded model domain expensive to draw.
+    const int xStride = max(1, static_cast<int>(floor(
+      visibleX.size() /
+        static_cast<double>(max(1, _params.wind_ideal_x_vectors)) + 0.5)));
+    const int zStride = max(1, static_cast<int>(floor(
+      visibleZ.size() /
+        static_cast<double>(max(1, _params.wind_ideal_y_vectors)) + 0.5)));
+
+    QColor color(wind.color_name);
+    if (!color.isValid()) {
+      color = Qt::white;
+    }
+    const double lineWidth = max(1, wind.line_width);
+    const fl32 uMissing = uReader->v_fhdr.missing_data_value;
+    const fl32 uBad = uReader->v_fhdr.bad_data_value;
+    const fl32 vMissing = vReader->v_fhdr.missing_data_value;
+    const fl32 vBad = vReader->v_fhdr.bad_data_value;
+
+    for (size_t jz = 0; jz < visibleZ.size(); jz += zStride) {
+      const int iz = visibleZ[jz];
+      const double level = uReader->v_vhdr.level[iz];
+      for (size_t jx = 0; jx < visibleX.size(); jx += xStride) {
+        const int ix = visibleX[jx];
+        const size_t dataIndex = static_cast<size_t>(iz) * nx + ix;
+        const fl32 rawU = uReader->v_fl32_data[dataIndex];
+        const fl32 rawV = vReader->v_fl32_data[dataIndex];
+        if (!isfinite(rawU) || !isfinite(rawV) || rawU == uMissing ||
+            rawU == uBad || rawV == vMissing || rawV == vBad) {
+          continue;
+        }
+
+        const double uMps = rawU * wind.data_units_scale_to_mps;
+        const double vMps = rawV * wind.data_units_scale_to_mps;
+        const double speedMps = hypot(uMps, vMps);
+        if (!isfinite(speedMps)) {
+          continue;
+        }
+        const double distanceKm = uReader->v_fhdr.grid_minx +
+          ix * uReader->v_fhdr.grid_dx;
+        const QPointF anchor =
+          _zoomWorld.getPixelPointF(distanceKm, level);
+
+        // These are compass symbols superimposed on a distance-height plot.
+        // Use the distance-axis pixel scale for both components: east is
+        // screen-right and true north is screen-up. The height transform must
+        // not rotate or rescale the horizontal wind direction.
+        const QPointF screenVelocity(
+          uMps * scaleSeconds / 1000.0 * pixelsPerKm,
+          -vMps * scaleSeconds / 1000.0 * pixelsPerKm);
+        if (wind.marker_type == ARROWS || wind.marker_type == VECTOR ||
+            wind.marker_type == TUFT || wind.marker_type == TICKVECTOR) {
+          if (speedMps < 0.1 ||
+              fabs(screenVelocity.x()) >= plotWidth / 4.0 ||
+              fabs(screenVelocity.y()) >= plotHeight / 4.0) {
+            continue;
+          }
+          const QPointF tail = wind.marker_type == ARROWS ?
+            anchor - 0.5 * screenVelocity : anchor;
+          const QPointF head = wind.marker_type == ARROWS ?
+            anchor + 0.5 * screenVelocity : anchor + screenVelocity;
+          if (wind.marker_type == TUFT) {
+            painter.setPen(QPen(color, lineWidth));
+            painter.drawEllipse(anchor, 1.5, 1.5);
+            painter.drawLine(anchor, head);
+          } else {
+            WindGlyphRenderer::drawArrow(
+              painter, tail, head, color, lineWidth,
+              _params.wind_head_size + 3.0 * (lineWidth - 1.0),
+              _params.wind_head_angle);
+            if (wind.marker_type == TICKVECTOR) {
+              const int tickCount = max(1, _params.wind_scaler - 1);
+              const double length = hypot(screenVelocity.x(),
+                                          screenVelocity.y());
+              if (length > 0.5) {
+                const QPointF unit = screenVelocity / length;
+                const QPointF side(-unit.y(), unit.x());
+                painter.setPen(QPen(color, lineWidth));
+                for (int itick = 1; itick <= tickCount; ++itick) {
+                  const QPointF at = anchor + screenVelocity *
+                    (itick / static_cast<double>(tickCount + 1));
+                  painter.drawLine(at - 2.0 * side, at + 2.0 * side);
+                }
+              }
+            }
+          }
+          continue;
+        }
+
+        QPointF toward(uMps, -vMps);
+        if (speedMps < 1.0e-6) {
+          toward = QPointF(0.0, -1.0);
+        }
+        const double directionDeg = fmod(
+          atan2(-uMps, -vMps) * 180.0 / M_PI + 360.0, 360.0);
+        bool southern = false;
+        WindGlyphRenderer::LabelStyle labelStyle =
+          WindGlyphRenderer::LabelStyle::None;
+        if (wind.marker_type == BARB_SH ||
+            wind.marker_type == LABELEDBARB_SH) {
+          southern = true;
+        } else if (wind.marker_type == METBARB) {
+          double lat = 0.0;
+          double lon = 0.0;
+          if (_routeLocation(distanceKm, lat, lon)) {
+            southern = lat < 0.0;
+          }
+        }
+        if (wind.marker_type == LABELEDBARB ||
+            wind.marker_type == LABELEDBARB_SH) {
+          labelStyle = WindGlyphRenderer::LabelStyle::DirectionAtOrigin;
+        } else if (wind.marker_type == METBARB) {
+          labelStyle = WindGlyphRenderer::LabelStyle::DirectionTensAtTip;
+        }
+        WindGlyphRenderer::drawBarb(
+          painter, anchor, -toward, speedMps * 1.9438444924406,
+          _params.wind_barb_shaft_len, lineWidth, color, southern,
+          labelStyle, directionDeg);
+      }
+    }
+
+    if (!referenceDrawn && _params.display_ref_lines &&
+        _params.wind_legends_on && pixelsPerKm > 0.0 &&
+        (wind.marker_type == ARROWS || wind.marker_type == VECTOR ||
+         wind.marker_type == TUFT || wind.marker_type == TICKVECTOR)) {
+      const double referencePixels = wind.reference_speed *
+        wind.units_scale_factor * scaleSeconds / 1000.0 * pixelsPerKm;
+      if (referencePixels > 1.0 && referencePixels < plotWidth / 2.0) {
+        const QPointF tail(min(_zoomWorld.getXMinPixel(),
+                               _zoomWorld.getXMaxPixel()) + 12.0,
+                           min(_zoomWorld.getYMinPixel(),
+                               _zoomWorld.getYMaxPixel()) + 12.0);
+        const QPointF head = tail + QPointF(referencePixels, 0.0);
+        WindGlyphRenderer::drawArrow(
+          painter, tail, head, color, lineWidth,
+          _params.wind_head_size, _params.wind_head_angle);
+        painter.setPen(color);
+        painter.drawText(head + QPointF(5.0, 4.0),
+                         QString("%1: %2 %3")
+                           .arg(QString::fromStdString(
+                             wind.wind_u->legend_name))
+                           .arg(wind.reference_speed)
+                           .arg(wind.units_label ? wind.units_label : ""));
+        referenceDrawn = true;
+      }
+    }
+  }
+  painter.restore();
+}
+
+/////////////////////////////////////////////////////////////
+// draw the sampled terrain surface and mask the earth below it
+
+void VertView::_drawTerrain(QPainter &painter)
+{
+  const MdvReader *terrain = _gd.layers.earth.terr;
+  if (_sectionReader == nullptr || !_sectionReader->isValidV() ||
+      (_sectionReader->v_fhdr.vlevel_type != Mdvx::VERT_TYPE_Z &&
+       !_isPolarRhi()) ||
+      !_gd.layers.earth.terrain_active || terrain == nullptr ||
+      !terrain->isValidV() ||
+      !isfinite(_params.terrain_height_scaler)) {
+    return;
+  }
+
+  const int nx = terrain->v_fhdr.nx;
+  if (nx < 2 || terrain->v_fl32_data.size() < static_cast<size_t>(nx)) {
+    return;
+  }
+
+  QColor skinColor(_params.terrain_earth_color1);
+  QColor coreColor(_params.terrain_earth_color2);
+  if (!skinColor.isValid()) {
+    skinColor = QColor("sienna");
+  }
+  if (!coreColor.isValid()) {
+    coreColor = QColor(139, 0, 0); // X11 red4, the legacy default
+  }
+
+  painter.save();
+  painter.setRenderHint(QPainter::Antialiasing, true);
+  _zoomWorld.setClippingOn(painter);
+
+  const double plotBottom = max(_zoomWorld.getYMinPixel(),
+                                _zoomWorld.getYMaxPixel());
+  const fl32 missing = terrain->v_fhdr.missing_data_value;
+  const fl32 bad = terrain->v_fhdr.bad_data_value;
+  vector<QPointF> surface;
+  surface.reserve(nx);
+
+  // Invalid terrain samples delimit independent ground polygons. Bridging a
+  // data gap would hide valid section data beneath an invented surface.
+  const auto drawSurface = [&]() {
+    if (surface.size() < 2) {
+      surface.clear();
+      return;
+    }
+
+    QPainterPath ground;
+    ground.moveTo(surface.front());
+    for (size_t ii = 1; ii < surface.size(); ++ii) {
+      ground.lineTo(surface[ii]);
+    }
+    ground.lineTo(surface.back().x(), plotBottom);
+    ground.lineTo(surface.front().x(), plotBottom);
+    ground.closeSubpath();
+    painter.fillPath(ground, coreColor);
+
+    QPainterPath skin;
+    skin.moveTo(surface.front());
+    for (size_t ii = 1; ii < surface.size(); ++ii) {
+      skin.lineTo(surface[ii]);
+    }
+    QPen skinPen(skinColor, 3.0);
+    skinPen.setCapStyle(Qt::RoundCap);
+    skinPen.setJoinStyle(Qt::RoundJoin);
+    painter.setPen(skinPen);
+    painter.setBrush(Qt::NoBrush);
+    painter.drawPath(skin);
+    surface.clear();
+  };
+
+  for (int ix = 0; ix < nx; ++ix) {
+    const fl32 rawHeight = terrain->v_fl32_data[ix];
+    if (!isfinite(rawHeight) || rawHeight == missing || rawHeight == bad) {
+      drawSurface();
+      continue;
+    }
+
+    const double distanceKm = terrain->v_fhdr.grid_minx +
+      ix * terrain->v_fhdr.grid_dx;
+    const double height = rawHeight * _params.terrain_height_scaler;
+    if (!isfinite(distanceKm) || !isfinite(height)) {
+      drawSurface();
+      continue;
+    }
+    surface.push_back(_zoomWorld.getPixelPointF(distanceKm, height));
+  }
+  drawSurface();
+  painter.restore();
 }
 
 /*************************************************************************

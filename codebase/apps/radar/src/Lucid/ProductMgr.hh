@@ -178,6 +178,11 @@ public:
   // so an older but still valid snapshot is never recorded for a new frame.
   bool activeProductsReady() const;
 
+  // Best-effort image generation may proceed once every active request has
+  // returned, even when one of the servers could not provide a snapshot.
+  bool activeProductRequestsSettled() const;
+  int numActiveProductsUnavailable() const;
+
   // Returns the number of products its supervising
   int get_num_products(void);
 

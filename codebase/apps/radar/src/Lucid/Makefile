@@ -52,6 +52,9 @@ LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 
 HDRS = \
 	$(PARAMS_HH) \
+	AutomaticImageGenerator.hh \
+	ImageGenerationManager.hh \
+	MovieManager.hh \
 	Args.hh \
 	GlobalData.hh \
 	GuiManager.hh \
@@ -85,6 +88,8 @@ HDRS = \
 	VlevelSelector.hh \
 	WayPts.hh \
 	WindMenuItem.hh \
+	WindGlyphRenderer.hh \
+	WindManager.hh \
 	WorldPlot.hh \
 	XyBox.hh \
 	ZoomMenuItem.hh \
@@ -106,6 +111,9 @@ HDRS = \
 
 NORM_SRCS = \
 	$(PARAMS_CC) \
+	AutomaticImageGenerator.cc \
+	ImageGenerationManager.cc \
+	MovieManager.cc \
 	Args.cc \
 	Cdraw_P.cc \
 	Cgui_P.cc \
@@ -128,6 +136,8 @@ NORM_SRCS = \
 	VlevelManager.cc \
 	VsectionRoute.cc \
 	WayPts.cc \
+	WindGlyphRenderer.cc \
+	WindManager.cc \
 	WorldPlot.cc \
 	XyBox.cc
 
