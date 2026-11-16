@@ -1,3 +1,45 @@
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// ** Copyright UCAR (c) 1990 - 2016                                         
+// ** University Corporation for Atmospheric Research (UCAR)                 
+// ** National Center for Atmospheric Research (NCAR)                        
+// ** Boulder, Colorado, USA                                                 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from UCAR.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of UCAR nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+///////////////////////////////////////////////////////////////
+//
+// SpdbSim.cc
+//
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Nov 2026
+//
+///////////////////////////////////////////////////////////////
+//
+// SpdbSim is intended to simulate Spdb-type data in a realtime
+// scenario.
+//
+// SpdbSim loops through a set of specified times in Spdb data,
+// modifies the times to wall-clock time, and writes the
+// modified chunks to an spdb output dir.
+//
+///////////////////////////////////////////////////////////////
+
 #include "SpdbSim.hh"
 #include "PayloadRetimer.hh"
 
@@ -15,6 +57,9 @@
 
 using namespace std;
 
+//////////////////////////////////////////////////////////////////////
+// constructor
+
 SpdbSim::SpdbSim(int argc, char **argv) :
         OK(TRUE),
         _progName("SpdbSim"),
@@ -25,11 +70,17 @@ SpdbSim::SpdbSim(int argc, char **argv) :
         _archiveStart(0),
         _archiveEnd(0)
 {
+
+  // parse command line args
+  
   if (_args.parse(argc, argv, _progName)) {
     cerr << "ERROR - " << _progName << ": invalid command line" << endl;
     OK = FALSE;
     return;
   }
+
+  // load parameter file
+  
   if (_params.loadFromArgs(argc, argv, _args.override.list, &_paramsPath)) {
     cerr << "ERROR - " << _progName << ": cannot load TDRP parameters"
          << endl;
@@ -37,12 +88,18 @@ SpdbSim::SpdbSim(int argc, char **argv) :
   }
 }
 
+//////////////////////////////////////////////////////////////////////
+// destructor
+
 SpdbSim::~SpdbSim()
 {
   if (_procmapRegistered) {
     PMU_auto_unregister();
   }
 }
+
+/////////////////////////////////////////////////////////////////////
+// main run method
 
 int SpdbSim::Run()
 {
@@ -56,6 +113,9 @@ int SpdbSim::Run()
   PMU_auto_register("Starting SPDB replay");
   return _runCycles();
 }
+
+////////////////////////////////////////////////////////////////////////
+// check the parameter states
 
 int SpdbSim::_validateParams() const
 {
@@ -84,6 +144,9 @@ int SpdbSim::_validateParams() const
   }
   return valid ? 0 : -1;
 }
+
+//////////////////////////////////////////////////////////////////////////
+// pre-check input data
 
 int SpdbSim::_readAndPreflight()
 {
@@ -219,6 +282,9 @@ int SpdbSim::_preflightCycle(time_t dataCycleStart) const
   return 0;
 }
 
+///////////////////////////////////////////////////////////////////////////
+// run the repeated simulation through the input data
+
 int SpdbSim::_runCycles()
 {
   // Data time follows the wall clock, while waits use a monotonic clock so a
@@ -251,6 +317,9 @@ int SpdbSim::_runCycles()
   return 0;
 }
 
+///////////////////////////////////////////////////////////////////////////
+// single run through the input data
+
 int SpdbSim::_runCycle(time_t dataCycleStart, double deadlineCycleStart)
 {
   size_t begin = 0;
@@ -277,6 +346,9 @@ int SpdbSim::_runCycle(time_t dataCycleStart, double deadlineCycleStart)
   }
   return 0;
 }
+
+//////////////////////////////////////////
+// write out modified data
 
 int SpdbSim::_publishGroup(size_t begin, size_t end,
                            time_t dataCycleStart)
@@ -359,6 +431,9 @@ int SpdbSim::_publishGroup(size_t begin, size_t end,
   return 0;
 }
 
+////////////////////////////////////////////////////////////////////////
+// wait
+
 int SpdbSim::_waitUntil(double deadline, const string &activity)
 {
   while (!_stopRequested) {
@@ -384,6 +459,9 @@ int SpdbSim::_waitUntil(double deadline, const string &activity)
   return -1;
 }
 
+/////////////////////////////////////////////////////////////////////
+// check input
+
 time_t SpdbSim::_mappedValid(const Spdb::chunk_t &chunk,
                              time_t dataCycleStart) const
 {
@@ -391,6 +469,9 @@ time_t SpdbSim::_mappedValid(const Spdb::chunk_t &chunk,
       (chunk.valid_time - _archiveStart) / _params.replay_rate;
   return dataCycleStart + (time_t) llround(scaled);
 }
+
+/////////////////////////////////////////////////////////////////////
+// set compression
 
 Spdb::compression_t SpdbSim::_outputCompression(
     const Spdb::chunk_t &chunk) const
@@ -411,6 +492,9 @@ Spdb::compression_t SpdbSim::_outputCompression(
   return Spdb::COMPRESSION_NONE;
 }
 
+/////////////////////////////////////////////////////////////////////
+// sorting
+
 bool SpdbSim::_chunkLess(const ReplayChunk &lhs, const ReplayChunk &rhs)
 {
   if (lhs.chunk.valid_time != rhs.chunk.valid_time) {
@@ -426,6 +510,9 @@ bool SpdbSim::_fitsSpdbTime(int64_t value)
 {
   return value >= 0 && value <= INT32_MAX;
 }
+
+/////////////////////////////////////////////////////////////////
+// wall time monotic
 
 double SpdbSim::_monotonicNow()
 {

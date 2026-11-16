@@ -4,6 +4,7 @@
 
 commentdef {
   p_header = "SpdbSim replays archive SPDB chunks as a realtime feed.";
+  p_text = "SpdbSim loops through a set of chunks in Spdb files, modifies the times to wall-clock time, and writes modified Spdb data to an output dir."
 }
 
 typedef enum {

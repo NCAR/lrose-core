@@ -128,8 +128,8 @@ void Args::_usage(ostream &out)
       << "  -offset seconds          output data-time offset\n"
       << "  -delay seconds           publication delay\n"
       << "  -loop | -once            loop or stop after one cycle\n"
-      << "  -debug, -d               normal debugging\n"
-      << "  -verbose, -v             verbose debugging\n"
+      << "  -debug | -d              normal debugging\n"
+      << "  -verbose | -v            verbose debugging\n"
       << "  -h | -help | -man        this message\n\n";
   Params::usage(out);
 }

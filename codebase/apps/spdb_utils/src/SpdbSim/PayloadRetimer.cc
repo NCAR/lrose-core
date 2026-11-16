@@ -1,3 +1,41 @@
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+// ** Copyright UCAR (c) 1990 - 2016                                         
+// ** University Corporation for Atmospheric Research (UCAR)                 
+// ** National Center for Atmospheric Research (NCAR)                        
+// ** Boulder, Colorado, USA                                                 
+// ** BSD licence applies - redistribution and use in source and binary      
+// ** forms, with or without modification, are permitted provided that       
+// ** the following conditions are met:                                      
+// ** 1) If the software is modified to produce derivative works,            
+// ** such modified software should be clearly marked, so as not             
+// ** to confuse it with the version available from UCAR.                    
+// ** 2) Redistributions of source code must retain the above copyright      
+// ** notice, this list of conditions and the following disclaimer.          
+// ** 3) Redistributions in binary form must reproduce the above copyright   
+// ** notice, this list of conditions and the following disclaimer in the    
+// ** documentation and/or other materials provided with the distribution.   
+// ** 4) Neither the name of UCAR nor the names of its contributors,         
+// ** if any, may be used to endorse or promote products derived from        
+// ** this software without specific prior written permission.               
+// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+///////////////////////////////////////////////////////////////
+//
+// PayloadRetimer.cc
+//
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Nov 2026
+//
+///////////////////////////////////////////////////////////////
+//
+// This class adjusts the times specific to the data
+// type in the various SPDB payloads.
+//
+////////////////////////////////////////////////////////////////
+
 #include "PayloadRetimer.hh"
 
 #include <Spdb/Product_defines.hh>
@@ -23,6 +61,9 @@ using namespace std;
 
 namespace {
 
+/////////////////////////////////////////////////////////////////
+// shift 32-bit time
+
 bool shiftTime32(si32 &value, int64_t offset,
                  const char *name, string &error)
 {
@@ -42,6 +83,9 @@ bool shiftTime32(si32 &value, int64_t offset,
   return true;
 }
 
+/////////////////////////////////////////////////////////////////
+// shift 64-bit time
+
 bool shiftTime64(si64 &value, int64_t offset,
                  const char *name, string &error)
 {
@@ -56,6 +100,9 @@ bool shiftTime64(si64 &value, int64_t offset,
   value += offset;
   return true;
 }
+
+/////////////////////////////////////////////////////////////////
+// shift time_t
 
 bool shiftTimeValue(time_t &value, int64_t offset,
                     const char *name, string &error)
@@ -73,11 +120,17 @@ bool shiftTimeValue(time_t &value, int64_t offset,
   return true;
 }
 
+/////////////////////////////////////////////////////////////////
+// copy the chunk buffer
+
 void copyBuffer(const void *data, int len, vector<unsigned char> &output)
 {
   const unsigned char *bytes = (const unsigned char *) data;
   output.assign(bytes, bytes + len);
 }
+
+/////////////////////////////////////////////////////////////////
+// retime gen point 
 
 int retimeGenPt(const void *input, int len, int64_t offset,
                 vector<unsigned char> &output, string &error)
@@ -99,6 +152,9 @@ int retimeGenPt(const void *input, int len, int64_t offset,
   copyBuffer(point.getBufPtr(), point.getBufLen(), output);
   return 0;
 }
+
+/////////////////////////////////////////////////////////////////
+// retime WxObs
 
 int retimeWxObs(const void *input, int len, int64_t offset,
                 vector<unsigned char> &output, string &error)
@@ -125,6 +181,9 @@ int retimeWxObs(const void *input, int len, int64_t offset,
   copyBuffer(obs.getBufPtr(), obs.getBufLen(), output);
   return 0;
 }
+
+/////////////////////////////////////////////////////////////////
+// retime ac data
 
 int validateAircraftPayload(int productId, int dataType2,
                             const void *input, int len,
@@ -161,6 +220,9 @@ int validateAircraftPayload(int productId, int dataType2,
   return 0;
 }
 
+/////////////////////////////////////////////////////////////////
+// retime ac georef
+
 int retimeAcGeoref(const void *input, int len, int64_t offset,
                    vector<unsigned char> &output, string &error)
 {
@@ -181,6 +243,9 @@ int retimeAcGeoref(const void *input, int len, int64_t offset,
   }
   return 0;
 }
+
+/////////////////////////////////////////////////////////////////
+// retime lightning
 
 int retimeLightning(const void *input, int len, int64_t offset,
                     vector<unsigned char> &output, string &error)
@@ -228,6 +293,9 @@ int retimeLightning(const void *input, int len, int64_t offset,
   return 0;
 }
 
+/////////////////////////////////////////////////////////////////
+// retime sigmet
+
 int retimeSigmet(const void *input, int len, int64_t offset,
                  vector<unsigned char> &output, string &error)
 {
@@ -256,6 +324,9 @@ int retimeSigmet(const void *input, int len, int64_t offset,
   SIGMET_spdb_to_BE(sigmet);
   return 0;
 }
+
+/////////////////////////////////////////////////////////////////
+// retime sigairmet
 
 int retimeSigAirMet(const void *input, int len, int64_t offset,
                     vector<unsigned char> &output, string &error)
@@ -312,6 +383,9 @@ int retimeSigAirMet(const void *input, int len, int64_t offset,
   return 0;
 }
 
+/////////////////////////////////////////////////////////////////
+// retime legacy sounding
+
 int retimeLegacySounding(const void *input, int len, int64_t offset,
                          vector<unsigned char> &output, string &error)
 {
@@ -342,6 +416,9 @@ int retimeLegacySounding(const void *input, int len, int64_t offset,
   return 0;
 }
 
+/////////////////////////////////////////////////////////////////
+// retime sounding
+
 int retimeSoundingPlus(const void *input, int len, int64_t offset,
                        vector<unsigned char> &output, string &error)
 {
@@ -360,6 +437,9 @@ int retimeSoundingPlus(const void *input, int len, int64_t offset,
   copyBuffer(sounding.getBufPtr(), sounding.getBufLen(), output);
   return 0;
 }
+
+/////////////////////////////////////////////////////////////////
+// retime gen poly
 
 int retimeGenPoly(const void *input, int len, int64_t offset,
                   vector<unsigned char> &output, string &error)
@@ -407,6 +487,9 @@ bool PayloadRetimer::supports(int productId, int)
       return false;
   }
 }
+
+/////////////////////////////////////////////////////
+// main calling point
 
 int PayloadRetimer::retime(int productId,
                            int dataType2,
