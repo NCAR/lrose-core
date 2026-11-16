@@ -49,6 +49,11 @@ SCRIPTS = \
 	snuff_usr1 \
 	sync2files \
 	utime_decode \
+	ProcmapAutoRestart.py \
+	ProcmapListCheck.py \
+	ProcmapListKill.py \
+	ProcmapListStart.py \
+	procmap_control.py \
 	auto_restart \
 	auto_restart_stats \
 	DataMapper_list_check \
