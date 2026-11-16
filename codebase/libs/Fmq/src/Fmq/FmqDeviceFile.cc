@@ -481,7 +481,7 @@ int64_t FmqDeviceFile::get_size(ident_t id)
 //  Return value:
 //    0 on success, -1 on failure.
 
-int FmqDeviceFile::update_last_id_read(int32_t lastIdRead)
+int FmqDeviceFile::update_last_id_read(int64_t offsetInStat, int32_t lastIdRead)
 
 {
   
@@ -493,8 +493,7 @@ int FmqDeviceFile::update_last_id_read(int32_t lastIdRead)
     return -1;
   }
   
-  Fmq::q_stat_t stat;
-  off_t offset = (char *) &stat.last_id_read - (char *) &stat.magic_cookie;
+  off_t offset = offsetInStat;
 
   int stat_id = fileno(stat_file);
   

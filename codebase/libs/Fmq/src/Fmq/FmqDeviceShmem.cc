@@ -39,6 +39,7 @@
 #include <toolsa/Path.hh>
 #include <toolsa/TaStr.hh>
 #include <Fmq/FmqDeviceShmem.hh>
+#include <string>
 #include <Fmq/Fmq.hh>
 #include <semaphore.h>
 #include <sys/sem.h>
@@ -279,22 +280,47 @@ int FmqDeviceShmem::_set_sizes_from_existing_queue()
     return -1;
   }
 
-  // read the status struct, to get the sizes
-  
-  Fmq::q_stat_t stat;
+  // attach the status segment, asking for the smallest valid stat
+  // struct; the attachment maps the whole segment whatever size is
+  // requested, and the magic cookie says which layout it holds
+
   void *statPtr = NULL;
-  // need to do something if the queue is 32-bit
-  if ((statPtr = _ushmGet(_statKey, sizeof(Fmq::q_stat_t))) == NULL) {
+  if ((statPtr = _ushmGet(_statKey, sizeof(Fmq::q_stat_32_t))) == NULL) {
     return -1;
   }
-  memcpy(&stat, statPtr, sizeof(Fmq::q_stat_t));
-  Fmq::be_to_stat_64(&stat);
 
-  // set the sizes
-  
-  _nbytes[STAT_IDENT] = sizeof(Fmq::q_stat_t) + stat.nslots * sizeof(Fmq::q_slot_t);
-  _nbytes[BUF_IDENT] = stat.buf_size;
-  
+  si32 magic_cookie;
+  memcpy(&magic_cookie, statPtr, sizeof(si32));
+  magic_cookie = BE_to_si32(magic_cookie);
+
+  if (magic_cookie == Fmq::Q_MAGIC_STAT_32) {
+
+    Fmq::q_stat_32_t stat;
+    memcpy(&stat, statPtr, sizeof(stat));
+    Fmq::be_to_stat_32(&stat);
+    _nbytes[STAT_IDENT] =
+      sizeof(Fmq::q_stat_32_t) + (int64_t) stat.nslots * sizeof(Fmq::q_slot_32_t);
+    _nbytes[BUF_IDENT] = stat.buf_size;
+
+  } else if (magic_cookie == Fmq::Q_MAGIC_STAT_64) {
+
+    Fmq::q_stat_64_t stat;
+    memcpy(&stat, statPtr, sizeof(stat));
+    Fmq::be_to_stat_64(&stat);
+    _nbytes[STAT_IDENT] =
+      sizeof(Fmq::q_stat_64_t) + (int64_t) stat.nslots * sizeof(Fmq::q_slot_64_t);
+    _nbytes[BUF_IDENT] = stat.buf_size;
+
+  } else {
+
+    _errStr += "ERROR - FmqDeviceShmem::_set_sizes_from_existing_queue\n";
+    _errStr += "  Stat magic cookie " + std::to_string(magic_cookie) +
+      " is not a known FMQ format\n";
+    _ushmDetach(statPtr);
+    return -1;
+
+  }
+
   // release the segment
 
   _ushmDetach(statPtr);
@@ -531,12 +557,11 @@ int64_t FmqDeviceShmem::get_size(ident_t id)
 //    0 on success, -1 on failure.
 ///
 
-int FmqDeviceShmem::update_last_id_read(int lastIdRead)
+int FmqDeviceShmem::update_last_id_read(int64_t offsetInStat, int32_t lastIdRead)
 
 {
   
-  Fmq::q_stat_t stat;
-  off_t offset = (char *) &stat.last_id_read - (char *) &stat.magic_cookie;
+  off_t offset = offsetInStat;
 
   si32 last_id_read = lastIdRead;
   BE_from_array_32(&last_id_read, sizeof(si32));

@@ -367,7 +367,7 @@ protected:
   // buffer up messages for writing
   // this allows for efficiency in write to a server
 
-  class writeData64 {
+  class writeData {
   public:
     int32_t type;
     int32_t subType;
@@ -376,19 +376,6 @@ protected:
     ta_compression_method_t compressMethod;
     MemBuf buf;
   };
-
-  class writeData32 {
-  public:
-    int32_t type;
-    int32_t subType;
-    int32_t msgLen;
-    bool compress;
-    ta_compression_method_t compressMethod;
-    MemBuf buf;
-  };
-
-  // default implementation is 64-bit
-  typedef writeData64 writeData;
 
 
   deque<writeData *> _writeQueue;

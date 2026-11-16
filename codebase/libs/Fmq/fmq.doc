@@ -16,6 +16,23 @@ April 1997
 
 =========================================================================
 
+NOTE - 64-bit layout
+--------------------
+
+This document describes the original FMQ layout: stat magic cookie
+88008801, a 56-byte stat struct and 40-byte slot structs of si32 fields,
+message entries padded to a multiple of 4 bytes. Queues in that layout
+are still read and written by the Fmq class and keep that layout for
+their lifetime.
+
+Queues created by the current library use the 64-bit layout declared in
+Fmq/Fmq.hh (q_stat_64_t, q_slot_64_t): stat magic cookie 88008803, a
+128-byte stat struct and 80-byte slot structs with all si32 fields before
+all si64 fields, message entries padded to a multiple of 8 bytes. The
+entry layout in the buffer (magic cookie, slot number, message, pad, id)
+is unchanged. The layout of an existing queue is detected from the stat
+magic cookie when it is opened.
+
 Overview
 --------
 

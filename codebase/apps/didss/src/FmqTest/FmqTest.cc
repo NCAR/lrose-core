@@ -201,7 +201,7 @@ int FmqTest::Run ()
       snprintf(text, 1999, "count: %d, time: %s\n",
                count, dtime.asString(3).c_str());
 
-      buf.add(text, strlen(text + 1));
+      buf.add(text, strlen(text));
       
     }
 

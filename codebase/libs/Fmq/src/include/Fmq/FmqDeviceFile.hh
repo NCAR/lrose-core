@@ -81,7 +81,7 @@ public:
   // read
   
   virtual int64_t do_read(ident_t id, void *mess, int64_t len);
-  virtual int update_last_id_read(int32_t lastIdRead);
+  virtual int update_last_id_read(int64_t offsetInStat, int32_t lastIdRead);
   
   // write
 

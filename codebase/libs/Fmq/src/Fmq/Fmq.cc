@@ -34,6 +34,7 @@
 #include <cassert>
 #include <cinttypes>
 #include <cstdarg>
+#include <vector>
 #include <dataport/bigend.h>
 #include <toolsa/MsgLog.hh>
 #include <toolsa/TaStr.hh>
@@ -64,8 +65,8 @@ Fmq::Fmq()
   _msecSleep = -1;
   _msecBlockingReadTimeout = -1;
 
-  _format = FmqFormat::V64;
-  
+  _format = FmqFormat::UNKNOWN;
+
   _dev = NULL;
   _msgLog = NULL;
 
@@ -325,6 +326,7 @@ Fmq::init(const char* fmqPath,
   _msgLog = msgLog;
 
   _init_status(_numSlots, _bufSize);
+  _format = FmqFormat::UNKNOWN;
 
   // create the device for low-level read/write
   
@@ -1761,83 +1763,54 @@ int Fmq::_read_stat ()
 
 {
 
+  if (_format == FmqFormat::UNKNOWN && _detect_format()) {
+    return -1;
+  }
+
   // try 5 times to read the status struct, using the checksum to
   // ensure it is correctly read
 
   q_stat_t status;
+  MEM_zero(status);
+  int32_t storedChecksum = 0;
+  int32_t expectedChecksum = 0;
 
   for (int ii = 0; ii < 5; ii++) {
 
-    int32_t magic_cookie;
-    if (_get_magic_cookie(magic_cookie)) {
-      _print_error("_read_stat", "Cannot read magic cookie");
+    // seek to start of status file
+
+    if (_seek_device(FmqDevice::STAT_IDENT, 0)) {
+      _print_error("_read_stat",
+                   "Cannot seek to start of status buffer");
       return -1;
     }
 
-    if (magic_cookie == Q_MAGIC_STAT_64) {
+    if (_format == FmqFormat::V32) {
 
-      _format = FmqFormat::V64;
-      
-      // read in status struct
-
-      if (_read_device(FmqDevice::STAT_IDENT, &status, sizeof(q_stat_t))) {
-        _print_error("_read_stat",
-                     "Cannot read status struct");
-        return -1;
-      }
-
-      // swap
-
-      be_to_stat_64(&status);
-
-
-    } else if (magic_cookie == Q_MAGIC_STAT_32) {
-
-      _format = FmqFormat::V32;
-
-      if (_openMode == CREATE) {
-        _print_error("_read_stat",
-                     "Do not use 32-bit format with openMode == CREATE");
-        return -1;
-      }
+      // read the 32-bit struct, check it as stored, convert
 
       q_stat_32_t status_32;
-
-      if (_read_device(FmqDevice::STAT_IDENT, &status_32, sizeof(q_stat_32_t))) {
+      if (_read_device(FmqDevice::STAT_IDENT, &status_32, sizeof(status_32))) {
         _print_error("_read_stat",
                      "Cannot read 32-bit status struct");
         return -1;
       }
-
-      // swap
-
       be_to_stat_32(&status_32);
-
-      // copy 32-bit to 64-bit status
-
-      status.magic_cookie = Q_MAGIC_STAT_64;
-      status.youngest_id = status_32.youngest_id;
-      status.youngest_slot = status_32.youngest_slot;
-      status.oldest_slot = status_32.oldest_slot;
-      status.nslots = status_32.nslots;
-      status.append_mode = status_32.append_mode;
-      status.blocking_write = status_32.blocking_write;
-      status.last_id_read = status_32.last_id_read;
-      status.buf_size = status_32.buf_size;
-      status.begin_insert = status_32.begin_insert;
-      status.end_insert = status_32.end_insert;
-      status.begin_append = status_32.begin_append;
-      status.time_written = status_32.time_written;
-
-      // create a new checksum
+      storedChecksum = status_32.checksum;
+      expectedChecksum = _compute_stat_checksum(&status_32);
+      stat_32_to_64(&status_32, &status);
       _add_stat_checksum(&status);
 
-    }
-    else {
+    } else {
 
-      _print_error("_read_stat",
-                   "magic cookie is not valid ");
-      return -1;
+      if (_read_device(FmqDevice::STAT_IDENT, &status, sizeof(status))) {
+        _print_error("_read_stat",
+                     "Cannot read status struct");
+        return -1;
+      }
+      be_to_stat_64(&status);
+      storedChecksum = status.checksum;
+      expectedChecksum = _compute_stat_checksum(&status);
 
     }
 
@@ -1845,26 +1818,25 @@ int Fmq::_read_stat ()
 
     _stat = status;
 
-    // checksum check
+    // checksum check - a stored 0 means the writer did not set one
 
-    if (_check_stat_checksum(&status) == 0) {
+    if (storedChecksum == 0 || storedChecksum == expectedChecksum) {
       return 0;
     }
 
   } // ii
 
-  //  checksum error
-  
+  // checksum error
+
   fprintf(stderr,
 	  "WARNING - _read_stat, stat checksum error\n"
 	  "checksum is %d, should be %d\n",
-	  status.checksum,
-	  _compute_stat_checksum(&status));
+	  storedChecksum, expectedChecksum);
   fprintf(stderr, "  Could not resolve bad checksum, continuing anyway ...\n");
   print_stat(stderr);
 
   return 0;
-  
+
 }
 
 ////////////////////////////////////////////////////////////
@@ -1879,43 +1851,16 @@ int Fmq::_read_stat ()
 int Fmq::_read_slots ()
 {
 
-  // function returns file pointer to 0
-
-  int32_t magic_cookie;
-  if (_get_magic_cookie(magic_cookie)) {
-    _print_error("_read_stat", "Cannot read magic cookie");
+  if (_format == FmqFormat::UNKNOWN) {
+    _print_error("_read_slots", "Queue format not yet detected");
     return -1;
   }
 
-  if (magic_cookie == Q_MAGIC_STAT_64) {
+  // make sure there are enough slots allocated
 
-    // seek to start of slots in status file
+  _alloc_slots(_stat.nslots);
 
-    if (_seek_device(FmqDevice::STAT_IDENT, sizeof(q_stat_t))) {
-      _print_error("_read_slots",
-		   "Cannot seek to start of slots in status buffer");
-      return -1;
-    }
-  
-    // read in slots, make sure there are enough slots allocated
-
-    _alloc_slots(_stat.nslots);
-  
-    int32_t nbytes = sizeof(q_slot_t) * _stat.nslots;
-    if (_read_device(FmqDevice::STAT_IDENT, _slots, nbytes)) {
-      _print_error("_read_slots", "Cannot read slots");
-      return -1;
-    }
-
-    // swap slot byte order
-
-    for(int32_t ii = 0; ii < _stat.nslots; ++ii) {
-      be_to_slot_64(&(_slots[ii]));
-    }
-
-    return 0;
-
-  } else if (magic_cookie == Q_MAGIC_STAT_32) {
+  if (_format == FmqFormat::V32) {
 
     // seek to start of slots in status file
 
@@ -1924,53 +1869,47 @@ int Fmq::_read_slots ()
 		   "Cannot seek to start of slots in status buffer");
       return -1;
     }
-    
-    q_slot_32_t *slots_32 = new q_slot_32_t[_stat.nslots];
 
-    // read in slots, make sure there are enough slots allocated
+    // read the 32-bit slots, convert into the 64-bit array
 
-    int32_t nbytes = sizeof(q_slot_32_t) * _stat.nslots;
-    if (_read_device(FmqDevice::STAT_IDENT, slots_32, nbytes)) {
+    std::vector<q_slot_32_t> slots_32(_stat.nslots);
+    int64_t nbytes = (int64_t) sizeof(q_slot_32_t) * _stat.nslots;
+    if (_read_device(FmqDevice::STAT_IDENT, slots_32.data(), nbytes)) {
       _print_error("_read_slots", "Cannot read slots");
       return -1;
-      delete [] slots_32;
+    }
+
+    for (int32_t ii = 0; ii < _stat.nslots; ii++) {
+      be_to_slot_32(&slots_32[ii]);
+      slot_32_to_64(&slots_32[ii], &_slots[ii]);
+      _add_slot_checksum(&_slots[ii]);
+    }
+
+  } else {
+
+    // seek to start of slots in status file
+
+    if (_seek_device(FmqDevice::STAT_IDENT, sizeof(q_stat_64_t))) {
+      _print_error("_read_slots",
+		   "Cannot seek to start of slots in status buffer");
+      return -1;
+    }
+
+    int64_t nbytes = (int64_t) sizeof(q_slot_64_t) * _stat.nslots;
+    if (_read_device(FmqDevice::STAT_IDENT, _slots, nbytes)) {
+      _print_error("_read_slots", "Cannot read slots");
+      return -1;
     }
 
     // swap slot byte order
 
-
-    BE_to_array_32(slots_32, _stat.nslots * sizeof(q_slot_32_t));
-
-    // copy 32-bit slots to 64-bit slots
-    
-    _alloc_slots(_stat.nslots);
-
-    for(int32_t i = 0; i < _stat.nslots; ++i) {
-      _slots[i].active = slots_32[i].active;
-      _slots[i].id = slots_32[i].id;
-      _slots[i].time = slots_32[i].time;
-      _slots[i].msg_len = slots_32[i].msg_len;
-      _slots[i].stored_len = slots_32[i].stored_len;
-      _slots[i].offset = slots_32[i].offset;
-      _slots[i].type = slots_32[i].type;
-      _slots[i].subtype = slots_32[i].subtype;
-      _slots[i].compress = slots_32[i].compress;
-      _add_slot_checksum(&_slots[i]);
+    for (int32_t ii = 0; ii < _stat.nslots; ii++) {
+      be_to_slot_64(&_slots[ii]);
     }
-    
-
-    // clean up memory allocated here
-    
-    delete [] slots_32;
-
-    return 0;
-  }
-  else {
-    _print_error("_read_slots",
-		 "magic cookie is not valid ");
-    return -1;
 
   }
+
+  return 0;
 
 }
 
@@ -1987,9 +1926,8 @@ int Fmq::_read_slot ( int32_t slot_num)
 
 {
 
-  int32_t magic_cookie;
-  if (_get_magic_cookie(magic_cookie)) {
-    _print_error("_read_stat", "Cannot read magic cookie");
+  if (_format == FmqFormat::UNKNOWN) {
+    _print_error("_read_slot", "Queue format not yet detected");
     return -1;
   }
 
@@ -2010,12 +1948,16 @@ int Fmq::_read_slot ( int32_t slot_num)
   // try 5 times to read the slot struct, using the checksum to
   // ensure it is correctly read
 
+  int32_t storedChecksum = 0;
+  int32_t expectedChecksum = 0;
+
   for (int ii = 0; ii < 5; ii++) {
 
-    if (magic_cookie == Q_MAGIC_STAT_64) {
+    if (_format == FmqFormat::V32) {
+
       // seek to given slot
 
-      int64_t offset = sizeof(q_stat_t) + slot_num * sizeof(q_slot_t);
+      int64_t offset = sizeof(q_stat_32_t) + (int64_t) slot_num * sizeof(q_slot_32_t);
       if (_seek_device(FmqDevice::STAT_IDENT, offset)) {
         _print_error("_read_slot",
                      "Cannot seek to slot %d in status file",
@@ -2023,86 +1965,67 @@ int Fmq::_read_slot ( int32_t slot_num)
         return -1;
       }
 
-      // read in slot
-
-      if (_read_device(FmqDevice::STAT_IDENT, slot, sizeof(q_slot_t))) {
-        _print_error("_read_slot",
-                     "Cannot read slot %d in status file",
-                     slot_num);
-        return -1;
-      }
-
-      // swap slot byte order
-
-      be_to_slot_64(slot);
-
-    }
-    else if (magic_cookie == Q_MAGIC_STAT_32) {
-
-
-      int64_t offset = sizeof(q_stat_32_t) + slot_num * sizeof(q_slot_32_t);
-      if (_seek_device(FmqDevice::STAT_IDENT, offset)) {
-        _print_error("_read_slot",
-                     "Cannot seek to slot %d in status file",
-                     slot_num);
-        return -1;
-      }
+      // read the 32-bit slot, check it as stored, convert
 
       q_slot_32_t slot_32;
-      // read in slot
-
-      if (_read_device(FmqDevice::STAT_IDENT, &slot_32, sizeof(q_slot_32_t))) {
+      if (_read_device(FmqDevice::STAT_IDENT, &slot_32, sizeof(slot_32))) {
         _print_error("_read_slot",
                      "Cannot read slot %d in status file",
                      slot_num);
         return -1;
       }
-
-      // swap slot byte order
-
       be_to_slot_32(&slot_32);
-
-      // copy 32-bit slot to 64-bit slot
-
-      slot->active = slot_32.active;
-      slot->id = slot_32.id;
-      slot->time = slot_32.time;
-      slot->msg_len = slot_32.msg_len;
-      slot->stored_len = slot_32.stored_len;
-      slot->offset = slot_32.offset;
-      slot->type = slot_32.type;
-      slot->subtype = slot_32.subtype;
-      slot->compress = slot_32.compress;
+      storedChecksum = slot_32.checksum;
+      expectedChecksum = _compute_slot_checksum(&slot_32);
+      slot_32_to_64(&slot_32, slot);
       _add_slot_checksum(slot);
 
-    }
-    else {
-      _print_error("_read_slot",
-                   "magic cookie is not valid ");
-      return -1;
+    } else {
+
+      // seek to given slot
+
+      int64_t offset = sizeof(q_stat_64_t) + (int64_t) slot_num * sizeof(q_slot_64_t);
+      if (_seek_device(FmqDevice::STAT_IDENT, offset)) {
+        _print_error("_read_slot",
+                     "Cannot seek to slot %d in status file",
+                     slot_num);
+        return -1;
+      }
+
+      // read in slot
+
+      if (_read_device(FmqDevice::STAT_IDENT, slot, sizeof(q_slot_64_t))) {
+        _print_error("_read_slot",
+                     "Cannot read slot %d in status file",
+                     slot_num);
+        return -1;
+      }
+      be_to_slot_64(slot);
+      storedChecksum = slot->checksum;
+      expectedChecksum = _compute_slot_checksum(slot);
 
     }
 
+    // a stored 0 means the slot is being written - retry
 
-
-    if (slot->checksum == 0) {
+    if (storedChecksum == 0) {
       continue;
     }
-    
+
     // checksum check
-    
-    if (_check_slot_checksum(slot) == 0) {
+
+    if (storedChecksum == expectedChecksum) {
       return 0;
     }
-    
+
   } // ii
 
   // checksum error
-  
+
   fprintf(stderr,
 	  "WARNING - _read_slot - slot checksum error\n"
 	  "checksum is %d, should be %d\n",
-	  slot->checksum, _compute_slot_checksum(slot));
+	  storedChecksum, expectedChecksum);
   fprintf(stderr, "  Could not resolve bad checksum, continuing anyway ...\n");
   _basic_print_slot(slot_num, slot, stderr);
 
@@ -2506,6 +2429,13 @@ int Fmq::_prepare_for_writing(int32_t nslots, int64_t buf_size)
 
   si08 last_byte;
 
+  // a new queue is written in the 64-bit layout; a queue being
+  // re-initialised keeps the layout it was opened in
+
+  if (_format == FmqFormat::UNKNOWN) {
+    _format = FmqFormat::V64;
+  }
+
   // allocate status and slots memory
 
   if (_alloc_slots(nslots)) {
@@ -2655,7 +2585,7 @@ int Fmq::_write_stat()
     return -1;
   }
     
-  if (_format == FmqFormat::V64) {
+  if (_format != FmqFormat::V32) {
     
     // make local copy of stat struct
     // set byte order to BigEnd
@@ -2723,7 +2653,7 @@ int Fmq::_write_slot (int32_t slot_num)
     return -1;
   }
   
-  if (_format == FmqFormat::V64) {
+  if (_format != FmqFormat::V32) {
     
     // seek to slot
 
@@ -3243,7 +3173,14 @@ int Fmq::_update_last_id_read()
     return -1;
   }
   
-  return _dev->update_last_id_read(_lastIdRead);
+  // the field sits at a different offset in the two stat layouts
+
+  int64_t offsetInStat = offsetof(q_stat_64_t, last_id_read);
+  if (_format == FmqFormat::V32) {
+    offsetInStat = offsetof(q_stat_32_t, last_id_read);
+  }
+
+  return _dev->update_last_id_read(offsetInStat, _lastIdRead);
 
 }
 
@@ -3570,7 +3507,7 @@ int Fmq::_get_magic_cookie(int32_t& cookie)
   // seek to start of status file
     
   if (_seek_device(FmqDevice::STAT_IDENT, 0)) {
-    _print_error("_read_stat", "Cannot seek to start of status buffer");
+    _print_error("_get_magic_cookie", "Cannot seek to start of status buffer");
     return -1;
   }
 
@@ -3578,7 +3515,7 @@ int Fmq::_get_magic_cookie(int32_t& cookie)
 
   int32_t magic_cookie;
   if (_read_device(FmqDevice::STAT_IDENT, &magic_cookie, sizeof(int32_t))) {
-    _print_error("_read_stat", "Cannot read magic cookie");
+    _print_error("_get_magic_cookie", "Cannot read magic cookie");
     return -1;
   }
 
@@ -3587,13 +3524,47 @@ int Fmq::_get_magic_cookie(int32_t& cookie)
 
   // seek start again
   if (_seek_device(FmqDevice::STAT_IDENT, 0)) {
-    _print_error("_read_stat",
+    _print_error("_get_magic_cookie",
 		 "Cannot seek to start of status buffer");
     return -1;
   }
 
   cookie = magic_cookie;
   return 0;
+}
+
+////////////////////////////////////////////////////////////
+//  Detect the layout of an existing queue from its stat magic
+//  cookie, and record it in _format. Done once per open; the
+//  layout of a queue does not change while it is open.
+//
+//  Return value:
+//    0 on success, -1 if the cookie is not a known FMQ format
+///
+
+int Fmq::_detect_format()
+
+{
+
+  int32_t magic_cookie;
+  if (_get_magic_cookie(magic_cookie)) {
+    return -1;
+  }
+
+  if (magic_cookie == Q_MAGIC_STAT_64) {
+    _format = FmqFormat::V64;
+  } else if (magic_cookie == Q_MAGIC_STAT_32) {
+    _format = FmqFormat::V32;
+  } else {
+    _print_error("_detect_format",
+                 "Stat magic cookie %d is neither the 64-bit (%d) "
+                 "nor the 32-bit (%d) FMQ format",
+                 magic_cookie, Q_MAGIC_STAT_64, Q_MAGIC_STAT_32);
+    return -1;
+  }
+
+  return 0;
+
 }
 
 
@@ -3835,7 +3806,7 @@ int Fmq::_fraction_used(double *slot_fraction_p,
   // count the active slots
 
   int32_t nslots_active = 0;
-  int32_t nbytes_active = 0;
+  int64_t nbytes_active = 0;
   q_slot_t *slot = _slots;
   for (int32_t islot = 0; islot < _stat.nslots; islot++, slot++) {
     if (slot->active) {
@@ -4167,6 +4138,51 @@ void Fmq::slot_64_to_32(q_slot_64_t *slot64, q_slot_32_t *slot32)
   slot32->subtype = slot64->subtype;
   slot32->compress = slot64->compress;
   slot32->checksum = slot64->checksum;
+
+}
+
+////////////////////////////////////////////////////////////
+// Convert 32-bit to 64-bit structs
+// The checksum is not carried over: it is recomputed for the
+// 64-bit struct by the caller.
+///
+
+void Fmq::stat_32_to_64(const q_stat_32_t *stat32, q_stat_64_t *stat64)
+{
+
+  MEM_zero(*stat64);
+
+  stat64->magic_cookie = Q_MAGIC_STAT_64;
+
+  stat64->youngest_id = stat32->youngest_id;
+  stat64->youngest_slot = stat32->youngest_slot;
+  stat64->oldest_slot = stat32->oldest_slot;
+  stat64->nslots = stat32->nslots;
+  stat64->buf_size = stat32->buf_size;
+  stat64->begin_insert = stat32->begin_insert;
+  stat64->end_insert = stat32->end_insert;
+  stat64->begin_append = stat32->begin_append;
+  stat64->append_mode = stat32->append_mode;
+  stat64->time_written = stat32->time_written;
+  stat64->blocking_write = stat32->blocking_write;
+  stat64->last_id_read = stat32->last_id_read;
+
+}
+
+void Fmq::slot_32_to_64(const q_slot_32_t *slot32, q_slot_64_t *slot64)
+{
+
+  MEM_zero(*slot64);
+
+  slot64->active = slot32->active;
+  slot64->id = slot32->id;
+  slot64->time = slot32->time;
+  slot64->msg_len = slot32->msg_len;
+  slot64->stored_len = slot32->stored_len;
+  slot64->offset = slot32->offset;
+  slot64->type = slot32->type;
+  slot64->subtype = slot32->subtype;
+  slot64->compress = slot32->compress;
 
 }
 

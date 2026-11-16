@@ -74,7 +74,10 @@ public:
 		      FMQ_SEEK_LAST,
 		      FMQ_SEEK_BACK };
 
-  enum class FmqFormat { V32, V64 };
+  // on-disk layout of an open queue, detected from the stat magic
+  // cookie when the queue is opened; new queues are written as V64
+
+  enum class FmqFormat { UNKNOWN, V32, V64 };
 
   // begin 64-bit implementation
 
@@ -131,9 +134,9 @@ public:
 
     si64 time;            /* Unix time at which the message is written */
     si64 msg_len;         /* message len in bytes */
-    si64 stored_len;      /* message len + extra XX bytes (Q_NBYTES_EXTRA_64)
-			                     * for magic-cookie and slot num fields,
-			                     *  plus padding out to even 4 bytes */
+    si64 stored_len;      /* message len + Q_NBYTES_EXTRA bytes for the
+                           * magic-cookie, slot-num and id fields, padded
+                           * out to a multiple of 8 bytes */
     si64 offset;          /* message offset in buffer */
     si64 pad_si64[2];
 
@@ -204,9 +207,9 @@ public:
     si32 id;              /* message id 0 to FMQ_MAX_ID */
     si32 time;            /* Unix time at which the message is written */
     si32 msg_len;         /* message len in bytes */
-    si32 stored_len;      /* message len + extra 12 bytes (Q_NBYTES_EXTRA_32)
-                           *  for magic-cookie and slot num fields,
-			                     * plus padding out to even 4 bytes */
+    si32 stored_len;      /* message len + Q_NBYTES_EXTRA bytes for the
+                           * magic-cookie, slot-num and id fields, padded
+                           * out to a multiple of 4 bytes */
     si32 offset;          /* message offset in buffer */
     si32 type;            /* message type - user-defined */
     si32 subtype;         /* message subtype - user-defined */
@@ -232,7 +235,8 @@ public:
   //   --------------------------------------------------------
   //   | magic cookie |  slot_num  | -- message -- | pad |  id  |
   //   --------------------------------------------------------
-  //   Pad is for 4-byte alignment.
+  //   Pad brings the entry to a multiple of 8 bytes (4 bytes in
+  //   queues written before the 64-bit layout).
 
 
   // constructor
@@ -692,6 +696,11 @@ public:
   
   static void stat_64_to_32(q_stat_64_t *stat64, q_stat_32_t *stat32);
   static void slot_64_to_32(q_slot_64_t *slot64, q_slot_32_t *slot32);
+
+  // 32-bit to 64-bit copying
+
+  static void stat_32_to_64(const q_stat_32_t *stat32, q_stat_64_t *stat64);
+  static void slot_32_to_64(const q_slot_32_t *slot32, q_slot_64_t *slot64);
   
 protected:
 
@@ -712,8 +721,8 @@ protected:
   int32_t _msecSleep;
   int32_t _msecBlockingReadTimeout;
 
-  // 64-bit or 32-bit queue on read
-  
+  // layout of the open queue, see FmqFormat
+
   FmqFormat _format;
   
   // logging
@@ -883,6 +892,7 @@ protected:
   int _check_stat_checksum(const q_stat_t *stat);
   int _check_slot_checksum(const q_slot_t *slot);
   int _get_magic_cookie(int32_t& cookie);
+  int _detect_format();
 
   int _compute_stat_checksum(const q_stat_32_t *stat);
   int _compute_slot_checksum(const q_slot_32_t *slot);
@@ -914,7 +924,7 @@ protected:
   void _basic_print_slot(int32_t slot_num, q_slot_t *slot, FILE *out) const;
   void _pretty_print_slot(int32_t slot_num, q_slot_t *slot, FILE *out) const;
 
-  // error print32_ting
+  // error printing
 
   void _print_error(const char *routine, const char *format, ...) const;
   void _print_info(const char *routine, const char *format, ...) const;

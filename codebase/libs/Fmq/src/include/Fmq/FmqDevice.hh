@@ -87,7 +87,10 @@ public:
   // read
   
   virtual int64_t do_read(ident_t id, void *mess, int64_t len) = 0;
-  virtual int update_last_id_read(int32_t lastIdRead) = 0;
+  // write lastIdRead into the stat struct at the given byte offset,
+  // which depends on the queue format and is supplied by Fmq
+
+  virtual int update_last_id_read(int64_t offsetInStat, int32_t lastIdRead) = 0;
   
   // write
 
