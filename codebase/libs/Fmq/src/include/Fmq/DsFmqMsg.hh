@@ -36,6 +36,10 @@
 
 #include <Fmq/Fmq.hh>
 #include <dsserver/DsServerMsg.hh>
+#include <cstddef>
+#include <cstdint>
+
+class DsMsgPart;
 using namespace std;
  
 class DsFmqMsg : public DsServerMsg
@@ -72,32 +76,20 @@ public:
     DS_FMQ_DATA_PART = 44003
   } msgPart_t ;
 
-  // Struct for initializing an fmq via the server
- 
+  // Structs for initializing an fmq via the server, and for describing
+  // each message carried in a read reply or write request.
+  //
+  // Each has two wire layouts: the legacy 32-bit one, which every
+  // DsFmqServer and client from before the 64-bit FMQ understands, and a
+  // 64-bit one that carries buffer and message sizes above 2 GB. A sender
+  // emits the legacy layout whenever the values fit in it and the 64-bit
+  // layout only when they do not, the same way DsMessage chooses 32- or
+  // 64-bit part headers by size. A receiver tells the layouts apart by
+  // part length, so the two sizes must differ (checked below).
+  //
+  // In memory the 64-bit layout is always used (initInfo_t, msgInfo_t).
+
   static const int PROC_NAME_LEN = 32;
-
-  typedef struct {
-    si32 debug;
-    si32 compress;
-    si32 openMode;
-    si32 openPosition;
-    si32 numSlots;
-    si32 spare[10];
-    char procName[PROC_NAME_LEN];
-    si64 bufSize;
-  } initInfo_64_t;
-
-  // Struct containing message properties
-
-  typedef struct {
-    si32 msgType;
-    si32 msgSubtype;
-    si32 msgPreCompressed; // flag to indicate already compressed
-    si32 msgUncompressedLen; // length before compression
-    si32 msgId;
-    si64 msgTime;
-    si64 msgLen; // msg len, compressed len if preCompressed
-  } msgInfo_64_t;
 
   typedef struct {
     si32 debug;
@@ -110,7 +102,20 @@ public:
     char procName[PROC_NAME_LEN];
   } initInfo_32_t;
 
-  // Struct containing message properties
+  static const int32_t INIT_INFO_64_NUM_SI32 = 8;
+  static const int32_t INIT_INFO_64_NUM_SI64 = 5;
+
+  typedef struct {
+    si32 debug;
+    si32 compress;
+    si32 openMode;
+    si32 openPosition;
+    si32 numSlots;
+    si32 spare_si32[3];
+    si64 bufSize;
+    si64 spare_si64[4];
+    char procName[PROC_NAME_LEN];
+  } initInfo_64_t;
 
   typedef struct {
     si32 msgType;
@@ -122,8 +127,40 @@ public:
     ti32 msgTime;
   } msgInfo_32_t;
 
+  static const int32_t MSG_INFO_64_NUM_SI32 = 8;
+  static const int32_t MSG_INFO_64_NUM_SI64 = 4;
 
-  // default implementation is 64-bit
+  typedef struct {
+    si32 msgType;
+    si32 msgSubtype;
+    si32 msgPreCompressed; // flag to indicate already compressed
+    si32 msgId;
+    si32 spare_si32[4];
+    si64 msgTime;
+    si64 msgLen; // msg len, compressed len if preCompressed
+    si64 msgUncompressedLen; // length before compression
+    si64 spare_si64[1];
+  } msgInfo_64_t;
+
+  static_assert(offsetof(initInfo_64_t, bufSize) ==
+                INIT_INFO_64_NUM_SI32 * sizeof(si32),
+                "Unexpected layout of initInfo_64_t");
+  static_assert(offsetof(initInfo_64_t, procName) ==
+                offsetof(initInfo_64_t, bufSize) + INIT_INFO_64_NUM_SI64 * sizeof(si64),
+                "Unexpected layout of initInfo_64_t");
+  static_assert(offsetof(msgInfo_64_t, msgTime) ==
+                MSG_INFO_64_NUM_SI32 * sizeof(si32),
+                "Unexpected layout of msgInfo_64_t");
+  static_assert(sizeof(msgInfo_64_t) ==
+                offsetof(msgInfo_64_t, msgTime) + MSG_INFO_64_NUM_SI64 * sizeof(si64),
+                "Unexpected layout of msgInfo_64_t");
+  static_assert(sizeof(initInfo_32_t) != sizeof(initInfo_64_t),
+                "init info layouts are told apart by part length");
+  static_assert(sizeof(msgInfo_32_t) != sizeof(msgInfo_64_t),
+                "msg info layouts are told apart by part length");
+
+  // in-memory form
+
   typedef initInfo_64_t initInfo_t;
   typedef msgInfo_64_t msgInfo_t;
 
@@ -246,18 +283,35 @@ protected:
   vector<msgInfo_t> _msgInfo;
 
   // methods
- 
-  void BEfromInfo_32(msgInfo_32_t *info);
-  void BEtoInfo_32(msgInfo_32_t *info);
-  void BEfromInfo_64(msgInfo_64_t *info);
-  void BEtoInfo_64(msgInfo_64_t *info);
 
   void clearInitInfo();
 
-  void BEfromInitInfo_32();
-  void BEtoInitInfo_32();
-  void BEfromInitInfo_64();
-  void BEtoInitInfo_64();
+  // wire format: send a part in the smallest layout that holds its
+  // values, decode either layout on receipt
+
+  static bool fitsInSi32(int64_t value);
+  static bool initInfoFitsLegacyLayout(const initInfo_t &info);
+  static bool msgInfoFitsLegacyLayout(const msgInfo_t &info);
+  static void initInfoFromLegacy(const initInfo_32_t &legacy, initInfo_t &info);
+  static void initInfoToLegacy(const initInfo_t &info, initInfo_32_t &legacy);
+  static void msgInfoFromLegacy(const msgInfo_32_t &legacy, msgInfo_t &info);
+  static void msgInfoToLegacy(const msgInfo_t &info, msgInfo_32_t &legacy);
+
+  void addInitInfoPart(const initInfo_t &info);
+  void addMsgInfoPart(const msgInfo_t &info);
+  int loadInitInfoPart(const DsMsgPart &part, Fmq &fmq);
+  int loadMsgInfoPart(const DsMsgPart &part, msgInfo_t &info, Fmq &fmq);
+
+  // byte swapping
+
+  static void BEfromInitInfo_32(initInfo_32_t *info);
+  static void BEtoInitInfo_32(initInfo_32_t *info);
+  static void BEfromInitInfo_64(initInfo_64_t *info);
+  static void BEtoInitInfo_64(initInfo_64_t *info);
+  static void BEfromMsgInfo_32(msgInfo_32_t *info);
+  static void BEtoMsgInfo_32(msgInfo_32_t *info);
+  static void BEfromMsgInfo_64(msgInfo_64_t *info);
+  static void BEtoMsgInfo_64(msgInfo_64_t *info);
 
 };
 

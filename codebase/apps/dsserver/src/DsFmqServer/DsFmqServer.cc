@@ -415,7 +415,7 @@ int DsFmqServer::_performRead(DsFmqMsg &msg)
   // 100 messages, or the total len exceeds a Mbyte
 
   int count = 0;
-  int totLen = 0;
+  int64_t totLen = 0;
   bool done = false;
 
   while (!done) {
@@ -490,7 +490,7 @@ int DsFmqServer::_performWrite(DsFmqMsg &msg)
   for (int ii = 0; ii < (int) msgInfo.size(); ii++) {
 
     if (msgInfo[ii].msgPreCompressed) {
-      int uncompLen = msgInfo[ii].msgUncompressedLen;
+      int64_t uncompLen = msgInfo[ii].msgUncompressedLen;
       if (_fmq.writeMsgPreCompressed(msgInfo[ii].msgType,
 				     msgInfo[ii].msgSubtype,
 				     msgData[ii],

@@ -37,6 +37,8 @@
 #include <Fmq/DsFmqMsg.hh>
 #include <toolsa/MsgLog.hh>
 #include <toolsa/mem.h>
+#include <cstdint>
+#include <cstring>
 
 using namespace std;
    
@@ -99,8 +101,7 @@ void DsFmqMsg::assembleRequestInit(const string &url,
     printInitInfo(cerr, "  ", _initInfo);
   }
 
-  BEfromInitInfo_64();
-  addPart(DS_FMQ_INIT_PART, sizeof(initInfo_t), &_initInfo);
+  addInitInfoPart(_initInfo);
   addURL(url);
   assemble();
 
@@ -276,8 +277,7 @@ void DsFmqMsg::addReadData(const Fmq &fmq)
 
   // add it to the message
   
-  BEfromInfo_64(&info);
-  addPart(DS_FMQ_INFO_PART, sizeof(msgInfo_t), &info);
+  addMsgInfoPart(info);
   addPart(DS_FMQ_DATA_PART,
 	  fmq.getMsgLen(), fmq.getMsg());
 
@@ -335,8 +335,7 @@ void DsFmqMsg::addWriteData(int32_t msgType, int32_t msgSubtype,
     info.msgLen = 0;
     info.msgPreCompressed = false;
     info.msgUncompressedLen = 0;
-    BEfromInfo_64(&info);
-    addPart(DS_FMQ_INFO_PART, sizeof(msgInfo_t), &info);
+    addMsgInfoPart(info);
 
     // add part with no length
     char dummy;
@@ -358,8 +357,7 @@ void DsFmqMsg::addWriteData(int32_t msgType, int32_t msgSubtype,
         info.msgUncompressedLen = msgLen;
       }
     }
-    BEfromInfo_64(&info);
-    addPart(DS_FMQ_INFO_PART, sizeof(msgInfo_t), &info);
+    addMsgInfoPart(info);
     addPart(DS_FMQ_DATA_PART, clen, cmsg);
 
     if (compress) {
@@ -500,11 +498,9 @@ int DsFmqMsg::disassemble(const void *msg, int64_t msgLen, Fmq &fmq)
 
   _initInfoSet = false;
   if (partExists(DS_FMQ_INIT_PART)) {
-    clearInitInfo();
-    memcpy(&_initInfo,
-	   (initInfo_t *)getPartByType(DS_FMQ_INIT_PART)->getBuf(),
-	   sizeof(initInfo_t));
-    BEtoInitInfo_64();
+    if (loadInitInfoPart(*getPartByType(DS_FMQ_INIT_PART), fmq)) {
+      return -1;
+    }
     fmq._progName = _initInfo.procName;
     fmq._debug = _initInfo.debug;
     fmq._compress = _initInfo.compress;
@@ -541,8 +537,9 @@ int DsFmqMsg::disassemble(const void *msg, int64_t msgLen, Fmq &fmq)
     for (int i = 0; i < nInfoParts; i++) {
       DsMsgPart *part = getPartByType(DS_FMQ_INFO_PART, i);
       msgInfo_t info;
-      memcpy(&info, (msgInfo_t *)part->getBuf(), sizeof(info));
-      BEtoInfo_64(&info);
+      if (loadMsgInfoPart(*part, info, fmq)) {
+        return -1;
+      }
       _msgInfo.push_back(info);
     }
   }
@@ -567,53 +564,211 @@ void DsFmqMsg::clearInitInfo()
 }
 
 /////////////////////////////////////////////////////
+// Wire format
+//
+// A part is sent in the legacy 32-bit layout when its values fit, and in
+// the 64-bit layout otherwise, so servers and clients from before the
+// 64-bit FMQ keep working for everything they could handle anyway. On
+// receipt the layout is identified by the part length.
+
+bool DsFmqMsg::fitsInSi32(int64_t value)
+{
+  return (value >= INT32_MIN && value <= INT32_MAX);
+}
+
+bool DsFmqMsg::initInfoFitsLegacyLayout(const initInfo_t &info)
+{
+  return fitsInSi32(info.bufSize);
+}
+
+bool DsFmqMsg::msgInfoFitsLegacyLayout(const msgInfo_t &info)
+{
+  return (fitsInSi32(info.msgLen) &&
+          fitsInSi32(info.msgUncompressedLen) &&
+          fitsInSi32(info.msgTime));
+}
+
+void DsFmqMsg::initInfoFromLegacy(const initInfo_32_t &legacy, initInfo_t &info)
+{
+  MEM_zero(info);
+  info.debug = legacy.debug;
+  info.compress = legacy.compress;
+  info.openMode = legacy.openMode;
+  info.openPosition = legacy.openPosition;
+  info.numSlots = legacy.numSlots;
+  info.bufSize = legacy.bufSize;
+  memcpy(info.procName, legacy.procName, PROC_NAME_LEN);
+}
+
+void DsFmqMsg::initInfoToLegacy(const initInfo_t &info, initInfo_32_t &legacy)
+{
+  MEM_zero(legacy);
+  legacy.debug = info.debug;
+  legacy.compress = info.compress;
+  legacy.openMode = info.openMode;
+  legacy.openPosition = info.openPosition;
+  legacy.numSlots = info.numSlots;
+  legacy.bufSize = (si32) info.bufSize;
+  memcpy(legacy.procName, info.procName, PROC_NAME_LEN);
+}
+
+void DsFmqMsg::msgInfoFromLegacy(const msgInfo_32_t &legacy, msgInfo_t &info)
+{
+  MEM_zero(info);
+  info.msgType = legacy.msgType;
+  info.msgSubtype = legacy.msgSubtype;
+  info.msgPreCompressed = legacy.msgPreCompressed;
+  info.msgId = legacy.msgId;
+  info.msgTime = legacy.msgTime;
+  info.msgLen = legacy.msgLen;
+  info.msgUncompressedLen = legacy.msgUncompressedLen;
+}
+
+void DsFmqMsg::msgInfoToLegacy(const msgInfo_t &info, msgInfo_32_t &legacy)
+{
+  MEM_zero(legacy);
+  legacy.msgType = info.msgType;
+  legacy.msgSubtype = info.msgSubtype;
+  legacy.msgPreCompressed = info.msgPreCompressed;
+  legacy.msgId = info.msgId;
+  legacy.msgTime = (ti32) info.msgTime;
+  legacy.msgLen = (si32) info.msgLen;
+  legacy.msgUncompressedLen = (si32) info.msgUncompressedLen;
+}
+
+// add the init info part, in the smallest layout that holds the values
+
+void DsFmqMsg::addInitInfoPart(const initInfo_t &info)
+{
+  if (initInfoFitsLegacyLayout(info)) {
+    initInfo_32_t legacy;
+    initInfoToLegacy(info, legacy);
+    BEfromInitInfo_32(&legacy);
+    addPart(DS_FMQ_INIT_PART, sizeof(legacy), &legacy);
+  } else {
+    initInfo_64_t wide = info;
+    BEfromInitInfo_64(&wide);
+    addPart(DS_FMQ_INIT_PART, sizeof(wide), &wide);
+  }
+}
+
+// add a msg info part, in the smallest layout that holds the values
+
+void DsFmqMsg::addMsgInfoPart(const msgInfo_t &info)
+{
+  if (msgInfoFitsLegacyLayout(info)) {
+    msgInfo_32_t legacy;
+    msgInfoToLegacy(info, legacy);
+    BEfromMsgInfo_32(&legacy);
+    addPart(DS_FMQ_INFO_PART, sizeof(legacy), &legacy);
+  } else {
+    msgInfo_64_t wide = info;
+    BEfromMsgInfo_64(&wide);
+    addPart(DS_FMQ_INFO_PART, sizeof(wide), &wide);
+  }
+}
+
+// load _initInfo from an init part in either layout
+// returns 0 on success, -1 if the part is neither layout
+
+int DsFmqMsg::loadInitInfoPart(const DsMsgPart &part, Fmq &fmq)
+{
+  clearInitInfo();
+  if (part.getLength() == (ssize_t) sizeof(initInfo_32_t)) {
+    initInfo_32_t legacy;
+    memcpy(&legacy, part.getBuf(), sizeof(legacy));
+    BEtoInitInfo_32(&legacy);
+    initInfoFromLegacy(legacy, _initInfo);
+  } else if (part.getLength() == (ssize_t) sizeof(initInfo_64_t)) {
+    memcpy(&_initInfo, part.getBuf(), sizeof(_initInfo));
+    BEtoInitInfo_64(&_initInfo);
+  } else {
+    fmq._print_error("DsFmqMsg::disassemble",
+                     "Init part has unexpected length: %ld bytes, "
+                     "expected %ld (legacy) or %ld (64-bit)",
+                     (long) part.getLength(),
+                     (long) sizeof(initInfo_32_t),
+                     (long) sizeof(initInfo_64_t));
+    return -1;
+  }
+  return 0;
+}
+
+// load a msg info struct from an info part in either layout
+// returns 0 on success, -1 if the part is neither layout
+
+int DsFmqMsg::loadMsgInfoPart(const DsMsgPart &part, msgInfo_t &info, Fmq &fmq)
+{
+  if (part.getLength() == (ssize_t) sizeof(msgInfo_32_t)) {
+    msgInfo_32_t legacy;
+    memcpy(&legacy, part.getBuf(), sizeof(legacy));
+    BEtoMsgInfo_32(&legacy);
+    msgInfoFromLegacy(legacy, info);
+  } else if (part.getLength() == (ssize_t) sizeof(msgInfo_64_t)) {
+    memcpy(&info, part.getBuf(), sizeof(info));
+    BEtoMsgInfo_64(&info);
+  } else {
+    fmq._print_error("DsFmqMsg::disassemble",
+                     "Msg info part has unexpected length: %ld bytes, "
+                     "expected %ld (legacy) or %ld (64-bit)",
+                     (long) part.getLength(),
+                     (long) sizeof(msgInfo_32_t),
+                     (long) sizeof(msgInfo_64_t));
+    return -1;
+  }
+  return 0;
+}
+
+/////////////////////////////////////////////////////
 // Byte swapping
+//
+// The 64-bit layouts hold all si32 fields first, then all si64 fields,
+// then procName, so each is swapped as two blocks. The static_asserts in
+// the header tie the block sizes to the struct layouts.
 
-void DsFmqMsg::BEfromInitInfo_32()
+void DsFmqMsg::BEfromInitInfo_32(initInfo_32_t *info)
 {
-  BE_from_array_32(&_initInfo, sizeof(initInfo_32_t) - PROC_NAME_LEN);
+  BE_from_array_32(info, sizeof(initInfo_32_t) - PROC_NAME_LEN);
 }
 
-void DsFmqMsg::BEtoInitInfo_32()
+void DsFmqMsg::BEtoInitInfo_32(initInfo_32_t *info)
 {
-  BE_to_array_32(&_initInfo, sizeof(initInfo_32_t) - PROC_NAME_LEN);
+  BE_to_array_32(info, sizeof(initInfo_32_t) - PROC_NAME_LEN);
 }
 
-void DsFmqMsg::BEfromInfo_32(msgInfo_32_t *info)
+void DsFmqMsg::BEfromInitInfo_64(initInfo_64_t *info)
+{
+  BE_from_array_32(info, INIT_INFO_64_NUM_SI32 * sizeof(si32));
+  BE_from_array_64(&info->bufSize, INIT_INFO_64_NUM_SI64 * sizeof(si64));
+}
+
+void DsFmqMsg::BEtoInitInfo_64(initInfo_64_t *info)
+{
+  BE_to_array_32(info, INIT_INFO_64_NUM_SI32 * sizeof(si32));
+  BE_to_array_64(&info->bufSize, INIT_INFO_64_NUM_SI64 * sizeof(si64));
+}
+
+void DsFmqMsg::BEfromMsgInfo_32(msgInfo_32_t *info)
 {
   BE_from_array_32(info, sizeof(msgInfo_32_t));
 }
 
-void DsFmqMsg::BEtoInfo_32(msgInfo_32_t *info)
+void DsFmqMsg::BEtoMsgInfo_32(msgInfo_32_t *info)
 {
   BE_to_array_32(info, sizeof(msgInfo_32_t));
 }
 
-void DsFmqMsg::BEfromInitInfo_64()
+void DsFmqMsg::BEfromMsgInfo_64(msgInfo_64_t *info)
 {
-  BE_from_array_32(&_initInfo, sizeof(initInfo_64_t) - PROC_NAME_LEN - sizeof(si64));
-  BE_from_array_64(&(_initInfo.bufSize), sizeof(si64));
+  BE_from_array_32(info, MSG_INFO_64_NUM_SI32 * sizeof(si32));
+  BE_from_array_64(&info->msgTime, MSG_INFO_64_NUM_SI64 * sizeof(si64));
 }
 
-void DsFmqMsg::BEtoInitInfo_64()
+void DsFmqMsg::BEtoMsgInfo_64(msgInfo_64_t *info)
 {
-  BE_to_array_32(&_initInfo, sizeof(initInfo_64_t) - PROC_NAME_LEN - sizeof(si64));
-  BE_to_array_64(&(_initInfo.bufSize), sizeof(si64));
+  BE_to_array_32(info, MSG_INFO_64_NUM_SI32 * sizeof(si32));
+  BE_to_array_64(&info->msgTime, MSG_INFO_64_NUM_SI64 * sizeof(si64));
 }
-
-void DsFmqMsg::BEfromInfo_64(msgInfo_64_t *info)
-{
-  BE_from_array_32(info, sizeof(msgInfo_64_t) - 2*sizeof(si64));
-  BE_from_array_64(&(info->msgTime), 2*sizeof(si64));
-}
-
-void DsFmqMsg::BEtoInfo_64(msgInfo_64_t *info)
-{
-  BE_to_array_32(info, sizeof(msgInfo_64_t) - 2*sizeof(si64));
-  BE_to_array_64(&(info->msgTime), 2*sizeof(si64));
-}
-
-
 
 /////////////////////////////////////////////////////
 // String representation
