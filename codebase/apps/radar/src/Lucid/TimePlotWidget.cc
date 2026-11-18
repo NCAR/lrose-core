@@ -51,7 +51,7 @@ TimePlotWidget::TimePlotWidget(QWidget *parent, const Params &params) :
   setMouseTracking(true);
   setToolTip("Left click: select frame; left drag: zoom time; "
              "middle drag: pan time; "
-             "right drag: expand movie; double-click: fit movie; "
+             "right drag: expand movie; "
              "Shift+right-click: help");
 }
 
@@ -113,6 +113,12 @@ void TimePlotWidget::fitMovie()
   _viewStart = _movieStart;
   _viewEnd = _movieEnd;
   update();
+}
+
+bool TimePlotWidget::isFitToMovie() const
+{
+  return fabs(_viewStart - _movieStart) <= 0.01 &&
+         fabs(_viewEnd - _movieEnd) <= 0.01;
 }
 
 QRectF TimePlotWidget::_plotRect() const
@@ -387,8 +393,9 @@ void TimePlotWidget::mousePressEvent(QMouseEvent *event)
       "Maps the current movie start and end to the left and right edges of "
       "the dragged rectangle. This computes a larger, frame-aligned movie "
       "range; use Accept to apply it.\n\n"
-      "Double left click\n"
-      "Fits the complete movie range in the canvas.\n\n"
+      "Reset button\n"
+      "Restores an altered movie range, or fits the current movie after a "
+      "time zoom or pan.\n\n"
       "Shift+right-click opens this help.");
     event->accept();
     return;
@@ -448,19 +455,6 @@ void TimePlotWidget::mouseReleaseEvent(QMouseEvent *event)
   event->accept();
 }
 
-void TimePlotWidget::mouseDoubleClickEvent(QMouseEvent *event)
-{
-  if (event->button() == Qt::LeftButton) {
-    _dragMode = DragMode::None;
-    fitMovie();
-    if (_viewChangedCallback) {
-      _viewChangedCallback(static_cast<time_t>(llround(_viewStart)),
-                           static_cast<time_t>(llround(_viewEnd)));
-    }
-    event->accept();
-  }
-}
-
 void TimePlotWidget::_finishZoom()
 {
   const QRectF plot = _plotRect();
@@ -491,6 +485,9 @@ void TimePlotWidget::_finishZoom()
   if (end - start >= _frameIntervalSecs) {
     _viewStart = start;
     _viewEnd = end;
+    if (_viewModifiedCallback) {
+      _viewModifiedCallback();
+    }
   }
 }
 
@@ -502,9 +499,14 @@ void TimePlotWidget::_finishPan()
   const double frameDelta = round(delta / _frameIntervalSecs);
   _viewStart = _pressViewStart + frameDelta * _frameIntervalSecs;
   _viewEnd = _pressViewEnd + frameDelta * _frameIntervalSecs;
-  if (frameDelta != 0.0 && _viewChangedCallback) {
-    _viewChangedCallback(static_cast<time_t>(llround(_viewStart)),
-                         static_cast<time_t>(llround(_viewEnd)));
+  if (frameDelta != 0.0) {
+    if (_viewModifiedCallback) {
+      _viewModifiedCallback();
+    }
+    if (_viewChangedCallback) {
+      _viewChangedCallback(static_cast<time_t>(llround(_viewStart)),
+                           static_cast<time_t>(llround(_viewEnd)));
+    }
   }
 }
 
@@ -544,6 +546,9 @@ void TimePlotWidget::_finishExpand()
     return;
   }
   if (_expansionCallback) {
+    if (_viewModifiedCallback) {
+      _viewModifiedCallback();
+    }
     _expansionCallback(static_cast<time_t>(llround(newStart)), newNFrames);
   }
 }

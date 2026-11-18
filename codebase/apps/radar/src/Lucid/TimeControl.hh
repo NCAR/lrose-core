@@ -127,7 +127,9 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   // Leave cached playback and restore the live display after an external
   // interaction, such as resizing the main window, invalidates movie frames.
-  void stopMovie() { _stopMovie(); }
+  void stopMovie(const char *reason = "external display change") {
+    _stopMovie(reason);
+  }
 
   // Configure the single frame used by unattended catalog generation. This
   // keeps legacy frame bounds and Product request intervals synchronized with
@@ -200,6 +202,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   QPushButton *_stopButton;
   QPushButton *_acceptButton;
   QPushButton *_cancelButton;
+  QPushButton *_resetButton;
   QPushButton *_outputButton;
   
   QDateTimeEdit *_startTimeEdit;
@@ -239,6 +242,14 @@ class DLL_EXPORT TimeControl : public QDialog {
   int _nFramesMovie;
   double _frameIntervalSecs;
   int _frameIndex;
+
+  // The first explicit definition edit captures an undo point. View-only
+  // zoom and pan need no definition snapshot; Reset simply fits that range.
+  bool _resetDefinitionValid;
+  DateTime _resetStartTime;
+  int _resetNFramesMovie;
+  double _resetFrameIntervalSecs;
+  int _resetFrameIndex;
   // TimeControl is the sole owner of accepted frame bounds. Renderers receive
   // immutable frame values through accessors, so GUI edits cannot leave a
   // second GlobalData movie model out of sync.
@@ -277,6 +288,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _updateTimesInGui();
   void _updateSelectedTimeInGui();
   void _updateTimePlot();
+  void _captureResetDefinition();
+  void _updateResetButton();
   void _applyExpandedMovieRange(time_t startTime, int nFrames);
   void _retrieveForTimeRange(time_t startTime, time_t endTime);
   void _selectFrameFromTimePlot(int frameIndex);
@@ -314,6 +327,8 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _startMovie();
   void _beginMovieBuild(bool outputAfterBuild);
   void _stopMovie();
+  void _stopMovie(const char *reason);
+  void _resetMovieDefinition();
   void _outputMovieLoop();
   void _finishMovieOutput();
   void _requestMovieFrame(int frameIndex);

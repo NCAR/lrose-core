@@ -98,10 +98,6 @@ Params *Params::_instance = (Params *) NULL;
 
   {
 
-    // sync the source object
-
-    source.sync();
-
     // zero out table
 
     memset(_table, 0, sizeof(_table));
@@ -117,6 +113,13 @@ Params *Params::_instance = (Params *) NULL;
     // copy table
 
     tdrpCopyTable((TDRPtable *) source._table, _table);
+
+    // load the copied table from the source object's members, so
+    // changes made to them since loading are kept. This is what
+    // source.sync() used to do, but without writing to source, so
+    // several threads can copy the same object safely.
+
+    tdrpUser2Table(_table, (char *) &source._start_);
 
     // set members
 
@@ -171,10 +174,6 @@ Params *Params::_instance = (Params *) NULL;
 
   {
 
-    // sync the other object
-
-    other.sync();
-
     // free up any existing memory
 
     freeAll();
@@ -190,6 +189,13 @@ Params *Params::_instance = (Params *) NULL;
     // copy table
 
     tdrpCopyTable((TDRPtable *) other._table, _table);
+
+    // load the copied table from the other object's members, so
+    // changes made to them since loading are kept. This is what
+    // other.sync() used to do, but without writing to other, so
+    // several threads can copy the same object safely.
+
+    tdrpUser2Table(_table, (char *) &other._start_);
 
     // set members
 
@@ -1115,7 +1121,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Number of seconds to wait for data to come in before giving up.");
     tt->help = tdrpStrDup("On very slow networks this may need to go as high as 180 seconds.");
     tt->val_offset = (char *) &data_timeout_secs - &_start_;
-    tt->single_val.i = 30;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'request_compressed_data'
@@ -1845,7 +1851,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->val_offset = (char *) &movie_frame_request_timeout_secs - &_start_;
     tt->has_min = TRUE;
     tt->min_val.i = 1;
-    tt->single_val.i = 120;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'movie_min_dwell_msecs'
@@ -5268,7 +5274,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Maximum time to wait for the data layers for one automatically generated image (secs).");
     tt->help = tdrpStrDup("A bounded wait prevents unattended image generation from hanging indefinitely when an MDV or symbolic product server is unavailable.");
     tt->val_offset = (char *) &images_request_timeout_secs - &_start_;
-    tt->single_val.i = 120;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'images_require_all_symprods'
@@ -5686,7 +5692,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Length of time to wait before killing simple external commands.");
     tt->help = tdrpStrDup("Used When running single image convert scripts and driving Browsers to web pages.");
     tt->val_offset = (char *) &simple_command_timeout_secs - &_start_;
-    tt->single_val.i = 30;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'complex_command_timeout_secs'

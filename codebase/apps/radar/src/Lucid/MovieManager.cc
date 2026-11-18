@@ -9,6 +9,7 @@
 #include "MovieManager.hh"
 
 #include <algorithm>
+#include <iostream>
 #include <utility>
 
 #include <QDateTime>
@@ -93,6 +94,13 @@ void MovieManager::beginFrameBuild(int frameIndex, int frameCount)
   // capture a coherent frame or return control to the user.
   const int timeoutSecs =
     std::max(1, _params.movie_frame_request_timeout_secs);
+  if (_params.debug) {
+    std::cerr << "Movie build gates: frame=" << frameIndex + 1
+              << " includesVertical=" << (_includesVertical ? "yes" : "no")
+              << " verticalGeneration=" << _verticalRequestGeneration
+              << " verticalReady=" << (_verticalReady ? "yes" : "no")
+              << " timeoutSecs=" << timeoutSecs << std::endl;
+  }
   _frameTimeoutTimer->start(timeoutSecs * 1000);
 }
 
@@ -117,6 +125,14 @@ bool MovieManager::markVerticalReady(int generation)
 {
   if (_buildFrame < 0 || !_includesVertical ||
       generation != _verticalRequestGeneration) {
+    if (_params.debug && _buildFrame >= 0) {
+      std::cerr << "Movie build: ignored vertical completion"
+                << " frame=" << _buildFrame + 1
+                << " receivedGeneration=" << generation
+                << " expectedGeneration=" << _verticalRequestGeneration
+                << " includesVertical="
+                << (_includesVertical ? "yes" : "no") << std::endl;
+    }
     return false;
   }
   _verticalReady = true;
@@ -128,6 +144,18 @@ bool MovieManager::markVerticalReady(int generation)
 
 void MovieManager::checkFrameReady(bool dependenciesReady)
 {
+  if (_params.debug && _buildFrame >= 0) {
+    std::cerr << "Movie build gates: frame=" << _buildFrame + 1
+              << " grid=" << (_gridReady ? "ready" : "pending")
+              << " verticalSection="
+              << (_verticalReady ? "ready" : "pending")
+              << " overlays="
+              << (dependenciesReady ? "ready" : "pending")
+              << " timeoutActive="
+              << (_frameTimeoutTimer->isActive() ? "yes" : "no")
+              << " timeoutRemainingMs="
+              << _frameTimeoutTimer->remainingTime() << std::endl;
+  }
   if (_buildFrame < 0 || !_gridReady || !_verticalReady ||
       !dependenciesReady) {
     return;
@@ -144,14 +172,38 @@ void MovieManager::checkFrameReady(bool dependenciesReady)
   // failure explicitly so TimeControl cannot remain indefinitely in Building.
   QString error;
   bool captured = false;
+  if (_params.debug) {
+    std::cerr << "Movie build: capturing frame " << completedFrame + 1
+              << std::endl;
+  }
   if (_callbacks.captureFrame) {
     captured = _callbacks.captureFrame(
       completedFrame, _includesVertical, error);
   } else {
     error = tr("No movie frame capture callback is available");
   }
+  if (_params.debug) {
+    std::cerr << "Movie build: capture frame " << completedFrame + 1
+              << (captured ? " succeeded" : " failed");
+    if (!error.isEmpty()) {
+      std::cerr << " error=" << error.toStdString();
+    }
+    std::cerr << std::endl;
+  }
   if (captured && _callbacks.frameRendered) {
-    _callbacks.frameRendered(completedFrame);
+    // Data readiness is normally detected inside GuiManager's 2 ms polling
+    // callback. Advance the controller only after that callback has unwound;
+    // requesting the next frame synchronously here lets the old reader pass
+    // continue against state which already belongs to the next frame.
+    QTimer::singleShot(0, this, [this, completedFrame]() {
+      if (_params.debug) {
+        std::cerr << "Movie build: delivering captured frame "
+                  << completedFrame + 1 << std::endl;
+      }
+      if (_callbacks.frameRendered) {
+        _callbacks.frameRendered(completedFrame);
+      }
+    });
     return;
   }
 
@@ -192,6 +244,11 @@ void MovieManager::_frameTimedOut()
   // callback synchronously follows the normal stop path and may immediately
   // restore live requests through GuiManager.
   const int timedOutFrame = _buildFrame;
+  if (_params.debug) {
+    std::cerr << "Movie build: frame " << timedOutFrame + 1
+              << " timed out waiting for "
+              << pending.join(tr(", ")).toStdString() << std::endl;
+  }
   _buildFrame = -1;
   _gridReady = false;
   _verticalReady = false;

@@ -81,6 +81,7 @@ TimeControl::TimeControl(GuiManager *parent) :
   _stopButton = NULL;
   _acceptButton = NULL;
   _cancelButton = NULL;
+  _resetButton = NULL;
   _outputButton = NULL;
   
   _startTimeEdit = NULL;
@@ -107,6 +108,10 @@ TimeControl::TimeControl(GuiManager *parent) :
   _nFramesMovie = _params.n_movie_frames;
   _frameIntervalSecs = _params.frame_interval_secs;
   _isRealtime = (_params.start_mode == Params::MODE_REALTIME);
+  _resetDefinitionValid = false;
+  _resetNFramesMovie = 1;
+  _resetFrameIntervalSecs = 1.0;
+  _resetFrameIndex = 0;
 
   // Establish the initial accepted timeline here rather than mirroring CIDD's
   // startup calculations in GlobalData. Archive frame-centering retains the
@@ -162,6 +167,7 @@ TimeControl::TimeControl(GuiManager *parent) :
   // disable these buttons at startup
 
   _enableAcceptCancel(false);
+  _updateResetButton();
 
   // set instance
   
@@ -226,7 +232,7 @@ void TimeControl::_populateGui()
   QFrame *timeLower = new QFrame(_timePanel);
   QHBoxLayout *timeLowerLayout = new QHBoxLayout;
   timeLower->setLayout(timeLowerLayout);
-  timeLowerLayout->setSpacing(3);
+  timeLowerLayout->setSpacing(1);
   timeLowerLayout->setContentsMargins(0, 0, 0, 0);
   // timeLower->setStyleSheet("border: 1px solid black; padding: 1px 1px 1px 1px;");
   
@@ -247,6 +253,10 @@ void TimeControl::_populateGui()
   _timePlot->setFrameSelectedCallback(
     [this](int frameIndex) {
       _selectFrameFromTimePlot(frameIndex);
+    });
+  _timePlot->setViewModifiedCallback(
+    [this]() {
+      _updateResetButton();
     });
   _timeLayout->addWidget(_timePlot);
   
@@ -273,7 +283,7 @@ void TimeControl::_populateGui()
   _stopButton = new QPushButton(startStopFrame);
   _stopButton->setText("Stop");
   connect(_stopButton, &QPushButton::clicked, this,
-          &TimeControl::_stopMovie);
+          [this]() { _stopMovie(); });
   _stopButton->setToolTip("Stop building or playing the movie");
   _stopButton->setStyleSheet("padding: 2px 4px 2px 4px; "
                             "background-color: red;");
@@ -495,34 +505,43 @@ void TimeControl::_populateGui()
   // lower panel contents
   //////////////////////////////////////////////////////////////////////
 
-  // output loop button
+  // reset and export buttons
   
-  QFrame *outputLoopFrame = new QFrame(timeUpper);
-  QVBoxLayout *outputLoopFrameLayout = new QVBoxLayout;
-  outputLoopFrame->setLayout(outputLoopFrameLayout);
-  outputLoopFrameLayout->setSpacing(2);
-  outputLoopFrameLayout->setContentsMargins(2, 2, 2, 2);
+  QFrame *movieActionFrame = new QFrame(timeLower);
+  QHBoxLayout *movieActionFrameLayout = new QHBoxLayout;
+  movieActionFrame->setLayout(movieActionFrameLayout);
+  movieActionFrameLayout->setSpacing(2);
+  movieActionFrameLayout->setContentsMargins(0, 1, 0, 1);
+
+  _resetButton = new QPushButton(movieActionFrame);
+  _resetButton->setText("Reset");
+  connect(_resetButton, &QPushButton::clicked, this,
+          &TimeControl::_resetMovieDefinition);
+  _resetButton->setToolTip(
+    "Restore the previous movie range or fit the time display");
+  _resetButton->setStyleSheet("padding: 3px 4px 3px 4px;");
   
-  _outputButton = new QPushButton(timeLower);
-  _outputButton->setText("Output Loop");
+  _outputButton = new QPushButton(movieActionFrame);
+  _outputButton->setText("Export");
   connect(_outputButton, &QPushButton::clicked, this,
           &TimeControl::_outputMovieLoop);
-  _outputButton->setToolTip("Save every movie frame and create an animation");
-  _outputButton->setStyleSheet("padding: 3px 6px 3px 6px; "
+  _outputButton->setToolTip("Export movie frames and create an animation");
+  _outputButton->setStyleSheet("padding: 3px 4px 3px 4px; "
                                "background-color: seagreen;");
   
-  outputLoopFrameLayout->addWidget(_outputButton, 0, Qt::AlignLeft);
+  movieActionFrameLayout->addWidget(_resetButton, 0, Qt::AlignLeft);
+  movieActionFrameLayout->addWidget(_outputButton, 0, Qt::AlignLeft);
   
   // fwd and back buttons
   
-  QString buttonStyle("padding: 3px 6px 3px 6px; "
+  QString buttonStyle("padding: 3px 4px 3px 4px; "
                       "background-color: seagreen;");
   
   QFrame *backButtonFrame = new QFrame(timeLower);
   QHBoxLayout *backButtonFrameLayout = new QHBoxLayout;
   backButtonFrame->setLayout(backButtonFrameLayout);
-  backButtonFrameLayout->setSpacing(3);
-  backButtonFrameLayout->setContentsMargins(2, 2, 2, 2);
+  backButtonFrameLayout->setSpacing(1);
+  backButtonFrameLayout->setContentsMargins(0, 1, 0, 1);
   
   _goBack1Button = new QPushButton(backButtonFrame);
   _goBack1Button->setText("<");
@@ -549,8 +568,8 @@ void TimeControl::_populateGui()
   QFrame *fwdButtonFrame = new QFrame(timeLower);
   QHBoxLayout *fwdButtonFrameLayout = new QHBoxLayout;
   fwdButtonFrame->setLayout(fwdButtonFrameLayout);
-  fwdButtonFrameLayout->setSpacing(3);
-  fwdButtonFrameLayout->setContentsMargins(2, 2, 2, 2);
+  fwdButtonFrameLayout->setSpacing(1);
+  fwdButtonFrameLayout->setContentsMargins(0, 1, 0, 1);
   
   _goFwd1Button = new QPushButton(fwdButtonFrame);
   _goFwd1Button->setText(">");
@@ -578,8 +597,8 @@ void TimeControl::_populateGui()
   
   QFrame *timeSliderFrame = new QFrame(timeLower);
   QHBoxLayout *timeSliderFrameLayout = new QHBoxLayout;
-  timeSliderFrameLayout->setSpacing(2);
-  timeSliderFrameLayout->setContentsMargins(2, 2, 2, 2);
+  timeSliderFrameLayout->setSpacing(1);
+  timeSliderFrameLayout->setContentsMargins(0, 1, 0, 1);
   timeSliderFrame->setLayout(timeSliderFrameLayout);
   // timeSliderFrame->setStyleSheet("border: 1px solid black; ");
   
@@ -659,7 +678,7 @@ void TimeControl::_populateGui()
   timeUpperLayout->addWidget(selectedTimeFrame, stretch, Qt::AlignLeft);
   timeUpperLayout->addWidget(acceptCancelFrame, stretch, Qt::AlignRight);
   
-  timeLowerLayout->addWidget(outputLoopFrame, 0, Qt::AlignLeft);
+  timeLowerLayout->addWidget(movieActionFrame, 0, Qt::AlignLeft);
   timeLowerLayout->addWidget(backButtonFrame, stretch, Qt::AlignLeft);
   timeLowerLayout->addWidget(timeSliderFrame, stretch, Qt::AlignCenter);
   timeLowerLayout->addWidget(fwdButtonFrame, stretch, Qt::AlignRight);
@@ -747,7 +766,7 @@ DateTime TimeControl::_getGuiEndTime() const
 void TimeControl::configureAutomaticImageTime(const DateTime &imageTime)
 {
   if (_movieState != MovieState::Idle) {
-    _stopMovie();
+    _stopMovie("automatic image time configuration");
   }
 
   _startTime = imageTime;
@@ -784,7 +803,7 @@ void TimeControl::restoreAfterAutomaticImages(const DateTime &startTime,
                                               bool realtime)
 {
   if (_movieState != MovieState::Idle) {
-    _stopMovie();
+    _stopMovie("automatic image state restoration");
   }
 
   _startTime = startTime;
@@ -873,10 +892,14 @@ void TimeControl::_cancelGuiSelections()
   _guiFrameIntervalSecs = _frameIntervalSecs;
   _guiFrameIndex = _frameIndex;
   _updateTimesInGui();
+  const QSignalBlocker framesBlocker(_nFramesSelector);
+  const QSignalBlocker intervalBlocker(_frameIntervalSelector);
   _nFramesSelector->setValue(_guiNFramesMovie);
   _frameIntervalSelector->setValue(_guiFrameIntervalSecs);
+  _resetDefinitionValid = false;
   _enableAcceptCancel(false);
   _computeFrameTimes();
+  _updateResetButton();
 }
 
 ////////////////////////////////////////////////////////
@@ -915,6 +938,16 @@ void TimeControl::_beginMovieBuild(bool outputAfterBuild)
 
 void TimeControl::_stopMovie()
 {
+  _stopMovie("Stop button");
+}
+
+void TimeControl::_stopMovie(const char *reason)
+{
+  if (_params.debug) {
+    cerr << "Movie build: stopping movie reason=" << reason
+         << " state=" << static_cast<int>(_movieState)
+         << " expectedFrame=" << _buildingFrameIndex + 1 << endl;
+  }
   _movieTimer->stop();
   _manager->cancelMovieBuild();
   _movieState = MovieState::Idle;
@@ -937,6 +970,46 @@ void TimeControl::_stopMovie()
   _manager->statusBar()->showMessage("Movie stopped", 3000);
 }
 
+////////////////////////////////////////////////////////
+// restore the pre-edit movie definition and fit its complete range
+
+void TimeControl::_resetMovieDefinition()
+{
+  if (_movieState != MovieState::Idle) {
+    return;
+  }
+
+  if (_resetDefinitionValid) {
+    _guiStartTime = _resetStartTime;
+    _guiNFramesMovie = _resetNFramesMovie;
+    _guiFrameIntervalSecs = _resetFrameIntervalSecs;
+    _guiFrameIndex = std::clamp(
+      _resetFrameIndex, 0, _guiNFramesMovie - 1);
+
+    // Publish the interdependent controls as one definition. Their normal
+    // edit handlers must not observe a partially restored range.
+    const QSignalBlocker startBlocker(_startTimeEdit);
+    const QSignalBlocker framesBlocker(_nFramesSelector);
+    const QSignalBlocker intervalBlocker(_frameIntervalSelector);
+    const QSignalBlocker sliderBlocker(_timeSlider);
+    _startTimeEdit->setDateTime(getQDateTime(_guiStartTime));
+    _nFramesSelector->setValue(_guiNFramesMovie);
+    _frameIntervalSelector->setValue(_guiFrameIntervalSecs);
+    _timeSlider->setMaximum(_guiNFramesMovie - 1);
+    _timeSlider->setSliderPosition(_guiFrameIndex);
+    _acceptGuiSelections();
+  }
+
+  _resetDefinitionValid = false;
+  _timePlot->fitMovie();
+  _retrieveForTimeRange(
+    _guiStartTime.utime(),
+    static_cast<time_t>(llround(
+      _guiStartTime.utime() +
+      _guiNFramesMovie * _guiFrameIntervalSecs)));
+  _updateResetButton();
+}
+
 void TimeControl::_requestMovieFrame(int frameIndex)
 {
   if (_movieState != MovieState::Building || frameIndex < 0 ||
@@ -946,6 +1019,11 @@ void TimeControl::_requestMovieFrame(int frameIndex)
 
   _buildingFrameIndex = frameIndex;
   _guiFrameIndex = frameIndex;
+  if (_params.debug) {
+    cerr << "Movie build: requesting frame " << frameIndex + 1
+         << " of " << _nFramesMovie
+         << " at " << _getGuiSelectedTime().asString(0) << endl;
+  }
   {
     const QSignalBlocker sliderBlocker(_timeSlider);
     _timeSlider->setSliderPosition(frameIndex);
@@ -958,13 +1036,27 @@ void TimeControl::_requestMovieFrame(int frameIndex)
 
 void TimeControl::movieFrameRendered(int frameIndex)
 {
+  if (_params.debug) {
+    cerr << "Movie build: received captured frame " << frameIndex + 1
+         << " state=" << static_cast<int>(_movieState)
+         << " expectedFrame=" << _buildingFrameIndex + 1
+         << " cacheSize=" << _renderedMovieFrames.size() << endl;
+  }
   if (_movieState != MovieState::Building ||
       frameIndex != _buildingFrameIndex || frameIndex < 0 ||
       frameIndex >= static_cast<int>(_renderedMovieFrames.size())) {
+    if (_params.debug) {
+      cerr << "Movie build: rejected captured frame " << frameIndex + 1
+           << " because controller state changed before delivery" << endl;
+    }
     return;
   }
 
   _renderedMovieFrames[frameIndex] = true;
+  if (_params.debug) {
+    cerr << "Movie build: captured frame " << frameIndex + 1
+         << " of " << _nFramesMovie << endl;
+  }
   _buildingFrameIndex = -1;
   _timePlot->setRenderedFrames(_renderedMovieFrames, -1);
   if (frameIndex + 1 < _nFramesMovie) {
@@ -993,7 +1085,7 @@ void TimeControl::movieFrameCaptureFailed(int frameIndex,
   // Use the normal stop path so cached playback, disabled controls, and the
   // live data request are restored together. Replace its routine Stop message
   // with the actionable failure after that cleanup has completed.
-  _stopMovie();
+  _stopMovie("frame capture failure");
   _manager->statusBar()->showMessage(message, 15000);
 }
 
@@ -1090,7 +1182,7 @@ void TimeControl::_finishMovieOutput()
 
   // Output builds use the same immutable cache as playback, but ownership of
   // the live canvases returns immediately after the files have been written.
-  _stopMovie();
+  _stopMovie("movie export completed");
   if (success) {
     QMessageBox::information(this, tr("Movie loop saved"), message);
   } else {
@@ -1119,6 +1211,7 @@ void TimeControl::_setGuiIntervalSecs(double val)
 
 void TimeControl::_setStartTimeFromEdit(const QDateTime &val)
 {
+  _captureResetDefinition();
   QDate dd = val.date();
   QTime tt = val.time();
   _guiStartTime.set(dd.year(), dd.month(), dd.day(),
@@ -1152,6 +1245,7 @@ void TimeControl::_updateTimesInGui()
   }
 
   QDateTime qtime = getQDateTime(_guiStartTime);
+  const QSignalBlocker startBlocker(_startTimeEdit);
   _startTimeEdit->setDateTime(qtime);
   
   _endTimeLabel->setText(_getGuiEndTime().asString(0).c_str());
@@ -1183,6 +1277,40 @@ void TimeControl::_updateTimePlot()
     _timePlot->setMovieState(_guiStartTime.utime(), _guiNFramesMovie,
                              _guiFrameIntervalSecs, _guiFrameIndex);
   }
+  _updateResetButton();
+}
+
+////////////////////////////////////////////////////////
+// retain one undo point before a movie definition is altered
+
+void TimeControl::_captureResetDefinition()
+{
+  if (_resetDefinitionValid) {
+    return;
+  }
+  _resetStartTime = _startTime;
+  _resetNFramesMovie = _nFramesMovie;
+  _resetFrameIntervalSecs = _frameIntervalSecs;
+  _resetFrameIndex = _frameIndex;
+  _resetDefinitionValid = true;
+  _updateResetButton();
+}
+
+////////////////////////////////////////////////////////
+// expose Reset only while it has an observable effect
+
+void TimeControl::_updateResetButton()
+{
+  if (!_resetButton) {
+    return;
+  }
+  const bool viewModified = _timePlot && !_timePlot->isFitToMovie();
+  const bool available = _resetDefinitionValid || viewModified;
+  const bool enabled = available && _movieState == MovieState::Idle;
+  _resetButton->setEnabled(enabled);
+  _resetButton->setStyleSheet(
+    enabled ? "padding: 3px 4px 3px 4px; background-color: seagreen;" :
+              "padding: 3px 4px 3px 4px; background-color: lightgray;");
 }
 
 ////////////////////////////////////////////////////////
@@ -1232,7 +1360,7 @@ void TimeControl::_retrieveForTimeRange(time_t startTime, time_t endTime)
     return;
   }
   if (_movieState != MovieState::Idle) {
-    _stopMovie();
+    _stopMovie("time-plot range retrieval");
   }
 
   const time_t movieStart = _guiStartTime.utime();
@@ -1287,7 +1415,7 @@ void TimeControl::_selectFrameFromTimePlot(int frameIndex)
   }
 
   if (_movieState != MovieState::Idle) {
-    _stopMovie();
+    _stopMovie("time-plot frame selection");
   }
 
   _guiFrameIndex = frameIndex;
@@ -1308,8 +1436,10 @@ void TimeControl::_applyExpandedMovieRange(time_t startTime, int nFrames)
     return;
   }
   if (_movieState != MovieState::Idle) {
-    _stopMovie();
+    _stopMovie("time-plot range expansion");
   }
+
+  _captureResetDefinition();
 
   const DateTime selectedTime = _getGuiSelectedTime();
   _guiStartTime.set(startTime);
@@ -1355,7 +1485,7 @@ void TimeControl::_setStartTime(const DateTime &stime)
 void TimeControl::goBack1()
 {
   if (_movieState != MovieState::Idle) {
-    _stopMovie();
+    _stopMovie("previous-frame action");
   }
   // change index
   if (_guiFrameIndex == 0) {
@@ -1381,6 +1511,7 @@ void TimeControl::goBack1()
 
 void TimeControl::_shiftBack1()
 {
+  _captureResetDefinition();
   _guiStartTime -= _getGuiMovieDurationSecs();
   _updateTimesInGui();
 }
@@ -1391,6 +1522,7 @@ void TimeControl::_shiftBack1()
 
 void TimeControl::_shiftBack3()
 {
+  _captureResetDefinition();
   _guiStartTime -= _getGuiMovieDurationSecs() * 3;
   _updateTimesInGui();
 }
@@ -1402,7 +1534,7 @@ void TimeControl::_shiftBack3()
 void TimeControl::goFwd1()
 {
   if (_movieState != MovieState::Idle) {
-    _stopMovie();
+    _stopMovie("next-frame action");
   }
   // change index
   if (_guiFrameIndex == _nFramesMovie - 1) {
@@ -1428,6 +1560,7 @@ void TimeControl::goFwd1()
 
 void TimeControl::_shiftFwd1()
 {
+  _captureResetDefinition();
   _guiStartTime += _getGuiMovieDurationSecs();
   _updateTimesInGui();
 }
@@ -1438,6 +1571,7 @@ void TimeControl::_shiftFwd1()
 
 void TimeControl::_shiftFwd3()
 {
+  _captureResetDefinition();
   _guiStartTime += _getGuiMovieDurationSecs() * 3;
   _updateTimesInGui();
 }
@@ -1516,7 +1650,7 @@ void TimeControl::_timeSliderReleased()
 void TimeControl::_timeSliderPressed() 
 {
   if (_movieState != MovieState::Idle) {
-    _stopMovie();
+    _stopMovie("time slider press");
   }
   int value = _timeSlider->value();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -1534,6 +1668,7 @@ void TimeControl::_setNFrames(int val)
   if (val < 1) {
     return;
   }
+  _captureResetDefinition();
   _guiNFramesMovie = val;
   _timeSlider->setMaximum(_guiNFramesMovie - 1);
   if (_guiFrameIndex >= _guiNFramesMovie) {
@@ -1553,6 +1688,7 @@ void TimeControl::_setFrameIntervalSecs(double val)
   if (val < 1) {
     return;
   }
+  _captureResetDefinition();
   _guiFrameIntervalSecs = val;
   _updateTimesInGui();
   _enableAcceptCancel(true);
@@ -1791,6 +1927,7 @@ void TimeControl::_setMovieDefinitionControlsEnabled(bool enabled)
   _nFramesSelector->setEnabled(enabled);
   _frameIntervalSelector->setEnabled(enabled);
   _realtimeSelector->setEnabled(enabled);
+  _updateResetButton();
   if (!enabled) {
     _acceptButton->setEnabled(false);
     _cancelButton->setEnabled(false);

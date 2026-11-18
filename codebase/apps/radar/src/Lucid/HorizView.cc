@@ -1044,12 +1044,26 @@ QImage HorizView::movieFrameImage(int frameIndex) const
 
 bool HorizView::captureMovieFrame(int frameIndex)
 {
-  if (frameIndex < 0 || frameIndex >= static_cast<int>(_movieFrames.size())) {
+  if (frameIndex < 0 || frameIndex >= static_cast<int>(_movieFrames.size()) ||
+      width() <= 0 || height() <= 0) {
+    if (_params.debug) {
+      cerr << "Movie capture: invalid horizontal target frame="
+           << frameIndex + 1 << " cacheSize=" << _movieFrames.size()
+           << " widgetSize=" << width() << "x" << height() << endl;
+    }
     return false;
   }
   _playbackFrameIndex = -1;
-  repaint();
+  if (_params.debug) {
+    cerr << "Movie capture: rendering horizontal frame " << frameIndex + 1
+         << " size=" << width() << "x" << height() << endl;
+  }
   _movieFrames[frameIndex] = captureImageWithoutInteractions();
+  if (_params.debug) {
+    cerr << "Movie capture: horizontal frame " << frameIndex + 1
+         << (_movieFrames[frameIndex].isNull() ? " failed" : " complete")
+         << endl;
+  }
   return !_movieFrames[frameIndex].isNull();
 }
 
@@ -1058,18 +1072,26 @@ bool HorizView::captureMovieFrame(int frameIndex)
 
 QImage HorizView::captureImageWithoutInteractions()
 {
+  if (width() <= 0 || height() <= 0) {
+    return QImage();
+  }
+
   const bool restoreRubberBand = _rubberBand && _rubberBand->isVisible();
   if (restoreRubberBand) {
     _rubberBand->hide();
   }
 
-  QImage image;
+  QImage image(size(), QImage::Format_ARGB32_Premultiplied);
+  image.fill(QColor(QString::fromStdString(_params.background_color)));
   {
-    // QWidget::grab() paints synchronously, so this scoped flag cannot leak
-    // into the normal display even when capture is invoked between events.
+    // Render directly into an image instead of using QWidget::grab(). The
+    // latter enters the window-system capture path, where Lucid's 2 ms GUI
+    // timer can issue another data/render cycle while a movie frame is being
+    // captured. Direct rendering remains synchronous and uses the already
+    // settled layer caches for this frame.
     QScopedValueRollback<bool> suppress(
       _suppressInteractionGraphics, true);
-    image = grab().toImage();
+    render(&image);
   }
 
   if (restoreRubberBand) {

@@ -53,7 +53,11 @@ public:
   void setFrameSelectedCallback(const std::function<void(int)> &callback) {
     _frameSelectedCallback = callback;
   }
+  void setViewModifiedCallback(const std::function<void()> &callback) {
+    _viewModifiedCallback = callback;
+  }
   void fitMovie();
+  bool isFitToMovie() const;
 
   QSize sizeHint() const override;
 
@@ -62,7 +66,6 @@ protected:
   void mousePressEvent(QMouseEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
   void mouseReleaseEvent(QMouseEvent *event) override;
-  void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
   enum class DragMode { None, Zoom, Pan, Expand };
@@ -88,6 +91,7 @@ private:
   std::function<void(time_t, int)> _expansionCallback;
   std::function<void(time_t, time_t)> _viewChangedCallback;
   std::function<void(int)> _frameSelectedCallback;
+  std::function<void()> _viewModifiedCallback;
 
   QRectF _plotRect() const;
   double _pixelForTime(double time) const;

@@ -159,6 +159,9 @@ carrying a live hover selection into cached playback.
   remain permanently active after an image-capture error.
 - Right-drag interval expansion requires Accept and updates the movie start and
   end widgets. Editing the frame interval no longer starts a build implicitly.
+- Reset is enabled only after a movie-definition or time-viewport change. It
+  restores the pre-edit definition when needed and otherwise fits the current
+  movie; the former double-click-to-fit gesture is disabled.
 - A field selected after stopping a movie immediately returns to the normal
   non-movie request/render path.
 
@@ -167,7 +170,7 @@ carrying a live hover selection into cached playback.
 - File -> Save-Image captures the horizontal view and, when visible, the
   vertical view. Names contain the view, sanitized field, selected UTC time,
   and a collision suffix so existing files are not replaced.
-- Time controller Output Loop writes the immutable movie caches. From idle it
+- Time controller Export writes the immutable movie caches. From idle it
   first builds the complete loop; during playback it exports the existing
   cache.
 - Loop output can launch `movie_convert_script` asynchronously with the
@@ -370,7 +373,7 @@ Suggested interactive smoke test:
 7. Test time-canvas selection, zoom, pan, automatic extension, right-drag plus
    Accept, and interval editing.
 8. Exercise Reload with an open vertical section and enabled Products.
-9. Test interactive Save-Image and Output Loop without overwriting prior files.
+9. Test interactive Save-Image and Export without overwriting prior files.
 10. Run automatic create-once, archive schedule, and realtime schedule modes;
    inspect image names, summaries, optional sidecars, and exit status.
 11. Press Ctrl-C during active MDV/SPDB/image requests and verify orderly

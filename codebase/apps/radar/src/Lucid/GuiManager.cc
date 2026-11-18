@@ -575,7 +575,7 @@ void GuiManager::restoreLiveDisplayAfterMovie()
 void GuiManager::stopMovieForDisplayChange()
 {
   if (_timeControl && _timeControl->isMovieActive()) {
-    _timeControl->stopMovie();
+    _timeControl->stopMovie("vertical window resize");
   }
 }
 
@@ -743,6 +743,23 @@ void GuiManager::_checkMovieFrameReady()
     _gd.wind_mgr->activeVerticalWindsSettled();
   const bool verticalTerrainReady =
     !_movieManager->includesVertical() || _terrainVerticalSettled;
+  if (_params.debug) {
+    cerr << "Movie readiness: frame=" << _movieManager->buildFrame() + 1
+         << " products=" << (productsReady ? "ready" : "pending")
+         << " horizWinds=" << (horizontalWindsReady ? "ready" : "pending")
+         << " vertWinds=" << (verticalWindsReady ? "ready" : "pending")
+         << " horizTerrain="
+         << (_terrainHorizontalSettled ? "ready" : "pending")
+         << " vertTerrain=" << (verticalTerrainReady ? "ready" : "pending");
+    if (!productsReady && _gd.prod_mgr) {
+      cerr << " productRequests="
+           << (_gd.prod_mgr->activeProductRequestsSettled() ?
+               "settled" : "in-flight")
+           << " productUnavailable="
+           << _gd.prod_mgr->numActiveProductsUnavailable();
+    }
+    cerr << endl;
+  }
   _movieManager->checkFrameReady(
     productsReady && horizontalWindsReady && verticalWindsReady &&
     _terrainHorizontalSettled && verticalTerrainReady);
@@ -851,7 +868,7 @@ void GuiManager::resizeEvent(QResizeEvent *event)
   // were active at build time. A resize necessarily returns to live mode so
   // the display can rebuild all layers for the new geometry.
   if (_timeControl && _timeControl->isMovieActive()) {
-    _timeControl->stopMovie();
+    _timeControl->stopMovie("main window resize");
   }
   // Restart the timer on each resize event
   _resizeTimer->start();
@@ -2289,6 +2306,10 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
       _checkAutomaticImageReady();
     }
     if (_movieManager->buildFrame() == frameIndex) {
+      if (_params.debug) {
+        cerr << "Movie readiness: horizontal grid ready for frame "
+             << frameIndex + 1 << endl;
+      }
       _movieManager->markGridReady(frameIndex);
       _checkMovieFrameReady();
     }
@@ -3332,6 +3353,11 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
 
   if (isMovieBuilding() &&
       _movieManager->markVerticalReady(reader->getVertGeneration())) {
+    if (_params.debug) {
+      cerr << "Movie readiness: vertical section ready for frame "
+           << _movieManager->buildFrame() + 1
+           << " generation=" << reader->getVertGeneration() << endl;
+    }
     _checkMovieFrameReady();
     return;
   }
