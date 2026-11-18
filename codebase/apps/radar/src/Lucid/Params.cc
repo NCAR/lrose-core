@@ -1089,7 +1089,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("update_interval");
     tt->descr = tdrpStrDup("Number of seconds between data update requests.");
-    tt->help = tdrpStrDup("The display will check the Data Mapper for new data every interval in real-time mode. At every interval we will check for updates to each grid and product. If no datamap_host is set, the data is assumed to be old and will be reloaded every interval. Set this wisely. Values of 10-900 are typical. Default=120 Setting this below 3 seconds is not advised.  interacts with the Data Mapper Host parameter: cidd.datamap_host:");
+    tt->help = tdrpStrDup("In real-time mode, the live display unconditionally reloads its active grid, products, winds, and visible vertical section at this interval. The timeline is advanced to the current time before each reload. Selecting an older frame pauses automatic updates until the live frame is selected again. Values of 10-900 are typical. Default=120. Setting this below 3 seconds is not advised.");
     tt->val_offset = (char *) &update_interval - &_start_;
     tt->single_val.i = 120;
     tt++;

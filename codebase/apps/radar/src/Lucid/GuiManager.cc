@@ -37,6 +37,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <limits>
 #include <utility>
 #include <QActionGroup>
 #include <QApplication>
@@ -197,6 +198,8 @@ GuiManager::GuiManager() :
 
   _main = NULL;
   _resizeTimer = NULL;
+  _realtimeUpdateTimer = NULL;
+  _realtimeRefreshPending = false;
   _resized = false;
   
   _horizFrame = NULL;
@@ -611,6 +614,12 @@ void GuiManager::movieStateChanged()
   const bool building = isMovieBuilding();
   const bool active = isMovieActive();
   const bool interactive = !_params.create_images_automatically;
+
+  if (!active && _realtimeRefreshPending) {
+    // Let the movie transition finish before returning ownership to live
+    // readers. Multiple timer expirations collapse into this single request.
+    QTimer::singleShot(0, this, [this]() { _handleRealtimeUpdate(); });
+  }
 
   // A movie build must capture one stable display configuration. Playback is
   // less restrictive: field and level choices may update the hidden live
@@ -1035,6 +1044,17 @@ void GuiManager::_setupWindows()
   
   _timeControl = new TimeControl(this);
   _timeControl->refreshDataAvailability();
+
+  _realtimeUpdateTimer = new QTimer(this);
+  const int maxIntervalSecs = std::numeric_limits<int>::max() / 1000;
+  const int intervalSecs = std::clamp(
+    _params.update_interval, 1, maxIntervalSecs);
+  _realtimeUpdateTimer->setInterval(intervalSecs * 1000);
+  connect(_realtimeUpdateTimer, &QTimer::timeout, this,
+          [this]() { _handleRealtimeUpdate(); });
+  connect(_timeControl, &TimeControl::realtimeModeChanged,
+          this, &GuiManager::_setRealtimeUpdatesEnabled);
+  _setRealtimeUpdatesEnabled(_timeControl->isRealtime());
   
   // fill out menu bar
 
@@ -2371,6 +2391,14 @@ void GuiManager::_handleFirstTimerEvent()
 
 void GuiManager::_reloadData()
 {
+  _invalidateDisplayedData(true);
+}
+
+////////////////////////////////////////////////////////
+// invalidate data represented by the live display
+
+void GuiManager::_invalidateDisplayedData(bool refreshProductsImmediately)
+{
   // Use the normal request path so a reload waits for any active horizontal
   // read and preserves the displayed image until replacement data arrive.
   _horizontalRequestHasChanged = true;
@@ -2380,7 +2408,9 @@ void GuiManager::_reloadData()
   }
   if (_gd.prod_mgr) {
     _gd.prod_mgr->reset_product_valid_flags();
-    _gd.prod_mgr->refreshActiveProducts();
+    if (refreshProductsImmediately) {
+      _gd.prod_mgr->refreshActiveProducts();
+    }
   }
   if (_gd.wind_mgr) {
     _gd.wind_mgr->invalidate();
@@ -2393,6 +2423,54 @@ void GuiManager::_reloadData()
       _vsectionRoute.size() >= 2) {
     _requestVerticalSection();
   }
+}
+
+////////////////////////////////////////////////////////
+// advance and reload the live realtime display
+
+void GuiManager::_handleRealtimeUpdate(bool selectLiveFrame)
+{
+  if (!_timeControl || !_timeControl->isRealtime() ||
+      _params.create_images_automatically) {
+    return;
+  }
+  if (isMovieActive()) {
+    _realtimeRefreshPending = true;
+    return;
+  }
+  if (!_timeControl->advanceRealtimeToNow(selectLiveFrame)) {
+    // Selecting an older realtime frame is an intentional pause, not a
+    // missed update which should later pull the user back to the live frame.
+    _realtimeRefreshPending = false;
+    return;
+  }
+
+  _realtimeRefreshPending = false;
+  // The changed timeline causes the normal request path to capture the new
+  // Product context. Do not first issue a redundant request at the old time.
+  _invalidateDisplayedData(false);
+}
+
+////////////////////////////////////////////////////////
+// start or stop the realtime update cadence
+
+void GuiManager::_setRealtimeUpdatesEnabled(bool enabled)
+{
+  if (!_realtimeUpdateTimer || _params.create_images_automatically) {
+    return;
+  }
+
+  _realtimeRefreshPending = false;
+  if (!enabled) {
+    _realtimeUpdateTimer->stop();
+    return;
+  }
+
+  _realtimeUpdateTimer->start();
+  // A mode transition should show live data immediately rather than leaving
+  // an archive selection visible for the first full update interval.
+  QTimer::singleShot(0, this,
+                     [this]() { _handleRealtimeUpdate(true); });
 }
 
 ////////////////////////////////////////////////////////

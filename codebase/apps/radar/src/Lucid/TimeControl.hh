@@ -143,6 +143,11 @@ class DLL_EXPORT TimeControl : public QDialog {
                                    bool realtime);
   bool isRealtime() const { return _isRealtime; }
 
+  // Move the accepted realtime window to now before an automatic refresh.
+  // Ordinary timer ticks leave an older frame selected by the user untouched;
+  // entering realtime explicitly returns the controller to its live frame.
+  bool advanceRealtimeToNow(bool selectLiveFrame);
+
   // convert between Qt and Radx date/time objects
   
   static QDateTime getQDateTime(const DateTime &rtime);
@@ -169,6 +174,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   // Abort a build whose fully rendered widget could not be copied into the
   // immutable movie cache.
   void movieFrameCaptureFailed(int frameIndex, const QString &error);
+
+ signals:
+
+  void realtimeModeChanged(bool enabled);
 
  private:
 
@@ -293,6 +302,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _computeFrameTimes();
   void _publishTimelineRange();
   void _publishSelectedFrame();
+  void _setRealtimeMode(bool enabled);
                            
  private slots:
 

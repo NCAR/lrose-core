@@ -1634,29 +1634,91 @@ void TimeControl::_publishSelectedFrame()
   _gd.coord_expt->time_cent = frame->mid;
 }
 
+////////////////////////////////////////////////////////
+// move the accepted realtime window to the current time
+
+bool TimeControl::advanceRealtimeToNow(bool selectLiveFrame)
+{
+  if (!_isRealtime || _movieState != MovieState::Idle ||
+      _nFramesMovie < 1) {
+    return false;
+  }
+
+  const int liveFrame = _nFramesMovie - 1;
+  if (!selectLiveFrame && _frameIndex != liveFrame) {
+    return false;
+  }
+
+  // The dialog is an editable view of the accepted timeline. A realtime tick
+  // must not commit or discard movie-definition edits which the user has not
+  // yet accepted; Start deliberately accepts those values as one operation.
+  const bool pendingGuiEdits =
+    _guiStartTime != _startTime ||
+    _guiNFramesMovie != _nFramesMovie ||
+    fabs(_guiFrameIntervalSecs - _frameIntervalSecs) > 1.0e-6 ||
+    _guiFrameIndex != _frameIndex;
+
+  time_t startTime = time(nullptr) - static_cast<time_t>(
+    liveFrame * _frameIntervalSecs);
+  const int roundingSecs = std::max(1, _params.temporal_rounding);
+  startTime -= startTime % roundingSecs;
+  const bool rangeChanged = _startTime.utime() != startTime;
+
+  _startTime.set(startTime);
+  _frameIndex = liveFrame;
+  _computeFrameTimes();
+  _publishTimelineRange();
+
+  if (rangeChanged) {
+    // Availability lists cover the complete timeline, so every field must
+    // discard its old range even though only the displayed field is re-read.
+    for (int ii = 0; ii < _gd.num_datafields; ++ii) {
+      if (_gd.mread[ii]) {
+        _gd.mread[ii]->invalidateTimeList();
+      }
+    }
+  }
+
+  if (!pendingGuiEdits) {
+    _guiStartTime = _startTime;
+    _guiNFramesMovie = _nFramesMovie;
+    _guiFrameIntervalSecs = _frameIntervalSecs;
+    _guiFrameIndex = _frameIndex;
+    {
+      const QSignalBlocker sliderBlocker(_timeSlider);
+      _timeSlider->setSliderPosition(_frameIndex);
+    }
+    _updateTimesInGui();
+    _enableAcceptCancel(false);
+  }
+  _timeHasChanged = true;
+  return true;
+}
+
+////////////////////////////////////////////////////////
+// publish a realtime/archive mode transition
+
+void TimeControl::_setRealtimeMode(bool enabled)
+{
+  if (_isRealtime == enabled) {
+    return;
+  }
+  _isRealtime = enabled;
+  cerr << (enabled ? "Realtime mode" : "Archive mode") << endl;
+  emit realtimeModeChanged(enabled);
+}
+
 // realtime mode?
 
 #if QT_VERSION >= 0x067000
 void TimeControl::_setRealtime(Qt::CheckState val)
 {
-  if (val == Qt::Checked) {
-    _isRealtime = true;
-    cerr << "Realtime mode" << endl;
-  } else {
-    _isRealtime = false;
-    cerr << "Archive mode" << endl;
-  }
+  _setRealtimeMode(val == Qt::Checked);
 }
 #else
 void TimeControl::_setRealtime(int val)
 {
-  if (val == 0) {
-    _isRealtime = false;
-    cerr << "Archive mode" << endl;
-  } else {
-    _isRealtime = true;
-    cerr << "Realtime mode" << endl;
-  }
+  _setRealtimeMode(val != 0);
 }
 #endif
 

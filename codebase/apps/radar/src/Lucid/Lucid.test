@@ -5010,13 +5010,12 @@ redraw_interval = 100;
 //
 // Number of seconds between data update requests.
 //
-// The display will check the Data Mapper for new data every interval in 
-//   real-time mode. At every interval we will check for updates to each 
-//   grid and product. If no datamap_host is set, the data is assumed to 
-//   be old and will be reloaded every interval. Set this wisely. Values 
-//   of 10-900 are typical. Default=120 Setting this below 3 seconds is 
-//   not advised.  interacts with the Data Mapper Host parameter: 
-//   cidd.datamap_host:.
+// In real-time mode, the live display unconditionally reloads its active
+//   grid, products, winds, and visible vertical section at this interval.
+//   The timeline is advanced to the current time before each reload.
+//   Selecting an older frame pauses automatic updates until the live frame
+//   is selected again. Values of 10-900 are typical. Default=120. Setting
+//   this below 3 seconds is not advised.
 //
 //
 // Type: int

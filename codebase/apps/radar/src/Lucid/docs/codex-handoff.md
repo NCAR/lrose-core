@@ -114,8 +114,9 @@ transitional and retains some CIDD-style shared structures.
 - SPDB requests run independently of MDV reads. Per-product generations reject
   stale completions, and bounded retry prevents tight loops against failed
   servers.
-- Product toggles, global enable, display changes, reload, and DataMapper
-  expiry participate in request or repaint decisions.
+- Product toggles, global enable, display changes, manual reload, and the
+  unconditional realtime refresh cadence participate in request or repaint
+  decisions. Realtime refresh does not depend on DataMapper availability.
 - Retrieval or decode failure retains the previous valid interactive snapshot.
 - Qt renderers cover text, polylines, icon lines, stroked icons, named and
   bitmap icons, arcs, rectangles, and station-report chunks.
