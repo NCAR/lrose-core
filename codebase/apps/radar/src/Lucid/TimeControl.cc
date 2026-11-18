@@ -146,6 +146,7 @@ TimeControl::TimeControl(GuiManager *parent) :
   _isSweep = false;
   _outputAfterBuild = false;
   _resumeRealtimeAfterMovie = false;
+  _movieBuildId = 0;
   _movieTimer = new QTimer(this);
   _movieTimer->setSingleShot(true);
   _buildingFrameIndex = -1;
@@ -734,14 +735,28 @@ DateTime TimeControl::getSelectedTime() const
 
 const TimelineFrame *TimeControl::getFrame(int frameIndex) const
 {
-  if (frameIndex < 0 || frameIndex >= static_cast<int>(_timelineFrames.size())) {
+  const vector<TimelineFrame> &frames =
+    isMovieActive() ? _movieTimelineFrames : _timelineFrames;
+  if (frameIndex < 0 || frameIndex >= static_cast<int>(frames.size())) {
     return nullptr;
   }
-  return &_timelineFrames[frameIndex];
+  return &frames[frameIndex];
+}
+
+int TimeControl::getFrameCount() const
+{
+  return static_cast<int>(
+    isMovieActive() ? _movieTimelineFrames.size() : _timelineFrames.size());
 }
 
 DateTime TimeControl::_getGuiSelectedTime() const
 {
+  if (isMovieActive()) {
+    const TimelineFrame *frame = getFrame(_guiFrameIndex);
+    if (frame) {
+      return DateTime(frame->start);
+    }
+  }
   DateTime stime(_guiStartTime + _guiFrameIndex * _guiFrameIntervalSecs);
   return stime;
 }
@@ -916,6 +931,10 @@ void TimeControl::_beginMovieBuild(bool outputAfterBuild)
   _manager->cancelMovieBuild();
   _manager->stopMoviePlayback();
   _acceptGuiSelections();
+  _movieTimelineFrames = _timelineFrames;
+  if (_movieTimelineFrames.empty()) {
+    return;
+  }
 
   // A movie is a frozen archive snapshot. Leaving realtime here stops its
   // cadence and makes the checkbox accurately describe the display owner.
@@ -926,12 +945,13 @@ void TimeControl::_beginMovieBuild(bool outputAfterBuild)
   _outputAfterBuild = outputAfterBuild;
   _setMovieDefinitionControlsEnabled(false);
   _manager->movieStateChanged();
-  _renderedMovieFrames.assign(_nFramesMovie, false);
+  _renderedMovieFrames.assign(_movieTimelineFrames.size(), false);
   _buildingFrameIndex = -1;
   _playbackFrameIndex = -1;
   _playbackDirection = 1;
   _timePlot->setRenderedFrames(_renderedMovieFrames, -1);
-  _manager->prepareMovieBuild(_nFramesMovie);
+  _movieBuildId = _manager->prepareMovieBuild(
+    static_cast<int>(_movieTimelineFrames.size()));
   _startButton->setEnabled(false);
   _outputButton->setEnabled(false);
   _requestMovieFrame(0);
@@ -957,6 +977,7 @@ void TimeControl::_stopMovie(const char *reason, bool restorePriorMode)
   }
   _movieTimer->stop();
   _manager->cancelMovieBuild();
+  _movieBuildId = 0;
   _operatingState = OperatingState::LiveArchive;
   _outputAfterBuild = false;
   _setMovieDefinitionControlsEnabled(true);
@@ -967,6 +988,7 @@ void TimeControl::_stopMovie(const char *reason, bool restorePriorMode)
   _startButton->setEnabled(true);
   _outputButton->setEnabled(true);
   _timePlot->setRenderedFrames(std::vector<bool>(), -1);
+  _movieTimelineFrames.clear();
 
   // Return ownership of the canvas to the live layers whenever either movie
   // construction or playback stops. Refresh at the selected movie time so we
@@ -1030,15 +1052,18 @@ void TimeControl::_resetMovieDefinition()
 void TimeControl::_requestMovieFrame(int frameIndex)
 {
   if (!isMovieBuilding() || frameIndex < 0 ||
-      frameIndex >= _nFramesMovie) {
+      frameIndex >= static_cast<int>(_movieTimelineFrames.size()) ||
+      _movieBuildId == 0) {
     return;
   }
 
   _buildingFrameIndex = frameIndex;
   _guiFrameIndex = frameIndex;
+  _frameIndex = frameIndex;
   if (_params.debug) {
     cerr << "Movie build: requesting frame " << frameIndex + 1
-         << " of " << _nFramesMovie
+         << " of " << _movieTimelineFrames.size()
+         << " buildId=" << _movieBuildId
          << " at " << _getGuiSelectedTime().asString(0) << endl;
   }
   {
@@ -1046,20 +1071,26 @@ void TimeControl::_requestMovieFrame(int frameIndex)
     _timeSlider->setSliderPosition(frameIndex);
   }
   _updateSelectedTimeInGui();
-  _acceptGuiSelections();
+  // Frame construction advances only the selection within the immutable
+  // Start snapshot. It must not rebuild the accepted live timeline while
+  // asynchronous readers are resolving the previous frame.
+  _publishSelectedFrame();
+  _timeHasChanged = true;
   _timePlot->setRenderedFrames(_renderedMovieFrames, frameIndex);
-  _manager->beginMovieFrameBuild(frameIndex);
+  _manager->beginMovieFrameBuild(_movieBuildId, frameIndex);
 }
 
-void TimeControl::movieFrameRendered(int frameIndex)
+void TimeControl::movieFrameRendered(uint64_t buildId, int frameIndex)
 {
   if (_params.debug) {
     cerr << "Movie build: received captured frame " << frameIndex + 1
+         << " buildId=" << buildId
          << " state=" << static_cast<int>(_operatingState)
          << " expectedFrame=" << _buildingFrameIndex + 1
          << " cacheSize=" << _renderedMovieFrames.size() << endl;
   }
   if (!isMovieBuilding() ||
+      buildId != _movieBuildId ||
       frameIndex != _buildingFrameIndex || frameIndex < 0 ||
       frameIndex >= static_cast<int>(_renderedMovieFrames.size())) {
     if (_params.debug) {
@@ -1076,7 +1107,7 @@ void TimeControl::movieFrameRendered(int frameIndex)
   }
   _buildingFrameIndex = -1;
   _timePlot->setRenderedFrames(_renderedMovieFrames, -1);
-  if (frameIndex + 1 < _nFramesMovie) {
+  if (frameIndex + 1 < static_cast<int>(_movieTimelineFrames.size())) {
     _requestMovieFrame(frameIndex + 1);
   } else if (_outputAfterBuild) {
     _finishMovieOutput();
@@ -1088,10 +1119,12 @@ void TimeControl::movieFrameRendered(int frameIndex)
 /////////////////////////////////////////////////////////////
 // leave Building state when a ready frame cannot be captured
 
-void TimeControl::movieFrameCaptureFailed(int frameIndex,
+void TimeControl::movieFrameCaptureFailed(uint64_t buildId,
+                                          int frameIndex,
                                           const QString &error)
 {
   if (!isMovieBuilding() ||
+      buildId != _movieBuildId ||
       frameIndex != _buildingFrameIndex) {
     return;
   }

@@ -9,6 +9,7 @@
 #ifndef MovieManager_HH
 #define MovieManager_HH
 
+#include <cstdint>
 #include <functional>
 
 #include <QImage>
@@ -39,8 +40,8 @@ public:
     std::function<bool(int, bool)> hasFrame;
     std::function<QImage(int, bool)> frameImage;
     std::function<void()> stopPlayback;
-    std::function<void(int)> frameRendered;
-    std::function<void(int, const QString &)> frameCaptureFailed;
+    std::function<void(uint64_t, int)> frameRendered;
+    std::function<void(uint64_t, int, const QString &)> frameCaptureFailed;
     std::function<QStringList()> pendingDependencies;
     std::function<void(const QString &)> showProgress;
   };
@@ -49,13 +50,14 @@ public:
                Callbacks callbacks,
                QObject *parent = nullptr);
 
-  void prepareBuild(int frameCount,
-                    bool includeVertical,
-                    const QString &fieldLabel);
-  void beginFrameBuild(int frameIndex, int frameCount);
+  uint64_t prepareBuild(int frameCount,
+                        bool includeVertical,
+                        const QString &fieldLabel);
+  void beginFrameBuild(uint64_t buildId, int frameIndex, int frameCount);
   void cancelBuild();
 
-  void markGridReady(int frameIndex);
+  void expectGridGeneration(int frameIndex, int generation);
+  bool markGridReady(int frameIndex, int generation);
   bool markVerticalReady(int generation);
   void checkFrameReady(bool dependenciesReady);
 
@@ -74,8 +76,11 @@ private:
 
   const Params &_params;
   Callbacks _callbacks;
+  uint64_t _nextBuildId;
+  uint64_t _activeBuildId;
   int _buildFrame;
   bool _gridReady;
+  int _gridRequestGeneration;
   bool _includesVertical;
   bool _verticalReady;
   int _verticalRequestGeneration;

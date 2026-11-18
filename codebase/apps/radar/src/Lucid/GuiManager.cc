@@ -317,15 +317,15 @@ GuiManager::GuiManager() :
       _vert->stopMoviePlayback();
     }
   };
-  movieCallbacks.frameRendered = [this](int frameIndex) {
+  movieCallbacks.frameRendered = [this](uint64_t buildId, int frameIndex) {
     if (_timeControl) {
-      _timeControl->movieFrameRendered(frameIndex);
+      _timeControl->movieFrameRendered(buildId, frameIndex);
     }
   };
   movieCallbacks.frameCaptureFailed =
-    [this](int frameIndex, const QString &error) {
+    [this](uint64_t buildId, int frameIndex, const QString &error) {
       if (_timeControl) {
-        _timeControl->movieFrameCaptureFailed(frameIndex, error);
+        _timeControl->movieFrameCaptureFailed(buildId, frameIndex, error);
       }
     };
   movieCallbacks.pendingDependencies = [this]() {
@@ -517,22 +517,23 @@ void GuiManager::setZoomIndex(int zoomIndex)
 ////////////////////////////////////////////////////////
 // initialize storage and request state for a new movie build
 
-void GuiManager::prepareMovieBuild(int frameCount)
+uint64_t GuiManager::prepareMovieBuild(int frameCount)
 {
   const bool includeVertical = _vertWindow && _vert &&
     _vertWindow->isVisible() && _vsectionRoute.size() >= 2;
   _terrainHorizontalSettled = true;
   _terrainHorizontalRequestPending = false;
   _terrainVerticalSettled = true;
-  _movieManager->prepareBuild(
+  return _movieManager->prepareBuild(
     frameCount, includeVertical,
     QString::fromStdString(getSelectedFieldLabel()));
 }
 
-void GuiManager::beginMovieFrameBuild(int frameIndex)
+void GuiManager::beginMovieFrameBuild(uint64_t buildId, int frameIndex)
 {
   _movieManager->beginFrameBuild(
-    frameIndex, _timeControl ? _timeControl->getNFramesMovie() : 0);
+    buildId, frameIndex,
+    _timeControl ? _timeControl->getNFramesMovie() : 0);
 }
 
 void GuiManager::cancelMovieBuild()
@@ -2254,6 +2255,12 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
       _vlevelManager.getRequestedLevel(),
       _fieldNum,
       true);
+    if (_movieManager->buildFrame() == frameIndex) {
+      // Frame indices repeat across builds. Record the exact reader request
+      // issued for this frame so a late completion cannot open the capture
+      // gate for a newer session at the same index.
+      _movieManager->expectGridGeneration(frameIndex, generation);
+    }
     if (_gd.wind_mgr) {
       _gd.wind_mgr->requestData(_timeControl->getSelectedTime().utime(),
                                 _vlevelManager.getRequestedLevel(),
@@ -2303,12 +2310,14 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
           mr->getHorizCompletedGeneration())) {
       _checkAutomaticImageReady();
     }
-    if (_movieManager->buildFrame() == frameIndex) {
+    if (_movieManager->markGridReady(
+          frameIndex, mr->getHorizCompletedGeneration())) {
       if (_params.debug) {
         cerr << "Movie readiness: horizontal grid ready for frame "
-             << frameIndex + 1 << endl;
+             << frameIndex + 1
+             << " generation=" << mr->getHorizCompletedGeneration()
+             << endl;
       }
-      _movieManager->markGridReady(frameIndex);
       _checkMovieFrameReady();
     }
     if (_fieldNum < _gd.num_datafields) {

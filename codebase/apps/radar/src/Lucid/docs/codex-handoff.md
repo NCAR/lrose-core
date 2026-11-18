@@ -150,9 +150,15 @@ carrying a live hover selection into cached playback.
   "Realtime but paused" state.
 - Start builds sequentially from frame zero, independent of the selected frame
   at the time Start is pressed.
+- Each Start creates a uniquely identified build session and copies the
+  accepted timeline into an immutable snapshot used through construction and
+  playback. Stop or a replacement build invalidates deferred callbacks from
+  the previous session, even when both were working on the same frame index.
 - Horizontal frames are captured only after the grid and exact symbolic-
-  product request keys are ready. If a vertical window has a valid route,
-  matching vertical composites are captured at the same frame index.
+  product request keys are ready. The primary grid must complete the exact MDV
+  generation issued for that frame; frame number alone is not sufficient. If
+  a vertical window has a valid route, matching vertical composites are
+  captured at the same frame index.
 - Playback uses immutable `QImage` caches rather than mutable live layers.
 - The time plot shows the frame being built in orange and completed frames in
   green. During playback, the displayed frame is gray.

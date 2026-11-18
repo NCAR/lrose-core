@@ -27,8 +27,11 @@ MovieManager::MovieManager(const Params &params,
         QObject(parent),
         _params(params),
         _callbacks(std::move(callbacks)),
+        _nextBuildId(0),
+        _activeBuildId(0),
         _buildFrame(-1),
         _gridReady(false),
+        _gridRequestGeneration(-1),
         _includesVertical(false),
         _verticalReady(false),
         _verticalRequestGeneration(-1),
@@ -42,13 +45,15 @@ MovieManager::MovieManager(const Params &params,
 /////////////////////////////////////////////////////////////
 // initialize one cache from a stable display configuration
 
-void MovieManager::prepareBuild(int frameCount,
-                                bool includeVertical,
-                                const QString &fieldLabel)
+uint64_t MovieManager::prepareBuild(int frameCount,
+                                    bool includeVertical,
+                                    const QString &fieldLabel)
 {
   _frameTimeoutTimer->stop();
+  _activeBuildId = ++_nextBuildId;
   _buildFrame = -1;
   _gridReady = false;
+  _gridRequestGeneration = -1;
   _includesVertical = includeVertical;
   _verticalReady = !_includesVertical;
   _verticalRequestGeneration = -1;
@@ -62,15 +67,22 @@ void MovieManager::prepareBuild(int frameCount,
     // still belong to a new immutable cache and must be requested again.
     _callbacks.resetProducts();
   }
+  return _activeBuildId;
 }
 
 /////////////////////////////////////////////////////////////
 // begin the exact horizontal and optional vertical requests for one frame
 
-void MovieManager::beginFrameBuild(int frameIndex, int frameCount)
+void MovieManager::beginFrameBuild(uint64_t buildId,
+                                   int frameIndex,
+                                   int frameCount)
 {
+  if (buildId == 0 || buildId != _activeBuildId) {
+    return;
+  }
   _buildFrame = frameIndex;
   _gridReady = false;
+  _gridRequestGeneration = -1;
   _verticalReady = !_includesVertical;
   _verticalRequestGeneration = -1;
 
@@ -107,18 +119,37 @@ void MovieManager::beginFrameBuild(int frameIndex, int frameCount)
 void MovieManager::cancelBuild()
 {
   _frameTimeoutTimer->stop();
+  _activeBuildId = 0;
   _buildFrame = -1;
   _gridReady = false;
+  _gridRequestGeneration = -1;
   _includesVertical = false;
   _verticalReady = false;
   _verticalRequestGeneration = -1;
 }
 
-void MovieManager::markGridReady(int frameIndex)
+void MovieManager::expectGridGeneration(int frameIndex, int generation)
 {
-  if (_buildFrame == frameIndex) {
-    _gridReady = true;
+  if (_activeBuildId != 0 && _buildFrame == frameIndex && generation >= 0) {
+    _gridRequestGeneration = generation;
   }
+}
+
+bool MovieManager::markGridReady(int frameIndex, int generation)
+{
+  if (_activeBuildId == 0 || _buildFrame != frameIndex ||
+      _gridRequestGeneration < 0 || generation != _gridRequestGeneration) {
+    if (_params.debug && _buildFrame >= 0) {
+      std::cerr << "Movie build: ignored horizontal completion"
+                << " frame=" << frameIndex + 1
+                << " receivedGeneration=" << generation
+                << " expectedGeneration=" << _gridRequestGeneration
+                << std::endl;
+    }
+    return false;
+  }
+  _gridReady = true;
+  return true;
 }
 
 bool MovieManager::markVerticalReady(int generation)
@@ -162,9 +193,11 @@ void MovieManager::checkFrameReady(bool dependenciesReady)
   }
 
   const int completedFrame = _buildFrame;
+  const uint64_t completedBuildId = _activeBuildId;
   _frameTimeoutTimer->stop();
   _buildFrame = -1;
   _gridReady = false;
+  _gridRequestGeneration = -1;
   _verticalReady = false;
 
   // Capture and completion callbacks are synchronous and may immediately
@@ -195,13 +228,18 @@ void MovieManager::checkFrameReady(bool dependenciesReady)
     // callback. Advance the controller only after that callback has unwound;
     // requesting the next frame synchronously here lets the old reader pass
     // continue against state which already belongs to the next frame.
-    QTimer::singleShot(0, this, [this, completedFrame]() {
+    QTimer::singleShot(0, this, [this, completedBuildId, completedFrame]() {
+      // Stop or a replacement build invalidates this queued delivery even if
+      // it happens to be constructing the same frame index.
+      if (completedBuildId != _activeBuildId) {
+        return;
+      }
       if (_params.debug) {
         std::cerr << "Movie build: delivering captured frame "
                   << completedFrame + 1 << std::endl;
       }
       if (_callbacks.frameRendered) {
-        _callbacks.frameRendered(completedFrame);
+        _callbacks.frameRendered(completedBuildId, completedFrame);
       }
     });
     return;
@@ -213,7 +251,7 @@ void MovieManager::checkFrameReady(bool dependenciesReady)
       tr("Could not capture the movie frame");
   }
   if (_callbacks.frameCaptureFailed) {
-    _callbacks.frameCaptureFailed(completedFrame, error);
+    _callbacks.frameCaptureFailed(completedBuildId, completedFrame, error);
   }
 }
 
@@ -244,6 +282,7 @@ void MovieManager::_frameTimedOut()
   // callback synchronously follows the normal stop path and may immediately
   // restore live requests through GuiManager.
   const int timedOutFrame = _buildFrame;
+  const uint64_t timedOutBuildId = _activeBuildId;
   if (_params.debug) {
     std::cerr << "Movie build: frame " << timedOutFrame + 1
               << " timed out waiting for "
@@ -251,10 +290,11 @@ void MovieManager::_frameTimedOut()
   }
   _buildFrame = -1;
   _gridReady = false;
+  _gridRequestGeneration = -1;
   _verticalReady = false;
   if (_callbacks.frameCaptureFailed) {
     _callbacks.frameCaptureFailed(
-      timedOutFrame,
+      timedOutBuildId, timedOutFrame,
       tr("Timed out after %1 seconds waiting for %2")
         .arg(std::max(1, _params.movie_frame_request_timeout_secs))
         .arg(pending.join(tr(", "))));

@@ -49,6 +49,7 @@
 #endif
 #endif
 
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <ctime>
@@ -116,9 +117,7 @@ class DLL_EXPORT TimeControl : public QDialog {
     return _nFramesMovie * _frameIntervalSecs;
   }
   int getFrameIndex() const { return _frameIndex; }
-  int getFrameCount() const {
-    return static_cast<int>(_timelineFrames.size());
-  }
+  int getFrameCount() const;
   const TimelineFrame *getFrame(int frameIndex) const;
   double getLoopDwellMsecs() const { return _loopDwellMsecs; }
   bool isMovieBuilding() const {
@@ -177,11 +176,13 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   // Called by GuiManager after all layers for the requested frame have been
   // captured into the immutable playback cache.
-  void movieFrameRendered(int frameIndex);
+  void movieFrameRendered(uint64_t buildId, int frameIndex);
 
   // Abort a build whose fully rendered widget could not be copied into the
   // immutable movie cache.
-  void movieFrameCaptureFailed(int frameIndex, const QString &error);
+  void movieFrameCaptureFailed(uint64_t buildId,
+                               int frameIndex,
+                               const QString &error);
 
  signals:
 
@@ -260,6 +261,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   // immutable frame values through accessors, so GUI edits cannot leave a
   // second GlobalData movie model out of sync.
   vector<TimelineFrame> _timelineFrames;
+  // A build and its subsequent playback retain the accepted frame values
+  // from Start. Live timeline publications cannot alter this snapshot while
+  // asynchronous readers and deferred capture callbacks are in flight.
+  vector<TimelineFrame> _movieTimelineFrames;
 
   // parameters
   
@@ -282,6 +287,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   // restore the user's prior live-tracking choice without making it a second
   // concurrently active operating mode.
   bool _resumeRealtimeAfterMovie;
+  uint64_t _movieBuildId;
   QTimer *_movieTimer;
   vector<bool> _renderedMovieFrames;
   int _buildingFrameIndex;

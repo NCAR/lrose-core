@@ -42,6 +42,7 @@
 #ifndef GuiManager_HH
 #define GuiManager_HH
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -137,8 +138,8 @@ public:
   void updateClickReport(const ClickReport &report);
 
   // Coordinate asynchronous data retrieval with TimeControl's movie builder.
-  void prepareMovieBuild(int frameCount);
-  void beginMovieFrameBuild(int frameIndex);
+  uint64_t prepareMovieBuild(int frameCount);
+  void beginMovieFrameBuild(uint64_t buildId, int frameIndex);
   void cancelMovieBuild();
   bool showMovieFrame(int frameIndex);
   bool exportMovieLoop(QString &message);
