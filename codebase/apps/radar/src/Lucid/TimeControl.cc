@@ -244,21 +244,13 @@ void TimeControl::_populateGui()
   // Keep the time canvas inside the dialog so it follows the controller's
   // window lifetime, movement, and resizing automatically.
   _timePlot = new TimePlotWidget(_timePanel, _params);
-  _timePlot->setExpansionCallback(
+  _timePlot->setRangeEditCallback(
     [this](time_t startTime, int nFrames) {
-      _applyExpandedMovieRange(startTime, nFrames);
-    });
-  _timePlot->setViewChangedCallback(
-    [this](time_t startTime, time_t endTime) {
-      _retrieveForTimeRange(startTime, endTime);
+      _applyPendingMovieRange(startTime, nFrames);
     });
   _timePlot->setFrameSelectedCallback(
     [this](int frameIndex) {
       _selectFrameFromTimePlot(frameIndex);
-    });
-  _timePlot->setViewModifiedCallback(
-    [this]() {
-      _updateResetButton();
     });
   _timeLayout->addWidget(_timePlot);
   
@@ -520,7 +512,7 @@ void TimeControl::_populateGui()
   connect(_resetButton, &QPushButton::clicked, this,
           &TimeControl::_resetMovieDefinition);
   _resetButton->setToolTip(
-    "Restore the previous movie range or fit the time display");
+    "Restore the movie definition that preceded the current edits");
   _resetButton->setStyleSheet("padding: 3px 4px 3px 4px;");
   
   _outputButton = new QPushButton(movieActionFrame);
@@ -905,8 +897,11 @@ void TimeControl::_cancelGuiSelections()
   _updateTimesInGui();
   const QSignalBlocker framesBlocker(_nFramesSelector);
   const QSignalBlocker intervalBlocker(_frameIntervalSelector);
+  const QSignalBlocker sliderBlocker(_timeSlider);
   _nFramesSelector->setValue(_guiNFramesMovie);
   _frameIntervalSelector->setValue(_guiFrameIntervalSecs);
+  _timeSlider->setMaximum(_guiNFramesMovie - 1);
+  _timeSlider->setSliderPosition(_guiFrameIndex);
   _resetDefinitionValid = false;
   _enableAcceptCancel(false);
   _computeFrameTimes();
@@ -1041,11 +1036,6 @@ void TimeControl::_resetMovieDefinition()
   // plot's movie bounds before fitting its view to the restored range.
   _updateTimePlot();
   _timePlot->fitMovie();
-  _retrieveForTimeRange(
-    _guiStartTime.utime(),
-    static_cast<time_t>(llround(
-      _guiStartTime.utime() +
-      _guiNFramesMovie * _guiFrameIntervalSecs)));
   _updateResetButton();
 }
 
@@ -1355,9 +1345,7 @@ void TimeControl::_updateResetButton()
   if (!_resetButton) {
     return;
   }
-  const bool viewModified = _timePlot && !_timePlot->isFitToMovie();
-  const bool available = _resetDefinitionValid || viewModified;
-  const bool enabled = available && !isMovieActive();
+  const bool enabled = _resetDefinitionValid && !isMovieActive();
   _resetButton->setEnabled(enabled);
   _resetButton->setStyleSheet(
     enabled ? "padding: 3px 4px 3px 4px; background-color: seagreen;" :
@@ -1403,59 +1391,6 @@ void TimeControl::refreshDataAvailability()
 }
 
 ////////////////////////////////////////////////////////
-// retrieve data and availability for a panned time view
-
-void TimeControl::_retrieveForTimeRange(time_t startTime, time_t endTime)
-{
-  if (endTime <= startTime) {
-    return;
-  }
-  if (isMovieActive()) {
-    _stopMovie("time-plot range retrieval", false);
-  }
-
-  const time_t movieStart = _guiStartTime.utime();
-  const double movieEnd = movieStart +
-    _guiNFramesMovie * _guiFrameIntervalSecs;
-  if (startTime < movieStart || endTime > movieEnd) {
-    const time_t expandedStart = std::min(startTime, movieStart);
-    const double expandedEnd = std::max(
-      static_cast<double>(endTime), movieEnd);
-    const int expandedFrames = static_cast<int>(ceil(
-      (expandedEnd - expandedStart) / _guiFrameIntervalSecs));
-    if (expandedFrames <= Constants::MAX_FRAMES) {
-      // Panning beyond either edge grows only that side of the movie. Accept
-      // immediately so newly exposed frame slots and availability arrive as
-      // one coherent retrieval while the selected absolute time is retained.
-      _applyExpandedMovieRange(expandedStart, expandedFrames);
-      _acceptGuiSelections();
-      return;
-    }
-  }
-
-  if (_gd.epoch_start == startTime && _gd.epoch_end == endTime) {
-    return;
-  }
-  _gd.epoch_start = startTime;
-  _gd.epoch_end = endTime;
-  if (_gd.coord_expt) {
-    _gd.coord_expt->epoch_start = startTime;
-    _gd.coord_expt->epoch_end = endTime;
-  }
-  // Availability ranges are part of the request domain. Invalidate both
-  // caches and let the normal GUI timer issue one coherent full retrieval.
-  for (int ii = 0; ii < _gd.num_datafields; ++ii) {
-    if (_gd.mread[ii]) {
-      _gd.mread[ii]->invalidateTimeList();
-    }
-  }
-  if (_gd.prod_mgr) {
-    _gd.prod_mgr->reset_product_valid_flags();
-  }
-  _timeHasChanged = true;
-}
-
-////////////////////////////////////////////////////////
 // select and immediately accept a frame clicked in the time plot
 
 void TimeControl::_selectFrameFromTimePlot(int frameIndex)
@@ -1480,15 +1415,15 @@ void TimeControl::_selectFrameFromTimePlot(int frameIndex)
 }
 
 ////////////////////////////////////////////////////////
-// apply a frame-aligned movie expansion as a pending GUI edit
+// apply any frame-aligned plot gesture as one pending movie definition
 
-void TimeControl::_applyExpandedMovieRange(time_t startTime, int nFrames)
+void TimeControl::_applyPendingMovieRange(time_t startTime, int nFrames)
 {
   if (nFrames < 1 || nFrames > Constants::MAX_FRAMES) {
     return;
   }
   if (isMovieActive()) {
-    _stopMovie("time-plot range expansion", false);
+    _stopMovie("time-plot range edit", false);
   }
   _enterArchiveModeForTimeChange();
 
@@ -1502,8 +1437,9 @@ void TimeControl::_applyExpandedMovieRange(time_t startTime, int nFrames)
                              _guiFrameIntervalSecs)),
     0, nFrames - 1);
 
-  // Expansion changes several interdependent controls. Block their signals
-  // so observers see one coherent pending movie definition.
+  // All drag gestures change several interdependent controls. Block their
+  // signals so observers see one coherent pending movie definition and only
+  // Accept publishes it to readers and external coordinate clients.
   const QSignalBlocker startBlocker(_startTimeEdit);
   const QSignalBlocker framesBlocker(_nFramesSelector);
   const QSignalBlocker sliderBlocker(_timeSlider);

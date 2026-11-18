@@ -172,11 +172,13 @@ carrying a live hover selection into cached playback.
   naming the outstanding layers instead of leaving the UI in Building state.
 - A capture failure follows the same stop path, so movie construction cannot
   remain permanently active after an image-capture error.
-- Right-drag interval expansion requires Accept and updates the movie start and
-  end widgets. Editing the frame interval no longer starts a build implicitly.
-- Reset is enabled only after a movie-definition or time-viewport change. It
-  restores the pre-edit definition when needed and otherwise fits the current
-  movie; the former double-click-to-fit gesture is disabled.
+- Left-drag zoom, middle-drag pan, and right-drag expansion all create the same
+  pending, frame-aligned movie definition. They update the start, end, frame
+  count, selection, and plot together, but do not publish or retrieve data
+  until Accept; Cancel restores the accepted definition.
+- Editing the frame interval no longer starts a build implicitly.
+- Reset is enabled after a movie-definition change and restores the pre-edit
+  definition. The former double-click-to-fit gesture is disabled.
 - A field selected after stopping a movie immediately returns to the normal
   non-movie request/render path.
 - Delayed resize events from the hidden vertical window no longer cancel a
