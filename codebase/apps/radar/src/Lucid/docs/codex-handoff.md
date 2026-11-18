@@ -1,9 +1,55 @@
 # Lucid Codex handoff
 
-Snapshot: 2026-11-14. Source and test changes through native polar RHI
+Snapshot: 2026-11-17. Source and test changes through native polar RHI
 rendering and returned-route display are committed and pushed in `421c363fc`
-(`implementing polar RHIs`). The current worktree contains only the three
-documentation updates described here.
+(`implementing polar RHIs`). The movie investigation described below is saved
+on the `Lucid_movie_bug` branch. The failure also reproduces after returning to
+`master`, so do not assume it was introduced by the recent realtime, Reset, or
+movie-widget changes.
+
+## Current movie investigation
+
+Interactive movie construction currently captures the first horizontal frame
+and then remains at that time instead of requesting frame two. This behavior
+was reproduced on `master` after saving the investigative changes on
+`Lucid_movie_bug`; it is therefore an existing problem exposed by this testing,
+not yet a demonstrated regression from the recent UI/realtime work.
+
+The branch contains conditional diagnostics across `MdvReader`, `GuiManager`,
+`MovieManager`, `HorizView`, and `TimeControl`. The latest instrumented run
+established the following sequence:
+
+1. The frame-one MDV read completes successfully.
+2. All movie gates report ready: horizontal grid, optional vertical section,
+   Products, winds, and terrain.
+3. The horizontal widget renders into its immutable `QImage` successfully.
+4. `MovieManager` reports capture success and delivers the completion callback.
+5. `TimeControl::movieFrameRendered()` receives that callback after its state
+   has already changed from `Building` to `Idle`; `_buildingFrameIndex` has
+   been reset to `-1`, so the completion is correctly rejected and frame two
+   is never requested.
+
+The decisive log lines are:
+
+```text
+Movie build: capture frame 1 succeeded
+Movie build: delivering captured frame 1
+Movie build: received captured frame 1 state=0 expectedFrame=0 cacheSize=16
+Movie build: rejected captured frame 1 because controller state changed before delivery
+```
+
+The repeated `poll(..., 1-2 ms) = 0 (Timeout)` output from `strace` is the
+normal high-frequency Qt/main-window polling loop and does not by itself show
+a blocked MDV worker. The next task is to identify what invokes the normal
+movie Stop path between capture and completion. The branch's latest diagnostic
+work tags stop callers with reasons such as main-window resize, vertical-window
+resize, time-plot range retrieval, time-plot selection/expansion, slider
+interaction, and capture failure. Run the branch with debug enabled and look
+for `Movie build: stopping movie reason=...` immediately before the rejected
+completion. Once identified, decide whether that event should be suppressed
+during construction or handled without invalidating an otherwise complete
+frame. Avoid weakening the frame/state guards until the unexpected transition
+is understood.
 
 ## Architecture
 
@@ -309,37 +355,41 @@ sidecars, transparency, multiple heights/zooms, and vertical images.
 
 ## Outstanding work
 
-1. Build the realtime/archive simulation environment described in
+1. Resume the first-frame movie investigation on `Lucid_movie_bug`. Capture
+   the new reason-tagged Stop diagnostic and fix the unexpected transition
+   from `Building` to `Idle`; verify horizontal-only and vertical movies across
+   all frames before removing or reducing the temporary diagnostics.
+2. Build the realtime/archive simulation environment described in
    `docs/lrose-process-data-management.md`. This is the next development
    focus and should begin in a new Codex thread.
-2. Select the replay boundary and source datasets. Prefer immutable archive
+3. Select the replay boundary and source datasets. Prefer immutable archive
    input and a separate writable realtime tree populated through normal LROSE
    file/latest-data or FMQ interfaces; Lucid should remain an ordinary client.
-3. Define the simulation project layout, process instances, `proc_list`,
+4. Define the simulation project layout, process instances, `proc_list`,
    `data_list`, logs, servers, replay clock/rate, looping policy, and late-data
    thresholds. Keep it isolated from operational data and shared-memory keys.
-4. Create a repeatable image-generation test matrix covering success, timeout,
+5. Create a repeatable image-generation test matrix covering success, timeout,
    stale completion, recovery, and scheduler coalescing.
-5. Verify automatic PNG transparency, geo XML, `_latest_data_info`, day
+6. Verify automatic PNG transparency, geo XML, `_latest_data_info`, day
    directories, and DataMapper behavior with downstream consumers.
-6. Exercise automatic combinations of multiple fields, heights, zooms, and
+7. Exercise automatic combinations of multiple fields, heights, zooms, and
    vertical routes, including filename uniqueness and state restoration.
-7. Continue visual comparison of symbolic products with CIDD and decide the
+8. Continue visual comparison of symbolic products with CIDD and decide the
    desired zero-chunk snapshot policy.
-8. Exercise native polar RHIs against CIDD, including full-range returned
+9. Exercise native polar RHIs against CIDD, including full-range returned
    routes, terrain, click values, movies, and Cartesian fallback when no
    measured RHI matches.
-9. Consolidate `MdvReader`'s remaining public legacy validity flags with its
+10. Consolidate `MdvReader`'s remaining public legacy validity flags with its
    private request/result state.
-10. Continue removing demonstrably unused `GlobalData::layers` state and
+11. Continue removing demonstrably unused `GlobalData::layers` state and
    simplify terrain/wind request queuing where `MdvReader` now provides the
    latest-request policy.
-11. Continue vertical-window presentation cleanup and regression testing.
-12. Remove Route Winds completely when the current commented history is no
+12. Continue vertical-window presentation cleanup and regression testing.
+13. Remove Route Winds completely when the current commented history is no
    longer needed.
-13. Work through `docs/parameter_status.txt` incrementally as affected features
+14. Work through `docs/parameter_status.txt` incrementally as affected features
    are cleaned up.
-14. There are no automated GUI tests yet; current validation is interactive.
+15. There are no automated GUI tests yet; current validation is interactive.
 
 ## Build and test
 
@@ -391,7 +441,8 @@ this directory. A useful opening request is:
 Read AGENTS.md, docs/codex-handoff.md,
 docs/lrose-process-data-management.md, docs/bug_status.txt, and
 docs/cleanup_status.txt. Review the current worktree and recent Lucid history,
-then help design and build the isolated realtime/archive simulator described
-in the handoff. Do not modify Lucid display code unless simulator testing
-identifies a concrete need.
+then check out `Lucid_movie_bug` and resume the first-frame movie investigation.
+Use the reason-tagged Stop diagnostic to identify why `TimeControl` changes
+from Building to Idle after a successful capture. After that regression is
+resolved and tested, return to the isolated realtime/archive simulator work.
 ```
