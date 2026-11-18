@@ -433,8 +433,9 @@ public:
 
   // draw legends
   
-  void drawLegends(const vector<string> &legends,
-                   Params::legend_pos_t &pos);
+  void drawLegends(QPainter &painter,
+                   const vector<string> &legends,
+                   Params::legend_pos_t pos);
 
   // Legends at top left
     

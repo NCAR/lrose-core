@@ -432,6 +432,17 @@ void HorizView::paintEvent(QPaintEvent *event)
     painter.restore();
   }
 
+  // The main legend is a final display annotation, not part of the cached
+  // grid. Drawing it after maps, Products, and interaction overlays prevents
+  // independently rendered layers from covering its text.
+  if (fieldNum >= 0 && fieldNum < _gd.num_datafields &&
+      _gd.mread[fieldNum] != nullptr) {
+    vector<string> legendText;
+    legendText.push_back(_gd.mread[fieldNum]->fieldLabelHoriz());
+    _zoom->drawLegends(
+      painter, legendText, _params.horiz_main_legend_pos);
+  }
+
   _sizeChanged = false;
   _zoomChanged = false;
 
@@ -1333,17 +1344,6 @@ int HorizView::_renderFieldGrid(int page,
     _zoom->renderLineContours(mr);
   }
 
-  // plot legends
-
-  if (mr != nullptr) {
-    char line[2048];
-    snprintf(line, 2048,
-             "%s", mr->fieldLabelHoriz().c_str());
-    vector<string> legendText;
-    legendText.push_back(line);
-    _zoom->drawLegends(legendText, _params.horiz_main_legend_pos);
-  }
-  
   return Constants::CIDD_SUCCESS;
 }
 

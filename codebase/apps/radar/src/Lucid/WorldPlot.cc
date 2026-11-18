@@ -1229,6 +1229,9 @@ void WorldPlot::drawLegendsTopLeft(QPainter &painter,
     string legend(legends[i]);
     QRect lRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     QRectF bRect(xx, yy, lRect.width() + 4, lRect.height() + 4);
+    QColor background(_params.background_color);
+    background.setAlpha(255);
+    painter.fillRect(bRect, background);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
     yy += lRect.height();
   }
@@ -1260,6 +1263,9 @@ void WorldPlot::drawLegendsTopRight(QPainter &painter,
     qreal xx = (qreal) (_xMaxPixel - _yAxisTickLen -
                         _legendTextMargin - lRect.width());
     QRectF bRect(xx, yy, lRect.width() + 4, lRect.height() + 4);
+    QColor background(_params.background_color);
+    background.setAlpha(255);
+    painter.fillRect(bRect, background);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
     yy += lRect.height();
   }
@@ -1291,6 +1297,9 @@ void WorldPlot::drawLegendsBottomLeft(QPainter &painter,
     QRect lRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     yy -= lRect.height();
     QRectF bRect(xx, yy, lRect.width() + 4, lRect.height() + 4);
+    QColor background(_params.background_color);
+    background.setAlpha(255);
+    painter.fillRect(bRect, background);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
   }
 
@@ -1322,6 +1331,9 @@ void WorldPlot::drawLegendsBottomRight(QPainter &painter,
                         _legendTextMargin - lRect.width());
     yy -= lRect.height();
     QRectF bRect(xx, yy, lRect.width() + 4, lRect.height() + 4);
+    QColor background(_params.background_color);
+    background.setAlpha(255);
+    painter.fillRect(bRect, background);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
   }
 
@@ -1332,8 +1344,9 @@ void WorldPlot::drawLegendsBottomRight(QPainter &painter,
 /////////////////	
 // draw legends
     
-void WorldPlot::drawLegends(const vector<string> &legends,
-                            Params::legend_pos_t &pos) 
+void WorldPlot::drawLegends(QPainter &painter,
+                            const vector<string> &legends,
+                            Params::legend_pos_t pos)
 
 {
 
@@ -1341,18 +1354,7 @@ void WorldPlot::drawLegends(const vector<string> &legends,
     return;
   }
   
-  // check we have an image
-
-  if (_gridImage == nullptr) {
-    cerr << "ERROR - WorldPlot::drawLegendsTopLeft" << endl;
-    cerr << "  _gridImage is null" << endl;
-    cerr << "  legend text: ";
-    for (size_t ii = 0; ii < legends.size(); ii++) {
-      cerr << "  line " << ii << ": " << legends[ii] << endl;
-    }
-  }
-
-  QPainter painter(_gridImage);
+  painter.save();
   QPen pen;
   pen.setColor(_params.horiz_legend_color);
   painter.setPen(pen);
@@ -1372,6 +1374,8 @@ void WorldPlot::drawLegends(const vector<string> &legends,
       drawLegendsTopLeft(painter, legends);
       break;
   }
+
+  painter.restore();
 
 }
 
