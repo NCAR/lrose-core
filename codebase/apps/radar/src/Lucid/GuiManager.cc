@@ -199,7 +199,6 @@ GuiManager::GuiManager() :
   _main = NULL;
   _resizeTimer = NULL;
   _realtimeUpdateTimer = NULL;
-  _realtimeRefreshPending = false;
   _resized = false;
   
   _horizFrame = NULL;
@@ -574,7 +573,12 @@ void GuiManager::restoreLiveDisplayAfterMovie()
 
 void GuiManager::stopMovieForDisplayChange()
 {
-  if (_timeControl && _timeControl->isMovieActive()) {
+  // The hidden vertical manager can receive delayed layout resize events even
+  // for a horizontal-only movie. Only geometry captured by this movie may
+  // invalidate its cache and force the operating state back to Archive.
+  if (_timeControl && _timeControl->isMovieActive() && _movieManager &&
+      _movieManager->includesVertical() && _vertWindow &&
+      _vertWindow->isVisible()) {
     _timeControl->stopMovie("vertical window resize");
   }
 }
@@ -614,12 +618,6 @@ void GuiManager::movieStateChanged()
   const bool building = isMovieBuilding();
   const bool active = isMovieActive();
   const bool interactive = !_params.create_images_automatically;
-
-  if (!active && _realtimeRefreshPending) {
-    // Let the movie transition finish before returning ownership to live
-    // readers. Multiple timer expirations collapse into this single request.
-    QTimer::singleShot(0, this, [this]() { _handleRealtimeUpdate(); });
-  }
 
   // A movie build must capture one stable display configuration. Playback is
   // less restrictive: field and level choices may update the hidden live
@@ -2449,24 +2447,16 @@ void GuiManager::_invalidateDisplayedData(bool refreshProductsImmediately)
 ////////////////////////////////////////////////////////
 // advance and reload the live realtime display
 
-void GuiManager::_handleRealtimeUpdate(bool selectLiveFrame)
+void GuiManager::_handleRealtimeUpdate()
 {
   if (!_timeControl || !_timeControl->isRealtime() ||
       _params.create_images_automatically) {
     return;
   }
-  if (isMovieActive()) {
-    _realtimeRefreshPending = true;
-    return;
-  }
-  if (!_timeControl->advanceRealtimeToNow(selectLiveFrame)) {
-    // Selecting an older realtime frame is an intentional pause, not a
-    // missed update which should later pull the user back to the live frame.
-    _realtimeRefreshPending = false;
+  if (!_timeControl->advanceRealtimeToNow()) {
     return;
   }
 
-  _realtimeRefreshPending = false;
   // The changed timeline causes the normal request path to capture the new
   // Product context. Do not first issue a redundant request at the old time.
   _invalidateDisplayedData(false);
@@ -2481,7 +2471,6 @@ void GuiManager::_setRealtimeUpdatesEnabled(bool enabled)
     return;
   }
 
-  _realtimeRefreshPending = false;
   if (!enabled) {
     _realtimeUpdateTimer->stop();
     return;
@@ -2491,7 +2480,7 @@ void GuiManager::_setRealtimeUpdatesEnabled(bool enabled)
   // A mode transition should show live data immediately rather than leaving
   // an archive selection visible for the first full update interval.
   QTimer::singleShot(0, this,
-                     [this]() { _handleRealtimeUpdate(true); });
+                     [this]() { _handleRealtimeUpdate(); });
 }
 
 ////////////////////////////////////////////////////////

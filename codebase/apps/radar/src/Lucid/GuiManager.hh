@@ -192,10 +192,8 @@ private:
   QTimer *_resizeTimer;
 
   // Realtime display updates are independent of the high-frequency event
-  // pump. Missed refreshes are coalesced while immutable movie frames own the
-  // canvases, then issued once live display ownership returns.
+  // pump. TimeControl stops this cadence before a movie claims the canvases.
   QTimer *_realtimeUpdateTimer;
-  bool _realtimeRefreshPending;
   
   // horizontal view windows
   
@@ -442,7 +440,7 @@ private slots:
   void _openFile();
   void _saveFile();
   void _reloadData();
-  void _handleRealtimeUpdate(bool selectLiveFrame = false);
+  void _handleRealtimeUpdate();
   void _setRealtimeUpdatesEnabled(bool enabled);
 
   // help menu

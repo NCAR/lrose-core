@@ -107,7 +107,8 @@ TimeControl::TimeControl(GuiManager *parent) :
   
   _nFramesMovie = _params.n_movie_frames;
   _frameIntervalSecs = _params.frame_interval_secs;
-  _isRealtime = (_params.start_mode == Params::MODE_REALTIME);
+  _operatingState = _params.start_mode == Params::MODE_REALTIME ?
+    OperatingState::LiveRealtime : OperatingState::LiveArchive;
   _resetDefinitionValid = false;
   _resetNFramesMovie = 1;
   _resetFrameIntervalSecs = 1.0;
@@ -117,7 +118,7 @@ TimeControl::TimeControl(GuiManager *parent) :
   // startup calculations in GlobalData. Archive frame-centering retains the
   // original request semantics used by closest-to-frame-center mode.
   time_t initialStart = 0;
-  if (_isRealtime) {
+  if (isRealtime()) {
     initialStart = time(nullptr) - static_cast<time_t>(
       (_nFramesMovie - 1) * _frameIntervalSecs);
     _frameIndex = std::max(0, _nFramesMovie - 1);
@@ -128,7 +129,7 @@ TimeControl::TimeControl(GuiManager *parent) :
   }
   const int roundingSecs = std::max(1, _params.temporal_rounding);
   initialStart -= initialStart % roundingSecs;
-  if (!_isRealtime &&
+  if (!isRealtime() &&
       _params.gather_data_mode == Params::CLOSEST_TO_FRAME_CENTER) {
     initialStart -= static_cast<time_t>(_frameIntervalSecs / 2.0);
   }
@@ -144,7 +145,7 @@ TimeControl::TimeControl(GuiManager *parent) :
   
   _isSweep = false;
   _outputAfterBuild = false;
-  _movieState = MovieState::Idle;
+  _resumeRealtimeAfterMovie = false;
   _movieTimer = new QTimer(this);
   _movieTimer->setSingleShot(true);
   _buildingFrameIndex = -1;
@@ -305,7 +306,7 @@ void TimeControl::_populateGui()
   realtimeTitle->setAlignment(Qt::AlignHCenter);
 
   _realtimeSelector = new QCheckBox(realtimeFrame);
-  _realtimeSelector->setChecked(_isRealtime);
+  _realtimeSelector->setChecked(isRealtime());
 
   realtimeFrameLayout->addWidget(realtimeTitle, 0,
                                  Qt::AlignTop | Qt::AlignCenter);
@@ -765,8 +766,8 @@ DateTime TimeControl::_getGuiEndTime() const
 
 void TimeControl::configureAutomaticImageTime(const DateTime &imageTime)
 {
-  if (_movieState != MovieState::Idle) {
-    _stopMovie("automatic image time configuration");
+  if (isMovieActive()) {
+    _stopMovie("automatic image time configuration", false);
   }
 
   _startTime = imageTime;
@@ -802,8 +803,8 @@ void TimeControl::restoreAfterAutomaticImages(const DateTime &startTime,
                                               int frameIndex,
                                               bool realtime)
 {
-  if (_movieState != MovieState::Idle) {
-    _stopMovie("automatic image state restoration");
+  if (isMovieActive()) {
+    _stopMovie("automatic image state restoration", false);
   }
 
   _startTime = startTime;
@@ -814,12 +815,7 @@ void TimeControl::restoreAfterAutomaticImages(const DateTime &startTime,
   _guiNFramesMovie = _nFramesMovie;
   _guiFrameIntervalSecs = _frameIntervalSecs;
   _guiFrameIndex = _frameIndex;
-  _isRealtime = realtime;
-
-  // Updating the checkbox must not route this internal restoration back
-  // through the user-mode handler while the remaining state is incomplete.
-  const QSignalBlocker realtimeBlocker(_realtimeSelector);
-  _realtimeSelector->setChecked(_isRealtime);
+  _setRealtimeMode(realtime);
   _computeFrameTimes();
   _publishTimelineRange();
   for (int ii = 0; ii < _gd.num_datafields; ++ii) {
@@ -844,7 +840,7 @@ void TimeControl::_acceptGuiSelections()
   // Stop showing an immutable cached frame before a manual controller edit
   // requests live data again. During build/playback the movie state owns the
   // displayed image and therefore bypasses this path.
-  if (_movieState == MovieState::Idle) {
+  if (!isMovieActive()) {
     _manager->stopMoviePlayback();
   }
   const bool movieRangeChanged = _startTime != _guiStartTime ||
@@ -921,7 +917,12 @@ void TimeControl::_beginMovieBuild(bool outputAfterBuild)
   _manager->stopMoviePlayback();
   _acceptGuiSelections();
 
-  _movieState = MovieState::Building;
+  // A movie is a frozen archive snapshot. Leaving realtime here stops its
+  // cadence and makes the checkbox accurately describe the display owner.
+  // Retain only the transition preference; realtime itself remains inactive.
+  _resumeRealtimeAfterMovie = isRealtime();
+  _setRealtimeMode(false);
+  _operatingState = OperatingState::MovieBuilding;
   _outputAfterBuild = outputAfterBuild;
   _setMovieDefinitionControlsEnabled(false);
   _manager->movieStateChanged();
@@ -941,16 +942,22 @@ void TimeControl::_stopMovie()
   _stopMovie("Stop button");
 }
 
-void TimeControl::_stopMovie(const char *reason)
+void TimeControl::_stopMovie(const char *reason, bool restorePriorMode)
 {
+  if (!isMovieActive()) {
+    return;
+  }
+  const bool resumeRealtime = restorePriorMode && _resumeRealtimeAfterMovie;
+  _resumeRealtimeAfterMovie = false;
+
   if (_params.debug) {
     cerr << "Movie build: stopping movie reason=" << reason
-         << " state=" << static_cast<int>(_movieState)
+         << " state=" << static_cast<int>(_operatingState)
          << " expectedFrame=" << _buildingFrameIndex + 1 << endl;
   }
   _movieTimer->stop();
   _manager->cancelMovieBuild();
-  _movieState = MovieState::Idle;
+  _operatingState = OperatingState::LiveArchive;
   _outputAfterBuild = false;
   _setMovieDefinitionControlsEnabled(true);
   _enableAcceptCancel(false);
@@ -968,6 +975,11 @@ void TimeControl::_stopMovie(const char *reason)
   _manager->restoreLiveDisplayAfterMovie();
   _timeHasChanged = true;
   _manager->statusBar()->showMessage("Movie stopped", 3000);
+  if (resumeRealtime) {
+    // Entering realtime schedules one immediate update, replacing the movie
+    // frame selection with the current live edge and forcing a fresh reload.
+    _setRealtimeMode(true);
+  }
 }
 
 ////////////////////////////////////////////////////////
@@ -975,7 +987,7 @@ void TimeControl::_stopMovie(const char *reason)
 
 void TimeControl::_resetMovieDefinition()
 {
-  if (_movieState != MovieState::Idle) {
+  if (isMovieActive()) {
     return;
   }
 
@@ -1001,6 +1013,11 @@ void TimeControl::_resetMovieDefinition()
   }
 
   _resetDefinitionValid = false;
+  // Accepting the restored definition updates the controller timeline but
+  // does not normally republish controls which already drove the time plot.
+  // Reset changes those controls under signal blockers, so synchronize the
+  // plot's movie bounds before fitting its view to the restored range.
+  _updateTimePlot();
   _timePlot->fitMovie();
   _retrieveForTimeRange(
     _guiStartTime.utime(),
@@ -1012,7 +1029,7 @@ void TimeControl::_resetMovieDefinition()
 
 void TimeControl::_requestMovieFrame(int frameIndex)
 {
-  if (_movieState != MovieState::Building || frameIndex < 0 ||
+  if (!isMovieBuilding() || frameIndex < 0 ||
       frameIndex >= _nFramesMovie) {
     return;
   }
@@ -1038,11 +1055,11 @@ void TimeControl::movieFrameRendered(int frameIndex)
 {
   if (_params.debug) {
     cerr << "Movie build: received captured frame " << frameIndex + 1
-         << " state=" << static_cast<int>(_movieState)
+         << " state=" << static_cast<int>(_operatingState)
          << " expectedFrame=" << _buildingFrameIndex + 1
          << " cacheSize=" << _renderedMovieFrames.size() << endl;
   }
-  if (_movieState != MovieState::Building ||
+  if (!isMovieBuilding() ||
       frameIndex != _buildingFrameIndex || frameIndex < 0 ||
       frameIndex >= static_cast<int>(_renderedMovieFrames.size())) {
     if (_params.debug) {
@@ -1074,7 +1091,7 @@ void TimeControl::movieFrameRendered(int frameIndex)
 void TimeControl::movieFrameCaptureFailed(int frameIndex,
                                           const QString &error)
 {
-  if (_movieState != MovieState::Building ||
+  if (!isMovieBuilding() ||
       frameIndex != _buildingFrameIndex) {
     return;
   }
@@ -1091,7 +1108,7 @@ void TimeControl::movieFrameCaptureFailed(int frameIndex,
 
 void TimeControl::_startMoviePlayback()
 {
-  _movieState = MovieState::Playing;
+  _operatingState = OperatingState::MoviePlaying;
   _manager->movieStateChanged();
   _buildingFrameIndex = -1;
   _playbackDirection = 1;
@@ -1102,7 +1119,7 @@ void TimeControl::_startMoviePlayback()
 
 void TimeControl::_showPlaybackFrame(int frameIndex, bool firstFrame)
 {
-  if (_movieState != MovieState::Playing ||
+  if (!isMoviePlaying() ||
       !_manager->showMovieFrame(frameIndex)) {
     return;
   }
@@ -1127,7 +1144,7 @@ void TimeControl::_showPlaybackFrame(int frameIndex, bool firstFrame)
 
 void TimeControl::_advanceMoviePlayback()
 {
-  if (_movieState != MovieState::Playing || _nFramesMovie < 1) {
+  if (!isMoviePlaying() || _nFramesMovie < 1) {
     return;
   }
   if (_nFramesMovie == 1) {
@@ -1153,13 +1170,13 @@ void TimeControl::_advanceMoviePlayback()
 
 void TimeControl::_outputMovieLoop()
 {
-  if (_movieState == MovieState::Building) {
+  if (isMovieBuilding()) {
     _manager->statusBar()->showMessage(
       "Wait for the current movie build to finish", 3000);
     return;
   }
 
-  if (_movieState == MovieState::Playing) {
+  if (isMoviePlaying()) {
     _manager->statusBar()->showMessage("Writing movie loop images");
     QString message;
     const bool success = _manager->exportMovieLoop(message);
@@ -1211,6 +1228,7 @@ void TimeControl::_setGuiIntervalSecs(double val)
 
 void TimeControl::_setStartTimeFromEdit(const QDateTime &val)
 {
+  _enterArchiveModeForTimeChange();
   _captureResetDefinition();
   QDate dd = val.date();
   QTime tt = val.time();
@@ -1306,7 +1324,7 @@ void TimeControl::_updateResetButton()
   }
   const bool viewModified = _timePlot && !_timePlot->isFitToMovie();
   const bool available = _resetDefinitionValid || viewModified;
-  const bool enabled = available && _movieState == MovieState::Idle;
+  const bool enabled = available && !isMovieActive();
   _resetButton->setEnabled(enabled);
   _resetButton->setStyleSheet(
     enabled ? "padding: 3px 4px 3px 4px; background-color: seagreen;" :
@@ -1359,8 +1377,8 @@ void TimeControl::_retrieveForTimeRange(time_t startTime, time_t endTime)
   if (endTime <= startTime) {
     return;
   }
-  if (_movieState != MovieState::Idle) {
-    _stopMovie("time-plot range retrieval");
+  if (isMovieActive()) {
+    _stopMovie("time-plot range retrieval", false);
   }
 
   const time_t movieStart = _guiStartTime.utime();
@@ -1414,9 +1432,10 @@ void TimeControl::_selectFrameFromTimePlot(int frameIndex)
     return;
   }
 
-  if (_movieState != MovieState::Idle) {
-    _stopMovie("time-plot frame selection");
+  if (isMovieActive()) {
+    _stopMovie("time-plot frame selection", false);
   }
+  _enterArchiveModeForTimeChange();
 
   _guiFrameIndex = frameIndex;
   {
@@ -1435,9 +1454,10 @@ void TimeControl::_applyExpandedMovieRange(time_t startTime, int nFrames)
   if (nFrames < 1 || nFrames > Constants::MAX_FRAMES) {
     return;
   }
-  if (_movieState != MovieState::Idle) {
-    _stopMovie("time-plot range expansion");
+  if (isMovieActive()) {
+    _stopMovie("time-plot range expansion", false);
   }
+  _enterArchiveModeForTimeChange();
 
   _captureResetDefinition();
 
@@ -1484,8 +1504,8 @@ void TimeControl::_setStartTime(const DateTime &stime)
 
 void TimeControl::goBack1()
 {
-  if (_movieState != MovieState::Idle) {
-    _stopMovie("previous-frame action");
+  if (isMovieActive()) {
+    _stopMovie("previous-frame action", false);
   }
   // change index
   if (_guiFrameIndex == 0) {
@@ -1495,6 +1515,7 @@ void TimeControl::goBack1()
   } else {
     _guiFrameIndex -= 1;
   }
+  _enterArchiveModeForTimeChange();
   // move slider
   _timeSliderInProgress = true;
   _timeSlider->setSliderPosition(_guiFrameIndex);
@@ -1511,6 +1532,7 @@ void TimeControl::goBack1()
 
 void TimeControl::_shiftBack1()
 {
+  _enterArchiveModeForTimeChange();
   _captureResetDefinition();
   _guiStartTime -= _getGuiMovieDurationSecs();
   _updateTimesInGui();
@@ -1522,6 +1544,7 @@ void TimeControl::_shiftBack1()
 
 void TimeControl::_shiftBack3()
 {
+  _enterArchiveModeForTimeChange();
   _captureResetDefinition();
   _guiStartTime -= _getGuiMovieDurationSecs() * 3;
   _updateTimesInGui();
@@ -1533,8 +1556,8 @@ void TimeControl::_shiftBack3()
 
 void TimeControl::goFwd1()
 {
-  if (_movieState != MovieState::Idle) {
-    _stopMovie("next-frame action");
+  if (isMovieActive()) {
+    _stopMovie("next-frame action", false);
   }
   // change index
   if (_guiFrameIndex == _nFramesMovie - 1) {
@@ -1544,6 +1567,7 @@ void TimeControl::goFwd1()
   } else {
     _guiFrameIndex += 1;
   }
+  _enterArchiveModeForTimeChange();
   // move slider
   _timeSliderInProgress = true;
   _timeSlider->setSliderPosition(_guiFrameIndex);
@@ -1560,6 +1584,7 @@ void TimeControl::goFwd1()
 
 void TimeControl::_shiftFwd1()
 {
+  _enterArchiveModeForTimeChange();
   _captureResetDefinition();
   _guiStartTime += _getGuiMovieDurationSecs();
   _updateTimesInGui();
@@ -1571,6 +1596,7 @@ void TimeControl::_shiftFwd1()
 
 void TimeControl::_shiftFwd3()
 {
+  _enterArchiveModeForTimeChange();
   _captureResetDefinition();
   _guiStartTime += _getGuiMovieDurationSecs() * 3;
   _updateTimesInGui();
@@ -1649,9 +1675,10 @@ void TimeControl::_timeSliderReleased()
 
 void TimeControl::_timeSliderPressed() 
 {
-  if (_movieState != MovieState::Idle) {
-    _stopMovie("time slider press");
+  if (isMovieActive()) {
+    _stopMovie("time slider press", false);
   }
+  _enterArchiveModeForTimeChange();
   int value = _timeSlider->value();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Time slider pressed, value: " << value << endl;
@@ -1773,18 +1800,14 @@ void TimeControl::_publishSelectedFrame()
 ////////////////////////////////////////////////////////
 // move the accepted realtime window to the current time
 
-bool TimeControl::advanceRealtimeToNow(bool selectLiveFrame)
+bool TimeControl::advanceRealtimeToNow()
 {
-  if (!_isRealtime || _movieState != MovieState::Idle ||
+  if (!isRealtime() || isMovieActive() ||
       _nFramesMovie < 1) {
     return false;
   }
 
   const int liveFrame = _nFramesMovie - 1;
-  if (!selectLiveFrame && _frameIndex != liveFrame) {
-    return false;
-  }
-
   // The dialog is an editable view of the accepted timeline. A realtime tick
   // must not commit or discard movie-definition edits which the user has not
   // yet accepted; Start deliberately accepts those values as one operation.
@@ -1836,12 +1859,41 @@ bool TimeControl::advanceRealtimeToNow(bool selectLiveFrame)
 
 void TimeControl::_setRealtimeMode(bool enabled)
 {
-  if (_isRealtime == enabled) {
+  if (isMovieActive()) {
     return;
   }
-  _isRealtime = enabled;
+
+  const OperatingState requested = enabled ?
+    OperatingState::LiveRealtime : OperatingState::LiveArchive;
+  if (_operatingState == requested) {
+    return;
+  }
+  _operatingState = requested;
+
+  // Programmatic transitions, notably Start leaving realtime, must keep the
+  // mode control and external coordinate clients synchronized without routing
+  // the checkbox signal back through this method.
+  if (_realtimeSelector) {
+    const QSignalBlocker realtimeBlocker(_realtimeSelector);
+    _realtimeSelector->setChecked(enabled);
+  }
+  if (_gd.coord_expt) {
+    _gd.coord_expt->runtime_mode = enabled ?
+      RUNMODE_REALTIME : RUNMODE_ARCHIVE;
+    _gd.coord_expt->time_seq_num++;
+  }
   cerr << (enabled ? "Realtime mode" : "Archive mode") << endl;
   emit realtimeModeChanged(enabled);
+}
+
+////////////////////////////////////////////////////////
+// make historical navigation an explicit archive operation
+
+void TimeControl::_enterArchiveModeForTimeChange()
+{
+  if (isRealtime()) {
+    _setRealtimeMode(false);
+  }
 }
 
 // realtime mode?

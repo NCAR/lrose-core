@@ -121,14 +121,20 @@ class DLL_EXPORT TimeControl : public QDialog {
   }
   const TimelineFrame *getFrame(int frameIndex) const;
   double getLoopDwellMsecs() const { return _loopDwellMsecs; }
-  bool isMovieBuilding() const { return _movieState == MovieState::Building; }
-  bool isMoviePlaying() const { return _movieState == MovieState::Playing; }
-  bool isMovieActive() const { return _movieState != MovieState::Idle; }
+  bool isMovieBuilding() const {
+    return _operatingState == OperatingState::MovieBuilding;
+  }
+  bool isMoviePlaying() const {
+    return _operatingState == OperatingState::MoviePlaying;
+  }
+  bool isMovieActive() const {
+    return isMovieBuilding() || isMoviePlaying();
+  }
 
   // Leave cached playback and restore the live display after an external
   // interaction, such as resizing the main window, invalidates movie frames.
   void stopMovie(const char *reason = "external display change") {
-    _stopMovie(reason);
+    _stopMovie(reason, true);
   }
 
   // Configure the single frame used by unattended catalog generation. This
@@ -143,12 +149,12 @@ class DLL_EXPORT TimeControl : public QDialog {
                                    double frameIntervalSecs,
                                    int frameIndex,
                                    bool realtime);
-  bool isRealtime() const { return _isRealtime; }
+  bool isRealtime() const {
+    return _operatingState == OperatingState::LiveRealtime;
+  }
 
-  // Move the accepted realtime window to now before an automatic refresh.
-  // Ordinary timer ticks leave an older frame selected by the user untouched;
-  // entering realtime explicitly returns the controller to its live frame.
-  bool advanceRealtimeToNow(bool selectLiveFrame);
+  // Move the accepted realtime window and selection to the current live edge.
+  bool advanceRealtimeToNow();
 
   // convert between Qt and Radx date/time objects
   
@@ -259,12 +265,23 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   int _loopDwellMsecs;
   int _loopDelayMsecs;
-  bool _isRealtime;
   bool _isSweep;
   bool _outputAfterBuild;
 
-  enum class MovieState { Idle, Building, Playing };
-  MovieState _movieState;
+  // Archive/realtime selection and movie ownership are mutually exclusive.
+  // Keeping them in one state prevents a realtime tick and movie build from
+  // both claiming the accepted timeline.
+  enum class OperatingState {
+    LiveArchive,
+    LiveRealtime,
+    MovieBuilding,
+    MoviePlaying
+  };
+  OperatingState _operatingState;
+  // Realtime is inactive while a frozen movie owns the display, but Stop can
+  // restore the user's prior live-tracking choice without making it a second
+  // concurrently active operating mode.
+  bool _resumeRealtimeAfterMovie;
   QTimer *_movieTimer;
   vector<bool> _renderedMovieFrames;
   int _buildingFrameIndex;
@@ -316,6 +333,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _publishTimelineRange();
   void _publishSelectedFrame();
   void _setRealtimeMode(bool enabled);
+  void _enterArchiveModeForTimeChange();
                            
  private slots:
 
@@ -327,7 +345,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _startMovie();
   void _beginMovieBuild(bool outputAfterBuild);
   void _stopMovie();
-  void _stopMovie(const char *reason);
+  void _stopMovie(const char *reason, bool restorePriorMode = true);
   void _resetMovieDefinition();
   void _outputMovieLoop();
   void _finishMovieOutput();

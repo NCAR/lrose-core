@@ -139,6 +139,15 @@ carrying a live hover selection into cached playback.
 
 ## Movie construction and playback
 
+- `TimeControl` now represents live Archive, live Realtime, movie building,
+  and movie playback as one mutually exclusive operating state. Starting a
+  movie freezes the accepted range, switches visibly to Archive, and stops the
+  realtime cadence. If the movie was started from Realtime, Stop restores
+  Realtime and immediately advances to the live edge; an Archive movie stops
+  back in Archive.
+- Historical frame selection, slider navigation, range expansion, and explicit
+  start-time shifts also switch to Archive instead of leaving a hidden
+  "Realtime but paused" state.
 - Start builds sequentially from frame zero, independent of the selected frame
   at the time Start is pressed.
 - Horizontal frames are captured only after the grid and exact symbolic-
@@ -164,6 +173,9 @@ carrying a live hover selection into cached playback.
   movie; the former double-click-to-fit gesture is disabled.
 - A field selected after stopping a movie immediately returns to the normal
   non-movie request/render path.
+- Delayed resize events from the hidden vertical window no longer cancel a
+  horizontal-only movie. A vertical resize invalidates the movie only when the
+  visible vertical view is part of its captured cache.
 
 ## Interactive image output
 
