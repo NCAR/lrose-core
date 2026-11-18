@@ -1373,6 +1373,8 @@ void GuiManager::_createActions()
     if (checked) {
       _horiz->setVsectionRouteVisible(true);
       _vertWindow->show();
+      _vertWindow->raise();
+      _vertWindow->activateWindow();
       return;
     }
     _vertWindow->close();
@@ -3146,6 +3148,13 @@ void GuiManager::_verticalRouteCompleted(const VsectionRoute &route)
   _showVertAct->setChecked(true);
   _horiz->setVsectionRouteVisible(true);
 
+  // Drawing a route is an explicit request to work with VertView, so present
+  // it now. Later asynchronous data completions must not steal focus from
+  // whichever application the user has moved to while the read is pending.
+  _vertWindow->show();
+  _vertWindow->raise();
+  _vertWindow->activateWindow();
+
   char message[256];
   snprintf(message, sizeof(message),
            "Vertical section route: %zu points, %.1f km",
@@ -3391,15 +3400,8 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
     return;
   }
 
-  // Closing the window while a request was in flight is a persistent display
-  // choice. Retain the returned data and route, but do not reopen either view.
-  if (!_showVertAct->isChecked()) {
-    return;
-  }
-  _vertWindow->show();
-  _vertWindow->raise();
-  _vertWindow->activateWindow();
-  // statusBar()->showMessage("Vertical section ready", 5000);
+  // Completion only publishes the new rendering. Visibility and focus remain
+  // user-owned so background archive or realtime reads stay unobtrusive.
 }
 
 /////////////////////////////////////////////////////////////
