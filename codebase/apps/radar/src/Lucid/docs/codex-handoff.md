@@ -3,8 +3,10 @@
 Snapshot: 2026-11-18. The realtime/archive/movie state refactor, symmetric
 time-range editing, and vertical-route visibility fixes are merged and pushed
 to `master` in `80f860592` (`Merge branch 'Lucid_time_state_refactor'`). The
-temporary `Lucid_movie_bug` and `Lucid_time_state_refactor` branches have been
-deleted. This handoff update is the only current worktree change.
+follow-up window, focus, and legend cleanup is pushed through `6d11ff43e`
+(`apps/radar/Lucid - vsection legends 2`). The temporary `Lucid_movie_bug` and
+`Lucid_time_state_refactor` branches have been deleted. This handoff update is
+the only current worktree change.
 
 ## Architecture
 
@@ -77,6 +79,23 @@ transitional and retains some CIDD-style shared structures.
 - Map layers are cached independently from MDV grids. Global and per-map menu
   changes rebuild that cache immediately without issuing a field request. The
   global Maps toggle now controls painting as intended.
+- Horizontal legends are painted after maps and symbolic products so those
+  layers cannot overwrite them. Legends in both views use opaque backgrounds;
+  multiline legend rows advance by their complete text/background height and
+  therefore do not overlap.
+- Vertical-section route legends use compact signed latitude/longitude text
+  with hemisphere suffixes. Preserve the current formatting in `VertView.cc`;
+  it includes a later manual adjustment after the initial implementation.
+- The field menu remains in its established column to the right of HorizView
+  and follows the decorated bottom edge of VertView. Geometry updates are
+  deferred by one Qt event-loop pass because some window managers publish
+  frame decorations after the move/resize notification.
+- Realtime refreshes update an open VertView without showing, raising, or
+  activating its window. VertView activation is reserved for explicit user
+  actions, preventing the update cadence from stealing keyboard focus from
+  other applications.
+- Main-window status-bar creation and messages are currently commented out in
+  `GuiManager.cc` and `TimeControl.cc`, with the old calls retained for now.
 - Mouse input is normalized at the event boundary. Left drag zooms, middle or
   Option-left drag pans, and right click selects a vertical section.
 - Vertical sections support single-segment and multi-segment selection. The
@@ -412,10 +431,16 @@ Suggested interactive smoke test:
    Accept, Cancel, and Reset update the complete range consistently; Reset and
    Cancel must also restore a pre-edit Realtime mode.
 8. Exercise Reload with an open vertical section and enabled Products.
-9. Test interactive Save-Image and Export without overwriting prior files.
-10. Run automatic create-once, archive schedule, and realtime schedule modes;
+9. Leave Realtime running with VertView open, switch focus to another
+   application, and verify repeated refreshes neither steal focus nor change
+   window stacking.
+10. Verify the field menu remains directly below VertView after VertView is
+    moved or resized. Exercise multi-segment routes and confirm all opaque
+    legend rows remain distinct and above other rendered layers.
+11. Test interactive Save-Image and Export without overwriting prior files.
+12. Run automatic create-once, archive schedule, and realtime schedule modes;
    inspect image names, summaries, optional sidecars, and exit status.
-11. Press Ctrl-C during active MDV/SPDB/image requests and verify orderly
+13. Press Ctrl-C during active MDV/SPDB/image requests and verify orderly
     shutdown.
 
 Before committing, run `git status --short`. Preserve unrelated worktree files
