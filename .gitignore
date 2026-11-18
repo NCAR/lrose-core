@@ -375,6 +375,7 @@ codebase/apps/mdv_utils/src/MdvPatch/MdvPatch
 codebase/apps/mdv_utils/src/MdvPointExtract/MdvPointExtract
 codebase/apps/mdv_utils/src/MdvPull/MdvPull
 codebase/apps/mdv_utils/src/MdvScatterPlot/MdvScatterPlot
+codebase/apps/mdv_utils/src/MdvSim/MdvSim
 codebase/apps/mdv_utils/src/MdvSmooth/MdvSmooth
 codebase/apps/mdv_utils/src/MdvSpdDir2UV/MdvSpdDir2UV
 codebase/apps/mdv_utils/src/MdvStats/MdvStats

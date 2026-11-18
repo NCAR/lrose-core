@@ -2032,7 +2032,9 @@ void HorizView::resizeEvent(QResizeEvent * e)
   for (size_t ii = 0; ii < _customZooms.size(); ii++) {
     _customZooms[ii].resize(width(), height());
   }
-  _pixmap = _pixmap.scaled(width(), height());
+  if (!_pixmap.isNull()) {
+    _pixmap = _pixmap.scaled(width(), height());
+  }
   _sizeChanged = true;
   
 }

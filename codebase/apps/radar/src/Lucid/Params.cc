@@ -1833,10 +1833,10 @@ Params *Params::_instance = (Params *) NULL;
     tt->max_val.i = 9999;
     tt->single_val.i = 75;
     tt++;
-
+    
     // Parameter 'movie_frame_request_timeout_secs'
     // ctype is 'int'
-
+    
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("movie_frame_request_timeout_secs");
@@ -1847,7 +1847,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->min_val.i = 1;
     tt->single_val.i = 120;
     tt++;
-
+    
     // Parameter 'movie_min_dwell_msecs'
     // ctype is 'int'
     
