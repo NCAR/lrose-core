@@ -1228,12 +1228,13 @@ void WorldPlot::drawLegendsTopLeft(QPainter &painter,
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
     QRect lRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
-    QRectF bRect(xx, yy, lRect.width() + 4, lRect.height() + 4);
+    const qreal lineHeight = lRect.height() + 4;
+    QRectF bRect(xx, yy, lRect.width() + 4, lineHeight);
     QColor background(_params.background_color);
     background.setAlpha(255);
     painter.fillRect(bRect, background);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
-    yy += lRect.height();
+    yy += lineHeight;
   }
   
   painter.restore();
@@ -1262,12 +1263,13 @@ void WorldPlot::drawLegendsTopRight(QPainter &painter,
     QRect lRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     qreal xx = (qreal) (_xMaxPixel - _yAxisTickLen -
                         _legendTextMargin - lRect.width());
-    QRectF bRect(xx, yy, lRect.width() + 4, lRect.height() + 4);
+    const qreal lineHeight = lRect.height() + 4;
+    QRectF bRect(xx, yy, lRect.width() + 4, lineHeight);
     QColor background(_params.background_color);
     background.setAlpha(255);
     painter.fillRect(bRect, background);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
-    yy += lRect.height();
+    yy += lineHeight;
   }
 
   painter.restore();
@@ -1295,8 +1297,9 @@ void WorldPlot::drawLegendsBottomLeft(QPainter &painter,
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
     QRect lRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
-    yy -= lRect.height();
-    QRectF bRect(xx, yy, lRect.width() + 4, lRect.height() + 4);
+    const qreal lineHeight = lRect.height() + 4;
+    yy -= lineHeight;
+    QRectF bRect(xx, yy, lRect.width() + 4, lineHeight);
     QColor background(_params.background_color);
     background.setAlpha(255);
     painter.fillRect(bRect, background);
@@ -1329,8 +1332,9 @@ void WorldPlot::drawLegendsBottomRight(QPainter &painter,
     QRect lRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     qreal xx = (qreal) (_xMaxPixel - _yAxisTickLen -
                         _legendTextMargin - lRect.width());
-    yy -= lRect.height();
-    QRectF bRect(xx, yy, lRect.width() + 4, lRect.height() + 4);
+    const qreal lineHeight = lRect.height() + 4;
+    yy -= lineHeight;
+    QRectF bRect(xx, yy, lRect.width() + 4, lineHeight);
     QColor background(_params.background_color);
     background.setAlpha(255);
     painter.fillRect(bRect, background);
