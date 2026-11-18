@@ -199,7 +199,6 @@ GuiManager::GuiManager() :
   _main = NULL;
   _resizeTimer = NULL;
   _realtimeUpdateTimer = NULL;
-  _realtimeRefreshPending = false;
   _resized = false;
   
   _horizFrame = NULL;
@@ -318,15 +317,15 @@ GuiManager::GuiManager() :
       _vert->stopMoviePlayback();
     }
   };
-  movieCallbacks.frameRendered = [this](int frameIndex) {
+  movieCallbacks.frameRendered = [this](uint64_t buildId, int frameIndex) {
     if (_timeControl) {
-      _timeControl->movieFrameRendered(frameIndex);
+      _timeControl->movieFrameRendered(buildId, frameIndex);
     }
   };
   movieCallbacks.frameCaptureFailed =
-    [this](int frameIndex, const QString &error) {
+    [this](uint64_t buildId, int frameIndex, const QString &error) {
       if (_timeControl) {
-        _timeControl->movieFrameCaptureFailed(frameIndex, error);
+        _timeControl->movieFrameCaptureFailed(buildId, frameIndex, error);
       }
     };
   movieCallbacks.pendingDependencies = [this]() {
@@ -518,22 +517,23 @@ void GuiManager::setZoomIndex(int zoomIndex)
 ////////////////////////////////////////////////////////
 // initialize storage and request state for a new movie build
 
-void GuiManager::prepareMovieBuild(int frameCount)
+uint64_t GuiManager::prepareMovieBuild(int frameCount)
 {
   const bool includeVertical = _vertWindow && _vert &&
     _vertWindow->isVisible() && _vsectionRoute.size() >= 2;
   _terrainHorizontalSettled = true;
   _terrainHorizontalRequestPending = false;
   _terrainVerticalSettled = true;
-  _movieManager->prepareBuild(
+  return _movieManager->prepareBuild(
     frameCount, includeVertical,
     QString::fromStdString(getSelectedFieldLabel()));
 }
 
-void GuiManager::beginMovieFrameBuild(int frameIndex)
+void GuiManager::beginMovieFrameBuild(uint64_t buildId, int frameIndex)
 {
   _movieManager->beginFrameBuild(
-    frameIndex, _timeControl ? _timeControl->getNFramesMovie() : 0);
+    buildId, frameIndex,
+    _timeControl ? _timeControl->getNFramesMovie() : 0);
 }
 
 void GuiManager::cancelMovieBuild()
@@ -574,8 +574,13 @@ void GuiManager::restoreLiveDisplayAfterMovie()
 
 void GuiManager::stopMovieForDisplayChange()
 {
-  if (_timeControl && _timeControl->isMovieActive()) {
-    _timeControl->stopMovie();
+  // The hidden vertical manager can receive delayed layout resize events even
+  // for a horizontal-only movie. Only geometry captured by this movie may
+  // invalidate its cache and force the operating state back to Archive.
+  if (_timeControl && _timeControl->isMovieActive() && _movieManager &&
+      _movieManager->includesVertical() && _vertWindow &&
+      _vertWindow->isVisible()) {
+    _timeControl->stopMovie("vertical window resize");
   }
 }
 
@@ -614,12 +619,6 @@ void GuiManager::movieStateChanged()
   const bool building = isMovieBuilding();
   const bool active = isMovieActive();
   const bool interactive = !_params.create_images_automatically;
-
-  if (!active && _realtimeRefreshPending) {
-    // Let the movie transition finish before returning ownership to live
-    // readers. Multiple timer expirations collapse into this single request.
-    QTimer::singleShot(0, this, [this]() { _handleRealtimeUpdate(); });
-  }
 
   // A movie build must capture one stable display configuration. Playback is
   // less restrictive: field and level choices may update the hidden live
@@ -743,6 +742,23 @@ void GuiManager::_checkMovieFrameReady()
     _gd.wind_mgr->activeVerticalWindsSettled();
   const bool verticalTerrainReady =
     !_movieManager->includesVertical() || _terrainVerticalSettled;
+  if (_params.debug) {
+    cerr << "Movie readiness: frame=" << _movieManager->buildFrame() + 1
+         << " products=" << (productsReady ? "ready" : "pending")
+         << " horizWinds=" << (horizontalWindsReady ? "ready" : "pending")
+         << " vertWinds=" << (verticalWindsReady ? "ready" : "pending")
+         << " horizTerrain="
+         << (_terrainHorizontalSettled ? "ready" : "pending")
+         << " vertTerrain=" << (verticalTerrainReady ? "ready" : "pending");
+    if (!productsReady && _gd.prod_mgr) {
+      cerr << " productRequests="
+           << (_gd.prod_mgr->activeProductRequestsSettled() ?
+               "settled" : "in-flight")
+           << " productUnavailable="
+           << _gd.prod_mgr->numActiveProductsUnavailable();
+    }
+    cerr << endl;
+  }
   _movieManager->checkFrameReady(
     productsReady && horizontalWindsReady && verticalWindsReady &&
     _terrainHorizontalSettled && verticalTerrainReady);
@@ -851,7 +867,7 @@ void GuiManager::resizeEvent(QResizeEvent *event)
   // were active at build time. A resize necessarily returns to live mode so
   // the display can rebuild all layers for the new geometry.
   if (_timeControl && _timeControl->isMovieActive()) {
-    _timeControl->stopMovie();
+    _timeControl->stopMovie("main window resize");
   }
   // Restart the timer on each resize event
   _resizeTimer->start();
@@ -1342,7 +1358,20 @@ void GuiManager::_createActions()
   _showVertAct->setStatusTip(tr("Show the VERT Window"));
   _showVertAct->setCheckable(true);
   _showVertAct->setChecked(false);
-  connect(_showVertAct, &QAction::triggered, _vertWindow, &VertView::show);
+  connect(_showVertAct, &QAction::triggered, this,
+          [this](bool checked) {
+    if (checked) {
+      _horiz->setVsectionRouteVisible(true);
+      _vertWindow->show();
+      return;
+    }
+    _vertWindow->close();
+    // Building rejects the close because its vertical frame is part of the
+    // current readiness contract. Keep the action consistent in that case.
+    if (_vertWindow->isVisible()) {
+      _showVertAct->setChecked(true);
+    }
+  });
 
   // howto and about
   
@@ -2239,6 +2268,12 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
       _vlevelManager.getRequestedLevel(),
       _fieldNum,
       true);
+    if (_movieManager->buildFrame() == frameIndex) {
+      // Frame indices repeat across builds. Record the exact reader request
+      // issued for this frame so a late completion cannot open the capture
+      // gate for a newer session at the same index.
+      _movieManager->expectGridGeneration(frameIndex, generation);
+    }
     if (_gd.wind_mgr) {
       _gd.wind_mgr->requestData(_timeControl->getSelectedTime().utime(),
                                 _vlevelManager.getRequestedLevel(),
@@ -2288,8 +2323,14 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
           mr->getHorizCompletedGeneration())) {
       _checkAutomaticImageReady();
     }
-    if (_movieManager->buildFrame() == frameIndex) {
-      _movieManager->markGridReady(frameIndex);
+    if (_movieManager->markGridReady(
+          frameIndex, mr->getHorizCompletedGeneration())) {
+      if (_params.debug) {
+        cerr << "Movie readiness: horizontal grid ready for frame "
+             << frameIndex + 1
+             << " generation=" << mr->getHorizCompletedGeneration()
+             << endl;
+      }
       _checkMovieFrameReady();
     }
     if (_fieldNum < _gd.num_datafields) {
@@ -2428,24 +2469,16 @@ void GuiManager::_invalidateDisplayedData(bool refreshProductsImmediately)
 ////////////////////////////////////////////////////////
 // advance and reload the live realtime display
 
-void GuiManager::_handleRealtimeUpdate(bool selectLiveFrame)
+void GuiManager::_handleRealtimeUpdate()
 {
   if (!_timeControl || !_timeControl->isRealtime() ||
       _params.create_images_automatically) {
     return;
   }
-  if (isMovieActive()) {
-    _realtimeRefreshPending = true;
-    return;
-  }
-  if (!_timeControl->advanceRealtimeToNow(selectLiveFrame)) {
-    // Selecting an older realtime frame is an intentional pause, not a
-    // missed update which should later pull the user back to the live frame.
-    _realtimeRefreshPending = false;
+  if (!_timeControl->advanceRealtimeToNow()) {
     return;
   }
 
-  _realtimeRefreshPending = false;
   // The changed timeline causes the normal request path to capture the new
   // Product context. Do not first issue a redundant request at the old time.
   _invalidateDisplayedData(false);
@@ -2460,7 +2493,6 @@ void GuiManager::_setRealtimeUpdatesEnabled(bool enabled)
     return;
   }
 
-  _realtimeRefreshPending = false;
   if (!enabled) {
     _realtimeUpdateTimer->stop();
     return;
@@ -2470,7 +2502,7 @@ void GuiManager::_setRealtimeUpdatesEnabled(bool enabled)
   // A mode transition should show live data immediately rather than leaving
   // an archive selection visible for the first full update interval.
   QTimer::singleShot(0, this,
-                     [this]() { _handleRealtimeUpdate(true); });
+                     [this]() { _handleRealtimeUpdate(); });
 }
 
 ////////////////////////////////////////////////////////
@@ -3101,6 +3133,8 @@ void GuiManager::_showValue()
 void GuiManager::_verticalRouteCompleted(const VsectionRoute &route)
 {
   _vsectionRoute = route;
+  _showVertAct->setChecked(true);
+  _horiz->setVsectionRouteVisible(true);
 
   char message[256];
   snprintf(message, sizeof(message),
@@ -3332,6 +3366,11 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
 
   if (isMovieBuilding() &&
       _movieManager->markVerticalReady(reader->getVertGeneration())) {
+    if (_params.debug) {
+      cerr << "Movie readiness: vertical section ready for frame "
+           << _movieManager->buildFrame() + 1
+           << " generation=" << reader->getVertGeneration() << endl;
+    }
     _checkMovieFrameReady();
     return;
   }
@@ -3342,7 +3381,11 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
     return;
   }
 
-  _showVertAct->setChecked(true);
+  // Closing the window while a request was in flight is a persistent display
+  // choice. Retain the returned data and route, but do not reopen either view.
+  if (!_showVertAct->isChecked()) {
+    return;
+  }
   _vertWindow->show();
   _vertWindow->raise();
   _vertWindow->activateWindow();
@@ -3422,7 +3465,17 @@ void GuiManager::_terrainVerticalReadComplete(MdvReader *reader)
 void GuiManager::vertWindowClosed(QCloseEvent *event)
 
 {
+  Q_UNUSED(event);
+  if (_timeControl && _timeControl->isMoviePlaying()) {
+    // Horizontal playback images contain the route overlay captured with the
+    // vertical view. Return to live rendering so hiding the route is visible
+    // immediately and the two views cannot imply different movie contents.
+    _timeControl->stopMovie("vertical window closed");
+  }
   _showVertAct->setChecked(false);
+  if (_horiz) {
+    _horiz->setVsectionRouteVisible(false);
+  }
 }
 
 /////////////////////////////////////////////////////

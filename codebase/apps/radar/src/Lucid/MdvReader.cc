@@ -320,8 +320,10 @@ int MdvReader::requestHorizPlane(const DateTime &midTime,
   
   if (!_readBusyH && _installedHRequestValid && _timeListValid &&
       _sameHorizDataRequest(request, _installedHRequest)) {
-    if(_gd.debug2) {
-      cerr << "======>> requestHorizPlane - no change <<<<==" << endl;
+    if (_gd.debug1) {
+      cerr << "MdvReader: reusing cached horizontal data"
+           << " generation=" << generation
+           << " requestTime=" << request.requestTime.asString(0) << endl;
     }
     _pendingHRequestValid = false;
     _publishCachedHorizRequest(request, false);

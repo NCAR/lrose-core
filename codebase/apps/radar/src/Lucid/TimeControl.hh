@@ -49,6 +49,7 @@
 #endif
 #endif
 
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <ctime>
@@ -86,6 +87,20 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   Q_OBJECT
 
+  // The operating mode is the sole authority for timeline ownership. Stop
+  // policy is explicit because historical navigation must remain in Archive,
+  // while a normal Stop restores the mode which preceded the movie.
+  enum class OperatingState {
+    LiveArchive,
+    LiveRealtime,
+    MovieBuilding,
+    MoviePlaying
+  };
+  enum class MovieStopPolicy {
+    RestorePreviousMode,
+    StayArchive
+  };
+
  public:
   
   // constructor
@@ -116,18 +131,24 @@ class DLL_EXPORT TimeControl : public QDialog {
     return _nFramesMovie * _frameIntervalSecs;
   }
   int getFrameIndex() const { return _frameIndex; }
-  int getFrameCount() const {
-    return static_cast<int>(_timelineFrames.size());
-  }
+  int getFrameCount() const;
   const TimelineFrame *getFrame(int frameIndex) const;
   double getLoopDwellMsecs() const { return _loopDwellMsecs; }
-  bool isMovieBuilding() const { return _movieState == MovieState::Building; }
-  bool isMoviePlaying() const { return _movieState == MovieState::Playing; }
-  bool isMovieActive() const { return _movieState != MovieState::Idle; }
+  bool isMovieBuilding() const {
+    return _operatingState == OperatingState::MovieBuilding;
+  }
+  bool isMoviePlaying() const {
+    return _operatingState == OperatingState::MoviePlaying;
+  }
+  bool isMovieActive() const {
+    return isMovieBuilding() || isMoviePlaying();
+  }
 
   // Leave cached playback and restore the live display after an external
   // interaction, such as resizing the main window, invalidates movie frames.
-  void stopMovie() { _stopMovie(); }
+  void stopMovie(const char *reason = "external display change") {
+    _stopMovie(reason);
+  }
 
   // Configure the single frame used by unattended catalog generation. This
   // keeps legacy frame bounds and Product request intervals synchronized with
@@ -141,12 +162,12 @@ class DLL_EXPORT TimeControl : public QDialog {
                                    double frameIntervalSecs,
                                    int frameIndex,
                                    bool realtime);
-  bool isRealtime() const { return _isRealtime; }
+  bool isRealtime() const {
+    return _operatingState == OperatingState::LiveRealtime;
+  }
 
-  // Move the accepted realtime window to now before an automatic refresh.
-  // Ordinary timer ticks leave an older frame selected by the user untouched;
-  // entering realtime explicitly returns the controller to its live frame.
-  bool advanceRealtimeToNow(bool selectLiveFrame);
+  // Move the accepted realtime window and selection to the current live edge.
+  bool advanceRealtimeToNow();
 
   // convert between Qt and Radx date/time objects
   
@@ -169,11 +190,13 @@ class DLL_EXPORT TimeControl : public QDialog {
 
   // Called by GuiManager after all layers for the requested frame have been
   // captured into the immutable playback cache.
-  void movieFrameRendered(int frameIndex);
+  void movieFrameRendered(uint64_t buildId, int frameIndex);
 
   // Abort a build whose fully rendered widget could not be copied into the
   // immutable movie cache.
-  void movieFrameCaptureFailed(int frameIndex, const QString &error);
+  void movieFrameCaptureFailed(uint64_t buildId,
+                               int frameIndex,
+                               const QString &error);
 
  signals:
 
@@ -200,6 +223,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   QPushButton *_stopButton;
   QPushButton *_acceptButton;
   QPushButton *_cancelButton;
+  QPushButton *_resetButton;
   QPushButton *_outputButton;
   
   QDateTimeEdit *_startTimeEdit;
@@ -239,21 +263,37 @@ class DLL_EXPORT TimeControl : public QDialog {
   int _nFramesMovie;
   double _frameIntervalSecs;
   int _frameIndex;
+
+  // The first explicit definition edit captures one undo point, including
+  // the live/archive mode which owned the timeline before the edit.
+  bool _resetDefinitionValid;
+  DateTime _resetStartTime;
+  int _resetNFramesMovie;
+  double _resetFrameIntervalSecs;
+  int _resetFrameIndex;
+  bool _resetRealtime;
   // TimeControl is the sole owner of accepted frame bounds. Renderers receive
   // immutable frame values through accessors, so GUI edits cannot leave a
   // second GlobalData movie model out of sync.
   vector<TimelineFrame> _timelineFrames;
+  // A build and its subsequent playback retain the accepted frame values
+  // from Start. Live timeline publications cannot alter this snapshot while
+  // asynchronous readers and deferred capture callbacks are in flight.
+  vector<TimelineFrame> _movieTimelineFrames;
 
   // parameters
   
   int _loopDwellMsecs;
   int _loopDelayMsecs;
-  bool _isRealtime;
   bool _isSweep;
   bool _outputAfterBuild;
 
-  enum class MovieState { Idle, Building, Playing };
-  MovieState _movieState;
+  OperatingState _operatingState;
+  // Realtime is inactive while a frozen movie owns the display, but Stop can
+  // restore the user's prior live-tracking choice without making it a second
+  // concurrently active operating mode.
+  bool _resumeRealtimeAfterMovie;
+  uint64_t _movieBuildId;
   QTimer *_movieTimer;
   vector<bool> _renderedMovieFrames;
   int _buildingFrameIndex;
@@ -277,8 +317,9 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _updateTimesInGui();
   void _updateSelectedTimeInGui();
   void _updateTimePlot();
-  void _applyExpandedMovieRange(time_t startTime, int nFrames);
-  void _retrieveForTimeRange(time_t startTime, time_t endTime);
+  void _captureResetDefinition();
+  void _updateResetButton();
+  void _applyPendingMovieRange(time_t startTime, int nFrames);
   void _selectFrameFromTimePlot(int frameIndex);
   
   void _setFrameIndex(int val) { _frameIndex = val; }
@@ -302,7 +343,9 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _computeFrameTimes();
   void _publishTimelineRange();
   void _publishSelectedFrame();
+  void _transitionTo(OperatingState state);
   void _setRealtimeMode(bool enabled);
+  void _enterArchiveModeForTimeChange();
                            
  private slots:
 
@@ -314,6 +357,10 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _startMovie();
   void _beginMovieBuild(bool outputAfterBuild);
   void _stopMovie();
+  void _stopMovie(
+    const char *reason,
+    MovieStopPolicy policy = MovieStopPolicy::RestorePreviousMode);
+  void _resetMovieDefinition();
   void _outputMovieLoop();
   void _finishMovieOutput();
   void _requestMovieFrame(int frameIndex);

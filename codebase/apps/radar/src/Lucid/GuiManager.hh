@@ -42,6 +42,7 @@
 #ifndef GuiManager_HH
 #define GuiManager_HH
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -137,8 +138,8 @@ public:
   void updateClickReport(const ClickReport &report);
 
   // Coordinate asynchronous data retrieval with TimeControl's movie builder.
-  void prepareMovieBuild(int frameCount);
-  void beginMovieFrameBuild(int frameIndex);
+  uint64_t prepareMovieBuild(int frameCount);
+  void beginMovieFrameBuild(uint64_t buildId, int frameIndex);
   void cancelMovieBuild();
   bool showMovieFrame(int frameIndex);
   bool exportMovieLoop(QString &message);
@@ -192,10 +193,8 @@ private:
   QTimer *_resizeTimer;
 
   // Realtime display updates are independent of the high-frequency event
-  // pump. Missed refreshes are coalesced while immutable movie frames own the
-  // canvases, then issued once live display ownership returns.
+  // pump. TimeControl stops this cadence before a movie claims the canvases.
   QTimer *_realtimeUpdateTimer;
-  bool _realtimeRefreshPending;
   
   // horizontal view windows
   
@@ -442,7 +441,7 @@ private slots:
   void _openFile();
   void _saveFile();
   void _reloadData();
-  void _handleRealtimeUpdate(bool selectLiveFrame = false);
+  void _handleRealtimeUpdate();
   void _setRealtimeUpdatesEnabled(bool enabled);
 
   // help menu

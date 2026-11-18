@@ -42,13 +42,9 @@ public:
   void setProductSeries(const std::vector<TimePlotSeries> &series);
   void setRenderedFrames(const std::vector<bool> &renderedFrames,
                          int buildingFrame);
-  void setExpansionCallback(
+  void setRangeEditCallback(
     const std::function<void(time_t, int)> &callback) {
-    _expansionCallback = callback;
-  }
-  void setViewChangedCallback(
-    const std::function<void(time_t, time_t)> &callback) {
-    _viewChangedCallback = callback;
+    _rangeEditCallback = callback;
   }
   void setFrameSelectedCallback(const std::function<void(int)> &callback) {
     _frameSelectedCallback = callback;
@@ -62,7 +58,6 @@ protected:
   void mousePressEvent(QMouseEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
   void mouseReleaseEvent(QMouseEvent *event) override;
-  void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
   enum class DragMode { None, Zoom, Pan, Expand };
@@ -85,8 +80,7 @@ private:
   DragMode _dragMode;
   QPoint _dragStart;
   QPoint _dragCurrent;
-  std::function<void(time_t, int)> _expansionCallback;
-  std::function<void(time_t, time_t)> _viewChangedCallback;
+  std::function<void(time_t, int)> _rangeEditCallback;
   std::function<void(int)> _frameSelectedCallback;
 
   QRectF _plotRect() const;

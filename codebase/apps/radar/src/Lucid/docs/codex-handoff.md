@@ -185,11 +185,31 @@ carrying a live hover selection into cached playback.
 
 ## Movie construction and playback
 
+- `TimeControl` now represents live Archive, live Realtime, movie building,
+  and movie playback as one mutually exclusive operating state. Starting a
+  movie freezes the accepted range, switches visibly to Archive, and stops the
+  realtime cadence. If the movie was started from Realtime, Stop restores
+  Realtime and immediately advances to the live edge; an Archive movie stops
+  back in Archive.
+- All operating-state changes pass through one transition function which
+  synchronizes the Realtime checkbox, external runtime mode, sequence
+  notification, and update timer. Movie stop callers select an explicit
+  restore-previous-mode or stay-in-Archive policy rather than independently
+  manipulating those side effects.
+- Historical frame selection, slider navigation, range expansion, and explicit
+  start-time shifts also switch to Archive instead of leaving a hidden
+  "Realtime but paused" state.
 - Start builds sequentially from frame zero, independent of the selected frame
   at the time Start is pressed.
+- Each Start creates a uniquely identified build session and copies the
+  accepted timeline into an immutable snapshot used through construction and
+  playback. Stop or a replacement build invalidates deferred callbacks from
+  the previous session, even when both were working on the same frame index.
 - Horizontal frames are captured only after the grid and exact symbolic-
-  product request keys are ready. If a vertical window has a valid route,
-  matching vertical composites are captured at the same frame index.
+  product request keys are ready. The primary grid must complete the exact MDV
+  generation issued for that frame; frame number alone is not sufficient. If
+  a vertical window has a valid route, matching vertical composites are
+  captured at the same frame index.
 - Playback uses immutable `QImage` caches rather than mutable live layers.
 - The time plot shows the frame being built in orange and completed frames in
   green. During playback, the displayed frame is gray.
@@ -203,17 +223,33 @@ carrying a live hover selection into cached playback.
   naming the outstanding layers instead of leaving the UI in Building state.
 - A capture failure follows the same stop path, so movie construction cannot
   remain permanently active after an image-capture error.
-- Right-drag interval expansion requires Accept and updates the movie start and
-  end widgets. Editing the frame interval no longer starts a build implicitly.
+- Left-drag zoom, middle-drag pan, and right-drag expansion all create the same
+  pending, frame-aligned movie definition. They update the start, end, frame
+  count, selection, and plot together, but do not publish or retrieve data
+  until Accept; Cancel restores the accepted definition.
+- The Reset snapshot also retains the pre-edit Archive/Realtime mode. A time
+  edit made from Realtime enters Archive, while Reset or Cancel restores
+  Realtime and resumes its live cadence.
+- Editing the frame interval no longer starts a build implicitly.
+- Reset is enabled after a movie-definition change and restores the pre-edit
+  definition. The former double-click-to-fit gesture is disabled.
 - A field selected after stopping a movie immediately returns to the normal
   non-movie request/render path.
+- Delayed resize events from the hidden vertical window no longer cancel a
+  horizontal-only movie. A vertical resize invalidates the movie only when the
+  visible vertical view is part of its captured cache.
+- Closing the vertical window hides its route overlay in the horizontal view
+  without discarding the retained route. Reopening shows it again, and a late
+  vertical completion cannot reopen a window the user closed. Closing during
+  playback stops the movie first because cached horizontal frames already
+  contain that route overlay.
 
 ## Interactive image output
 
 - File -> Save-Image captures the horizontal view and, when visible, the
   vertical view. Names contain the view, sanitized field, selected UTC time,
   and a collision suffix so existing files are not replaced.
-- Time controller Output Loop writes the immutable movie caches. From idle it
+- Time controller Export writes the immutable movie caches. From idle it
   first builds the complete loop; during playback it exports the existing
   cache.
 - Loop output can launch `movie_convert_script` asynchronously with the
@@ -420,7 +456,7 @@ Suggested interactive smoke test:
 7. Test time-canvas selection, zoom, pan, automatic extension, right-drag plus
    Accept, and interval editing.
 8. Exercise Reload with an open vertical section and enabled Products.
-9. Test interactive Save-Image and Output Loop without overwriting prior files.
+9. Test interactive Save-Image and Export without overwriting prior files.
 10. Run automatic create-once, archive schedule, and realtime schedule modes;
    inspect image names, summaries, optional sidecars, and exit status.
 11. Press Ctrl-C during active MDV/SPDB/image requests and verify orderly

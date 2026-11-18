@@ -1121,7 +1121,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Number of seconds to wait for data to come in before giving up.");
     tt->help = tdrpStrDup("On very slow networks this may need to go as high as 180 seconds.");
     tt->val_offset = (char *) &data_timeout_secs - &_start_;
-    tt->single_val.i = 30;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'request_compressed_data'
@@ -1851,7 +1851,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->val_offset = (char *) &movie_frame_request_timeout_secs - &_start_;
     tt->has_min = TRUE;
     tt->min_val.i = 1;
-    tt->single_val.i = 120;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'movie_min_dwell_msecs'
@@ -5274,7 +5274,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Maximum time to wait for the data layers for one automatically generated image (secs).");
     tt->help = tdrpStrDup("A bounded wait prevents unattended image generation from hanging indefinitely when an MDV or symbolic product server is unavailable.");
     tt->val_offset = (char *) &images_request_timeout_secs - &_start_;
-    tt->single_val.i = 120;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'images_require_all_symprods'
@@ -5692,7 +5692,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Length of time to wait before killing simple external commands.");
     tt->help = tdrpStrDup("Used When running single image convert scripts and driving Browsers to web pages.");
     tt->val_offset = (char *) &simple_command_timeout_secs - &_start_;
-    tt->single_val.i = 30;
+    tt->single_val.i = 20;
     tt++;
     
     // Parameter 'complex_command_timeout_secs'
