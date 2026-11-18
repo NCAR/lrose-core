@@ -55,7 +55,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
-#include <QStatusBar>
+// #include <QStatusBar>
 #include <QDateTime>
 #include <QDateTimeEdit>
 #include <QTimeZone>
@@ -349,9 +349,9 @@ GuiManager::GuiManager() :
     }
     return pending;
   };
-  movieCallbacks.showProgress = [this](const QString &message) {
-    statusBar()->showMessage(message);
-  };
+  // movieCallbacks.showProgress = [this](const QString &message) {
+  //   statusBar()->showMessage(message);
+  // };
   _movieManager = new MovieManager(
     _params, std::move(movieCallbacks), this);
 
@@ -676,7 +676,7 @@ void GuiManager::movieStateChanged()
 
 void GuiManager::showMovieInteractionBlocked()
 {
-  statusBar()->showMessage(tr("Stop the movie to change the view"), 3000);
+  // statusBar()->showMessage(tr("Stop the movie to change the view"), 3000);
 }
 
 /////////////////////////////////////////////////////////////
@@ -1001,13 +1001,13 @@ void GuiManager::_setupWindows()
       _checkMovieFrameReady();
       _checkAutomaticImageReady();
     });
-    _gd.prod_mgr->setStatusCallback(
-      [this](const string &message, bool isError) {
-        // Successful requests use a brief progress message. Errors remain
-        // visible longer while the previous valid product stays displayed.
-        statusBar()->showMessage(QString::fromStdString(message),
-                                 isError ? 15000 : 3000);
-      });
+    // _gd.prod_mgr->setStatusCallback(
+    //   [this](const string &message, bool isError) {
+    //     // Successful requests use a brief progress message. Errors remain
+    //     // visible longer while the previous valid product stays displayed.
+    //     statusBar()->showMessage(QString::fromStdString(message),
+    //                              isError ? 15000 : 3000);
+    //   });
   }
 
   connect(_horiz, &HorizView::verticalRouteCompleted,
@@ -1125,13 +1125,13 @@ void GuiManager::_setupWindows()
 
   // set up status bar
 
-  statusBar()->setStyleSheet(
-          "QStatusBar {"
-          "  background-color: palette(alternate-base);"
-          "  border-top: 2px solid palette(mid);"
-          "  padding: 4px 6px;"
-          "}"
-                             );
+  // statusBar()->setStyleSheet(
+  //         "QStatusBar {"
+  //         "  background-color: palette(alternate-base);"
+  //         "  border-top: 2px solid palette(mid);"
+  //         "  padding: 4px 6px;"
+  //         "}"
+  //                            );
 
   _configureAutomaticImageUi();
   
@@ -1176,8 +1176,8 @@ void GuiManager::_configureAutomaticImageUi()
   _showMenu->setEnabled(false);
 
   _clickReportDialog->hide();
-  statusBar()->showMessage(
-    tr("Automatic image generation: interactive controls are disabled"));
+  // statusBar()->showMessage(
+  //   tr("Automatic image generation: interactive controls are disabled"));
 }
 
 ///////////////////////////////////////////////////////
@@ -2669,11 +2669,11 @@ void GuiManager::_startAutomaticHorizontalJob()
 
   const QString fieldName = QString::fromUtf8(
     _params._fields[fieldIndex].field_name);
-  statusBar()->showMessage(
-    tr("Creating automatic image %1 of %2: %3 at %4 km, zoom %5")
-      .arg(_imageGenerationManager->currentJobNumber())
-      .arg(_imageGenerationManager->jobCount())
-      .arg(fieldName).arg(job.heightKm).arg(job.zoomName));
+  // statusBar()->showMessage(
+  //   tr("Creating automatic image %1 of %2: %3 at %4 km, zoom %5")
+  //     .arg(_imageGenerationManager->currentJobNumber())
+  //     .arg(_imageGenerationManager->jobCount())
+  //     .arg(fieldName).arg(job.heightKm).arg(job.zoomName));
   if (_params.images_debug != Params::IMAGE_DEBUG_OFF) {
     cerr << "Automatic image: requesting field " << fieldName.toStdString()
          << " at " << job.heightKm << " km, zoom "
@@ -2709,12 +2709,12 @@ void GuiManager::_startAutomaticVerticalJob()
 
   const QString fieldName = QString::fromUtf8(
     _params._fields[job.fieldIndex].field_name);
-  statusBar()->showMessage(
-    tr("Creating automatic image %1 of %2: %3, vertical section %4")
-      .arg(_imageGenerationManager->currentJobNumber())
-      .arg(_imageGenerationManager->jobCount())
-      .arg(fieldName)
-      .arg(_imageGenerationManager->currentRoute().name));
+  // statusBar()->showMessage(
+  //   tr("Creating automatic image %1 of %2: %3, vertical section %4")
+  //     .arg(_imageGenerationManager->currentJobNumber())
+  //     .arg(_imageGenerationManager->jobCount())
+  //     .arg(fieldName)
+  //     .arg(_imageGenerationManager->currentRoute().name));
   if (_params.images_debug != Params::IMAGE_DEBUG_OFF) {
     cerr << "Automatic image: requesting vertical field "
          << fieldName.toStdString() << ", route "

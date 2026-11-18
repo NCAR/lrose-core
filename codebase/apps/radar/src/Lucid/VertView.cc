@@ -495,6 +495,12 @@ void VertView::_drawLegends(QPainter &painter)
 {
   vector<string> legends;
   char text[1024];
+  const auto latitudeHemisphere = [](double latitude) {
+    return std::signbit(latitude) ? 'S' : 'N';
+  };
+  const auto longitudeHemisphere = [](double longitude) {
+    return std::signbit(longitude) ? 'W' : 'E';
+  };
 
   if (_sectionReader != nullptr && _sectionReader->isValidV() &&
       _sectionReader->getVertWayPts().getNPoints() >= 2) {
@@ -524,17 +530,21 @@ void VertView::_drawLegends(QPainter &painter)
 
       if (ii == 0) {
         snprintf(text, sizeof(text),
-                 "Start lat/lon: %.5f, %.5f  End lat/lon: %.5f, %.5f  Length: %.1f km",
-                 startLat, startLon, endLat, endLon, lengthKm);
+                 "(%.3f%c,%.3f%c) to (%.3f%c,%.3f%c), %.1f km",
+                 startLat, latitudeHemisphere(startLat),
+                 startLon, longitudeHemisphere(startLon),
+                 endLat, latitudeHemisphere(endLat),
+                 endLon, longitudeHemisphere(endLon), lengthKm);
       } else {
         snprintf(text, sizeof(text),
-                 "End lat/lon: %.5f, %.5f  Length: %.1f km",
-                 endLat, endLon, lengthKm);
+                 "To (%.3f%c,%.3f%c) %.1f km",
+                 endLat, latitudeHemisphere(endLat),
+                 endLon, longitudeHemisphere(endLon), lengthKm);
       }
       legends.push_back(text);
     }
   } else {
-    snprintf(text, sizeof(text), "Vsection length (km): %g", _routeLengthKm);
+    snprintf(text, sizeof(text), "Len: %g km", _routeLengthKm);
     legends.push_back(text);
   }
 

@@ -44,7 +44,7 @@
 #include <QMessageBox>
 #include <QVBoxLayout>
 #include <QSignalBlocker>
-#include <QStatusBar>
+// #include <QStatusBar>
 #include <QTimer>
 #include <toolsa/utim.h>
 #include "TimeControl.hh"
@@ -1000,7 +1000,7 @@ void TimeControl::_stopMovie(const char *reason, MovieStopPolicy policy)
   // the immutable playback image.
   _manager->restoreLiveDisplayAfterMovie();
   _timeHasChanged = true;
-  _manager->statusBar()->showMessage("Movie stopped", 3000);
+  // _manager->statusBar()->showMessage("Movie stopped", 3000);
   if (resumeRealtime) {
     // Entering realtime schedules one immediate update, replacing the movie
     // frame selection with the current live edge and forcing a fresh reload.
@@ -1130,14 +1130,14 @@ void TimeControl::movieFrameCaptureFailed(uint64_t buildId,
     return;
   }
 
-  const QString message = tr("Movie frame %1 capture failed: %2")
-    .arg(frameIndex + 1).arg(error);
+  // const QString message = tr("Movie frame %1 capture failed: %2")
+  //   .arg(frameIndex + 1).arg(error);
 
   // Use the normal stop path so cached playback, disabled controls, and the
   // live data request are restored together. Replace its routine Stop message
   // with the actionable failure after that cleanup has completed.
   _stopMovie("frame capture failure");
-  _manager->statusBar()->showMessage(message, 15000);
+  // _manager->statusBar()->showMessage(message, 15000);
 }
 
 void TimeControl::_startMoviePlayback()
@@ -1146,7 +1146,7 @@ void TimeControl::_startMoviePlayback()
   _manager->movieStateChanged();
   _buildingFrameIndex = -1;
   _playbackDirection = 1;
-  _manager->statusBar()->showMessage("Movie ready", 3000);
+  // _manager->statusBar()->showMessage("Movie ready", 3000);
   _outputButton->setEnabled(true);
   _showPlaybackFrame(0, true);
 }
@@ -1205,13 +1205,13 @@ void TimeControl::_advanceMoviePlayback()
 void TimeControl::_outputMovieLoop()
 {
   if (isMovieBuilding()) {
-    _manager->statusBar()->showMessage(
-      "Wait for the current movie build to finish", 3000);
+    // _manager->statusBar()->showMessage(
+    //   "Wait for the current movie build to finish", 3000);
     return;
   }
 
   if (isMoviePlaying()) {
-    _manager->statusBar()->showMessage("Writing movie loop images");
+    // _manager->statusBar()->showMessage("Writing movie loop images");
     QString message;
     const bool success = _manager->exportMovieLoop(message);
     if (success) {
@@ -1227,7 +1227,7 @@ void TimeControl::_outputMovieLoop()
 
 void TimeControl::_finishMovieOutput()
 {
-  _manager->statusBar()->showMessage("Writing movie loop images");
+  // _manager->statusBar()->showMessage("Writing movie loop images");
   QString message;
   const bool success = _manager->exportMovieLoop(message);
 
