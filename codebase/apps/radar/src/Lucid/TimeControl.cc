@@ -113,6 +113,7 @@ TimeControl::TimeControl(GuiManager *parent) :
   _resetNFramesMovie = 1;
   _resetFrameIntervalSecs = 1.0;
   _resetFrameIndex = 0;
+  _resetRealtime = false;
 
   // Establish the initial accepted timeline here rather than mirroring CIDD's
   // startup calculations in GlobalData. Archive frame-centering retains the
@@ -892,6 +893,8 @@ void TimeControl::_acceptGuiSelections()
 
 void TimeControl::_cancelGuiSelections()
 {
+  const bool restoreMode = _resetDefinitionValid;
+  const bool restoreRealtime = _resetRealtime;
   _guiStartTime = _startTime;
   _guiNFramesMovie = _nFramesMovie;
   _guiFrameIntervalSecs = _frameIntervalSecs;
@@ -908,6 +911,9 @@ void TimeControl::_cancelGuiSelections()
   _enableAcceptCancel(false);
   _computeFrameTimes();
   _updateResetButton();
+  if (restoreMode) {
+    _setRealtimeMode(restoreRealtime);
+  }
 }
 
 ////////////////////////////////////////////////////////
@@ -1012,6 +1018,7 @@ void TimeControl::_resetMovieDefinition()
   }
 
   if (_resetDefinitionValid) {
+    const bool restoreRealtime = _resetRealtime;
     _guiStartTime = _resetStartTime;
     _guiNFramesMovie = _resetNFramesMovie;
     _guiFrameIntervalSecs = _resetFrameIntervalSecs;
@@ -1030,6 +1037,7 @@ void TimeControl::_resetMovieDefinition()
     _timeSlider->setMaximum(_guiNFramesMovie - 1);
     _timeSlider->setSliderPosition(_guiFrameIndex);
     _acceptGuiSelections();
+    _setRealtimeMode(restoreRealtime);
   }
 
   _resetDefinitionValid = false;
@@ -1254,8 +1262,8 @@ void TimeControl::_setGuiIntervalSecs(double val)
 
 void TimeControl::_setStartTimeFromEdit(const QDateTime &val)
 {
-  _enterArchiveModeForTimeChange();
   _captureResetDefinition();
+  _enterArchiveModeForTimeChange();
   QDate dd = val.date();
   QTime tt = val.time();
   _guiStartTime.set(dd.year(), dd.month(), dd.day(),
@@ -1336,6 +1344,7 @@ void TimeControl::_captureResetDefinition()
   _resetNFramesMovie = _nFramesMovie;
   _resetFrameIntervalSecs = _frameIntervalSecs;
   _resetFrameIndex = _frameIndex;
+  _resetRealtime = isRealtime();
   _resetDefinitionValid = true;
   _updateResetButton();
 }
@@ -1428,9 +1437,8 @@ void TimeControl::_applyPendingMovieRange(time_t startTime, int nFrames)
   if (isMovieActive()) {
     _stopMovie("time-plot range edit", MovieStopPolicy::StayArchive);
   }
-  _enterArchiveModeForTimeChange();
-
   _captureResetDefinition();
+  _enterArchiveModeForTimeChange();
 
   const DateTime selectedTime = _getGuiSelectedTime();
   _guiStartTime.set(startTime);
@@ -1504,8 +1512,8 @@ void TimeControl::goBack1()
 
 void TimeControl::_shiftBack1()
 {
-  _enterArchiveModeForTimeChange();
   _captureResetDefinition();
+  _enterArchiveModeForTimeChange();
   _guiStartTime -= _getGuiMovieDurationSecs();
   _updateTimesInGui();
 }
@@ -1516,8 +1524,8 @@ void TimeControl::_shiftBack1()
 
 void TimeControl::_shiftBack3()
 {
-  _enterArchiveModeForTimeChange();
   _captureResetDefinition();
+  _enterArchiveModeForTimeChange();
   _guiStartTime -= _getGuiMovieDurationSecs() * 3;
   _updateTimesInGui();
 }
@@ -1556,8 +1564,8 @@ void TimeControl::goFwd1()
 
 void TimeControl::_shiftFwd1()
 {
-  _enterArchiveModeForTimeChange();
   _captureResetDefinition();
+  _enterArchiveModeForTimeChange();
   _guiStartTime += _getGuiMovieDurationSecs();
   _updateTimesInGui();
 }
@@ -1568,8 +1576,8 @@ void TimeControl::_shiftFwd1()
 
 void TimeControl::_shiftFwd3()
 {
-  _enterArchiveModeForTimeChange();
   _captureResetDefinition();
+  _enterArchiveModeForTimeChange();
   _guiStartTime += _getGuiMovieDurationSecs() * 3;
   _updateTimesInGui();
 }

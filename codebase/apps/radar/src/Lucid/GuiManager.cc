@@ -1358,7 +1358,20 @@ void GuiManager::_createActions()
   _showVertAct->setStatusTip(tr("Show the VERT Window"));
   _showVertAct->setCheckable(true);
   _showVertAct->setChecked(false);
-  connect(_showVertAct, &QAction::triggered, _vertWindow, &VertView::show);
+  connect(_showVertAct, &QAction::triggered, this,
+          [this](bool checked) {
+    if (checked) {
+      _horiz->setVsectionRouteVisible(true);
+      _vertWindow->show();
+      return;
+    }
+    _vertWindow->close();
+    // Building rejects the close because its vertical frame is part of the
+    // current readiness contract. Keep the action consistent in that case.
+    if (_vertWindow->isVisible()) {
+      _showVertAct->setChecked(true);
+    }
+  });
 
   // howto and about
   
@@ -3120,6 +3133,8 @@ void GuiManager::_showValue()
 void GuiManager::_verticalRouteCompleted(const VsectionRoute &route)
 {
   _vsectionRoute = route;
+  _showVertAct->setChecked(true);
+  _horiz->setVsectionRouteVisible(true);
 
   char message[256];
   snprintf(message, sizeof(message),
@@ -3366,7 +3381,11 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
     return;
   }
 
-  _showVertAct->setChecked(true);
+  // Closing the window while a request was in flight is a persistent display
+  // choice. Retain the returned data and route, but do not reopen either view.
+  if (!_showVertAct->isChecked()) {
+    return;
+  }
   _vertWindow->show();
   _vertWindow->raise();
   _vertWindow->activateWindow();
@@ -3446,7 +3465,17 @@ void GuiManager::_terrainVerticalReadComplete(MdvReader *reader)
 void GuiManager::vertWindowClosed(QCloseEvent *event)
 
 {
+  Q_UNUSED(event);
+  if (_timeControl && _timeControl->isMoviePlaying()) {
+    // Horizontal playback images contain the route overlay captured with the
+    // vertical view. Return to live rendering so hiding the route is visible
+    // immediately and the two views cannot imply different movie contents.
+    _timeControl->stopMovie("vertical window closed");
+  }
   _showVertAct->setChecked(false);
+  if (_horiz) {
+    _horiz->setVsectionRouteVisible(false);
+  }
 }
 
 /////////////////////////////////////////////////////

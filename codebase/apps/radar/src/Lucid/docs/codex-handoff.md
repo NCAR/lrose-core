@@ -181,6 +181,9 @@ carrying a live hover selection into cached playback.
   pending, frame-aligned movie definition. They update the start, end, frame
   count, selection, and plot together, but do not publish or retrieve data
   until Accept; Cancel restores the accepted definition.
+- The Reset snapshot also retains the pre-edit Archive/Realtime mode. A time
+  edit made from Realtime enters Archive, while Reset or Cancel restores
+  Realtime and resumes its live cadence.
 - Editing the frame interval no longer starts a build implicitly.
 - Reset is enabled after a movie-definition change and restores the pre-edit
   definition. The former double-click-to-fit gesture is disabled.
@@ -189,6 +192,11 @@ carrying a live hover selection into cached playback.
 - Delayed resize events from the hidden vertical window no longer cancel a
   horizontal-only movie. A vertical resize invalidates the movie only when the
   visible vertical view is part of its captured cache.
+- Closing the vertical window hides its route overlay in the horizontal view
+  without discarding the retained route. Reopening shows it again, and a late
+  vertical completion cannot reopen a window the user closed. Closing during
+  playback stops the movie first because cached horizontal frames already
+  contain that route overlay.
 
 ## Interactive image output
 

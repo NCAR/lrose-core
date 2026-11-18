@@ -118,6 +118,7 @@ HorizView::HorizView(QWidget* parent,
   _panPreviewY = 0;
   _suppressInteractionGraphics = false;
   _vsectionRouteEditing = false;
+  _vsectionRouteVisible = true;
   _vsectionPreviewX = 0;
   _vsectionPreviewY = 0;
 
@@ -465,6 +466,15 @@ void HorizView::setVsectionRoute(const VsectionRoute &route)
     return;
   }
   _vsectionRoute = route;
+  update();
+}
+
+////////////////////////////////////////////////////////
+// control route presentation without discarding returned server geometry
+
+void HorizView::setVsectionRouteVisible(bool visible)
+{
+  _vsectionRouteVisible = visible;
   update();
 }
 
@@ -1518,6 +1528,7 @@ void HorizView::mousePressEvent(QMouseEvent *e)
     }
 
     setFocus(Qt::MouseFocusReason);
+    _vsectionRouteVisible = true;
     if (!_vsectionRouteEditing) {
       _vsectionRoute.clear();
       _vsectionRouteEditing =
@@ -1921,7 +1932,7 @@ void HorizView::_completeVsectionRoute()
 
 void HorizView::_drawVsectionRoute(QPainter &painter)
 {
-  if (_vsectionRoute.empty()) {
+  if (!_vsectionRouteVisible || _vsectionRoute.empty()) {
     return;
   }
 

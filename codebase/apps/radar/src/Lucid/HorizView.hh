@@ -124,6 +124,7 @@ class DLL_EXPORT HorizView : public QWidget
   // adjusted by the MDV server. The user's request is retained by GuiManager.
 
   void setVsectionRoute(const VsectionRoute &route);
+  void setVsectionRouteVisible(bool visible);
   
   // The method that is called when a repaint event is triggered.
 
@@ -280,6 +281,7 @@ class DLL_EXPORT HorizView : public QWidget
 
   VsectionRoute _vsectionRoute;
   bool _vsectionRouteEditing;
+  bool _vsectionRouteVisible;
   int _vsectionPreviewX, _vsectionPreviewY;
   
   // Location world of the latest click point.

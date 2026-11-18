@@ -264,13 +264,14 @@ class DLL_EXPORT TimeControl : public QDialog {
   double _frameIntervalSecs;
   int _frameIndex;
 
-  // The first explicit definition edit captures an undo point. View-only
-  // zoom and pan need no definition snapshot; Reset simply fits that range.
+  // The first explicit definition edit captures one undo point, including
+  // the live/archive mode which owned the timeline before the edit.
   bool _resetDefinitionValid;
   DateTime _resetStartTime;
   int _resetNFramesMovie;
   double _resetFrameIntervalSecs;
   int _resetFrameIndex;
+  bool _resetRealtime;
   // TimeControl is the sole owner of accepted frame bounds. Renderers receive
   // immutable frame values through accessors, so GUI edits cannot leave a
   // second GlobalData movie model out of sync.
