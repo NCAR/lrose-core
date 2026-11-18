@@ -145,6 +145,11 @@ carrying a live hover selection into cached playback.
   realtime cadence. If the movie was started from Realtime, Stop restores
   Realtime and immediately advances to the live edge; an Archive movie stops
   back in Archive.
+- All operating-state changes pass through one transition function which
+  synchronizes the Realtime checkbox, external runtime mode, sequence
+  notification, and update timer. Movie stop callers select an explicit
+  restore-previous-mode or stay-in-Archive policy rather than independently
+  manipulating those side effects.
 - Historical frame selection, slider navigation, range expansion, and explicit
   start-time shifts also switch to Archive instead of leaving a hidden
   "Realtime but paused" state.

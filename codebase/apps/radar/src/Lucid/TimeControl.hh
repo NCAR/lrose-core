@@ -87,6 +87,20 @@ class DLL_EXPORT TimeControl : public QDialog {
   
   Q_OBJECT
 
+  // The operating mode is the sole authority for timeline ownership. Stop
+  // policy is explicit because historical navigation must remain in Archive,
+  // while a normal Stop restores the mode which preceded the movie.
+  enum class OperatingState {
+    LiveArchive,
+    LiveRealtime,
+    MovieBuilding,
+    MoviePlaying
+  };
+  enum class MovieStopPolicy {
+    RestorePreviousMode,
+    StayArchive
+  };
+
  public:
   
   // constructor
@@ -133,7 +147,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   // Leave cached playback and restore the live display after an external
   // interaction, such as resizing the main window, invalidates movie frames.
   void stopMovie(const char *reason = "external display change") {
-    _stopMovie(reason, true);
+    _stopMovie(reason);
   }
 
   // Configure the single frame used by unattended catalog generation. This
@@ -273,15 +287,6 @@ class DLL_EXPORT TimeControl : public QDialog {
   bool _isSweep;
   bool _outputAfterBuild;
 
-  // Archive/realtime selection and movie ownership are mutually exclusive.
-  // Keeping them in one state prevents a realtime tick and movie build from
-  // both claiming the accepted timeline.
-  enum class OperatingState {
-    LiveArchive,
-    LiveRealtime,
-    MovieBuilding,
-    MoviePlaying
-  };
   OperatingState _operatingState;
   // Realtime is inactive while a frozen movie owns the display, but Stop can
   // restore the user's prior live-tracking choice without making it a second
@@ -337,6 +342,7 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _computeFrameTimes();
   void _publishTimelineRange();
   void _publishSelectedFrame();
+  void _transitionTo(OperatingState state);
   void _setRealtimeMode(bool enabled);
   void _enterArchiveModeForTimeChange();
                            
@@ -350,7 +356,9 @@ class DLL_EXPORT TimeControl : public QDialog {
   void _startMovie();
   void _beginMovieBuild(bool outputAfterBuild);
   void _stopMovie();
-  void _stopMovie(const char *reason, bool restorePriorMode = true);
+  void _stopMovie(
+    const char *reason,
+    MovieStopPolicy policy = MovieStopPolicy::RestorePreviousMode);
   void _resetMovieDefinition();
   void _outputMovieLoop();
   void _finishMovieOutput();

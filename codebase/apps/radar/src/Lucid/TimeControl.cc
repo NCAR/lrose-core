@@ -774,7 +774,8 @@ DateTime TimeControl::_getGuiEndTime() const
 void TimeControl::configureAutomaticImageTime(const DateTime &imageTime)
 {
   if (isMovieActive()) {
-    _stopMovie("automatic image time configuration", false);
+    _stopMovie("automatic image time configuration",
+               MovieStopPolicy::StayArchive);
   }
 
   _startTime = imageTime;
@@ -811,7 +812,8 @@ void TimeControl::restoreAfterAutomaticImages(const DateTime &startTime,
                                               bool realtime)
 {
   if (isMovieActive()) {
-    _stopMovie("automatic image state restoration", false);
+    _stopMovie("automatic image state restoration",
+               MovieStopPolicy::StayArchive);
   }
 
   _startTime = startTime;
@@ -935,8 +937,7 @@ void TimeControl::_beginMovieBuild(bool outputAfterBuild)
   // cadence and makes the checkbox accurately describe the display owner.
   // Retain only the transition preference; realtime itself remains inactive.
   _resumeRealtimeAfterMovie = isRealtime();
-  _setRealtimeMode(false);
-  _operatingState = OperatingState::MovieBuilding;
+  _transitionTo(OperatingState::MovieBuilding);
   _outputAfterBuild = outputAfterBuild;
   _setMovieDefinitionControlsEnabled(false);
   _manager->movieStateChanged();
@@ -957,12 +958,14 @@ void TimeControl::_stopMovie()
   _stopMovie("Stop button");
 }
 
-void TimeControl::_stopMovie(const char *reason, bool restorePriorMode)
+void TimeControl::_stopMovie(const char *reason, MovieStopPolicy policy)
 {
   if (!isMovieActive()) {
     return;
   }
-  const bool resumeRealtime = restorePriorMode && _resumeRealtimeAfterMovie;
+  const bool resumeRealtime =
+    policy == MovieStopPolicy::RestorePreviousMode &&
+    _resumeRealtimeAfterMovie;
   _resumeRealtimeAfterMovie = false;
 
   if (_params.debug) {
@@ -973,7 +976,7 @@ void TimeControl::_stopMovie(const char *reason, bool restorePriorMode)
   _movieTimer->stop();
   _manager->cancelMovieBuild();
   _movieBuildId = 0;
-  _operatingState = OperatingState::LiveArchive;
+  _transitionTo(OperatingState::LiveArchive);
   _outputAfterBuild = false;
   _setMovieDefinitionControlsEnabled(true);
   _enableAcceptCancel(false);
@@ -1131,7 +1134,7 @@ void TimeControl::movieFrameCaptureFailed(uint64_t buildId,
 
 void TimeControl::_startMoviePlayback()
 {
-  _operatingState = OperatingState::MoviePlaying;
+  _transitionTo(OperatingState::MoviePlaying);
   _manager->movieStateChanged();
   _buildingFrameIndex = -1;
   _playbackDirection = 1;
@@ -1401,7 +1404,7 @@ void TimeControl::_selectFrameFromTimePlot(int frameIndex)
   }
 
   if (isMovieActive()) {
-    _stopMovie("time-plot frame selection", false);
+    _stopMovie("time-plot frame selection", MovieStopPolicy::StayArchive);
   }
   _enterArchiveModeForTimeChange();
 
@@ -1423,7 +1426,7 @@ void TimeControl::_applyPendingMovieRange(time_t startTime, int nFrames)
     return;
   }
   if (isMovieActive()) {
-    _stopMovie("time-plot range edit", false);
+    _stopMovie("time-plot range edit", MovieStopPolicy::StayArchive);
   }
   _enterArchiveModeForTimeChange();
 
@@ -1474,7 +1477,7 @@ void TimeControl::_setStartTime(const DateTime &stime)
 void TimeControl::goBack1()
 {
   if (isMovieActive()) {
-    _stopMovie("previous-frame action", false);
+    _stopMovie("previous-frame action", MovieStopPolicy::StayArchive);
   }
   // change index
   if (_guiFrameIndex == 0) {
@@ -1526,7 +1529,7 @@ void TimeControl::_shiftBack3()
 void TimeControl::goFwd1()
 {
   if (isMovieActive()) {
-    _stopMovie("next-frame action", false);
+    _stopMovie("next-frame action", MovieStopPolicy::StayArchive);
   }
   // change index
   if (_guiFrameIndex == _nFramesMovie - 1) {
@@ -1645,7 +1648,7 @@ void TimeControl::_timeSliderReleased()
 void TimeControl::_timeSliderPressed() 
 {
   if (isMovieActive()) {
-    _stopMovie("time slider press", false);
+    _stopMovie("time slider press", MovieStopPolicy::StayArchive);
   }
   _enterArchiveModeForTimeChange();
   int value = _timeSlider->value();
@@ -1824,35 +1827,47 @@ bool TimeControl::advanceRealtimeToNow()
 }
 
 ////////////////////////////////////////////////////////
-// publish a realtime/archive mode transition
+// make one authoritative operating-state transition
+
+void TimeControl::_transitionTo(OperatingState state)
+{
+  if (_operatingState == state) {
+    return;
+  }
+
+  const bool wasRealtime = isRealtime();
+  const bool willBeRealtime = state == OperatingState::LiveRealtime;
+  _operatingState = state;
+
+  // Movie states are archive-owned from the perspective of readers and
+  // coordinate clients. Only a change in that live/archive classification
+  // starts or stops the realtime cadence; Building -> Playing is internal.
+  if (wasRealtime == willBeRealtime) {
+    return;
+  }
+  if (_realtimeSelector) {
+    const QSignalBlocker realtimeBlocker(_realtimeSelector);
+    _realtimeSelector->setChecked(willBeRealtime);
+  }
+  if (_gd.coord_expt) {
+    _gd.coord_expt->runtime_mode = willBeRealtime ?
+      RUNMODE_REALTIME : RUNMODE_ARCHIVE;
+    _gd.coord_expt->time_seq_num++;
+  }
+  cerr << (willBeRealtime ? "Realtime mode" : "Archive mode") << endl;
+  emit realtimeModeChanged(willBeRealtime);
+}
+
+////////////////////////////////////////////////////////
+// handle a user or restoration request for a live mode
 
 void TimeControl::_setRealtimeMode(bool enabled)
 {
   if (isMovieActive()) {
     return;
   }
-
-  const OperatingState requested = enabled ?
-    OperatingState::LiveRealtime : OperatingState::LiveArchive;
-  if (_operatingState == requested) {
-    return;
-  }
-  _operatingState = requested;
-
-  // Programmatic transitions, notably Start leaving realtime, must keep the
-  // mode control and external coordinate clients synchronized without routing
-  // the checkbox signal back through this method.
-  if (_realtimeSelector) {
-    const QSignalBlocker realtimeBlocker(_realtimeSelector);
-    _realtimeSelector->setChecked(enabled);
-  }
-  if (_gd.coord_expt) {
-    _gd.coord_expt->runtime_mode = enabled ?
-      RUNMODE_REALTIME : RUNMODE_ARCHIVE;
-    _gd.coord_expt->time_seq_num++;
-  }
-  cerr << (enabled ? "Realtime mode" : "Archive mode") << endl;
-  emit realtimeModeChanged(enabled);
+  _transitionTo(enabled ? OperatingState::LiveRealtime :
+                          OperatingState::LiveArchive);
 }
 
 ////////////////////////////////////////////////////////
