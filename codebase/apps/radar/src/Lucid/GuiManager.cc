@@ -224,7 +224,6 @@ GuiManager::GuiManager() :
 
   _fieldMenu = NULL;
   _fieldTable = NULL;
-  _fieldMenuPlaced = false;
   _fieldMenuPanel = NULL;
   _fieldMenuLayout = NULL;
 
@@ -1019,6 +1018,17 @@ void GuiManager::_setupWindows()
   _vertWindow = new VertManager(this);
   connect(_vertWindow, &VertManager::singleSegmentVsectionChanged,
           _horiz, &HorizView::setSingleSegmentVsection);
+  connect(_vertWindow, &VertManager::windowGeometryChanged, this,
+          [this]() {
+            // Window-manager decorations lag the resize notification on some
+            // desktops. Defer placement so frameGeometry() includes them and
+            // does not put the field menu a title-bar height too high.
+            QTimer::singleShot(0, this, [this]() {
+              if (_fieldMenu && _fieldMenu->isVisible()) {
+                _placeFieldMenu();
+              }
+            });
+          });
   
   // set pointer to the vertWidget
   
@@ -2165,13 +2175,13 @@ void GuiManager::_placeFieldMenu()
     return;
   }
   
-  if (_fieldMenuPlaced) {
-    return;
+  QPoint pos = getTopRightPos();
+  if (_vertWindow) {
+    // Keep the field menu in its established column to the right of the main
+    // view, but stack it beneath the complete decorated vertical window.
+    pos.setY(_vertWindow->frameGeometry().bottom() + 1);
   }
-  
-  _fieldMenu->move(getTopRightPos());
-
-  _fieldMenuPlaced = true;
+  _fieldMenu->move(pos);
 
 }
 

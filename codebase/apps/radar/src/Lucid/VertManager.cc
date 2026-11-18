@@ -26,6 +26,7 @@
 #include <QHBoxLayout>
 #include <QInputDialog>
 #include <QLabel>
+#include <QMoveEvent>
 #include <QVBoxLayout>
 
 #include "GuiManager.hh"
@@ -114,9 +115,16 @@ void VertManager::keyPressEvent(QKeyEvent * e)
   _guiManager->keyPressEvent(e);
 }
 
+void VertManager::moveEvent(QMoveEvent *event)
+{
+  QMainWindow::moveEvent(event);
+  emit windowGeometryChanged();
+}
+
 void VertManager::resizeEvent(QResizeEvent *event)
 {
   QMainWindow::resizeEvent(event);
+  emit windowGeometryChanged();
   if (_guiManager->isMovieActive()) {
     _guiManager->stopMovieForDisplayChange();
   }

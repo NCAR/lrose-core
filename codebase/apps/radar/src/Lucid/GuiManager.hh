@@ -253,7 +253,6 @@ private:
   
   QDialog *_fieldMenu;
   QTableWidget *_fieldTable;
-  bool _fieldMenuPlaced;
   QFrame *_fieldMenuPanel;
   QVBoxLayout *_fieldMenuLayout;
 

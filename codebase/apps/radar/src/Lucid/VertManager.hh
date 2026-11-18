@@ -95,6 +95,7 @@ public:
 signals:
 
   void singleSegmentVsectionChanged(bool enabled);
+  void windowGeometryChanged();
 
 private slots:
   
@@ -106,6 +107,7 @@ private slots:
   
 protected:
 
+  void moveEvent(QMoveEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
 
   ///////////////////////
