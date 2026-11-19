@@ -43,6 +43,7 @@
 #include <QAction>
 #include <QLabel>
 #include <QLayout>
+#include <QWidgetAction>
 #include <QMessageBox>
 #include <QErrorMessage>
 
@@ -93,6 +94,8 @@ VertView::VertView(QWidget* parent,
   // Allow the widget to get focus
   
   setFocusPolicy(Qt::StrongFocus);
+  setToolTip(tr("Left click: show click report; left drag: zoom; "
+                "Shift+right-click: help"));
 
   // create the rubber band
   
@@ -2301,6 +2304,39 @@ void VertView::mousePressEvent(QMouseEvent *e)
 #else
   QPointF pos(e->pos());
 #endif
+
+  if (e->button() == Qt::RightButton &&
+      e->modifiers().testFlag(Qt::ShiftModifier)) {
+    QMenu menu(this);
+    QWidgetAction *helpAction = new QWidgetAction(&menu);
+    QLabel *helpText = new QLabel(&menu);
+    helpText->setTextFormat(Qt::RichText);
+    helpText->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    helpText->setWordWrap(true);
+    helpText->setMinimumWidth(390);
+    helpText->setContentsMargins(12, 10, 12, 10);
+
+    // Keep the canvas help passive and local to the view. The actual display
+    // settings remain in VertManager's menus, where their state is visible.
+    helpText->setText(tr(
+      "<b>Vertical-section controls</b><br><br>"
+      "<b>Click report</b><br>Left-click a point to show its location and "
+      "the current field value.<br><br>"
+      "<b>Zoom</b><br>Left-drag a rectangle over the plot. Use Unzoom in "
+      "the vertical window to restore the full section.<br><br>"
+      "<b>Cursor value</b><br>Enable Show &gt; Show values in the main "
+      "window, then move the cursor over the section.<br><br>"
+      "<b>Display options</b><br>Use the vertical window's Overlays and "
+      "Configuration menus for grids, height limits, the selected-height "
+      "line, and terrain.<br><br>"
+      "<b>Help</b><br>Shift+right-click opens this popup."));
+
+    helpAction->setDefaultWidget(helpText);
+    menu.addAction(helpAction);
+    menu.exec(mapToGlobal(pos.toPoint()));
+    e->accept();
+    return;
+  }
 
   if (e->button() == Qt::RightButton) {
     _leftDragActive = false;

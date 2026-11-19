@@ -1387,8 +1387,8 @@ void GuiManager::_createActions()
 
   // howto and about
   
-  _howtoAct = new QAction(tr("Howto"), this);
-  _howtoAct->setStatusTip(tr("Show the application's Howto box"));
+  _howtoAct = new QAction(tr("How To"), this);
+  _howtoAct->setStatusTip(tr("Show Lucid controls and context-help gestures"));
   connect(_howtoAct, &QAction::triggered, this, &GuiManager::_howto);
 
   _aboutAct = new QAction(tr("About"), this);
@@ -3495,27 +3495,63 @@ void GuiManager::vertWindowClosed(QCloseEvent *event)
 
 void GuiManager::_howto()
 {
-  string text;
-  text += "HOWTO HINTS FOR Lucid\n";
-  text += "========================\n";
-  text += "\n";
-  text += "Use NUMBER keys to display RAW fields\n";
-  text += "Use ALT-NUMBER keys to display FILTERED fields\n";
-  text += "Hit '.' to toggle between the two latest fields\n";
-  text += "\n";
-  text += "You can also use the arrow keys to select different fields\n";
-  text += "\n";
-  text += "Click in main window to get field data at a point.\n";
-  text += "\n";
+  QString vsectionSelection;
   if (_params.single_segment_vsection) {
-    text += "Right-drag and release to select a vertical section.\n";
+    vsectionSelection = tr(
+      "Right-drag and release to select one segment. On macOS, "
+      "Control-drag is the right-button alternative.");
   } else {
-    text += "Right-drag to start a vertical-section route.\n";
-    text += "Right-click to add segments and double-click to finish.\n";
-    text += "Use Backspace to remove a point or Escape to cancel.\n";
+    vsectionSelection = tr(
+      "Right-drag to start, then right-click to add segments. Double-click "
+      "to finish; Backspace removes the last point and Escape cancels. On "
+      "macOS, Control-click is the right-button alternative.");
   }
-  text += "Use Shift-right-click for plan-view interaction help.\n";
-  QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
+
+  // This is the durable overview; the canvas popups repeat the relevant
+  // subset so users can discover controls without leaving their work area.
+  const QString text = tr(
+    "<b>Lucid controls</b><br><br>"
+    "<b>Getting context help</b><br>"
+    "Shift+right-click the plan view, vertical-section view, or time canvas "
+    "for controls specific to that canvas. Right-click a field in the Field "
+    "menu to open its rendering configuration.<br><br>"
+
+    "<b>Plan view</b><br>"
+    "Left-drag a rectangle to zoom. Middle-button drag, or Option-left-drag, "
+    "pans the view. %1<br>"
+    "Click or drag vertically in the height selector to the right of the "
+    "plot to choose a level.<br><br>"
+
+    "<b>Vertical-section view</b><br>"
+    "Left-click shows the click report. Left-drag a rectangle to zoom; use "
+    "Unzoom in the vertical window to restore the full section. The vertical "
+    "window's Overlays and Configuration menus control grids, height limits, "
+    "the selected-height line, and terrain.<br><br>"
+
+    "<b>Values and click reports</b><br>"
+    "Show &gt; Show values displays the current field value as the cursor "
+    "moves over either data view. Left-click either view to populate and "
+    "show the click-report window.<br><br>"
+
+    "<b>Time selector</b><br>"
+    "A single left click selects the movie frame containing that time. "
+    "Left-drag defines a smaller frame-aligned range, middle-drag pans the "
+    "range by whole frames, and right-drag expands the range by mapping the "
+    "current endpoints to the dragged interval. Drag edits are pending until "
+    "Accept; Reset restores the definition active before the edit.<br><br>"
+
+    "<b>Field menu</b><br>"
+    "Left-click selects a field. Right-click a field to choose polygons, "
+    "filled contours, or no filled rendering; toggle line contours; edit "
+    "contour low/high/interval; toggle column-max mode; or rescale/reset the "
+    "color range.<br><br>"
+
+    "<b>Keyboard</b><br>"
+    "Left/Right steps through time, Up/Down changes height, and period (.) "
+    "returns to the previously selected field."
+  ).arg(vsectionSelection);
+
+  QMessageBox::about(this, tr("How to use Lucid"), text);
 }
 
 void GuiManager::_about()
