@@ -1229,7 +1229,7 @@ dexport_info = {
 //
 //
 
-debug = DEBUG_VERBOSE;
+debug = DEBUG_OFF;
 
 ///////////// short_requests //////////////////////////
 //
