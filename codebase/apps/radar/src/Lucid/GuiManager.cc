@@ -2020,7 +2020,8 @@ void GuiManager::_showFieldContextMenu(const QPoint &pos)
             const double interval = contourInterval->value();
             if (high < low || interval <= 0.0) {
               QMessageBox::warning(_fieldMenu, tr("Invalid contours"),
-                                   tr("High must not be below low, and interval must be positive."));
+                                   tr("High must not be below low, and "
+                                      "interval must be positive."));
               return;
             }
 

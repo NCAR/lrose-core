@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 
     // The following line may fix the problem of the Boundary Editor
     // not appearing in the menu bar when Lucid is built using
-    // linux, run on a Mac.                                                                                                                       
+    // linux, run on a Mac.
     QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
     
     QApplication app(argc, argv);

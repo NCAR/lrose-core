@@ -1153,7 +1153,8 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         continue;
       }
 
-      if(strncasecmp(str_ptr,"ICONDEF",7) == 0) {        /* describes an icon's coordinates in pixels */
+      if(strncasecmp(str_ptr,"ICONDEF",7) == 0) {
+        /* describes an icon's coordinates in pixels */
         index = ov->num_icondefs;
         if(index >= ov->num_alloc_icondefs) {
           if(ov->num_alloc_icondefs == 0) { /* start with space for 2 */
@@ -1191,7 +1192,9 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         ov->geo_icondef[index]->y = (short *) calloc(1,num_points * sizeof(short));
 
         if(ov->geo_icondef[index]->x == NULL || ov->geo_icondef[index]->y == NULL) {
-          fprintf(stderr,"Error!: Unable to allocate space for icon points in file %s, num points: %d\n",
+          fprintf(stderr,
+                  "Error!: Unable to allocate space for icon points in file %s, "
+                  "num points: %d\n",
                   ov->map_file_name.c_str(),num_points);
           exit(-1);
         }
@@ -1256,7 +1259,8 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         }
 
         if(found == 0) {    
-          fprintf(stderr,"No Icon definition: %s found in file %s!\n",cfield[1],ov->map_file_name.c_str());
+          fprintf(stderr,"No Icon definition: %s found in file %s!\n",
+                  cfield[1],ov->map_file_name.c_str());
           str_ptr = strtok_r(NULL,"\n",&lasts); // grab next line
           continue;
         }
@@ -1327,7 +1331,9 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         STRcopy(ov->geo_polyline[index]->label,cfield[1],Constants::LABEL_LENGTH);
         num_points = atoi(cfield[2]);
         if(num_points <=0 ) {
-          fprintf(stderr,"Warning!: Bad POLYLINE Definition. File: %s, Line: %s\n",name_buf,str_ptr);
+          fprintf(stderr,
+                  "Warning!: Bad POLYLINE Definition. File: %s, Line: %s\n",
+                  name_buf,str_ptr);
           fprintf(stderr,"        : Format should be:    POLYLINE Label #points\n");
           fprintf(stderr,"        : Skipping \n");
           str_ptr = strtok_r(NULL,"\n",&lasts); // move to next line
@@ -1341,7 +1347,9 @@ int Lucid::_loadRapMap(MapOverlay_t *ov, const string &mapFilePath)
         ov->geo_polyline[index]->proj_y = (double *) calloc(1,num_points * sizeof(double));
 
         if(ov->geo_polyline[index]->lat == NULL || ov->geo_polyline[index]->lon == NULL) {
-          fprintf(stderr,"Error!: Unable to allocate space for polyline points in file %s, num points: %d\n",
+          fprintf(stderr,
+                  "Error!: Unable to allocate space for polyline points in file %s, "
+                  "num points: %d\n",
                   ov->map_file_name.c_str(),num_points);
           exit(-1);
         }
@@ -1516,7 +1524,8 @@ int Lucid::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const stri
   SHPGetInfo(SH, &n_objects, &shape_type, NULL, NULL);
 
   if(_gd.debug) {
-    fprintf(stderr,"Found %d objects, type %d  in %s\n",n_objects, shape_type, ov->map_file_name.c_str());
+    fprintf(stderr,"Found %d objects, type %d  in %s\n",
+            n_objects, shape_type, ov->map_file_name.c_str());
   }
 
   for(i=0; i < n_objects; i++ ) {  // Loop through each object
@@ -1557,13 +1566,19 @@ int Lucid::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const stri
         STRcopy(ov->geo_polyline[index]->label,"Shape",Constants::LABEL_LENGTH);
 
         /* Get space for points in the polyline */
-        ov->geo_polyline[index]->lat = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
-        ov->geo_polyline[index]->lon = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
-        ov->geo_polyline[index]->proj_x = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
-        ov->geo_polyline[index]->proj_y = (double *) calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
+        ov->geo_polyline[index]->lat = (double *)
+          calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
+        ov->geo_polyline[index]->lon = (double *)
+          calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
+        ov->geo_polyline[index]->proj_x = (double *)
+          calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
+        ov->geo_polyline[index]->proj_y = (double *)
+          calloc(1,(SO->nVertices + SO->nParts) * sizeof(double));
 
         if(ov->geo_polyline[index]->lat == NULL || ov->geo_polyline[index]->lon == NULL) {
-          fprintf(stderr,"Error!: Unable to allocate space for polyline points in file %s, num points: %d\n",
+          fprintf(stderr,
+                  "Error!: Unable to allocate space for polyline points in file %s, "
+                  "num points: %d\n",
                   ov->map_file_name.c_str(),SO->nVertices);
           exit(-1);
         }
@@ -1616,7 +1631,9 @@ int Lucid::_loadShapeMap(MapOverlay_t *ov, const string &shpFilePath, const stri
           ov->geo_icondef[0]->y = (short *) calloc(1,num_points * sizeof(short));
 
           if(ov->geo_icondef[0]->x == NULL || ov->geo_icondef[0]->y == NULL) {
-            fprintf(stderr,"Error!: Unable to allocate space for icon points in file %s, num points: %d\n",
+            fprintf(stderr,
+                    "Error!: Unable to allocate space for icon points in file %s, "
+                    "num points: %d\n",
                     ov->map_file_name.c_str(),num_points);
             exit(-1);
           }
@@ -2483,7 +2500,8 @@ int Lucid::_getColorscaleCachePath(const string &colorscaleName,
   vector<string> urlList;
   TaStr::tokenize(_params.color_scale_urls, ",", urlList);
   for (size_t ii = 0; ii < urlList.size(); ii++) {
-    if (_getResourceCachePath(_gd.colorscaleCacheDir, urlList[ii], colorscaleName, cachePath) == 0) {
+    if (_getResourceCachePath(_gd.colorscaleCacheDir, urlList[ii],
+                              colorscaleName, cachePath) == 0) {
       return 0;
     }
   }

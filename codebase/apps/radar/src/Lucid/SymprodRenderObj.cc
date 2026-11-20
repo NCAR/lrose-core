@@ -553,7 +553,10 @@ double SymprodRenderStrokedIcon::dist(double lat, double lon)
   double d = 999999.99; // A huge distance by default.
   double theta = 0.0;
 
-  if( _iconOrigins != NULL) PJGLatLon2RTheta(_iconOrigins[0].lat, _iconOrigins[0].lon,lat,lon,&d,&theta);
+  if( _iconOrigins != NULL) {
+    PJGLatLon2RTheta(_iconOrigins[0].lat, _iconOrigins[0].lon,
+                     lat, lon, &d, &theta);
+  }
 
   return d;
 }

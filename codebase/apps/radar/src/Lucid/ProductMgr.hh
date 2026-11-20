@@ -186,7 +186,8 @@ public:
   // Returns the number of products its supervising
   int get_num_products(void);
 
-  void check_product_validity(time_t tm, DmapAccess &dmap);  // Check datamapper info for updated data
+  // Check DataMapper information for updated data.
+  void check_product_validity(time_t tm, DmapAccess &dmap);
 
   void fillExportFields(vector<world_pt_t> &wpt, string &label) const;
   

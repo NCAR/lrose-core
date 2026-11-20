@@ -523,7 +523,8 @@ bool AutomaticImageGenerator::_parseRoutePoints(
 {
   points.clear();
   const QRegularExpression pairExpression(
-    R"(\(\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*,\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*\))");
+    R"(\(\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*,\s*)"
+    R"(([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*\))");
   QRegularExpressionMatchIterator matches =
     pairExpression.globalMatch(text);
   while (matches.hasNext()) {

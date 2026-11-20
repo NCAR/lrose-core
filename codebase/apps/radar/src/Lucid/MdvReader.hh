@@ -253,13 +253,17 @@ public:
   /* Dynamic Values */
   double h_last_scale; /* Horizontal scale factor & bias to restore original value */
   double h_last_bias;
-  double h_last_missing; /* Store bad, missing and transform to see if we need to recompute color lookup */
+  // Store bad, missing and transform to determine whether to recompute the
+  // horizontal color lookup.
+  double h_last_missing;
   double h_last_bad;
   int h_last_transform;
   
   double v_last_scale; /* Vertical scale factor & bias to restore original value */
   double v_last_bias;
-  double v_last_missing; /* Store bad, missing and transform to see if we need to recompute color lookup */
+  // Store bad, missing and transform to determine whether to recompute the
+  // vertical color lookup.
+  double v_last_missing;
   double v_last_bad;
   int v_last_transform;
   
@@ -291,9 +295,11 @@ public:
   string color_file; /* color scale file name */
   
   // char field_units[LABEL_LENGTH]; /* Units label of the data */
-  // char button_name[NAME_LENGTH]; /* Field name for buttons, label, - "dbZ" etc - From Config file */
+  // char button_name[NAME_LENGTH];
+  // Field name for buttons, label, - "dbZ" etc - From Config file.
   // char legend_name[NAME_LENGTH]; /* name for legends , - "MHR" etc - From Config file */
-  // char field_label[NAME_LENGTH]; /* field name, label, - "dbZ" etc - As reported by Data source */
+  // char field_label[NAME_LENGTH];
+  // Field name, label, - "dbZ" etc - As reported by Data source.
   // char url[URL_LENGTH]; /* server URL- mdvp:://host:port:dir */
   // char color_file[NAME_LENGTH]; /* color scale file name */
   
