@@ -1762,8 +1762,7 @@ string MdvReader::fieldLabelHoriz() const
   
   // Convert time to a string
   
-  string tlabel =
-    h_date.strfTime(_params.label_time_format, !_params.use_local_timestamps);
+  string tlabel = h_date.strfTime(_params.label_time_format);
 
   char vertLabel[256];
   vertLabel[0] = '\0';
@@ -1826,8 +1825,7 @@ string MdvReader::fieldLabelVert() const
   
   // Convert time to a string
   
-  string tlabel =
-    v_date.strfTime(_params.label_time_format, !_params.use_local_timestamps);
+  string tlabel = v_date.strfTime(_params.label_time_format);
   
   char label[2048];
   label[0] = '\0';

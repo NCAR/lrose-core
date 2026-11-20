@@ -680,18 +680,6 @@ public:
 
   tdrp_bool_t proj_pole_is_north;
 
-  double proj_persp_radius;
-
-  double proj_false_northing;
-
-  double proj_false_easting;
-
-  tdrp_bool_t proj_set_offset_origin;
-
-  double proj_offset_origin_latitude;
-
-  double proj_offset_origin_longitude;
-
   tdrp_bool_t use_cosine_correction;
 
   tdrp_bool_t report_clicks_in_degM_and_nm;
@@ -743,8 +731,6 @@ public:
 
   int num_cache_zooms;
 
-  double min_zoom_threshold;
-
   double domain_limit_min_x;
 
   double domain_limit_max_x;
@@ -757,29 +743,7 @@ public:
 
   int num_field_menu_cols;
 
-  tdrp_bool_t one_click_rhi;
-
-  double rotate_coarse_adjust;
-
-  double rotate_medium_adjust;
-
-  double rotate_fine_adjust;
-
   tdrp_bool_t disable_pick_mode;
-
-  tdrp_bool_t close_popups;
-
-  char* status_info_file;
-
-  tdrp_bool_t enable_status_window;
-
-  tdrp_bool_t report_clicks_in_status_window;
-
-  tdrp_bool_t show_clock;
-
-  tdrp_bool_t draw_clock_local;
-
-  tdrp_bool_t use_local_timestamps;
 
   int label_font_size;
 
@@ -1224,7 +1188,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[361];
+  mutable TDRPtable _table[343];
 
   const char *_className;
 

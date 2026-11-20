@@ -575,42 +575,6 @@ paramdef boolean {
   p_help = "This applies to POLAR_STEREO. If false, the projection is over the south pole.";
 } proj_pole_is_north;
 
-paramdef double {
-  p_default = 35786;
-  p_descr = "Radius of perspective point (km).";
-  p_help = "This applies to VERT_PERSP.";
-} proj_persp_radius;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Projection false northing correction.";
-  p_help = "Occasionally, this is added to the Y coordinate so that all coordinates are positive. Normally 0. As an alternative to false_northing and false_easting, you can set the offset_latitude and offset_longitude";
-} proj_false_northing;
-
-paramdef double {
-  p_default = 0.0;
-  p_descr = "Projection false easting correction.";
-  p_help = "Occasionally, this is added to the X coordinate so that all coordinates are positive. Normally 0.";
-} proj_false_easting;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Do you want to specify an offset origin using lat/lon instead of false_northing and false_easting?";
-  p_help = "If true, set proj_offset_origin_latitude and proj_offset_origin_longitude.";
-} proj_set_offset_origin;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Latitude of offset origin.";
-  p_help = "See proj_set_offset_origin.";
-} proj_offset_origin_latitude;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Longitude of offset origin.";
-  p_help = "See proj_set_offset_origin.";
-} proj_offset_origin_longitude;
-
 paramdef boolean {
   p_default = TRUE;
   p_descr = "Diagnostic mode used to ignore the Elevation angle on polar data (radars, etc).";
@@ -838,12 +802,6 @@ paramdef int {
   p_help = "";
 } num_cache_zooms;
 
-paramdef double {
-  p_default = 5;
-  p_descr = "Minimum distance to zoom into to in KM.";
-  p_help = "Won't allow the user to define custom zooms small than this size (along the longest edge).";
-} min_zoom_threshold;
-
 commentdef {
   p_header = "Zoom domain limits.";
   p_text = "Overlays are clipped to this domain and pan/moves cannot exceed these edge limits. Note: Lucid does not pan on the outermost domain.\n\nNote: for Lat/Lon Domains, Choose 0-360, -90+90. to get whole earth.\n\nOne can also choose Longitude range -180 to 180, -90 to 270, etc.\nFor whole earth views, aspect ration 1.0,  set the outer most domain to -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0 and use -180 to 180 and -90 to 90.";
@@ -898,76 +856,10 @@ paramdef int {
 } num_field_menu_cols;
 
 paramdef boolean {
-  p_default = FALSE;
-  p_descr = "This parameter allows the user to define a route/rhi with one mouse click and drag.";
-  p_help = "When set to TRUE, disallows multi way point cross sections. RHI are defined by clicking right mouse near the radar origin and dragging away from the radar along the desired  azimuth and releasing.";
-} one_click_rhi;
-
-paramdef double {
-  p_default = 6;
-  p_descr = "Lucid uses the number pad keys 7,9,4,6,1,3 to rotate the RHI by +/- these amounts (deg).";
-  p_help = "7-9 is coarse, 4-6 is medium, and 1-3 is fine.";
-} rotate_coarse_adjust;
-
-paramdef double {
-  p_default = 2;
-  p_descr = "Adjust RHI azimuth in medium mode.";
-  p_help = "Keys 4-6.";
-} rotate_medium_adjust;
-
-paramdef double {
-  p_default = 0.5;
-  p_descr = "Adjust RHI azimuth in fine mode.";
-  p_help = "Keys 1-3.";
-} rotate_fine_adjust;
-
-paramdef boolean {
   p_default = TRUE;
   p_descr = "Disable pick feature.";
   p_help = "";
 } disable_pick_mode;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Close Lucid's pop ups When the main window is closed.";
-  p_help = "Set this to FALSE if you don't want Lucid to close its pop ups when switching between virtual desktops";
-} close_popups;
-
-paramdef string {
-  p_default = "";
-  p_descr = "System NO-Data Status/Info File.";
-  p_help = "Will check for updates to this file, if it exists, and will replace the no_data_message with the text from this file. Leave blank if no file is to be checked.";
-} status_info_file;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Enable the status window.";
-  p_help = "If FALSE, no status window is displayed.";
-} enable_status_window;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Report clicks in the status window.";
-  p_help = "By default distance are in km and bearings in deg T.";
-} report_clicks_in_status_window;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set TRUE for displaying an analog clock in the upper right hand corner of the image.";
-  p_help = "";
-} show_clock;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set TRUE for clock in local time.";
-  p_help = "Otherwise UTC.";
-} draw_clock_local;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "TRUE: time stamps are local. FALSE: time stamps are UTC.";
-  p_help = "All Input time widgets expect UTC when FALSE, local times when set TRUE.";
-} use_local_timestamps;
 
 paramdef int {
   p_default = 12;

@@ -1070,7 +1070,7 @@ int LegacyParams::_readMainParams()
   } else if (climoStr.find("yearly") != string::npos) {
     fprintf(_tdrpFile, "climo_mode = CLIMO_YEARLY_INTERVAL;\n");
   }
-  _getBoolean("cidd.use_local_timestamps", 0);
+  // _getBoolean("cidd.use_local_timestamps", 0);
 
   /* movies */
   _getLong("cidd.max_time_list_span", 365, true, "climo_max_time_span_days");
@@ -1231,8 +1231,8 @@ int LegacyParams::_readMainParams()
      
   /* Toggle for enabling a status report window */
 
-  _getBoolean("cidd.enable_status_window", 0);
-  _getBoolean("cidd.report_clicks_in_status_window", 0);
+  // _getBoolean("cidd.enable_status_window", 0);
+  // _getBoolean("cidd.report_clicks_in_status_window", 0);
   _getBoolean("cidd.report_clicks_in_degM_and_nm", 0);
   _getDouble("cidd.magnetic_variation_deg", 0);
   
@@ -1269,7 +1269,7 @@ int LegacyParams::_readMainParams()
     zoomLimitsInLatlon = true;
   }
   _getLong("cidd.num_cache_zooms", 1, false);
-  _getDouble("cidd.min_zoom_threshold", 5.0);
+  // _getDouble("cidd.min_zoom_threshold", 5.0);
   int numZoomLevels = _getLong("cidd.num_zoom_levels", 1, false);
   
   vector<ZoomLevel> zooms;
@@ -1712,11 +1712,11 @@ int LegacyParams::_readMainParams()
 
   /* Toggle for displaying the analog clock */
   
-  _getBoolean("cidd.show_clock", 0);
+  // _getBoolean("cidd.show_clock", 0);
 
   /* Set the time to display on the analog clock */
 
-  _getBoolean("cidd.draw_clock_local", 0);
+  // _getBoolean("cidd.draw_clock_local", 0);
   
   // field menu - number of columns
 
@@ -1728,19 +1728,19 @@ int LegacyParams::_readMainParams()
 
   // canvas events
 
-  _getDouble("cidd.rotate_coarse_adjust",6.0);
-  _getDouble("cidd.rotate_medium_adjust",2.0);
-  _getDouble("cidd.rotate_fine_adjust", 0.5);
+  // _getDouble("cidd.rotate_coarse_adjust",6.0);
+  // _getDouble("cidd.rotate_medium_adjust",2.0);
+  // _getDouble("cidd.rotate_fine_adjust", 0.5);
   _getBoolean("cidd.disable_pick_mode", 1);
   _replaceUnderscores = _getBoolean("cidd.replace_underscores", 1);
-  _getBoolean("cidd.close_popups", 0);
+  // _getBoolean("cidd.close_popups", 0);
   _getBoolean("cidd.clip_overlay_fields", 0);
 
   // labels
 
   _getString("cidd.horiz_frame_label", "Lucid");
   _getString("cidd.no_data_message", "NO DATA FOUND (in this area at the selected time)");
-  _getString("cidd.status_info_file", "");
+  // _getString("cidd.status_info_file", "");
   // _getString("cidd.help_command", "");
 
   // image intensity

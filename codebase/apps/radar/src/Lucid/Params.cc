@@ -1572,78 +1572,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'proj_persp_radius'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("proj_persp_radius");
-    tt->descr = tdrpStrDup("Radius of perspective point (km).");
-    tt->help = tdrpStrDup("This applies to VERT_PERSP.");
-    tt->val_offset = (char *) &proj_persp_radius - &_start_;
-    tt->single_val.d = 35786;
-    tt++;
-    
-    // Parameter 'proj_false_northing'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("proj_false_northing");
-    tt->descr = tdrpStrDup("Projection false northing correction.");
-    tt->help = tdrpStrDup("Occasionally, this is added to the Y coordinate so that all coordinates are positive. Normally 0. As an alternative to false_northing and false_easting, you can set the offset_latitude and offset_longitude");
-    tt->val_offset = (char *) &proj_false_northing - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'proj_false_easting'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("proj_false_easting");
-    tt->descr = tdrpStrDup("Projection false easting correction.");
-    tt->help = tdrpStrDup("Occasionally, this is added to the X coordinate so that all coordinates are positive. Normally 0.");
-    tt->val_offset = (char *) &proj_false_easting - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'proj_set_offset_origin'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("proj_set_offset_origin");
-    tt->descr = tdrpStrDup("Do you want to specify an offset origin using lat/lon instead of false_northing and false_easting?");
-    tt->help = tdrpStrDup("If true, set proj_offset_origin_latitude and proj_offset_origin_longitude.");
-    tt->val_offset = (char *) &proj_set_offset_origin - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'proj_offset_origin_latitude'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("proj_offset_origin_latitude");
-    tt->descr = tdrpStrDup("Latitude of offset origin.");
-    tt->help = tdrpStrDup("See proj_set_offset_origin.");
-    tt->val_offset = (char *) &proj_offset_origin_latitude - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'proj_offset_origin_longitude'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("proj_offset_origin_longitude");
-    tt->descr = tdrpStrDup("Longitude of offset origin.");
-    tt->help = tdrpStrDup("See proj_set_offset_origin.");
-    tt->val_offset = (char *) &proj_offset_origin_longitude - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
     // Parameter 'use_cosine_correction'
     // ctype is 'tdrp_bool_t'
     
@@ -2063,18 +1991,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'min_zoom_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_zoom_threshold");
-    tt->descr = tdrpStrDup("Minimum distance to zoom into to in KM.");
-    tt->help = tdrpStrDup("Won't allow the user to define custom zooms small than this size (along the longest edge).");
-    tt->val_offset = (char *) &min_zoom_threshold - &_start_;
-    tt->single_val.d = 5;
-    tt++;
-    
     // Parameter 'Comment 19'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -2176,54 +2092,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'one_click_rhi'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("one_click_rhi");
-    tt->descr = tdrpStrDup("This parameter allows the user to define a route/rhi with one mouse click and drag.");
-    tt->help = tdrpStrDup("When set to TRUE, disallows multi way point cross sections. RHI are defined by clicking right mouse near the radar origin and dragging away from the radar along the desired  azimuth and releasing.");
-    tt->val_offset = (char *) &one_click_rhi - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'rotate_coarse_adjust'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rotate_coarse_adjust");
-    tt->descr = tdrpStrDup("Lucid uses the number pad keys 7,9,4,6,1,3 to rotate the RHI by +/- these amounts (deg).");
-    tt->help = tdrpStrDup("7-9 is coarse, 4-6 is medium, and 1-3 is fine.");
-    tt->val_offset = (char *) &rotate_coarse_adjust - &_start_;
-    tt->single_val.d = 6;
-    tt++;
-    
-    // Parameter 'rotate_medium_adjust'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rotate_medium_adjust");
-    tt->descr = tdrpStrDup("Adjust RHI azimuth in medium mode.");
-    tt->help = tdrpStrDup("Keys 4-6.");
-    tt->val_offset = (char *) &rotate_medium_adjust - &_start_;
-    tt->single_val.d = 2;
-    tt++;
-    
-    // Parameter 'rotate_fine_adjust'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rotate_fine_adjust");
-    tt->descr = tdrpStrDup("Adjust RHI azimuth in fine mode.");
-    tt->help = tdrpStrDup("Keys 1-3.");
-    tt->val_offset = (char *) &rotate_fine_adjust - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
     // Parameter 'disable_pick_mode'
     // ctype is 'tdrp_bool_t'
     
@@ -2234,90 +2102,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &disable_pick_mode - &_start_;
     tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'close_popups'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("close_popups");
-    tt->descr = tdrpStrDup("Close Lucid's pop ups When the main window is closed.");
-    tt->help = tdrpStrDup("Set this to FALSE if you don't want Lucid to close its pop ups when switching between virtual desktops");
-    tt->val_offset = (char *) &close_popups - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'status_info_file'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("status_info_file");
-    tt->descr = tdrpStrDup("System NO-Data Status/Info File.");
-    tt->help = tdrpStrDup("Will check for updates to this file, if it exists, and will replace the no_data_message with the text from this file. Leave blank if no file is to be checked.");
-    tt->val_offset = (char *) &status_info_file - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'enable_status_window'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("enable_status_window");
-    tt->descr = tdrpStrDup("Enable the status window.");
-    tt->help = tdrpStrDup("If FALSE, no status window is displayed.");
-    tt->val_offset = (char *) &enable_status_window - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'report_clicks_in_status_window'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("report_clicks_in_status_window");
-    tt->descr = tdrpStrDup("Report clicks in the status window.");
-    tt->help = tdrpStrDup("By default distance are in km and bearings in deg T.");
-    tt->val_offset = (char *) &report_clicks_in_status_window - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'show_clock'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("show_clock");
-    tt->descr = tdrpStrDup("Set TRUE for displaying an analog clock in the upper right hand corner of the image.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &show_clock - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'draw_clock_local'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("draw_clock_local");
-    tt->descr = tdrpStrDup("Set TRUE for clock in local time.");
-    tt->help = tdrpStrDup("Otherwise UTC.");
-    tt->val_offset = (char *) &draw_clock_local - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'use_local_timestamps'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_local_timestamps");
-    tt->descr = tdrpStrDup("TRUE: time stamps are local. FALSE: time stamps are UTC.");
-    tt->help = tdrpStrDup("All Input time widgets expect UTC when FALSE, local times when set TRUE.");
-    tt->val_offset = (char *) &use_local_timestamps - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'label_font_size'

@@ -1,40 +1,40 @@
 ## Unused parameters
 
-Debugging and process control:
+# Debugging and process control:
 
 debug_flag
 debug1_flag
 debug2_flag
 titan_key
 
-Data retrieval:
+# Data retrieval:
 
 # model_run_list_hours
 # check_clipping
 # locator_margin_km
 
-Projection and click coordinates:
+# Projection and click coordinates:
 
-proj_persp_radius
-proj_false_northing
-proj_false_easting
-proj_set_offset_origin
-proj_offset_origin_latitude
-proj_offset_origin_longitude
+# proj_persp_radius
+# proj_false_northing
+# proj_false_easting
+# proj_set_offset_origin
+# proj_offset_origin_latitude
+# proj_offset_origin_longitude
 report_clicks_in_degM_and_nm
 magnetic_variation_deg
 
-GUI and interaction:
+# GUI and interaction:
 
-min_zoom_threshold
-one_click_rhi
-rotate_coarse_adjust
-rotate_medium_adjust
-rotate_fine_adjust
-close_popups
-status_info_file
-enable_status_window
-report_clicks_in_status_window
+# min_zoom_threshold
+# one_click_rhi
+# rotate_coarse_adjust
+# rotate_medium_adjust
+# rotate_fine_adjust
+# close_popups
+# status_info_file
+# enable_status_window
+# report_clicks_in_status_window
 draw_clock_local
 label_font_size
 
