@@ -274,14 +274,6 @@ public:
     char* waypt_locs;
   } images_vsection_spec_t;
 
-  typedef struct {
-    char* id_label;
-    char* url;
-    double valid_minutes;
-    int default_id_no;
-    char* default_label;
-  } draw_export_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -1237,31 +1229,6 @@ public:
   images_vsection_spec_t *_images_vsection_spec;
   int images_vsection_spec_n;
 
-  char* click_point_fmq_url;
-
-  int simple_command_timeout_secs;
-
-  int complex_command_timeout_secs;
-
-  char* latest_click_mark_color;
-
-  tdrp_bool_t click_posn_rel_to_origin;
-
-  char* latest_client_mark_color;
-
-  char* remote_ui_url;
-
-  tdrp_bool_t draw_export_active;
-
-  draw_export_t *_draw_export_info;
-  int draw_export_info_n;
-
-  char* help_command;
-
-  char* canvas_help;
-
-  char* frame_message_help;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -1269,7 +1236,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[383];
+  mutable TDRPtable _table[367];
 
   const char *_className;
 

@@ -101,26 +101,27 @@ wind_w_scale_factor
 
 # Route-wind styling:
 
-#route_font_height
-#route_add_waypoints_labels
-#route_add_wind_text
-#route_label_style
-#route_label_interval
-#route_num_labels
-#route_track_line_width
+# route_font_height
+# route_add_waypoints_labels
+# route_add_wind_text
+# route_label_style
+# route_label_interval
+# route_num_labels
+# route_track_line_width
 
-Plugins, external commands, and help:
+# Plugins, external commands, and help:
 
-click_point_fmq_url
-simple_command_timeout_secs
-complex_command_timeout_secs
-latest_click_mark_color
-click_posn_rel_to_origin
-latest_client_mark_color
-draw_export_active
-help_command
-canvas_help
-frame_message_help
+# click_point_fmq_url
+# simple_command_timeout_secs
+# complex_command_timeout_secs
+# latest_click_mark_color
+# click_posn_rel_to_origin
+# latest_client_mark_color
+# draw_export_active
+
+# help_command
+# canvas_help
+# frame_message_help
 
 ## Functionally orphaned areas
 

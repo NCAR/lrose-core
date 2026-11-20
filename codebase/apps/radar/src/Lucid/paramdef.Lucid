@@ -34,8 +34,6 @@ commentdef {
     "\t<TERRAIN> - terrain and land-use data\n"
     "\t<WINDS> - gridded wind fields and rendering\n"
     "\t<IMAGE_GENERATION> - automatic image output and vertical-section specifications\n"
-    "\t<PLUGINS> - communication with external applications\n"
-    "\t<HELP> - user-help configuration\n"
     "\n";    
 }
 
@@ -2662,114 +2660,5 @@ paramdef struct images_vsection_spec_t {
 
 commentdef {
   p_header = "</IMAGE_GENERATION>";
-}
-
-//////////////////////////////////////////////////////////
-// Inter-process communication for the latest click point
-// Allows Lucid to control and collaborate with other apps.
-
-commentdef {
-  p_header = "<PLUGINS>";
-  p_text = "Communicating with other applications.";
-}
-
-paramdef string {
-  p_default = "/tmp/fmq/click_point";
-  p_descr = "URL for click point URL.";
-  p_help = "The details of the latest click point are written to an FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT.";
-} click_point_fmq_url;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Length of time to wait before killing simple external commands.";
-  p_help = "Used When running single image convert scripts and driving Browsers to web pages.";
-} simple_command_timeout_secs;
-
-paramdef int {
-  p_default = 180;
-  p_descr = "Length of time to wait before killing complex external commands.";
-  p_help = "Used when spawning animation building script.";
-} complex_command_timeout_secs;
-
-paramdef string {
-  p_default = "red";
-  p_descr = "Color of mark showing latest click location.";
-  p_help = "";
-} latest_click_mark_color;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Compute click posn in coords relative to display origin.";
-  p_help = "If FALSE, click posn is computed in absolute coords for the projection in use.";
-} click_posn_rel_to_origin;
-
-paramdef string {
-  p_default = "yellow";
-  p_descr = "Color of mark showing latest click of remote client.";
-  p_help = "";
-} latest_client_mark_color;
-
-paramdef string {
-  p_default = "/tmp/remoteUI";
-  p_descr = "FMQ Type URL for Receiving Remote commands.";
-  p_help = "";
-} remote_ui_url;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Is drawing for export active?";
-} draw_export_active;
-
-typedef struct {
-  string id_label;
-  string url;
-  double valid_minutes;
-  int default_id_no;
-  string default_label;
-} draw_export_t;
-
-paramdef struct draw_export_t {
-  p_default = { {"Boundry",   "/tmp/cidd.fmq",      60, 0, "A"},
-                {"Boundry-b",   "/tmp/cidd.fmq",      60, 0, "B"} };
-  p_descr = "Human Drawn Products for Export Parameters.";
-  p_help = 
-    " Each Entry needs:\n"
-    "ID_Label FMQ_URL Valid_Minutes Default_ID_no"
-    "    ID_LABEL - This is used to designate Product types\n"
-    "    FMQ_URL: example: fmqp:://host::dir/file \n"
-    "   Valid_Minutes: How many minutes the product is valid by default\n"
-    "   Default_ID_no: Default Data Type (Enumerated ID)\n"
-    "   Default_label: Test to place into Label field by default\n"
-    "\n";
-} draw_export_info[];
-
-commentdef {
-  p_header = "</PLUGINS>";
-};
-
-commentdef {
-  p_header = "<HELP>";
-}
-
-paramdef string {
-  p_default = "chrome http://front.eol.ucar.edu/displayParams/Lucid'";
-  p_descr = "Main command to run to get help.";
-  p_help = "";
-} help_command;
-
-paramdef string {
-  p_default = "cidd_help::canvas";
-  p_descr = "Help text links.";
-  p_help = "These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.";
-} canvas_help;
-
-paramdef string {
-  p_default = "cidd_help:frame_message";
-  p_descr = "Help text links.";
-  p_help = "These take the form:\nwidget_name_help: file_name:file_index_key_string.\nThe HELPPATH environment variable must be set or the help file must be located in /usr/lib/help.\nNote the file name gets expanded to file_name.info.";
-} frame_message_help;
-
-commentdef {
-  p_header = "</HELP>";
 }
 
