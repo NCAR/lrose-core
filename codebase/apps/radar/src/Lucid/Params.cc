@@ -720,7 +720,7 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Directory for storing temporary files as a cache.");
     tt->help = tdrpStrDup("The temporary files we cache are for the maps and color scales. Below this top level directory Lucid will create subdirectories as follows:\n\t(maps) 'top_level_cache_dir/Lucid/params_file_name/maps'\n\t(color_scales) 'top_level_cache_dir/Lucid/params_file_name/color_scales'");
     tt->val_offset = (char *) &top_level_cache_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/cache");
+    tt->single_val.s = tdrpStrDup("$(HOME)/cache");
     tt++;
     
     // Parameter 'clear_cache'

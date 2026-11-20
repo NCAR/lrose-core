@@ -92,7 +92,7 @@ paramdef string {
 } instance;
 
 paramdef string {
-  p_default = "/tmp/cache";
+  p_default = "$(HOME)/cache";
   p_descr = "Directory for storing temporary files as a cache.";
   p_help = "The temporary files we cache are for the maps and color scales. Below this top level directory Lucid will create subdirectories as follows:\n\t(maps) 'top_level_cache_dir/Lucid/params_file_name/maps'\n\t(color_scales) 'top_level_cache_dir/Lucid/params_file_name/color_scales'";
 } top_level_cache_dir;

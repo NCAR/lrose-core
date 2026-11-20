@@ -47,6 +47,7 @@
 #include <toolsa/utim.h>
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
+#include <toolsa/file_io.h>
 #include <toolsa/TaStr.hh>
 #include <toolsa/http.h>
 #include <toolsa/HttpURL.hh>
@@ -64,6 +65,7 @@
 #include <cctype>
 #include <QApplication>
 #include <QErrorMessage>
+#include <QDir>
 
 using namespace std;
 
@@ -116,16 +118,24 @@ Lucid::Lucid(int argc, char **argv) :
 
   _progName = strdup("Lucid");
 
+  // make tmp dir for params file
+  
+  QString tmpDir = QDir::tempPath();
+  string lucidTmpDir = tmpDir.toStdString() + PATH_DELIM + "Lucid";
+  ta_makedir(lucidTmpDir.c_str());
+
   // check for legacy params file
   // if found create a temporary tdrp file based on the legacy file
 
   string legacyParamsPath;
-  char tdrpParamsPath[5000];
   bool usingLegacyParams = false;
+  char tdrpParamsPath[MAX_PATH_LEN];
   if (_args.getLegacyParamsPath(argc, (const char **) argv, legacyParamsPath) == 0) {
     Path lpPath(legacyParamsPath);
-    snprintf(tdrpParamsPath, 4999,
-             "/tmp/Lucid.%s.%d.tdrp", lpPath.getFile().c_str(), getpid());
+    snprintf(tdrpParamsPath, MAX_PATH_LEN,
+             "%s%sLucid_%s_%d.tdrp",
+             lucidTmpDir.c_str(), PATH_DELIM,
+             lpPath.getFile().c_str(), getpid());
     LegacyParams lParams;
     lParams.translateToTdrp(legacyParamsPath, tdrpParamsPath);
     usingLegacyParams = true;
