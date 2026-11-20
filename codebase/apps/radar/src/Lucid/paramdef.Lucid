@@ -2368,12 +2368,6 @@ paramdef double {
   p_help = "Wind vector length = wind_scaler * wind_time_scale_interval *  wind velocity";
 } wind_time_scale_interval;
 
-paramdef enum wind_marker_t {
-  p_default = WIND_ARROW;
-  p_descr = "Wind marker rendering style.";
-  p_help = "See WIND section for details on rendering style.";
-} wind_marker_type;
-
 paramdef double {
   p_default = 10;
   p_descr = "Scale the vertical velocity by this factor, relative to the U/V. ";

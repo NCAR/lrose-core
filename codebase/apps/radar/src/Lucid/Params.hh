@@ -1146,8 +1146,6 @@ public:
 
   double wind_time_scale_interval;
 
-  wind_marker_t wind_marker_type;
-
   double wind_w_scale_factor;
 
   double wind_units_scale_factor;
@@ -1236,7 +1234,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[367];
+  mutable TDRPtable _table[366];
 
   const char *_className;
 

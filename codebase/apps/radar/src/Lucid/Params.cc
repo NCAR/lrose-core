@@ -5053,40 +5053,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'wind_marker_type'
-    // ctype is '_wind_marker_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("wind_marker_type");
-    tt->descr = tdrpStrDup("Wind marker rendering style.");
-    tt->help = tdrpStrDup("See WIND section for details on rendering style.");
-    tt->val_offset = (char *) &wind_marker_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("wind_marker_t");
-    tt->enum_def.nfields = 9;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("WIND_ARROW");
-      tt->enum_def.fields[0].val = WIND_ARROW;
-      tt->enum_def.fields[1].name = tdrpStrDup("WIND_VECTOR");
-      tt->enum_def.fields[1].val = WIND_VECTOR;
-      tt->enum_def.fields[2].name = tdrpStrDup("WIND_BARB");
-      tt->enum_def.fields[2].val = WIND_BARB;
-      tt->enum_def.fields[3].name = tdrpStrDup("WIND_LABELEDBARB");
-      tt->enum_def.fields[3].val = WIND_LABELEDBARB;
-      tt->enum_def.fields[4].name = tdrpStrDup("WIND_TUFT");
-      tt->enum_def.fields[4].val = WIND_TUFT;
-      tt->enum_def.fields[5].name = tdrpStrDup("WIND_TICKVECTOR");
-      tt->enum_def.fields[5].val = WIND_TICKVECTOR;
-      tt->enum_def.fields[6].name = tdrpStrDup("WIND_METBARB");
-      tt->enum_def.fields[6].val = WIND_METBARB;
-      tt->enum_def.fields[7].name = tdrpStrDup("WIND_BARB_SH");
-      tt->enum_def.fields[7].val = WIND_BARB_SH;
-      tt->enum_def.fields[8].name = tdrpStrDup("WIND_LABELEDBARB_SH");
-      tt->enum_def.fields[8].val = WIND_LABELEDBARB_SH;
-    tt->single_val.e = WIND_ARROW;
-    tt++;
-    
     // Parameter 'wind_w_scale_factor'
     // ctype is 'double'
     
