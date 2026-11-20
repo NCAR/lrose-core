@@ -2104,18 +2104,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'label_font_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("label_font_size");
-    tt->descr = tdrpStrDup("Basic font size for labels (pixels).");
-    tt->help = tdrpStrDup("Some of the labels are scaled relative to this size.");
-    tt->val_offset = (char *) &label_font_size - &_start_;
-    tt->single_val.i = 12;
-    tt++;
-    
     // Parameter 'range_ring_label_font_size'
     // ctype is 'int'
     
@@ -2308,18 +2296,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'vlevel_selector_labels_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vlevel_selector_labels_color");
-    tt->descr = tdrpStrDup("Color of labels in vlevel_selector.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vlevel_selector_labels_color - &_start_;
-    tt->single_val.s = tdrpStrDup("white");
-    tt++;
-    
     // Parameter 'vlevel_selector_marker_color'
     // ctype is 'char*'
     
@@ -2470,18 +2446,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("%Y/%m/%d %H:%M:%S");
     tt++;
     
-    // Parameter 'frame_range_time_format'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("frame_range_time_format");
-    tt->descr = tdrpStrDup("Set the format for the time strings in the frame range text fields.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &frame_range_time_format - &_start_;
-    tt->single_val.s = tdrpStrDup("%H:%M");
-    tt++;
-    
     // Parameter 'layer_legends_on'
     // ctype is 'tdrp_bool_t'
     
@@ -2518,18 +2482,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'display_labels'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("display_labels");
-    tt->descr = tdrpStrDup("Switch to turn off all data labels on the display.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &display_labels - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'display_ref_lines'
     // ctype is 'tdrp_bool_t'
     
@@ -2554,15 +2506,15 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'horiz_bot_margin'
+    // Parameter 'horiz_bottom_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_bot_margin");
+    tt->param_name = tdrpStrDup("horiz_bottom_margin");
     tt->descr = tdrpStrDup("Height of bottom margin (pixels).");
     tt->help = tdrpStrDup("Size of bottom margin for horiz window.");
-    tt->val_offset = (char *) &horiz_bot_margin - &_start_;
+    tt->val_offset = (char *) &horiz_bottom_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
@@ -2965,15 +2917,15 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'vsection_bot_margin'
+    // Parameter 'vsection_bottom_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vsection_bot_margin");
-    tt->descr = tdrpStrDup("Height of bottom margin (pixels).");
-    tt->help = tdrpStrDup("Size of bottom margin for vert section window.");
-    tt->val_offset = (char *) &vsection_bot_margin - &_start_;
+    tt->param_name = tdrpStrDup("vsection_bottom_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin in VERT mode (pixels).");
+    tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
+    tt->val_offset = (char *) &vsection_bottom_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
@@ -3157,30 +3109,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("white");
     tt++;
     
-    // Parameter 'vsection_top_margin2'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vsection_top_margin2");
-    tt->descr = tdrpStrDup("Height of top margin in VERT mode (pixels).");
-    tt->help = tdrpStrDup("Titles go in the top margin.");
-    tt->val_offset = (char *) &vsection_top_margin2 - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
-    // Parameter 'vsection_bottom_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vsection_bottom_margin");
-    tt->descr = tdrpStrDup("Height of bottom margin in VERT mode (pixels).");
-    tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
-    tt->val_offset = (char *) &vsection_bottom_margin - &_start_;
-    tt->single_val.i = 20;
-    tt++;
-    
     // Parameter 'vsection_label_font_size'
     // ctype is 'int'
     
@@ -3191,18 +3119,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &vsection_label_font_size - &_start_;
     tt->single_val.i = 8;
-    tt++;
-    
-    // Parameter 'vsection_text_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vsection_text_margin");
-    tt->descr = tdrpStrDup("Margin around some text (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vsection_text_margin - &_start_;
-    tt->single_val.i = 5;
     tt++;
     
     // Parameter 'vsection_plot_selected_horiz_height'
@@ -3265,18 +3181,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
-    // Parameter 'vsection_beam_queue_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vsection_beam_queue_size");
-    tt->descr = tdrpStrDup("Size of the queue for VERT beams.");
-    tt->help = tdrpStrDup("After the queue reaches this size, older beams are discarded.");
-    tt->val_offset = (char *) &vsection_beam_queue_size - &_start_;
-    tt->single_val.i = 360;
-    tt++;
-    
     // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -3319,18 +3223,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("black");
     tt++;
     
-    // Parameter 'background_color2'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("background_color2");
-    tt->descr = tdrpStrDup("Color of main display background.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &background_color2 - &_start_;
-    tt->single_val.s = tdrpStrDup("black");
-    tt++;
-    
     // Parameter 'text_color'
     // ctype is 'char*'
     
@@ -3365,18 +3257,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &margin_color - &_start_;
     tt->single_val.s = tdrpStrDup("black");
-    tt++;
-    
-    // Parameter 'out_of_range_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("out_of_range_color");
-    tt->descr = tdrpStrDup("Render values outside the data range of the color scale.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &out_of_range_color - &_start_;
-    tt->single_val.s = tdrpStrDup("transparent");
     tt++;
     
     // Parameter 'route_path_color'
@@ -3415,30 +3295,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("gray50");
     tt++;
     
-    // Parameter 'height_axis_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("height_axis_color");
-    tt->descr = tdrpStrDup("The text in the height selector margin.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &height_axis_color - &_start_;
-    tt->single_val.s = tdrpStrDup("pink");
-    tt++;
-    
-    // Parameter 'height_indicator_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("height_indicator_color");
-    tt->descr = tdrpStrDup("A solid rectangle showing the height extent of the data plane.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &height_indicator_color - &_start_;
-    tt->single_val.s = tdrpStrDup("gray50");
-    tt++;
-    
     // Parameter 'range_rings_color'
     // ctype is 'char*'
     
@@ -3460,18 +3316,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->descr = tdrpStrDup("Set to 'transparent' to avoid having these plotted. ");
     tt->help = tdrpStrDup("Otherwise, these data will be plotted in the indicated color.");
     tt->val_offset = (char *) &missing_data_color - &_start_;
-    tt->single_val.s = tdrpStrDup("transparent");
-    tt++;
-    
-    // Parameter 'bad_data_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("bad_data_color");
-    tt->descr = tdrpStrDup("Set to 'transparent' to avoid having these plotted. ");
-    tt->help = tdrpStrDup("Otherwise, these data will be plotted in the indicated color.");
-    tt->val_offset = (char *) &bad_data_color - &_start_;
     tt->single_val.s = tdrpStrDup("transparent");
     tt++;
     

@@ -35,34 +35,32 @@ magnetic_variation_deg
 # status_info_file
 # enable_status_window
 # report_clicks_in_status_window
-draw_clock_local
-label_font_size
+# draw_clock_local
+# label_font_size
 
-Time and selector display:
+# Time and selector display:
 
-vlevel_selector_labels_color
-frame_range_time_format
-display_labels
-display_ref_lines
+# vlevel_selector_labels_color
+# frame_range_time_format
+# display_labels
 
-Vertical-section display:
+# Vertical-section display:
 
-vsection_bot_margin
-vsection_top_margin2
-vsection_text_margin
-vsection_beam_queue_size
+# vsection_bot_margin
+# vsection_top_margin2
+# vsection_text_margin
+# vsection_beam_queue_size
 
-Colors:
+# Colors:
 
-background_color2
-out_of_range_color
-height_axis_color
-height_indicator_color
-bad_data_color
+# background_color2
+# out_of_range_color
+# height_axis_color
+# height_indicator_color
+# bad_data_color
+# missing_data_color is used; bad_data_color is not.
 
-missing_data_color is used; bad_data_color is not.
-
-Range rings and overlays:
+# Range rings and overlays:
 
 range_ring_follows_data
 range_ring_x_space

@@ -1370,18 +1370,18 @@ int LegacyParams::_readMainParams()
   _getString("cidd.foreground_color", "White");
   _getString("cidd.background_color", "Black");
   _getString("cidd.margin_color", "Black");
-  _getString("cidd.out_of_range_color", "transparent");
+  // _getString("cidd.out_of_range_color", "transparent");
   _getString("cidd.route_path_color", "yellow");
   _getString("cidd.time_axis_color", "cyan");
   _getString("cidd.time_frame_color", "yellow");
-  _getString("cidd.height_axis_color", "cyan");
-  _getString("cidd.height_indicator_color", "red");
+  // _getString("cidd.height_axis_color", "cyan");
+  // _getString("cidd.height_indicator_color", "red");
   _getString("cidd.range_ring_color", "grey", true, "range_rings_color");
   _getString("cidd.range_ring_color", "grey", true, "horiz_grid_color");
   _getString("cidd.range_ring_color", "grey", true,
              "vsection_grid_color");
   _getString("cidd.missing_data_color","transparent");
-  _getString("cidd.bad_data_color","transparent");
+  // _getString("cidd.bad_data_color","transparent");
 
   // _getString("cidd.latest_click_mark_color", "red");
   // _getString("cidd.latest_client_mark_color", "yellow");
@@ -1422,7 +1422,7 @@ int LegacyParams::_readMainParams()
 
   _getString("cidd.label_time_format", "%m/%d/%y %H:%M:%S");
   _getString("cidd.moviestart_time_format", "%H:%M %m/%d/%Y");
-  _getString("cidd.frame_range_time_format", "%H:%M");
+  // _getString("cidd.frame_range_time_format", "%H:%M");
 
   // Get the on/off state of the extra legend plotting - Force to either 0 or 1
 
@@ -1432,7 +1432,7 @@ int LegacyParams::_readMainParams()
 
   /* Toggle for displaying data labels */
 
-  _getBoolean("cidd.display_labels", 1);
+  // _getBoolean("cidd.display_labels", 1);
 
   /* Toggle for displaying the analog clock */
   _getBoolean("cidd.display_ref_lines", 1);
@@ -1466,7 +1466,7 @@ int LegacyParams::_readMainParams()
   fprintf(_tdrpFile, "vsection_color_scale_width = %d;\n", horizRightMargin);
   
   _getLong("cidd.horiz_top_margin", 20);
-  _getLong("cidd.horiz_bot_margin", 20);
+  _getLong("cidd.horiz_bot_margin", 20, true, "horiz_bottom_margin");
   _getLong("cidd.horiz_left_margin", 20);
   // int rightMargin = _getLong("cidd.horiz_right_margin", 80.0, false);
   // fprintf(_tdrpFile, "horiz_right_margin = %d;\n", 6);
@@ -1490,7 +1490,7 @@ int LegacyParams::_readMainParams()
   fprintf(_tdrpFile, "vsection_top_margin = %d;\n", vertTopMargin * 1);
   
   int vertBotMargin = _getLong("cidd.vert_bot_margin", 40, false);
-  fprintf(_tdrpFile, "vsection_bot_margin = %d;\n", vertBotMargin * 1);
+  fprintf(_tdrpFile, "vsection_bottom_margin = %d;\n", vertBotMargin * 1);
   
   int vertLeftMargin = _getLong("cidd.vert_left_margin", 40, false);
   fprintf(_tdrpFile, "vsection_left_margin = %d;\n", vertLeftMargin * 1);

@@ -929,7 +929,7 @@ void HorizView::_initWorld(WorldPlot &world,
   world.setLeftMargin(_params.horiz_left_margin);
   world.setRightMargin(_params.horiz_right_margin);
   world.setTopMargin(_params.horiz_top_margin);
-  world.setBottomMargin(_params.horiz_bot_margin);
+  world.setBottomMargin(_params.horiz_bottom_margin);
   world.setTitleTextMargin(_params.horiz_title_text_margin);
   world.setLegendTextMargin(_params.horiz_legend_text_margin);
   world.setAxisTextMargin(_params.horiz_axis_text_margin);

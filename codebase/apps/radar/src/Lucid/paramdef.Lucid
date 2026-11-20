@@ -862,12 +862,6 @@ paramdef boolean {
 } disable_pick_mode;
 
 paramdef int {
-  p_default = 12;
-  p_descr = "Basic font size for labels (pixels).";
-  p_help = "Some of the labels are scaled relative to this size.";
-} label_font_size;
-
-paramdef int {
   p_default = 8;
   p_descr = "Font size for labels on range rings (pixels).";
 } range_ring_label_font_size;
@@ -953,11 +947,6 @@ paramdef string {
 } vlevel_selector_axis_color;
 
 paramdef string {
-  p_default = "white";
-  p_descr = "Color of labels in vlevel_selector.";
-} vlevel_selector_labels_color;
-
-paramdef string {
   p_default = "orange";
   p_descr = "Color of selection marker in vlevel selector.";
 } vlevel_selector_marker_color;
@@ -1027,12 +1016,6 @@ paramdef string {
   p_help = "See 'man strftime' for format options. Can add additional text as part of the Time string.";
 } label_time_format;
 
-paramdef string {
-  p_default = "%H:%M";
-  p_descr = "Set the format for the time strings in the frame range text fields.";
-  p_help = "";
-} frame_range_time_format;
-
 paramdef boolean {
   p_default = TRUE;
   p_descr = "Plot a Legend for each Grid overlay.";
@@ -1053,12 +1036,6 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "Switch to turn off all data labels on the display.";
-  p_help = "";
-} display_labels;
-
-paramdef boolean {
-  p_default = TRUE;
   p_descr = "Switch to turn on/off Height, Route and Wind Scale reference lines.";
   p_help = "";
 } display_ref_lines;
@@ -1073,7 +1050,7 @@ paramdef int {
   p_default = 20;
   p_descr = "Height of bottom margin (pixels).";
   p_help = "Size of bottom margin for horiz window.";
-} horiz_bot_margin;
+} horiz_bottom_margin;
 
 paramdef int {
   p_default = 20;
@@ -1260,9 +1237,9 @@ paramdef int {
 
 paramdef int {
   p_default = 20;
-  p_descr = "Height of bottom margin (pixels).";
-  p_help = "Size of bottom margin for vert section window.";
-} vsection_bot_margin;
+  p_descr = "Height of bottom margin in VERT mode (pixels).";
+  p_help = "Time scale goes in the bottom margin.";
+} vsection_bottom_margin;
 
 paramdef int {
   p_default = 20;
@@ -1346,26 +1323,9 @@ paramdef string {
 } vsection_grid_color;
 
 paramdef int {
-  p_default = 20;
-  p_descr = "Height of top margin in VERT mode (pixels).";
-  p_help = "Titles go in the top margin.";
-} vsection_top_margin2;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Height of bottom margin in VERT mode (pixels).";
-  p_help = "Time scale goes in the bottom margin.";
-} vsection_bottom_margin;
-
-paramdef int {
   p_default = 8;
   p_descr = "Font size for labels on range rings (pixels).";
 } vsection_label_font_size;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Margin around some text (pixels).";
-} vsection_text_margin;
 
 paramdef boolean {
   p_default = false;
@@ -1388,12 +1348,6 @@ paramdef enum legend_pos_t {
   p_help = "This include time, field name and elevation angle.";
 } vsection_main_legend_pos;
 
-paramdef int {
-  p_default = 360;
-  p_descr = "Size of the queue for VERT beams.";
-  p_help = "After the queue reaches this size, older beams are discarded.";
-} vsection_beam_queue_size;
-
 commentdef {
   p_header = "</VSECTION_VIEW>";
 }
@@ -1415,11 +1369,6 @@ paramdef string {
 } background_color;
 
 paramdef string {
-  p_default = "black";
-  p_descr = "Color of main display background.";
-} background_color2;
-
-paramdef string {
   p_default = "white";
   p_descr = "Color of text annotation in main display.";
 } text_color;
@@ -1434,12 +1383,6 @@ paramdef string {
   p_descr = "Background of margins.";
   p_help = "";
 } margin_color;
-
-paramdef string {
-  p_default = "transparent";
-  p_descr = "Render values outside the data range of the color scale.";
-  p_help = "";
-} out_of_range_color;
 
 paramdef string {
   p_default = "yellow";
@@ -1460,18 +1403,6 @@ paramdef string {
 } time_frame_color;
 
 paramdef string {
-  p_default = "pink";
-  p_descr = "The text in the height selector margin.";
-  p_help = "";
-} height_axis_color;
-
-paramdef string {
-  p_default = "gray50";
-  p_descr = "A solid rectangle showing the height extent of the data plane.";
-  p_help = "";
-} height_indicator_color;
-
-paramdef string {
   p_default = "grey";
   p_descr = "Range rings and azimuth lines.";
   p_help = "";
@@ -1482,12 +1413,6 @@ paramdef string {
   p_descr = "Set to 'transparent' to avoid having these plotted. ";
   p_help = "Otherwise, these data will be plotted in the indicated color.";
 } missing_data_color;
-
-paramdef string {
-  p_default = "transparent";
-  p_descr = "Set to 'transparent' to avoid having these plotted. ";
-  p_help = "Otherwise, these data will be plotted in the indicated color.";
-} bad_data_color;
 
 paramdef string {
   p_default = "orange";

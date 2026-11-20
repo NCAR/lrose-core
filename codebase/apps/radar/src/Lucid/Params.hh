@@ -745,8 +745,6 @@ public:
 
   tdrp_bool_t disable_pick_mode;
 
-  int label_font_size;
-
   int range_ring_label_font_size;
 
   int click_cross_size;
@@ -779,8 +777,6 @@ public:
 
   char* vlevel_selector_axis_color;
 
-  char* vlevel_selector_labels_color;
-
   char* vlevel_selector_marker_color;
 
   char* vlevel_selector_data_values_color;
@@ -803,21 +799,17 @@ public:
 
   char* label_time_format;
 
-  char* frame_range_time_format;
-
   tdrp_bool_t layer_legends_on;
 
   tdrp_bool_t cont_legends_on;
 
   tdrp_bool_t wind_legends_on;
 
-  tdrp_bool_t display_labels;
-
   tdrp_bool_t display_ref_lines;
 
   int horiz_top_margin;
 
-  int horiz_bot_margin;
+  int horiz_bottom_margin;
 
   int horiz_left_margin;
 
@@ -879,7 +871,7 @@ public:
 
   int vsection_top_margin;
 
-  int vsection_bot_margin;
+  int vsection_bottom_margin;
 
   int vsection_left_margin;
 
@@ -911,13 +903,7 @@ public:
 
   char* vsection_grid_color;
 
-  int vsection_top_margin2;
-
-  int vsection_bottom_margin;
-
   int vsection_label_font_size;
-
-  int vsection_text_margin;
 
   tdrp_bool_t vsection_plot_selected_horiz_height;
 
@@ -927,13 +913,9 @@ public:
 
   legend_pos_t vsection_main_legend_pos;
 
-  int vsection_beam_queue_size;
-
   char* foreground_color;
 
   char* background_color;
-
-  char* background_color2;
 
   char* text_color;
 
@@ -941,23 +923,15 @@ public:
 
   char* margin_color;
 
-  char* out_of_range_color;
-
   char* route_path_color;
 
   char* time_axis_color;
 
   char* time_frame_color;
 
-  char* height_axis_color;
-
-  char* height_indicator_color;
-
   char* range_rings_color;
 
   char* missing_data_color;
-
-  char* bad_data_color;
 
   char* epoch_indicator_color;
 
@@ -1188,7 +1162,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[343];
+  mutable TDRPtable _table[330];
 
   const char *_className;
 
