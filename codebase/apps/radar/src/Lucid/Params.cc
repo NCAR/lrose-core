@@ -4290,30 +4290,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->comment_text = tdrpStrDup("Lucid can cooperate with a secondary app, receiving click details via shared memo");
     tt++;
     
-    // Parameter 'mark_latest_click_location'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("mark_latest_click_location");
-    tt->descr = tdrpStrDup("Option to mark latest click location from client app.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &mark_latest_click_location - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'latest_click_mark_size'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("latest_click_mark_size");
-    tt->descr = tdrpStrDup("Size of marker at latest click location (pixels).");
-    tt->help = tdrpStrDup("Location clicked in client app.");
-    tt->val_offset = (char *) &latest_click_mark_size - &_start_;
-    tt->single_val.i = 11;
-    tt++;
-    
     // Parameter 'image_inten'
     // ctype is 'double'
     

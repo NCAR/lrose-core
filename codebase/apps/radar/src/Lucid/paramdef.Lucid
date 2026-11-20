@@ -1906,18 +1906,6 @@ commentdef {
   p_text = "Lucid can cooperate with a secondary app, receiving click details via shared memo";
 }
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to mark latest click location from client app.";
-  p_help = "";
-} mark_latest_click_location;
-
-paramdef int {
-  p_default = 11;
-  p_descr = "Size of marker at latest click location (pixels).";
-  p_help = "Location clicked in client app.";
-} latest_click_mark_size;
-
 paramdef double {
   p_default = 0.8;
   p_descr = "Sets the relative intensity of images, relative to the overlays.";

@@ -72,23 +72,14 @@ clip_overlay_fields
 
 Older rendering controls:
 
-mark_latest_click_location
-latest_click_mark_size
+# mark_latest_click_location
+# latest_click_mark_size
 image_inten
 inten_levels
 data_inten
 image_fill_threshold
 scale_units_per_km
 scale_units_label
-
-Terrain:
-
-terrain_active
-terrain_height_scaler
-terrain_earth_color1
-terrain_earth_color2
-
-Notably, terrain activation currently depends on whether terrain_url is nonempty, not on terrain_active.
 
 Wind rendering:
 

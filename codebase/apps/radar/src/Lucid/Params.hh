@@ -1069,10 +1069,6 @@ public:
 
   tdrp_bool_t draw_main_on_top;
 
-  tdrp_bool_t mark_latest_click_location;
-
-  int latest_click_mark_size;
-
   double image_inten;
 
   int inten_levels;
@@ -1234,7 +1230,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[366];
+  mutable TDRPtable _table[364];
 
   const char *_className;
 

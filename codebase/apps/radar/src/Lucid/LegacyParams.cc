@@ -177,9 +177,9 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     
   // read in draw export from old tdrp section, write to main params
   
-  if (_readDrawExportTdrp()) {
-    return -1;
-  }
+  // if (_readDrawExportTdrp()) {
+  //   return -1;
+  // }
     
   // read in image generation from old tdrp section, write to main params
   
@@ -839,7 +839,7 @@ int LegacyParams::_loadKeyValPairsDefault(char* &db_buf, int &db_len)
   params_text += ParamsTextWinds;
   params_text += ParamsTextMaps;
   params_text += ParamsTextMainParams;
-  params_text += _getDefaultTdrpParams("DRAW_EXPORT", &draw_P);
+  // params_text += _getDefaultTdrpParams("DRAW_EXPORT", &draw_P);
   params_text += _getDefaultTdrpParams("IMAGE_GENERATION", &images_P);
   params_text += _getDefaultTdrpParams("SYMPRODS", &syprod_P);
   params_text += _getDefaultTdrpParams("TERRAIN", &terrain_P);
@@ -1102,8 +1102,8 @@ int LegacyParams::_readMainParams()
   _getLong("cidd.update_interval", Constants::UPDATE_INTERVAL);
   _getString("cidd.datamap_host", "");
   _getLong("cidd.data_timeout_secs", 10);
-  _getLong("cidd.simple_command_timeout_secs",30);
-  _getLong("cidd.complex_command_timeout_secs",180);
+  // _getLong("cidd.simple_command_timeout_secs",30);
+  // _getLong("cidd.complex_command_timeout_secs",180);
 
   // movies
 
@@ -1359,7 +1359,7 @@ int LegacyParams::_readMainParams()
 
   // server access
 
-  _getString("cidd.remote_ui_url", "");
+  // _getString("cidd.remote_ui_url", "");
   _getString("cidd.http_tunnel_url", "");
   _httpProxyUrl = _getString("cidd.http_proxy_url", "");
 
@@ -1383,8 +1383,8 @@ int LegacyParams::_readMainParams()
   _getString("cidd.missing_data_color","transparent");
   _getString("cidd.bad_data_color","transparent");
 
-  _getString("cidd.latest_click_mark_color", "red");
-  _getString("cidd.latest_client_mark_color", "yellow");
+  // _getString("cidd.latest_click_mark_color", "red");
+  // _getString("cidd.latest_client_mark_color", "yellow");
 
   // time control GUI - colors
   
@@ -1541,28 +1541,28 @@ int LegacyParams::_readMainParams()
   _getLong("cidd.wind_scaler", 3);
   _getDouble("cidd.wind_time_scale_interval", 10.0);
 
-  _windMarkerType = _getString("cidd.wind_marker_type", "arrow", false);
-  if (_windMarkerType == "arrow") {
-    fprintf(_tdrpFile, "wind_marker_type = WIND_ARROW;\n");
-  } else if (_windMarkerType == "vector") {
-    fprintf(_tdrpFile, "wind_marker_type = WIND_VECTOR;\n");
-  } else if (_windMarkerType == "barb") {
-    fprintf(_tdrpFile, "wind_marker_type = WIND_BARB;\n");
-  } else if (_windMarkerType == "labeledbarb") {
-    fprintf(_tdrpFile, "wind_marker_type = WIND_LABELEDBARB;\n");
-  } else if (_windMarkerType == "tuft") {
-    fprintf(_tdrpFile, "wind_marker_type = WIND_TUFT;\n");
-  } else if (_windMarkerType == "tickvector") {
-    fprintf(_tdrpFile, "wind_marker_type = WIND_TICKVECTOR;\n");
-  } else if (_windMarkerType == "metbarb") {
-    fprintf(_tdrpFile, "wind_marker_type = WIND_METBARB;\n");
-  } else if (_windMarkerType == "barb_sh") {
-    fprintf(_tdrpFile, "wind_marker_type = WIND_BARB_SH;\n");
-  } else if (_windMarkerType == "labeledbarb_sh") {
-    fprintf(_tdrpFile, "wind_marker_type = WIND_LABELEDBARB_SH;\n");
-  } else {
-    fprintf(_tdrpFile, "wind_marker_type = WIND_ARROW;\n");
-  }
+  // _windMarkerType = _getString("cidd.wind_marker_type", "arrow", false);
+  // if (_windMarkerType == "arrow") {
+  //   fprintf(_tdrpFile, "wind_marker_type = WIND_ARROW;\n");
+  // } else if (_windMarkerType == "vector") {
+  //   fprintf(_tdrpFile, "wind_marker_type = WIND_VECTOR;\n");
+  // } else if (_windMarkerType == "barb") {
+  //   fprintf(_tdrpFile, "wind_marker_type = WIND_BARB;\n");
+  // } else if (_windMarkerType == "labeledbarb") {
+  //   fprintf(_tdrpFile, "wind_marker_type = WIND_LABELEDBARB;\n");
+  // } else if (_windMarkerType == "tuft") {
+  //   fprintf(_tdrpFile, "wind_marker_type = WIND_TUFT;\n");
+  // } else if (_windMarkerType == "tickvector") {
+  //   fprintf(_tdrpFile, "wind_marker_type = WIND_TICKVECTOR;\n");
+  // } else if (_windMarkerType == "metbarb") {
+  //   fprintf(_tdrpFile, "wind_marker_type = WIND_METBARB;\n");
+  // } else if (_windMarkerType == "barb_sh") {
+  //   fprintf(_tdrpFile, "wind_marker_type = WIND_BARB_SH;\n");
+  // } else if (_windMarkerType == "labeledbarb_sh") {
+  //   fprintf(_tdrpFile, "wind_marker_type = WIND_LABELEDBARB_SH;\n");
+  // } else {
+  //   fprintf(_tdrpFile, "wind_marker_type = WIND_ARROW;\n");
+  // }
     
   _getDouble("cidd.wind_w_scale_factor", 10.0);
   _getDouble("cidd.wind_units_scale_factor", 1.0);
@@ -1706,12 +1706,12 @@ int LegacyParams::_readMainParams()
 
   // latest click location
 
-  _getBoolean("cidd.mark_latest_click_location", 0);
-  _getLong("cidd.latest_click_mark_size", 11);
-  _getBoolean("cidd.click_posn_rel_to_origin", 0);
+  // _getBoolean("cidd.mark_latest_click_location", 0);
+  // _getLong("cidd.latest_click_mark_size", 11);
+  // _getBoolean("cidd.click_posn_rel_to_origin", 0);
 
   /* Toggle for displaying the analog clock */
-
+  
   _getBoolean("cidd.show_clock", 0);
 
   /* Set the time to display on the analog clock */
@@ -1741,7 +1741,7 @@ int LegacyParams::_readMainParams()
   _getString("cidd.horiz_frame_label", "Lucid");
   _getString("cidd.no_data_message", "NO DATA FOUND (in this area at the selected time)");
   _getString("cidd.status_info_file", "");
-  _getString("cidd.help_command", "");
+  // _getString("cidd.help_command", "");
 
   // image intensity
 
@@ -2803,195 +2803,6 @@ int LegacyParams::_readTerrainTdrp()
   
 }
 
-#ifdef NOT_ANY_MORE
-
-/************************************************************************
- * Read in route winds params
- */
-
-int LegacyParams::_readRouteWindsTdrp()
-  
-{
-
-  // Instantiate the route winds params object
-  
-  Croutes_P routes;
-  
-  // read in buffer
-  
-  long param_text_len = 0, param_text_line_no = 0;
-  const char *param_text =
-    _findTagText(_paramsBuf, "ROUTE_WINDS",
-                 &param_text_len, &param_text_line_no);
-  
-  if(param_text == NULL || param_text_len <=0 ) {
-    fprintf(stderr,"Warning: No ROUTE_WINDS Section in params\n");
-    fprintf(_tdrpFile, "route_winds_active = FALSE;\n");
-  } else {
-    // Set the routes object from the buffer
-    if(routes.loadFromBuf("ROUTE WINDS TDRP Section",
-                          NULL,param_text,
-                          param_text_len,
-                          param_text_line_no,
-                          TRUE, FALSE) < 0) {
-      fprintf(stderr,
-              "Problems with <ROUTE_WINDS> params in legacy params file.\n");
-      fprintf(stderr,"Please fix.\n");
-      return -1;
-    }
-  }
-  
-  // write it out to tdrp file, changing param names as appropriate
-  
-  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-  fprintf(_tdrpFile, "// <ROUTE_VSECTIONS>\n");
-  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-  
-  fprintf(_tdrpFile, "route_winds_active = TRUE;\n");
-  
-  switch (routes.debug) {
-    case Croutes_P::DEBUG_OFF:
-      fprintf(_tdrpFile, "route_debug = ROUTE_DEBUG_OFF;\n");
-      break;
-    case Croutes_P::DEBUG_NORM:
-      fprintf(_tdrpFile, "route_debug = ROUTE_DEBUG_NORM;\n");
-      break;
-    case Croutes_P::DEBUG_VERBOSE:
-      fprintf(_tdrpFile, "route_debug = ROUTE_DEBUG_VERBOSE;\n");
-      break;
-  }
-  
-  fprintf(_tdrpFile, "route_font_height = %d;\n",
-          routes.font_height);
-  fprintf(_tdrpFile, "route_add_waypoints_labels = %d;\n",
-          routes.add_waypoints_labels);
-  fprintf(_tdrpFile, "route_add_wind_text = %d;\n",
-          routes.add_wind_text);
-  
-  switch (routes.label_style) {
-    case Croutes_P::REGULAR_INTERVALS:
-      fprintf(_tdrpFile,
-              "route_label_style = ROUTE_REGULAR_INTERVALS;\n");
-      break;
-    case Croutes_P::EQUAL_DIVISIONS:
-      fprintf(_tdrpFile,
-              "route_label_style = ROUTE_EQUAL_DIVISIONS;\n");
-      break;
-  }
-  
-  fprintf(_tdrpFile, "route_label_interval = %lg;\n",
-          routes.label_interval);
-  fprintf(_tdrpFile, "route_num_labels = %d;\n",
-          routes.num_route_labels);
-  fprintf(_tdrpFile, "route_track_line_width = %d;\n",
-          routes.route_track_line_width);
-
-  fprintf(_tdrpFile, "route_u_url = \"%s\";\n", routes.u_url);
-  fprintf(_tdrpFile, "route_v_url = \"%s\";\n", routes.v_url);
-
-  fprintf(_tdrpFile, "route_paths = {\n");
-  for (int ii = 0; ii < routes.route_paths_n; ii++) {
-    fprintf(_tdrpFile, "  \"%s\"", routes._route_paths[ii]);
-    if (ii == routes.route_paths_n - 1) {
-      fprintf(_tdrpFile, "\n");
-    } else {
-      fprintf(_tdrpFile, ",\n");
-    }
-  }
-  fprintf(_tdrpFile, "};\n");
-
-  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-  fprintf(_tdrpFile, "// </ROUTE_VSECTIONS>\n");
-  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-  
-  return 0;
-  
-}
-
-#endif
-
-/************************************************************************
- * Read in draw export params
- */
-
-int LegacyParams::_readDrawExportTdrp()
-  
-{
-
-  // Instantiate the draw params object, which will load the defaults
-  
-  Cdraw_P draw;
-
-  // read in DRAW buffer
-
-  bool draw_export_active = true;
-  long param_text_len = 0, param_text_line_no = 0;
-  const char *param_text =
-    _findTagText(_paramsBuf,"DRAW_EXPORT",
-                 &param_text_len, &param_text_line_no);
-  
-  if(param_text == NULL || param_text_len <=0 ) {
-    fprintf(stderr,"Warning: No DRAW_EXPORT Section in params\n");
-    fprintf(stderr,"Will be disabled\n");
-    draw_export_active = false;
-  } else {
-    // Set the symprod object from the buffer
-    if(draw.loadFromBuf("DRAW_EXPORT TDRP Section",
-                        NULL,param_text,
-                        param_text_len,
-                        param_text_line_no,
-                        TRUE, FALSE) < 0) {
-      fprintf(stderr,"Problems with <DRAW_EXPORT> params in legacy params file.\n");
-      fprintf(stderr,"Please fix.\n");
-      fprintf(stderr,"Will be disabled\n");
-      draw_export_active = false;
-    }
-  }
-
-  // write it out to tdrp file, changing param names as appropriate
-  
-  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-  fprintf(_tdrpFile, "// <DRAW_EXPORT>\n");
-  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-
-  if (draw_export_active) {
-    
-    fprintf(_tdrpFile, "draw_export_active = TRUE;\n");
-
-    fprintf(_tdrpFile, "draw_export_info = {\n");
-    
-    for (int ii = 0; ii < draw.dexport_info_n; ii++) {
-      
-      Cdraw_P::dexport_t &info = draw._dexport_info[ii];
-      
-      fprintf(_tdrpFile, "  {\n");
-      fprintf(_tdrpFile, "    id_label = \"%s\",\n", info.id_label);
-      fprintf(_tdrpFile, "    url = \"%s\",\n", info.url);
-      fprintf(_tdrpFile, "    valid_minutes = %lg,\n", info.valid_minutes);
-      fprintf(_tdrpFile, "    default_id_no = %d,\n",
-              info.default_id_no);
-      fprintf(_tdrpFile, "    default_label = \"%s\"\n", info.default_label);
-      fprintf(_tdrpFile, "  }\n");
-      if (ii < draw.dexport_info_n - 1) {
-        fprintf(_tdrpFile, "  ,\n");
-      }
-    } // ii
-    fprintf(_tdrpFile, "};\n");
-
-  } else {
-
-    fprintf(_tdrpFile, "draw_export_active = FALSE;\n");
-
-  }
-  
-  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-  fprintf(_tdrpFile, "// </DRAW_EXPORT>\n");
-  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
-  
-  return 0;
-  
-}
-
 /************************************************************************
  * Read in image generation params
  */
@@ -3107,10 +2918,10 @@ void LegacyParams::printLegacyDefaults(ostream &out)
   params_text += ParamsTextWinds;
   params_text += ParamsTextMaps;
   params_text += ParamsTextMainParams;
-  params_text += _getDefaultTdrpParams("DRAW_EXPORT", &draw_P);
   params_text += _getDefaultTdrpParams("IMAGE_GENERATION", &images_P);
   params_text += _getDefaultTdrpParams("SYMPRODS", &syprod_P);
   params_text += _getDefaultTdrpParams("TERRAIN", &terrain_P);
+  // params_text += _getDefaultTdrpParams("DRAW_EXPORT", &draw_P);
   // params_text += _getDefaultTdrpParams("ROUTE_WINDS", &routes_P);
 
   out << params_text << endl;
@@ -3177,3 +2988,193 @@ void LegacyParams::_parseStringIntoTime(const string &timeStr, DateTime &dtime)
   dtime.set(year, month, day, hour, min, sec);
 
 }
+
+#ifdef NOT_ANY_MORE
+
+/************************************************************************
+ * Read in route winds params
+ */
+
+int LegacyParams::_readRouteWindsTdrp()
+  
+{
+
+  // Instantiate the route winds params object
+  
+  Croutes_P routes;
+  
+  // read in buffer
+  
+  long param_text_len = 0, param_text_line_no = 0;
+  const char *param_text =
+    _findTagText(_paramsBuf, "ROUTE_WINDS",
+                 &param_text_len, &param_text_line_no);
+  
+  if(param_text == NULL || param_text_len <=0 ) {
+    fprintf(stderr,"Warning: No ROUTE_WINDS Section in params\n");
+    fprintf(_tdrpFile, "route_winds_active = FALSE;\n");
+  } else {
+    // Set the routes object from the buffer
+    if(routes.loadFromBuf("ROUTE WINDS TDRP Section",
+                          NULL,param_text,
+                          param_text_len,
+                          param_text_line_no,
+                          TRUE, FALSE) < 0) {
+      fprintf(stderr,
+              "Problems with <ROUTE_WINDS> params in legacy params file.\n");
+      fprintf(stderr,"Please fix.\n");
+      return -1;
+    }
+  }
+  
+  // write it out to tdrp file, changing param names as appropriate
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// <ROUTE_VSECTIONS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  
+  fprintf(_tdrpFile, "route_winds_active = TRUE;\n");
+  
+  switch (routes.debug) {
+    case Croutes_P::DEBUG_OFF:
+      fprintf(_tdrpFile, "route_debug = ROUTE_DEBUG_OFF;\n");
+      break;
+    case Croutes_P::DEBUG_NORM:
+      fprintf(_tdrpFile, "route_debug = ROUTE_DEBUG_NORM;\n");
+      break;
+    case Croutes_P::DEBUG_VERBOSE:
+      fprintf(_tdrpFile, "route_debug = ROUTE_DEBUG_VERBOSE;\n");
+      break;
+  }
+  
+  fprintf(_tdrpFile, "route_font_height = %d;\n",
+          routes.font_height);
+  fprintf(_tdrpFile, "route_add_waypoints_labels = %d;\n",
+          routes.add_waypoints_labels);
+  fprintf(_tdrpFile, "route_add_wind_text = %d;\n",
+          routes.add_wind_text);
+  
+  switch (routes.label_style) {
+    case Croutes_P::REGULAR_INTERVALS:
+      fprintf(_tdrpFile,
+              "route_label_style = ROUTE_REGULAR_INTERVALS;\n");
+      break;
+    case Croutes_P::EQUAL_DIVISIONS:
+      fprintf(_tdrpFile,
+              "route_label_style = ROUTE_EQUAL_DIVISIONS;\n");
+      break;
+  }
+  
+  fprintf(_tdrpFile, "route_label_interval = %lg;\n",
+          routes.label_interval);
+  fprintf(_tdrpFile, "route_num_labels = %d;\n",
+          routes.num_route_labels);
+  fprintf(_tdrpFile, "route_track_line_width = %d;\n",
+          routes.route_track_line_width);
+
+  fprintf(_tdrpFile, "route_u_url = \"%s\";\n", routes.u_url);
+  fprintf(_tdrpFile, "route_v_url = \"%s\";\n", routes.v_url);
+
+  fprintf(_tdrpFile, "route_paths = {\n");
+  for (int ii = 0; ii < routes.route_paths_n; ii++) {
+    fprintf(_tdrpFile, "  \"%s\"", routes._route_paths[ii]);
+    if (ii == routes.route_paths_n - 1) {
+      fprintf(_tdrpFile, "\n");
+    } else {
+      fprintf(_tdrpFile, ",\n");
+    }
+  }
+  fprintf(_tdrpFile, "};\n");
+
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// </ROUTE_VSECTIONS>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  
+  return 0;
+  
+}
+
+/************************************************************************
+ * Read in draw export params
+ */
+
+int LegacyParams::_readDrawExportTdrp()
+  
+{
+
+  // Instantiate the draw params object, which will load the defaults
+  
+  Cdraw_P draw;
+
+  // read in DRAW buffer
+
+  bool draw_export_active = true;
+  long param_text_len = 0, param_text_line_no = 0;
+  const char *param_text =
+    _findTagText(_paramsBuf,"DRAW_EXPORT",
+                 &param_text_len, &param_text_line_no);
+  
+  if(param_text == NULL || param_text_len <=0 ) {
+    fprintf(stderr,"Warning: No DRAW_EXPORT Section in params\n");
+    fprintf(stderr,"Will be disabled\n");
+    draw_export_active = false;
+  } else {
+    // Set the symprod object from the buffer
+    if(draw.loadFromBuf("DRAW_EXPORT TDRP Section",
+                        NULL,param_text,
+                        param_text_len,
+                        param_text_line_no,
+                        TRUE, FALSE) < 0) {
+      fprintf(stderr,"Problems with <DRAW_EXPORT> params in legacy params file.\n");
+      fprintf(stderr,"Please fix.\n");
+      fprintf(stderr,"Will be disabled\n");
+      draw_export_active = false;
+    }
+  }
+
+  // write it out to tdrp file, changing param names as appropriate
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// <DRAW_EXPORT>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+
+  if (draw_export_active) {
+    
+    fprintf(_tdrpFile, "draw_export_active = TRUE;\n");
+
+    fprintf(_tdrpFile, "draw_export_info = {\n");
+    
+    for (int ii = 0; ii < draw.dexport_info_n; ii++) {
+      
+      Cdraw_P::dexport_t &info = draw._dexport_info[ii];
+      
+      fprintf(_tdrpFile, "  {\n");
+      fprintf(_tdrpFile, "    id_label = \"%s\",\n", info.id_label);
+      fprintf(_tdrpFile, "    url = \"%s\",\n", info.url);
+      fprintf(_tdrpFile, "    valid_minutes = %lg,\n", info.valid_minutes);
+      fprintf(_tdrpFile, "    default_id_no = %d,\n",
+              info.default_id_no);
+      fprintf(_tdrpFile, "    default_label = \"%s\"\n", info.default_label);
+      fprintf(_tdrpFile, "  }\n");
+      if (ii < draw.dexport_info_n - 1) {
+        fprintf(_tdrpFile, "  ,\n");
+      }
+    } // ii
+    fprintf(_tdrpFile, "};\n");
+
+  } else {
+
+    fprintf(_tdrpFile, "draw_export_active = FALSE;\n");
+
+  }
+  
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  fprintf(_tdrpFile, "// </DRAW_EXPORT>\n");
+  fprintf(_tdrpFile, "//////////////////////////////////////////\n");
+  
+  return 0;
+  
+}
+
+#endif
+

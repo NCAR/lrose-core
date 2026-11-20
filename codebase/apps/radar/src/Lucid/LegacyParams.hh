@@ -404,7 +404,7 @@ private:
   int _readSymprodsTdrp();
   int _readTerrainTdrp();
   // int _readRouteWindsTdrp();
-  int _readDrawExportTdrp();
+  // int _readDrawExportTdrp();
   int _readImageGenTdrp();
   void _parseStringIntoTime(const string &timeStr, DateTime &dtime);
 
