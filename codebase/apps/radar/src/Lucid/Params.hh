@@ -961,17 +961,7 @@ public:
 
   int min_pixels_per_range_ring;
 
-  tdrp_bool_t range_ring_follows_data;
-
-  int range_ring_x_space;
-
-  int range_ring_y_space;
-
-  tdrp_bool_t range_ring_labels;
-
   double azimuth_lines_spacing_deg;
-
-  tdrp_bool_t clip_overlay_fields;
 
   char* horiz_frame_label;
 
@@ -1000,20 +990,6 @@ public:
   int layer_fields_n;
 
   tdrp_bool_t draw_main_on_top;
-
-  double image_inten;
-
-  int inten_levels;
-
-  double data_inten;
-
-  int image_fill_threshold;
-
-  int dynamic_contour_threshold;
-
-  double scale_units_per_km;
-
-  char* scale_units_label;
 
   int product_line_width;
 
@@ -1162,7 +1138,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[330];
+  mutable TDRPtable _table[317];
 
   const char *_className;
 

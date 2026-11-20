@@ -62,24 +62,23 @@ magnetic_variation_deg
 
 # Range rings and overlays:
 
-range_ring_follows_data
-range_ring_x_space
-range_ring_y_space
-range_ring_labels
-clip_overlay_fields
+# range_ring_x_space
+# range_ring_y_space
+# range_ring_labels
+# clip_overlay_fields
 
-Older rendering controls:
+# Older rendering controls:
 
 # mark_latest_click_location
 # latest_click_mark_size
-image_inten
-inten_levels
-data_inten
-image_fill_threshold
-scale_units_per_km
-scale_units_label
+# image_inten
+# inten_levels
+# data_inten
+# image_fill_threshold
+# scale_units_per_km
+# scale_units_label
 
-Wind rendering:
+# Wind rendering:
 
 wind_w_scale_factor
 

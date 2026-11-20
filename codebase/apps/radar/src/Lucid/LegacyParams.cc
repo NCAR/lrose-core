@@ -1203,8 +1203,8 @@ int LegacyParams::_readMainParams()
   _getDouble("cidd.north_angle", 0.0, true, "proj_rotation");
   _getBoolean("cidd.use_cosine", 1, true, "use_cosine_correction"); // legacy
   _getBoolean("cidd.use_cosine_correction", 1);
-  _getDouble("cidd.scale_units_per_km", 1.0);
-  _getString("cidd.scale_units_label", "km");
+  // _getDouble("cidd.scale_units_per_km", 1.0);
+  // _getString("cidd.scale_units_label", "km");
 
   // data retrieval
 
@@ -1511,9 +1511,9 @@ int LegacyParams::_readMainParams()
   }
   _getBoolean("cidd.range_ring_for_radar_only", 1, true, "range_rings_for_radar_only");
   
-  _getLong("cidd.range_ring_x_space", 50);
-  _getLong("cidd.range_ring_y_space", 15);
-  _getBoolean("cidd.range_ring_labels", 1);
+  // _getLong("cidd.range_ring_x_space", 50);
+  // _getLong("cidd.range_ring_y_space", 15);
+  // _getBoolean("cidd.range_ring_labels", 1);
   _getDouble("cidd.range_ring_spacing", -1.0, true, "range_ring_spacing_km");
   _getDouble("cidd.max_ring_range", 1000.0, true, "max_ring_range_km");
   _getDouble("cidd.azmith_interval", 30.0, true, "azimuth_lines_spacing_deg");
@@ -1734,7 +1734,7 @@ int LegacyParams::_readMainParams()
   _getBoolean("cidd.disable_pick_mode", 1);
   _replaceUnderscores = _getBoolean("cidd.replace_underscores", 1);
   // _getBoolean("cidd.close_popups", 0);
-  _getBoolean("cidd.clip_overlay_fields", 0);
+  // _getBoolean("cidd.clip_overlay_fields", 0);
 
   // labels
 
@@ -1745,13 +1745,13 @@ int LegacyParams::_readMainParams()
 
   // image intensity
 
-  _getDouble("cidd.image_inten", 0.8);
-  _getLong("cidd.inten_levels", 32);
-  _getDouble("cidd.data_inten", 1.0);
+  // _getDouble("cidd.image_inten", 0.8);
+  // _getLong("cidd.inten_levels", 32);
+  // _getDouble("cidd.data_inten", 1.0);
 
   // fill and contour thresholds
-  _getLong("cidd.image_fill_threshold", 120000);
-  _getLong("cidd.dynamic_contour_threshold", 160000);
+  // _getLong("cidd.image_fill_threshold", 120000);
+  // _getLong("cidd.dynamic_contour_threshold", 160000);
   
   // shmem
   _getLong("cidd.coord_key", 63500);

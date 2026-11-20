@@ -1520,41 +1520,11 @@ paramdef int {
   p_help = "If there are fewer than this number of pixels per ring, the rings are not shown.";
 } min_pixels_per_range_ring;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Plot range rings relative to radar location.";
-  p_help = "We get the location from the data. If FALSE, rings are relative to plot origin.";
-} range_ring_follows_data;
-
-paramdef int {
-  p_default = 50;
-  p_descr = "Spacing in x for range ring labels (pixels).";
-  p_help = "";
-} range_ring_x_space;
-
-paramdef int {
-  p_default = 15;
-  p_descr = "Spacing in y for range ring labels (pixels).";
-  p_help = "";
-} range_ring_y_space;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Plot range ring labels.";
-  p_help = "Label the range for each ring.";
-} range_ring_labels;
-
 paramdef double {
   p_default = 30;
   p_descr = "Spacing for azimuth lines plotted with range rings (deg).";
   p_help = "The azimuth lines start at 0, and rotate clockwise from there.";
 } azimuth_lines_spacing_deg;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "The default behavior is to render the overlay fields using the same render method as the primary field.";
-  p_help = "Lucid can Render Overlay fields using filled polygons, and clip the data between some minimum and maximum. This is useful, for example, if one wants to show Radar data over +40dB overlaid on satellite imagery.";
-} clip_overlay_fields;
 
 paramdef string {
   p_default = "Lucid";
@@ -1711,53 +1681,6 @@ paramdef boolean {
   p_descr = "TRUE: render main field first, then layers.";
   p_help = "FALSE: render main field on top of layers.";
 } draw_main_on_top;
-
-commentdef {
-  p_header = "Marking click location from separate app.";
-  p_text = "Lucid can cooperate with a secondary app, receiving click details via shared memo";
-}
-
-paramdef double {
-  p_default = 0.8;
-  p_descr = "Sets the relative intensity of images, relative to the overlays.";
-  p_help = "Set between 0.2 and 1.0.";
-} image_inten;
-
-paramdef int {
-  p_default = 32;
-  p_descr = "The number of selectable intensity levels in the slider control.";
-  p_help = "";
-} inten_levels;
-
-paramdef double {
-  p_default = 1;
-  p_descr = "Sets the relative intensity of data grid colors, relative to the overlays.";
-  p_help = "";
-} data_inten;
-
-paramdef int {
-  p_default = 120000;
-  p_descr = "Sets the threshold in drawable grid points where image rendering is done by a filling method on the client, rather than by rectangles on the Xserver.";
-  p_help = "Set this high if the X server is fast or the comm link to the server is slow. Set this low if the X server is slow. Typical values range from 10,000 to 100,000  Used for 'cart' style rendering.";
-} image_fill_threshold;
-
-paramdef int {
-  p_default = 160000;
-  p_descr = "Sets the grid-cell threshold used by dynamic terrain rendering.";
-  p_help = "Terrain grids smaller than this threshold use filled contours; larger grids use polygon filling.";
-} dynamic_contour_threshold;
-
-paramdef double {
-  p_default = 0.5395932;
-  p_descr = "Set the scale factor and label for Range rings and Distance scales.";
-  p_help = "";
-} scale_units_per_km;
-
-paramdef string {
-  p_default = "km";
-  p_descr = "Set the units labels.";
-  p_help = "km, nm, deg";
-} scale_units_label;
 
 commentdef {
   p_header = "</RENDERING>";

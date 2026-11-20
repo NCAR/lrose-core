@@ -3537,54 +3537,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.i = 15;
     tt++;
     
-    // Parameter 'range_ring_follows_data'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_follows_data");
-    tt->descr = tdrpStrDup("Plot range rings relative to radar location.");
-    tt->help = tdrpStrDup("We get the location from the data. If FALSE, rings are relative to plot origin.");
-    tt->val_offset = (char *) &range_ring_follows_data - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'range_ring_x_space'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_x_space");
-    tt->descr = tdrpStrDup("Spacing in x for range ring labels (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &range_ring_x_space - &_start_;
-    tt->single_val.i = 50;
-    tt++;
-    
-    // Parameter 'range_ring_y_space'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_y_space");
-    tt->descr = tdrpStrDup("Spacing in y for range ring labels (pixels).");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &range_ring_y_space - &_start_;
-    tt->single_val.i = 15;
-    tt++;
-    
-    // Parameter 'range_ring_labels'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("range_ring_labels");
-    tt->descr = tdrpStrDup("Plot range ring labels.");
-    tt->help = tdrpStrDup("Label the range for each ring.");
-    tt->val_offset = (char *) &range_ring_labels - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'azimuth_lines_spacing_deg'
     // ctype is 'double'
     
@@ -3595,18 +3547,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->help = tdrpStrDup("The azimuth lines start at 0, and rotate clockwise from there.");
     tt->val_offset = (char *) &azimuth_lines_spacing_deg - &_start_;
     tt->single_val.d = 30;
-    tt++;
-    
-    // Parameter 'clip_overlay_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("clip_overlay_fields");
-    tt->descr = tdrpStrDup("The default behavior is to render the overlay fields using the same render method as the primary field.");
-    tt->help = tdrpStrDup("Lucid can Render Overlay fields using filled polygons, and clip the data between some minimum and maximum. This is useful, for example, if one wants to show Radar data over +40dB overlaid on satellite imagery.");
-    tt->val_offset = (char *) &clip_overlay_fields - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'horiz_frame_label'
@@ -3878,92 +3818,8 @@ Params *Params::_instance = (Params *) NULL;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 36");
-    tt->comment_hdr = tdrpStrDup("Marking click location from separate app.");
-    tt->comment_text = tdrpStrDup("Lucid can cooperate with a secondary app, receiving click details via shared memo");
-    tt++;
-    
-    // Parameter 'image_inten'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("image_inten");
-    tt->descr = tdrpStrDup("Sets the relative intensity of images, relative to the overlays.");
-    tt->help = tdrpStrDup("Set between 0.2 and 1.0.");
-    tt->val_offset = (char *) &image_inten - &_start_;
-    tt->single_val.d = 0.8;
-    tt++;
-    
-    // Parameter 'inten_levels'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("inten_levels");
-    tt->descr = tdrpStrDup("The number of selectable intensity levels in the slider control.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &inten_levels - &_start_;
-    tt->single_val.i = 32;
-    tt++;
-    
-    // Parameter 'data_inten'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("data_inten");
-    tt->descr = tdrpStrDup("Sets the relative intensity of data grid colors, relative to the overlays.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &data_inten - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'image_fill_threshold'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("image_fill_threshold");
-    tt->descr = tdrpStrDup("Sets the threshold in drawable grid points where image rendering is done by a filling method on the client, rather than by rectangles on the Xserver.");
-    tt->help = tdrpStrDup("Set this high if the X server is fast or the comm link to the server is slow. Set this low if the X server is slow. Typical values range from 10,000 to 100,000  Used for 'cart' style rendering.");
-    tt->val_offset = (char *) &image_fill_threshold - &_start_;
-    tt->single_val.i = 120000;
-    tt++;
-    
-    // Parameter 'dynamic_contour_threshold'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("dynamic_contour_threshold");
-    tt->descr = tdrpStrDup("Sets the grid-cell threshold used by dynamic terrain rendering.");
-    tt->help = tdrpStrDup("Terrain grids smaller than this threshold use filled contours; larger grids use polygon filling.");
-    tt->val_offset = (char *) &dynamic_contour_threshold - &_start_;
-    tt->single_val.i = 160000;
-    tt++;
-    
-    // Parameter 'scale_units_per_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("scale_units_per_km");
-    tt->descr = tdrpStrDup("Set the scale factor and label for Range rings and Distance scales.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &scale_units_per_km - &_start_;
-    tt->single_val.d = 0.539593;
-    tt++;
-    
-    // Parameter 'scale_units_label'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("scale_units_label");
-    tt->descr = tdrpStrDup("Set the units labels.");
-    tt->help = tdrpStrDup("km, nm, deg");
-    tt->val_offset = (char *) &scale_units_label - &_start_;
-    tt->single_val.s = tdrpStrDup("km");
+    tt->comment_hdr = tdrpStrDup("</RENDERING>");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'Comment 37'
@@ -3971,15 +3827,6 @@ Params *Params::_instance = (Params *) NULL;
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 37");
-    tt->comment_hdr = tdrpStrDup("</RENDERING>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 38'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 38");
     tt->comment_hdr = tdrpStrDup("<SYMBOLIC_PRODUCTS>");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4059,11 +3906,11 @@ Params *Params::_instance = (Params *) NULL;
       tt->struct_vals[5].i = 1;
     tt++;
     
-    // Parameter 'Comment 39'
+    // Parameter 'Comment 38'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 39");
+    tt->param_name = tdrpStrDup("Comment 38");
     tt->comment_hdr = tdrpStrDup("<SYMBOLIC_PRODUCTS>.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4237,20 +4084,20 @@ Params *Params::_instance = (Params *) NULL;
       tt->struct_vals[9].b = pFALSE;
     tt++;
     
+    // Parameter 'Comment 39'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 39");
+    tt->comment_hdr = tdrpStrDup("</SYMBOLIC_PRODUCTS>.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'Comment 40'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 40");
-    tt->comment_hdr = tdrpStrDup("</SYMBOLIC_PRODUCTS>.");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 41'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 41");
     tt->comment_hdr = tdrpStrDup("<TERRAIN>");
     tt->comment_text = tdrpStrDup("Note: Terrain Fields must be on the same projection as the Display");
     tt++;
@@ -4385,20 +4232,20 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("red4");
     tt++;
     
+    // Parameter 'Comment 41'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 41");
+    tt->comment_hdr = tdrpStrDup("</TERRAIN>.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'Comment 42'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 42");
-    tt->comment_hdr = tdrpStrDup("</TERRAIN>.");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 43'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 43");
     tt->comment_hdr = tdrpStrDup("<WINDS>");
     tt->comment_text = tdrpStrDup("Plotting wind vector overlays on grids.");
     tt++;
@@ -4669,20 +4516,20 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.s = tdrpStrDup("m/sec");
     tt++;
     
+    // Parameter 'Comment 43'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 43");
+    tt->comment_hdr = tdrpStrDup("</WINDS>");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'Comment 44'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 44");
-    tt->comment_hdr = tdrpStrDup("</WINDS>");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 45'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 45");
     tt->comment_hdr = tdrpStrDup("<IMAGE_GENERATION>");
     tt->comment_text = tdrpStrDup("In creating files for the field catalog, the file name is of the form:\n\n\tcategory.platform.YYYYMMDDHHmm.product_name.ext.\n\nThe following parameters control the output directory, and the construction of the file name. The product_name comprises the field name followed by _HORIZ or _VERT.");
     tt++;
@@ -5107,11 +4954,11 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.e = IMAGE_DEBUG_OFF;
     tt++;
     
-    // Parameter 'Comment 46'
+    // Parameter 'Comment 45'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 46");
+    tt->param_name = tdrpStrDup("Comment 45");
     tt->comment_hdr = tdrpStrDup("GENERATE VSECTION IMAGES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -5181,11 +5028,11 @@ Params *Params::_instance = (Params *) NULL;
       tt->struct_vals[2].s = tdrpStrDup("(0, 0) (0, 150)");
     tt++;
     
-    // Parameter 'Comment 47'
+    // Parameter 'Comment 46'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 47");
+    tt->param_name = tdrpStrDup("Comment 46");
     tt->comment_hdr = tdrpStrDup("</IMAGE_GENERATION>");
     tt->comment_text = tdrpStrDup("");
     tt++;
