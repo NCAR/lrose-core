@@ -83,10 +83,16 @@ int Args::parse (const int argc, const char **argv)
   
   for (int i =  1; i < argc; i++) {
 
-    if (!strcmp(argv[i], "--") ||
-	!strcmp(argv[i], "-h") ||
-	!strcmp(argv[i], "-help") ||
-	!strcmp(argv[i], "-man")) {
+    if (!strcmp(argv[i], "-quiet")) {
+      
+      // trap -quiet to prevent warning of unknown arg
+      
+      _gd.quiet_mode = 1;
+      
+    } else if (!strcmp(argv[i], "--") ||
+               !strcmp(argv[i], "-h") ||
+               !strcmp(argv[i], "-help") ||
+               !strcmp(argv[i], "-man")) {
       
       _usage(cout);
       exit (0);
@@ -400,11 +406,11 @@ int Args::_processLegacyArgs(int argc, const char **argv)
 
   // Look for the quiet mode flag first.
   for(int ii=1; ii < argc; ii++) {
-    if(strcmp(argv[ii], "-quiet") == 0 ) {
+    if(strcmp(argv[ii], "-quiet") == 0) {
       _gd.quiet_mode = 1;
     }
   }
-     
+
   // loop through args
 
   int iret = 0;

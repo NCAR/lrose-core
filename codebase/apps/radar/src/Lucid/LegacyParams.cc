@@ -2601,8 +2601,8 @@ int LegacyParams::_readSymprodsTdrp()
                  &param_text_len, &param_text_line_no);
   
   if(param_text == NULL || param_text_len <=0 ) {
-    fprintf(stderr,"Warning: No SYMPRODS Section in params\n");
-    fprintf(stderr,"  will use the defaults\n");
+    // fprintf(stderr,"Warning: No SYMPRODS Section in params\n");
+    // fprintf(stderr,"  will use the defaults\n");
   } else {
     // Set the symprod object from the buffer
     if(symprod.loadFromBuf("SYMPRODS TDRP Section",
@@ -2824,8 +2824,8 @@ int LegacyParams::_readImageGenTdrp()
                  &param_text_len, &param_text_line_no);
   
   if(param_text == NULL || param_text_len <=0 ) {
-    fprintf(stderr,"Warning: No IMAGE_GENERATION Section in params\n");
-    fprintf(stderr,"  will be ignored\n");
+    // fprintf(stderr,"Warning: No IMAGE_GENERATION Section in params\n");
+    // fprintf(stderr,"  will be ignored\n");
     image_gen_active = false;
   } else {
     // Set the symprod object from the buffer

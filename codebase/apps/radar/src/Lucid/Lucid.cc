@@ -69,39 +69,7 @@
 
 using namespace std;
 
-namespace {
-
-double windDataScaleToMps(string units, double legacyFallback)
-{
-  transform(units.begin(), units.end(), units.begin(),
-            [](unsigned char ch) { return static_cast<char>(tolower(ch)); });
-  units.erase(remove_if(units.begin(), units.end(),
-                        [](unsigned char ch) { return isspace(ch); }),
-              units.end());
-  if (units == "m/s" || units == "m/sec" || units == "mps" ||
-      units == "ms-1" || units == "m.s-1") {
-    return 1.0;
-  }
-  if (units == "km/h" || units == "km/hr" || units == "kph") {
-    return 1.0 / 3.6;
-  }
-  if (units == "kt" || units == "kts" || units == "knot" ||
-      units == "knots") {
-    return 0.514444444444;
-  }
-  if (units == "mph") {
-    return 0.44704;
-  }
-
-  // Legacy configurations used the global factor for sources whose unit
-  // spelling was site-specific. Preserve that behavior when the explicit
-  // per-layer units cannot be recognized.
-  return legacyFallback;
-
-}
-
-} // namespace
-
+///////////////////////////////////////////////////////////////////////
 // Constructor
 
 Lucid::Lucid(int argc, char **argv) :
@@ -149,7 +117,14 @@ Lucid::Lucid(int argc, char **argv) :
     OK = false;
     return;
   }
-  
+
+  // copyright etc
+
+  if (!_gd.quiet_mode) {
+    ucopyright((char *) _progName.c_str());
+    cout << "Lucid version: " << Constants::LUCID_VERSION << endl;
+  }
+
   // load TDRP params from command line
 
   char *paramsPath = (char *) "unknown";
@@ -208,6 +183,7 @@ Lucid::Lucid(int argc, char **argv) :
 
 }
 
+///////////////////////////////////////////////////////////////////////
 // destructor
 
 Lucid::~Lucid()
@@ -251,11 +227,6 @@ int Lucid::RunApp(QApplication &app)
 
 int Lucid::_initDataSpace()
 {
-
-  if(!_gd.quiet_mode) {
-    fprintf(stderr,"Lucid: Version %s\n", Constants::LUCID_VERSION);
-    fprintf(stderr,"Copyright: %s\n\n", Constants::LUCID_COPYRIGHT);
-  }
 
   // debugging level
   
@@ -869,7 +840,7 @@ void Lucid::_initWinds()
 
     lwind.units_scale_factor = _params.wind_units_scale_factor;
     lwind.data_units_scale_to_mps =
-      windDataScaleToMps(windp.units, _params.wind_units_scale_factor);
+      _windDataScaleToMps(windp.units, _params.wind_units_scale_factor);
     lwind.reference_speed = _params.wind_reference_speed;
     lwind.units_label = _params.wind_units_label;
 
@@ -935,6 +906,38 @@ void Lucid::_initWindComponent(MdvReader *wrec,
   wrec->h_fhdr.proj_origin_lon = 0.0;
   wrec->h_fhdr.proj_origin_lat = 0.0;
   
+}
+
+///////////////////////////////////////////////////////////////////////
+// scale wind data to MPS
+
+double Lucid::_windDataScaleToMps(string units, double legacyFallback)
+{
+  transform(units.begin(), units.end(), units.begin(),
+            [](unsigned char ch) { return static_cast<char>(tolower(ch)); });
+  units.erase(remove_if(units.begin(), units.end(),
+                        [](unsigned char ch) { return isspace(ch); }),
+              units.end());
+  if (units == "m/s" || units == "m/sec" || units == "mps" ||
+      units == "ms-1" || units == "m.s-1") {
+    return 1.0;
+  }
+  if (units == "km/h" || units == "km/hr" || units == "kph") {
+    return 1.0 / 3.6;
+  }
+  if (units == "kt" || units == "kts" || units == "knot" ||
+      units == "knots") {
+    return 0.514444444444;
+  }
+  if (units == "mph") {
+    return 0.44704;
+  }
+
+  // Legacy configurations used the global factor for sources whose unit
+  // spelling was site-specific. Preserve that behavior when the explicit
+  // per-layer units cannot be recognized.
+  return legacyFallback;
+
 }
 
 ////////////////////////////////////////////////////////////////
@@ -2425,7 +2428,9 @@ int Lucid::_getResourceCachePath(const string &cacheDir,
     
     char *cs_buf;
     int cs_len;
-    int ret_stat = HTTPgetURL(remoteUrl.c_str(), _params.data_timeout_secs * 1000, &cs_buf, &cs_len);
+    int ret_stat = HTTPgetURL(remoteUrl.c_str(),
+                              _params.data_timeout_secs * 1000,
+                              &cs_buf, &cs_len);
     if(ret_stat <= 0) {
       cerr << "ERROR - cidd_init::_getResourceCachePath" << endl;
       cerr << "  Cannot get remote resource, url: " << remoteUrl << endl;

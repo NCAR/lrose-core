@@ -100,7 +100,9 @@ private:
   void _initWindComponent(MdvReader *wrec,
                           const Params::wind_t &windp,
                           bool isU, bool isV, bool isW);
+  double _windDataScaleToMps(string units, double legacyFallback);
   void _initTerrain();
+  
   // void _initRouteWinds();
 
   int _initMaps();
