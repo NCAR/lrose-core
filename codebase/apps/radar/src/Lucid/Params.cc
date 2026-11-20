@@ -1142,18 +1142,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'model_run_list_hours'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("model_run_list_hours");
-    tt->descr = tdrpStrDup("Gather model run times within these number of hours from the end of the movie loop.");
-    tt->help = tdrpStrDup("More hours means more Model runs will appear in the menu.");
-    tt->val_offset = (char *) &model_run_list_hours - &_start_;
-    tt->single_val.i = 24;
-    tt++;
-    
     // Parameter 'forecast_interval_hours'
     // ctype is 'double'
     
@@ -1214,18 +1202,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'check_clipping'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("check_clipping");
-    tt->descr = tdrpStrDup("Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.");
-    tt->help = tdrpStrDup("Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.");
-    tt->val_offset = (char *) &check_clipping - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'http_tunnel_url'
     // ctype is 'char*'
     
@@ -1257,18 +1233,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("Another view of the possible Service Topologies.");
     tt->comment_text = tdrpStrDup("All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nLucid<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nLucid<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nLucid<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer");
-    tt++;
-    
-    // Parameter 'locator_margin_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("locator_margin_km");
-    tt->descr = tdrpStrDup("Station locator features.");
-    tt->help = tdrpStrDup("Maximum allowed  Distance in km between request point and station.");
-    tt->val_offset = (char *) &locator_margin_km - &_start_;
-    tt->single_val.d = 50;
     tt++;
     
     // Parameter 'station_loc_url'

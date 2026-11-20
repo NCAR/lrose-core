@@ -1085,7 +1085,7 @@ int LegacyParams::_readMainParams()
   // _getLong("cidd.movieframe_time_mode", 0);
 
   // clipping for rendering
-  _getBoolean("cidd.check_clipping", 0);
+  // _getBoolean("cidd.check_clipping", 0);
   
   // data retrieval
   _getDouble("cidd.stretch_factor", 1.5, true, "time_search_stretch_factor");
@@ -1114,7 +1114,7 @@ int LegacyParams::_readMainParams()
 
   // model data
 
-  _getLong("cidd.model_run_list_hours",24);
+  // _getLong("cidd.model_run_list_hours",24);
 
   // How many idle seconds can elapse before resetting the display
 
@@ -1347,7 +1347,7 @@ int LegacyParams::_readMainParams()
 
   _getString("cidd.map_file_subdir", "$(HOME)/git/lrose-displays/maps",
              true, "map_urls");
-  _getDouble("cidd.locator_margin_km", 50.0);
+  // _getDouble("cidd.locator_margin_km", 50.0);
   _getString("cidd.station_loc_url", "");
 
   int maps_font_mode = _getLong("cidd.font_display_mode", 1, false);

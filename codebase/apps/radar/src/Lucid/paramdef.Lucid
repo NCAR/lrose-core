@@ -325,12 +325,6 @@ paramdef boolean {
   p_help = "See 'request_compressed_data'.";
 } request_gzip_vol_compression;
 
-paramdef int {
-  p_default = 24;
-  p_descr = "Gather model run times within these number of hours from the end of the movie loop.";
-  p_help = "More hours means more Model runs will appear in the menu.";
-} model_run_list_hours;
-
 paramdef double {
   p_default = 24;
   p_descr = "This parameter sets the maximum number of hours in the future a user can select from the quick forecast menu";
@@ -367,11 +361,11 @@ paramdef boolean {
   p_help = "If TRUE, this will reduce the volume of data retrieved, for efficiency. But this does mean that a new request is made with every zoom change. If FALSE, the entire data domain is returned on the first request, which means that the data does not need to be requested after each zoom change.";
 } clip_to_current_zoom_on_symprod_request;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.";
-  p_help = "Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.";
-} check_clipping;
+// paramdef boolean {
+//   p_default = FALSE;
+//   p_descr = "Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.";
+//   p_help = "Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.";
+// } check_clipping;
 
 paramdef string {
   p_default = "http://www.rap.ucar.edu/DsServerTunnel.";
@@ -390,11 +384,11 @@ commentdef {
   p_text = "All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nLucid<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nLucid<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nLucid<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer";
 }
 
-paramdef double {
-  p_default = 50;
-  p_descr = "Station locator features.";
-  p_help = "Maximum allowed  Distance in km between request point and station.";
-} locator_margin_km;
+// paramdef double {
+//   p_default = 50;
+//   p_descr = "Station locator features.";
+//   p_help = "Maximum allowed  Distance in km between request point and station.";
+// } locator_margin_km;
 
 paramdef string {
   p_default = "http://www.rap.ucar.edu/maps/Taiwan_stations.dat";

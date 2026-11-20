@@ -9,9 +9,9 @@ titan_key
 
 Data retrieval:
 
-model_run_list_hours
-check_clipping
-locator_margin_km
+# model_run_list_hours
+# check_clipping
+# locator_margin_km
 
 Projection and click coordinates:
 

@@ -631,8 +631,6 @@ public:
 
   tdrp_bool_t request_gzip_vol_compression;
 
-  int model_run_list_hours;
-
   double forecast_interval_hours;
 
   double past_interval_hours;
@@ -643,13 +641,9 @@ public:
 
   tdrp_bool_t clip_to_current_zoom_on_symprod_request;
 
-  tdrp_bool_t check_clipping;
-
   char* http_tunnel_url;
 
   char* http_proxy_url;
-
-  double locator_margin_km;
 
   char* station_loc_url;
 
@@ -1230,7 +1224,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[364];
+  mutable TDRPtable _table[361];
 
   const char *_className;
 
