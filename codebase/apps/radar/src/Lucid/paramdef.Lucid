@@ -51,24 +51,6 @@ paramdef enum debug_t {
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Basic debug flag.";
-  p_help = "General informational messages - Initialization messages.";
-} debug_flag;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "More verbose debug flag.";
-  p_help = "Data flow related messages.";
-} debug1_flag;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Verbose diagnostics.";
-  p_help = "Developer debugging information.";
-} debug2_flag;
-
 commentdef {
   p_header = "</DEBUGGING>";
 }
@@ -118,12 +100,6 @@ paramdef int {
   p_descr = "Key for coordinate in shared memory.";
   p_help = "Store clicked locations in shmem. Other apps can watch for those clicks, and respond approppriately.";
 } coord_key;
-
-paramdef int {
-  p_default = 61600;
-  p_descr = "Key for titan clicks in shared memory.";
-  p_help = "Store clicked locations in shmem. Rview and TimeHist can watch for those clicks, and respond approppriately.";
-} titan_key;
 
 commentdef {
   p_header = "STARTUP MODE and TIME parameters";

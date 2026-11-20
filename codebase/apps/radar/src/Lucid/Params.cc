@@ -633,42 +633,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
-    // Parameter 'debug_flag'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("debug_flag");
-    tt->descr = tdrpStrDup("Basic debug flag.");
-    tt->help = tdrpStrDup("General informational messages - Initialization messages.");
-    tt->val_offset = (char *) &debug_flag - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'debug1_flag'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("debug1_flag");
-    tt->descr = tdrpStrDup("More verbose debug flag.");
-    tt->help = tdrpStrDup("Data flow related messages.");
-    tt->val_offset = (char *) &debug1_flag - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'debug2_flag'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("debug2_flag");
-    tt->descr = tdrpStrDup("Verbose diagnostics.");
-    tt->help = tdrpStrDup("Developer debugging information.");
-    tt->val_offset = (char *) &debug2_flag - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -769,18 +733,6 @@ Params *Params::_instance = (Params *) NULL;
     tt->help = tdrpStrDup("Store clicked locations in shmem. Other apps can watch for those clicks, and respond approppriately.");
     tt->val_offset = (char *) &coord_key - &_start_;
     tt->single_val.i = 61500;
-    tt++;
-    
-    // Parameter 'titan_key'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("titan_key");
-    tt->descr = tdrpStrDup("Key for titan clicks in shared memory.");
-    tt->help = tdrpStrDup("Store clicked locations in shmem. Rview and TimeHist can watch for those clicks, and respond approppriately.");
-    tt->val_offset = (char *) &titan_key - &_start_;
-    tt->single_val.i = 61600;
     tt++;
     
     // Parameter 'Comment 5'

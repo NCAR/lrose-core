@@ -1029,9 +1029,9 @@ int LegacyParams::_readMainParams()
   fprintf(_tdrpFile, "// <MAIN_PARAMS>\n");
   fprintf(_tdrpFile, "//////////////////////////////////////////\n");
 
-  _debug = _getBoolean("cidd.debug_flag", 0);
-  _debug1 = _getBoolean("cidd.debug1_flag", 0);
-  _debug2 = _getBoolean("cidd.debug2_flag", 0);
+  _debug = _getBoolean("cidd.debug_flag", 0, false);
+  _debug1 = _getBoolean("cidd.debug1_flag", 0, false);
+  _debug2 = _getBoolean("cidd.debug2_flag", 0, false);
 
   if (_debug2) {
     fprintf(_tdrpFile, "debug = DEBUG_EXTRA;\n");
@@ -2789,7 +2789,7 @@ int LegacyParams::_readTerrainTdrp()
     fprintf(_tdrpFile, "terrain_earth_color2 = \"%s\";\n", terrain.earth_color2);
 
   } else {
-
+    
     fprintf(_tdrpFile, "terrain_active = FALSE;\n");
 
   }

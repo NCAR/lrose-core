@@ -582,12 +582,6 @@ public:
 
   debug_t debug;
 
-  tdrp_bool_t debug_flag;
-
-  tdrp_bool_t debug1_flag;
-
-  tdrp_bool_t debug2_flag;
-
   tdrp_bool_t register_with_procmap;
 
   char* instance;
@@ -601,8 +595,6 @@ public:
   int idle_reset_seconds;
 
   int coord_key;
-
-  int titan_key;
 
   mode_t start_mode;
 
@@ -1138,7 +1130,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[317];
+  mutable TDRPtable _table[313];
 
   const char *_className;
 
