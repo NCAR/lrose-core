@@ -2461,6 +2461,9 @@ void GuiManager::_invalidateDisplayedData(bool refreshProductsImmediately)
     // under the same time/level key before the explicit refresh.
     _horiz->clearFieldDataQueue();
   }
+  if (_vert) {
+    _vert->clearFieldDataQueue();
+  }
   if (_fieldNum >= 0 && _fieldNum < _gd.num_datafields &&
       _gd.mread[_fieldNum]) {
     _gd.mread[_fieldNum]->invalidateTimeList();
@@ -3199,6 +3202,11 @@ int GuiManager::_requestVerticalSection()
     wayPts.addPoint(point.lat, point.lon);
   }
 
+  // Recent vertical fields remain comparable only for this requested time
+  // and route. Field changes preserve the context and build the MRU cache.
+  _vert->setFieldDataContext(
+    _timeControl->getSelectedTime().utime(), _vsectionRoute);
+
   MdvReader *reader = _gd.mread[_fieldNum];
   connect(reader, &MdvReader::verticalReadComplete,
           this, &GuiManager::_verticalReadComplete,
@@ -3364,7 +3372,7 @@ void GuiManager::_verticalReadComplete(MdvReader *reader)
     }
   }
 
-  _vert->setSection(reader);
+  _vert->setSection(_fieldNum, reader);
   _vertWindow->setSectionInfo(_params._fields[_fieldNum].field_name,
                               reader->v_date,
                               reader->getVertTotalLengthKm());
@@ -3535,9 +3543,9 @@ void GuiManager::_howto()
     "the selected-height line, and terrain.<br><br>"
 
     "<b>Values and click reports</b><br>"
-    "Show &gt; Show values displays the current field value as the cursor "
-    "moves over either data view. Left-click either view to populate and "
-    "show the click-report window.<br><br>"
+    "Show &gt; Show values displays values from recently selected fields as "
+    "the cursor moves over either data view. Left-click either view to "
+    "populate and show the click-report window.<br><br>"
 
     "<b>Time selector</b><br>"
     "A single left click selects the movie frame containing that time. "

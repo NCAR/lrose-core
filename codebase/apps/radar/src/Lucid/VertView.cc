@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
+#include <utility>
 
 #include <QTimer>
 #include <QBrush>
@@ -112,6 +113,9 @@ VertView::VertView(QWidget* parent,
   _worldReleaseX = 0.0;
   _worldReleaseY = 0.0;
   _pointClicked = false;
+  _haveClickLocation = false;
+  _clickDistanceKm = 0.0;
+  _clickVerticalCoord = 0.0;
   _leftDragActive = false;
   _sectionPixmapDirty = true;
   _windsPixmapDirty = true;
@@ -122,6 +126,9 @@ VertView::VertView(QWidget* parent,
   _mouseValueVisible = false;
   _mouseValueX = 0;
   _mouseValueY = 0;
+  _sectionFieldIndex = -1;
+  _fieldDataContextValid = false;
+  _fieldDataTime = 0;
   _plotSelectedHorizHeight = _params.vsection_plot_selected_horiz_height;
   _selectedHorizHeightKm = _params.start_ht_km;
   _mousePressX = 0;
@@ -301,10 +308,14 @@ void VertView::mouseReleaseEvent(QMouseEvent *e)
   if (distanceMoved <= 20.0) {
     _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
     _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+    _haveClickLocation = false;
 
     SectionSample sample;
     if (_sampleSection(_mouseReleaseX, _mouseReleaseY, sample)) {
       _pointClicked = true;
+      _haveClickLocation = true;
+      _clickDistanceKm = sample.distanceKm;
+      _clickVerticalCoord = sample.verticalCoord;
       emit clickReportAvailable(_createClickReport(sample));
     }
   
@@ -474,13 +485,15 @@ void VertView::_drawOverlays(QPainter &painter)
   
   if (!_suppressInteractionGraphics && _pointClicked) {
 
-    int startX = _mouseReleaseX - _params.click_cross_size / 2;
-    int endX = _mouseReleaseX + _params.click_cross_size / 2;
-    int startY = _mouseReleaseY - _params.click_cross_size / 2;
-    int endY = _mouseReleaseY + _params.click_cross_size / 2;
+    const int clickX = _zoomWorld.getXPixel(_clickDistanceKm);
+    const int clickY = _zoomWorld.getYPixel(_clickVerticalCoord);
+    int startX = clickX - _params.click_cross_size / 2;
+    int endX = clickX + _params.click_cross_size / 2;
+    int startY = clickY - _params.click_cross_size / 2;
+    int endY = clickY + _params.click_cross_size / 2;
 
-    painter.drawLine(startX, _mouseReleaseY, endX, _mouseReleaseY);
-    painter.drawLine(_mouseReleaseX, startY, _mouseReleaseX, endY);
+    painter.drawLine(startX, clickY, endX, clickY);
+    painter.drawLine(clickX, startY, clickX, endY);
 
   }
 
@@ -597,10 +610,15 @@ void VertView::clear()
 {
 
   _pointClicked = false;
+  _haveClickLocation = false;
   _leftDragActive = false;
   _mouseValueVisible = false;
   _mouseValueText.clear();
   _sectionReader = nullptr;
+  _sectionFieldIndex = -1;
+  _fieldDataQueue.clear();
+  _fieldDataContextValid = false;
+  _fieldDataRoute.clear();
   _selectedHorizHeightCurve.clear();
   
   // Now rerender the images
@@ -734,21 +752,160 @@ void VertView::paintEvent(QPaintEvent *event)
 }
 
 /////////////////////////////////////////////////////////////
+// establish the data context shared by recent vertical fields
+
+void VertView::setFieldDataContext(time_t requestedTime,
+                                   const VsectionRoute &route)
+{
+  vector<QPointF> requestedRoute;
+  requestedRoute.reserve(route.size());
+  for (const VsectionRoute::Point &point : route.points()) {
+    requestedRoute.emplace_back(point.lat, point.lon);
+  }
+
+  bool sameRoute = _fieldDataContextValid &&
+    requestedRoute.size() == _fieldDataRoute.size();
+  for (size_t ii = 0; sameRoute && ii < requestedRoute.size(); ++ii) {
+    constexpr double coordinateTolerance = 1.0e-8;
+    sameRoute =
+      fabs(requestedRoute[ii].x() - _fieldDataRoute[ii].x()) <=
+        coordinateTolerance &&
+      fabs(requestedRoute[ii].y() - _fieldDataRoute[ii].y()) <=
+        coordinateTolerance;
+  }
+
+  if (_fieldDataContextValid && _fieldDataTime == requestedTime &&
+      sameRoute) {
+    return;
+  }
+
+  const bool routeChanged = !sameRoute;
+  _fieldDataContextValid = true;
+  _fieldDataTime = requestedTime;
+  _fieldDataRoute = std::move(requestedRoute);
+  clearFieldDataQueue();
+
+  // A click distance belongs to its route. Preserve it across time changes,
+  // but discard it when the geographic path itself changes.
+  if (routeChanged) {
+    _haveClickLocation = false;
+    _pointClicked = false;
+  }
+}
+
+/////////////////////////////////////////////////////////////
+// discard recent vertical fields without changing their context
+
+void VertView::clearFieldDataQueue()
+{
+  _fieldDataQueue.clear();
+  _mouseValueVisible = false;
+  _mouseValueText.clear();
+  update();
+}
+
+/////////////////////////////////////////////////////////////
+// retain an immutable snapshot for value and click sampling
+
+void VertView::_saveFieldDataToQueue(int fieldIndex,
+                                     const MdvReader &reader)
+{
+  for (auto ii = _fieldDataQueue.begin(); ii != _fieldDataQueue.end(); ++ii) {
+    if (ii->fieldIndex == fieldIndex) {
+      _fieldDataQueue.erase(ii);
+      break;
+    }
+  }
+
+  const size_t capacity = static_cast<size_t>(
+    std::max(1, _params.field_data_queue_max_size));
+  while (_fieldDataQueue.size() >= capacity) {
+    _fieldDataQueue.pop_back();
+  }
+
+  VertFieldSnapshot snapshot;
+  snapshot.fieldIndex = fieldIndex;
+  snapshot.fieldName = reader.v_fhdr.field_name;
+  snapshot.units = reader.v_fhdr.units;
+  snapshot.mhdr = reader.v_mhdr;
+  snapshot.fhdr = reader.v_fhdr;
+  snapshot.vhdr = reader.v_vhdr;
+  snapshot.data = reader.v_fl32_data;
+  const WayPts &wayPoints = reader.getVertWayPts();
+  snapshot.route.reserve(wayPoints.getNPoints());
+  for (size_t ii = 0; ii < wayPoints.getNPoints(); ++ii) {
+    double lat = 0.0;
+    double lon = 0.0;
+    wayPoints.getPoint(ii, lat, lon);
+    snapshot.route.emplace_back(lat, lon);
+  }
+  snapshot.totalLengthKm = reader.getVertTotalLengthKm();
+  snapshot.polarRhi =
+    reader.v_fhdr.proj_type == Mdvx::PROJ_RHI_RADAR &&
+    reader.v_fhdr.vlevel_type == Mdvx::VERT_TYPE_AZ;
+  snapshot.verticalUnits = snapshot.polarRhi ? "km" :
+    Mdvx::vertTypeZUnits(reader.v_fhdr.vlevel_type);
+
+  double radarLat = 0.0;
+  double radarLon = 0.0;
+  snapshot.radarAltitudeValid =
+    _getRadarLocation(radarLat, radarLon, snapshot.radarAltitudeKm);
+  _fieldDataQueue.push_front(std::move(snapshot));
+}
+
+/////////////////////////////////////////////////////////////
 // install a gridded MDV vertical section
 
-void VertView::setSection(const MdvReader *reader)
+void VertView::setSection(int fieldIndex, const MdvReader *reader)
 {
+  const bool refreshMouseValue = _showValue && _mouseValueVisible;
+  const bool previousSectionValid =
+    _sectionReader != nullptr && _sectionReader->isValidV();
+  const bool previousPolar = previousSectionValid && _isPolarRhi();
+  const int previousVerticalType = previousSectionValid ?
+    _sectionReader->v_fhdr.vlevel_type : Mdvx::VERT_TYPE_Z;
+  const string previousVerticalUnits = _verticalUnits;
+
   _sectionReader = reader;
+  _sectionFieldIndex = fieldIndex;
   _mouseValueVisible = false;
   _mouseValueText.clear();
   _verticalUnits.clear();
   if (_sectionReader != nullptr) {
     _verticalUnits = _isPolarRhi() ? "km" :
       Mdvx::vertTypeZUnits(_sectionReader->v_fhdr.vlevel_type);
+    if (_sectionReader->isValidV()) {
+      _saveFieldDataToQueue(fieldIndex, *_sectionReader);
+    }
+  }
+
+  if (previousSectionValid && _sectionReader != nullptr &&
+      _sectionReader->isValidV()) {
+    const bool previousUsesHeight =
+      previousPolar || previousVerticalType == Mdvx::VERT_TYPE_Z;
+    const bool currentUsesHeight =
+      _isPolarRhi() ||
+      _sectionReader->v_fhdr.vlevel_type == Mdvx::VERT_TYPE_Z;
+    const bool coordinatesCompatible =
+      (previousUsesHeight && currentUsesHeight) ||
+      (!previousUsesHeight && !currentUsesHeight &&
+       previousVerticalType == _sectionReader->v_fhdr.vlevel_type &&
+       previousVerticalUnits == _verticalUnits);
+    if (!coordinatesCompatible) {
+      // A numeric click height cannot be reinterpreted as pressure, sigma or
+      // another unrelated vertical coordinate after a field switch.
+      _haveClickLocation = false;
+      _pointClicked = false;
+    }
   }
   _rebuildSelectedHorizHeightCurve();
   _savedZooms.clear();
   configureWorldCoords();
+
+  if (refreshMouseValue) {
+    _updateMouseValue(_mouseValueX, _mouseValueY);
+  }
+  _updateClickReport();
   update();
 }
 
@@ -1019,12 +1176,14 @@ void VertView::_drawSelectedHorizHeight(QPainter &painter)
 }
 
 /////////////////////////////////////////////////////////////
-// sample the underlying vertical-section grid at a widget location
+// convert a widget location to the current section coordinates
 
-bool VertView::_sampleGridValue(int mouseX, int mouseY,
-                                SectionSample &sample) const
+bool VertView::_getSectionCoordinates(int mouseX, int mouseY,
+                                      SectionSample &sample) const
 {
-  if (_sectionReader == nullptr || !_sectionReader->isValidV()) {
+  if (_sectionReader == nullptr || !_sectionReader->isValidV() ||
+      _fieldDataQueue.empty() ||
+      _fieldDataQueue.front().fieldIndex != _sectionFieldIndex) {
     return false;
   }
 
@@ -1041,21 +1200,116 @@ bool VertView::_sampleGridValue(int mouseX, int mouseY,
     return false;
   }
 
-  if (_isPolarRhi()) {
-    return _samplePolarRhiValue(mouseX, mouseY, sample);
-  }
+  sample.distanceKm = _zoomWorld.getXWorld(mouseX);
+  sample.verticalCoord = _zoomWorld.getYWorld(mouseY);
+  return std::isfinite(sample.distanceKm) && sample.distanceKm >= 0.0 &&
+    std::isfinite(sample.verticalCoord);
+}
 
-  const int nx = _sectionReader->v_fhdr.nx;
-  const int nz = _sectionReader->v_fhdr.nz;
-  const double dx = _sectionReader->v_fhdr.grid_dx;
-  if (nx <= 0 || nz <= 0 || !std::isfinite(dx) || dx == 0.0 ||
-      _sectionReader->v_fl32_data.size() != (size_t) nx * (size_t) nz) {
+/////////////////////////////////////////////////////////////
+// determine whether a cached field uses the displayed vertical coordinate
+
+bool VertView::_fieldCoordinatesCompatible(
+  const VertFieldSnapshot &field) const
+{
+  if (_fieldDataQueue.empty() ||
+      _fieldDataQueue.front().fieldIndex != _sectionFieldIndex ||
+      !_fieldRouteCompatible(field)) {
     return false;
   }
 
-  sample.distanceKm = _zoomWorld.getXWorld(mouseX);
-  sample.verticalCoord = _zoomWorld.getYWorld(mouseY);
-  double totalLengthKm = _sectionReader->getVertTotalLengthKm();
+  const VertFieldSnapshot &current = _fieldDataQueue.front();
+  const bool currentUsesHeight = current.polarRhi ||
+    current.fhdr.vlevel_type == Mdvx::VERT_TYPE_Z;
+  const bool fieldUsesHeight = field.polarRhi ||
+    field.fhdr.vlevel_type == Mdvx::VERT_TYPE_Z;
+  if (currentUsesHeight || fieldUsesHeight) {
+    return currentUsesHeight && fieldUsesHeight;
+  }
+
+  return !current.polarRhi && !field.polarRhi &&
+    current.fhdr.vlevel_type == field.fhdr.vlevel_type &&
+    current.verticalUnits == field.verticalUnits;
+}
+
+/////////////////////////////////////////////////////////////
+// confirm that a cached field follows the displayed geographic path
+
+bool VertView::_fieldRouteCompatible(const VertFieldSnapshot &field) const
+{
+  if (_fieldDataQueue.empty()) {
+    return false;
+  }
+  const VertFieldSnapshot &current = _fieldDataQueue.front();
+  if (field.fieldIndex == current.fieldIndex) {
+    return true;
+  }
+  if (current.route.size() < 2 || field.route.size() < 2) {
+    return false;
+  }
+
+  constexpr double coordinateToleranceDeg = 1.0e-4;
+  const auto samePoint = [](const QPointF &left, const QPointF &right) {
+    return fabs(left.x() - right.x()) <= coordinateToleranceDeg &&
+      fabs(left.y() - right.y()) <= coordinateToleranceDeg;
+  };
+
+  // A measured RHI may be extended to a field-dependent maximum range. Its
+  // overlapping gates remain comparable when origin and radial agree.
+  if ((current.polarRhi || field.polarRhi) &&
+      current.route.size() == 2 && field.route.size() == 2 &&
+      samePoint(current.route.front(), field.route.front())) {
+    double currentLength = 0.0;
+    double currentAzimuth = 0.0;
+    double fieldLength = 0.0;
+    double fieldAzimuth = 0.0;
+    PJGLatLon2RTheta(current.route[0].x(), current.route[0].y(),
+                    current.route[1].x(), current.route[1].y(),
+                    &currentLength, &currentAzimuth);
+    PJGLatLon2RTheta(field.route[0].x(), field.route[0].y(),
+                    field.route[1].x(), field.route[1].y(),
+                    &fieldLength, &fieldAzimuth);
+    double azimuthDifference = fabs(currentAzimuth - fieldAzimuth);
+    azimuthDifference = std::min(azimuthDifference,
+                                 360.0 - azimuthDifference);
+    return std::isfinite(currentLength) && currentLength > 0.0 &&
+      std::isfinite(fieldLength) && fieldLength > 0.0 &&
+      std::isfinite(azimuthDifference) && azimuthDifference <= 0.05;
+  }
+
+  if (current.route.size() != field.route.size()) {
+    return false;
+  }
+  for (size_t ii = 0; ii < current.route.size(); ++ii) {
+    if (!samePoint(current.route[ii], field.route[ii])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/////////////////////////////////////////////////////////////
+// sample one cached field at section distance and vertical coordinate
+
+bool VertView::_sampleFieldValue(const VertFieldSnapshot &field,
+                                 SectionSample &sample) const
+{
+  if (!_fieldCoordinatesCompatible(field)) {
+    return false;
+  }
+  if (field.polarRhi) {
+    return _samplePolarRhiValue(field, sample);
+  }
+
+  const int nx = field.fhdr.nx;
+  const int nz = field.fhdr.nz;
+  const double dx = field.fhdr.grid_dx;
+  if (nx <= 0 || nz <= 0 || !std::isfinite(dx) || dx == 0.0 ||
+      field.data.size() != (size_t) nx * (size_t) nz) {
+    return false;
+  }
+
+  double totalLengthKm = field.totalLengthKm;
   if (!std::isfinite(totalLengthKm) || totalLengthKm <= 0.0) {
     totalLengthKm = (nx - 1) * fabs(dx);
   }
@@ -1064,7 +1318,7 @@ bool VertView::_sampleGridValue(int mouseX, int mouseY,
     return false;
   }
   int ix = (int) std::llround
-    ((sample.distanceKm - _sectionReader->v_fhdr.grid_minx) / dx);
+    ((sample.distanceKm - field.fhdr.grid_minx) / dx);
 
   // Rendering extends the first and last sample cells to the route ends.
   // Apply the same rule so endpoint clicks select visible data rather than
@@ -1079,19 +1333,17 @@ bool VertView::_sampleGridValue(int mouseX, int mouseY,
   double firstEdge;
   double lastEdge;
   if (nz == 1) {
-    double halfWidth = fabs(_sectionReader->v_fhdr.grid_dz) / 2.0;
+    double halfWidth = fabs(field.fhdr.grid_dz) / 2.0;
     if (halfWidth == 0.0) {
       halfWidth = 0.5;
     }
-    firstEdge = _sectionReader->v_vhdr.level[0] - halfWidth;
-    lastEdge = _sectionReader->v_vhdr.level[0] + halfWidth;
+    firstEdge = field.vhdr.level[0] - halfWidth;
+    lastEdge = field.vhdr.level[0] + halfWidth;
   } else {
-    firstEdge = _sectionReader->v_vhdr.level[0] -
-      (_sectionReader->v_vhdr.level[1] -
-       _sectionReader->v_vhdr.level[0]) / 2.0;
-    lastEdge = _sectionReader->v_vhdr.level[nz - 1] +
-      (_sectionReader->v_vhdr.level[nz - 1] -
-       _sectionReader->v_vhdr.level[nz - 2]) / 2.0;
+    firstEdge = field.vhdr.level[0] -
+      (field.vhdr.level[1] - field.vhdr.level[0]) / 2.0;
+    lastEdge = field.vhdr.level[nz - 1] +
+      (field.vhdr.level[nz - 1] - field.vhdr.level[nz - 2]) / 2.0;
   }
   if (sample.verticalCoord < std::min(firstEdge, lastEdge) ||
       sample.verticalCoord > std::max(firstEdge, lastEdge)) {
@@ -1099,24 +1351,23 @@ bool VertView::_sampleGridValue(int mouseX, int mouseY,
   }
 
   int iz = 0;
-  double closest = fabs(sample.verticalCoord -
-                        _sectionReader->v_vhdr.level[0]);
+  double closest = fabs(sample.verticalCoord - field.vhdr.level[0]);
   for (int ii = 1; ii < nz; ++ii) {
-    const double difference = fabs(sample.verticalCoord -
-                                   _sectionReader->v_vhdr.level[ii]);
+    const double difference =
+      fabs(sample.verticalCoord - field.vhdr.level[ii]);
     if (difference < closest) {
       closest = difference;
       iz = ii;
     }
   }
 
-  const fl32 missing = _sectionReader->v_fhdr.missing_data_value;
-  const fl32 bad = _sectionReader->v_fhdr.bad_data_value;
-  double value = _sectionReader->v_fl32_data[iz * nx + ix];
+  const fl32 missing = field.fhdr.missing_data_value;
+  const fl32 bad = field.fhdr.bad_data_value;
+  double value = field.data[iz * nx + ix];
   if (!std::isfinite(value) || value == missing || value == bad) {
     return false;
   }
-  if (_sectionReader->v_fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
+  if (field.fhdr.transform_type == Mdvx::DATA_TRANSFORM_LOG) {
     value = exp(value);
   }
   if (!std::isfinite(value)) {
@@ -1133,26 +1384,20 @@ bool VertView::_sampleGridValue(int mouseX, int mouseY,
 /////////////////////////////////////////////////////////////
 // sample a native RHI by inverting distance/height to range/elevation
 
-bool VertView::_samplePolarRhiValue(int mouseX, int mouseY,
+bool VertView::_samplePolarRhiValue(const VertFieldSnapshot &field,
                                     SectionSample &sample) const
 {
-  const Mdvx::field_header_t &fhdr = _sectionReader->v_fhdr;
+  const Mdvx::field_header_t &fhdr = field.fhdr;
   if (fhdr.nx <= 0 || fhdr.ny <= 0 || fhdr.nz != 1 ||
       fhdr.grid_dx == 0.0 || fhdr.grid_dy == 0.0 ||
-      _sectionReader->v_fl32_data.size() !=
+      field.data.size() !=
         static_cast<size_t>(fhdr.nx) * fhdr.ny) {
     return false;
   }
 
-  double radarLat, radarLon, radarAltitudeKm;
-  if (!_getRadarLocation(radarLat, radarLon, radarAltitudeKm)) {
+  if (!field.radarAltitudeValid) {
     return false;
   }
-  (void) radarLat;
-  (void) radarLon;
-
-  sample.distanceKm = _zoomWorld.getXWorld(mouseX);
-  sample.verticalCoord = _zoomWorld.getYWorld(mouseY);
   if (!std::isfinite(sample.distanceKm) || sample.distanceKm < 0.0 ||
       !std::isfinite(sample.verticalCoord)) {
     return false;
@@ -1163,7 +1408,7 @@ bool VertView::_samplePolarRhiValue(int mouseX, int mouseY,
   // rendering so a visible gate and its reported value cannot diverge.
 
   BeamHeight beamHeight;
-  beamHeight.setInstrumentHtKm(radarAltitudeKm);
+  beamHeight.setInstrumentHtKm(field.radarAltitudeKm);
   const double elevationDeg = beamHeight.computeElevationDeg(
     sample.verticalCoord, sample.distanceKm);
   const double slantRangeKm = beamHeight.getSlantRangeKm();
@@ -1194,7 +1439,7 @@ bool VertView::_samplePolarRhiValue(int mouseX, int mouseY,
   const fl32 missing = fhdr.missing_data_value;
   const fl32 bad = fhdr.bad_data_value;
   double value =
-    _sectionReader->v_fl32_data[static_cast<size_t>(iy) * fhdr.nx + ix];
+    field.data[static_cast<size_t>(iy) * fhdr.nx + ix];
   if (!std::isfinite(value) || value == missing || value == bad) {
     return false;
   }
@@ -1212,12 +1457,36 @@ bool VertView::_samplePolarRhiValue(int mouseX, int mouseY,
 }
 
 /////////////////////////////////////////////////////////////
+// sample every compatible recent field at one section location
+
+vector<ClickReportField> VertView::_getFieldValues(
+  double distanceKm, double verticalCoord) const
+{
+  vector<ClickReportField> values;
+  for (const VertFieldSnapshot &field : _fieldDataQueue) {
+    SectionSample sample;
+    sample.distanceKm = distanceKm;
+    sample.verticalCoord = verticalCoord;
+    if (!_sampleFieldValue(field, sample)) {
+      continue;
+    }
+
+    ClickReportField reportField;
+    reportField.name = field.fieldName;
+    reportField.units = field.units;
+    reportField.value = sample.value;
+    values.push_back(reportField);
+  }
+  return values;
+}
+
+/////////////////////////////////////////////////////////////
 // add geographic metadata needed only by a click report
 
 bool VertView::_sampleSection(int mouseX, int mouseY,
                               SectionSample &sample) const
 {
-  if (!_sampleGridValue(mouseX, mouseY, sample)) {
+  if (!_getSectionCoordinates(mouseX, mouseY, sample)) {
     return false;
   }
   return _routeLocation(sample.distanceKm,
@@ -1274,31 +1543,66 @@ bool VertView::_routeLocation(double distanceKm, double &latitude,
 }
 
 /////////////////////////////////////////////////////////////
-// create a click report for the current vertical field
+// create a click report from all compatible recent vertical fields
 
 ClickReport VertView::_createClickReport(const SectionSample &sample) const
 {
+  const VertFieldSnapshot &primaryField = _fieldDataQueue.front();
   ClickReport report;
-  report.dataTime = _sectionReader->v_mhdr.time_centroid;
+  report.dataTime = primaryField.mhdr.time_centroid;
   report.latitude = sample.latitude;
   report.longitude = sample.longitude;
   report.height = sample.verticalCoord;
   report.heightLabel =
-    (_sectionReader->v_fhdr.vlevel_type == Mdvx::VERT_TYPE_Z ||
-     _isPolarRhi()) ?
+    (primaryField.fhdr.vlevel_type == Mdvx::VERT_TYPE_Z ||
+     primaryField.polarRhi) ?
     "Height" : "Vertical";
-  report.heightUnits = _verticalUnits;
+  report.heightUnits = primaryField.verticalUnits;
   report.x = sample.distanceKm;
   report.xLabel = "Distance";
   report.xUnits = "km";
   report.showY = false;
 
-  ClickReportField field;
-  field.name = _sectionReader->v_fhdr.field_name;
-  field.units = _sectionReader->v_fhdr.units;
-  field.value = sample.value;
-  report.fields.push_back(field);
+  report.fields = _getFieldValues(sample.distanceKm, sample.verticalCoord);
   return report;
+}
+
+/////////////////////////////////////////////////////////////
+// refresh the report at the latest vertical click location
+
+void VertView::_updateClickReport()
+{
+  if (!_haveClickLocation || _sectionReader == nullptr ||
+      !_sectionReader->isValidV() || _fieldDataQueue.empty()) {
+    return;
+  }
+
+  const double minDistance = std::min(_zoomWorld.getXMinWorld(),
+                                      _zoomWorld.getXMaxWorld());
+  const double maxDistance = std::max(_zoomWorld.getXMinWorld(),
+                                      _zoomWorld.getXMaxWorld());
+  const double minVertical = std::min(_zoomWorld.getYMinWorld(),
+                                      _zoomWorld.getYMaxWorld());
+  const double maxVertical = std::max(_zoomWorld.getYMinWorld(),
+                                      _zoomWorld.getYMaxWorld());
+  if (_clickDistanceKm < minDistance || _clickDistanceKm > maxDistance ||
+      _clickVerticalCoord < minVertical ||
+      _clickVerticalCoord > maxVertical) {
+    // A field may have a smaller returned domain than the field on which the
+    // click was made. Do not clamp that location to a misleading endpoint.
+    _haveClickLocation = false;
+    _pointClicked = false;
+    return;
+  }
+
+  SectionSample sample;
+  sample.distanceKm = _clickDistanceKm;
+  sample.verticalCoord = _clickVerticalCoord;
+  if (!_routeLocation(sample.distanceKm,
+                      sample.latitude, sample.longitude)) {
+    return;
+  }
+  emit clickReportAvailable(_createClickReport(sample));
 }
 
 /////////////////////////////////////////////////////////////
@@ -1312,20 +1616,27 @@ void VertView::_updateMouseValue(int mouseX, int mouseY)
     return;
   }
 
-  // Hover reporting deliberately stops at the grid lookup. Route
-  // interpolation is useful for click metadata but is unnecessary work for
-  // every mouse-move event.
-
   SectionSample sample;
-  if (!_sampleGridValue(mouseX, mouseY, sample)) {
+  if (!_getSectionCoordinates(mouseX, mouseY, sample)) {
     return;
   }
 
-  char text[1024];
-  snprintf(text, sizeof(text), "%s: %g %s",
-           _sectionReader->v_fhdr.field_name, sample.value,
-           _sectionReader->v_fhdr.units);
-  _mouseValueText = text;
+  // Hover reporting samples immutable arrays only. Route interpolation is
+  // reserved for click metadata and filled contours are never regenerated.
+  const vector<ClickReportField> fields =
+    _getFieldValues(sample.distanceKm, sample.verticalCoord);
+  for (const ClickReportField &field : fields) {
+    char line[1024];
+    snprintf(line, sizeof(line), "%s: %g %s",
+             field.name.c_str(), field.value, field.units.c_str());
+    if (!_mouseValueText.empty()) {
+      _mouseValueText += "\n";
+    }
+    _mouseValueText += line;
+  }
+  if (_mouseValueText.empty()) {
+    return;
+  }
   _mouseValueX = mouseX;
   _mouseValueY = mouseY;
   _mouseValueVisible = true;
@@ -2321,11 +2632,12 @@ void VertView::mousePressEvent(QMouseEvent *e)
     helpText->setText(tr(
       "<b>Vertical-section controls</b><br><br>"
       "<b>Click report</b><br>Left-click a point to show its location and "
-      "the current field value.<br><br>"
+      "values from recently selected fields.<br><br>"
       "<b>Zoom</b><br>Left-drag a rectangle over the plot. Use Unzoom in "
       "the vertical window to restore the full section.<br><br>"
-      "<b>Cursor value</b><br>Enable Show &gt; Show values in the main "
-      "window, then move the cursor over the section.<br><br>"
+      "<b>Cursor values</b><br>Enable Show &gt; Show values in the main "
+      "window, then move the cursor over the section to sample recently "
+      "selected fields.<br><br>"
       "<b>Display options</b><br>Use the vertical window's Overlays and "
       "Configuration menus for grids, height limits, the selected-height "
       "line, and terrain.<br><br>"

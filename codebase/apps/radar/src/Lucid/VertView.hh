@@ -38,6 +38,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 
 #include <QDialog>
 #include <QWidget>
@@ -60,6 +61,7 @@
 
 #include "ClickReport.hh"
 #include "ScaledLabel.hh"
+#include "VsectionRoute.hh"
 #include "WorldPlot.hh"
 
 class GuiManager;
@@ -107,10 +109,18 @@ class DLL_EXPORT VertView : public QWidget
   
   void setRouteLengthKm(double val) { _routeLengthKm = val; }
   
-  // Install the latest MDV vertical section.  MdvReader is owned for the
-  // lifetime of the application; this view retains a non-owning pointer.
+  // Establish the requested time and route shared by recent field snapshots.
+  // Field changes preserve this context; time and route changes replace it.
 
-  void setSection(const MdvReader *reader);
+  void setFieldDataContext(time_t requestedTime,
+                           const VsectionRoute &route);
+  void clearFieldDataQueue();
+
+  // Install the latest MDV vertical section. MdvReader is owned for the
+  // lifetime of the application; this view retains a non-owning pointer for
+  // rendering and an immutable snapshot for cursor and click sampling.
+
+  void setSection(int fieldIndex, const MdvReader *reader);
 
   // Immutable widget composites keep vertical playback synchronized with the
   // horizontal loop without retaining mutable MDV buffers for every frame.
@@ -326,6 +336,7 @@ class DLL_EXPORT VertView : public QWidget
    */
 
   bool _pointClicked;
+  bool _haveClickLocation;
   bool _leftDragActive;
   int _mousePressX, _mousePressY;
   int _mouseReleaseX, _mouseReleaseY;
@@ -337,6 +348,7 @@ class DLL_EXPORT VertView : public QWidget
   
   double _worldPressX, _worldPressY;
   double _worldReleaseX, _worldReleaseY;
+  double _clickDistanceKm, _clickVerticalCoord;
 
   /**
    * @brief The width of the color scale
@@ -365,7 +377,32 @@ class DLL_EXPORT VertView : public QWidget
   // Current gridded MDV vertical section.
 
   const MdvReader *_sectionReader;
+  int _sectionFieldIndex;
   string _verticalUnits;
+
+  // Value reporting owns immutable copies because an MdvReader may publish a
+  // later request while the field remains in the recent-field list.
+
+  struct VertFieldSnapshot {
+    int fieldIndex = -1;
+    string fieldName;
+    string units;
+    string verticalUnits;
+    Mdvx::master_header_t mhdr;
+    Mdvx::field_header_t fhdr;
+    Mdvx::vlevel_header_t vhdr;
+    vector<fl32> data;
+    vector<QPointF> route;
+    double totalLengthKm = 0.0;
+    bool polarRhi = false;
+    bool radarAltitudeValid = false;
+    double radarAltitudeKm = 0.0;
+  };
+
+  deque<VertFieldSnapshot> _fieldDataQueue;
+  bool _fieldDataContextValid;
+  time_t _fieldDataTime;
+  vector<QPointF> _fieldDataRoute;
 
   // Contour construction is substantially more expensive than the axes and
   // interactive overlays. Cache the data layer until its data or transform
@@ -419,15 +456,23 @@ class DLL_EXPORT VertView : public QWidget
   vector<double> _computeVerticalEdges() const;
   bool _isPolarRhi() const;
   bool _buildPolarRhiCorners(vector<QPointF> &corners) const;
-  bool _sampleGridValue(int mouseX, int mouseY,
-                        SectionSample &sample) const;
-  bool _samplePolarRhiValue(int mouseX, int mouseY,
+  void _saveFieldDataToQueue(int fieldIndex, const MdvReader &reader);
+  bool _getSectionCoordinates(int mouseX, int mouseY,
+                              SectionSample &sample) const;
+  bool _sampleFieldValue(const VertFieldSnapshot &field,
+                         SectionSample &sample) const;
+  bool _samplePolarRhiValue(const VertFieldSnapshot &field,
                             SectionSample &sample) const;
+  bool _fieldCoordinatesCompatible(const VertFieldSnapshot &field) const;
+  bool _fieldRouteCompatible(const VertFieldSnapshot &field) const;
+  vector<ClickReportField> _getFieldValues(double distanceKm,
+                                            double verticalCoord) const;
   bool _sampleSection(int mouseX, int mouseY,
                       SectionSample &sample) const;
   bool _routeLocation(double distanceKm, double &latitude,
                       double &longitude) const;
   void _updateMouseValue(int mouseX, int mouseY);
+  void _updateClickReport();
   void _drawMouseValue(QPainter &painter);
   ClickReport _createClickReport(const SectionSample &sample) const;
 
