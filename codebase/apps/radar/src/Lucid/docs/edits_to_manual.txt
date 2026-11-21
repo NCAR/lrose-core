@@ -1,0 +1,185 @@
+Lucid User Manual review
+========================
+
+Reviewed: 2026-11-21
+File: Lucid_User_Manual.pdf
+
+Overall assessment
+------------------
+
+The manual is clear, well organized, and visually strong. It follows a useful
+progression from basic operation to vertical sections, movies, and parameters,
+and it closely matches the current application. The corrections and additions
+below would bring it fully in line with current Lucid behavior.
+
+
+Important accuracy corrections
+------------------------------
+
+1. Parameter-generation commands should include -quiet.
+
+   Lucid prints its copyright and version before processing TDRP arguments, so
+   redirected output can contain non-TDRP text. This occurs in Lucid.cc before
+   loadApplyArgs() or loadFromArgs() processes -print_params.
+
+   Use:
+
+     Lucid -quiet -p CIDD.params -print_params > Lucid.params
+     Lucid -quiet -print_params > Lucid.my_params
+     Lucid -quiet -params Lucid.my_params -print_params > Lucid.my_params_new
+
+   This affects the examples in sections 2.2 and 6.
+
+2. Page 3 names the cache parameter incorrectly.
+
+   Change:
+
+     top_level_cache
+
+   to:
+
+     top_level_cache_dir
+
+   The latter is the parameter defined in paramdef.Lucid.
+
+3. Section 5.8 describes Reset incorrectly.
+
+   Reset does not necessarily restore the startup values. It restores the
+   movie definition that was active immediately before the current edit.
+
+   Suggested heading:
+
+     Resetting to the pre-edit values
+
+   Suggested description:
+
+     Clicking Reset restores the movie definition that was active before the
+     current edit. It also restores the previous Archive or Realtime mode.
+
+4. Section 5.10 needs to describe the current Export behavior and parameters.
+
+   Interactive movie export currently:
+
+   - Writes directly into images_output_dir.
+   - Does not use images_horiz_subdir or images_vsect_subdir.
+   - Uses images_file_name_extension for the output still-image format.
+   - Saves both horizontal and vertical sequences when the built movie includes
+     the vertical view.
+   - Runs movie_convert_script separately for the horizontal and vertical
+     sequences when both are present.
+   - Builds the movie first if Export is selected while no completed movie
+     cache is available.
+
+   movie_convert_script must either be available through PATH or be specified
+   by an executable path. The converter script determines the final animation
+   format; it is not necessarily a GIF.
+
+5. Section 3.4 understates Save Image behavior.
+
+   Save Image always captures the horizontal view. It also captures the
+   vertical view when that window is visible. Existing files are preserved by
+   adding a numeric suffix rather than replacing them. The images are written
+   to images_output_dir.
+
+
+Terminology and wording
+-----------------------
+
+- Page 9: change "color contours" to the exact UI term, "filled contours."
+
+- Page 12: Show values creates a temporary overlay in the data view, not a
+  temporary dialog.
+
+- Pages 6 and 16: "context help popup" is clearer than "context menu." These
+  help popups contain explanatory text rather than selectable commands. The
+  field-button popup remains a true context menu.
+
+- Section 5.4: a single click on the time canvas selects the frame containing
+  the clicked time, rather than necessarily the frame closest to it.
+
+- Section 3.5 should mention the Color scale -> Reset action, which restores
+  the color scale's original endpoint values.
+
+- Clarify that column-max mode changes the horizontal MDV request only. It does
+  not change the vertical-section request or display.
+
+- The Render method description could explain that NONE is useful with the
+  optional line-contour overlay to provide line-only rendering.
+
+
+Small corrections
+-----------------
+
+- Page 14: change "selected in Figure 20" to "selected in Figure 4.1."
+
+- Page 15: change "The repeat for additional segments" to "Then repeat for
+  additional segments."
+
+- Page 22: change "move loop .gif file" to "movie-loop GIF file," or use the
+  format-neutral term "animation" because the configured conversion script
+  determines the output format.
+
+- In the single-segment vertical-section instructions, change "clicking the
+  right mouse button and a starting point" to "right-clicking at a starting
+  point."
+
+
+Useful additions
+----------------
+
+- Document Option-left drag as the macOS alternative to middle-button pan and
+  Control-click/drag as the macOS alternative to the right mouse button.
+
+- Add the keyboard shortcuts currently shown by Help -> How To:
+
+  - Left/Right steps through time.
+  - Up/Down changes the selected height.
+  - Period (.) returns to the previously selected field.
+
+- In the multi-segment vertical-section instructions, mention that Backspace
+  removes the last point and Escape cancels the selection.
+
+- Document horizontal terrain behavior. When terrain is enabled, it masks
+  applicable Cartesian plan-view fields where terrain exceeds the selected
+  data height. It is not applied to polar plan-view radar data. The same
+  configuration toggle controls terrain in both the horizontal and vertical
+  views.
+
+- Consider a separate chapter for automatic catalog image generation. The
+  introduction mentions this capability, but the manual currently documents
+  only interactive Save Image and movie Export. Such a chapter could cover:
+
+  - Create-once, archive-schedule, and realtime-schedule modes.
+  - Multiple fields, heights, zooms, and vertical-section routes.
+  - Output directories, filename format, day directories, and subdirectories.
+  - Optional geo XML and _latest_data_info sidecars.
+  - Transparency and symbolic-product readiness policies.
+  - Request timeouts, summaries, and exit status.
+
+- The native RHI section could note that native rendering depends on the MDV
+  server returning a matching measured RHI in polar RHI geometry. Otherwise,
+  Lucid displays the normal Cartesian vertical-section response.
+
+
+Presentation and layout
+-----------------------
+
+- Figure 3.3 is stale. Its Help -> How To screenshot says Show values displays
+  only the current field and does not include the multi-chevron time-range
+  shift guidance. The current application describes recently selected fields
+  and the <<, >>, <<<, and >>> buttons.
+
+- Figure 5.5 is separated from its caption by a page break. Keep the figure and
+  caption together.
+
+- Page 13 is mostly empty. Section 4 could begin there unless each major
+  chapter is intentionally required to start on a new page.
+
+- Page 18 contains only the native RHI figure. This is acceptable for a large
+  illustration, but it could be combined with nearby text if a more compact
+  manual is desired.
+
+- A short table of contents would improve navigation in a 23-page manual.
+
+- The screenshots are generally sharp and readable, the captions are
+  consistent, and the blue section headings provide a clear visual hierarchy.
