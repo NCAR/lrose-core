@@ -4,7 +4,9 @@ Snapshot: 2026-11-21. The realtime/archive/movie state refactor remains the
 baseline. Subsequent parameter, help, formatting, and display cleanup is
 committed, followed by the horizontal recent-field cache cleanup in
 `65f56cb0c` and the matching vertical-section cache in `5c8d1a43c`. The
-worktree was clean before this handoff update.
+multi-chevron time-range shift workflow is committed in `5e4319f1a`. Before
+this handoff update, the only worktree item was the unrelated untracked
+`images/root.png`.
 
 ## Architecture
 
@@ -219,6 +221,12 @@ carrying a live hover selection into cached playback.
   pending, frame-aligned movie definition. They update the start, end, frame
   count, selection, and plot together, but do not publish or retrieve data
   until Accept; Cancel restores the accepted definition.
+- The `<<` and `>>` buttons shift the complete pending range by one movie
+  duration; `<<<` and `>>>` shift it by three. Repeated presses accumulate
+  against one reset snapshot, retain the selected frame's relative index, and
+  require Accept before publishing new request times. Cancel restores the
+  accepted definition and prior mode. The single-chevron `<` and `>` buttons
+  remain immediate frame navigation.
 - The Reset snapshot also retains the pre-edit Archive/Realtime mode. A time
   edit made from Realtime enters Archive, while Reset or Cancel restores
   Realtime and resumes its live cadence.
@@ -469,7 +477,9 @@ Suggested interactive smoke test:
 7. Test time-canvas selection and left-drag zoom, middle-drag pan, and
    right-drag expansion. Verify each produces one pending definition and that
    Accept, Cancel, and Reset update the complete range consistently; Reset and
-   Cancel must also restore a pre-edit Realtime mode.
+   Cancel must also restore a pre-edit Realtime mode. Exercise all four
+   multi-chevron range-shift buttons, including repeated shifts before Accept
+   or Cancel, and confirm single-chevron frame navigation remains immediate.
 8. Exercise Reload with an open vertical section and enabled Products.
 9. Leave Realtime running with VertView open, switch focus to another
    application, and verify repeated refreshes neither steal focus nor change
