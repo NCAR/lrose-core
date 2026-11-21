@@ -1,12 +1,10 @@
 # Lucid Codex handoff
 
-Snapshot: 2026-11-18. The realtime/archive/movie state refactor, symmetric
-time-range editing, and vertical-route visibility fixes are merged and pushed
-to `master` in `80f860592` (`Merge branch 'Lucid_time_state_refactor'`). The
-follow-up window, focus, and legend cleanup is pushed through `6d11ff43e`
-(`apps/radar/Lucid - vsection legends 2`). The temporary `Lucid_movie_bug` and
-`Lucid_time_state_refactor` branches have been deleted. This handoff update is
-the only current worktree change.
+Snapshot: 2026-11-21. The realtime/archive/movie state refactor remains the
+baseline. Subsequent parameter, help, formatting, and display cleanup is
+committed, followed by the horizontal recent-field cache cleanup in
+`65f56cb0c` and the matching vertical-section cache in `5c8d1a43c`. The
+worktree was clean before this handoff update.
 
 ## Architecture
 
@@ -33,11 +31,14 @@ transitional and retains some CIDD-style shared structures.
   filled and line contours, range rings, and symbolic-product composition.
 - `HorizView` renders the plan view and handles zoom, live-preview pan, cursor
   values, click reports, vertical-section selection, Product hover picking,
-  and immutable movie composites.
+  and immutable movie composites. It owns immutable snapshots of recently
+  selected horizontal fields for cursor and click sampling.
 - `VertManager` owns the vertical-section window and configuration menu;
   `VertView` renders Cartesian sections and native polar RHIs, cursor/click
   values, terrain and wind overlays, and the selected horizontal height or
-  radar beam-height curve.
+  radar beam-height curve. `VertView` owns the corresponding recent-field
+  snapshots for section sampling while rendering continues to use the live
+  current `MdvReader`.
 - `TimeControl` owns the mutually exclusive Archive, Realtime, movie-building,
   and movie-playing state; the accepted and pending timelines; immutable build
   snapshots; sequencing; and playback controls. `TimePlotWidget` renders the
@@ -98,6 +99,10 @@ transitional and retains some CIDD-style shared structures.
   `GuiManager.cc` and `TimeControl.cc`, with the old calls retained for now.
 - Mouse input is normalized at the event boundary. Left drag zooms, middle or
   Option-left drag pans, and right click selects a vertical section.
+- Shift-right-click opens context help in the plan view, vertical-section
+  view, and time canvas. Help -> How To consolidates those gestures with the
+  height selector, value/click display, keyboard shortcuts, and the Field menu
+  right-click rendering controls.
 - Vertical sections support single-segment and multi-segment selection. The
   vertical window refreshes immediately on field and render-configuration
   changes.
@@ -118,8 +123,20 @@ transitional and retains some CIDD-style shared structures.
 - For polar fields, the selected elevation is converted to a radar beam-height
   curve using radar location and altitude. Invalid radar metadata suppresses
   the curve.
-- Cursor values and click reports work in both views. Filled-contour cursor
-  values are sampled from the underlying grid without regenerating contours.
+- Cursor values and click reports in both views use independent immutable MRU
+  caches of recently selected fields, bounded by
+  `field_data_queue_max_size` and keyed by configured field index. Selecting
+  an existing field moves its replacement snapshot to the front. Values are
+  sampled directly from the retained grids, so filled contours are never
+  regenerated for cursor motion.
+- The horizontal cache is valid for one requested time and level. The vertical
+  cache is valid for one requested time and route; it supports both Cartesian
+  sections and native polar RHIs. Compatible height/RHI fields can coexist,
+  while incompatible vertical coordinates or returned routes are omitted from
+  a report. Field and presentation changes retain the cache; data-context
+  changes and Reload clear it. A vertical click is retained across time or
+  compatible field changes, but not across a route or vertical-coordinate
+  change that would reinterpret its location.
 - Model U/V winds can be rendered over horizontal and vertical fields using
   vectors or weather-map barbs. Vertical symbols retain their true-north
   orientation rather than representing along-section or vertical velocity.
@@ -305,6 +322,17 @@ sidecars, transparency, multiple heights/zooms, and vertical images.
 
 ## Recent reliability and cleanup work
 
+- Recent-field sampling state now belongs to `HorizView` and `VertView`, not
+  `MdvReader`. The snapshots copy the grid and metadata needed for sampling;
+  the current reader remains the rendering source. This makes ownership and
+  invalidation explicit and prevents later asynchronous reads from changing a
+  cached value under the cursor.
+- Horizontal and vertical value/click reports use the same MRU policy and the
+  same configured capacity. The vertical implementation additionally checks
+  route and coordinate compatibility before combining fields.
+- Obsolete HawkEye How To content has been replaced with Lucid-wide control
+  help, and the vertical view now has context help consistent with the plan
+  and time views.
 - The original CIDD movie structure in `GlobalData` has been replaced by the
   timeline owned by `TimeControl`.
 - Horizontal MDV cache reuse is active, and a request arriving during a worker
@@ -359,6 +387,12 @@ sidecars, transparency, multiple heights/zooms, and vertical images.
 - Preserve the user's selected vertical route as the request definition, but
   display server-returned geometry when an MDV service adjusts the route.
   Response geometry must not cause a recursive primary-data request.
+- Keep recent-field value caches view-owned and immutable. Their identity is
+  the configured field index, not the returned MDV field name, and their
+  lifetime is tied to the requested data context rather than presentation
+  settings. Populate them from normal completed field reads rather than
+  issuing extra MDV requests; rendering itself continues to use the live
+  current reader.
 - Missing/bad grid values remain holes unless explicit mapping says otherwise.
   Invalid contour topology falls back to polygon rendering.
 - Automatic image work is serialized through the GUI display state; fixed
@@ -419,7 +453,13 @@ Suggested interactive smoke test:
    `RHI_polar_rendering.png` and CIDD. Verify polygon geometry, km axes, RHI
    title azimuth, cursor/click values, the full-range line in `HorizView`, and
    fallback to a Cartesian section when no measured RHI is suitable.
-4. Exercise horizontal and vertical cursor values and click reports.
+4. Exercise horizontal and vertical cursor values and click reports. Select
+   more than one field, revisit an earlier field, and verify MRU order and the
+   configured queue limit. Confirm render-only changes retain the values,
+   while Reload clears both caches, horizontal time/level changes clear the
+   horizontal cache, and vertical time/route changes clear the vertical cache.
+   For vertical sections, also test compatible Cartesian fields, native RHIs,
+   and an incompatible vertical coordinate if one is available.
 5. Toggle Products globally and individually, then compare METAR placement and
    timing with CIDD.
 6. Build and play horizontal-only and horizontal-plus-vertical movies from
