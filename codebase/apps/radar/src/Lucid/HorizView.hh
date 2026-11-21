@@ -120,6 +120,11 @@ class DLL_EXPORT HorizView : public QWidget
 
   void setShowValue(bool state);
 
+  // Retain recent fields only while they describe the same requested data
+  // plane. Presentation changes do not alter this context.
+
+  void setFieldDataContext(time_t requestedTime, double requestedLevel);
+
   // Replace the displayed section path with the geometry accepted or
   // adjusted by the MDV server. The user's request is retained by GuiManager.
 
@@ -132,7 +137,7 @@ class DLL_EXPORT HorizView : public QWidget
   
   // set flags to control rendering
 
-  void triggerGridRendering(int index, int page);
+  void triggerGridRendering(int fieldNum, int frameIndex);
 
   // Rerender retained data after a display-only field setting changes.
 
@@ -306,9 +311,24 @@ class DLL_EXPORT HorizView : public QWidget
 
   MdvxProj _proj;
 
-  // saved copy of field data
+  // Each entry is an immutable rendering-time snapshot. Configured field
+  // identity, rather than the MDV field name, distinguishes sources which
+  // expose identically named fields.
 
-  deque<MdvReader::FieldCopy> _fieldDataQueue;
+  struct HorizFieldSnapshot {
+    int fieldIndex = -1;
+    string fieldName;
+    Mdvx::master_header_t mhdr;
+    Mdvx::field_header_t fhdr;
+    Mdvx::vlevel_header_t vhdr;
+    MdvxProj proj;
+    vector<fl32> data;
+  };
+
+  deque<HorizFieldSnapshot> _fieldDataQueue;
+  bool _fieldDataContextValid;
+  time_t _fieldDataTime;
+  double _fieldDataLevel;
 
   ///////////////////////
   // Protected methods //

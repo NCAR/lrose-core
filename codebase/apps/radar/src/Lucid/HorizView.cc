@@ -43,6 +43,7 @@
 #include <iomanip>
 #include <chrono>
 #include <ctime>
+#include <utility>
 
 using namespace std;
 
@@ -152,6 +153,9 @@ HorizView::HorizView(QWidget* parent,
   _mouseValueVisible = false;
   _mouseValueX = 0;
   _mouseValueY = 0;
+  _fieldDataContextValid = false;
+  _fieldDataTime = 0;
+  _fieldDataLevel = 0.0;
   _updateMouseTracking();
 
   // initialize the horiz projection
@@ -211,33 +215,39 @@ void HorizView::timerEvent(QTimerEvent *event)
 
 void HorizView::_saveFieldDataToQueue(int fieldNum)
 {
-  
+  if (fieldNum < 0 || fieldNum >= _gd.num_datafields ||
+      _gd.mread[fieldNum] == nullptr) {
+    return;
+  }
+
   MdvReader *mr = _gd.mread[fieldNum];
-  string fieldName = mr->h_fhdr.field_name;
-  
-  // remove any existing entry with the same name
-  
+
+  // Move a reselected configured field to the front. Field names alone are
+  // not unique because separate sources can expose the same MDV field name.
   for (auto ii = _fieldDataQueue.begin(); ii != _fieldDataQueue.end(); ii++) {
-    if (ii->fieldName == fieldName) {
+    if (ii->fieldIndex == fieldNum) {
       _fieldDataQueue.erase(ii);
       break;
     }
   } // ii
 
-  // check for queue size
-
-  while ((int) _fieldDataQueue.size() >= _params.field_data_queue_max_size) {
+  // Always retain the current field even if a malformed parameter requests a
+  // non-positive cache size; Show values cannot operate without that entry.
+  const size_t capacity = static_cast<size_t>(
+    std::max(1, _params.field_data_queue_max_size));
+  while (_fieldDataQueue.size() >= capacity) {
     _fieldDataQueue.pop_back();
   }
-  
-  // push field data onto front of queue
 
-  _fieldDataQueue.push_front(MdvReader::FieldCopy(fieldName,
-                                                  mr->h_mhdr,
-                                                  mr->h_fhdr,
-                                                  mr->h_vhdr,
-                                                  mr->proj,
-                                                  mr->h_fl32_data));
+  HorizFieldSnapshot snapshot;
+  snapshot.fieldIndex = fieldNum;
+  snapshot.fieldName = mr->h_fhdr.field_name;
+  snapshot.mhdr = mr->h_mhdr;
+  snapshot.fhdr = mr->h_fhdr;
+  snapshot.vhdr = mr->h_vhdr;
+  snapshot.proj = mr->proj;
+  snapshot.data = mr->h_fl32_data;
+  _fieldDataQueue.push_front(std::move(snapshot));
 
   // A field selection replaces or augments the queue used by the click
   // dialog.  Refresh the existing report in place at the last click location.
@@ -249,6 +259,26 @@ void HorizView::_saveFieldDataToQueue(int fieldNum)
     _updateMouseValue(_mouseValueX, _mouseValueY);
   }
 
+}
+
+////////////////////////////////////////////////////////
+// establish the data plane shared by retained field snapshots
+
+void HorizView::setFieldDataContext(time_t requestedTime,
+                                    double requestedLevel)
+{
+  if (_fieldDataContextValid && _fieldDataTime == requestedTime &&
+      _fieldDataLevel == requestedLevel) {
+    return;
+  }
+
+  // A field switch preserves this pair, whereas time and level changes do
+  // not. Clear before the replacement read completes so cursor values can
+  // never report a snapshot from the previous plane.
+  _fieldDataContextValid = true;
+  _fieldDataTime = requestedTime;
+  _fieldDataLevel = requestedLevel;
+  clearFieldDataQueue();
 }
 
 void HorizView::clearFieldDataQueue()
@@ -560,7 +590,7 @@ vector<ClickReportField> HorizView::_getFieldValues(double lat,
 
   // The queue retains recently displayed fields, potentially with different
   // projections.  Locate the cursor independently in each saved grid.
-  for (const MdvReader::FieldCopy &field : _fieldDataQueue) {
+  for (const HorizFieldSnapshot &field : _fieldDataQueue) {
     int gridX, gridY;
     field.proj.latlon2xyIndex(lat, lon, gridX, gridY);
     const Mdvx::field_header_t &fhdr = field.fhdr;
@@ -570,11 +600,11 @@ vector<ClickReportField> HorizView::_getFieldValues(double lat,
     }
 
     const int64_t dataIndex = (int64_t) gridY * fhdr.nx + gridX;
-    if (dataIndex < 0 || dataIndex >= (int64_t) field.fl32_data.size()) {
+    if (dataIndex < 0 || dataIndex >= (int64_t) field.data.size()) {
       continue;
     }
 
-    double value = field.fl32_data[dataIndex];
+    double value = field.data[dataIndex];
     if (!std::isfinite(value) ||
         value == fhdr.missing_data_value ||
         value == fhdr.bad_data_value) {
@@ -609,7 +639,7 @@ void HorizView::_updateClickReport()
     return;
   }
 
-  const MdvReader::FieldCopy &primaryField = _fieldDataQueue.front();
+  const HorizFieldSnapshot &primaryField = _fieldDataQueue.front();
   ClickReport report;
   report.dataTime = primaryField.mhdr.time_centroid;
   report.latitude = _worldClickLat;
@@ -957,16 +987,16 @@ void HorizView::_initWorld(WorldPlot &world,
 //////////////////////////////////////////
 // set flags to control frame rendering
 
-void HorizView::triggerGridRendering(int page, int index)
+void HorizView::triggerGridRendering(int fieldNum, int frameIndex)
 
 {
 
-  _renderFramePage = page;
-  _renderFrameIndex = index;
+  _renderFramePage = fieldNum;
+  _renderFrameIndex = frameIndex;
 
   // save field data to queue
 
-  _saveFieldDataToQueue(page);
+  _saveFieldDataToQueue(fieldNum);
 
   // render data grids to grid image in WorldPlot
   

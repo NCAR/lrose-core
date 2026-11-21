@@ -2249,11 +2249,11 @@ void GuiManager::_checkAndReadH(MdvReader *mr)
   
   bool stateHasChanged = _checkForStateChange();
 
-  // clear field data if non-field state has changed
-  
-  if (stateHasChanged) {
-    _horiz->clearFieldDataQueue();
-  }
+  // Recent fields remain comparable across presentation-only changes. The
+  // view clears them only when the requested time or level changes.
+  _horiz->setFieldDataContext(
+    _timeControl->getSelectedTime().utime(),
+    _vlevelManager.getRequestedLevel());
   
   // check for field change
   
@@ -2456,6 +2456,11 @@ void GuiManager::_invalidateDisplayedData(bool refreshProductsImmediately)
   // Use the normal request path so a reload waits for any active horizontal
   // read and preserves the displayed image until replacement data arrive.
   _horizontalRequestHasChanged = true;
+  if (_horiz) {
+    // Reload must not combine newly requested data with snapshots retained
+    // under the same time/level key before the explicit refresh.
+    _horiz->clearFieldDataQueue();
+  }
   if (_fieldNum >= 0 && _fieldNum < _gd.num_datafields &&
       _gd.mread[_fieldNum]) {
     _gd.mread[_fieldNum]->invalidateTimeList();
