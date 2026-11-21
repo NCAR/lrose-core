@@ -3551,8 +3551,10 @@ void GuiManager::_howto()
     "A single left click selects the movie frame containing that time. "
     "Left-drag defines a smaller frame-aligned range, middle-drag pans the "
     "range by whole frames, and right-drag expands the range by mapping the "
-    "current endpoints to the dragged interval. Drag edits are pending until "
-    "Accept; Reset restores the definition active before the edit.<br><br>"
+    "current endpoints to the dragged interval. The &lt;&lt;/&gt;&gt; buttons "
+    "shift by one movie duration and &lt;&lt;&lt;/&gt;&gt;&gt; shift by three. Range "
+    "edits are pending until Accept; Reset restores the definition active "
+    "before the edit.<br><br>"
 
     "<b>Field menu</b><br>"
     "Left-click selects a field. Right-click a field to choose polygons, "

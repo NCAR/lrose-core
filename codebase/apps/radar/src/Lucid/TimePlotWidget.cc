@@ -386,6 +386,9 @@ void TimePlotWidget::mousePressEvent(QMouseEvent *event)
       "Maps the current movie start and end to the left and right edges of "
       "the dragged rectangle. This computes a larger, frame-aligned movie "
       "range; use Accept to apply it.\n\n"
+      "Range shift buttons\n"
+      "<< and >> shift by one complete movie duration; <<< and >>> shift "
+      "by three. These changes are pending until Accept.\n\n"
       "Reset button\n"
       "Restores the movie definition that was active before the edit.\n\n"
       "Shift+right-click opens this help.");

@@ -546,14 +546,18 @@ void TimeControl::_populateGui()
 
   _shiftBack1Button = new QPushButton(backButtonFrame);
   _shiftBack1Button->setText("<<");
-  connect(_shiftBack1Button, &QPushButton::clicked, this, &TimeControl::_shiftBack1);
-  _shiftBack1Button->setToolTip("Go back by 1 movie duration");
+  connect(_shiftBack1Button, &QPushButton::clicked,
+          this, &TimeControl::_shiftBack1);
+  _shiftBack1Button->setToolTip(
+    "Shift back by 1 movie duration; use Accept to apply");
   _shiftBack1Button->setStyleSheet(buttonStyle);
   
   _shiftBack3Button = new QPushButton(backButtonFrame);
   _shiftBack3Button->setText("<<<");
-  connect(_shiftBack3Button, &QPushButton::clicked, this, &TimeControl::_shiftBack3);
-  _shiftBack3Button->setToolTip("Go back by 3 movie durations");
+  connect(_shiftBack3Button, &QPushButton::clicked,
+          this, &TimeControl::_shiftBack3);
+  _shiftBack3Button->setToolTip(
+    "Shift back by 3 movie durations; use Accept to apply");
   _shiftBack3Button->setStyleSheet(buttonStyle);
   
   backButtonFrameLayout->addWidget(_shiftBack3Button, 0, Qt::AlignLeft);
@@ -574,14 +578,18 @@ void TimeControl::_populateGui()
     
   _shiftFwd1Button = new QPushButton(fwdButtonFrame);
   _shiftFwd1Button->setText(">>");
-  connect(_shiftFwd1Button, &QPushButton::clicked, this, &TimeControl::_shiftFwd1);
-  _shiftFwd1Button->setToolTip("Go forward by 1 movie duration");
+  connect(_shiftFwd1Button, &QPushButton::clicked,
+          this, &TimeControl::_shiftFwd1);
+  _shiftFwd1Button->setToolTip(
+    "Shift forward by 1 movie duration; use Accept to apply");
   _shiftFwd1Button->setStyleSheet(buttonStyle);
 
   _shiftFwd3Button = new QPushButton(fwdButtonFrame);
   _shiftFwd3Button->setText(">>>");
-  connect(_shiftFwd3Button, &QPushButton::clicked, this, &TimeControl::_shiftFwd3);
-  _shiftFwd3Button->setToolTip("Go forward by 3 movie durations");
+  connect(_shiftFwd3Button, &QPushButton::clicked,
+          this, &TimeControl::_shiftFwd3);
+  _shiftFwd3Button->setToolTip(
+    "Shift forward by 3 movie durations; use Accept to apply");
   _shiftFwd3Button->setStyleSheet(buttonStyle);
 
   fwdButtonFrameLayout->addWidget(_goFwd1Button, 0, Qt::AlignRight);
@@ -1506,28 +1514,44 @@ void TimeControl::goBack1()
   _acceptGuiSelections();
 }
 
+/////////////////////////////////////////////////////////////
+// stage a whole-range shift without publishing new request times
+
+void TimeControl::_shiftPendingMovieRange(int movieDurations)
+{
+  if (movieDurations == 0) {
+    return;
+  }
+  if (isMovieActive()) {
+    _stopMovie("movie-range shift", MovieStopPolicy::StayArchive);
+  }
+
+  // Repeated button presses accumulate in the pending view, but retain one
+  // reset point so Cancel restores the complete pre-edit definition and mode.
+  _captureResetDefinition();
+  _enterArchiveModeForTimeChange();
+  _guiStartTime += _getGuiMovieDurationSecs() * movieDurations;
+
+  // Keep the selected frame at the same relative position in the shifted
+  // range. Only Accept publishes the new bounds to readers and Products.
+  _updateTimesInGui();
+  _enableAcceptCancel(true);
+}
+
 /////////////////////////////////////////////////
 // shift back by movie duration
-// needs user to accept for it to take effect
 
 void TimeControl::_shiftBack1()
 {
-  _captureResetDefinition();
-  _enterArchiveModeForTimeChange();
-  _guiStartTime -= _getGuiMovieDurationSecs();
-  _updateTimesInGui();
+  _shiftPendingMovieRange(-1);
 }
 
 /////////////////////////////////////////////////
 // shift back by 3 movie durations
-// needs user to accept for it to take effect
 
 void TimeControl::_shiftBack3()
 {
-  _captureResetDefinition();
-  _enterArchiveModeForTimeChange();
-  _guiStartTime -= _getGuiMovieDurationSecs() * 3;
-  _updateTimesInGui();
+  _shiftPendingMovieRange(-3);
 }
 
 /////////////////////////////////////////////////
@@ -1560,26 +1584,18 @@ void TimeControl::goFwd1()
 
 /////////////////////////////////////////////////
 // shift fwd by one movie duration
-// needs user to accept for it to take effect
 
 void TimeControl::_shiftFwd1()
 {
-  _captureResetDefinition();
-  _enterArchiveModeForTimeChange();
-  _guiStartTime += _getGuiMovieDurationSecs();
-  _updateTimesInGui();
+  _shiftPendingMovieRange(1);
 }
 
 /////////////////////////////////////////////////
 // shift fwd by 3 movie durations
-// needs user to accept for it to take effect
 
 void TimeControl::_shiftFwd3()
 {
-  _captureResetDefinition();
-  _enterArchiveModeForTimeChange();
-  _guiStartTime += _getGuiMovieDurationSecs() * 3;
-  _updateTimesInGui();
+  _shiftPendingMovieRange(3);
 }
 
 // trap time slider trigger - no action for now
