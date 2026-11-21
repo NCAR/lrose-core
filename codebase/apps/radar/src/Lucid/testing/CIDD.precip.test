@@ -351,7 +351,7 @@ cidd.html_mode: 0
 
 # Image Generation related resources
 # Set this to a value to get cidd to output imagery as XWD in this directory
-cidd.image_dir: $(HOME)/images
+cidd.image_dir: $(HOME)/Downloads/Lucid/images
 
 # Set to 1 if one wants CIDD to run once through it's HTML output
 # plot list and then exit - Currently all fields at each zoom level
