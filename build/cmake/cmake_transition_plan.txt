@@ -1,0 +1,202 @@
+The repository is ready to move toward CMake-only, but the old Makefiles cannot be renamed or removed yet. The current CMake generator still treats them as its source of truth.
+
+I recommend making the checked-in CMakeLists.txt files authoritative, retiring the generator, and only then archiving or deleting the legacy system.
+
+Main findings
+=============
+
+- There are 1,686 tracked Makefile files:
+  - 1,536 under codebase
+  - 150 under deprecated
+- There are 884 __makefile.template files.
+  - Every template has a corresponding Makefile.
+  - 878 are identical to their Makefile.
+  - Only six differ, and in those cases the Makefile generally contains newer changes.
+- There are 629 checked-in CMakeLists.txt files:
+  - 624 marked as generator-produced
+  - 5 apparently hand-maintained
+- _makefiles contains 198 package/profile variants plus 268 old CVS metadata files.
+
+1. CMake generation still depends on the legacy system
+-------------------------------------------------------
+
+build/cmake/createCMakeLists.py reads Makefile, makefile, and
+__makefile.template. It extracts:
+
+- Directory structure from SUB_DIRS
+- Library names from MODULE_NAME
+- Application names from TARGET_FILE
+- Sources from SRCS, CPP_SRCS, etc.
+- Link dependencies from LOC_LIBS
+- Qt, X11, and TDRP behavior by searching Makefile text
+
+It also copies between Makefile and __makefile.template during an ostensibly generative operation. That side effect should be removed even if the generator is temporarily retained.
+
+Renaming Makefiles to .legacy.Makefile now would prevent future CMake regeneration.
+
+2. Package-specific builds also depend on _makefiles
+-----------------------------------------------------
+
+The --package option in build/scripts/build_lrose_cmake.py first installs a package-specific Makefile and then regenerates CMake.
+
+Consequently, retiring _makefiles without replacement would lose the current definitions of lrose-core, lrose-radx, lrose-cidd, Samurai, HCR, and related profiles.
+
+These selections should become native CMake options or presets before _makefiles is archived. For example:
+
+  set(LROSE_BUILD_PROFILE "core" CACHE STRING
+      "Build profile: core, radx, cidd, samurai, hcr")
+
+Or preferably use CMakePresets.json with profile-specific cache variables.
+
+3. The committed CMake configuration works, but has warnings
+-------------------------------------------------------------
+
+I successfully ran:
+
+  cmake -S . -B /tmp/lrose-cmake-review -DCMAKE_BUILD_TYPE=Release
+  cmake --build /tmp/lrose-cmake-review --target tdrp_gen -j 4
+
+Configuration completed and tdrp plus tdrp_gen built successfully. The source worktree remained clean.
+
+Observed issues:
+
+- CMake 3.31 warns that the declared minimum of 3.7 is obsolete.
+- NetCDF discovery fails with a warning, but configuration continues and targets later link a raw netcdf library name.
+- enable_testing() is present, but ctest -N reports zero tests.
+- Qt package probing produces repeated pkg-config checks.
+- The build currently depends heavily on globally scoped include and link settings.
+
+4. The CMake module paths appear incorrect
+-------------------------------------------
+
+In codebase/CMakeLists.txt:
+
+  SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../build/cmake/")
+  SET(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
+
+For a top-level build, these point outside the repository and into a nonexistent codebase/build/cmake, respectively. They should likely be based on ${CMAKE_SOURCE_DIR}/build/cmake.
+
+However, build/cmake/lrose-config.cmake does not appear to be included or installed anywhere. It should either become a proper installed package configuration, such as LROSEConfig.cmake, or be removed.
+
+5. Several generator choices should be modernized
+-------------------------------------------------
+
+The generated build presently uses directory-global operations:
+
+- include_directories()
+- link_directories()
+- link_libraries()
+- Global CMAKE_C_FLAGS, CMAKE_CXX_FLAGS, and linker flags
+
+The scale is substantial: the committed CMake files contain roughly 17,000 include_directories and 11,000 link_libraries calls.
+
+Incrementally replace these with target-scoped constructs:
+
+  target_include_directories(target PRIVATE ...)
+  target_compile_features(target PRIVATE cxx_std_17)
+  target_compile_definitions(target PRIVATE ...)
+  target_link_libraries(target PRIVATE LROSE::toolsa HDF5::HDF5 ...)
+
+LROSE libraries should expose their own transitive dependencies. Applications would then link only the libraries they directly use instead of repeating a large ordered list.
+
+Other improvements:
+
+- Use BUILD_SHARED_LIBS rather than generating different add_library(STATIC|SHARED) statements.
+- Express 32-bit, Jasper, Cray, and Fujitsu behavior as cache options or toolchain files.
+- Use imported targets for Qt, X11, HDF5, and NetCDF.
+- Remove repeated project() declarations from almost every directory.
+- Avoid hard-coded /usr/lib, /usr/lib64, Homebrew, and Miniforge search paths where package targets can provide them.
+- Use cmake --build and cmake --install in scripts and documentation, so the workflow is not tied to Unix Makefiles.
+
+6. TDRP generation writes into the source tree
+-----------------------------------------------
+
+The functions in codebase/CMakeLists.txt generate Params.cc and Params.hh in ${CMAKE_CURRENT_SOURCE_DIR} and invoke shell-specific export, cd, and &&.
+
+A cleaner rule would:
+
+- Generate into ${CMAKE_CURRENT_BINARY_DIR}
+- Add that directory to the target's include paths
+- Use $<TARGET_FILE:tdrp_gen>
+- Declare DEPENDS tdrp_gen and the parameter definition file
+- Use WORKING_DIRECTORY
+- Avoid shell-specific commands
+
+Also, only applications needing generated parameters should depend on tdrp_gen. The generator currently emits that dependency for every application.
+
+7. Some maintenance scripts are unsafe for an authoritative CMake tree
+-----------------------------------------------------------------------
+
+build/cmake/rm_CMakeLists.py recursively deletes every CMakeLists.txt. That now includes committed files and five hand-maintained files, including nested Qt example projects. This script should be retired immediately once CMake is declared authoritative.
+
+build/scripts/build_lrose_cmake.py also has an apparent path error: its normal branch runs cmake -S . -B build without first changing into codebase, then expects output beneath codebase/build.
+
+The build and release scripts should be migrated before removing legacy metadata.
+
+Recommended transition
+======================
+
+Phase 1: Establish CMake as the source of truth
+-----------------------------------------------
+
+1. Tag the current repository, for example pre-cmake-only, so the complete legacy build remains permanently accessible.
+2. Stop routinely running createCMakeLists.py.
+3. Add a top-level in-source-build guard:
+
+     if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+       message(FATAL_ERROR
+         "In-source builds are unsupported. Use: cmake -S . -B build")
+     endif()
+
+   This directly prevents CMake from overwriting checked-in legacy Makefiles.
+4. Convert generator-time settings such as static builds, Jasper, -m32, profiles, and dependency prefixes into CMake cache options, presets, or toolchain files.
+5. Update release scripts to consume the committed CMake tree without running installPackageMakefiles.py or createCMakeLists.py.
+6. Add at least Linux configure/build CI, with profile-specific jobs as needed.
+
+Phase 2: Retire redundant legacy material
+-----------------------------------------
+
+The __makefile.template files can be deleted. They are entirely redundant, and the six differences I found represent stale templates rather than unique authoritative content.
+
+For the Makefiles themselves, my preference is:
+
+1. Preserve the final legacy system in a named Git tag.
+2. Remove the Makefiles from the active branch.
+3. Add a short docs/build/legacy-make-system.md explaining where the tag is and why the system was retired.
+
+Git already provides a better archive than leaving 1,686 hidden files throughout the active source tree.
+
+If they must remain in the working tree, Makefile.legacy is clearer than .legacy.Makefile: it avoids the CMake collision while remaining discoverable. A mirrored legacy-build/ directory would be even cleaner, although it sacrifices adjacency to the associated sources.
+
+The _makefiles variants and build/make_include should be treated as one unit with the Makefiles. Either archive all of them or retain all of them until native CMake profiles are complete.
+
+Phase 3: Improve CMake incrementally
+-----------------------------------
+
+A wholesale rewrite of 629 files would be risky. I would modernize in this order:
+
+1. Top-level dependency discovery and options
+2. LROSE library targets and transitive dependencies
+3. TDRP generation
+4. Qt applications
+5. Package/profile selection
+6. Tests and installation/export support
+7. Application targets in manageable groups
+
+Documentation
+=============
+
+The current CMake manual still instructs users to install package Makefiles and regenerate CMake. It also uses staged direct make invocations.
+
+The Miniforge instructions invoke a nonexistent --mambaBuild option.
+
+The new canonical instructions can be much simpler:
+
+  cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX="$HOME/lrose"
+
+  cmake --build build --parallel 8
+  cmake --install build
+
+If that single build does not correctly build tdrp_gen before its consumers, the dependency graph should be fixed rather than documenting a staged manual build.
