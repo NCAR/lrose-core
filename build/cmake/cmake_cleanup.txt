@@ -1,0 +1,478 @@
+Yes. The recursive layout itself is reasonable: explicit directory manifests and one target file per application/library are maintainable. The main problem is not the number of CMakeLists.txt files; it is that configuration, dependencies, and target details are currently mixed together and rely on directory-global state.
+
+I would do one structural cleanup before declaring the files authoritative. It can be incremental and does not require rewriting all 629 files immediately.
+
+Recommended hierarchy
+=====================
+
+A useful ownership model would be:
+
+  CMakeLists.txt                         Project policy and configuration
+  build/cmake/
+      LroseOptions.cmake                 User-facing build options
+      LroseDependencies.cmake            External package discovery
+      LroseTargets.cmake                 Small target helper functions
+      LroseTdrp.cmake                    TDRP generation
+      toolchains/
+          mamba.cmake
+          linux-m32.cmake
+          cray.cmake
+          fujitsu.cmake
+      profiles/
+          core.cmake
+          radx.cmake
+          cidd.cmake
+          samurai.cmake
+
+  codebase/CMakeLists.txt                Add libs, then apps
+
+  codebase/libs/CMakeLists.txt           Library manifest
+  codebase/libs/toolsa/src/CMakeLists.txt
+                                         Define the toolsa target
+
+  codebase/apps/CMakeLists.txt           Application-category manifest
+  codebase/apps/radar/CMakeLists.txt     Radar application manifest
+  codebase/apps/radar/src/Foo/CMakeLists.txt
+                                         Define Foo
+
+The important rule is that each layer has one job.
+
+  Level                            Appropriate content
+  -----                            -------------------
+  Toolchain/preset                 Compiler selection, sysroot, ABI, -m32,
+                                   Mamba environment
+  Root CMakeLists.txt              CMake minimum, project(), policies,
+                                   options, global invariants, dependency
+                                   setup
+  codebase/CMakeLists.txt          Add libraries and applications
+  Library/application manifests    Component selection and add_subdirectory()
+  Target files                     Sources, headers, direct dependencies,
+                                   target-specific flags, installation
+  Helper modules                   Repeated behavior such as TDRP generation
+
+1. Keep the explicit recursive manifests
+========================================
+
+Files such as codebase/libs/CMakeLists.txt and
+codebase/apps/radar/src/CMakeLists.txt are fundamentally a good design.
+
+Explicit add_subdirectory() entries are preferable to filesystem globbing because:
+
+- Adding or removing a target is a reviewable source change.
+- Deprecated or experimental directories are not accidentally compiled.
+- Package profiles can make deliberate selections.
+- Configuration does not silently change when an unrelated directory appears.
+
+The old generator did not discover sources automatically either--it copied explicit source lists from Makefiles. Moving those explicit declarations into CMake does not create a new maintenance obligation; it merely removes the duplicate Makefile declaration.
+
+I would not use file(GLOB_RECURSE ...) for applications or source files. It is tempting, but makes accidental additions more likely and makes changes less obvious in review.
+
+2. Remove nested project() calls--but only after fixing TDRP
+============================================================
+
+Almost every recursive and target file currently calls project(). There are 627 such calls. There should normally be only one, in the repository root.
+
+However, the current generator uses ${PROJECT_NAME} as an implicit application name for:
+
+- TDRP parameter generation
+- add_dependencies(${PROJECT_NAME} tdrp_gen)
+
+Therefore, removing nested project() calls immediately would break generated applications.
+
+First make the target explicit:
+
+  lrose_add_tdrp(
+    TARGET RadxPrint
+    PARAMDEF paramdef.RadxPrint
+  )
+
+Then the helper can refer to the supplied target instead of directory state. After that, nested project() calls can be removed safely.
+
+This is an important cleanup because PROJECT_NAME currently changes as CMake descends through the tree, making helper behavior dependent on traversal order and directory context.
+
+3. Put only genuine project-wide invariants at the root
+=======================================================
+
+The root CMakeLists.txt should own:
+
+  cmake_minimum_required(VERSION 3.16) # Exact version after platform review
+  project(lrose-core VERSION ... LANGUAGES C CXX)
+
+  if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+    message(FATAL_ERROR
+      "In-source builds are unsupported. Use: cmake -S . -B build")
+  endif()
+
+  list(PREPEND CMAKE_MODULE_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
+
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+
+  include(GNUInstallDirs)
+  include(CTest)
+
+  add_subdirectory(codebase)
+
+Good root-level settings include:
+
+- C/C++ language baseline
+- Position-independent code
+- Default shared/static policy
+- Build options
+- Installation directory conventions
+- RPATH policy, where truly common
+- Testing enablement
+- Custom module path
+- External dependency initialization
+
+Settings that should not be placed there include target-specific libraries, include directories, Qt components, X11 requirements, or application-specific definitions.
+
+The language standard should not depend on whether Qt 5 or Qt 6 was found, as it currently does in codebase/CMakeLists.txt. Choose a supported project baseline--probably C++17--and apply exceptions only to targets that genuinely need them.
+
+4. Move compiler and platform selection into toolchain files
+============================================================
+
+These are configuration-time decisions that must be known before project() enables the languages:
+
+- Compiler selection
+- Cray/Fujitsu compiler behavior
+- -m32
+- Sysroot and cross-compilation
+- Mamba-only dependency searches
+- Architecture flags
+
+They should not be generator options and should not be appended to CMAKE_C_FLAGS later.
+
+For example:
+
+  cmake -S . -B build-cidd \
+    --toolchain build/cmake/toolchains/linux-m32.cmake \
+    --preset cidd
+
+A toolchain file can set:
+
+  set(CMAKE_C_FLAGS_INIT "-m32")
+  set(CMAKE_CXX_FLAGS_INIT "-m32")
+  set(CMAKE_FIND_ROOT_PATH ...)
+
+This ensures compiler validation and dependency discovery use the same ABI. Adding -m32 after compiler detection can produce a mixture of 32-bit targets and 64-bit dependencies.
+
+Similarly, users should select compilers with CC, CXX, a preset, or a toolchain file. The CMAKE_C_COMPILER_NAMES settings currently in codebase/CMakeLists.txt should eventually disappear.
+
+5. Replace global flags with an internal options target
+=======================================================
+
+Some settings apply to all first-party LROSE targets but should not affect vendored or third-party targets. An interface target is useful for this:
+
+  add_library(lrose_build_options INTERFACE)
+  add_library(LROSE::build_options ALIAS lrose_build_options)
+
+  target_compile_features(lrose_build_options
+    INTERFACE cxx_std_17)
+
+  target_compile_definitions(lrose_build_options
+    INTERFACE
+      $<$<NOT:$<BOOL:${LROSE_ENABLE_JASPER}>>:NO_JASPER_LIB>
+  )
+
+Every first-party target can link it:
+
+  target_link_libraries(toolsa
+    PRIVATE LROSE::build_options)
+
+This is better than modifying CMAKE_CXX_FLAGS because:
+
+- Flags follow targets rather than directory traversal.
+- Vendored code can be excluded.
+- Definitions are visible through target inspection.
+- Export and installation behavior can be controlled.
+- Debug/Release flags remain under CMake's standard configuration model.
+
+Warnings could use a separate LROSE::warnings interface target, allowing stricter warnings to be enabled without imposing them on bundled third-party code.
+
+6. Make each library describe its public interface
+==================================================
+
+A library target should declare:
+
+- Its own sources
+- Public headers/include directory
+- Direct public and private dependencies
+- Required compile definitions/features
+- Installation
+
+For example:
+
+  add_library(toolsa
+    Data/DataScaler.cc
+    Log/Log.cc
+    # Explicit remaining sources
+  )
+
+  add_library(LROSE::toolsa ALIAS toolsa)
+
+  target_include_directories(toolsa
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  )
+
+  target_link_libraries(toolsa
+    PUBLIC
+      Threads::Threads
+      ZLIB::ZLIB
+    PRIVATE
+      LROSE::build_options
+  )
+
+  install(
+    TARGETS toolsa
+    EXPORT LroseTargets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
+
+The current toolsa definition includes the header directories for almost every other LROSE library. That hides real dependency relationships.
+
+Each library should see only:
+
+- Its own headers
+- Headers supplied by targets in target_link_libraries()
+
+This is the single most valuable improvement for future maintenance. Once library dependencies are accurate, an application can link a few direct libraries and inherit the rest transitively.
+
+Avoid installed headers during a source build
+---------------------------------------------
+
+Generated targets currently add:
+
+  include_directories(${CMAKE_INSTALL_PREFIX}/include)
+  link_directories(${CMAKE_INSTALL_PREFIX}/lib)
+
+This is risky. A build may silently use headers or libraries from a previous LROSE installation rather than the source tree being compiled.
+
+Internal dependencies should always use CMake targets from the current build. The install prefix should be a destination, not an input to the same build.
+
+External dependency prefixes should enter through CMAKE_PREFIX_PATH, imported packages, presets, or toolchain files.
+
+7. Define external dependencies once, then use imported targets
+===============================================================
+
+External dependency discovery belongs in a central module called from the root, after build components are known.
+
+Targets should link names such as:
+
+  HDF5::HDF5
+  NetCDF::NetCDF_C
+  Threads::Threads
+  ZLIB::ZLIB
+  BZip2::BZip2
+  X11::X11
+  Qt6::Core
+  Qt6::Widgets
+
+This eliminates most manual include and library directory manipulation.
+
+Optional packages should be found only when an enabled component needs them:
+
+  if(LROSE_BUILD_GUI)
+    find_package(Qt6 COMPONENTS Core Widgets Network Qml QUIET)
+
+    if(NOT Qt6_FOUND AND LROSE_ALLOW_QT5)
+      find_package(Qt5 REQUIRED COMPONENTS Core Widgets Network Qml)
+    endif()
+  endif()
+
+Qt configuration should not be repeated in every application. Set target properties:
+
+  set_target_properties(HawkEye PROPERTIES
+    AUTOMOC ON
+    AUTORCC ON
+    AUTOUIC ON
+  )
+
+Then link imported Qt targets directly.
+
+8. Use thin helper functions, not another generator
+===================================================
+
+With hundreds of similar applications, a small helper is justified:
+
+  lrose_add_executable(
+    TARGET RadxPrint
+    SOURCES
+      Args.cc
+      Main.cc
+      RadxPrint.cc
+    PRIVATE_LIBRARIES
+      LROSE::Radx
+      LROSE::toolsa
+    TDRP
+      paramdef.RadxPrint
+  )
+
+The helper may perform only common mechanical work:
+
+- add_executable()
+- Link LROSE::build_options
+- Attach TDRP generation when requested
+- Apply standard installation destinations
+- Possibly set standard RPATH properties
+
+It should not:
+
+- Search the filesystem
+- Infer dependencies from source text
+- Add every LROSE library
+- Select applications implicitly
+- Hide unusual target behavior
+
+That keeps each target authoritative while removing 60-100 lines of duplicated boilerplate.
+
+Libraries can use a similar helper, but I would start with executables because their generated files are especially repetitive.
+
+9. Treat recursive files as manifests, not policy containers
+============================================================
+
+Directory-scoped commands propagate to descendants, which means a statement in apps/radar/CMakeLists.txt affects every radar application but not its sibling categories.
+
+That can be useful for a genuine subtree invariant, but target properties remain safer. Traversal order and directory placement should not alter how a target compiles.
+
+A recursive manifest should ideally look like:
+
+  add_subdirectory(src/AcGeoref2Spdb)
+  add_subdirectory(src/CalCompute)
+  add_subdirectory(src/HawkEye)
+
+Or, when component selection is needed:
+
+  if(LROSE_BUILD_HAWKEYE)
+    add_subdirectory(src/HawkEye)
+  endif()
+
+It should not contain compiler flags, include directories, or libraries merely because many children happen to use them.
+
+Pass-through files
+------------------
+
+There are 76 recursion-only CMake files, including 56 that add exactly one child directory. Examples include apps/radar/CMakeLists.txt adding only src, and libs/toolsa/CMakeLists.txt adding only src.
+
+These files are harmless, but many are redundant. I would not make their removal a prerequisite for the transition.
+
+Later, choose one consistent convention:
+
+- Keep the category file and have it add src/Application directories directly; or
+- Let the parent add category/src directly.
+
+My preference for applications is to retain the category file because it is a useful ownership and profile boundary:
+
+  apps/CMakeLists.txt
+      -> radar/CMakeLists.txt
+          -> src/HawkEye/CMakeLists.txt
+          -> src/Lucid/CMakeLists.txt
+
+That would allow the intermediate radar/src/CMakeLists.txt to be eliminated eventually.
+
+For libraries, libs/CMakeLists.txt can add toolsa/src directly unless the toolsa directory needs component-level options or supporting targets.
+
+10. Replace _makefiles with profiles plus component options
+===========================================================
+
+Profiles should select components; they should not change target definitions.
+
+For example:
+
+  option(LROSE_BUILD_GUI "Build graphical applications" ON)
+  option(LROSE_BUILD_CIDD "Build CIDD applications" ON)
+  option(LROSE_BUILD_RADAR "Build radar applications" ON)
+  option(LROSE_BUILD_TESTS "Build tests" ON)
+  option(LROSE_ENABLE_JASPER "Enable Jasper support" OFF)
+
+Presets can then provide supported configurations:
+
+  {
+    "name": "lrose-core",
+    "cacheVariables": {
+      "LROSE_BUILD_CIDD": "ON",
+      "LROSE_BUILD_RADAR": "ON"
+    }
+  }
+
+If existing profiles select individual applications rather than entire categories, preserve those selections in profile files:
+
+  set(LROSE_RADAR_APPLICATIONS
+    HawkEye
+    Lucid
+    RadxDealias
+  )
+
+The radar manifest can consume that list. This is the direct CMake equivalent of the current profile-specific SUB_DIRS, without keeping an alternate Makefile hierarchy.
+
+I would keep component options as the underlying mechanism and treat profiles as tested collections of option values. Users can then customize a profile without creating another package Makefile.
+
+11. TDRP should be the first helper refactored
+==============================================
+
+A target-oriented implementation should roughly have this contract:
+
+  lrose_generate_tdrp(
+    TARGET RadxPrint
+    PARAMDEF "${CMAKE_CURRENT_SOURCE_DIR}/paramdef.RadxPrint"
+    # SINGLETON, when required
+  )
+
+It should:
+
+- Generate outputs in ${CMAKE_CURRENT_BINARY_DIR}
+- Add generated sources to the named target
+- Add the binary directory to that target's include paths
+- Invoke $<TARGET_FILE:tdrp_gen>
+- Depend on both tdrp_gen and the parameter definition
+- Avoid export, cd, and &&
+- Be independent of ${PROJECT_NAME}
+
+This change unlocks removal of nested project() calls and eliminates the current universal tdrp_gen dependency.
+
+Suggested order before declaring CMake authoritative
+====================================================
+
+I would perform the structural work in this sequence:
+
+1. Add the in-source-build guard.
+2. Move all top-level configuration into the root CMakeLists.txt.
+3. Introduce explicit options and toolchain files.
+4. Refactor TDRP helpers to take explicit targets.
+5. Remove nested project() calls.
+6. Introduce LROSE::build_options.
+7. Define imported external dependencies centrally.
+8. Modernize libraries, starting with foundational ones such as tdrp, dataport, and toolsa.
+9. Introduce the thin executable helper and migrate applications in groups.
+10. Replace _makefiles with component options and presets.
+11. Update release builds and CI to exercise every supported profile.
+12. Retire the generator and legacy Makefiles.
+
+The library modernization should precede bulk application cleanup. Once libraries publish correct include paths and transitive dependencies, application definitions become dramatically smaller.
+
+Bottom line
+===========
+
+The current physical hierarchy is suitable. I would retain:
+
+- A root project file
+- Library and application manifests
+- Category-level application manifests
+- One authoritative target definition near each application or library
+
+Before freezing it, I would correct the scoping model:
+
+- Global policy at the root
+- Platform/ABI behavior in toolchains
+- Selection in manifests and presets
+- Reusable mechanics in small helper functions
+- Compilation and dependency details on targets
+
+That produces a system where future maintenance usually means editing exactly one local target file and, when adding or removing a component, one parent manifest--without regenerating anything.
