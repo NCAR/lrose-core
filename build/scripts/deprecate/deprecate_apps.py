@@ -23,12 +23,10 @@ def main():
 
     # We will be executing some sibling scripts. Get our path so that
     # the sibling scripts from the same path can be executed explicitly.
+
     global thisScriptDir
     thisScriptDir = os.path.dirname(os.path.abspath(__file__))
     
-    print("==>> Running %s      :" % thisScriptName, file=sys.stderr)
-    print("==>>  thisScriptDir : ", thisScriptDir, file=sys.stderr)
-
     # parse the command line
 
     usage = "usage: %prog [options]"
@@ -44,30 +42,30 @@ def main():
                       help='Path of lrose-core top level directory, default is: ' +
                       coreDirDefault)
     parser.add_option('--appDir',
-                      dest='appDir', default="codebase/apps/titan/src",
+                      dest='appDir', default="apps/titan/src",
                       help='Path to app dir')
     
     (options, args) = parser.parse_args()
     
     os.chdir(options.coreDir)
     coreDir = os.getcwd()
-    codebaseDir = os.path.join(coreDir, "codebase")
+
+    codebaseAppDir = os.path.join("codebase", options.appDir);
+    deprecatedAppDir = os.path.join("deprecated", options.appDir);
 
     if (options.debug):
         print("=============================================", file=sys.stderr)
-        print("Running %s      :" % thisScriptName, file=sys.stderr)
-        print("  thisScriptDir : ", thisScriptDir, file=sys.stderr)
-        print("  coreDir       : ", coreDir, file=sys.stderr)
-        print("  codebaseDir   : ", codebaseDir, file=sys.stderr)
-        print("  appDir        : ", options.appDir, file=sys.stderr)
+        print("Running %s         :" % thisScriptName, file=sys.stderr)
+        print("  thisScriptDir    : ", thisScriptDir, file=sys.stderr)
+        print("  coreDir          : ", coreDir, file=sys.stderr)
+        print("  appDir           : ", options.appDir, file=sys.stderr)
+        print("  codebaseAppDir   : ", codebaseAppDir, file=sys.stderr)
+        print("  deprecatedAppDir : ", deprecatedAppDir, file=sys.stderr)
         print("=============================================", file=sys.stderr)
         
-    # go to the top level codebase directory
-
-
     # get list of subdirs from Makefile
     
-    makefileSubdirList = getMakefileSubdirList(options.appDir)
+    makefileSubdirList = getMakefileSubdirList(codebaseAppDir)
     if (options.debug):
         print("=====================================", file=sys.stderr)
         print("  makefileSubdirs: ", makefileSubdirList, file=sys.stderr)
@@ -75,7 +73,7 @@ def main():
     
     # get list of subdirs from file system
     
-    actualSubdirList = getActualSubdirList(options.appDir)
+    actualSubdirList = getActualSubdirList(codebaseAppDir)
     if (options.debug):
         print("=====================================", file=sys.stderr)
         print("  actualSubdirs: ", actualSubdirList, file=sys.stderr)
@@ -93,6 +91,14 @@ def main():
         print("  unused: ", unused, file=sys.stderr)
         print("=====================================", file=sys.stderr)
 
+    # write commands
+    
+    print("mkdir -p ", deprecatedAppDir, file=sys.stdout)
+    for dir in unused:
+        codebaseDir = os.path.join(codebaseAppDir, dir)
+        deprecatedDir = os.path.join(deprecatedAppDir, dir)
+        print("git mv ", codebaseDir, " ", deprecatedDir, file=sys.stdout)
+        
     sys.exit(0)
 
 ########################################################################
