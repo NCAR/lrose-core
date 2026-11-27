@@ -81,12 +81,6 @@ public:
   } mode_t;
 
   typedef enum {
-    OUTPUT_ENCODING_FLOAT32 = 0,
-    OUTPUT_ENCODING_INT32 = 1,
-    OUTPUT_ENCODING_INT16 = 2
-  } output_encoding_t;
-
-  typedef enum {
     ATTR_STRING = 0,
     ATTR_INT = 1,
     ATTR_DOUBLE = 2,
@@ -107,8 +101,7 @@ public:
     char* input_field_name;
     char* output_field_name;
     char* output_units;
-    output_encoding_t encoding;
-    double missingValue;
+    float missingValue;
   } output_field_t;
 
   typedef struct {
@@ -443,8 +436,6 @@ public:
 
   double max_range_km;
 
-  tdrp_bool_t set_ngates_constant;
-
   tdrp_bool_t trim_surveillance_sweeps_to_360deg;
 
   char* radial_dim_name;
@@ -518,7 +509,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[60];
+  mutable TDRPtable _table[59];
 
   const char *_className;
 

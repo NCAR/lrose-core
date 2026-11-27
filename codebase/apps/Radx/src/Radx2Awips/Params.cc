@@ -93,10 +93,6 @@
 
   {
 
-    // sync the source object
-
-    source.sync();
-
     // zero out table
 
     memset(_table, 0, sizeof(_table));
@@ -112,6 +108,13 @@
     // copy table
 
     tdrpCopyTable((TDRPtable *) source._table, _table);
+
+    // load the copied table from the source object's members, so
+    // changes made to them since loading are kept. This is what
+    // source.sync() used to do, but without writing to source, so
+    // several threads can copy the same object safely.
+
+    tdrpUser2Table(_table, (char *) &source._start_);
 
     // set members
 
@@ -143,10 +146,6 @@
 
   {
 
-    // sync the other object
-
-    other.sync();
-
     // free up any existing memory
 
     freeAll();
@@ -162,6 +161,13 @@
     // copy table
 
     tdrpCopyTable((TDRPtable *) other._table, _table);
+
+    // load the copied table from the other object's members, so
+    // changes made to them since loading are kept. This is what
+    // other.sync() used to do, but without writing to other, so
+    // several threads can copy the same object safely.
+
+    tdrpUser2Table(_table, (char *) &other._start_);
 
     // set members
 
@@ -806,18 +812,6 @@
     tt->single_val.d = 9999;
     tt++;
     
-    // Parameter 'set_ngates_constant'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_ngates_constant");
-    tt->descr = tdrpStrDup("Option to force the number of gates to be constant.");
-    tt->help = tdrpStrDup("If TRUE, the number of gates on all rays will be set to the maximum, and gates added to shorter rays will be filled with missing values.");
-    tt->val_offset = (char *) &set_ngates_constant - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'trim_surveillance_sweeps_to_360deg'
     // ctype is 'tdrp_bool_t'
     
@@ -1031,7 +1025,7 @@
     tt->array_elem_size = sizeof(output_field_t);
     tt->array_n = 3;
     tt->struct_def.name = tdrpStrDup("output_field_t");
-    tt->struct_def.nfields = 5;
+    tt->struct_def.nfields = 4;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -1049,44 +1043,26 @@
       tt->struct_def.fields[2].ptype = STRING_TYPE;
       tt->struct_def.fields[2].rel_offset = 
         (char *) &_output_fields->output_units - (char *) _output_fields;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("output_encoding_t");
-      tt->struct_def.fields[3].fname = tdrpStrDup("encoding");
-      tt->struct_def.fields[3].ptype = ENUM_TYPE;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("float");
+      tt->struct_def.fields[3].fname = tdrpStrDup("missingValue");
+      tt->struct_def.fields[3].ptype = FLOAT_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_output_fields->encoding - (char *) _output_fields;
-        tt->struct_def.fields[3].enum_def.name = tdrpStrDup("output_encoding_t");
-        tt->struct_def.fields[3].enum_def.nfields = 3;
-        tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT32");
-        tt->struct_def.fields[3].enum_def.fields[0].val = OUTPUT_ENCODING_FLOAT32;
-        tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("OUTPUT_ENCODING_INT32");
-        tt->struct_def.fields[3].enum_def.fields[1].val = OUTPUT_ENCODING_INT32;
-        tt->struct_def.fields[3].enum_def.fields[2].name = tdrpStrDup("OUTPUT_ENCODING_INT16");
-        tt->struct_def.fields[3].enum_def.fields[2].val = OUTPUT_ENCODING_INT16;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("missingValue");
-      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
         (char *) &_output_fields->missingValue - (char *) _output_fields;
-    tt->n_struct_vals = 15;
+    tt->n_struct_vals = 12;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("DBZ");
       tt->struct_vals[1].s = tdrpStrDup("Reflectivity");
       tt->struct_vals[2].s = tdrpStrDup("dBZ");
-      tt->struct_vals[3].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[4].d = -99900;
-      tt->struct_vals[5].s = tdrpStrDup("VEL");
-      tt->struct_vals[6].s = tdrpStrDup("Velocity");
-      tt->struct_vals[7].s = tdrpStrDup("MetersPerSecond");
-      tt->struct_vals[8].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[9].d = -99900;
-      tt->struct_vals[10].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[11].s = tdrpStrDup("SpectrumWidth");
-      tt->struct_vals[12].s = tdrpStrDup("MetersPerSecond");
-      tt->struct_vals[13].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[14].d = -99900;
+      tt->struct_vals[3].f = -99900;
+      tt->struct_vals[4].s = tdrpStrDup("VEL");
+      tt->struct_vals[5].s = tdrpStrDup("Velocity");
+      tt->struct_vals[6].s = tdrpStrDup("MetersPerSecond");
+      tt->struct_vals[7].f = -99900;
+      tt->struct_vals[8].s = tdrpStrDup("WIDTH");
+      tt->struct_vals[9].s = tdrpStrDup("SpectrumWidth");
+      tt->struct_vals[10].s = tdrpStrDup("MetersPerSecond");
+      tt->struct_vals[11].f = -99900;
     tt++;
     
     // Parameter 'Comment 6'

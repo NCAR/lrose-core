@@ -8,18 +8,20 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
 	Ascii2Radx \
-	RadxCartDP \
+	CartBeamBlock \
 	Dsr2Radx \
 	FixCfradialPaths \
 	FixFieldVals \
 	FixRadxPointing \
 	FixRadxValues \
+	GroundEchoStats \
 	Radx2Dsr \
 	Radx2Fmq \
 	Radx2Grid \
 	RadxBeamBlock \
 	RadxBufr \
 	RadxCalUpdate \
+	RadxCartDP \
 	RadxCheck \
 	RadxClutMon \
 	RadxClutter \
@@ -47,7 +49,9 @@ SUB_DIRS = \
 	RadxSim \
 	RadxSunMon \
         RadxStats \
+        RadxTest \
         RadxTimeStats \
-        RadxVolTimingStats
+        RadxVolTimingStats \
+	TestRadxMsg
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
