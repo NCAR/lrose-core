@@ -12,6 +12,7 @@ project (lrose-core)
 
 # subdirectories
 
+add_subdirectory (DataFileName)
 add_subdirectory (Dsr2titanAscii)
 add_subdirectory (Dsr2UF)
 add_subdirectory (Dsr2Vol)

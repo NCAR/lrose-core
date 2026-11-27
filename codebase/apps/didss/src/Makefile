@@ -7,6 +7,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
+	DataFileName \
 	Dsr2titanAscii \
 	Dsr2UF \
 	Dsr2Vol \
