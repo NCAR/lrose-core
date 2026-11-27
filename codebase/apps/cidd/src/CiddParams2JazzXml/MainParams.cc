@@ -135,7 +135,7 @@ vector< Zoom > MainParams::getZooms() const
   int default_zoom = _params.getLong("cidd.start_zoom_level", 1) - 1;
   
   char param_string[40];
-  char label_default[10];
+  char label_default[40];
   
   double max_delta_x = _domainLimitMaxX - _domainLimitMinX;
   double max_delta_y = _domainLimitMaxY - _domainLimitMinY;
@@ -146,8 +146,8 @@ vector< Zoom > MainParams::getZooms() const
 
     Zoom zoom;
     
-    sprintf(param_string, "cidd.level%d_label", i + 1);
-    sprintf(label_default, "%d", i + 1);
+    snprintf(param_string, 40, "cidd.level%d_label", i + 1);
+    snprintf(label_default, 40, "%d", i + 1);
     zoom.name = _params.getString(param_string, label_default);
     
     if (i == default_zoom)

@@ -8,11 +8,16 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 TARGETS =  $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
-         fix_map \
-	 MapCircles \
-	 MapGrid \
-	 OverlayCreate \
-         toneDownColorscale
+	fix_map \
+	CiddParams2JazzXml \
+	MapCircles \
+	MapGrid \
+	Shape2Map \
+	ShapeAscii2Map \
+	ShapeGridPt2Mdv \
+	OverlayCreate \
+	shapefile2Mapfile \
+	toneDownColorscale
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
 
