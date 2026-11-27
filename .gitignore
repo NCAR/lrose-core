@@ -186,7 +186,8 @@ codebase/apps/dsserver/src/GenPt2Symprod/GenPt2Symprod
 codebase/apps/dsserver/src/GenPtField2Symprod/GenPtField2Symprod
 codebase/apps/dsserver/src/GetPortNumber/GetPortNumber
 codebase/apps/dsserver/src/HydroStation2Symprod/HydroStation2Symprod
-codebase/apps/dsserver/src/Ltg2Symprod/Ltg2Symprod
+codebase/apps/dsserver/src/Ltg2Symprod/Ltg2Symprod  
+codebase/apps/dsserver/src/IcingAirmet2Symprod/IcingAirmet2Symprod  
 codebase/apps/dsserver/src/Mad2Symprod/Mad2Symprod
 codebase/apps/dsserver/src/Metar2Symprod/Metar2Symprod
 codebase/apps/dsserver/src/NcMdvServer/NcMdvServer
@@ -201,7 +202,8 @@ codebase/apps/dsserver/src/SpdbXml2Table/SpdbXml2Table
 codebase/apps/dsserver/src/StnAscii2Symprod/StnAscii2Symprod
 codebase/apps/dsserver/src/SunCal2Symprod/SunCal2Symprod
 codebase/apps/dsserver/src/SyncDataMap/SyncDataMap
-codebase/apps/dsserver/src/TestDataMap/TestDataMap
+codebase/apps/dsserver/src/TestDataMap/TestDataMap  
+codebase/apps/dsserver/src/TrecGauge2Symprod/TrecGauge2Symprod  
 codebase/apps/dsserver/src/Tstorms2Symprod/Tstorms2Symprod
 codebase/apps/dsserver/src/Vergrid2Symprod/Vergrid2Symprod
 codebase/apps/dsserver/src/WxHazards2Symprod/WxHazards2Symprod
