@@ -1,26 +1,3 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -50,8 +27,6 @@
  * @author Automatically generated
  *
  */
-using namespace std;
-
 #include "Params.hh"
 #include <cstring>
 
@@ -95,10 +70,6 @@ using namespace std;
 
   {
 
-    // sync the source object
-
-    source.sync();
-
     // zero out table
 
     memset(_table, 0, sizeof(_table));
@@ -114,6 +85,13 @@ using namespace std;
     // copy table
 
     tdrpCopyTable((TDRPtable *) source._table, _table);
+
+    // load the copied table from the source object's members, so
+    // changes made to them since loading are kept. This is what
+    // source.sync() used to do, but without writing to source, so
+    // several threads can copy the same object safely.
+
+    tdrpUser2Table(_table, (char *) &source._start_);
 
     // set members
 
@@ -145,10 +123,6 @@ using namespace std;
 
   {
 
-    // sync the other object
-
-    other.sync();
-
     // free up any existing memory
 
     freeAll();
@@ -164,6 +138,13 @@ using namespace std;
     // copy table
 
     tdrpCopyTable((TDRPtable *) other._table, _table);
+
+    // load the copied table from the other object's members, so
+    // changes made to them since loading are kept. This is what
+    // other.sync() used to do, but without writing to other, so
+    // several threads can copy the same object safely.
+
+    tdrpUser2Table(_table, (char *) &other._start_);
 
     // set members
 
@@ -277,6 +258,18 @@ using namespace std;
   bool Params::isArgValid(const char *arg)
   {
     return (tdrpIsArgValid(arg));
+  }
+
+  ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  int Params::isArgValidN(const char *arg)
+  {
+    return (tdrpIsArgValidN(arg));
   }
 
   ////////////////////////////////////////////

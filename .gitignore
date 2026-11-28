@@ -258,6 +258,8 @@ codebase/apps/ingest/src/Grib2Mdv/Grib2Mdv
 codebase/apps/ingest/src/Grib2toMdv/Grib2toMdv
 codebase/apps/ingest/src/Grib2toNc/Grib2toNc
 codebase/apps/ingest/src/GtsSockIngest/GtsSockIngest
+codebase/apps/ingest/src/Hrrr15minNcf2Mdv/Hrrr15minNcf2Mdv
+codebase/apps/ingest/src/KSMesonet2Spdb/KSMesonet2Spdb
 codebase/apps/ingest/src/LdmDynamic2Static/LdmDynamic2Static
 codebase/apps/ingest/src/LdmMetars2File/LdmMetars2File
 codebase/apps/ingest/src/Ltg2Spdb/Ltg2Spdb
@@ -274,12 +276,16 @@ codebase/apps/ingest/src/NcRadarSplit/NcRadarSplit
 codebase/apps/ingest/src/NcarAcPosn2Spdb/NcarAcPosn2Spdb
 codebase/apps/ingest/src/NewNidsRadial2Mdv/NewNidsRadial2Mdv
 codebase/apps/ingest/src/NexradBzipDecompress/NexradBzipDecompress
+codebase/apps/ingest/src/Nexrad2Netcdf/Nexrad2Netcdf
 codebase/apps/ingest/src/Nids2Mdv/Nids2Mdv
 codebase/apps/ingest/src/NidsRadial2Mdv/NidsRadial2Mdv
 codebase/apps/ingest/src/NidsRaster2Mdv/NidsRaster2Mdv
 codebase/apps/ingest/src/NidsVad2Spdb/NidsVad2Spdb
 codebase/apps/ingest/src/OdimHdf5ToMdv/OdimHdf5ToMdv
 codebase/apps/ingest/src/PrintNids/PrintNids
+codebase/apps/ingest/src/PirepCsv2Spdb/PirepCsv2Spdb
+codebase/apps/ingest/src/Precip2Spdb/Precip2Spdb
+codebase/apps/ingest/src/RawIQ2NetCDF/RawIQ2NetCDF
 codebase/apps/ingest/src/Rdas2Dsr/Rdas2Dsr
 codebase/apps/ingest/src/SatOrbit2AcPosn/SatOrbit2AcPosn
 codebase/apps/ingest/src/SawsUm2Mdv/SawsUm2Mdv
@@ -289,6 +295,7 @@ codebase/apps/ingest/src/SigAirMet2Spdb/SigAirMet2Spdb
 codebase/apps/ingest/src/Sigmet2Dsr/Sigmet2Dsr
 codebase/apps/ingest/src/SigmetRaw2Dsr/SigmetRaw2Dsr
 codebase/apps/ingest/src/SigmetUdp2Dsr/SigmetUdp2Dsr
+codebase/apps/ingest/src/SnoTel/SnoTel
 codebase/apps/ingest/src/SynopObsIngest/SynopObsIngest
 codebase/apps/ingest/src/Taf2Spdb/Taf2Spdb
 codebase/apps/ingest/src/UAEMesonet2Spdb/UAEMesonet2Spdb

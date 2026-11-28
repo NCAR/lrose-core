@@ -10,6 +10,7 @@ SUB_DIRS = \
 	AcData2Spdb \
 	AcTrack2Polygon \
 	AcarsNc2GenPt \
+	Amdar2Spdb \
 	ArgentineAwsIngest \
 	Awos2Spdb \
 	Aws2Spdb \
@@ -21,6 +22,7 @@ SUB_DIRS = \
 	CwbAws2Spdb \
 	CwbObs2Spdb \
 	CwbSfc2Mdv \
+	DoeSounding2Spdb \
 	EolMobileKml2Spdb \
 	EraGrib2Mdv \
 	Era5Nc2Mdv \
@@ -31,7 +33,10 @@ SUB_DIRS = \
 	GpmHdf5ToMdv \
 	Grib2Mdv \
 	Grib2toMdv \
+	Grib2toNc \
 	GtsSockIngest \
+	Hrrr15minNcf2Mdv \
+	KSMesonet2Spdb \
 	LdmDynamic2Static \
 	LdmMetars2File \
 	Ltg2Spdb \
@@ -45,12 +50,16 @@ SUB_DIRS = \
 	NcRadarSplit \
 	NcarAcPosn2Spdb \
 	NewNidsRadial2Mdv \
+	Nexrad2Netcdf \
 	NexradBzipDecompress \
 	Nids2Mdv \
 	NidsRadial2Mdv \
 	NidsRaster2Mdv \
 	NidsVad2Spdb \
+	OdimHdf52Mdv \
 	PrintNids \
+	PirepCsv2Spdb \
+	RawIQ2NetCDF \
 	Rdas2Dsr \
 	SatOrbit2AcPosn \
 	SawsUm2Mdv \
@@ -58,6 +67,7 @@ SUB_DIRS = \
 	ShipObsIngest \
 	SigAirMet2Spdb \
 	SynopObsIngest \
+	Taf2Spdb \
 	UAEMesonet2Spdb \
 	Uf2Dsr \
 	Usgs2Spdb \

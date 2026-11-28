@@ -39,10 +39,13 @@ MODULE_TYPE = progcpp
 
 LOC_INCLUDES = $(JASPER_INCLUDES) $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lMdv -lRadx -ldsserver \
-	-ldidss -lrapformats -lgrib2 -leuclid \
-	-ltoolsa -lpthread $(JASPER_LIBS) -lpng \
-	-ldataport -ltdrp -lrapmath $(NETCDF4_LIBS)
+LOC_LIBS = \
+	-ldsdata -lMdv -lSpdb -lFmq \
+	-lrapformats -ldsserver -ldidss -lgrib2 \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	$(JASPER_LIBS) -lpng $(NETCDF4_LIBS) -lbz2 \
+	-lz -lpthread -lm
 
 LOC_LDFLAGS = $(JASPER_LDFLAGS) $(NETCDF4_LDFLAGS)
 
