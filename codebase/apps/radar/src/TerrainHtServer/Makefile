@@ -60,7 +60,8 @@ XMLRPC_LIBS = \
 	-lxmlrpc_server_abyss \
 	-lxmlrpc_server_abyss++ \
 	-lxmlrpc_server_pstream++ \
-	-lxmlrpc_util
+	-lxmlrpc_util \
+	-lxmlrpc_util++
 
 LOC_LIBS = \
 	-ldsdata -lradar -lMdv -lSpdb \

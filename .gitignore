@@ -561,6 +561,7 @@ codebase/apps/radar/src/SunCpCompute/SunCpCompute
 codebase/apps/radar/src/SweepInfo2Spdb/SweepInfo2Spdb
 
 codebase/apps/radar/src/TsAscope/TsAscope
+codebase/apps/radar/src/TsAscope/TsAscope
 codebase/apps/radar/src/TsAscope/Makefile.qmake
 codebase/apps/radar/src/TsAscope/moc_*cpp
 codebase/apps/radar/src/TsAscope/moc_predefs.h
@@ -589,6 +590,7 @@ codebase/apps/radar/src/VertCompute/VertCompute
 codebase/apps/radar/src/ZdrCalSimHv/ZdrCalSimHv
 codebase/apps/radar/src/TerrainHtServer/TerrainHtServer
 codebase/apps/radar/src/TerrainHtServer/TestClientTerrainHt
+codebase/apps/radar/src/TerrainHtServer/WorldTerrain
 
 codebase/apps/refractt/src/CalcMoisture/CalcMoisture
 codebase/apps/refractt/src/Chill2netCDFSweep/Chill2netCDFSweep

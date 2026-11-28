@@ -11,6 +11,7 @@ SUB_DIRS = \
 	AcGeorefCompare \
 	AltCpCompute \
 	CalCompute \
+	CartSim \
 	CedricPrint \
 	ChillCal2Xml \
 	ChillSdb2CalXml \
@@ -35,6 +36,9 @@ SUB_DIRS = \
 	HcrTs2Moments \
 	HcrVelCorrect \
 	Hsrl2Radx \
+	HsrlMon \
+	HsrlSim \
+	HsrlTcp2Fmq \
 	IntfRemove \
 	IpsEye \
 	IpsTsArchive \
@@ -49,8 +53,10 @@ SUB_DIRS = \
 	MdvFold \
 	MdvRadarShear \
         MergeHcrAndHsrl \
+	Mpd2Radx \
 	NexradPowerStats \
 	NoiseMon \
+	PidZdrStats \
 	PointingCpCompute \
 	PowerInfo2Spdb \
 	Qmap2Cidd \
@@ -66,6 +72,7 @@ SUB_DIRS = \
 	SpectraPrint \
 	Sprite \
 	StaggeredLimits \
+	StormShapeSim \
 	SunCal \
 	SunCpCompute \
 	SweepInfo2Spdb \
