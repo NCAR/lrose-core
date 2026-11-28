@@ -68,6 +68,7 @@ SUB_DIRS = \
 	RadxDealias \
 	RapMap2Chill \
 	RcalXml2Table \
+	ScanInfo2TsFmq \
 	SimCpCompute \
 	SpectraPrint \
 	Sprite \
@@ -76,6 +77,7 @@ SUB_DIRS = \
 	SunCal \
 	SunCpCompute \
 	SweepInfo2Spdb \
+	TrmmClimo2Mdv \
 	Ts2Moments \
 	Ts2NetCDF \
 	TsCalAuto \

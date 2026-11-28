@@ -560,6 +560,7 @@ codebase/apps/radar/src/SunCal/testing/sunscan_ael_code
 codebase/apps/radar/src/SunCpCompute/SunCpCompute
 codebase/apps/radar/src/SweepInfo2Spdb/SweepInfo2Spdb
 
+codebase/apps/radar/src/TrmmClimo2Mdv/TrmmClimo2Mdv
 codebase/apps/radar/src/TsAscope/TsAscope
 codebase/apps/radar/src/TsAscope/TsAscope
 codebase/apps/radar/src/TsAscope/Makefile.qmake
