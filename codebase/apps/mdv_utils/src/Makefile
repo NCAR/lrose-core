@@ -31,6 +31,7 @@ SUB_DIRS = \
 	MdvBlend \
 	MdvCircularFilt \
 	MdvClump \
+	MdvCreateConstantFile \
 	MdvCombine \
 	MdvComp \
 	MdvCompare \
@@ -59,6 +60,8 @@ SUB_DIRS = \
 	MdvPatch \
 	MdvPointExtract \
 	MdvPull \
+	MdvRepeatDay \
+	MdvRepeatOne \
 	MdvScatterPlot \
 	MdvSim \
 	MdvSmooth \
@@ -75,6 +78,7 @@ SUB_DIRS = \
 	MdvxHowBad \
 	NcGeneric2Mdv \
 	NetCDF2Mdv \
+	Nimrod2Mdv \
 	Plain2Mdv \
 	PrintMdv \
 	ReadDEM \
@@ -92,6 +96,9 @@ SUB_DIRS = \
 	mdv_constant_data \
 	mdv_le2be \
 	mdv_repeat_day \
-	update_mdv_times
+	mdvWindRose \
+	update_mdv_times \
+	wrfFreezingLevel \
+	wrfLtgPotential
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets

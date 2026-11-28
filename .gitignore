@@ -323,6 +323,7 @@ codebase/apps/interp/src/surf_interp/surf_interp
 codebase/apps/mdv_utils/src/Affirm/Affirm
 codebase/apps/mdv_utils/src/Binary2Mdv/Binary2Mdv
 codebase/apps/mdv_utils/src/CreateTestMdv/CreateTestMdv
+codebase/apps/mdv_utils/src/MdvCreateConstantFile/MdvCreateConstantFile
 codebase/apps/mdv_utils/src/CwbRadar2Mdv/CwbRadar2Mdv
 codebase/apps/mdv_utils/src/Egm2Mdv/Egm2Mdv
 codebase/apps/mdv_utils/src/GribNc2Mdv/GribNc2Mdv
@@ -384,6 +385,8 @@ codebase/apps/mdv_utils/src/MdvOffsetField/MdvOffsetField
 codebase/apps/mdv_utils/src/MdvPatch/MdvPatch
 codebase/apps/mdv_utils/src/MdvPointExtract/MdvPointExtract
 codebase/apps/mdv_utils/src/MdvPull/MdvPull
+codebase/apps/mdv_utils/src/MdvRepeatDay/MdvRepeatDay
+codebase/apps/mdv_utils/src/MdvRepeatOne/MdvRepeatOne
 codebase/apps/mdv_utils/src/MdvScatterPlot/MdvScatterPlot
 codebase/apps/mdv_utils/src/MdvSim/MdvSim
 codebase/apps/mdv_utils/src/MdvSmooth/MdvSmooth
@@ -400,6 +403,7 @@ codebase/apps/mdv_utils/src/Mdvx2Vil/Mdvx2Vil
 codebase/apps/mdv_utils/src/MdvxHowBad/MdvxHowBad
 codebase/apps/mdv_utils/src/NcGeneric2Mdv/NcGeneric2Mdv
 codebase/apps/mdv_utils/src/NetCDF2Mdv/NetCDF2Mdv
+codebase/apps/mdv_utils/src/Nimrod2Mdv/Nimrod2Mdv
 codebase/apps/mdv_utils/src/NsslNetCDF2Mdv/NsslNetCDF2Mdv
 codebase/apps/mdv_utils/src/Plain2Mdv/Plain2Mdv
 codebase/apps/mdv_utils/src/PrintMdv/PrintMdv
@@ -420,8 +424,11 @@ codebase/apps/mdv_utils/src/mdv_bin_data/mdv_bin_data
 codebase/apps/mdv_utils/src/mdv_constant_data/mdv_constant_data
 codebase/apps/mdv_utils/src/mdv_le2be/mdv_le2be
 codebase/apps/mdv_utils/src/mdv_repeat_day/mdv_repeat_day
+codebase/apps/mdv_utils/src/mdvWindRose/mdvWindRose
 codebase/apps/mdv_utils/src/print_mdv/print_mdv
 codebase/apps/mdv_utils/src/update_mdv_times/update_mdv_times
+codebase/apps/mdv_utils/src/wrfFreezingLevel/wrfFreezingLevel
+codebase/apps/mdv_utils/src/wrfLtgPotential/wrfLtgPotential
 
 codebase/apps/mm5/src/MM52Spdb/MM52Spdb
 codebase/apps/mm5/src/MM5Ingest/MM5Ingest
